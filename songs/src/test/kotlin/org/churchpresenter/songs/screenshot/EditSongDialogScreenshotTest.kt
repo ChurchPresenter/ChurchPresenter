@@ -24,6 +24,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The song editor, in both themes.
@@ -54,24 +55,26 @@ class EditSongDialogScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Box(Modifier.size(1120.dp, 760.dp)) {
-                        EditSongContent(
-                            backgroundButton = testBackgroundButton,
-                            song = song,
-                            songbooks = songbooks,
-                            existingSongs = existingSongs,
-                            isNewSong = isNewSong,
-                            theme = mode,
-                            tuning = tuning,
-                            showTuningFields = showTuningFields,
-                            chordsVisible = chordsVisible,
-                            onChordsVisibleChange = {},
-                            languageNames = languageNames.orEmpty(),
-                            onLanguageNamesChange = if (languageNames != null) ({}) else null,
-                            onDismiss = {},
-                            onSave = { _, _ -> },
-                        )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Box(Modifier.size(1120.dp, 760.dp)) {
+                            EditSongContent(
+                                backgroundButton = testBackgroundButton,
+                                song = song,
+                                songbooks = songbooks,
+                                existingSongs = existingSongs,
+                                isNewSong = isNewSong,
+                                theme = mode,
+                                tuning = tuning,
+                                showTuningFields = showTuningFields,
+                                chordsVisible = chordsVisible,
+                                onChordsVisibleChange = {},
+                                languageNames = languageNames.orEmpty(),
+                                onLanguageNamesChange = if (languageNames != null) ({}) else null,
+                                onDismiss = {},
+                                onSave = { _, _ -> },
+                            )
+                        }
                     }
                 }
             }

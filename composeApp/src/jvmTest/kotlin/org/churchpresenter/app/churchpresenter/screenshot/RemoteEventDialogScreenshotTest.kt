@@ -19,6 +19,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The remote-permission dialog — what an operator is asked when a phone tries to do something — in
@@ -47,32 +48,34 @@ class RemoteEventDialogScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    val presentation = resolveRemoteEventPresentation(
-                        event = event,
-                        queueSize = queueSize,
-                        isClientKnownAllowed = isClientKnownAllowed,
-                        isClientKnownBlocked = isClientKnownBlocked,
-                    )
-                    Box(Modifier.size(500.dp, presentation.dialogHeight)) {
-                        RemoteEventDialogContent(
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        val presentation = resolveRemoteEventPresentation(
                             event = event,
-                            actionLabel = presentation.actionLabel,
-                            typeIcon = presentation.typeIcon,
-                            typeAccent = presentation.typeAccent,
-                            bodyTitle = presentation.bodyTitle,
-                            remaining = presentation.remaining,
-                            showAllowPermanently = presentation.showAllowPermanently,
+                            queueSize = queueSize,
                             isClientKnownAllowed = isClientKnownAllowed,
                             isClientKnownBlocked = isClientKnownBlocked,
-                            isInstanceLinkFollower = isInstanceLinkFollower,
-                            onAllow = {},
-                            onAllowForSession = {},
-                            onAllowPermanently = {},
-                            onBlockForSession = {},
-                            onBlockPermanently = {},
-                            onDeny = {},
                         )
+                        Box(Modifier.size(500.dp, presentation.dialogHeight)) {
+                            RemoteEventDialogContent(
+                                event = event,
+                                actionLabel = presentation.actionLabel,
+                                typeIcon = presentation.typeIcon,
+                                typeAccent = presentation.typeAccent,
+                                bodyTitle = presentation.bodyTitle,
+                                remaining = presentation.remaining,
+                                showAllowPermanently = presentation.showAllowPermanently,
+                                isClientKnownAllowed = isClientKnownAllowed,
+                                isClientKnownBlocked = isClientKnownBlocked,
+                                isInstanceLinkFollower = isInstanceLinkFollower,
+                                onAllow = {},
+                                onAllowForSession = {},
+                                onAllowPermanently = {},
+                                onBlockForSession = {},
+                                onBlockPermanently = {},
+                                onDeny = {},
+                            )
+                        }
                     }
                 }
             }

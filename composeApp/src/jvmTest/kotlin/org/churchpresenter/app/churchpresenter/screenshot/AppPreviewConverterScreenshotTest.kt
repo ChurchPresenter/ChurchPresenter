@@ -20,6 +20,7 @@ import java.io.File
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The bundled format converter, reached from the Help menu. It ships its own colour scheme rather
@@ -37,8 +38,10 @@ class AppPreviewConverterScreenshotTest {
         TestSingletons.latchToTestHome()
         runSkikoComposeUiTest(size = Size(1100f, 800f), density = Density(1f)) {
             setContent {
-                ConverterTheme {
-                    Box(Modifier.size(1100.dp, 800.dp)) { App() }
+                PinnedFonts {
+                    ConverterTheme {
+                        Box(Modifier.size(1100.dp, 800.dp)) { App() }
+                    }
                 }
             }
             waitForIdle()

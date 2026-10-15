@@ -14,7 +14,6 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
-import io.github.takahirom.roborazzi.captureRoboImage
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
@@ -66,6 +65,8 @@ import java.nio.ByteOrder
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 /**
  * The portrait/mobile-aspect counterpart of [PresenterFullScreenScreenshotTest] -- every one of its
@@ -93,7 +94,7 @@ class PresenterPortraitFullScreenScreenshotTest {
 
     private fun shoot(name: String, content: @Composable () -> Unit) =
         runDesktopComposeUiTest(width = 1080, height = 1920) {
-            setContent { MaterialTheme { Box(screen) { content() } } }
+            setContent { PinnedFonts { MaterialTheme { Box(screen) { content() } } } }
             waitForIdle()
             if (photoRequested) awaitPhoto()
             capture(name)
@@ -119,7 +120,7 @@ class PresenterPortraitFullScreenScreenshotTest {
     }
 
     private fun ComposeUiTest.capture(name: String) {
-        onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
+        captureTo(File("$SCREENSHOT_ROOT/$SECTION/$name.png"))
     }
 
     // ── Songs: what is on the slide ─────────────────────────────────────────────────────────────

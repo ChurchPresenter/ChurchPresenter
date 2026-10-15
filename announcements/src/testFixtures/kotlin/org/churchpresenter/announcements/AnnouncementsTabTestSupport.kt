@@ -29,6 +29,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `AnnouncementsTab` test classes.
@@ -92,38 +93,40 @@ fun announcementsTab(
     val reports = AnnouncementReports()
     runDesktopComposeUiTest(width = WINDOW_WIDTH, height = WINDOW_HEIGHT) {
         setContent {
-            var appSettings by remember {
-                mutableStateOf(
-                    settings(AppSettings(announcementsSettings = initial, projectionSettings = projectionSettings))
-                )
-            }
-            val windowState = if (floatingWindow) WindowState(placement = WindowPlacement.Floating) else null
-            CompositionLocalProvider(LocalMainWindowState provides windowState) {
-            ThemedForTest(themeMode) {
-                Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    AnnouncementsTab(
-                        appSettings = appSettings,
-                        onSettingsChange = { transform ->
-                            appSettings = transform(appSettings)
-                            reports.settingsChanges++
-                            reports.settings = appSettings.announcementsSettings
-                            reports.appSettings = appSettings
-                        },
-                        output = presenter.takeIf { withPresenter },
-                        stageMonitorScreens = stageMonitorScreens,
-                        use24HourClock = use24HourClock,
-                        previewOutput = previewOutput ?: FallbackPreviewOutput,
-                        onAddToSchedule =
-                            if (withOnAddToSchedule) {
-                                { s: AnnouncementsSettings -> reports.scheduled += s }
-                            } else null,
-                        onSavePreset =
-                            if (withOnSavePreset) {
-                                { s: AnnouncementsSettings -> reports.presets += s }
-                            } else null,
+            PinnedFonts {
+                var appSettings by remember {
+                    mutableStateOf(
+                        settings(AppSettings(announcementsSettings = initial, projectionSettings = projectionSettings))
                     )
                 }
-            }
+                val windowState = if (floatingWindow) WindowState(placement = WindowPlacement.Floating) else null
+                CompositionLocalProvider(LocalMainWindowState provides windowState) {
+                ThemedForTest(themeMode) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        AnnouncementsTab(
+                            appSettings = appSettings,
+                            onSettingsChange = { transform ->
+                                appSettings = transform(appSettings)
+                                reports.settingsChanges++
+                                reports.settings = appSettings.announcementsSettings
+                                reports.appSettings = appSettings
+                            },
+                            output = presenter.takeIf { withPresenter },
+                            stageMonitorScreens = stageMonitorScreens,
+                            use24HourClock = use24HourClock,
+                            previewOutput = previewOutput ?: FallbackPreviewOutput,
+                            onAddToSchedule =
+                                if (withOnAddToSchedule) {
+                                    { s: AnnouncementsSettings -> reports.scheduled += s }
+                                } else null,
+                            onSavePreset =
+                                if (withOnSavePreset) {
+                                    { s: AnnouncementsSettings -> reports.presets += s }
+                                } else null,
+                        )
+                    }
+                }
+                }
             }
         }
         block(presenter, reports)

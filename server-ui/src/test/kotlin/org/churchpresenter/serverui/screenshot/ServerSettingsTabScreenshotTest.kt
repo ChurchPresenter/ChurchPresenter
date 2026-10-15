@@ -37,6 +37,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureComponent
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Server tab of the settings dialog, in both themes.
@@ -254,16 +255,18 @@ class ServerSettingsTabScreenshotTest {
             val clients = RemoteClientManager().apply(seedClients)
             runComposeUiTest {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Surface(color = MaterialTheme.colorScheme.background) {
-                            Box(Modifier.fillMaxSize()) {
-                                var current by remember { mutableStateOf(settings) }
-                                ServerSettingsTab(
-                                    settings = current,
-                                    onSettingsChange = { transform -> current = transform(current) },
-                                    companionServer = companion,
-                                    remoteClientManager = clients,
-                                )
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Surface(color = MaterialTheme.colorScheme.background) {
+                                Box(Modifier.fillMaxSize()) {
+                                    var current by remember { mutableStateOf(settings) }
+                                    ServerSettingsTab(
+                                        settings = current,
+                                        onSettingsChange = { transform -> current = transform(current) },
+                                        companionServer = companion,
+                                        remoteClientManager = clients,
+                                    )
+                                }
                             }
                         }
                     }

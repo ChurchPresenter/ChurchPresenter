@@ -7,7 +7,4 @@
 # detekt in that file, and a line naming a file that is gone fails checkLiveSafeAllowlist. Never add
 # a line without asking.
 
-canvas-engine/src/main/kotlin/org/churchpresenter/canvas/SceneSourceRenderer.kt: ImageSourceContent exists  # decodes the scene's picture in remember on its first draw; loading it off the thread changes when the picture appears
-canvas-engine/src/main/kotlin/org/churchpresenter/canvas/SceneSourceRenderer.kt: VideoSourceContent exists  # picks the missing-file placeholder on each recomposition; checking off the thread would show a frame of it first
-canvas-engine/src/main/kotlin/org/churchpresenter/canvas/SceneSourceRenderer.kt: QRCodeSourceContent ImageIO.write  # encodes the QR code to PNG in memory, no disk, once per text or colour change
 live-output/src/main/kotlin/org/churchpresenter/liveoutput/DeckLinkComposeOutput.kt: DeckLinkComposeOutput Thread.sleep  # on dispose only: the black frames must reach the device before DeckLinkManager.close

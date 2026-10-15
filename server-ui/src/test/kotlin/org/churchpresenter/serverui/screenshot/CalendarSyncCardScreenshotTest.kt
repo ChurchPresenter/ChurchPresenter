@@ -28,6 +28,7 @@ import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.churchpresenter.sharedui.screenshot.captureComponent
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The "Calendar on phones" card of the Server tab, in each state it reports, and the QR the
@@ -147,19 +148,21 @@ class CalendarSyncCardScreenshotTest {
         val revoked = ArrayList<String>()
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) {
-                    CalendarSyncCardContent(
-                        settings = paired,
-                        onSettingsChange = {},
-                        status = CalendarSyncStatus.Synced(AT, SyncOutcome(1, 0, 0, 0)),
-                        devices = devices,
-                        labelFor = { "" },
-                        onSyncNow = { syncNow++ },
-                        onUnpair = { unpair++ },
-                        onRevoke = { revoked += it },
-                        zone = ZONE,
-                        locale = LOCALE,
-                    )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) {
+                        CalendarSyncCardContent(
+                            settings = paired,
+                            onSettingsChange = {},
+                            status = CalendarSyncStatus.Synced(AT, SyncOutcome(1, 0, 0, 0)),
+                            devices = devices,
+                            labelFor = { "" },
+                            onSyncNow = { syncNow++ },
+                            onUnpair = { unpair++ },
+                            onRevoke = { revoked += it },
+                            zone = ZONE,
+                            locale = LOCALE,
+                        )
+                    }
                 }
             }
             onAllNodesWithText("Sync now")[0].performClick()
@@ -177,19 +180,21 @@ class CalendarSyncCardScreenshotTest {
         val seen = ArrayList<Boolean>()
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) {
-                    CalendarSyncCardContent(
-                        settings = AppSettings(),
-                        onSettingsChange = { change -> seen += change(AppSettings()).calendarSync.enabled },
-                        status = CalendarSyncStatus.Off,
-                        devices = emptyList(),
-                        labelFor = { "" },
-                        onSyncNow = {},
-                        onUnpair = {},
-                        onRevoke = {},
-                        zone = ZONE,
-                        locale = LOCALE,
-                    )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) {
+                        CalendarSyncCardContent(
+                            settings = AppSettings(),
+                            onSettingsChange = { change -> seen += change(AppSettings()).calendarSync.enabled },
+                            status = CalendarSyncStatus.Off,
+                            devices = emptyList(),
+                            labelFor = { "" },
+                            onSyncNow = {},
+                            onUnpair = {},
+                            onRevoke = {},
+                            zone = ZONE,
+                            locale = LOCALE,
+                        )
+                    }
                 }
             }
             onAllNodes(isToggleable())[0].performClick()

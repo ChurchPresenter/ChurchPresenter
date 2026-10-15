@@ -33,6 +33,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `PicturesTab` test classes.
@@ -120,26 +121,28 @@ internal fun picturesTab(
         val reports = PictureReports()
         runComposeUiTest {
             setContent {
-                ThemedForTest(themeMode) {
-                  CompositionLocalProvider(LocalShortcuts provides shortcuts) {
-                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                        PicturesTab(
-                            viewModel = vm,
-                            appSettings = appSettings,
-                            presenterManager = presenterManager,
-                            selectedPictureItem = selectedPictureItem,
-                            onInstanceLinkSendNextPicture = onInstanceLinkSendNextPicture,
-                            onInstanceLinkSendPreviousPicture = onInstanceLinkSendPreviousPicture,
-                            onAddToSchedule = { path, name, count ->
-                                reports.scheduled += Triple(path, name, count)
-                            },
-                            onSettingsChange = { transform ->
-                                reports.settingsChanges++
-                                reports.settingsAfterChange = transform(appSettings)
-                            },
-                        )
+                PinnedFonts {
+                    ThemedForTest(themeMode) {
+                      CompositionLocalProvider(LocalShortcuts provides shortcuts) {
+                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                            PicturesTab(
+                                viewModel = vm,
+                                appSettings = appSettings,
+                                presenterManager = presenterManager,
+                                selectedPictureItem = selectedPictureItem,
+                                onInstanceLinkSendNextPicture = onInstanceLinkSendNextPicture,
+                                onInstanceLinkSendPreviousPicture = onInstanceLinkSendPreviousPicture,
+                                onAddToSchedule = { path, name, count ->
+                                    reports.scheduled += Triple(path, name, count)
+                                },
+                                onSettingsChange = { transform ->
+                                    reports.settingsChanges++
+                                    reports.settingsAfterChange = transform(appSettings)
+                                },
+                            )
+                        }
+                      }
                     }
-                  }
                 }
             }
             block(vm, reports)

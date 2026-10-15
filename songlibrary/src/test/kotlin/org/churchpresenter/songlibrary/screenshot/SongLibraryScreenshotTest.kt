@@ -32,6 +32,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Song Library Manager window, in every state it can be in, in both themes.
@@ -213,16 +214,18 @@ class SongLibraryScreenshotTest {
             val gate = Gated()
             runComposeUiTest {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.fillMaxSize()) {
-                            SongLibraryApp(
-                                libraryFolder = folder,
-                                onClose = {},
-                                typicalSeconds = typicalSeconds,
-                                io = if (hold) gate else Dispatchers.IO,
-                                // A flash caught at a different moment each run is a different image.
-                                animateProblems = false,
-                            )
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.fillMaxSize()) {
+                                SongLibraryApp(
+                                    libraryFolder = folder,
+                                    onClose = {},
+                                    typicalSeconds = typicalSeconds,
+                                    io = if (hold) gate else Dispatchers.IO,
+                                    // A flash caught at a different moment each run is a different image.
+                                    animateProblems = false,
+                                )
+                            }
                         }
                     }
                 }

@@ -38,6 +38,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The bundled Lottie lower-third generator, reached from the Help menu and from the Lower Third tab.
@@ -109,9 +110,11 @@ class LottieGenScreenshotTest {
             val thumbnailDiagnostics = ThumbnailDiagnostics()
             runSkikoComposeUiTest(size = window, density = Density(1f)) {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.size(window.width.dp, window.height.dp)) {
-                            LottieGenApp(embedded = true, thumbnailDiagnostics = thumbnailDiagnostics)
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.size(window.width.dp, window.height.dp)) {
+                                LottieGenApp(embedded = true, thumbnailDiagnostics = thumbnailDiagnostics)
+                            }
                         }
                     }
                 }

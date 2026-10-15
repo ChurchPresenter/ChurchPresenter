@@ -30,6 +30,7 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The title slide a song opens on, on a full-screen output -- every state the settings can put it
@@ -48,7 +49,7 @@ class PresenterTitleSlideScreenshotTest {
     private val screen = Modifier.size(1920.dp, 1080.dp)
 
     private fun shoot(name: String, content: @Composable () -> Unit) = runComposeUiTest {
-        setContent { MaterialTheme { Box(screen) { content() } } }
+        setContent { PinnedFonts { MaterialTheme { Box(screen) { content() } } } }
         waitForIdle()
         capture(name)
     }

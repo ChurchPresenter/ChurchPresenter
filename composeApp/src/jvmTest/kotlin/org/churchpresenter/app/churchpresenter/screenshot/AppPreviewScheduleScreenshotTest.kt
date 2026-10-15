@@ -20,6 +20,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 class AppPreviewScheduleScreenshotTest {
 
@@ -44,9 +45,11 @@ class AppPreviewScheduleScreenshotTest {
                         density = Density(PREVIEW_DENSITY),
                     ) {
                         setContent {
-                            ChurchPresenterTheme(themeMode = mode) {
-                                Box(Modifier.width(PANEL_WIDTH.dp)) {
-                                    ScheduleTab(scheduleViewModel = vm, onPresenting = {})
+                            PinnedFonts {
+                                ChurchPresenterTheme(themeMode = mode) {
+                                    Box(Modifier.width(PANEL_WIDTH.dp)) {
+                                        ScheduleTab(scheduleViewModel = vm, onPresenting = {})
+                                    }
                                 }
                             }
                         }

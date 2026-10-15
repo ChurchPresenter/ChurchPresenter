@@ -18,6 +18,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 class AppPreviewAboutScreenshotTest {
 
@@ -35,16 +36,18 @@ class AppPreviewAboutScreenshotTest {
                 density = Density(1f),
             ) {
                 setContent {
-                    Box(Modifier.size(ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT)) {
-                        AboutDialogContent(
-                            onDismiss = {},
-                            appSettings = appSettings,
-                            identity = appTelemetryIdentity,
-                            theme = mode,
-                            // Pinned: the real one carries the build's git hash, so this image
-                            // would differ from the committed one after every single commit.
-                            versionDisplay = "26.8.0 (0000000)",
-                        )
+                    PinnedFonts {
+                        Box(Modifier.size(ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT)) {
+                            AboutDialogContent(
+                                onDismiss = {},
+                                appSettings = appSettings,
+                                identity = appTelemetryIdentity,
+                                theme = mode,
+                                // Pinned: the real one carries the build's git hash, so this image
+                                // would differ from the committed one after every single commit.
+                                versionDisplay = "26.8.0 (0000000)",
+                            )
+                        }
                     }
                 }
                 waitForIdle()

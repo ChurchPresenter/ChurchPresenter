@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -175,8 +176,16 @@ private val PART_OPTIONS =
  * straight to `screenshots/previewApp/…` is verified, while the throwaway halves are not.
  *
  * [rootIndex] 1 shoots an open popup — a dropdown or menu is a compose root of its own.
+ *
+ * Fails a capture whose content is not inside [PinnedFonts]: its text would be in the system font,
+ * and the picture would differ from one Mac to the next.
  */
 fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0) {
+    val pinned = onAllNodes(SemanticsMatcher.keyIsDefined(PinnedFontsMarker), useUnmergedTree = true)
+        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+    check(pinned.isNotEmpty()) {
+        "${file.name}: the content is not inside PinnedFonts, so its text is in this machine's system font"
+    }
     dismissHover()
     val options = if (file.absoluteFile.startsWith(PARTS.absoluteFile)) PART_OPTIONS else GOLDEN_OPTIONS
     onAllNodes(isRoot())[rootIndex].captureRoboImage(file.path, options)
@@ -285,9 +294,11 @@ fun captureComponent(
 ) = stackedThemes(section, name, trim = true) { mode, file ->
     runComposeUiTest {
         setContent {
-            ChurchPresenterTheme(themeMode = mode) {
-                Surface(color = MaterialTheme.colorScheme.surface) {
-                    Box(Modifier.padding(12.dp)) { content() }
+            PinnedFonts {
+                ChurchPresenterTheme(themeMode = mode) {
+                    Surface(color = MaterialTheme.colorScheme.surface) {
+                        Box(Modifier.padding(12.dp)) { content() }
+                    }
                 }
             }
         }

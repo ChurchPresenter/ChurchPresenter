@@ -22,6 +22,7 @@ import java.time.Instant
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The update dialog in every state it can be in, at the size its window opens at.
@@ -43,23 +44,25 @@ class UpdateDialogScreenshotTest {
         stackedThemes(SECTION, name) { mode, file ->
             runSkikoComposeUiTest(size = Size(WIDTH, height), density = Density(1f)) {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Surface(color = MaterialTheme.colorScheme.background) {
-                            Box(Modifier.fillMaxSize()) {
-                                UpdateAvailableContent(
-                                    result = result,
-                                    isManualCheck = isManualCheck,
-                                    participateInPrereleases = participateInPrereleases,
-                                    onParticipateInPrereleasesChange = {},
-                                    updateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
-                                    onUpdateCheckIntervalChange = {},
-                                    downloadState = downloadState,
-                                    onDownload = {},
-                                    onInstall = {},
-                                    onOpenReleasePage = {},
-                                    onDismiss = {},
-                                    copyText = {},
-                                )
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Surface(color = MaterialTheme.colorScheme.background) {
+                                Box(Modifier.fillMaxSize()) {
+                                    UpdateAvailableContent(
+                                        result = result,
+                                        isManualCheck = isManualCheck,
+                                        participateInPrereleases = participateInPrereleases,
+                                        onParticipateInPrereleasesChange = {},
+                                        updateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
+                                        onUpdateCheckIntervalChange = {},
+                                        downloadState = downloadState,
+                                        onDownload = {},
+                                        onInstall = {},
+                                        onOpenReleasePage = {},
+                                        onDismiss = {},
+                                        copyText = {},
+                                    )
+                                }
                             }
                         }
                     }

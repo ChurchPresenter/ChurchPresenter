@@ -18,6 +18,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 class AppPreviewContactScreenshotTest {
 
@@ -28,25 +29,27 @@ class AppPreviewContactScreenshotTest {
         THEMES.forEach { (suffix, mode) ->
             runSkikoComposeUiTest(size = Size(520f, 660f), density = Density(1f)) {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.size(520.dp, 660.dp)) {
-                            ContactUsDialogContent(
-                                onDismiss = {},
-                                types = TYPES,
-                                selectedType = TYPES[1],
-                                onSelectedTypeChange = {},
-                                name = "Sarah Bennett",
-                                onNameChange = {},
-                                email = "sarah@gracechurch.org",
-                                onMessageChange = {},
-                                message = "Thank you for building this — we've used it every Sunday " +
-                                    "since Easter and the lower thirds have made a real difference " +
-                                    "to our livestream.",
-                                onEmailChange = {},
-                                status = SendStatus.Idle,
-                                onSend = {},
-                                sentText = "",
-                            )
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.size(520.dp, 660.dp)) {
+                                ContactUsDialogContent(
+                                    onDismiss = {},
+                                    types = TYPES,
+                                    selectedType = TYPES[1],
+                                    onSelectedTypeChange = {},
+                                    name = "Sarah Bennett",
+                                    onNameChange = {},
+                                    email = "sarah@gracechurch.org",
+                                    onMessageChange = {},
+                                    message = "Thank you for building this — we've used it every Sunday " +
+                                        "since Easter and the lower thirds have made a real difference " +
+                                        "to our livestream.",
+                                    onEmailChange = {},
+                                    status = SendStatus.Idle,
+                                    onSend = {},
+                                    sentText = "",
+                                )
+                            }
                         }
                     }
                 }

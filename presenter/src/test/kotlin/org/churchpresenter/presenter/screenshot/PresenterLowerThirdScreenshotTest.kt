@@ -42,6 +42,7 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.jetbrains.compose.resources.decodeToImageBitmap
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The lower third — the band across the foot of the screen a broadcast keys over its camera feed.
@@ -62,7 +63,7 @@ class PresenterLowerThirdScreenshotTest {
     private val screen = Modifier.size(1920.dp, 1080.dp)
 
     private fun shoot(name: String, content: @Composable () -> Unit) = runComposeUiTest {
-        setContent { MaterialTheme { Box(screen) { content() } } }
+        setContent { PinnedFonts { MaterialTheme { Box(screen) { content() } } } }
         waitForIdle()
         capture(name)
     }

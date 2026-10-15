@@ -19,6 +19,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `STTTab` test classes.
@@ -76,23 +77,25 @@ fun sttTab(
         stt.seed()
         runComposeUiTest {
             setContent {
-                ThemedForTest(themeMode) {
-                    // The tab paints no ground of its own — in the app it sits on the window's
-                    // `colorScheme.background`, and without that the capture is transparent
-                    // everywhere the tab does not draw.
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    STTTab(
-                        sttManager = stt,
-                        captionsLive = captionsLive,
-                        presenting = { reports.presenting += it },
-                        appSettings = appSettings,
-                        onSettingsChange = { transform ->
-                            reports.settingsChanges++
-                            reports.settingsAfterChange = transform(appSettings)
-                        },
-                    )
-                    }
+                PinnedFonts {
+                    ThemedForTest(themeMode) {
+                        // The tab paints no ground of its own — in the app it sits on the window's
+                        // `colorScheme.background`, and without that the capture is transparent
+                        // everywhere the tab does not draw.
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        STTTab(
+                            sttManager = stt,
+                            captionsLive = captionsLive,
+                            presenting = { reports.presenting += it },
+                            appSettings = appSettings,
+                            onSettingsChange = { transform ->
+                                reports.settingsChanges++
+                                reports.settingsAfterChange = transform(appSettings)
+                            },
+                        )
+                        }
+                        }
                     }
                 }
             }

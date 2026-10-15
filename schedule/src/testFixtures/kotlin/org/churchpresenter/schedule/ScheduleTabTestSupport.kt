@@ -24,6 +24,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
 import java.nio.file.Files
 import java.time.LocalTime
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /** Writes schedule items the way the app does, defaults included. */
 private val itemsJsonFormat = Json { encodeDefaults = true }
@@ -115,40 +116,42 @@ internal fun scheduleTab(
         val reports = ScheduleReports()
         val body: ComposeUiTest.() -> Unit = {
             setContent {
-                ThemedForTest(themeMode) {
-                    CompositionLocalProvider(LocalShowControlEnabled provides showControl) {
-                    Box(modifier = if (width != null) Modifier.width(width) else Modifier) {
-                    ScheduleTab(
-                        scheduleViewModel = vm,
-                        itemZoomPercent = itemZoomPercent,
-                        onItemZoomChange = { reports.zoomChanges += it },
-                        legacyRowActions = legacyRowActions,
-                        onLegacyRowActionsChange = { reports.legacyRowActionChanges += it },
-                        hiddenToolbarButtons = hiddenToolbarButtons,
-                        onToggleToolbarButton = { reports.toolbarButtonToggles += it },
-                        toolbarIconSize = toolbarIconSize,
-                        onToolbarIconSizeChange = { reports.toolbarIconSizeChanges += it },
-                        onPresenting = { reports.presenting += it },
-                        onItemClick = { reports.clicked += it },
-                        onEditLabel = { reports.editedLabels += it },
-                        onSelectedItemChanged = { reports.selectionChanges += it },
-                        onActionsReady = { reports.actions = it },
-                        onAddLabel = { reports.addLabelRequests++ },
-                        onPresentSong = { reports.presented += it },
-                        onPresentBible = { reports.presented += it },
-                        onPresentWebsite = { reports.presented += it },
-                        onPresentAnnouncement = { reports.presented += it },
-                        onPresentMedia = { reports.presented += it },
-                        onPresentLowerThird = { reports.presented += it },
-                        onPresentDictionary = { reports.presented += it },
-                        upcomingServiceLoad = upcomingServiceLoad,
-                        onLoadServiceNow = { reports.loadNowChoices += it },
-                        scheduleService = scheduleService,
-                        onSaveScheduleToCalendar = { reports.saveToCalendarRequests++ },
-                        onAddScheduleToCalendar =
-                            if (offerAddToCalendar) ({ reports.addToCalendarRequests += 1 }) else null,
-                    )
-                    }
+                PinnedFonts {
+                    ThemedForTest(themeMode) {
+                        CompositionLocalProvider(LocalShowControlEnabled provides showControl) {
+                        Box(modifier = if (width != null) Modifier.width(width) else Modifier) {
+                        ScheduleTab(
+                            scheduleViewModel = vm,
+                            itemZoomPercent = itemZoomPercent,
+                            onItemZoomChange = { reports.zoomChanges += it },
+                            legacyRowActions = legacyRowActions,
+                            onLegacyRowActionsChange = { reports.legacyRowActionChanges += it },
+                            hiddenToolbarButtons = hiddenToolbarButtons,
+                            onToggleToolbarButton = { reports.toolbarButtonToggles += it },
+                            toolbarIconSize = toolbarIconSize,
+                            onToolbarIconSizeChange = { reports.toolbarIconSizeChanges += it },
+                            onPresenting = { reports.presenting += it },
+                            onItemClick = { reports.clicked += it },
+                            onEditLabel = { reports.editedLabels += it },
+                            onSelectedItemChanged = { reports.selectionChanges += it },
+                            onActionsReady = { reports.actions = it },
+                            onAddLabel = { reports.addLabelRequests++ },
+                            onPresentSong = { reports.presented += it },
+                            onPresentBible = { reports.presented += it },
+                            onPresentWebsite = { reports.presented += it },
+                            onPresentAnnouncement = { reports.presented += it },
+                            onPresentMedia = { reports.presented += it },
+                            onPresentLowerThird = { reports.presented += it },
+                            onPresentDictionary = { reports.presented += it },
+                            upcomingServiceLoad = upcomingServiceLoad,
+                            onLoadServiceNow = { reports.loadNowChoices += it },
+                            scheduleService = scheduleService,
+                            onSaveScheduleToCalendar = { reports.saveToCalendarRequests++ },
+                            onAddScheduleToCalendar =
+                                if (offerAddToCalendar) ({ reports.addToCalendarRequests += 1 }) else null,
+                        )
+                        }
+                        }
                     }
                 }
             }

@@ -26,6 +26,7 @@ import org.churchpresenter.core.models.qa.Question
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextReplacement
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `QATab` test classes.
@@ -106,27 +107,29 @@ fun qaTab(
         qa.seed()
         runComposeUiTest {
             setContent {
-                var current by remember { mutableStateOf(settings) }
-                ThemedForTest(themeMode) {
-                    // The tab paints no ground of its own — in the app it sits on the window's
-                    // `colorScheme.background` (MainDesktop). Without this the capture is
-                    // transparent everywhere the tab does not draw, which reads as a black page.
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    QATab(
-                        qaManager = qa,
-                        output = presenter,
-                        serverUrl = serverUrl,
-                        presenting = { reports.presenting += it },
-                        appSettings = current,
-                        onSettingsChange = { transform ->
-                            reports.settingsChanges++
-                            reports.settingsAfterChange = transform(current)
-                            if (applySettings) current = transform(current)
-                        },
-                        remoteDialog = remoteDialog,
-                    )
-                    }
+                PinnedFonts {
+                    var current by remember { mutableStateOf(settings) }
+                    ThemedForTest(themeMode) {
+                        // The tab paints no ground of its own — in the app it sits on the window's
+                        // `colorScheme.background` (MainDesktop). Without this the capture is
+                        // transparent everywhere the tab does not draw, which reads as a black page.
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        QATab(
+                            qaManager = qa,
+                            output = presenter,
+                            serverUrl = serverUrl,
+                            presenting = { reports.presenting += it },
+                            appSettings = current,
+                            onSettingsChange = { transform ->
+                                reports.settingsChanges++
+                                reports.settingsAfterChange = transform(current)
+                                if (applySettings) current = transform(current)
+                            },
+                            remoteDialog = remoteDialog,
+                        )
+                        }
+                        }
                     }
                 }
             }
