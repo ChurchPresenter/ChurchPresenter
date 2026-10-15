@@ -144,6 +144,11 @@ private fun startCef(): CefApp {
         builder.addJcefArgs("--disable-smooth-scrolling")
         println("smooth scrolling off")
     }
+    // `-PcefArgs="--disable-gpu --other"`: extra Chromium switches, to compare render paths.
+    System.getProperty("osr.cefArgs")?.split(' ')?.filter(String::isNotBlank)?.forEach { arg ->
+        builder.addJcefArgs(arg)
+        println("chromium switch $arg")
+    }
     return builder.build()
 }
 
@@ -190,7 +195,8 @@ fun main() {
             exitApplication()
             exitProcess(0)
         }
-        OutputWindow(store, stats, cfg, shutdown)
+        // `-PnoOutput=1`: the Preview alone, to tell what the second window costs.
+        if (System.getProperty("osr.noOutput") == null) OutputWindow(store, stats, cfg, shutdown)
         PreviewWindow(store, stats, browser, shutdown)
     }
 }
@@ -260,6 +266,7 @@ private fun DisableInputMethodsIfAsked(window: Window) {
 }
 
 private val isMac = System.getProperty("os.name").startsWith("Mac")
+private val isLinux = System.getProperty("os.name").startsWith("Linux")
 
 /**
  * Types [char] into the page's focused field. JCEF's native macOS key path drops a `KEY_TYPED` whose
@@ -273,8 +280,8 @@ private fun insertText(browser: CefBrowserHeadless, char: Char) {
 }
 
 /**
- * While [pageFocused], sends every key event of [window] to [browser] untouched and keeps it from
- * Compose. Compose's own key events carry no `KEY_TYPED` (Chromium's char event) and wrap the AWT
+ * While [pageFocused], sends every key event of [window] to [browser] (on Linux re-made by
+ * [linuxKeyEvent]) and keeps it from Compose. Compose's own key events carry no `KEY_TYPED` (Chromium's char event) and wrap the AWT
  * event, so the raw AWT event is taken here instead, with its real id, scancode and raw code.
  */
 @Composable
@@ -284,13 +291,15 @@ private fun ForwardKeysWhileFocused(window: Window, pageFocused: AtomicBoolean, 
             if (!pageFocused.get() || SwingUtilities.getWindowAncestor(e.component) !== window) {
                 false
             } else {
+                val sent = if (isLinux) linuxKeyEvent(e) else e
                 if (System.getProperty("osr.logKeys") != null) {
-                    println("key id=${e.id} code=${e.keyCode} char=${e.keyChar.code} '${e.keyChar}' mods=${e.modifiersEx}")
+                    val keysym = if (sent !== e) " sent=0x%x".format(sent.keyChar.code) else ""
+                    println("key id=${e.id} code=${e.keyCode} char=${e.keyChar.code} '${e.keyChar}' mods=${e.modifiersEx}$keysym")
                 }
                 if (isMac && e.id == KeyEvent.KEY_TYPED && e.keyChar.code > 0x7f) {
                     insertText(browser, e.keyChar)
                 } else {
-                    browser.key(e)
+                    browser.key(sent)
                 }
                 true
             }
@@ -312,7 +321,7 @@ private fun UrlBar(browser: CefBrowserHeadless) {
             textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
             modifier = Modifier.fillMaxWidth().padding(6.dp).onPreviewKeyEvent { e ->
                 if (e.type == KeyEventType.KeyDown && e.key == Key.Enter && text.isNotBlank()) {
-                    val url = if ("://" in text) text else "https://$text"
+                    val url = if ("://" in text || NO_HOST_SCHEMES.any(text::startsWith)) text else "https://$text"
                     browser.loadURL(url)
                     true
                 } else false
@@ -328,3 +337,6 @@ private fun UrlBar(browser: CefBrowserHeadless) {
         )
     }
 }
+
+/** Schemes the URL bar takes as typed, with no `//`. */
+private val NO_HOST_SCHEMES = listOf("about:", "data:", "javascript:")

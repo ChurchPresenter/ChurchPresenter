@@ -30,22 +30,26 @@ import java.awt.event.MouseWheelEvent
  * The wheel rotation to hand JCEF for an AWT [preciseWheelRotation][MouseWheelEvent.getPreciseWheelRotation].
  *
  * JCEF passes the rotation to Chromium as a pixel delta, negated and barely scaled: one notch down
- * arrives as `deltaY=-1` on macOS and `deltaY=-2.5` on Windows (truncated to whole pixels), where
- * Chrome scrolls 40 px per line and 100 px per notch. So this sends pre-negated units of JCEF's
- * factor, and carries what is left in pixels — after JCEF's own truncation — so a touchpad's small
- * steps add up exactly. Linux is passed through until measured.
+ * arrives as `deltaY=-1` on macOS, `deltaY=-2.5` on Windows (truncated to whole pixels) and
+ * `deltaY=-3` on Linux (the event's scroll amount, 3), where Chrome scrolls 40 px per line, 100 px
+ * per notch and 53 px per notch. So this sends pre-negated units of JCEF's factor, and carries what
+ * is left in pixels — after JCEF's own truncation — so a touchpad's small steps add up exactly. On
+ * Linux the event is sent with a scroll amount of [scrollAmount] 1, so JCEF's factor is exactly one.
  */
 internal class WheelScaler(os: String = System.getProperty("os.name")) {
-    /** Pixels per AWT rotation unit, and JCEF's native multiplier; null where unmeasured. */
-    private val scale: Pair<Double, Double>? = when {
+    /** Pixels per AWT rotation unit, and JCEF's native multiplier. */
+    private val scale: Pair<Double, Double> = when {
         os.startsWith("Mac") -> 40.0 to 1.0
         os.startsWith("Windows") -> 100.0 to 2.5
-        else -> null
+        else -> 53.0 to 1.0
     }
+
+    /** The scroll amount to send instead of the event's own, where JCEF multiplies by it; null keeps it. */
+    val scrollAmount: Int? = if (os.startsWith("Mac") || os.startsWith("Windows")) null else 1
     private var carryPixels = 0.0
 
     fun rotationFor(precise: Double): Int {
-        val (pixelsPerUnit, nativeFactor) = scale ?: return precise.toInt()
+        val (pixelsPerUnit, nativeFactor) = scale
         val wanted = precise * pixelsPerUnit + carryPixels
         val units = (wanted / nativeFactor).toInt()
         // What Chromium will actually scroll: JCEF multiplies by its factor and drops the fraction.
@@ -55,11 +59,11 @@ internal class WheelScaler(os: String = System.getProperty("os.name")) {
     }
 }
 
-/** `-PnoMipmaps=1` turns mipmapped sampling off, to measure what it costs. */
-private val noMipmaps = System.getProperty("osr.noMipmaps") != null
-
-/** Drawn smaller than this share of its size, a picture is sampled from mipmaps. */
-private const val MIPMAP_BELOW = 0.67f
+/**
+ * A small window drawn smaller than this share of even the smallest level samples it from mipmaps:
+ * past 2:1 a bilinear sample skips source pixels. Only a very small preview gets there.
+ */
+private const val MIPMAP_BELOW = 0.5f
 
 /** Where the page's picture sits inside a box of [box]: centred, letterboxed to the frame's aspect. */
 internal fun fitRect(box: Size, frameW: Int, frameH: Int): Rect {
@@ -72,30 +76,28 @@ internal fun fitRect(box: Size, frameW: Int, frameH: Int): Rect {
 }
 
 /**
- * Draws the latest frame, letterboxed, with the open popup over it, and reports each draw to [stats]
- * under [name]. Every window that shows the page is one of these over the same [store]; a [small]
- * one draws the frame's scaled-down copy when there is one.
+ * What one window draws from a [Frame]: the full view, or for a small window one of the frame's
+ * [levels][Frame.levels] chosen by its size at draw time, and the popup. [pictures] is what it picks
+ * from. Two are equivalent when they would draw the same pixels, so a window is not redrawn when only
+ * the other window's pictures changed.
  */
-/**
- * What one window draws from a [Frame]: its [picture] (the full view, or for a small window the
- * scaled-down copy when there is one), and the popup. Two are equivalent when they would draw the
- * same pixels, so a window is not redrawn when only the other window's picture changed.
- */
-private class Shown(val frame: Frame, val picture: Image, val pictureSeq: Long) {
+private class Shown(val frame: Frame, val pictures: List<Image>, val pictureSeq: Long) {
     companion object {
-        fun of(frame: Frame, small: Boolean): Shown {
-            val preview = frame.preview
-            return if (small && preview != null) Shown(frame, preview, frame.previewSeq)
-            else Shown(frame, frame.view, frame.viewSeq)
-        }
+        fun of(frame: Frame, small: Boolean): Shown =
+            if (small && frame.levels.isNotEmpty()) Shown(frame, listOf(frame.view) + frame.levels, frame.previewSeq)
+            else Shown(frame, listOf(frame.view), frame.viewSeq)
 
         val Policy = object : SnapshotMutationPolicy<Shown?> {
             override fun equivalent(a: Shown?, b: Shown?): Boolean =
-                a?.picture === b?.picture && a?.frame?.popup === b?.frame?.popup &&
+                a?.pictures?.last() === b?.pictures?.last() && a?.frame?.popup === b?.frame?.popup &&
                     a?.frame?.popupRect == b?.frame?.popupRect
         }
     }
 }
+
+/** The smallest of [pictures] (largest first) at least [width] wide; the largest when none is. */
+private fun pick(pictures: List<Image>, width: Float): Image =
+    pictures.lastOrNull { it.width >= width } ?: pictures.first()
 
 /**
  * Draws the latest frame, letterboxed, with the open popup over it, and reports each draw to [stats]
@@ -112,13 +114,12 @@ fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier,
     Canvas(modifier) {
         val current = shown ?: return@Canvas
         val f = current.frame
-        val picture = current.picture
         val start = System.nanoTime()
-        val dst = fitRect(size, picture.width, picture.height)
-        // Shrinking a picture by more than about 1.5× with plain bilinear skips source pixels and
-        // breaks up small text, so a window that does (a small preview) samples from mipmaps, which
-        // the GPU builds as it uploads the picture. Near full size (the Output) it would be wasted work.
-        val shrinking = dst.width < picture.width * MIPMAP_BELOW && !noMipmaps
+        val dst = fitRect(size, f.view.width, f.view.height)
+        val picture = pick(current.pictures, dst.width)
+        // Mipmaps are rebuilt on the CPU for every new picture, so only a small window that is below
+        // even the smallest level pays for them. The Output is meant to be drawn at its own size.
+        val shrinking = small && !plainPreview && dst.width < picture.width * MIPMAP_BELOW
         val sampling = FilterMipmap(FilterMode.LINEAR, if (shrinking) MipmapMode.LINEAR else MipmapMode.NONE)
         drawIntoCanvas { c ->
             val canvas = c.skiaCanvas
@@ -179,7 +180,7 @@ fun Modifier.forwardPointer(browser: CefBrowserHeadless, cursorType: Int, onPres
                             browser.wheel(
                                 MouseWheelEvent(
                                     src, awt.id, awt.`when`, awt.modifiersEx, x, y, awt.xOnScreen, awt.yOnScreen,
-                                    awt.clickCount, awt.isPopupTrigger, awt.scrollType, awt.scrollAmount,
+                                    awt.clickCount, awt.isPopupTrigger, awt.scrollType, wheel.scrollAmount ?: awt.scrollAmount,
                                     rotation, rotation.toDouble(),
                                 ),
                             )
