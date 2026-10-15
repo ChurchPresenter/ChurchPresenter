@@ -8,26 +8,27 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import kotlinx.coroutines.CompletableDeferred
 import org.churchpresenter.bible.SpbFixture
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 /**
  * The dictionary's Bible-translation selector — which translation the "In Scripture" verses are read
  * from, as opposed to the app's primary Bible.
  *
- * It is drawn only once interlinear data has loaded **and** at least one `.spb` has been found, so
- * every other suite here runs with it absent.
+ * It is drawn only once at least one `.spb` has been found, so every other suite here runs with it
+ * absent. It does not wait for the interlinear data: a row that appeared when that data arrived
+ * would push the entry list down under the pointer.
  *
- * **Both halves are reached through the real API rather than by writing the view model's state.**
- * `isInterlinearDataLoaded` is set by the pre-load the tab kicks off itself (the harness already
- * stubs `InterlinearRepository`, so it resolves immediately), and `availableDictBibles` by
- * `loadAvailableBibles` over a directory of real `.spb` files built with [SpbFixture] — which also
- * exercises the title being read out of the file, since that is the name the operator picks by.
- * Every one of these properties has a `private set`; widening four of them to make a test simpler
+ * **The translations are reached through the real API rather than by writing the view model's
+ * state.** `availableDictBibles` is set by `loadAvailableBibles` over a directory of real `.spb`
+ * files built with [SpbFixture] — which also exercises the title being read out of the file, since
+ * that is the name the operator picks by. It has a `private set`; widening it to make a test simpler
  * would have meant testing a state the app cannot actually reach.
  *
  * **The label is uppercased by `DropdownSelector`** (`label.uppercase()`), so it is matched as
@@ -39,11 +40,6 @@ import kotlin.test.assertEquals
  *  * **The spinner** shown while a chosen translation loads. `isDictBibleLoading` is only true
  *    between the click and the file being read, which for a fixture-sized `.spb` is too short to
  *    observe without racing it — and it cannot be set directly.
- *  * **The `isInterlinearDataLoaded` gate on its own.** The tests below pin the inner
- *    `availableDictBibles.isNotEmpty()` gate, but not the outer one: the pre-load resolves against
- *    the stubbed repository as soon as the harness has waited for the entries, so the state that
- *    would isolate it — translations found, interlinear data still loading — cannot be held open
- *    without racing that coroutine. Mutating the outer gate away therefore fails nothing here.
  */
 class DictionaryTabBibleSelectorTest {
 
@@ -78,14 +74,8 @@ class DictionaryTabBibleSelectorTest {
         return dir.absolutePath
     }
 
-    /** Waits for the interlinear pre-load the tab starts on its own. */
-    private fun ComposeUiTest.awaitInterlinear(vm: DictionaryViewModel) {
-        waitUntil("interlinear data to load", SCAN_TIMEOUT_MS) { vm.isInterlinearDataLoaded }
-    }
-
     /** Puts the tab in the state that draws the selector, with two translations to choose from. */
     private fun ComposeUiTest.withTranslations(vm: DictionaryViewModel) {
-        awaitInterlinear(vm)
         vm.loadAvailableBibles(bibleFolder("kjv.spb" to "King James", "rst.spb" to "Synodal"))
         waitUntil("the translations to be listed", SCAN_TIMEOUT_MS) { vm.availableDictBibles.size == 2 }
         waitForIdle()
@@ -98,20 +88,29 @@ class DictionaryTabBibleSelectorTest {
     }
 
     @Test
-    fun `the selector appears once interlinear data and translations are both present`() =
-        dictionaryTab { vm, _ ->
-            onAllNodesWithText(LABEL).assertCountEquals(0)
+    fun `the selector appears once translations are found`() = dictionaryTab { vm, _ ->
+        onAllNodesWithText(LABEL).assertCountEquals(0)
 
-            withTranslations(vm)
+        withTranslations(vm)
 
-            onNodeWithText(LABEL).assertIsDisplayed()
-            onNodeWithText(PRIMARY).assertIsDisplayed()
-        }
+        onNodeWithText(LABEL).assertIsDisplayed()
+        onNodeWithText(PRIMARY).assertIsDisplayed()
+    }
 
     @Test
-    fun `loaded data with no translations installed draws nothing`() = dictionaryTab { vm, _ ->
+    fun `the selector does not wait for the interlinear data`() {
+        val interlinearLoad = CompletableDeferred<Unit>()
+        dictionaryTab(interlinearLoad = interlinearLoad) { vm, _ ->
+            withTranslations(vm)
+
+            assertFalse(vm.isInterlinearDataLoaded, "the interlinear data is still loading")
+            onNodeWithText(LABEL).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `with no translations installed it draws nothing`() = dictionaryTab { vm, _ ->
         // An empty folder is the ordinary case for anyone who has not put a Bible beside the app.
-        awaitInterlinear(vm)
         vm.loadAvailableBibles(bibleFolder())
         // `waitForIdle` does not cover the scan, which runs on the IO pool: the list is asserted
         // empty here because it started empty, and the second scan below cancels this one anyway.
@@ -135,7 +134,6 @@ class DictionaryTabBibleSelectorTest {
      */
     @Test
     fun `a newer folder scan supersedes an older one still in flight`() = dictionaryTab { vm, _ ->
-        awaitInterlinear(vm)
         val older = vm.loadAvailableBibles(bibleFolder("kjv.spb" to "King James", "rst.spb" to "Synodal"))
         vm.loadAvailableBibles(bibleFolder("web.spb" to "World English"))
         waitUntil("the newer folder's translation to be listed", SCAN_TIMEOUT_MS) {

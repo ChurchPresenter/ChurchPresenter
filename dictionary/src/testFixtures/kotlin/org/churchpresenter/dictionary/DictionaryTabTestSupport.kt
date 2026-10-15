@@ -13,6 +13,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import io.mockk.coEvery
+import kotlinx.coroutines.CompletableDeferred
 import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
@@ -98,11 +99,20 @@ fun dictionaryTab(
     appSettings: AppSettings? = null,
     /** What the dictionary reads; the fixture corpus plus [extraEntries] by default. */
     files: FixtureFiles = DictionaryFixture.files(extraEntries),
+    /**
+     * Holds the interlinear pre-load back until it is completed; null lets it finish at once, the
+     * state every other suite here runs in. A test completes it to watch the data arrive.
+     */
+    interlinearLoad: CompletableDeferred<Unit>? = null,
     block: ComposeUiTest.(vm: DictionaryViewModel, reports: DictionaryReports) -> Unit,
 ) {
     mockkConstructor(InterlinearRepository::class)
-    coEvery { anyConstructed<InterlinearRepository>().ensureGreekLoaded() } returns Unit
-    coEvery { anyConstructed<InterlinearRepository>().ensureHebrewLoaded() } returns Unit
+    coEvery { anyConstructed<InterlinearRepository>().ensureGreekLoaded() } coAnswers {
+        interlinearLoad?.await() ?: Unit
+    }
+    coEvery { anyConstructed<InterlinearRepository>().ensureHebrewLoaded() } coAnswers {
+        interlinearLoad?.await() ?: Unit
+    }
     every { anyConstructed<InterlinearRepository>().getVersesForEntry(any()) } returns emptyList()
     verses.forEach { (number, forEntry) ->
         every { anyConstructed<InterlinearRepository>().getVersesForEntry(number) } returns forEntry
