@@ -54,6 +54,8 @@ data class SoakVerdict(
     val uiStalls: Int = 0,
     val worstUiStallMs: Double = 0.0,
     val failures: List<String>,
+    /** Blocking calls the event thread made -- file, socket, sleep -- one line each. */
+    val eventThreadIo: List<String> = emptyList(),
 ) {
     val passed: Boolean get() = failures.isEmpty()
 }
@@ -77,9 +79,14 @@ internal fun growth(values: List<Double>): Double {
 
 /**
  * Judges a run after its warm-up: any frame past the stall limit fails it, so does any time the UI
- * thread stopped answering past its budget, and so does memory that kept growing.
+ * thread stopped answering past its budget, so does memory that kept growing, and so does any
+ * blocking call the event thread made at any point ([eventThreadIo], one line each).
  */
-fun judge(all: List<SoakSample>, limits: SoakLimits = SoakLimits()): SoakVerdict {
+fun judge(
+    all: List<SoakSample>,
+    limits: SoakLimits = SoakLimits(),
+    eventThreadIo: List<String> = emptyList(),
+): SoakVerdict {
     val samples = all.filterNot { it.warmup }
     val heapGrowth = growth(samples.map { it.heapMb })
     val rss = samples.mapNotNull { it.rssMb }
@@ -102,6 +109,9 @@ fun judge(all: List<SoakSample>, limits: SoakLimits = SoakLimits()): SoakVerdict
         if (judged && rssGrowth != null && rssGrowth > limits.rssGrowthMb) {
             add("resident memory grew ${fmt(rssGrowth)} MB, past ${fmt(limits.rssGrowthMb)} MB")
         }
+        if (eventThreadIo.isNotEmpty()) {
+            add("the event thread blocked in ${eventThreadIo.size} place(s), first: ${eventThreadIo.first()}")
+        }
     }
     return SoakVerdict(
         heapGrowthMb = heapGrowth,
@@ -114,6 +124,7 @@ fun judge(all: List<SoakSample>, limits: SoakLimits = SoakLimits()): SoakVerdict
         uiStalls = uiStalls,
         worstUiStallMs = worstUi,
         failures = failures,
+        eventThreadIo = eventThreadIo,
     )
 }
 
@@ -164,6 +175,13 @@ fun soakMarkdown(
     val rss = verdict.rssGrowthMb?.let { "${fmt(it)} MB (limit ${fmt(limits.rssGrowthMb)})$judged" }
         ?: "not reported by this OS"
     appendLine("| Resident memory growth | $rss |")
+    appendLine("| Blocking calls on the event thread | ${verdict.eventThreadIo.size} |")
+    if (verdict.eventThreadIo.isNotEmpty()) {
+        appendLine()
+        appendLine("Blocking calls on the event thread, each place once:")
+        appendLine()
+        verdict.eventThreadIo.forEach { appendLine("- $it") }
+    }
     if (worstByContent.isNotEmpty()) {
         appendLine()
         appendLine("| Content | Worst frame after warm-up |")

@@ -206,6 +206,9 @@ include(":control-in")
 // What each tab needs of the live output, as interfaces -- BibleOutput, SlidesOutput, QAOutput and
 // the rest -- and the frame a deck plays. The tabs declare against it, :live-output implements it,
 // and neither depends on the other.
+// The build's own detekt rules: the live-safe check on the output modules (AGENT.md, "Live-safe
+// output paths"). On no app classpath; build-logic's cp.detekt hands it to detekt as a plugin.
+include(":detekt-rules")
 include(":output-api")
 include(":live-output")
 

@@ -198,6 +198,9 @@ jobs:
       - name: Module layers
         # Which modules may depend on which: AGENT.md, "Layers".
         run: ./gradlew checkModuleLayers
+      - name: Live-safe allowlist
+        # Every line names a file that still exists: AGENT.md, "Live-safe output paths".
+        run: ./gradlew checkLiveSafeAllowlist
 
   app:
     needs: prepare

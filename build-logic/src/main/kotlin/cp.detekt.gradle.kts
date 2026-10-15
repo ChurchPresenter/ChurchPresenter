@@ -11,6 +11,17 @@ apply(plugin = "io.gitlab.arturbosch.detekt")
 val catalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies.add("detektPlugins", catalog.findLibrary("detekt-formatting").get())
 
+// The build's own rules (`live-safe:` in the config, scoped there to the output modules). Not
+// transitive: detekt brings its own Kotlin standard library, and the build's newer one must not
+// replace it on detekt's class path.
+if (path != ":detekt-rules") {
+    val rules = dependencies.add("detektPlugins", dependencies.project(mapOf("path" to ":detekt-rules")))
+    (rules as ModuleDependency).isTransitive = false
+} else {
+    // The rules module lints with its own jar, so detekt knows the `live-safe:` keys in the config.
+    pluginManager.withPlugin("java") { dependencies.add("detektPlugins", files(tasks.named("jar"))) }
+}
+
 extensions.configure<DetektExtension> {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))

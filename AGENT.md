@@ -159,6 +159,7 @@ module-specific notes there, not here.**
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
 | `show-control/`        | `:show-control`        | The action vocabulary and `ActionRunner`, played through the app's `ShowHost` (see `docs/SHOW_CONTROL.md`) | [AGENT.md](show-control/AGENT.md)        |
 | `control-in/`          | `:control-in`          | MIDI and OSC in and out: the codecs, the ports and the hub that maps what arrives to actions | [AGENT.md](control-in/AGENT.md)          |
+| `detekt-rules/`        | `:detekt-rules`        | The build's own detekt rules: the live-safe check on the output modules, run by every module's detekt | [AGENT.md](detekt-rules/AGENT.md)        |
 | `output-api/`          | `:output-api`          | What each tab needs of the live output, as interfaces, and the frame a deck plays: declared against by the tabs, implemented by `:live-output` | [AGENT.md](output-api/AGENT.md)          |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 | `helper/`              | `:helper`              | Wick, the helper lamp — tips, display setup, typed requests, the spotlight that rings controls | [AGENT.md](helper/AGENT.md)              |
@@ -224,6 +225,25 @@ edge would be recorded, the check fails on an entry that is no longer a forbidde
 writes the file. **Never add a line to it without asking** — an edge that seems to need one is a
 sign that something belongs a layer down (DEVELOPMENT_GUIDE.md, "Adding a module"). A new module gets its layer in `layers.properties`; the check fails
 on one that has none.
+
+### Live-safe output paths — nothing blocks the event thread
+Every output window composes on the AWT event thread, and the off-screen outputs are confined to it
+(`docs/SHOW_CONTROL.md`, Output isolation), so a blocking call there freezes the projector for as
+long as it takes. **An output composable reads state only; loading happens in a `Dispatchers.IO`
+coroutine that writes that state** (`rememberFileExists` in `:shared-ui` is the pattern).
+- **`BlockingCallOnEventThread`** (`:detekt-rules`, `live-safe:` in `config/detekt/detekt.yml`)
+  fails detekt on a file, network, decode or sleep call in a `@Composable` function of `:live-output`,
+  `:presenter` and the six engines — in its body, a `remember`, or an effect that never leaves the
+  thread. It reads names, not types.
+- **`config/architecture/live-safe-allowed.txt`** holds the calls that stay, one line each with its
+  reason. It only shrinks: a line whose call is gone fails detekt, a line whose file is gone fails
+  `./gradlew checkLiveSafeAllowlist` (a CI step), and nothing writes it. **Never add a line without
+  asking**; move the work off the thread instead.
+- **`EventThreadIoMonitor`** (`:diagnostics`) watches the event thread through JFR for what a source
+  rule cannot see — a file, socket or sleep behind a helper. A debug build logs each place once, and
+  `soakTest` fails on any.
+- `render-benchmark.yml` runs the render regression check on every pull request that touches an
+  output module.
 
 ### POI is shared by four modules
 `:presentation-engine`, `:converter`, `:statistics` and `:composeApp` all pull Apache POI, and

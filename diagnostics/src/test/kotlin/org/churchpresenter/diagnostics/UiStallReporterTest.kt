@@ -98,6 +98,13 @@ class UiStallReporterTest {
     }
 
     @Test
+    fun `a run with nothing ever live has no live minutes`() {
+        now = 3_600_000
+
+        assertEquals(0, reporter.liveMinutes())
+    }
+
+    @Test
     fun `live minutes add up every interval, the one still open included`() {
         reporter.outputLive(true)
         now += 90_000

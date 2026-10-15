@@ -46,6 +46,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.appsettings.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.EventThreadIoMonitor
 import org.churchpresenter.diagnostics.StartupProbe
 import kotlin.system.exitProcess
 import org.churchpresenter.diagnostics.UiStallInjector
@@ -207,8 +208,10 @@ fun main() {
 
     // A dev build can stall its own UI on a schedule (-Dchurchpresenter.injectUiStall=<ms>,<everySec>)
     // to show what a stall costs the outputs -- see docs/SHOW_CONTROL.md, Output isolation.
+    // It also logs every blocking call its event thread makes -- AGENT.md, "Live-safe output paths".
     if (!BuildConfig.IS_RELEASE) {
         UiStallSpec.parse(System.getProperty(UiStallInjector.PROPERTY))?.let { UiStallInjector.start(it) }
+        EventThreadIoMonitor.startLogging()
     }
 
     val startupSettings = SettingsManager().loadSettings()
