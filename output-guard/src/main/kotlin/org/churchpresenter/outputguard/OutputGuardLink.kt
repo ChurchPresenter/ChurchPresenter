@@ -3,7 +3,6 @@ package org.churchpresenter.outputguard
 import org.churchpresenter.diagnostics.Log
 import java.awt.EventQueue
 import java.awt.Rectangle
-import java.awt.Window
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -16,7 +15,8 @@ import java.util.concurrent.atomic.AtomicLong
  * [stop] tells the guard the app is quitting on purpose, so it leaves without showing anything.
  *
  * [startGuard] starts the guard process for a folder and [relaunchCommand] is how the guard would
- * start this app again; both are the caller's, since only the app knows how it was launched.
+ * start this app again; both are the caller's, since only the app knows how it was launched. The
+ * heartbeat writes every [beatMs].
  */
 class OutputGuardLink(
     private val files: GuardFiles,
@@ -24,14 +24,19 @@ class OutputGuardLink(
     relaunchCommand: List<String>,
     private val pid: Long = ProcessHandle.current().pid(),
     private val clock: () -> Long = System::currentTimeMillis,
+    private val beatMs: Long = BEAT_MS,
 ) {
+    /** An output the guard follows: its id, and how to ask whether it shows and where it is. */
+    private class Watched(val id: Int, val isShowing: () -> Boolean, val bounds: () -> Rectangle)
+
     private val state = GuardState.open(files.state)
-    private val windows = mutableMapOf<Window, Int>()
+    private val watched = mutableMapOf<Any, Watched>()
     private val seqs = mutableMapOf<Int, Long>()
     private val nextId = AtomicInteger(1)
     private val stopped = AtomicBoolean(false)
+    private val started = AtomicBoolean(false)
     private val tickPending = AtomicBoolean(false)
-    private val lastGuardStart = AtomicLong(0)
+    private val lastGuardStart = AtomicLong(NEVER)
 
     @Volatile private var guard: Process? = null
 
@@ -43,8 +48,9 @@ class OutputGuardLink(
         files.writeRelaunchCommand(relaunchCommand)
     }
 
-    /** Starts the guard and the heartbeat. */
+    /** Starts the guard and the heartbeat, once, and never after [stop]. */
     fun start(): OutputGuardLink {
+        if (stopped.get() || !started.compareAndSet(false, true)) return this
         launchGuard()
         heartbeat.start()
         return this
@@ -64,19 +70,24 @@ class OutputGuardLink(
             state.live = isLive
         }
 
-    /** An output window is up; the guard follows it while it shows. Returns the id its still goes under. */
-    fun register(window: Window): Int = synchronized(windows) { windows.getOrPut(window) { nextId.getAndIncrement() } }
+    /**
+     * An output is up, under [key]: the guard follows it while [isShowing] says so, over [bounds].
+     * Registering the same key again keeps its id.
+     */
+    fun register(key: Any, isShowing: () -> Boolean, bounds: () -> Rectangle): Int = synchronized(watched) {
+        watched.getOrPut(key) { Watched(nextId.getAndIncrement(), isShowing, bounds) }.id
+    }
 
-    /** An output window is gone; its still is deleted on the heartbeat thread, not the caller's. */
-    fun unregister(window: Window) {
-        val id = synchronized(windows) { windows.remove(window) } ?: return
+    /** The output under [key] is gone; its still is deleted on the heartbeat thread, not the caller's. */
+    fun unregister(key: Any) {
+        val id = synchronized(watched) { watched.remove(key) }?.id ?: return
         synchronized(seqs) { seqs.remove(id) }
         retired.add(id)
     }
 
-    /** The output windows the guard follows, by id. */
-    fun outputWindows(): Map<Int, Window> = synchronized(windows) {
-        windows.entries.associate { (window, id) -> id to window }
+    /** What the guard follows, by id: the keys the outputs were registered under -- the app's windows. */
+    fun outputs(): Map<Int, Any> = synchronized(watched) {
+        watched.entries.associate { (key, output) -> output.id to key }
     }
 
     /** Stores the still of output [id] -- BGRA, [width] by [height] -- and tells the guard it is there. */
@@ -84,7 +95,6 @@ class OutputGuardLink(
         if (stopped.get()) return
         files.writeSnapshot(id, width, height, bgra)
         synchronized(seqs) { seqs[id] = (seqs[id] ?: 0L) + 1 }
-        report()
     }
 
     /** Stores what is on air, for an app the guard relaunches to put back. */
@@ -104,7 +114,12 @@ class OutputGuardLink(
             while (!stopped.get()) {
                 state.heartbeatAt = clock()
                 generateSequence { retired.poll() }.forEach(files::deleteSnapshot)
-                report()
+                // Where the showing outputs are, and their latest stills; up once there is one.
+                val showing = synchronized(watched) { watched.values.filter { it.isShowing() } }
+                state.outputs = showing.map { output ->
+                    GuardedOutput(output.id, output.bounds(), synchronized(seqs) { seqs[output.id] ?: 0L })
+                }
+                if (showing.isNotEmpty()) state.outputsUp = true
                 // One tick at a time through the event queue: when it runs is when the event thread
                 // last answered.
                 if (tickPending.compareAndSet(false, true)) {
@@ -114,27 +129,18 @@ class OutputGuardLink(
                     }
                 }
                 if (guard?.isAlive == false) launchGuard()
-                Thread.sleep(BEAT_MS)
+                Thread.sleep(beatMs)
             }
         } catch (_: InterruptedException) {
             // Stopped.
         }
     }
 
-    /** Writes where the showing outputs are; they are up once there is one. */
-    private fun report() {
-        val showing = synchronized(windows) { windows.entries.filter { it.key.isShowing }.map { it.key to it.value } }
-        val outputs = showing.map { (window, id) ->
-            GuardedOutput(id, Rectangle(window.bounds), synchronized(seqs) { seqs[id] ?: 0L })
-        }
-        state.outputs = outputs
-        if (outputs.isNotEmpty()) state.outputsUp = true
-    }
-
     /** Starts the guard, at most once every few seconds should it keep dying. */
     private fun launchGuard() {
         val now = clock()
-        if (stopped.get() || now - lastGuardStart.get() < RESTART_GAP_MS) return
+        val last = lastGuardStart.get()
+        if (stopped.get() || (last != NEVER && now - last < RESTART_GAP_MS)) return
         lastGuardStart.set(now)
         guard = runCatching { startGuard(files) }
             .onFailure { Log.warn(TAG, "The output guard did not start: ${it.message}") }
@@ -144,6 +150,7 @@ class OutputGuardLink(
     private companion object {
         const val BEAT_MS = 250L
         const val RESTART_GAP_MS = 5_000L
+        const val NEVER = Long.MIN_VALUE
         const val TAG = "OutputGuard"
     }
 }

@@ -36,6 +36,11 @@ that state back in an app the guard relaunched (`--relaunched-by-output-guard`).
 - **A quit on purpose sets `closing`**: switching the guard off, the app quitting, or a shutdown hook.
   Only a crash or a kill leaves the guard to cover.
 - **Never write a file in place.** The other process reads it at any moment.
+- **What the tests cannot reach, and why**: the `JWindow` behind `Backstop` (`AwtBackstop`), the
+  process entry (`runOutputGuard`, `startProcess`, the default exit) — a
+  headless test can build neither a window nor a second process. Everything they decide is tested
+  through `GuardWindows`, `GuardProgram`, `appToWatch` and the key-based `register`, with fakes.
+  The behaviour itself was checked on macOS with a real `kill -9` (`docs/SHOW_CONTROL.md`).
 
 ## Commands
 

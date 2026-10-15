@@ -1,14 +1,7 @@
 package org.churchpresenter.outputguard
 
-import java.awt.Color
-import java.awt.Graphics
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
 import java.io.File
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import javax.swing.JPanel
-import javax.swing.JWindow
 import javax.swing.SwingUtilities
 import javax.swing.Timer
 import kotlin.system.exitProcess
@@ -30,16 +23,23 @@ fun runOutputGuard(dir: File) {
     System.setProperty("apple.awt.UIElement", "true")
     val files = GuardFiles(dir)
     val state = GuardState.open(files.state)
-    val pid = state.appPid
-    val app = ProcessHandle.of(pid).orElse(null)
-    if (!state.isCurrent || app == null) exitProcess(0)
+    val app = appToWatch(state) ?: exitProcess(0)
     SwingUtilities.invokeLater {
-        GuardProgram(files, state, pid, appAlive = { app.isAlive }, relaunch = ::startProcess).start()
+        GuardProgram(files, state, app.pid(), appAlive = app::isAlive, relaunch = ::startProcess).start()
     }
     // Held here until the program exits the process: with no window up yet, AWT would otherwise
     // let the JVM end as soon as this returns.
     CountDownLatch(1).await()
 }
+
+/**
+ * The app [state] names, when it was written by this build and the process is still there; [find]
+ * looks a pid up, so a test can be the system.
+ */
+fun appToWatch(
+    state: GuardState,
+    find: (Long) -> ProcessHandle? = { ProcessHandle.of(it).orElse(null) },
+): ProcessHandle? = if (state.isCurrent) find(state.appPid) else null
 
 /**
  * What the guard does, ten times a second on the event thread: [decide], then move its windows
@@ -95,100 +95,6 @@ class GuardProgram(
 
     private companion object {
         const val TICK_MS = 100
-    }
-}
-
-/**
- * The guard's windows, one per output of the app: borderless, never focused, the same bounds as the
- * output, showing the output's last still -- black before the first. At normal level they sit under
- * the app's outputs, which are always on top; covering raises them to the same level and in front,
- * which is also in front of any other app's window on that screen.
- */
-class GuardWindows(private val files: GuardFiles) {
-
-    private val windows = mutableMapOf<Int, GuardWindow>()
-    private val loader = Executors.newSingleThreadExecutor { task ->
-        Thread(task, "output-guard-stills").apply { isDaemon = true }
-    }
-    private var covering = false
-
-    /** Puts a window under each of [outputs], takes away the rest, and loads any newer still. */
-    fun follow(outputs: List<GuardedOutput>) {
-        val ids = outputs.map { it.id }.toSet()
-        windows.keys.filterNot { it in ids }.forEach { id -> windows.remove(id)?.dispose() }
-        outputs.forEach { output ->
-            val window = windows.getOrPut(output.id) { GuardWindow() }
-            if (window.bounds != output.bounds) window.bounds = output.bounds
-            if (!window.isVisible) window.isVisible = true
-            if (output.snapshotSeq != window.seq) {
-                window.seq = output.snapshotSeq
-                loader.execute {
-                    val still = files.readSnapshot(output.id)
-                    SwingUtilities.invokeLater { window.show(still) }
-                }
-            }
-        }
-    }
-
-    /** Raises every window over everything on its screen. */
-    fun cover() {
-        if (covering) return
-        covering = true
-        windows.values.forEach { window ->
-            window.isAlwaysOnTop = true
-            window.toFront()
-        }
-    }
-
-    /** Puts every window back under the app's outputs. */
-    fun lower() {
-        if (!covering) return
-        covering = false
-        windows.values.forEach { window ->
-            window.isAlwaysOnTop = false
-            window.toBack()
-        }
-    }
-
-    fun close() {
-        windows.values.forEach(JWindow::dispose)
-        windows.clear()
-        loader.shutdownNow()
-    }
-
-    /** How many windows are up, and whether they cover. */
-    val count: Int get() = windows.size
-    val isCovering: Boolean get() = covering
-}
-
-/** One output's backstop: its last still scaled to fill the window, or black. */
-private class GuardWindow : JWindow() {
-    var seq = -1L
-    private var still: BufferedImage? = null
-
-    init {
-        focusableWindowState = false
-        setAutoRequestFocus(false)
-        background = Color.BLACK
-        contentPane = object : JPanel() {
-            override fun paintComponent(g: Graphics) {
-                g.color = Color.BLACK
-                g.fillRect(0, 0, width, height)
-                still?.let { image ->
-                    (g as? java.awt.Graphics2D)?.setRenderingHint(
-                        RenderingHints.KEY_INTERPOLATION,
-                        RenderingHints.VALUE_INTERPOLATION_BILINEAR,
-                    )
-                    g.drawImage(image, 0, 0, width, height, null)
-                }
-            }
-        }
-    }
-
-    fun show(image: BufferedImage?) {
-        if (image == null) return
-        still = image
-        repaint()
     }
 }
 

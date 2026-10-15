@@ -26,7 +26,9 @@ import org.churchpresenter.outputguard.OUTPUT_GUARD_ARGUMENT
 import org.churchpresenter.outputguard.OutputGuardLink
 import org.churchpresenter.outputguard.RELAUNCHED_ARGUMENT
 import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
-import java.awt.Window
+import java.awt.Component
+import java.awt.Container
+import java.awt.Rectangle
 import java.io.File
 
 /** The running output guard, for the output windows to register with; null while it is off. */
@@ -41,37 +43,41 @@ internal val LocalOutputGuard = compositionLocalOf<OutputGuardLink?> { null }
  * state goes back on air.
  */
 @Composable
-internal fun AppRootState.OutputGuardWiring(relaunchedByGuard: Boolean, content: @Composable () -> Unit) {
+internal fun AppRootState.OutputGuardWiring(
+    relaunchedByGuard: Boolean,
+    startGuard: (GuardFiles) -> Process? = ::startGuardProcess,
+    content: @Composable () -> Unit,
+) {
     val projection = appSettings.projectionSettings
-    val guard = rememberOutputGuard(enabled = devMode && projection.outputGuardEnabled)
+    val guard = rememberOutputGuard(enabled = devMode && projection.outputGuardEnabled, startGuard)
     SideEffect { guard?.takeOverOnHang = projection.outputGuardOnHang }
     if (guard != null) OutputGuardStills(guard, presenterManager)
     if (relaunchedByGuard) RestoreAfterRelaunch(presenterManager)
     CompositionLocalProvider(LocalOutputGuard provides guard, content = content)
 }
 
-/** Registers an output [window] with the guard for as long as it is composed. */
+/** Registers an output [window] with the guard for as long as it is composed, where it is on screen. */
 @Composable
-internal fun GuardedOutputWindow(guard: OutputGuardLink, window: Window) {
+internal fun GuardedOutputWindow(guard: OutputGuardLink, window: Component) {
     DisposableEffect(guard, window) {
-        guard.register(window)
+        guard.register(window, window::isShowing) { Rectangle(window.bounds) }
         onDispose { guard.unregister(window) }
     }
 }
 
 /**
- * The guard while [enabled], started off the event thread -- it opens a file and starts a process --
- * and stopped when it is switched off, when the app quits, and from a shutdown hook should the app
- * end some other orderly way. Only a crash or a kill leaves it running, which is what it is for.
+ * The guard while [enabled], started off the event thread -- it opens a file and starts a process
+ * ([startGuard]) -- and stopped when it is switched off, when the app quits, and from a shutdown hook
+ * should the app end some other orderly way. Only a crash or a kill leaves it running, which is what
+ * it is for.
  */
 @Composable
-private fun rememberOutputGuard(enabled: Boolean): OutputGuardLink? {
+internal fun rememberOutputGuard(enabled: Boolean, startGuard: (GuardFiles) -> Process?): OutputGuardLink? {
     var link by remember { mutableStateOf<OutputGuardLink?>(null) }
     LaunchedEffect(enabled) {
         if (!enabled) return@LaunchedEffect
         val started = withContext(Dispatchers.IO) {
-            OutputGuardLink(GuardFiles.forUser(), startGuard = ::startGuardProcess, relaunchCommand = relaunchCommand())
-                .start()
+            OutputGuardLink(GuardFiles.forUser(), startGuard = startGuard, relaunchCommand = relaunchCommand()).start()
         }
         val hook = addGuardedShutdownHook("output-guard") { started.stop() }
         link = started
@@ -92,7 +98,7 @@ private fun rememberOutputGuard(enabled: Boolean): OutputGuardLink? {
  * thread. The first pass runs as soon as the guard is up.
  */
 @Composable
-private fun OutputGuardStills(guard: OutputGuardLink, presenterManager: PresenterManager) {
+internal fun OutputGuardStills(guard: OutputGuardLink, presenterManager: PresenterManager) {
     LaunchedEffect(guard, presenterManager) {
         snapshotFlow {
             Triple(presenterManager.program.value, presenterManager.anythingLive, presenterManager.snapshotLiveState())
@@ -101,8 +107,9 @@ private fun OutputGuardStills(guard: OutputGuardLink, presenterManager: Presente
             delay(STILL_AFTER_CHANGE_MS)
             withContext(Dispatchers.IO) {
                 guard.saveLiveState(guardJson.encodeToString(LiveStateSnapshot.serializer(), liveState))
-                guard.outputWindows().forEach { (id, window) ->
-                    captureStill(window)?.let { still -> guard.snapshot(id, still.width, still.height, still.bgra) }
+                guard.outputs().forEach { (id, window) ->
+                    val still = (window as? Container)?.let(::captureStill) ?: return@forEach
+                    guard.snapshot(id, still.width, still.height, still.bgra)
                 }
             }
         }
@@ -111,27 +118,23 @@ private fun OutputGuardStills(guard: OutputGuardLink, presenterManager: Presente
 
 /** Puts back on air what the app that died had there, as its last still saved it. */
 @Composable
-private fun RestoreAfterRelaunch(presenterManager: PresenterManager) {
+internal fun RestoreAfterRelaunch(presenterManager: PresenterManager) {
     LaunchedEffect(presenterManager) {
-        val saved = withContext(Dispatchers.IO) {
-            val file = GuardFiles.forUser().liveState
-            if (file.isFile) {
-                runCatching { guardJson.decodeFromString(LiveStateSnapshot.serializer(), file.readText()) }
-                    .getOrNull()
-            } else {
-                null
-            }
-        } ?: return@LaunchedEffect
+        val saved = withContext(Dispatchers.IO) { readSavedLiveState(GuardFiles.forUser()) } ?: return@LaunchedEffect
         presenterManager.restoreLiveState(saved)
         Log.info("OutputGuard", "Restarted by the output guard: ${saved.mode} is back on air")
     }
 }
 
+/** The live state the guard's last still was saved with, or null when there is none or it is unreadable. */
+internal fun readSavedLiveState(files: GuardFiles): LiveStateSnapshot? =
+    runCatching { guardJson.decodeFromString(LiveStateSnapshot.serializer(), files.liveState.readText()) }.getOrNull()
+
 /** An output's pixels as it last drew them: BGRA, four bytes each. */
-private class Still(val width: Int, val height: Int, val bgra: ByteArray)
+internal class Still(val width: Int, val height: Int, val bgra: ByteArray)
 
 /** What [window] last drew, read from its Skia surface as DeckLink reads its own; null if it cannot be. */
-private fun captureStill(window: Window): Still? = runCatching {
+internal fun captureStill(window: Container): Still? = runCatching {
     val bitmap = findSkiaLayer(window)?.screenshot() ?: return@runCatching null
     try {
         val pixels = bitmap.peekPixels() ?: return@runCatching null
