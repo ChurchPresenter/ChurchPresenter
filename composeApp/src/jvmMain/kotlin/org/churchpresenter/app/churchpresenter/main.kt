@@ -49,9 +49,11 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.StartupProbe
 import kotlin.system.exitProcess
 import org.churchpresenter.diagnostics.UiStallInjector
+import org.churchpresenter.diagnostics.UiStallReporter
 import org.churchpresenter.diagnostics.UiStallSpec
 import org.churchpresenter.diagnostics.UiWatchdog
 import org.churchpresenter.telemetry.LiveMapReporter
+import org.churchpresenter.sharedui.utils.RunRecord
 import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
 import java.io.IOException
@@ -71,6 +73,16 @@ internal const val CURRENT_EULA_VERSION = 1
 
 /** How a startup-benchmark launch that never drew its window ends; see StartupProbe. */
 private const val STARTUP_PROBE_NO_FRAME_EXIT = 3
+
+/**
+ * The UI-thread stalls this run counts and reports -- see UiStallReporter. A release build sends
+ * them to Sentry and waits half a second with nothing live; a debug build only logs them, at the
+ * watchdog's own budget, so a breakpoint never reaches Sentry.
+ */
+internal val uiStallReporter = UiStallReporter(
+    idleBudgetMs = if (BuildConfig.IS_RELEASE) UiStallReporter.RELEASE_IDLE_BUDGET_MS else UiWatchdog.DEFAULT_BUDGET_MS,
+    send = { if (BuildConfig.IS_RELEASE) UiStallReporter.sendToSentry(it) },
+)
 
 private var singleInstanceSocket: java.net.ServerSocket? = null
 
@@ -137,6 +149,25 @@ private fun bundleDefaultBible(settings: AppSettings) {
 }
 
 /** System properties the JDK and skiko each read once, on first use, so they are set before anything runs. */
+/**
+ * At shutdown, what this run tells the next launch's ping about itself: how long it lasted, how long
+ * an output was live and how many live stalls passed half a second. Together they say how often a
+ * service stalls, which decides whether outputs move to a process of their own (docs/SHOW_CONTROL.md,
+ * Output isolation).
+ */
+private fun recordRunAtShutdown(startedAt: Long) = addGuardedShutdownHook("session") {
+    UsageEvents.recordRun(
+        RunRecord(
+            sessionMinutes = ((System.currentTimeMillis() - startedAt) / MILLIS_PER_MINUTE).toInt(),
+            liveMinutes = uiStallReporter.liveMinutes(),
+            liveStalls = uiStallReporter.liveStallsPastGate(),
+        )
+    )
+    // Shutdown is when the high-water marks are final. Reports only when they are higher than a
+    // scene can account for — see ResourceCensus, and why counts rather than CPU or heap.
+    ResourceCensus.reportIfLeaky()
+}
+
 private fun setLatchedSystemProperties() {
     // Skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
@@ -174,8 +205,6 @@ fun main() {
     // Before the first window: every window gets the app icon's pixel frames as it opens.
     AppWindowIcons.install()
 
-    // A debug build says where the UI thread was stuck whenever it stops answering -- see UiWatchdog.
-    if (!BuildConfig.IS_RELEASE) UiWatchdog.start()
     // A dev build can stall its own UI on a schedule (-Dchurchpresenter.injectUiStall=<ms>,<everySec>)
     // to show what a stall costs the outputs -- see docs/SHOW_CONTROL.md, Output isolation.
     if (!BuildConfig.IS_RELEASE) {
@@ -196,6 +225,10 @@ fun main() {
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+    // Every build says where the UI thread was stuck whenever it stops answering, and a release
+    // build sends the stall to Sentry -- see UiWatchdog and UiStallReporter. After the reporter is
+    // set up, so the first stall it counts can be sent.
+    UiWatchdog.start(budgetMs = uiStallReporter::budgetMs, onStall = uiStallReporter::stalled)
     // The same for the updater, which compares releases against this version.
     UpdateChecker.initialize(UpdaterIdentity(appVersion = BuildConfig.APP_VERSION, isRelease = BuildConfig.IS_RELEASE))
     // The installer a previous update ran is still in the temp directory: it could not be deleted
@@ -216,7 +249,7 @@ fun main() {
     if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)
 
     val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
-    val previousSessionMinutes = UsageEvents.lastSessionMinutes()
+    val previousRun = UsageEvents.lastRun()
     LiveMapReporter.pingOnOpen(
         identity = appTelemetryIdentity,
         installId = analyticsInstallId(startupSettings.analyticsReportingEnabled) { CrashReporter.installId() },
@@ -226,13 +259,15 @@ fun main() {
                 startupSettings,
                 screenCount = LiveMapReporter.detectScreenCount(),
                 songCounts = LiveMapReporter.gatherSongCounts(startupSettings),
-                sessionMinutes = previousSessionMinutes,
+                sessionMinutes = previousRun.sessionMinutes,
+                liveMinutes = previousRun.liveMinutes,
+                liveStalls = previousRun.liveStalls,
             )
         },
         events = pendingUsageEvents,
         onDelivered = {
             UsageEvents.markReported(pendingUsageEvents)
-            if (previousSessionMinutes > 0) UsageEvents.clearSessionMinutes()
+            if (!previousRun.isEmpty) UsageEvents.clearLastRun()
         }
     )
 
@@ -247,13 +282,7 @@ fun main() {
         runCatching { runBlocking { CameraDeviceCatalog.refresh() } }
     }.apply { isDaemon = true }.start()
 
-    val sessionStartedAt = System.currentTimeMillis()
-    addGuardedShutdownHook("session") {
-        UsageEvents.recordSessionMinutes(((System.currentTimeMillis() - sessionStartedAt) / MILLIS_PER_MINUTE).toInt())
-        // Shutdown is when the high-water marks are final. Reports only when they are higher than a
-        // scene can account for — see ResourceCensus, and why counts rather than CPU or heap.
-        ResourceCensus.reportIfLeaky()
-    }
+    recordRunAtShutdown(startedAt = System.currentTimeMillis())
 
     val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")

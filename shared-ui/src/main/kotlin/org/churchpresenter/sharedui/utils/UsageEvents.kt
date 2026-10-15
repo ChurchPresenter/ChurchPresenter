@@ -153,7 +153,24 @@ internal data class UsageEventLog(
      * run that ends in a crash or a hard kill records nothing and is simply not counted.
      */
     val lastSessionMinutes: Int = 0,
+    /**
+     * How long the previous run had an output live, in whole minutes, and how many UI stalls past
+     * half a second began while it was; both 0 once reported. Written and read with
+     * [lastSessionMinutes].
+     */
+    val lastLiveMinutes: Int = 0,
+    val lastLiveStalls: Int = 0,
 )
+
+/**
+ * What one run reports about itself at the next launch: how long it lasted, how long an output was
+ * live, and how many UI stalls past half a second began while one was -- all in whole minutes or
+ * counts, and nothing about what was shown.
+ */
+data class RunRecord(val sessionMinutes: Int = 0, val liveMinutes: Int = 0, val liveStalls: Int = 0) {
+    /** Whether there is anything to report. */
+    val isEmpty: Boolean get() = sessionMinutes <= 0 && liveMinutes <= 0 && liveStalls <= 0
+}
 
 internal fun UsageEventLog.recording(event: UsageEvent, times: Int = 1): UsageEventLog =
     copy(total = total + (event.name to (total[event.name] ?: 0) + times))
@@ -221,16 +238,31 @@ open class UsageEventStore(private val fileProvider: () -> File) {
         if ((log.total[event.name] ?: 0) == 0) save(log.recording(event))
     }
 
-    /** Stores how long the run that is now ending lasted. Called from a shutdown hook. */
-    fun recordSessionMinutes(minutes: Int): Unit = synchronized(lock) {
-        if (minutes > 0) save(load().copy(lastSessionMinutes = minutes))
+    /**
+     * Stores what the run that is now ending reports about itself. Called from a shutdown hook. A run
+     * with nothing to report -- under a minute, nothing live -- leaves the last one's record waiting.
+     */
+    fun recordRun(run: RunRecord): Unit = synchronized(lock) {
+        if (!run.isEmpty) {
+            save(
+                load().copy(
+                    lastSessionMinutes = run.sessionMinutes,
+                    lastLiveMinutes = run.liveMinutes,
+                    lastLiveStalls = run.liveStalls,
+                )
+            )
+        }
     }
 
-    /** The previous run's length in minutes, or 0 if unknown or already reported. */
-    fun lastSessionMinutes(): Int = synchronized(lock) { load().lastSessionMinutes }
+    /** The previous run's record; empty if unknown or already reported. */
+    fun lastRun(): RunRecord = synchronized(lock) {
+        load().let { RunRecord(it.lastSessionMinutes, it.lastLiveMinutes, it.lastLiveStalls) }
+    }
 
-    /** Clears the previous run's length once it has been delivered, so it is reported once. */
-    fun clearSessionMinutes(): Unit = synchronized(lock) { save(load().copy(lastSessionMinutes = 0)) }
+    /** Clears the previous run's record once it has been delivered, so it is reported once. */
+    fun clearLastRun(): Unit = synchronized(lock) {
+        save(load().copy(lastSessionMinutes = 0, lastLiveMinutes = 0, lastLiveStalls = 0))
+    }
 
     /** What has happened since the last [markReported], per event. */
     fun unreported(): Map<UsageEvent, Int> = synchronized(lock) { load().unreported() }

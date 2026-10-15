@@ -83,7 +83,7 @@ class ThreadDumpTest {
     @Test
     fun `starting the watchdog twice runs one thread, and stopping it ends it`() {
         UiWatchdog.start()
-        UiWatchdog.start(budgetMs = 1_000)
+        UiWatchdog.start(budgetMs = { 1_000 })
 
         assertEquals(1, Thread.getAllStackTraces().keys.count { it.name == "ui-watchdog" && it.isAlive })
 
@@ -98,7 +98,7 @@ class ThreadDumpTest {
         System.setErr(PrintStream(captured, true))
         try {
             EventQueue.invokeLater { release.await(10, TimeUnit.SECONDS) }
-            UiWatchdog.start(budgetMs = 50)
+            UiWatchdog.start(budgetMs = { 50 })
             assertContains(awaitText(captured, "has not answered"), "[UiWatchdog]")
             release.countDown()
             assertContains(awaitText(captured, "UI thread answered after"), "(budget 50ms)")

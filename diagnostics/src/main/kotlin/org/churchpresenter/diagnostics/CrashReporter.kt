@@ -269,13 +269,16 @@ object CrashReporter {
      * sentence: interpolating a file name, a count or a device into it splits one recurring problem
      * into one issue per value. Everything that varies belongs in [tags] (short, searchable,
      * low-cardinality) or in [extras] (the detail you want to read once the issue is open).
-     * Both are PII-scrubbed on the way out, like the message itself.
+     * Both are PII-scrubbed on the way out, like the message itself. A non-empty [fingerprint]
+     * replaces Sentry's own grouping -- for an event whose cause is a value, such as where a stalled
+     * UI thread was stuck.
      */
     fun reportWarning(
         context: String,
         throwable: Throwable? = null,
         tags: Map<String, String> = emptyMap(),
         extras: Map<String, String> = emptyMap(),
+        fingerprint: List<String> = emptyList(),
     ) {
         try {
             if (!Sentry.isEnabled()) return
@@ -285,6 +288,7 @@ object CrashReporter {
                 message = Message().apply { message = context }
                 tags.forEach { (k, v) -> setTag(k, v) }
                 extras.forEach { (k, v) -> setExtra(k, v) }
+                if (fingerprint.isNotEmpty()) fingerprints = fingerprint
             }
             Sentry.captureEvent(event)
         } catch (_: Exception) {}

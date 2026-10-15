@@ -11,27 +11,36 @@ import java.awt.EventQueue
  * still stuck -- afterwards the stack is gone -- and, when the thread answers, how long it was out.
  * It holds no thread and no clock of its own, so a test drives it with numbers.
  *
- * [stack] is the event thread's current stack, [report] where a line goes (the app: `Log.warn`),
- * and [onAnswered] is told how long every ping took, stalled or not -- the soak test counts them.
- * The event thread answers and the watchdog thread polls, so every call takes the detector's lock.
+ * [budgetMs] is read as each ping is posted, so the budget can tighten while an output is live and
+ * a ping keeps the one it started with. [stack] is the event thread's current stack, [report] where
+ * a line goes (the app: `Log.warn`), [onAnswered] is told how long every ping took, stalled or not
+ * -- the soak test counts them -- and [onStall] hears each stall once it is over, with the stack
+ * from while it was stuck. The event thread answers and the watchdog thread polls, so every call
+ * takes the detector's lock.
  */
 class StallDetector(
-    private val budgetMs: Long,
+    private val budgetMs: () -> Long,
     private val stack: () -> List<StackTraceElement>,
     private val report: (String) -> Unit,
     private val onAnswered: (lateMs: Long) -> Unit = {},
+    private val onStall: (Stall) -> Unit = {},
 ) {
     private var postedAt = NONE
-    private var reported = false
+    private var budget = 0L
+    private var frames: List<StackTraceElement>? = null
 
     /** Whether a ping is out and not yet answered. */
     val isWaiting: Boolean get() = synchronized(this) { postedAt != NONE }
+
+    /** The budget the ping that is out now was posted with. */
+    val currentBudgetMs: Long get() = synchronized(this) { budget }
 
     /** A ping was handed to the event thread at [now]. */
     @Synchronized
     fun posted(now: Long) {
         postedAt = now
-        reported = false
+        budget = budgetMs()
+        frames = null
     }
 
     /** The event thread ran the ping at [now]. */
@@ -39,19 +48,22 @@ class StallDetector(
     fun answered(now: Long) {
         if (postedAt == NONE) return
         val late = now - postedAt
-        if (reported) report("UI thread answered after ${late}ms (budget ${budgetMs}ms)")
+        val stuckAt = frames
+        if (stuckAt != null) report("UI thread answered after ${late}ms (budget ${budget}ms)")
         onAnswered(late)
+        if (stuckAt != null) onStall(Stall(lateMs = late, budgetMs = budget, frames = stuckAt))
         postedAt = NONE
-        reported = false
+        frames = null
     }
 
     /** Called often: reports the stack the first time the unanswered ping is past the budget. */
     @Synchronized
     fun poll(now: Long) {
-        if (postedAt == NONE || reported || now - postedAt <= budgetMs) return
-        reported = true
-        val frames = stack().joinToString("\n") { "        at $it" }
-        report("UI thread has not answered for ${now - postedAt}ms (budget ${budgetMs}ms); it is at:\n$frames")
+        if (postedAt == NONE || frames != null || now - postedAt <= budget) return
+        val stuckAt = stack()
+        frames = stuckAt
+        val text = stuckAt.joinToString("\n") { "        at $it" }
+        report("UI thread has not answered for ${now - postedAt}ms (budget ${budget}ms); it is at:\n$text")
     }
 
     private companion object {
@@ -59,11 +71,14 @@ class StallDetector(
     }
 }
 
+/** One stall, once it is over: how long the event thread was out, against which budget, and where it was stuck. */
+data class Stall(val lateMs: Long, val budgetMs: Long, val frames: List<StackTraceElement>)
+
 /**
  * The live watchdog over [StallDetector] (`docs/SHOW_CONTROL.md`, Output isolation): a daemon thread
- * posts a ping to the AWT event queue and polls for the answer. It is for debug builds -- it wakes
- * a few times every budget -- and reports through [Log], so a stall also lands in the crash
- * report's breadcrumbs.
+ * posts a ping to the AWT event queue and polls for the answer a few times every budget. It runs in
+ * every build, and reports each stall through [Log], so it also lands in the crash report's
+ * breadcrumbs; [UiStallReporter] decides which stalls go to Sentry as events of their own.
  */
 object UiWatchdog {
 
@@ -73,19 +88,25 @@ object UiWatchdog {
     @Volatile private var thread: Thread? = null
 
     /**
-     * Starts watching, if it is not already; [budgetMs] is how long a stall may last unreported, and
-     * [onAnswered] hears how long each ping took to be answered.
+     * Starts watching, if it is not already; [budgetMs] is how long a stall may last unreported, read
+     * as each ping goes out, [onAnswered] hears how long each ping took to be answered, and [onStall]
+     * hears each stall once it is over.
      */
     @Synchronized
-    fun start(budgetMs: Long = DEFAULT_BUDGET_MS, onAnswered: (lateMs: Long) -> Unit = {}) {
+    fun start(
+        budgetMs: () -> Long = { DEFAULT_BUDGET_MS },
+        onAnswered: (lateMs: Long) -> Unit = {},
+        onStall: (Stall) -> Unit = {},
+    ) {
         if (thread?.isAlive == true) return
         val detector = StallDetector(
             budgetMs = budgetMs,
             stack = { ThreadDump.stackOf(EVENT_THREAD).orEmpty() },
             report = { Log.warn(TAG, it) },
             onAnswered = onAnswered,
+            onStall = onStall,
         )
-        thread = Thread({ watch(detector, budgetMs) }, "ui-watchdog").apply {
+        thread = Thread({ watch(detector) }, "ui-watchdog").apply {
             isDaemon = true
             start()
         }
@@ -98,8 +119,7 @@ object UiWatchdog {
         thread = null
     }
 
-    private fun watch(detector: StallDetector, budgetMs: Long) {
-        val tick = (budgetMs / TICKS_PER_BUDGET).coerceAtLeast(1)
+    private fun watch(detector: StallDetector) {
         try {
             while (!Thread.currentThread().isInterrupted) {
                 if (!detector.isWaiting) {
@@ -107,7 +127,7 @@ object UiWatchdog {
                     EventQueue.invokeLater { detector.answered(System.currentTimeMillis()) }
                 }
                 detector.poll(System.currentTimeMillis())
-                Thread.sleep(tick)
+                Thread.sleep((detector.currentBudgetMs / TICKS_PER_BUDGET).coerceAtLeast(1))
             }
         } catch (_: InterruptedException) {
             // Stopped.

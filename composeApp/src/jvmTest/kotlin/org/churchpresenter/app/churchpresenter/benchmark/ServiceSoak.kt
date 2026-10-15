@@ -57,7 +57,7 @@ class ServiceSoak {
         val cue = mutableIntStateOf(0)
         var cuesShown = 0
         val limits = SoakLimits()
-        UiWatchdog.start(budgetMs = limits.uiStallMs.toLong(), onAnswered = uiStalls::record)
+        UiWatchdog.start(budgetMs = { limits.uiStallMs.toLong() }, onAnswered = uiStalls::record)
         // Watched like a frame: building the output composes it for the first time, and a soak once
         // hung right there, before the frame loop and its own watchdog had started.
         val built = SoakStallWatchdog(

@@ -233,6 +233,27 @@ process until a stall is seen in the field that they do not explain. If it is bu
 that only holds the last frame of a window and keeps the projector black-free if the UI dies --
 before moving any composition into it.
 
+### Release builds report their stalls
+
+A stall "seen in the field" needs a watchdog in the field, so `UiWatchdog` now runs in every build,
+started in `main.kt` once `CrashReporter` is set up. `UiStallReporter` decides what each stall is:
+
+- **The budget follows the outputs**: 100 ms (six frames at 60 Hz) while any output shows content,
+  500 ms otherwise in a release build, 250 ms in a debug build. A ping keeps the budget it was posted
+  with.
+- **Startup is skipped**: nothing counts until 30 s after the main window's first frame. A first
+  launch stalls for a second or more while it loads.
+- **A release build sends each stall to Sentry** as a warning titled "UI thread stalled", carrying
+  the event thread's stack from while it was stuck, `stall.live` and `stall.length` tags, and the
+  exact length as an extra. It groups on the first frame of the app's own code, so one cause is one
+  issue. At most ten a run; a debug build only logs them, so a breakpoint never reaches Sentry.
+- **Telemetry counts the services.** Each run records how long an output was live and how many
+  stalls past 500 ms began while it was; the next launch's ping sends them as `liveMinutes` and
+  `liveStalls`. A run with live minutes is a service.
+
+**The gate.** Once a release with this has been out four to six weeks: if more than 1% of services
+have a live stall past 500 ms, the output process is scheduled. The hot stacks are fixed either way.
+
 ## Migration
 
 Each step shippable on its own, each keeping every existing test green:

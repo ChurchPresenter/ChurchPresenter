@@ -6,6 +6,7 @@ import org.churchpresenter.server.updateLiveState
 import org.churchpresenter.server.LiveContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import java.io.File
 import java.util.Locale
 import org.churchpresenter.bible.Bible
@@ -38,6 +39,10 @@ internal fun LiveStateBroadcastWiring(
     screenCountForUsage: Int,
     deckLinkCountForUsage: Int,
 ) {
+    // Whether anything is on air sets the UI watchdog's budget and counts the run's live minutes.
+    LaunchedEffect(presenterManager) {
+        snapshotFlow { presenterManager.anythingLive }.collect { uiStallReporter.outputLive(it) }
+    }
     LaunchedEffect(Unit) {
         presenterManager.onLiveStateChanged = { pm, source ->
             // The one-off "this install has actually shown something to a congregation" mark.

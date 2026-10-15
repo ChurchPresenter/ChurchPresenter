@@ -25,6 +25,8 @@ owns — [CrashReporter] and [BuildIdentity].
 | `CrashReporter.kt` | `object CrashReporter` — the local crash log, the Sentry bridge, PII scrubbing, the crash-escalation counter, and `BuildIdentity` |
 | `Secrets.kt` | `Secrets.redact` — masks secret query parameters (`apiKey`, `password`, `token`, `access_token`, `refresh_token`, `client_secret`) and `X-Api-Key:` / `Authorization: Bearer|Basic` values |
 | `Log.kt` | `object Log` (`info`/`warn`/`error`) — the app's diagnostic lines: `[tag] message` on stderr, and a breadcrumb for warnings and errors. `Logger` takes its sink and trail as parameters for tests |
+| `UiWatchdog.kt` | `StallDetector` and `object UiWatchdog` — pings the AWT event thread and logs its stack when a ping goes unanswered past the budget; runs in every build |
+| `UiStallReporter.kt` | Which stalls become Sentry events (the live budget, the startup settle window, ten a run, grouped on the first app frame), and the live minutes and live stalls a run reports to telemetry (`docs/SHOW_CONTROL.md`, Output isolation) |
 
 47 files across `:composeApp` call it, which is why it is its own module rather than part of
 `:settings`: everything that can fail wants to report, and nothing should have to depend on the
@@ -58,6 +60,10 @@ dev build — so an unfiltered issue list mixes real user crashes with whatever 
 did that afternoon. A stale Gradle build is the loud one: it produces `NoClassDefFoundError` and
 `NoSuchMethodError` on `:settings` classes, and `Base64` failures inside `decodeAsString` of the
 generated Compose resources. Those are one `./gradlew clean`, not ten bugs.
+
+**UI stalls are one issue per cause**, titled "UI thread stalled" and grouped on the first frame of
+the app's own code. Filter `stall.live:true` for the ones an audience saw; `stall.length` says how
+long, in ranges.
 
 **Not every issue is a crash.** `logback.xml` forwards every `ERROR` log line to Sentry as its own
 issue and every `WARN` as a breadcrumb, so an issue whose only frame is a log call came from

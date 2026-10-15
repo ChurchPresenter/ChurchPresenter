@@ -9,13 +9,13 @@ class StallDetectorTest {
 
     private val lines = mutableListOf<String>()
     private val frame = StackTraceElement("Compose", "measure", "Layout.kt", 42)
-    private val detector = StallDetector(budgetMs = 100, stack = { listOf(frame) }, report = { lines += it })
+    private val detector = StallDetector(budgetMs = { 100 }, stack = { listOf(frame) }, report = { lines += it })
 
     @Test
     fun `every answer is told how late it was, stalled or not`() {
         val lates = mutableListOf<Long>()
         val counting = StallDetector(
-            budgetMs = 100,
+            budgetMs = { 100 },
             stack = { listOf(frame) },
             report = { },
             onAnswered = { lates += it },
@@ -80,6 +80,43 @@ class StallDetectorTest {
 
         assertEquals(1, lines.size)
         assertTrue("has not answered for 200ms" in lines.single())
+    }
+
+    @Test
+    fun `a ping keeps the budget it was posted with`() {
+        var budget = 100L
+        val changing = StallDetector(budgetMs = { budget }, stack = { listOf(frame) }, report = { lines += it })
+        changing.posted(0)
+        budget = 500
+        changing.poll(150)
+
+        assertEquals(1, lines.size, "a budget that changes mid-ping does not move that ping's")
+        assertEquals(100, changing.currentBudgetMs)
+
+        changing.answered(200)
+        changing.posted(1_000)
+        assertEquals(500, changing.currentBudgetMs, "the next ping takes the new one")
+    }
+
+    @Test
+    fun `a stall is handed over once it is over, with where it was stuck`() {
+        val stalls = mutableListOf<Stall>()
+        val watched = StallDetector(
+            budgetMs = { 100 },
+            stack = { listOf(frame) },
+            report = { },
+            onStall = { stalls += it },
+        )
+        watched.posted(0)
+        watched.answered(80)
+        assertTrue(stalls.isEmpty(), "an answer inside the budget is not a stall")
+
+        watched.posted(100)
+        watched.poll(250)
+        assertTrue(stalls.isEmpty(), "not until the thread answers")
+
+        watched.answered(420)
+        assertEquals(listOf(Stall(lateMs = 320, budgetMs = 100, frames = listOf(frame))), stalls)
     }
 
     @Test

@@ -11,6 +11,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.diagnostics.UiStallReporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -52,6 +53,22 @@ class LiveStateBroadcastWiringTest {
         val first = manager.onLiveStateChanged
         waitForIdle()
         assertEquals(first, manager.onLiveStateChanged)
+    }
+
+    @Test
+    fun `whether anything is on air sets the UI watchdog's budget`() = runComposeUiTest {
+        val manager = PresenterManager()
+        compose(this, manager)
+        waitForIdle()
+        try {
+            manager.setPresentingMode(Presenting.BIBLE)
+            waitUntil { uiStallReporter.budgetMs() == UiStallReporter.LIVE_BUDGET_MS }
+
+            manager.setPresentingMode(Presenting.NONE)
+            waitUntil { uiStallReporter.budgetMs() != UiStallReporter.LIVE_BUDGET_MS }
+        } finally {
+            uiStallReporter.outputLive(false)
+        }
     }
 
     @Test
