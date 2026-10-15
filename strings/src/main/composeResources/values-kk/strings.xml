@@ -2259,6 +2259,9 @@
     <string name="preview_output_mode_disabled_warning">Бұл шығыс қазір осы мазмұнды көрсетпейді.</string>
     <string name="preview_settings_show_labels">Шығыс белгілерін көрсету</string>
     <string name="preview_settings_show_modes">Дисплей түрін көрсету</string>
+    <string name="preview_section_display">Көрсету</string>
+    <string name="preview_section_layout">Орналасу</string>
+    <string name="preview_layout_rename">Орналасудың атын өзгерту</string>
     <string name="song_add_translation">Тіл қосу</string>
     <string name="song_fourth_language">4-тіл</string>
     <string name="song_pane_translation">%1$d-тіл</string>

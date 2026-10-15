@@ -2261,6 +2261,9 @@
     <string name="preview_output_mode_disabled_warning">Этот выход сейчас не показывает этот контент.</string>
     <string name="preview_settings_show_labels">Показывать подписи выходов</string>
     <string name="preview_settings_show_modes">Показывать тип отображения</string>
+    <string name="preview_section_display">Отображение</string>
+    <string name="preview_section_layout">Макет</string>
+    <string name="preview_layout_rename">Переименовать макет</string>
     <string name="song_add_translation">Добавить язык</string>
     <string name="song_fourth_language">Язык 4</string>
     <string name="song_pane_translation">Язык %1$d</string>

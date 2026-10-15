@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">ຊ່ອງອອກນີ້ບໍ່ໄດ້ສະແດງເນື້ອຫານີ້ໃນຕອນນີ້.</string>
     <string name="preview_settings_show_labels">ສະແດງປ້າຍຊ່ອງອອກ</string>
     <string name="preview_settings_show_modes">ສະແດງປະເພດການສະແດງຜົນ</string>
+    <string name="preview_section_display">ການສະແດງ</string>
+    <string name="preview_section_layout">ໂຄງຮ່າງ</string>
+    <string name="preview_layout_rename">ປ່ຽນຊື່ໂຄງຮ່າງ</string>
     <string name="song_add_translation">ເພີ່ມພາສາ</string>
     <string name="song_fourth_language">ພາສາ 4</string>
     <string name="song_pane_translation">ພາສາ %1$d</string>

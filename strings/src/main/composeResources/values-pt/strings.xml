@@ -2287,6 +2287,9 @@
     <string name="preview_output_mode_disabled_warning">Esta saída não está mostrando este conteúdo no momento.</string>
     <string name="preview_settings_show_labels">Mostrar rótulos de saída</string>
     <string name="preview_settings_show_modes">Mostrar tipo de exibição</string>
+    <string name="preview_section_display">Exibição</string>
+    <string name="preview_section_layout">Layout</string>
+    <string name="preview_layout_rename">Renomear layout</string>
     <string name="song_add_translation">Adicionar um idioma</string>
     <string name="song_fourth_language">Idioma 4</string>
     <string name="song_pane_translation">Idioma %1$d</string>

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">यो आउटपुटले अहिले यो सामग्री देखाउँदैन।</string>
     <string name="preview_settings_show_labels">आउटपुट लेबलहरू देखाउनुहोस्</string>
     <string name="preview_settings_show_modes">प्रदर्शन प्रकार देखाउनुहोस्</string>
+    <string name="preview_section_display">प्रदर्शन</string>
+    <string name="preview_section_layout">लेआउट</string>
+    <string name="preview_layout_rename">लेआउटको नाम बदल्नुहोस्</string>
     <string name="song_add_translation">भाषा थप्नुहोस्</string>
     <string name="song_fourth_language">भाषा ४</string>
     <string name="song_pane_translation">भाषा %1$d</string>

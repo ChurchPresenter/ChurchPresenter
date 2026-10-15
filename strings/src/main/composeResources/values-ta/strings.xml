@@ -2309,6 +2309,9 @@
     <string name="preview_output_mode_disabled_warning">இந்த வெளியீடு தற்போது இந்த உள்ளடக்கத்தைக் காட்டவில்லை.</string>
     <string name="preview_settings_show_labels">வெளியீடு லேபிள்களைக் காட்டு</string>
     <string name="preview_settings_show_modes">காட்சி வகையைக் காட்டு</string>
+    <string name="preview_section_display">காட்சி</string>
+    <string name="preview_section_layout">தளவமைப்பு</string>
+    <string name="preview_layout_rename">தளவமைப்பை மறுபெயரிடு</string>
     <string name="song_add_translation">ஒரு மொழியைச் சேர்க்கவும்</string>
     <string name="song_fourth_language">மொழி 4</string>
     <string name="song_pane_translation">மொழி %1$d</string>

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Tokeo hili kwa sasa halionyeshi maudhui haya.</string>
     <string name="preview_settings_show_labels">Onyesha lebo za matokeo</string>
     <string name="preview_settings_show_modes">Onyesha aina ya uonyeshaji</string>
+    <string name="preview_section_display">Onyesho</string>
+    <string name="preview_section_layout">Mpangilio</string>
+    <string name="preview_layout_rename">Badilisha jina la mpangilio</string>
     <string name="song_add_translation">Ongeza lugha</string>
     <string name="song_fourth_language">Lugha 4</string>
     <string name="song_pane_translation">Lugha %1$d</string>

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">این خروجی در حال حاضر این محتوا را نشان نمی‌دهد.</string>
     <string name="preview_settings_show_labels">نمایش برچسب‌های خروجی</string>
     <string name="preview_settings_show_modes">نمایش نوع نمایش</string>
+    <string name="preview_section_display">نمایش</string>
+    <string name="preview_section_layout">چیدمان</string>
+    <string name="preview_layout_rename">تغییر نام چیدمان</string>
     <string name="song_add_translation">افزودن یک زبان</string>
     <string name="song_fourth_language">زبان 4</string>
     <string name="song_pane_translation">زبان %1$d</string>

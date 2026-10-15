@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Bu chiqish hozirda bu tarkibni ko'rsatmayapti.</string>
     <string name="preview_settings_show_labels">Chiqish yorliqlarini ko'rsatish</string>
     <string name="preview_settings_show_modes">Ko'rsatish turini ko'rsatish</string>
+    <string name="preview_section_display">Koʻrinish</string>
+    <string name="preview_section_layout">Joylashuv</string>
+    <string name="preview_layout_rename">Joylashuv nomini oʻzgartirish</string>
     <string name="song_add_translation">Til qo'shish</string>
     <string name="song_fourth_language">4-til</string>
     <string name="song_pane_translation">%1$d-til</string>

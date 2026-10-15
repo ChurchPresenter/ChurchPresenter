@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Bu çıkış şu anda bu içeriği göstermiyor.</string>
     <string name="preview_settings_show_labels">Çıkış etiketlerini göster</string>
     <string name="preview_settings_show_modes">Görüntü türünü göster</string>
+    <string name="preview_section_display">Görünüm</string>
+    <string name="preview_section_layout">Düzen</string>
+    <string name="preview_layout_rename">Düzeni yeniden adlandır</string>
     <string name="song_add_translation">Dil ekle</string>
     <string name="song_fourth_language">Dil 4</string>
     <string name="song_pane_translation">Dil %1$d</string>

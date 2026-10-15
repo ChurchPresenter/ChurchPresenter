@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">เอาต์พุตนี้ยังไม่แสดงเนื้อหานี้ในขณะนี้</string>
     <string name="preview_settings_show_labels">แสดงป้ายชื่อเอาต์พุต</string>
     <string name="preview_settings_show_modes">แสดงประเภทการแสดงผล</string>
+    <string name="preview_section_display">การแสดงผล</string>
+    <string name="preview_section_layout">เลย์เอาต์</string>
+    <string name="preview_layout_rename">เปลี่ยนชื่อเลย์เอาต์</string>
     <string name="song_add_translation">เพิ่มภาษา</string>
     <string name="song_fourth_language">ภาษา 4</string>
     <string name="song_pane_translation">ภาษา %1$d</string>

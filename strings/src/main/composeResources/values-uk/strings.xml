@@ -2258,6 +2258,9 @@
     <string name="preview_output_mode_disabled_warning">Цей вихід наразі не показує цей вміст.</string>
     <string name="preview_settings_show_labels">Показувати підписи виходів</string>
     <string name="preview_settings_show_modes">Показувати тип відображення</string>
+    <string name="preview_section_display">Відображення</string>
+    <string name="preview_section_layout">Макет</string>
+    <string name="preview_layout_rename">Перейменувати макет</string>
     <string name="song_add_translation">Додати мову</string>
     <string name="song_fourth_language">Мова 4</string>
     <string name="song_pane_translation">Мова %1$d</string>

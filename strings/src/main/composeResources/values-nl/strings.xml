@@ -2286,6 +2286,9 @@
     <string name="preview_output_mode_disabled_warning">Deze uitgang toont deze inhoud momenteel niet.</string>
     <string name="preview_settings_show_labels">Uitganglabels tonen</string>
     <string name="preview_settings_show_modes">Weergavetype tonen</string>
+    <string name="preview_section_display">Weergave</string>
+    <string name="preview_section_layout">Indeling</string>
+    <string name="preview_layout_rename">Indeling hernoemen</string>
     <string name="song_add_translation">Taal toevoegen</string>
     <string name="song_fourth_language">Taal 4</string>
     <string name="song_pane_translation">Taal %1$d</string>
