@@ -344,6 +344,20 @@ fun main(args: Array<String>) {
         startupSettings.atemSettings
     )
 
+    runApplication(startupSettings, coroutineExceptionHandler, relaunchedByGuard = RELAUNCHED_ARGUMENT in args)
+}
+
+/** Opens the windows, once [main] has done everything that comes before them. */
+private fun runApplication(
+    startupSettings: AppSettings,
+    coroutineExceptionHandler: CoroutineExceptionHandler,
+    relaunchedByGuard: Boolean,
+) {
+    // Read here, on this thread, so the manager the app keeps already holds the settings and the
+    // first composition does not read the file on the event thread. Not main's first read:
+    // bundleDefaultBible may have written the file since.
+    val settingsManager = SettingsManager().also { it.loadSettings() }
+
     application(exitProcessOnExit = true) {
         // Held above every window so each one -- the main window, Settings, every dialog -- is drawn
         // with the same accent, font and text size, and a change reaches all of them at once.
@@ -352,7 +366,9 @@ fun main(args: Array<String>) {
             LocalThemeCustomization provides themeCustomization,
             LocalDevelopmentBuild provides !BuildConfig.IS_RELEASE,
         ) {
-            ChurchPresenterApp(coroutineExceptionHandler, RELAUNCHED_ARGUMENT in args) { themeCustomization = it }
+            ChurchPresenterApp(coroutineExceptionHandler, settingsManager, relaunchedByGuard) {
+                themeCustomization = it
+            }
         }
     }
 }
@@ -366,12 +382,13 @@ fun main(args: Array<String>) {
 @Composable
 private fun ApplicationScope.ChurchPresenterApp(
     coroutineExceptionHandler: CoroutineExceptionHandler,
+    settingsManager: SettingsManager,
     relaunchedByGuard: Boolean,
     onThemeCustomizationChange: (ThemeCustomization) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope { coroutineExceptionHandler }
     val application = this
-    val root = remember { AppRootState(application, coroutineScope) }
+    val root = remember { AppRootState(application, coroutineScope, settingsManager = settingsManager) }
     with(root) {
         // The desktop's end of calendar sync with phones. Made here, beside the settings it writes
         // back to, so the startup round and the Settings card talk to the same object.

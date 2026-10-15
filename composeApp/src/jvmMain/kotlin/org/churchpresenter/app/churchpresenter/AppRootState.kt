@@ -70,9 +70,10 @@ internal class AppRootState(
     val coroutineScope: CoroutineScope,
     // The displays besides the main one; a test passes its own, having none.
     private val secondaryDisplays: () -> List<ResolvedDisplay> = ::nonPrimaryDisplays,
+    // main hands over one that has already read the file, so the first composition does not.
+    val settingsManager: SettingsManager = SettingsManager(),
 ) {
     var appReady by mutableStateOf(false)
-    val settingsManager = SettingsManager()
     val statisticsManager = StatisticsManager()
     val verseSequenceLog = VerseSequenceLog()
     var appSettings by mutableStateOf(settingsManager.loadSettings().let {
