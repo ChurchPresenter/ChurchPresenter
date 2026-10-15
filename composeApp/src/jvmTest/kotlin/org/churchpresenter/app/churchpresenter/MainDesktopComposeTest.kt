@@ -10,7 +10,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.doubleClick
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -41,6 +44,7 @@ import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.qa.QAManager
+import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
 import org.churchpresenter.schedule.ScheduleToolbarButton
 import org.churchpresenter.schedule.ScheduleToolbarIconSize
 import org.churchpresenter.server.InstanceLinkStatus
@@ -889,10 +893,11 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
         val folder = File(dir, "lower-thirds").apply { mkdirs() }
         File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")
         val manager = PresenterManager()
+        val wiring = Wiring()
         val settings = withOneSong().let {
             it.copy(streamingSettings = it.streamingSettings.copy(lowerThirdFolder = folder.absolutePath))
         }
-        root(settings, presenterManager = manager) { actions ->
+        root(settings, wiring = wiring, presenterManager = manager) { actions ->
             actions.addLowerThird("gone", "Gone", false, 0)
             waitForIdle()
             takeLive("Gone")
@@ -901,9 +906,20 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
             actions.addLowerThird("pastor", "Pastor", false, 0)
             waitForIdle()
             takeLive("Pastor")
-            assertEquals(Presenting.LOWER_THIRD, manager.lastLive.value)
+            // This failed once in CI with NONE and could not be made to fail again, so the message
+            // carries what tells the suspects apart: whether a preset reached the output at all, which
+            // tab the double-click left showing, and whether a popup or a second row was in the way.
+            assertEquals(Presenting.LOWER_THIRD, manager.lastLive.value, lowerThirdState(manager, wiring))
             assertTrue(manager.lottieJsonContent.value.isNotEmpty())
         }
+    }
+
+    private fun ComposeUiTest.lowerThirdState(manager: PresenterManager, wiring: Wiring): String {
+        val rows = onAllNodes(hasText("Pastor", substring = true) and hasAnyAncestor(hasTestTag(SCHEDULE_ROW_CARD_TAG)))
+        return "slideContent=${manager.slideContent.value}, " +
+            "preset='${manager.currentLowerThirdName.value}' (${manager.lottieJsonContent.value.length} chars), " +
+            "tabs=${wiring.tabChanges}, roots=${onAllNodes(isRoot()).fetchSemanticsNodes().size}, " +
+            "schedule rows reading Pastor=${rows.fetchSemanticsNodes().size}"
     }
 
     @Test
