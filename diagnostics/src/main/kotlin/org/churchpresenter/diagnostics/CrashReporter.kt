@@ -17,6 +17,7 @@ import java.io.StringWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import java.util.zip.ZipException
 import kotlin.system.exitProcess
 
 private const val FLUSH_TIMEOUT_MS = 3_000L
@@ -95,6 +96,13 @@ internal enum class CrashKind {
 }
 
 private const val UNKNOWN_VERSION = "unknown"
+
+/** The app's own classes. */
+private const val APP_PACKAGE = "org.churchpresenter."
+
+/** What reads the app's own jars after startup: the class loaders and Compose's resource reader. */
+private val CLASSPATH_READERS =
+    listOf("jdk.internal.loader.", "java.lang.ClassLoader", "org.jetbrains.compose.resources.")
 
 /** What [BuildIdentity] reports for build provenance it was not told. */
 private const val UNKNOWN_BUILD = "unknown"
@@ -347,6 +355,28 @@ object CrashReporter {
             current = current.cause
         }
         return CrashKind.OTHER
+    }
+
+    /**
+     * Whether [throwable] is a development build's own output changing under it: a class of ours
+     * gone from the classpath, or a jar on it rewritten while it was being read -- what rebuilding
+     * while the app runs does. The developer watches it happen, and no installed copy can, so a
+     * report of it only buries real ones. Classified by type and the frame it came from, never by
+     * message.
+     */
+    internal fun isStaleBuildOutput(throwable: Throwable?): Boolean {
+        val seen = mutableSetOf<Throwable>()
+        var current = throwable
+        while (current != null && seen.add(current)) {
+            val frames = current.stackTrace
+            val ourClassGone = current is NoClassDefFoundError &&
+                frames.firstOrNull()?.className?.startsWith(APP_PACKAGE) == true
+            val classpathJarRewritten = current is ZipException &&
+                frames.any { frame -> CLASSPATH_READERS.any { frame.className.startsWith(it) } }
+            if (ourClassGone || classpathJarRewritten) return true
+            current = current.cause
+        }
+        return false
     }
 
     internal fun readCrashCount(): Int = try {
@@ -743,9 +773,11 @@ object CrashReporter {
     /**
      * Scrubs PII from every outgoing event, then attaches the most recent local crash-report file
      * (also scrubbed) to error and fatal events. Neither step may block delivery, which is why
-     * both are wrapped.
+     * both are wrapped. A development build's crash from its own output changing under it
+     * ([isStaleBuildOutput]) is the one event dropped.
      */
     internal fun crashAttachingBeforeSend() = SentryOptions.BeforeSendCallback { event, hint ->
+        if (!build.isRelease && isStaleBuildOutput(event.throwable)) return@BeforeSendCallback null
         try { scrubEvent(event) } catch (_: Exception) { /* never block delivery */ }
         try {
             if (event.level == SentryLevel.ERROR || event.level == SentryLevel.FATAL) {
