@@ -27,11 +27,11 @@ compose.desktop {
 // `-PlogKeys=1` prints every key and wheel event forwarded to the page, `-PnoIme=1` turns input
 // methods off on both windows, `-PnoSentPump=1` turns off the Windows sent-message pump (both
 // diagnostics for the language-switch freeze), `-PsmoothScroll=1` keeps Chromium's smooth scrolling on (off by default),
-// `-PplainPreview=1` draws the preview from the full frame with plain bilinear, `-PnoOutput=1` opens the Preview alone,
+// `-Prgba=1` keeps frames as RGBA instead of BGRA, `-PplainPreview=1` draws the preview from the full frame with plain bilinear, `-PnoOutput=1` opens the Preview alone,
 // `-PcefArgs="--disable-gpu"` adds Chromium switches. For the window side: `-PrenderApi=OPENGL|SOFTWARE_FAST|…`
 // picks skiko's renderer, `-Pvsync=false` turns its vsync off, and `-PglYield=USLEEP` sets NVIDIA's `__GL_YIELD`.
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
-    listOf("url", "size", "fps", "scale", "logKeys", "noIme", "noSentPump", "smoothScroll", "plainPreview", "noOutput", "cefArgs").forEach { key ->
+    listOf("url", "size", "fps", "scale", "logKeys", "noIme", "noSentPump", "smoothScroll", "plainPreview", "noOutput", "cefArgs", "rgba").forEach { key ->
         project.findProperty(key)?.let { systemProperty("osr.$key", it) }
     }
     project.findProperty("renderApi")?.let { systemProperty("skiko.renderApi", it) }

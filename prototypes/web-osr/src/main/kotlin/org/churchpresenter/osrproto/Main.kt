@@ -46,7 +46,9 @@ import org.cef.browser.CefBrowserHeadless
 import org.cef.browser.CefFrame
 import org.cef.callback.CefContextMenuParams
 import org.cef.callback.CefMenuModel
+import org.cef.CefSettings
 import org.cef.handler.CefContextMenuHandlerAdapter
+import org.cef.handler.CefDisplayHandlerAdapter
 import org.cef.handler.CefLifeSpanHandlerAdapter
 import java.awt.Component
 import java.awt.Container
@@ -169,6 +171,11 @@ fun main() {
             model.clear()
         }
     })
+    // The Linux copy workaround reports the page's selection through a console message.
+    client.addDisplayHandler(object : CefDisplayHandlerAdapter() {
+        override fun onConsoleMessage(b: CefBrowser?, level: CefSettings.LogSeverity?, message: String?, source: String?, line: Int) =
+            message != null && LinuxClipboard.handle(message)
+    })
     // target=_blank opens in place: a windowless browser has nowhere to put a popup window.
     client.addLifeSpanHandler(object : CefLifeSpanHandlerAdapter() {
         override fun onBeforePopup(browser: CefBrowser, frame: CefFrame?, url: String?, name: String?): Boolean {
@@ -281,7 +288,7 @@ private fun insertText(browser: CefBrowserHeadless, char: Char) {
 
 /**
  * While [pageFocused], sends every key event of [window] to [browser] (on Linux re-made by
- * [linuxKeyEvent]) and keeps it from Compose. Compose's own key events carry no `KEY_TYPED` (Chromium's char event) and wrap the AWT
+ * [linuxKeyEvent], with copy and cut through [LinuxClipboard]) and keeps it from Compose. Compose's own key events carry no `KEY_TYPED` (Chromium's char event) and wrap the AWT
  * event, so the raw AWT event is taken here instead, with its real id, scancode and raw code.
  */
 @Composable
@@ -296,10 +303,15 @@ private fun ForwardKeysWhileFocused(window: Window, pageFocused: AtomicBoolean, 
                     val keysym = if (sent !== e) " sent=0x%x".format(sent.keyChar.code) else ""
                     println("key id=${e.id} code=${e.keyCode} char=${e.keyChar.code} '${e.keyChar}' mods=${e.modifiersEx}$keysym")
                 }
-                if (isMac && e.id == KeyEvent.KEY_TYPED && e.keyChar.code > 0x7f) {
-                    insertText(browser, e.keyChar)
-                } else {
-                    browser.key(sent)
+                val clipboard = if (isLinux) LinuxClipboard.actionOf(e) else null
+                when {
+                    isMac && e.id == KeyEvent.KEY_TYPED && e.keyChar.code > 0x7f -> insertText(browser, e.keyChar)
+                    clipboard == LinuxClipboard.Action.CUT -> LinuxClipboard.read(browser, clipboard)
+                    clipboard == LinuxClipboard.Action.COPY -> {
+                        browser.key(sent)
+                        LinuxClipboard.read(browser, clipboard)
+                    }
+                    else -> browser.key(sent)
                 }
                 true
             }

@@ -50,13 +50,17 @@ class Frame(
  * the smallest level at least its own size, so it never shrinks a picture by more than 2:1 — past
  * that a bilinear sample skips source pixels and small text breaks up — and never uploads a 4K
  * texture to draw it at 640 px. Each level is redone only over what changed, where mipmaps would be
- * rebuilt whole for every frame in every window. The worker takes the newest frame whenever it is
- * free, and every frame carries the latest levels it made, a frame or so behind. It reads the frame's
- * ring buffer, which could in principle be rewritten under it if it took longer than [RING_SIZE]
- * frames; that would only tear the preview. `-PplainPreview=1` turns the levels off.
+ * rebuilt whole for every frame in every window. A frame is published only with its levels, so
+ * both windows change at the same moment: on Linux skiko draws the windows that changed together and
+ * waits for one vertical blank, and a preview a few milliseconds behind the output cost a second
+ * wait every frame and halved both windows' rate. The worker takes the newest frame whenever it is
+ * free; a paint that arrives while it is busy replaces the one waiting, and is not drawn.
+ * `-PplainPreview=1` turns the levels off, and frames are then published from the paint callback.
  *
- * An image is closed [RETIRED_KEPT] frames after it stops being current, and a ring buffer is not
- * written again until every image over it is closed: the ring is longer than that by two.
+ * An image is closed [RETIRED_KEPT] frames after it stops being current. The ring has room for
+ * those, the current frame, the one with the worker, the one waiting and the one being written; a
+ * run of paints dropped while the worker is busy uses ring buffers too, and if it were long enough
+ * to come round to a frame still on screen, that frame would tear. Nothing is freed under an image.
  */
 class FrameStore(private val stats: Stats, private val dipWidth: Int) : HeadlessSink {
     private val _frames = MutableStateFlow<Frame?>(null)
@@ -83,6 +87,9 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
     private val retiredLevels = ArrayDeque<List<Image>>()
     /** Whether the preview worker is busy with a frame. */
     private var scaling = false
+    /** A paint written but not yet published, waiting for the worker, and when it arrived. */
+    private var pending: Ring.Written? = null
+    private var pendingAt = 0L
     /** The bounding box, in view pixels, of everything painted since the preview worker last started. */
     private var previewDirty: Rectangle? = null
     private val previewWorker = Executors.newSingleThreadExecutor(daemon("osr-preview"))
@@ -105,28 +112,40 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             return
         }
         val target = ring?.takeIf { it.width == width && it.height == height }
-            ?: Ring(width, height).also { fresh ->
+            ?: Ring(width, height, swizzle = rgba).also { fresh ->
                 // Images over the old ring's buffers are still being retired; keep it alive until they are.
                 ring?.let { old -> oldRings.addLast(seq to old) }
                 ring = fresh
             }
         val written = target.write(dirtyRects, buffer, copyPool)
         stats.paint(false, copiedNs = System.nanoTime() - start, previewNs = 0, full = written.full, rects = dirtyRects)
-        publish(written.image, start)
-        if (width / 2 >= SMALLEST_LEVEL && !plainPreview) {
-            dirtyRects.forEach { r -> previewDirty = previewDirty?.union(r) ?: Rectangle(r) }
-            if (!scaling) {
-                val dirty = previewDirty
-                previewDirty = null
-                scaling = true
-                previewWorker.execute { scaleLevels(written.buffer, width, height, dirty) }
-            }
+        if (width / 2 < SMALLEST_LEVEL || plainPreview) {
+            publish(written.image, emptyList(), start)
+            return
         }
+        dirtyRects.forEach { r -> previewDirty = previewDirty?.union(r) ?: Rectangle(r) }
+        pending?.image?.close()
+        pending = written
+        pendingAt = start
+        if (!scaling) startScaling()
     }
 
-    /** On the preview worker: brings the levels up to date over [dirty] of the view in [view], then hands them to the frames from now on. */
-    private fun scaleLevels(view: ByteBuffer, width: Int, height: Int, dirty: Rectangle?) {
+    /** Hands the waiting paint, if any, to the preview worker. Called holding the lock. */
+    private fun startScaling() {
+        val next = pending ?: return
+        val paintedAt = pendingAt
+        val dirty = previewDirty
+        pending = null
+        previewDirty = null
+        scaling = true
+        previewWorker.execute { scaleLevels(next, paintedAt, dirty) }
+    }
+
+    /** On the preview worker: brings the levels up to date over [dirty] of [view], then publishes the two together. */
+    private fun scaleLevels(view: Ring.Written, paintedAt: Long, dirty: Rectangle?) {
         val start = System.nanoTime()
+        val width = view.image.width
+        val height = view.image.height
         val fresh = pyramid?.takeIf { it.viewWidth == width && it.viewHeight == height }
         val target = fresh ?: Pyramid(width, height).also { made ->
             // Images over the old levels' buffers are still being retired; keep them alive until they are.
@@ -134,7 +153,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             pyramid = made
         }
         while (oldPyramids.isNotEmpty() && previewSeq - oldPyramids.first().first > RING_SIZE) oldPyramids.removeFirst()
-        val levels = target.update(view, if (fresh == null) null else dirty, levelPool)
+        val levels = target.update(view.buffer, if (fresh == null) null else dirty, levelPool)
         stats.preview(System.nanoTime() - start)
         synchronized(this) {
             scaling = false
@@ -142,8 +161,8 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             while (retiredLevels.size > RETIRED_KEPT) retiredLevels.removeFirst().forEach(Image::close)
             latestLevels = levels
             previewSeq++
-            // Same picture of the page, so the same paint time: latency stays honest.
-            _frames.value?.let { republish(it.paintedAt) }
+            publish(view.image, levels, paintedAt)
+            startScaling()
         }
     }
 
@@ -182,12 +201,12 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         )
     }
 
-    private fun publish(image: Image, paintedAt: Long) {
+    private fun publish(image: Image, levels: List<Image>, paintedAt: Long) {
         _frames.value?.let { old -> retire(listOf(old.view)) }
         _frames.value = Frame(
             seq = ++seq,
             view = image,
-            levels = latestLevels.takeIf { it.firstOrNull()?.width == image.width / 2 }.orEmpty(),
+            levels = levels,
             popup = popupImage.takeIf { popupVisible },
             popupRect = popupRect.takeIf { popupVisible },
             paintedAt = paintedAt,
@@ -206,14 +225,16 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
     }
 
     /**
-     * [RING_SIZE] direct BGRA buffers the size of the view, written in turn. Each remembers which paint
+     * [RING_SIZE] direct buffers the size of the view, written in turn. Each remembers which paint
      * it holds; writing one copies, from Chromium's buffer, the dirty rects of every paint since then.
+     * With [swizzle] the copy also turns Chromium's BGRA into RGBA. Pixels are in the order
+     * `-Prgba=1` asks for, whatever the ring.
      */
-    private class Ring(val width: Int, val height: Int) {
+    private class Ring(val width: Int, val height: Int, private val swizzle: Boolean) {
         /** What [write] made: the image, whether the copy was full, and the buffer under the image. */
         class Written(val image: Image, val full: Boolean, val buffer: ByteBuffer)
 
-        private val info = ImageInfo(width, height, ColorType.BGRA_8888, ColorAlphaType.PREMUL)
+        private val info = ImageInfo(width, height, if (rgba) ColorType.RGBA_8888 else ColorType.BGRA_8888, ColorAlphaType.PREMUL)
         private val rowBytes = width * 4
         private val bytes = rowBytes * height
         private val buffers = Array(RING_SIZE) { ByteBuffer.allocateDirect(bytes) }
@@ -264,7 +285,24 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
 
         /** Copies the whole frame in [COPY_THREADS] bands of rows: this thread takes the first, [pool] the rest. */
         private fun copyAll(source: ByteBuffer, target: ByteBuffer, pool: ExecutorService) {
-            inBands(0, height, pool) { y0, y1 -> target.put(y0 * rowBytes, source, y0 * rowBytes, (y1 - y0) * rowBytes) }
+            inBands(0, height, pool) { y0, y1 -> span(source, target, y0 * rowBytes, (y1 - y0) * rowBytes) }
+        }
+
+        /** Copies [length] bytes at [at] from [source] to [target], swapping red and blue with [swizzle]. */
+        private fun span(source: ByteBuffer, target: ByteBuffer, at: Int, length: Int) {
+            if (!swizzle) {
+                target.put(at, source, at, length)
+                return
+            }
+            val s = source.duplicate().order(ByteOrder.nativeOrder())
+            val t = target.duplicate().order(ByteOrder.nativeOrder())
+            var i = at
+            val end = at + length
+            while (i < end) {
+                val p = s.getInt(i)
+                t.putInt(i, (p and GREEN_ALPHA) or (p ushr 16 and 0xff) or (p and 0xff shl 16))
+                i += 4
+            }
         }
 
         /**
@@ -305,8 +343,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             val rowLength = c.width * 4
             val copy = { y0: Int, y1: Int ->
                 for (y in y0 until y1) {
-                    val at = y * rowBytes + c.x * 4
-                    target.put(at, source, at, rowLength)
+                    span(source, target, y * rowBytes + c.x * 4, rowLength)
                 }
             }
             if (c.width.toLong() * c.height >= POOLED_RECT_PIXELS) inBands(c.y, c.y + c.height, pool, copy)
@@ -322,7 +359,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
     private class Pyramid(val viewWidth: Int, val viewHeight: Int) {
         private class Level(val width: Int, val height: Int) {
             val pixels: ByteBuffer = ByteBuffer.allocateDirect(width * height * 4)
-            val ring = Ring(width, height)
+            val ring = Ring(width, height, swizzle = false)
         }
 
         private val levels = buildList {
@@ -405,8 +442,8 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         /** Frames kept alive after they stop being current: a window may still be drawing one. */
         const val RETIRED_KEPT = 2
 
-        /** Ring buffers: the current frame, the retired ones, and one being written. */
-        const val RING_SIZE = RETIRED_KEPT + 2
+        /** Ring buffers: the retired frames, the current one, the worker's, the waiting one and the one being written. */
+        const val RING_SIZE = RETIRED_KEPT + 4
 
         /** The pyramid's levels stop before they would be narrower than this. */
         const val SMALLEST_LEVEL = 480
@@ -426,9 +463,18 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         const val LANES = 0x00FF00FF
         const val ROUND = 0x00020002
 
+        /** The two bytes that stay put when red and blue swap, on a little-endian machine. */
+        const val GREEN_ALPHA = 0xFF00FF00.toInt()
+
         fun daemon(name: String) = ThreadFactory { r -> Thread(r, name).apply { isDaemon = true } }
     }
 }
+
+/**
+ * `-Prgba=1`: frames are kept as RGBA rather than Chromium's BGRA, swapped during the copy, to find out
+ * whether a GPU driver converts BGRA on the CPU while uploading it.
+ */
+internal val rgba = System.getProperty("osr.rgba") != null
 
 /** `-PplainPreview=1`: no levels, so the preview draws the whole view with plain bilinear sampling. */
 internal val plainPreview = System.getProperty("osr.plainPreview") != null
