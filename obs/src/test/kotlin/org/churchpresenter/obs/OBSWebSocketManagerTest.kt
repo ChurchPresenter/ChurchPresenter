@@ -323,6 +323,9 @@ class OBSWebSocketManagerTest {
         obs.connectTo(server)
         server.nextFrame()
         server.say("""{"op":5,"d":{"eventType":"SceneListChanged"}}""")
+        // Frames are read in order, so once this list is in, the event before it has been handled.
+        server.say(sceneList("Wide"))
+        awaitUntil("the scene list to arrive") { obs.scenes.value.isNotEmpty() }
         obs.setScene("Worship")
         val next = server.nextFrame()["d"]!!.jsonObject
         assertEquals("SetCurrentProgramScene", next["requestType"]?.jsonPrimitive?.content)
