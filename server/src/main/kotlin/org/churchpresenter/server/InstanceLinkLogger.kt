@@ -3,6 +3,7 @@ package org.churchpresenter.server
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Which side of an Instance Link connection a log line describes. A single running instance can log
@@ -21,26 +22,33 @@ enum class InstanceLinkLogSide { PRIMARY, FOLLOWER }
  * without re-instrumenting by hand each time.
  *
  * Same shape as CrashReporter/TrainingDataLogger: hand-rolled JSONL (no serialization library),
- * best-effort (every write wrapped in `runCatching`), thread-safe via a private lock, and files older
- * than [MAX_AGE_DAYS] deleted once per process — this codebase has no app-wide file-logging framework
- * wired up (Logback is console/Sentry-only), so this mirrors the existing hand-rolled convention
- * rather than introducing a new one.
+ * best-effort (every write wrapped in `runCatching`), and files older than [MAX_AGE_DAYS] deleted
+ * once per process. A line is built where [log] is called, its timestamp with it, and written by one
+ * thread of the logger's own: the primary logs from the event thread while something is live, and a
+ * call never waits on the disk. A line still queued when the process is killed is lost.
+ *
+ * This codebase has no app-wide file-logging framework wired up (Logback is console/Sentry-only),
+ * so this mirrors the existing hand-rolled convention rather than introducing a new one.
  */
 object InstanceLinkLogger {
 
     private const val MAX_AGE_DAYS = 30L
     private const val FILE_PREFIX = "instance-link_"
 
-    private val lock = Any()
     private val cleanedUp = AtomicBoolean(false)
+
+    /** Every write, in the order the lines were logged. */
+    private val writer = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "instance-link-log").apply { isDaemon = true }
+    }
 
     // Frozen at first use (≈ app start), down to the second so quick restarts never share a file.
     private val runStamp: String =
         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
 
-    private val logDir by lazy {
-        File(System.getProperty("user.home"), ".churchpresenter/instance-link/logs").also { it.mkdirs() }
-    }
+    // Resolved on the first caller's thread, which touches no disk -- a test fixes the path to its own
+    // user.home by logging once -- and created on [writer].
+    private val logDir by lazy { File(System.getProperty("user.home"), ".churchpresenter/instance-link/logs") }
 
     private val logFile by lazy { File(logDir, "$FILE_PREFIX$runStamp.jsonl") }
 
@@ -51,9 +59,9 @@ object InstanceLinkLogger {
      * stringified via `toString()`.
      */
     fun log(side: InstanceLinkLogSide, event: String, fields: Map<String, Any?> = emptyMap()) {
-        cleanupOldLogsOnce()
-        runCatching {
-            val line = buildString {
+        val file = logFile
+        val line = runCatching {
+            buildString {
                 append("{\"ts_ms\":").append(System.currentTimeMillis())
                 append(",\"side\":\"").append(side.name.lowercase()).append('"')
                 append(",\"event\":\"").append(esc(event)).append('"')
@@ -63,8 +71,19 @@ object InstanceLinkLogger {
                 }
                 append('}')
             }
-            synchronized(lock) { logFile.appendText(line + "\n", Charsets.UTF_8) }
+        }.getOrNull() ?: return
+        writer.execute {
+            cleanupOldLogsOnce()
+            runCatching {
+                logDir.mkdirs()
+                file.appendText(line + "\n", Charsets.UTF_8)
+            }
         }
+    }
+
+    /** Waits until every line logged so far is on disk. */
+    internal fun flush() {
+        writer.submit { }.get()
     }
 
     private fun StringBuilder.appendJsonValue(value: Any?) {
