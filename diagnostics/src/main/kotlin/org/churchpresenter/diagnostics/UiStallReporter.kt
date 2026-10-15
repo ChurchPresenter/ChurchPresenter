@@ -59,7 +59,7 @@ class UiStallReporter(
         if (startedAt < countsFrom) return
         val wasLive = liveSince != NONE && liveSince <= startedAt
         if (wasLive && stall.lateMs > GATE_MS) liveStalls++
-        if (sent >= MAX_EVENTS) return
+        if (sent >= MAX_EVENTS || sampledAsItAnswered(stall)) return
         sent++
         send(stallEvent(stall, wasLive))
     }
@@ -137,6 +137,18 @@ fun stallEvent(stall: Stall, live: Boolean): StallEvent {
         fingerprint = listOf("ui-stall", cause?.let { "${it.className}.${it.methodName}" } ?: "no-frames"),
     )
 }
+
+/**
+ * Whether [stall]'s stack is the event thread already running the watchdog's own ping: the stall
+ * ended between two polls and its stack was taken as the thread answered, so it says nothing about
+ * where the thread was stuck. Counted like any stall, but not sent -- it would group on the
+ * watchdog itself.
+ */
+internal fun sampledAsItAnswered(stall: Stall): Boolean = stall.frames.any { frame ->
+    WATCHDOG_CLASSES.any { frame.className.startsWith(it) }
+}
+
+private val WATCHDOG_CLASSES = listOf(StallDetector::class.java.name, UiWatchdog::class.java.name)
 
 /** A stall's length as a few searchable ranges, so a tag never holds a raw number. */
 internal fun lengthBucket(lateMs: Long): String = when {
