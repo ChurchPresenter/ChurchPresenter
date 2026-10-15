@@ -3,6 +3,7 @@ package org.churchpresenter.sharedui.filechooser
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.utils.Constants
 import org.freedesktop.dbus.errors.ServiceUnknown
+import org.freedesktop.dbus.exceptions.AddressResolvingException
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
@@ -183,13 +184,8 @@ abstract class FileChooser {
             attempt()
         } catch (e: CancellationException) {
             throw e
-        } catch (_: PortalUnavailableException) {
-            return portalMissing(fallback)
-        } catch (_: ServiceUnknown) {
-            // The bus is there but nothing owns the portal's name: the same machine state, said by
-            // the bus itself and recognised by type rather than by its (localised) message.
-            return portalMissing(fallback)
         } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
+            if (isNoPortal(t)) return portalMissing(fallback)
             // Native dialogs (FileKit, the Windows shell, the XDG portal) fail with whatever the
             // platform throws, native Errors included; any of them means use the Swing chooser.
             CrashReporter.reportWarning(
@@ -247,3 +243,15 @@ internal data class DialogRequest(
     val selectDirectory: Boolean = false,
     val multiple: Boolean = false,
 )
+
+/**
+ * Whether [t] says this session has no desktop portal to ask, rather than that a native dialog
+ * broke: `FileChooser.withNativeDialog` falls back on it without a report. Each is recognised by its
+ * type, never by its (localised) message:
+ * - [PortalUnavailableException]: the bus answered, but the connection had no name to send from.
+ * - [ServiceUnknown]: the bus is there but nothing owns the portal's name.
+ * - [AddressResolvingException]: there is no session bus to reach at all -- the address the
+ *   environment gives names a socket that is gone, as in a session started without one.
+ */
+internal fun isNoPortal(t: Throwable): Boolean =
+    t is PortalUnavailableException || t is ServiceUnknown || t is AddressResolvingException
