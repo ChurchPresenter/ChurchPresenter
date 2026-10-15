@@ -339,24 +339,4 @@ class AnnouncementsTimerControlTest {
         assertEquals("Draft", saved.announcementsSettings.text)
         assertEquals(Presenting.NONE, pm.slideContent.value)
     }
-
-    // ── Timer formatting ────────────────────────────────────────────────────────
-
-    @Test
-    fun `a timer under an hour is shown as minutes and seconds`() {
-        assertEquals("00:00", AnnouncementsViewModel.formatTimer(0))
-        assertEquals("00:09", AnnouncementsViewModel.formatTimer(9))
-        assertEquals("00:59", AnnouncementsViewModel.formatTimer(59))
-        assertEquals("01:00", AnnouncementsViewModel.formatTimer(60))
-        assertEquals("05:30", AnnouncementsViewModel.formatTimer(330))
-        assertEquals("59:59", AnnouncementsViewModel.formatTimer(3599))
-    }
-
-    @Test
-    fun `an hour or more gains an hours field, unpadded`() {
-        assertEquals("1:00:00", AnnouncementsViewModel.formatTimer(3600))
-        assertEquals("1:01:01", AnnouncementsViewModel.formatTimer(3661))
-        assertEquals("10:00:00", AnnouncementsViewModel.formatTimer(36_000))
-        assertEquals("23:59:59", AnnouncementsViewModel.formatTimer(86_399))
-    }
 }

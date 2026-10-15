@@ -27,6 +27,10 @@ import java.nio.file.Files
 import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.click
 
 /**
  * Harness and fixtures shared by the `CanvasTab` test classes.
@@ -108,6 +112,7 @@ internal fun canvasTab(
     val reports = CanvasReports()
     try {
         vm.seed()
+        reports.settings = settings(AppSettings())
         runComposeUiTest {
             setContent {
                 ThemedForTest(themeMode) {
@@ -245,3 +250,17 @@ internal fun ComposeUiTest.clickCanvasLabel(label: String) {
 /** The sources in the current scene, in the order the view model holds them. */
 internal fun SceneViewModel.sourceNames(): List<String> =
     currentScene?.sources?.map(SceneSource::name) ?: emptyList()
+
+/** Rests the pointer on [node] until its tooltip has had time to appear. */
+internal fun ComposeUiTest.hover(node: SemanticsNodeInteraction) {
+    node.performMouseInput { moveTo(center) }
+    waitForIdle()
+    mainClock.advanceTimeBy(2_000)
+    waitForIdle()
+}
+
+/** Closes the open menu the way an operator does: a click on the tab outside it. */
+internal fun ComposeUiTest.dismissPopup() {
+    onAllNodes(isRoot())[0].performMouseInput { click(Offset(2f, 2f)) }
+    waitForIdle()
+}

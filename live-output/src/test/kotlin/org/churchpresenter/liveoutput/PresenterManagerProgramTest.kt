@@ -6,7 +6,7 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.liveshow.BackgroundSource
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.liveshow.Layer

@@ -385,6 +385,13 @@ class SourcePropertiesTextTest {
     }
 
     @Test
+    fun `Outline strokes the text and nothing else`() = sourcePanel(Fixture.text()) { get ->
+        clickStyleButton("Outline")
+
+        assertEquals(Fixture.text().copy(outline = Fixture.text().outline.copy(enabled = true)), get())
+    }
+
+    @Test
     fun `a face stored on is turned back off by its own button`() {
         sourcePanel(Fixture.text().copy(bold = true, italic = true)) { get ->
             clickStyleButton("Bold")

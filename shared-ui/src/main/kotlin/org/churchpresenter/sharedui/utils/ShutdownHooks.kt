@@ -15,8 +15,24 @@ package org.churchpresenter.sharedui.utils
  *
  * [name] names the thread, so a hang during shutdown is identifiable in a thread dump.
  */
-fun addGuardedShutdownHook(name: String, body: () -> Unit) {
-    Runtime.getRuntime().addShutdownHook(Thread(guardedShutdownBody(body), "shutdown-$name"))
+fun addGuardedShutdownHook(name: String, body: () -> Unit): GuardedShutdownHook {
+    val thread = Thread(guardedShutdownBody(body), "shutdown-$name")
+    Runtime.getRuntime().addShutdownHook(thread)
+    return GuardedShutdownHook(thread)
+}
+
+/**
+ * A hook [addGuardedShutdownHook] registered. The JVM keeps its body until exit, and with it
+ * everything the body reaches — so an owner that ends before the JVM does [remove]s it, or every
+ * instance it ever made stays reachable for the life of the process.
+ */
+class GuardedShutdownHook internal constructor(private val thread: Thread) {
+    /** Takes the hook back; false when it was already gone or the JVM is already shutting down. */
+    fun remove(): Boolean = try {
+        Runtime.getRuntime().removeShutdownHook(thread)
+    } catch (_: IllegalStateException) {
+        false
+    }
 }
 
 /**

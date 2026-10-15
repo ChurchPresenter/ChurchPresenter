@@ -59,7 +59,7 @@ stub it by that string.
 
 ```bash
 ./gradlew :shared-ui:test :shared-ui:detekt
-./gradlew :shared-ui:jacocoTestCoverageVerification   # the six-counter floor from the root build
+./gradlew :shared-ui:jacocoTestCoverageVerification   # the six-counter floor from `cp.test`
 ./gradlew :shared-ui:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```
 

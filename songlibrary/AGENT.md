@@ -52,7 +52,7 @@ All three gates run in CI, gated on this directory (or the shared build files) c
 
 ## Gates
 
-The root build's six counters at 85%, **no floor lowered** — this module declares no
+`cp.test`'s six counters at 85%, **no floor lowered** — this module declares no
 `coverageFloors`. detekt runs against the app's shared config, over `src/main/kotlin` and
 `src/test/kotlin`, with no baseline.
 

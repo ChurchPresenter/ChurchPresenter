@@ -70,6 +70,7 @@ import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.sharedui.composables.bibleInsetFill
+import org.churchpresenter.core.models.schedule.formatTimer
 
 /* The Announcements tab's timer: its mode, its display, its steppers, its controls. */
 
@@ -120,7 +121,7 @@ internal fun AnnouncementsTabScope.AnnouncementsTimerSection(viewModel: Announce
                 viewModel.isTimerExpired -> viewModel.timerExpiredText.ifBlank { timerExpiredLabel }
                 viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY ->
                     viewModel.liveClockText
-                else -> AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
+                else -> formatTimer(viewModel.timerDisplayValue)
             },
             style = MaterialTheme.typography.displayMedium,
             color = if (viewModel.isTimerExpired) MaterialTheme.colorScheme.error
@@ -403,7 +404,7 @@ private fun AnnouncementsTabScope.TimerStageMonitorButton(viewModel: Announcemen
                     }
                     output.setAnnouncementTickerLive(true)
                 }
-                val liveText = AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
+                val liveText = formatTimer(viewModel.timerDisplayValue)
                 toggleStageMonitor(viewModel, liveText)
             },
             tooltipText = if (isSentToStageMonitor) stringResource(
@@ -472,7 +473,7 @@ private fun AnnouncementsTabScope.TimerScheduleButtons(viewModel: AnnouncementsV
                 val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
                     viewModel.liveClockText
                 } else {
-                    AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
+                    formatTimer(viewModel.timerDisplayValue)
                 }
                 output.setAnnouncementText(liveText)
                 output.setPresentingMode(Presenting.ANNOUNCEMENTS)

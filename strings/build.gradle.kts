@@ -1,13 +1,6 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
+    id("cp.kotlin-jvm")
+    id("cp.compose")
 }
 
 compose.resources {

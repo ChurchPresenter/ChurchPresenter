@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.helper.ui.GuideSpotlightHost
+import org.churchpresenter.sharedui.guide.LocalSpotlightHost
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.material.icons.Icons
@@ -108,7 +108,7 @@ fun BibleCatalogBrowserDialog(
     ) {
         ProvideUiFontScale {
             // This window's own spotlight: Wick's "add a Bible translation" tour rings its list.
-            GuideSpotlightHost(Modifier.fillMaxSize()) {
+            LocalSpotlightHost.current(Modifier.fillMaxSize()) {
                 BibleCatalogBrowserDialogContent(
                     viewModels = viewModels,
                     tabLabels = tabLabels,

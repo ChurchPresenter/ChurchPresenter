@@ -4,25 +4,21 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 ## What it is
 
-**Lower thirds**:
+**The Lower Third tab and the ATEM settings page**:
 - the tab (`LowerThirdTab`), which lists the lottie presets in a folder, previews them, and puts them
   live or onto an ATEM;
-- what an ATEM upload needs: the render cache, the off-screen renderer and the key sequencer;
-- `LowerThirdPresenter` (`presenter/`), the animation on an output. It takes the frame to draw as
-  a plain `ImageBitmap`; `:live-output`'s `LottieFrameStream` owns the native bitmap behind it.
-  `LowerThirdLayout` stays in the app, since it draws the app's camera and video backgrounds;
-- `LottieFonts` and the bundled fonts it reads, under `src/main/resources/fonts`. LottieGen's
-  `FontRegistry` reads the same resources off the classpath;
 - the ATEM page of the Options dialog (`AtemSettingsTab`, with `AtemSettingsFields`), which edits
   `AtemSettings` and tests the connection.
 
-A real Gradle module of this build: `include(":lower-third")`,
-`implementation(projects.lowerThird)`. Its consumers are `:composeApp` and `:live-output`. The
-outputs (`:live-output`), the app's ATEM bridge and routes, and the Bible lottie band all use the
-render cache, the sequencer and `LottieFonts` from here.
+What they drive — the render cache, the off-screen renderer, `LowerThirdPresenter`, the key
+sequencer, `LottieFonts` and the bundled fonts — is `:lower-third-engine`, which this module takes
+with `api`. `LowerThirdLayout` stays in the app, since it draws the app's camera and video
+backgrounds.
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
-`:atem`, `:lottieGenerator` and `:presentation-engine`, and nothing of `:composeApp`'s.
+A feature-layer module (root AGENT.md, "Layers"): `include(":lower-third")`. Its consumer is
+`:composeApp`. It takes `:lower-third-engine`, `:shared-ui`, `:strings`, `:icons`, `:core-models`,
+`:settings`, `:theme`, `:diagnostics`, `:atem`, `:lottieGenerator` and `:presentation-engine`, and
+nothing of `:composeApp`'s.
 
 ## Seams to the app
 
@@ -35,16 +31,6 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Layout
 
-- **The render cache** (`render/`): `LottieRenderCache` prepares and reads cache entries. Its JSON
-  and size policy is `LottieRenderSizes`, reached through the `LottieRenderPolicy` interface by
-  delegation. Its files, keys and eviction are `LottieCacheFiles`, and its frame codec is `ArgbRle`.
-- **The sequencer**: `LowerThirdSequencer.run` takes:
-  - a `LowerThirdClip`: what runs;
-  - a `LowerThirdKey`: which ATEM key takes it on air;
-  - an `AtemKeyDriver`: by default the switcher's keepalive connection. A test passes its own to
-    make a key fail without the client's 5s timeout.
-- **`LottieRenderCache.ensureForFile`** returns its background job. Nothing in the app waits on it;
-  a test does.
 - **The tab** builds a remembered, `@Stable` `LowerThirdTabScope` from three holders:
   - `LowerThirdTabInputs`: what the app hands it;
   - `LowerThirdTabState`: what the composition holds;
@@ -57,7 +43,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Package
 
-**`org.churchpresenter.lowerthird`**, with `.render` and `.presenter`. The test helpers (`lowerThirdTab`,
+**`org.churchpresenter.lowerthird`** (`.render` and `.presenter` are `:lower-third-engine`'s). The test helpers (`lowerThirdTab`,
 `LowerThirdLabel`, the folder fixtures and the finders) are in `src/testFixtures`. They are public,
 so the app's screenshot suite can use them. That suite passes the app's real preview output and
 picker through `previewFor` and `pickerFor`.

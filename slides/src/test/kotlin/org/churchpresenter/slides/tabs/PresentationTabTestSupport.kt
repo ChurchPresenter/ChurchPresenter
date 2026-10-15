@@ -90,6 +90,8 @@ internal fun presentationTab(
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     width: Dp? = null,
     themeMode: ThemeMode? = null,
+    /** The remote-control dialog the host draws; the app's opens a real window, so tests pass their own. */
+    remoteDialog: @Composable (onDismiss: () -> Unit) -> Unit = {},
     block: ComposeUiTest.(vm: PresentationViewModel, reports: PresentationReports) -> Unit,
 ) {
     val appSettings = settings(AppSettings())
@@ -120,6 +122,7 @@ internal fun presentationTab(
                         onInstanceLinkSendNextSlide = onInstanceLinkSendNextSlide,
                         onInstanceLinkSendPreviousSlide = onInstanceLinkSendPreviousSlide,
                         onInstanceLinkSendProject = onInstanceLinkSendProject,
+                        remoteDialog = remoteDialog,
                     )
                 }
             }

@@ -61,6 +61,8 @@ import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import org.churchpresenter.sharedui.composables.TvScreenBox
+import org.churchpresenter.sharedui.composables.tvScreenBoxWidthFor
 
 @Composable
 fun BackgroundSettingsTab(

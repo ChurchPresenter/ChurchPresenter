@@ -21,8 +21,8 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.graphics.Color as ComposeColor
 import io.github.alexzhirkevich.compottie.LottieComposition
-import org.churchpresenter.dictionary.data.StrongsEntry
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.dictionary.StrongsEntry
+import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline

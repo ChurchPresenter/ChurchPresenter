@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.retypeNumberField
 
 @OptIn(ExperimentalTestApi::class)
 class ProfileOverlayControlsTest {

@@ -70,7 +70,7 @@
 - `dictionary/` (the `:dictionary` Gradle module) — the Strong's dictionary tab (`DictionaryTab.kt` and
   its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
   `:server`'s `StrongsDictionaryRepository.kt` serves the same data to the companion API
-- `dictionary/…/presenter/DictionaryPresenter.kt` — the dictionary card on the output
+- `presenter/…/dictionary/presenter/DictionaryPresenter.kt` — the dictionary card on the output
 - `profiles/…/ProfileDictionaryPage.kt`, `profiles/…/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `bible-tab/…/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
@@ -103,7 +103,7 @@
 **Source locations:**
 - `slides/…/tabs/PresentationTab.kt` (the `:slides` module) — main UI; its pieces in `PresentationTabScope.kt`, `PresentationTopBar.kt`, `PresentationControlsBar.kt`, `PresentationBody.kt`
 - `slides/…/viewmodel/PresentationViewModel.kt`
-- `live-output/…/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `PresentationFrame.kt` — animated playback
+- `live-output/…/PresentationPlayer.kt` (the app), `slides-engine/…/presenter/PresentationPresenter.kt` and `output-api/…/slides/presenter/PresentationFrame.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `:server`'s `CompanionServer.kt` — slide API for mobile (background rendering)
@@ -120,11 +120,11 @@
 **Source locations:**
 - `slides/…/tabs/PicturesTab.kt` (the `:slides` module) — image slideshow UI; its pieces in `PicturesTabScope.kt`, `PicturesHeader.kt`, `PicturesControlsBar.kt`, `PicturesGrid.kt`
 - `media/…/tabs/MediaTab.kt` (the `:media` module) — audio/video UI; its pieces in `MediaTabScope.kt`, `MediaSourceBar.kt`, `MediaControlsBar.kt`
-- `slides/…/viewmodel/PicturesViewModel.kt`, `media/…/viewmodel/MediaViewModel.kt`, `media/…/viewmodel/LocalMediaViewModel.kt`
+- `slides/…/viewmodel/PicturesViewModel.kt`, `media-engine/…/viewmodel/MediaViewModel.kt`, `media-engine/…/viewmodel/LocalMediaViewModel.kt`
 - `slides/…/data/HiddenItemsStore.kt`, `shared-ui/…/composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
-- `slides/…/presenter/PicturePresenter.kt`, `media/…/presenter/MediaPresenter.kt`
-- `media/…/composables/VideoPlayer.kt`
+- `slides-engine/…/presenter/PicturePresenter.kt`, `media-engine/…/presenter/MediaPresenter.kt`
+- `media-engine/…/composables/VideoPlayer.kt`
 - `media/…/dialogs/tabs/MediaSettingsTab.kt`
 - `profiles/…/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
 - `profiles/…/ProfileOverlayPages.kt`, `profiles/…/DisplayTextRows.kt` — the subtitle look, edited on Profiles → Subtitles
@@ -139,11 +139,12 @@
 
 **Source locations:**
 - `lower-third/` (the `:lower-third` Gradle module) — the tab (`LowerThird.kt` and its pieces in
-  `LowerThird*.kt`), `LowerThirdSequencer.kt`, and under `render/` the ATEM render cache
-  (`LottieRenderCache.kt` with `LottieRenderSizes.kt`, `LottieCacheFiles.kt`, `ArgbRle.kt`), the
-  off-screen renderer, `LottieFonts` and the bundled fonts
+  `LowerThird*.kt`)
+- `lower-third-engine/` (the `:lower-third-engine` Gradle module) — `LowerThirdSequencer.kt`, and under
+  `render/` the ATEM render cache (`LottieRenderCache.kt` with `LottieRenderSizes.kt`,
+  `LottieCacheFiles.kt`, `ArgbRle.kt`), the off-screen renderer, `LottieFonts` and the bundled fonts
 - `tabs/AppLowerThirdTab.kt` — the app's wrapper, which supplies the preview output and its picker
-- `lower-third/…/presenter/LowerThirdPresenter.kt` — the lower third on the output
+- `lower-third-engine/…/presenter/LowerThirdPresenter.kt` — the lower third on the output
 - `lottieGenerator/.../lottie/TextShaping.kt` — the Text shaping setting every Lottie player reads from the file
 - `presenter/…/BibleLottieBand.kt`, `presenter/…/BibleLottieTemplate.kt`, `presenter/…/BibleLottieTextFit.kt`, `presenter/…/BibleBandClock.kt` — the Bible band at run time; driven from `live-output/…/PresenterTransitionEffects.kt`
 - `profiles/…/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
@@ -159,8 +160,7 @@
 - `tabs/AppAnnouncementsTab.kt` — the app's wrapper: the live output, the stage monitors and the
   preview-output picker; `live-output/…/PresenterAnnouncementsOutput.kt` — the tab's `AnnouncementsOutput`
 - `data/settings/AnnouncementsSettings.kt`
-- `announcements/…/presenter/AnnouncementsPresenter.kt` — the announcement on the output
-- `utils/TimerStateManager.kt`
+- `presenter/…/announcements/presenter/AnnouncementsPresenter.kt` — the announcement on the output
 
 ## Web & Canvas
 - **Live websites on screen** — present any web page with bookmarks, navigation and zoom, and even type into live pages.
@@ -176,14 +176,14 @@
 - `canvas/…/CanvasTab.kt` (the `:canvas` module) — scene compositor UI; its pieces in `CanvasTabScope.kt`, `CanvasLeftPanel.kt`, `CanvasAddSourceMenu.kt`, `CanvasCenterPanel.kt`
 - `canvas/…/SceneViewModel.kt`, its source edits in `SceneViewModelSources.kt`
 - `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module) — including a scene's second layout and which one an output draws
-- `canvas/…/SceneCanvas.kt`, `SceneSourceRenderer.kt` (with `SceneTextSources.kt`, `SceneClockSource.kt`, `SceneDeviceSources.kt`), `SourcePropertiesPanel.kt`
+- `canvas-engine/…/SceneCanvas.kt`, `SceneSourceRenderer.kt` (with `SceneTextSources.kt`, `SceneClockSource.kt`, `SceneDeviceSources.kt`) (the `:canvas-engine` module); the editors are `canvas/…/SourcePropertiesPanel.kt`
 - `canvas/…/CanvasSizeMenu.kt`, `CanvasPlacement.kt` — a scene's size and layouts, and layers left off the canvas
-- `canvas/…/SharedBrowserFrameCache.kt` (with `BrowserProcesses.kt`, `CdpPages.kt`), `SharedCameraFrameCache.kt`
-- `canvas/…/NdiFrameCache.kt`, `NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
-- `canvas/…/OmtFrameCache.kt`, `SceneOmtEditor.kt`, `ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
+- `canvas-engine/…/SharedBrowserFrameCache.kt` (with `BrowserProcesses.kt`, `CdpPages.kt`), `SharedCameraFrameCache.kt`
+- `canvas-engine/…/NdiFrameCache.kt`, `canvas/…/NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
+- `canvas-engine/…/OmtFrameCache.kt`, `canvas/…/SceneOmtEditor.kt`, `canvas-engine/…/ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `canvas-engine/…/NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
 - `shared-ui/…/utils/FfmpegBinary.kt`, `live-output/…/settings/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
-- `canvas/…/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
+- `canvas-engine/…/ScenePresenter.kt`, `web-engine/…/presenter/WebsitePresenter.kt` (the `:web-engine` module: JCEF, `CefManager`, the embedded browser)
 - `data/settings/WebBookmark.kt`
 
 ## Live Captions & Translation
@@ -195,13 +195,14 @@
 - **Two languages your way** — stacked, side by side, or interleaved with each line followed by its translation; either language first; sharing a box or each in its own; the translation in its own size, capitals, weight and slant.
 
 **Source locations:**
-- `stt/` (the `:stt` Gradle module) — `STTTab.kt` (with `STTTabParts.kt`) and `STTManager.kt` (with
-  `STTTranscript.kt` and the Help Dev `STTCapture.kt`)
+- `stt/` (the `:stt` Gradle module) — `STTTab.kt` (with `STTTabParts.kt`)
+- `stt-engine/` (the `:stt-engine` Gradle module) — `STTManager.kt` (with `STTTranscript.kt` and the
+  Help Dev `STTCapture.kt`)
 - `tabs/AppSTTTab.kt` — the app's wrapper, which supplies the live mode and the caption settings dialog
 - `data/settings/STTSettings.kt`
-- `stt/…/presenter/STTPresenter.kt` — the captions on the output
+- `presenter/…/stt/presenter/STTPresenter.kt` — the captions on the output
 - `profiles/…/ProfileCaptionsPage.kt`, `profiles/…/CaptionReadingGroup.kt` — the caption look and reading settings, edited on Profiles → Live captions
-- `stt/…/presenter/` — `CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `CaptionLook.kt` (card, band, margins, silence fade), `CaptionTicker.kt`, `CaptionInterleave.kt`, `CaptionLanguages.kt`, and the reveal pace in `SttDripFeed.kt` and `SttRevealPace.kt`
+- `presenter/…/stt/presenter/` — `CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `CaptionLook.kt` (card, band, margins, silence fade), `CaptionTicker.kt`, `CaptionInterleave.kt`, `CaptionLanguages.kt`, and the reveal pace in `SttDripFeed.kt` and `SttRevealPace.kt`
 - `composables/CaptionText.kt` — `BottomAlignedText`, which draws only the lines in its window (also used by video subtitles)
 - `dialogs/STTSettingsDialog.kt` — the install-wide Bible-engine options
 
@@ -218,7 +219,7 @@
 - `tabs/AppQATab.kt` — the app's wrapper, which supplies the remote-access dialog;
   `live-output/…/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
 - `data/settings/QASettings.kt`
-- `qa/…/presenter/QAPresenter.kt` — the question and the QR code on the output; the QR image itself is `generateQRCodeBitmap` in `:shared-ui`
+- `presenter/…/qa/presenter/QAPresenter.kt` — the question and the QR code on the output; the QR image itself is `generateQRCodeBitmap` in `:shared-ui`
 - `profiles/…/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
 - `dialogs/QARemoteDialog.kt` — links, public access, rate limit and the QR message
 - `core-models/src/main/kotlin/.../models/qa/Question.kt` (the `:core-models` module)
@@ -283,7 +284,7 @@
 - `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `live-output/…/settings/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
-- `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `live-output/…/preview/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
+- `canvas-engine/…/DeckLinkManager.kt`, `canvas-engine/…/DeckLinkInputGate.kt`, `live-output/…/preview/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
 - `live-output/…/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
 - `profiles/…/BackgroundSettingsTab.kt`, `live-output/…/settings/ProjectionSettingsTab.kt`

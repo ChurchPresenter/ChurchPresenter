@@ -42,8 +42,8 @@ internal class CanvasTabScope(
     val onSavePreset: ((sceneId: String, sceneName: String) -> Unit)?,
     val cameraHost: CameraHost?,
     val density: Density,
-    val onSettingsChangeState: State<((AppSettings) -> AppSettings) -> Unit>,
-    val isMaximized: Boolean,
+    private val onSettingsChangeState: State<((AppSettings) -> AppSettings) -> Unit>,
+    private val isMaximized: Boolean,
     val sourceNames: CanvasSourceNames,
     val wentLive: (ScheduleItem) -> Unit,
     private val state: CanvasTabState,
@@ -60,7 +60,7 @@ internal class CanvasTabScope(
     var activeTool by state.activeTool
     var drawingStrokeColor by state.drawingStrokeColor
     var drawingFillColor by state.drawingFillColor
-    var drawingStrokeWidth by state.drawingStrokeWidth
+    val drawingStrokeWidth by state.drawingStrokeWidth
     val focusRequester = state.focusRequester
 
     fun saveLeftPanel() {

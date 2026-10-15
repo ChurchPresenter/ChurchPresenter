@@ -25,9 +25,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.utils.FallbackOutputSize
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.profileFor
-import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.stageMonitorScreenIndices
 
 /**
  * Chrome shared by the Song and Bible settings previews.
@@ -74,20 +72,6 @@ const val SETTINGS_PREVIEW_SCALED_TAG = "settingsPreviewScaledContent"
  * big that output is, so both go through [OutputSize].
  */
 internal typealias PreviewOutputSize = OutputSize
-
-/**
- * The screen this styling actually lands on.
- *
- * The first assigned output that has reported its bounds, so a 4:3 projector or a 2560x1080
- * ultrawide is previewed at its own shape rather than assumed to be 16:9. With nothing assigned
- * yet, or nothing that has reported, 1920x1080 stands in.
- */
-fun previewOutputSize(settings: AppSettings): PreviewOutputSize {
-    val assigned = settings.projectionSettings.screenAssignments
-        .firstOrNull { it.targetBoundsW > 0 && it.targetBoundsH > 0 }
-    return if (assigned != null) OutputSize(assigned.targetBoundsW, assigned.targetBoundsH)
-    else FallbackOutputSize
-}
 
 /**
  * The screen the **stage monitor** lands on.
@@ -233,8 +217,3 @@ internal fun PreviewBadge(label: String, modifier: Modifier = Modifier) {
         )
     }
 }
-
-fun stageMonitorScreenIndices(proj: ProjectionSettings): List<Int> =
-    proj.screenAssignments.indices.filter {
-        proj.profileFor(proj.screenAssignments[it])?.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-    }

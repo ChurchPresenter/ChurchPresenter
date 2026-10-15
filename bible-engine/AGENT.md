@@ -75,7 +75,7 @@ so a replay can be driven from the command line. The replay suite is inert witho
 
 ## Gates
 
-- **Coverage**: the root build's six counters at their default 85% floor over the whole module —
+- **Coverage**: `cp.test`'s six counters at their default 85% floor over the whole module —
   no `extra["coverageFloors"]` override, and `extra["coverageExcludes"]` is only the default
   `**/ComposableSingletons*` (`Main.kt` and `tools/` are measured). CI is the measure:
   `SpbLoaderTest` and `ReverseLookupTest` also run against the Bibles a developer's machine has and

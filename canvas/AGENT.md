@@ -4,54 +4,45 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 ## What it is
 
-The **Canvas** tab and everything a scene is drawn from:
-- `SceneViewModel` and the scene editor (`CanvasTab` and its panels, `SceneCanvas`);
-- the source renderer (`SceneSourceRenderer`) and the source property editors;
-- the capture sources the renderer draws: cameras (enumeration, formats, diagnostics, the ffmpeg
-  frame cache), screen and window capture, the headless-browser source, NDI and OMT input,
-  DeckLink input;
-- `ScenePresenter`, which the app's outputs draw a scene with.
+The **Canvas** tab: `SceneViewModel` and the scene editor — `CanvasTab` and its panels, the size
+menu and layouts (`CanvasSizeMenu`, `CanvasPlacement`), the add-source menu, and the source property
+editors (`SourcePropertiesPanel` and the per-kind editors). What a scene is drawn *from* — the
+canvas, the renderer, the capture sources and `ScenePresenter` — is `:canvas-engine`, which this
+module takes with `api`.
 
-A real Gradle module of this build: `include(":canvas")`, `implementation(projects.canvas)`. Its
-consumers are `:composeApp` and `:live-output`. Besides the tab the app uses `SceneViewModel`,
-`ScenePresenter`, the camera background (`CameraBackground`, `CameraDeviceCatalog`, the camera
-picker parts), the video cache behind looping backgrounds, `DeckLinkManager` and `liveMerges`, and
-`PreviewShape`.
-
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
-`:diagnostics`, `:ndi`, `:omt`, `:media`, `:slides`, `:bible` and `:bible-tab`, and nothing of
-`:composeApp`'s.
+A feature-layer module (root AGENT.md, "Layers"): `include(":canvas")`. Its consumer is
+`:composeApp`, which uses the tab and `SceneViewModel`. It takes `:canvas-engine`, `:shared-ui`,
+`:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:ndi`, `:omt` and `:bible`, and
+nothing of `:composeApp`'s.
 
 ## Seams to the app
 
 - **`onPresentScene`**: the tab's Go Live. The app sets the active scene, switches the output to
   the canvas and shows the output window.
-- **`NetworkInputs`**: the app's NDI runtime and OMT library, as the canvas receives from them. The
-  app owns and loads both (it sends its own outputs over them) and installs `AppNetworkInputs`
-  (`:live-output`) once at startup, first thing in `main`. Until then every call answers as an
-  unloaded library.
-- The Bible source lists translations with its own `bibleFilesInDirectory`, a copy of the app's
-  `FileManager.getBibleFilesInDirectory` kept here so the move did not touch `:bible` — every UI
-  module depends on it through `:shared-ui`, so a change there reruns nearly every suite in CI.
+- **`cameraHost`**: the machine the camera panel describes. The app passes none, so the panel reads
+  `CameraDeviceCatalog` and probes ffmpeg itself; a test pins one.
+- The Bible source pages through `:bible` directly (`BibleSourceBrowser`), and lists translations
+  with its own `bibleFilesInDirectory`, a copy of the app's `FileManager.getBibleFilesInDirectory`.
 
 ## Layout
 
 - **`SceneViewModel`** keeps its scenes and the scene-level actions; the source edits are
   extensions in `SceneViewModelSources.kt` — outside the module they need an import
   (`import org.churchpresenter.canvas.addSource`).
-- **The browser source** is three objects: `SharedBrowserFrameCache` (the shared frames, one per
-  source), `BrowserProcesses` (finding the browser, its port, stopping it) and `CdpPages` (the
-  page over DevTools).
-- **The renderer** is split by kind of source: `SceneSourceRenderer.kt`, `SceneTextSources.kt`,
-  `SceneClockSource.kt`, `SceneDeviceSources.kt`, and `WindowBounds.kt` for window capture.
+- **The tab** is `CanvasTab.kt` over `CanvasTabScope.kt`, with `CanvasLeftPanel.kt` (scenes and
+  layers), `CanvasCenterPanel.kt` (the canvas, its toolbar and the properties column) and
+  `CanvasAddSourceMenu.kt`.
+- **The editors** are split by kind of source: `SceneMediaEditors.kt`, `SceneGraphicEditors.kt`,
+  `SceneDeviceEditors.kt`, `SceneOmtEditor.kt` and `BibleSourceProperties.kt`.
 
 ## Coverage floor
 
 The shared 85% on all six counters; no `coverageFloors` entry. Complexity and branches clear it by
 about a point, so a new branch needs a test with it. What is left uncovered is mostly not untested
-behavior: building the libvlc player, the headless browser's own process and DevTools traffic, the
-coroutine plumbing around the ffmpeg pipe, the native DeckLink/X11/Win32 calls, the `minOf`/`maxOf`
-empty-list exits in shape math, and Compose's remembered-lambda checks on click handlers.
+behavior: Compose's remembered-lambda checks on the editors' handlers (the "nothing changed but the
+slot is empty" exit, which no recomposition reaches), the text editor's pop-out window (a real
+`DialogWindow`, which a headless test cannot open), the style rows' shadow handler (the canvas offers
+no shadow button), and defensive exits a picker cannot reach.
 
 ## Package
 
@@ -64,8 +55,9 @@ The tab harness (`canvasTab`, `CanvasLabel`) and the source-panel harness are in
 - **Tests and screenshots live here.** The screenshot suites are `screenshot/CanvasTabScreenshotTest`
   and `screenshot/CanvasOmtSourceScreenshotTest`; their images are under `canvas/screenshots/`.
   The website's `previewApp/canvas_*` export is shot by the app.
-- What needs the app stays there: the song backgrounds' camera picker and their tests, the OBS
-  scene wiring, the off-screen scene pump, and `DeckLinkComposeOutput`.
+- What needs the app stays there: the OBS scene wiring, the off-screen scene pump, and
+  `DeckLinkComposeOutput`. What the outputs and the settings pages draw with is `:canvas-engine`'s,
+  never this module's.
 
 ## Commands
 

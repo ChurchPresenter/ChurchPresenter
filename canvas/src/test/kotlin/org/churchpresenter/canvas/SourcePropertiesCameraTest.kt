@@ -99,6 +99,27 @@ class SourcePropertiesCameraTest {
         onNodeWithText("Open Camera Privacy Settings").assertDoesNotExist()
     }
 
+    // ── With no machine pinned ────────────────────────────────────────────────
+
+    /**
+     * The app's own path: no host handed in, so the panel reads the process-wide catalog, refreshes
+     * it on first composition and probes ffmpeg itself. Under an OS with no enumerator that refresh
+     * runs no tool and finds no camera, which the panel then reports like any empty machine.
+     */
+    @Test
+    fun `with no host pinned the panel asks this machine, and reports what it found`() =
+        withOsName(OS_WITHOUT_ENUMERATOR) {
+            val asked = System.currentTimeMillis()
+            sourcePanel(Fixture.camera(), cameraHost = null) { _ ->
+                waitUntil(timeoutMillis = 5_000) {
+                    (CameraDeviceCatalog.lastEnumeration?.enumeratedAtMs ?: 0L) >= asked
+                }
+                waitForIdle()
+
+                onNodeWithText("No cameras found").assertExists("the catalog's empty answer reaches the panel")
+            }
+        }
+
     // ── Refresh ───────────────────────────────────────────────────────────────
 
     @Test

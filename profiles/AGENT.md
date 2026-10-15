@@ -15,17 +15,19 @@ The Profiles settings pages and what they are built from:
 - the settings card kit the app's own pages use (`SettingsCard`, `SettingsCardBadge`,
   `LocalApplySettings`, `LocalSettingsDevMode`);
 - the settings row kit every settings page uses (`SettingsGroup`, `SettingsRowControls`, `RowOption`,
-  `SettingsDetail`), and the small pickers beside it (`PreviewOutputPicker`, `TvScreenBox`,
-  `SliderNumberField`, `ScanningRow`);
+  `SettingsDetail`), and the small pickers beside it (`PreviewOutputPicker`, `SliderNumberField`) —
+  the generic pieces the output's own settings also draw (`TvScreenBox`, `ScanningRow`,
+  `HintTooltip`, `MetronomeDot`, `previewOutputSize`) are `:shared-ui`'s;
 - `FileManager`, which the Bible page lists translations with.
 
 A real Gradle module of this build: `include(":profiles")`, `implementation(projects.profiles)`. Its
-consumers are `:composeApp` and `:live-output`. The app keeps the settings pages that need app
+consumers are `:composeApp`, `:app-settings`, `:dialogs`, `:server-ui` and `:telemetry` — not
+`:live-output`, which is a layer below it (see the root AGENT.md, "Layers"). The app keeps the settings pages that need app
 services — Projection, Server, System, Companion — and the Options dialog that hosts every page.
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
-`:presenter`, `:canvas`, `:media`, `:slides`, `:bible`, `:bible-tab`, `:lottieGenerator`, `:atem`,
-`:stt`, `:dictionary` and `:qa`, and nothing of `:composeApp`'s.
+It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
+`:presenter`, `:canvas-engine`, `:media`, `:media-engine`, `:slides-engine`, `:bible`, `:bible-tab`,
+`:lottieGenerator`, `:atem`, `:dictionary` and `:qa`, and nothing of `:composeApp`'s.
 
 ## Seams to the app
 

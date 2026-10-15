@@ -2,6 +2,8 @@ rootProject.name = "churchpresenter"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
+    // The build's convention plugins (`cp.*`): what every module's build file shares.
+    includeBuild("build-logic")
     repositories {
         google {
             mavenContent {
@@ -99,6 +101,10 @@ include(":bible")
 // from settings and from any `.schedule` file. Depended on by :composeApp, which opens it from the
 // Help menu beside the Song Library Manager and loads a planned service into the Schedule tab.
 include(":calendar")
+// The Calendar Manager's model without its window: a run of show, its clocks and cues, the
+// reference parser and the PDF export. The Schedule tab, the helper and the song editor read it;
+// :calendar draws it.
+include(":calendar-core")
 
 include(":strings")
 
@@ -107,12 +113,21 @@ include(":icons")
 include(":shared-ui")
 
 include(":slides")
+// What the picture and presentation outputs draw, without the tabs: PicturePresenter,
+// PresentationPresenter, PictureDecoder. :slides, :presenter, :canvas and :live-output use it.
+include(":slides-engine")
 
 include(":media")
+// The playback under the Media tab, without the tab: the VLC and software players, VLC discovery,
+// subtitles, MediaPresenter and MediaViewModel. The outputs, the presenter and canvas play with it.
+include(":media-engine")
 
 // The Web tab and the embedded Chromium it and the output window browse with (JCEF). Depended on by
 // :composeApp, which hands it the live output through WebOutput.
 include(":web")
+// The embedded Chromium (JCEF) without the Web tab: CefManager, the embedded web view and
+// WebsitePresenter, which the output window draws a page with.
+include(":web-engine")
 
 // The hidden Crossword tab and the decoder for the puzzles it plays. Not :crossword, which is the
 // authoring tool and must stay out of the app; the puzzles reach this module by a build-time copy.
@@ -123,8 +138,15 @@ include(":crossword-tab")
 include(":qa")
 include(":dictionary")
 include(":stt")
+// STTManager without the STT tab: the caption server's socket.io client, the capture and the
+// transcript. The Bible tab's detection and the outputs read it.
+include(":stt-engine")
 include(":announcements")
 include(":lower-third")
+// What the Lower Third tab drives, without the tab: the lottie render cache and its off-screen renderer,
+// the output's presenter, the ATEM sequencer and the bundled lottie fonts. The outputs and the
+// server use it.
+include(":lower-third-engine")
 
 // The helper lamp: tips, display setup, typed tasks and the spotlight that points at controls.
 // Depended on by :composeApp, which carries the actions out through HelperActionExecutor.
@@ -147,9 +169,13 @@ include(":server")
 // opens and saves. Depended on by :composeApp, which hands it the Planning Center import.
 include(":schedule")
 
-// The Canvas tab and SceneViewModel, the scene renderer, and the capture sources it draws: cameras,
-// screen and window capture, NDI and OMT input, DeckLink. Depended on by :composeApp.
+// The Canvas tab: SceneViewModel, the scene editor and the source property editors. Depended on by
+// :composeApp.
 include(":canvas")
+// What a scene is drawn with, without the Canvas tab: the scene renderer and its capture sources --
+// cameras, screen and window capture, the browser source, NDI and OMT in, DeckLink. The outputs and
+// the presenter draw with it.
+include(":canvas-engine")
 
 // What the song and Bible outputs draw: the slides, their looks and layouts, the backgrounds and the
 // Lottie bands. Depended on by :composeApp, which keeps the windows and the off-screen outputs.
@@ -177,6 +203,10 @@ include(":show-control")
 include(":control-in")
 // The live output: PresenterManager and what is on air, the output windows and the stage monitor, and
 // the off-screen outputs (NDI, OMT, Browser Source, DeckLink). Depended on by :composeApp.
+// What each tab needs of the live output, as interfaces -- BibleOutput, SlidesOutput, QAOutput and
+// the rest -- and the frame a deck plays. The tabs declare against it, :live-output implements it,
+// and neither depends on the other.
+include(":output-api")
 include(":live-output")
 
 // Statistics: what was presented and when, the play log, and the CCLI report window over them.

@@ -1,6 +1,7 @@
 package org.churchpresenter.liveoutput
 
-import org.churchpresenter.server.BrowserSourceFrame
+import org.churchpresenter.core.models.output.BrowserSourceFrame
+import org.churchpresenter.core.models.output.FrameRect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -344,10 +345,10 @@ class BrowserSourceVideoRenderer(
 
         val rect = decision.rect
         val frame = if (decision.forceFullFrame) {
-            BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, w, h, encodeFrame(intBuf, w, h))
+            BrowserSourceFrame(FrameRect(rect.x, rect.y, rect.w, rect.h), w, h, encodeFrame(intBuf, w, h))
         } else {
             val cropped = cropPixels(intBuf, w, rect)
-            BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, w, h, encodeFrame(cropped, rect.w, rect.h))
+            BrowserSourceFrame(FrameRect(rect.x, rect.y, rect.w, rect.h), w, h, encodeFrame(cropped, rect.w, rect.h))
         }
         frames.emit(frame)
         if (decision.forceFullFrame) lastFullFrameAtMs = elapsedMs

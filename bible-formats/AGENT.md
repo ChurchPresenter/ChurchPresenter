@@ -43,7 +43,7 @@ now depends on this module for the conversions it offers from its own window.
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test both in scope.
   18 of its findings used to sit in `:composeApp`'s baseline; they are suppressed at the site now,
   with the reasons above.
-- **Coverage**: the root build's default six counters at 85%, all of them — **no `coverageFloors`,
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no `coverageFloors`,
   no `coverageExcludes`.** COMPLEXITY is the tight one (85.3%), so a new uncovered branch is what
   will break the gate first.
 

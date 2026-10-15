@@ -1,6 +1,7 @@
 package org.churchpresenter.sharedui.utils
 
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.AppSettings
 
 /** Standing in for an output whose real size nothing has reported yet. */
 private const val FALLBACK_OUTPUT_WIDTH = 1920
@@ -98,3 +99,17 @@ fun outputSizeOf(assignment: ScreenAssignment, kind: OutputKind): OutputSize = w
 
 private fun sizeOrFallback(width: Int, height: Int): OutputSize =
     if (width > 0 && height > 0) OutputSize(width, height) else FallbackOutputSize
+
+/**
+ * The screen this styling actually lands on.
+ *
+ * The first assigned output that has reported its bounds, so a 4:3 projector or a 2560x1080
+ * ultrawide is previewed at its own shape rather than assumed to be 16:9. With nothing assigned
+ * yet, or nothing that has reported, 1920x1080 stands in.
+ */
+fun previewOutputSize(settings: AppSettings): OutputSize {
+    val assigned = settings.projectionSettings.screenAssignments
+        .firstOrNull { it.targetBoundsW > 0 && it.targetBoundsH > 0 }
+    return if (assigned != null) OutputSize(assigned.targetBoundsW, assigned.targetBoundsH)
+    else FallbackOutputSize
+}

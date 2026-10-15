@@ -27,7 +27,7 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.lowerthird.render.LottieRenderCache
@@ -39,7 +39,7 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.presenter.PicturePresenter
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.stt.presenter.STTPresenter
 import kotlinx.coroutines.runBlocking
 import java.awt.Color

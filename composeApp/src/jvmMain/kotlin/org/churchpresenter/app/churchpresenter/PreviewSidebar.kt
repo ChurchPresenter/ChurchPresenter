@@ -70,7 +70,7 @@ import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.composables.TooltipIconButton
-import org.churchpresenter.profiles.previewOutputSize
+import org.churchpresenter.sharedui.utils.previewOutputSize
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.liveoutput.clearMessage

@@ -19,7 +19,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.BibleSettings
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.bible.SelectedVerse

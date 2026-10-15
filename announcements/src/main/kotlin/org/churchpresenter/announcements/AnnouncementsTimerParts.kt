@@ -201,9 +201,7 @@ internal class AnnouncementsClock(
         get() = state.liveClockFormat
         set(value) {
             state.liveClockFormat = value
-            if (state.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
-                state.liveClockText = LocalTime.now().format(DateTimeFormatter.ofPattern(value))
-            }
+            if (state.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) state.liveClockText = liveClockNow()
         }
 
     override var timerMode: String
@@ -254,15 +252,27 @@ internal class AnnouncementsClock(
         }
     }
 
+    /**
+     * Shows the time at once, then keeps it current from the ticker.
+     *
+     * The first reading is taken here, on the caller's thread, not left to the ticker's first pass:
+     * until it lands the read-out is empty, one line tall, and in the narrow timer column a time that
+     * wraps to two lines then pushes everything under it down a line -- the format field and the
+     * transport keys moving out from under a pointer already on its way to them. Taken here, the
+     * read-out has its height before the mode's controls are first laid out.
+     */
     private fun startLiveClockPreview() {
         liveClockJob?.cancel()
+        state.liveClockText = liveClockNow()
         liveClockJob = scope.launch {
             while (true) {
-                state.liveClockText = LocalTime.now().format(DateTimeFormatter.ofPattern(state.liveClockFormat))
                 delay(TICK_INTERVAL_MS)
+                state.liveClockText = liveClockNow()
             }
         }
     }
+
+    private fun liveClockNow(): String = LocalTime.now().format(DateTimeFormatter.ofPattern(state.liveClockFormat))
 }
 
 // Duration/Count-up/Specific-Time tick on the output (not here), so the countdown survives

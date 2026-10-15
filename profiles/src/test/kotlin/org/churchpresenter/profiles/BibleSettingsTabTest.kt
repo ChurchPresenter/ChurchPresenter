@@ -28,6 +28,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.sharedui.composables.SCANNING_ROW_TAG
 
 /**
  * The Bible settings tab, content only: which Bibles are in the translation stack and in what

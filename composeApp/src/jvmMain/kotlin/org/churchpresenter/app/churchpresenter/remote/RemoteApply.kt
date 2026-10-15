@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.remote
 import org.churchpresenter.server.LiveStateDto
 import java.io.File
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.LinkLayers
 import org.churchpresenter.core.models.songs.LyricSection

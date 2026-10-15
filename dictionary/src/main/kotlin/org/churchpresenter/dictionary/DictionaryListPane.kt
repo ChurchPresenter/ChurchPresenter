@@ -58,7 +58,7 @@ import org.churchpresenter.strings.generated.resources.dictionary_loading
 import org.churchpresenter.strings.generated.resources.dictionary_no_results
 import org.churchpresenter.strings.generated.resources.dictionary_search_hint
 import org.churchpresenter.theme.components.DropdownSelector
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.BibleListRowShape

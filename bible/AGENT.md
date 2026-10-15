@@ -53,7 +53,7 @@ owns that format, and **thirty-three suites in `:composeApp` build their fixture
 
 ## Gates
 
-- **Coverage**: the root build's default six counters at 85%, **no `coverageFloors` override and no
+- **Coverage**: `cp.test`'s default six counters at 85%, **no `coverageFloors` override and no
   `coverageExcludes`**. The extraction landed at branches 0.78 / complexity 0.79 and was brought up
   with real tests rather than a lowered floor — `BibleSearchScopeTest`, `BibleMalformedModuleTest`
   and `BibleLookupFallbackTest`. Branches and complexity are the tight pair, clearing by under a

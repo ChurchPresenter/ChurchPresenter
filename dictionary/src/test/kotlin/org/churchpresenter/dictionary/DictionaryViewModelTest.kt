@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
 import org.churchpresenter.dictionary.data.InterlinearRepository
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

@@ -1,5 +1,7 @@
 package org.churchpresenter.sharedui.guide
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
@@ -103,6 +105,15 @@ val LocalGuideSession = staticCompositionLocalOf<GuideSession?> { null }
  * Wick is off.
  */
 val LocalWickCorner = staticCompositionLocalOf<(@Composable (Modifier) -> Unit)?> { null }
+
+/**
+ * Wraps a window's content in the helper's spotlight, so a tour can ring that window's controls. The
+ * app provides the helper's own host; a module the helper is no dependency of reads this instead.
+ * With no helper running, the content is drawn as it is.
+ */
+val LocalSpotlightHost = staticCompositionLocalOf<@Composable (Modifier, @Composable BoxScope.() -> Unit) -> Unit> {
+    { modifier, content -> Box(modifier) { content() } }
+}
 
 /** The color a tagged control is highlighted in while a tour points at it; set by the spotlight host. */
 val LocalGuideRingColor = staticCompositionLocalOf { Color.Unspecified }

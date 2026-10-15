@@ -1,5 +1,6 @@
 package org.churchpresenter.diagnostics
 
+import io.sentry.ITransaction
 import io.sentry.Attachment
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -485,18 +486,30 @@ object CrashReporter {
      * Performance. Falls back to running [block] directly when Sentry is disabled.
      */
     inline fun <T> trace(operation: String, name: String, block: () -> T): T {
-        if (!isEnabled()) return block()
-        val tx = try { Sentry.startTransaction(name, operation) } catch (_: Exception) { null } ?: return block()
+        val transaction = startTransaction(operation, name)
+        // [block] is inlined here once, whether or not a transaction started: a traced function
+        // compiles to one copy of its own body, not one per path through this function.
         // runCatching so the failure is recorded and rethrown unchanged without naming a type: the
         // block is arbitrary caller code, and an Error — an OOM mid-render is the realistic one —
         // has to mark the transaction failed just as an exception does.
         val outcome = runCatching { block() }
-        outcome.exceptionOrNull()?.let { failure ->
-            tx.throwable = failure
-            tx.status = SpanStatus.INTERNAL_ERROR
-        }
-        try { tx.finish() } catch (_: Exception) {}
+        if (transaction != null) finishTransaction(transaction, outcome.exceptionOrNull())
         return outcome.getOrThrow()
+    }
+
+    /** The transaction [trace] runs its block under; null while Sentry is off, or will not start one. */
+    @PublishedApi
+    internal fun startTransaction(operation: String, name: String): ITransaction? =
+        if (!isEnabled()) null else try { Sentry.startTransaction(name, operation) } catch (_: Exception) { null }
+
+    /** Marks [transaction] failed with [failure], when there is one, and finishes it. */
+    @PublishedApi
+    internal fun finishTransaction(transaction: ITransaction, failure: Throwable?) {
+        if (failure != null) {
+            transaction.throwable = failure
+            transaction.status = SpanStatus.INTERNAL_ERROR
+        }
+        try { transaction.finish() } catch (_: Exception) {}
     }
 
     /** Sends user-provided feedback (e.g. after a crash) as a Sentry event + user feedback. */

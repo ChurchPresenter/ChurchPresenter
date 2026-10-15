@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.dictionary.data.DictionaryFiles
 import org.churchpresenter.dictionary.data.InterlinearRepository
 import org.churchpresenter.dictionary.data.InterlinearVerse
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 
 enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
 

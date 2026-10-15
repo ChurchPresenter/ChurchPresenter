@@ -193,12 +193,11 @@ jobs:
           # entry for the same OS) instead of a copy per job that pushes the rest out of the 10 GB.
           cache-read-only: true
       - name: Detekt
-        run: >-
-          ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
-          :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
-          :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
-          :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :helper:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt :control-in:detekt :live-output:detekt :statistics:detekt :updater:detekt :telemetry:detekt :app-settings:detekt :server-ui:detekt
+        # Every module that applies detekt (cp.detekt), the app included -- a new one is in by default.
+        run: ./gradlew detekt
+      - name: Module layers
+        # Which modules may depend on which: AGENT.md, "Layers".
+        run: ./gradlew checkModuleLayers
 
   app:
     needs: prepare
@@ -464,7 +463,7 @@ jobs:
                       floors.setdefault(parts[1], {})[parts[2]] = float(parts[3]) * 100
 
           # Each report's own totals. composeApp's report is built over exactly the classes its floor
-          # is (coverableAppClasses() in composeApp/build.gradle.kts), so these are the gated numbers.
+          # is (coverableAppClasses() in build-logic's cp.app-coverage), so these are the gated numbers.
           def totals(root):
               """Covered/total per counter, from the report's own totals."""
               sums = {}

@@ -5,13 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.churchpresenter.announcements.AnnouncementsViewModel
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Presenting
 import java.time.Instant
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import org.churchpresenter.core.models.schedule.formatTimer
 
 private const val TICK_INTERVAL_MS = 1000L
 private const val SECONDS_PER_HOUR = 3600
@@ -174,7 +174,7 @@ internal class LiveAnnouncementsState(private val context: PresenterContext) : L
                 if (remaining <= 0) break
                 val current = whileCurrentTicker(generation) {
                     _timerRemainingSeconds.value = remaining
-                    pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                    pushAnnouncementTextIfLive(formatTimer(remaining))
                 }
                 if (!current) return@launch
                 delay(TICK_INTERVAL_MS)
@@ -206,7 +206,7 @@ internal class LiveAnnouncementsState(private val context: PresenterContext) : L
                 val elapsed = (Instant.now().epochSecond - startEpochSecond).toInt().coerceAtLeast(0)
                 val current = whileCurrentTicker(generation) {
                     _timerRemainingSeconds.value = elapsed
-                    pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(elapsed))
+                    pushAnnouncementTextIfLive(formatTimer(elapsed))
                 }
                 if (!current) return@launch
                 delay(TICK_INTERVAL_MS)
@@ -226,7 +226,7 @@ internal class LiveAnnouncementsState(private val context: PresenterContext) : L
                 val remaining = if (diff > 0) diff else diff + SECONDS_PER_DAY
                 val current = whileCurrentTicker(generation) {
                     _timerRemainingSeconds.value = remaining
-                    pushAnnouncementTextIfLive(AnnouncementsViewModel.formatTimer(remaining))
+                    pushAnnouncementTextIfLive(formatTimer(remaining))
                 }
                 if (!current) return@launch
                 delay(TICK_INTERVAL_MS)
@@ -268,7 +268,7 @@ internal class LiveAnnouncementsState(private val context: PresenterContext) : L
         val liveText = if (timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
             LocalTime.now().format(DateTimeFormatter.ofPattern(liveClockFormat))
         } else {
-            AnnouncementsViewModel.formatTimer(_timerRemainingSeconds.value)
+            formatTimer(_timerRemainingSeconds.value)
         }
         setAnnouncementText(liveText)
     }

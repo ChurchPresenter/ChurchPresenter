@@ -47,7 +47,7 @@ class WebTabScopeTest {
             onUpdateScheduleTitle = { url, title -> titles += url to title },
             state = state,
             isLive = isLive,
-            navController = WebNavController().apply { browser = previewBrowser },
+            navController = WebNavController(previewBrowser),
             previewAspectRatio = 16f / 9f,
             outputPicker = {},
         )

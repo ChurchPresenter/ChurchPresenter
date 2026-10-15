@@ -1,18 +1,11 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    id("cp.jvm-module")
+    id("cp.test-home")
+    id("cp.compose")
+    // Committed, beside the module, as :composeApp's and the other tab modules' are.
+    id("cp.screenshots")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.roborazzi)
     `java-test-fixtures`
-    jacoco
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
 }
 
 // The strings and icons come from :strings and :icons. This module's own resources are the bundled
@@ -29,16 +22,15 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
-    implementation(projects.diagnostics)
     implementation(projects.presenter)
-    implementation(projects.canvas)
+    implementation(projects.canvasEngine)
     implementation(projects.media)
-    implementation(projects.slides)
+    implementation(projects.mediaEngine)
+    implementation(projects.slidesEngine)
     implementation(projects.bible)
     implementation(projects.bibleTab)
     implementation(projects.lottieGenerator)
     implementation(projects.atem)
-    implementation(projects.stt)
     implementation(projects.dictionary)
     implementation(projects.qa)
 
@@ -74,33 +66,3 @@ dependencies {
     testImplementation(libs.roborazzi.composeDesktop)
 }
 
-// The suite gets a home of its own under build/ so a test can never touch the real ~/.churchpresenter.
-tasks.withType<Test>().configureEach {
-    val testHome = layout.buildDirectory.dir("test-home").get().asFile
-    doFirst { testHome.mkdirs() }
-    systemProperty("user.home", testHome.absolutePath)
-    systemProperty("java.awt.headless", "true")
-}
-
-// Committed, beside the module, as :composeApp's and the other tab modules' are.
-roborazzi {
-    outputDir.set(layout.projectDirectory.dir("screenshots"))
-}
-
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin", "src/testFixtures/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

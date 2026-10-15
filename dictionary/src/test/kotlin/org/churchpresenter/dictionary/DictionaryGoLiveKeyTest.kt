@@ -12,7 +12,7 @@ import androidx.compose.ui.test.requestFocus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.KeyboardShortcutSettings
 

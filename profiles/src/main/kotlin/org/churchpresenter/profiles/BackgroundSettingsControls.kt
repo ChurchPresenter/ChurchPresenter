@@ -76,6 +76,7 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.settings.operatorBibleSettings
 import org.churchpresenter.settings.operatorSongSettings
+import org.churchpresenter.sharedui.composables.HintTooltip
 
 /** The one editor, for whichever surface the rail has open. */
 @Composable

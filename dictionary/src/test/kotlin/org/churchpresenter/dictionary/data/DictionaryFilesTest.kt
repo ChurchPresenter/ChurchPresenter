@@ -7,6 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import java.io.FileNotFoundException
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 
 /**
  * The files this module ships, as the app reads them: every name [DictionaryFiles] defines is on the

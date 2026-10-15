@@ -18,7 +18,7 @@ import io.mockk.mockkConstructor
 import io.mockk.unmockkConstructor
 import org.churchpresenter.dictionary.data.InterlinearRepository
 import org.churchpresenter.dictionary.data.InterlinearVerse
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode

@@ -1,18 +1,12 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
+    id("cp.jvm-module")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
     application
-    jacoco
 }
 
 group = "engine"
 
 extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
-
-kotlin {
-    jvmToolchain(21)
-}
 
 dependencies {
     implementation(libs.ktor.server.core)
@@ -58,21 +52,3 @@ tasks.register<JavaExec>("stickyAudit") {
     mainClass.set("org.churchpresenter.bibleengine.tools.StickyAuditKt")
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    // No baseline: every finding was fixed in code, and the module must stay at zero.
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

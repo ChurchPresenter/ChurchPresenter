@@ -58,5 +58,5 @@ All of these run in CI, gated on this directory or a module it consumes changing
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**.
-- **Coverage**: the root build's default six counters at 85% — **no** `coverageFloors`, **no**
+- **Coverage**: `cp.test`'s default six counters at 85% — **no** `coverageFloors`, **no**
   `coverageExcludes`.

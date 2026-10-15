@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlinx.coroutines.CompletableDeferred
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.WindowLayoutSettings
 import org.churchpresenter.sharedui.testing.showsContainingText

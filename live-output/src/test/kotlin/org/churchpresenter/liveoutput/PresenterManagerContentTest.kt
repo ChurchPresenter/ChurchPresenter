@@ -3,7 +3,7 @@ package org.churchpresenter.liveoutput
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import kotlin.test.Test

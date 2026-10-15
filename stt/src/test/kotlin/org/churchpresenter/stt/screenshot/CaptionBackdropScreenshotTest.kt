@@ -14,7 +14,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.stt.presenter.STTPresenter
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.STTSettings

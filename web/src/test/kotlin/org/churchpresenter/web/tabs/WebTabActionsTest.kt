@@ -35,6 +35,7 @@ class WebTabActionsTest {
         interactive: Boolean = false,
         attachLive: Boolean = true,
         bookmarks: List<WebBookmark> = emptyList(),
+        preview: CefBrowser? = previewBrowser,
     ): WebTabScope {
         output.setLiveBrowser(if (attachLive) liveBrowser else null)
         settings = settings.copy(webBookmarks = bookmarks)
@@ -47,7 +48,7 @@ class WebTabActionsTest {
             onUpdateScheduleTitle = null,
             state = state,
             isLive = isLive,
-            navController = WebNavController().apply { browser = previewBrowser },
+            navController = WebNavController(preview),
             previewAspectRatio = 1f,
             outputPicker = {},
         )
@@ -90,7 +91,7 @@ class WebTabActionsTest {
 
     @Test
     fun `refresh with no preview browser yet does nothing`() {
-        val s = scope().also { it.navController.browser = null }
+        val s = scope(preview = null)
         s.refresh()
     }
 

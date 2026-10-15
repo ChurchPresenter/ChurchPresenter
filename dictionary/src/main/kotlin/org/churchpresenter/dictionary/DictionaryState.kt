@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.dictionary.data.InterlinearRepository
 import org.churchpresenter.dictionary.data.InterlinearVerse
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 
 /**
  * Everything [DictionaryViewModel] and its parts read and write. The parts are separate classes, but

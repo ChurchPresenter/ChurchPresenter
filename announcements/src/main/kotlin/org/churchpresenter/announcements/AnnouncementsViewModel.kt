@@ -222,14 +222,4 @@ class AnnouncementsViewModel private constructor(
         output.setAnnouncementText(state.text)
         output.setPresentingMode(Presenting.ANNOUNCEMENTS)
     }
-
-    companion object {
-        fun formatTimer(remaining: Int): String {
-            val h = remaining / SECONDS_PER_HOUR
-            val m = (remaining % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE
-            val s = remaining % SECONDS_PER_MINUTE
-            return if (h > 0) "%d:%02d:%02d".format(h, m, s)
-            else "%02d:%02d".format(m, s)
-        }
-    }
 }

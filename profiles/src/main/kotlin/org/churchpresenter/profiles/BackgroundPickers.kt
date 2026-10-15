@@ -62,34 +62,6 @@ import java.io.IOException
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 
-/** The panel's own tooltip, for a control that is present but cannot be used. */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun HintTooltip(hint: String, content: @Composable () -> Unit) {
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                Text(
-                    text = hint,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        )
-    ) {
-        content()
-    }
-}
-
 // ── The quick tray's shelf ───────────────────────────────────────────────────────────────────
 
 /**

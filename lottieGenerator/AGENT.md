@@ -27,7 +27,7 @@ The app passes `outputDir` and the canvas size and gets an `onFileSaved` callbac
 `embedded = true` it stays inside the app's window chrome. Keep those entry points public and their
 parameters defaulted — they are the whole API surface.
 
-The app renders the generated files itself (`:lower-third`'s `LowerThirdPresenter`,
+The app renders the generated files itself (`:lower-third-engine`'s `LowerThirdPresenter`,
 `LowerThirdOffscreenRenderer`, `LottieFrameStream`); nothing in this module is involved at
 presentation time.
 
@@ -117,7 +117,7 @@ Both CI steps are gated on this directory or the shared build files changing.
 
 ## Gates
 
-- **Coverage**: the root build's default, 85% on all six counters — no `extra["coverageFloors"]`,
+- **Coverage**: `cp.test`'s default, 85% on all six counters — no `extra["coverageFloors"]`,
   and `extra["coverageExcludes"]` is the default `**/ComposableSingletons*` and nothing more.
   Branches and complexity clear 85% by under a point, so new branches need tests with them.
   The compiled (Path A) styles are covered by `CompiledStyleMatrixTest`, which renders every one

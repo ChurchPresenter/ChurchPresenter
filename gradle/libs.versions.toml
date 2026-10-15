@@ -44,6 +44,9 @@ pitestJunit5 = "1.2.3"
 
 [libraries]
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-core" }
+# The embedded Chromium the Web tab and the output window browse with; its natives are per
+# platform, in :composeApp.
+jcefmaven = { module = "me.friwi:jcefmaven", version = "143.0.14" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 # The JSON reader BibleEngineClient parses the engine's messages with -- and, through the root build's
 # security floor, the one socket.io-client parses with too.

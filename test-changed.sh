@@ -32,8 +32,9 @@ ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 
 MAIN_SRC="composeApp/src/jvmMain/kotlin composeApp/src/commonMain/kotlin"
-# The other modules of this build, by directory — each maps to a `:<dir>:test` task.
-MODULE_DIRS="converter|companion-satellite|theme|core-models|bible-engine|lottieGenerator|crossword|presentation-engine|settings|diagnostics|atem|planning-center|bible-formats|songlibrary|song-chords|bible|ndi|omt|calendar|shared-ui|slides|media|songs|bible-tab|server|schedule|companion-surface|canvas|presenter|profiles|obs|live-show|show-control|control-in|live-output|statistics|updater|server-ui|app-settings|telemetry|helper"
+# The other modules of this build, by directory — each maps to a `:<dir>:test` task. Read from
+# settings.gradle.kts, so a new module is picked up the day it is included.
+MODULE_DIRS="$(sed -nE 's/^include\(":([^"]+)"\)/\1/p' settings.gradle.kts | grep -v '^composeApp$' | paste -sd'|' -)"
 TEST_SRC="composeApp/src/jvmTest/kotlin"
 MAX_PATTERNS=120          # past this a full run is cheaper than a vast --tests filter
 BASE_REF="${BASE_REF:-origin/main}"

@@ -34,6 +34,9 @@ than dropping a file at the root.
 | `companion/` | `CompanionSurfaceSlot.kt`, `CompanionSurfacePlacement.kt` — where a Companion surface is docked |
 | `shortcuts/` | `KeyChord.kt` — a keyboard binding, serialized into settings |
 | `presentation/` | `PresentationLoadError.kt`, `AnimationType.kt` |
+| `stt/` | `STTSegment.kt` — one caption segment and a `HighlightedWord`, as the caption client produces them and an output draws them |
+| `dictionary/` | `StrongsEntry.kt` — one Strong's dictionary entry |
+| `output/` | `BrowserSourceFrame.kt` — one PNG delta of a Browser Source output (its `FrameRect` and the frame size), from the renderer to the server. A plain class: it is passed through, never compared |
 
 The songs package was `core.models.songs` — a second package root left over from the Song Library
 extraction — until it was folded in here. **One package root: `org.churchpresenter.app.churchpresenter`.**
@@ -75,6 +78,10 @@ helpers that used to share its file stayed behind in `:composeApp`.
   thirty.
 - **Anything `:composeApp` calls has to be public here.** `websiteDisplayText` was `internal` and
   is not any more.
+- **A model a composable takes is listed in `config/compose/stability.conf`.** This module is not
+  compiled with the Compose plugin, so the compiler cannot see that a model is immutable, and treats
+  it as unstable unless that file says so. List a class there only when every property is a `val` of
+  an immutable type.
 - **No Compose runtime, no composables, no Compose compiler plugin.** The module depends on
   `compose.ui` for exactly one reason: `KeyChord` is a keyboard binding and speaks Compose's
   `Key`/`KeyEvent`/`KeyShortcut`. If a change here needs the Compose compiler, the type belongs in
@@ -113,7 +120,7 @@ All three run in CI, gated on this directory or the shared build files changing.
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, no baseline, main and test both in scope.
-- **Coverage**: the root build's default six counters at 85%, all of them — **no**
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no**
   `coverageFloors`, **no** `coverageExcludes`. `ModelInvariantsTest` uses `kotlin-reflect` to sweep
   the hierarchy, which is what keeps a newly added model from silently arriving uncovered.
 

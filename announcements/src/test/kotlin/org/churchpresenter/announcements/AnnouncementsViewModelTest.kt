@@ -282,6 +282,25 @@ class AnnouncementsViewModelTest {
 
     // ── Mode switching ──────────────────────────────────────────────────────────
 
+    /**
+     * The live clock shows the time the moment its mode is chosen, rather than on the ticker's
+     * first pass. Until a time is there the read-out is one empty line, and where the time wraps --
+     * the timer column is narrow -- the controls under it then move down a line, from under a
+     * pointer already on its way to them.
+     */
+    @Test
+    fun `switching to the live clock shows the time at once`() {
+        val vm = vm()
+        vm.liveClockFormat = "HH:mm:ss"
+
+        vm.timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY
+
+        assertTrue(
+            Regex("""\d{2}:\d{2}:\d{2}""").matches(vm.liveClockText),
+            "the read-out holds the time as soon as the mode is set, got '${vm.liveClockText}'",
+        )
+    }
+
     @Test
     fun `switching to clock mode computes a positive countdown to the target`() {
         val vm = vm()

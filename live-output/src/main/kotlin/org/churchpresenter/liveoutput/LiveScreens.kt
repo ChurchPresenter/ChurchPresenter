@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.sharedui.models.Presenting

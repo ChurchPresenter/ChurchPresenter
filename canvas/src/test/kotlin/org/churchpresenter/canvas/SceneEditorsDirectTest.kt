@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 class SceneEditorsDirectTest {
 
     @AfterTest
-    fun stopTimers() = TimerStateManager.clear()
+    fun stopTimers() = clearSceneTimers()
 
     private fun ComposeUiTest.clickOutline(index: Int = 0) {
         onAllNodes(hasText("O") and hasClickAction())[index].performScrollTo().performClick()
