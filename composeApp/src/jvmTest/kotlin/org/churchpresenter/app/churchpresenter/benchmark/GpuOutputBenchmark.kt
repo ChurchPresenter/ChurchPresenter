@@ -102,6 +102,8 @@ fun main() {
             LaunchedEffect(Unit) { exitApplication() }
         }
     }
+    // Its pings keep the event queue busy, which would keep AWT -- and this JVM -- from ever ending.
+    UiWatchdog.stop()
 
     photo.parentFile.deleteRecursively()
     val info = RunInfo.current(warmupFrames, frames)

@@ -89,7 +89,7 @@ object BenchmarkScenarios {
             "bible two translations" to { frame ->
                 Fill {
                     BiblePresenter(
-                        selectedVerses = listOf(bibleVerse(frame), bibleVerse(frame, "rst.spb", RUSSIAN)),
+                        selectedVerses = listOf(bibleVerse(frame), bibleVerse(frame, "rst.spb", RUSSIAN[frame % 2])),
                         appSettings = TWO_TRANSLATIONS,
                     )
                 }
@@ -249,7 +249,12 @@ private val BIBLE = listOf(
     "For God so loved the world, that he gave his only begotten Son.",
     "For God sent not his Son into the world to condemn the world.",
 )
-private const val RUSSIAN = "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного."
+
+// The same two verses as BIBLE, so the second translation changes with the first.
+private val RUSSIAN = listOf(
+    "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного.",
+    "Ибо не послал Бог Сына Своего в мир, чтобы судить мир.",
+)
 private val QUESTIONS = listOf(
     "How do I join a small group?",
     "How should a small group decide what to study together, and how often should it change?",
