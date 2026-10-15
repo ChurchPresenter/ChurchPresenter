@@ -428,6 +428,55 @@ class CefManagerTest {
         )
     }
 
+    // ── An install jcefmaven would discard ──────────────────────────────────────
+
+    /** A half-extracted install: a library and a nested folder, one file of it marked read-only. */
+    private fun partialInstall(): File = File(dir, "jcef").apply {
+        File(this, "swiftshader").mkdirs()
+        File(this, "libcef.dll").writeText("x")
+        File(this, "swiftshader/vk_swiftshader.dll").apply { writeText("x") }.setReadOnly()
+    }
+
+    @Test
+    fun `a complete install is left alone`() {
+        val installDir = partialInstall()
+
+        assertNull(clearIncompleteInstall(installDir, isComplete = { true }))
+        assertTrue(File(installDir, "libcef.dll").exists(), "a working install must never be deleted")
+    }
+
+    @Test
+    fun `an incomplete install is cleared, read-only files included`() {
+        val installDir = partialInstall()
+
+        assertNull(clearIncompleteInstall(installDir, isComplete = { false }))
+        assertFalse(installDir.exists(), "jcefmaven can only create the directory if it is gone")
+    }
+
+    @Test
+    fun `a file that will not go blocks the root instead of failing the install`() {
+        val installDir = partialInstall()
+        val held = File(installDir, "libcef.dll")
+
+        val blocker = clearIncompleteInstall(
+            installDir,
+            isComplete = { false },
+            delete = { it != held && it != installDir && it.delete() },
+        )
+
+        assertEquals("install_in_use", blocker)
+    }
+
+    @Test
+    fun `a half-extracted install is not one jcefmaven would use`() {
+        assertFalse(installIsComplete(partialInstall()), "no install.lock, so jcefmaven would start again")
+    }
+
+    @Test
+    fun `no install yet is nothing to clear`() {
+        assertNull(clearIncompleteInstall(File(dir, "jcef"), isComplete = { false }))
+    }
+
     @Test
     fun `a writable directory with room goes ahead`() {
         assertNull(JcefInstall.installBlocker(writable = true, usableSpaceBytes = plentyOfSpace))
