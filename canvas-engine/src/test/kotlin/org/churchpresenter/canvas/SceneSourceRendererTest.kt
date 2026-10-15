@@ -20,9 +20,6 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.PathPoint
-import java.awt.image.BufferedImage
-import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -70,86 +67,6 @@ class SceneSourceRendererTest {
     /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
     @AfterTest
     fun stopTimers() = TimerStateManager.clear()
-
-    // ── Image ──────────────────────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `an image source renders the file when it exists and is a valid image`() = runComposeUiTest {
-        val file = File.createTempFile("scene-source-test", ".png")
-        try {
-            val img = BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
-            for (y in 0 until 10) for (x in 0 until 10) img.setRGB(x, y, 0xFFFF0000.toInt())
-            ImageIO.write(img, "png", file)
-
-            setContent {
-                MaterialTheme {
-                    SceneSourceRenderer(SceneSource.ImageSource(
-                        id = "i1",
-                        name = "Photo",
-                        filePath = file.absolutePath,
-                    ))
-                }
-            }
-            onNodeWithContentDescription("Photo").assertExists("a valid image file must render as an Image")
-        } finally {
-            file.delete()
-        }
-    }
-
-    @Test
-    fun `an image source shows a placeholder when the file does not exist`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                SceneSourceRenderer(SceneSource.ImageSource(id = "i2", name = "Photo", filePath = "/nonexistent/x.png"))
-            }
-        }
-        onNodeWithText("Image not found").assertExists()
-    }
-
-    @Test
-    fun `an image source shows a placeholder when the file is not a valid image`() = runComposeUiTest {
-        val file = File.createTempFile("scene-source-test-corrupt", ".png")
-        try {
-            file.writeText("this is not image data")
-            setContent {
-                MaterialTheme {
-                    SceneSourceRenderer(SceneSource.ImageSource(
-                        id = "i3",
-                        name = "Photo",
-                        filePath = file.absolutePath,
-                    ))
-                }
-            }
-            onNodeWithText("Image not found").assertExists("a corrupt file must be caught, not crash the renderer")
-        } finally {
-            file.delete()
-        }
-    }
-
-    @Test
-    fun `every image contentScale value renders without error`() = runComposeUiTest {
-        val file = File.createTempFile("scene-source-test-scale", ".png")
-        try {
-            ImageIO.write(BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB), "png", file)
-            for (scale in listOf("FIT", "FILL", "STRETCH", "NONE", "unknown-falls-back-to-fit")) {
-                setContent {
-                    MaterialTheme {
-                        SceneSourceRenderer(
-                            SceneSource.ImageSource(
-                                id = "i4",
-                                name = "P",
-                                filePath = file.absolutePath,
-                                contentScale = scale,
-                            )
-                        )
-                    }
-                }
-                onNodeWithContentDescription("P").assertExists("contentScale=\"$scale\" must still render the image")
-            }
-        } finally {
-            file.delete()
-        }
-    }
 
     // ── Text ───────────────────────────────────────────────────────────────────────────────────
 

@@ -3,7 +3,6 @@ package org.churchpresenter.canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import org.churchpresenter.strings.generated.resources.canvas_browser_no_url
-import org.churchpresenter.slides.utils.PictureDecoder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -24,7 +23,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.canvas_image_not_found
 import org.churchpresenter.strings.generated.resources.show_qr_code
 import org.churchpresenter.strings.generated.resources.canvas_video_vlc_load_failed
 import org.churchpresenter.strings.generated.resources.canvas_video_vlc_not_found
@@ -46,15 +44,15 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.produceState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.cos
 import kotlin.math.sin
-import org.jetbrains.skia.Image as SkiaImage
 import java.io.File
 import androidx.compose.foundation.Canvas
 
@@ -119,38 +117,6 @@ fun SceneSourceRenderer(
 }
 
 @Composable
-private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifier) {
-    val bitmap = remember(source.filePath) {
-        // PictureDecoder, not Skia directly — a scene image is a file the operator chose, and the
-        // formats Skia refuses are ordinary camera and print output.
-        val file = File(source.filePath)
-        if (file.exists()) PictureDecoder.decodeOrNull(file)?.toComposeImageBitmap() else null
-    }
-
-    if (bitmap != null) {
-        val scale = when (source.contentScale) {
-            "FILL" -> ContentScale.Crop
-            "STRETCH" -> ContentScale.FillBounds
-            "NONE" -> ContentScale.None
-            else -> ContentScale.Fit
-        }
-        Image(
-            painter = BitmapPainter(bitmap),
-            contentDescription = source.name,
-            contentScale = scale,
-            modifier = modifier.fillMaxSize()
-        )
-    } else {
-        Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(stringResource(Res.string.canvas_image_not_found), color = Color.White, fontSize = 12.sp)
-        }
-    }
-}
-
-@Composable
 private fun ColorSourceContent(source: SceneSource.ColorSource, modifier: Modifier) {
     val color1 = parseHexColor(source.color).copy(alpha = source.sourceOpacity)
     if (source.isGradient) {
@@ -181,7 +147,16 @@ private fun VideoSourceContent(
     modifier: Modifier,
 ) {
     val file = remember(source.filePath) { if (source.filePath.isNotBlank()) File(source.filePath) else null }
-    if (file == null || !file.exists() || !isVlcAvailable) {
+    // Checked off the event thread, once per path; until the answer is in, this is the same
+    // "Loading" box a video shows before its first frame.
+    val fileExists by produceState<Boolean?>(null, file) {
+        value = file?.let { withContext(Dispatchers.IO) { it.exists() } } ?: false
+    }
+    if (file != null && fileExists == null && isVlcAvailable) {
+        VideoLoading(modifier)
+        return
+    }
+    if (file == null || fileExists != true || !isVlcAvailable) {
         Box(
             modifier = modifier.fillMaxSize().background(Color.DarkGray),
             contentAlignment = Alignment.Center
@@ -226,12 +201,17 @@ private fun VideoSourceContent(
             modifier = modifier.fillMaxSize()
         )
     } else {
-        Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(stringResource(Res.string.canvas_video_loading), color = Color.White, fontSize = 14.sp)
-        }
+        VideoLoading(modifier)
+    }
+}
+
+@Composable
+private fun VideoLoading(modifier: Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize().background(Color.DarkGray),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(stringResource(Res.string.canvas_video_loading), color = Color.White, fontSize = 14.sp)
     }
 }
 
@@ -509,11 +489,9 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
                     img.setRGB(x, y, if (matrix.get(x, y)) fgArgb else bgArgb)
                 }
             }
-            SkiaImage.makeFromEncoded(
-                ByteArrayOutputStream().also {
-                    ImageIO.write(img, "PNG", it)
-                }.toByteArray()
-            ).toComposeImageBitmap()
+            // Straight from the pixels: encoding a PNG only to decode it again cost the event thread
+            // an ImageIO write on every change of text or colour.
+            img.toComposeImageBitmap()
         } catch (_: Exception) {
             null
         }
