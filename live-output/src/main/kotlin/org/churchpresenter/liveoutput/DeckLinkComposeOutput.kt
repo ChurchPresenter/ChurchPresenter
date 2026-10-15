@@ -266,8 +266,11 @@ private fun offscreenFrame(
     setLocation(virtualBounds.x - width, virtualBounds.y)
 }
 
-/** The `SkiaLayer` a `ComposePanel` builds itself around, wherever in its tree it ended up. */
-private fun findSkiaLayer(container: Container): SkiaLayer? {
+/**
+ * The `SkiaLayer` a `ComposePanel` or a Compose window builds itself around, wherever in its tree it
+ * ended up -- for reading the pixels it last drew, as DeckLink and the output guard's stills do.
+ */
+fun findSkiaLayer(container: Container): SkiaLayer? {
     for (comp in container.components) {
         if (comp is SkiaLayer) return comp
         if (comp is Container) {

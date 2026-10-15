@@ -5,19 +5,19 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * [PresenterManager.snapshotLiveState] and [PresenterManager.restoreLiveState], which the settings
- * dialog's on-screen preview uses to borrow the outputs and give them back.
+ * [PresenterManager.snapshotLiveState] and [PresenterManager.restoreLiveState], which the output
+ * guard's relaunch uses to put back what was on air -- written to disk as JSON in between.
  *
- * The thing worth pinning is that the *whole* set comes back: the preview overwrites ten pieces of
- * state, and a restore that missed one would leave the operator's screen showing a sample verse's
- * section index against their own song, which is the kind of wrongness nobody notices until it is
- * live.
+ * The thing worth pinning is that the *whole* set comes back: a restore that missed one of the ten
+ * pieces would leave the screen showing one song's section index against another's lines, which is
+ * the kind of wrongness nobody notices until it is live.
  */
 class PresenterManagerLiveStateSnapshotTest {
 
@@ -99,6 +99,20 @@ class PresenterManagerLiveStateSnapshotTest {
 
         assertEquals(Presenting.NONE, pm.slideContent.value, "nothing was live, so nothing comes back live")
         assertEquals(emptyList(), pm.selectedVerses.value)
+    }
+
+    @Test
+    fun `a snapshot comes back whole from its JSON, as a relaunched app reads it`() {
+        val snapshot = liveManager().snapshotLiveState()
+        val json = Json.encodeToString(PresenterManager.LiveStateSnapshot.serializer(), snapshot)
+
+        val read = Json.decodeFromString(PresenterManager.LiveStateSnapshot.serializer(), json)
+        val pm = PresenterManager()
+        pm.restoreLiveState(read)
+
+        assertEquals(snapshot, read)
+        assertEquals(Presenting.LYRICS, pm.slideContent.value)
+        assertEquals("their first line", pm.lyricSection.value.lines.single())
     }
 
     // ── The draft-settings channel ──────────────────────────────────────────────

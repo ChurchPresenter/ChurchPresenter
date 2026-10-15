@@ -87,6 +87,13 @@ object LiveMapReporter {
         val songs: Int = 0,
         /** How long the previous run lasted, in minutes; 0 when unknown. */
         val sessionMinutes: Int = 0,
+        /**
+         * How long the previous run had an output live, in minutes, and how many UI stalls past half
+         * a second began while it was. A run with live minutes is a service; the share of those with
+         * a stall decides whether outputs need a process of their own.
+         */
+        val liveMinutes: Int = 0,
+        val liveStalls: Int = 0,
     )
 
     /**
@@ -134,6 +141,8 @@ object LiveMapReporter {
         screenCount: Int,
         songCounts: Pair<Int, Int> = 0 to 0,
         sessionMinutes: Int = 0,
+        liveMinutes: Int = 0,
+        liveStalls: Int = 0,
     ): SetupFacts {
         // Outputs with no display chosen, or on a monitor marked "Don't use", are configuration the
         // operator has switched off. Reading
@@ -149,6 +158,8 @@ object LiveMapReporter {
             songbooks = songCounts.first,
             songs = songCounts.second,
             sessionMinutes = sessionMinutes,
+            liveMinutes = liveMinutes,
+            liveStalls = liveStalls,
         )
     }
 
@@ -296,6 +307,8 @@ private fun StringBuilder.appendSetupFacts(setup: LiveMapReporter.SetupFacts) {
     if (setup.songbooks > 0) append("&songbooks=${setup.songbooks}")
     if (setup.songs > 0) append("&songs=${setup.songs}")
     if (setup.sessionMinutes > 0) append("&sessionMinutes=${setup.sessionMinutes}")
+    if (setup.liveMinutes > 0) append("&liveMinutes=${setup.liveMinutes}")
+    if (setup.liveStalls > 0) append("&liveStalls=${setup.liveStalls}")
 }
 
 // Everything above describes the session that is starting. These are things that already

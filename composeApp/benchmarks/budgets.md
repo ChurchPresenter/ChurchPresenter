@@ -25,6 +25,13 @@ Re-measure on the reference machine before changing a number.
 
 These are `SoakLimits`; the soak enforces them on every run, weekly on CI.
 
+## The UI watchdog (`gpuBenchmark` with and without `-PgpuBenchmarkWatchdog`)
+
+Measured 2026-10-15 with the watchdog pinging the event thread at its live budget, 100 ms: across
+the 13 on-screen scenarios at 1080p the typical frame stays 16.66–16.67 ms, p99 moves by at most
+0.4 ms either way, and dropped frames are the same (one, the lottie lower third, in both runs). No
+budget: it costs nothing measurable. Re-measure when the watchdog changes.
+
 ## Frames
 
 - Off-screen (NDI, OMT, Browser Source): `benchmarks/results.md`, one frame at p99 — 16.7 ms at

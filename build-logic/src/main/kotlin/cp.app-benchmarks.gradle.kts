@@ -95,6 +95,7 @@ tasks.register<Test>("renderBenchmark") {
 // How each content type runs on an on-screen output window, drawn on the GPU -- see GpuOutputBenchmark.
 //   ./gradlew :composeApp:gpuBenchmark                      # report to build/reports/gpu-benchmark/
 //   ./gradlew :composeApp:gpuBenchmark -PrecordGpuBaseline  # also overwrite composeApp/benchmarks/gpu/
+//   ./gradlew :composeApp:gpuBenchmark -PgpuBenchmarkWatchdog  # with the UI watchdog pinging at its live budget
 // Needs a display, so it runs on the reference Mac, never on CI. It opens one window per content type
 // and size over the main screen. Its `main` lives with the render benchmark in jvmTest, so this runs
 // jvmTest's classpath -- not headless, and with its own home so nothing reads the operator's settings.
@@ -113,6 +114,7 @@ tasks.register<JavaExec>("gpuBenchmark") {
     systemProperty("gpuBenchmark.baselineDir", layout.projectDirectory.dir("benchmarks/gpu").asFile.absolutePath)
     systemProperty("gpuBenchmark.record", project.hasProperty("recordGpuBaseline").toString())
     providers.gradleProperty("gpuBenchmarkFrames").orNull?.let { systemProperty("gpuBenchmark.frames", it) }
+    systemProperty("gpuBenchmark.watchdog", project.hasProperty("gpuBenchmarkWatchdog").toString())
     doFirst { home.mkdirs() }
     doLast {
         val report = reportDir.resolve("results.md")

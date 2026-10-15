@@ -233,6 +233,51 @@ process until a stall is seen in the field that they do not explain. If it is bu
 that only holds the last frame of a window and keeps the projector black-free if the UI dies --
 before moving any composition into it.
 
+### Release builds report their stalls
+
+A stall "seen in the field" needs a watchdog in the field, so `UiWatchdog` now runs in every build,
+started in `main.kt` once `CrashReporter` is set up. `UiStallReporter` decides what each stall is:
+
+- **The budget follows the outputs**: 100 ms (six frames at 60 Hz) while any output shows content,
+  500 ms otherwise in a release build, 250 ms in a debug build. A ping keeps the budget it was posted
+  with.
+- **Startup is skipped**: nothing counts until 30 s after the main window's first frame. A first
+  launch stalls for a second or more while it loads.
+- **A release build sends each stall to Sentry** as a warning titled "UI thread stalled", carrying
+  the event thread's stack from while it was stuck, `stall.live` and `stall.length` tags, and the
+  exact length as an extra. It groups on the first frame of the app's own code, so one cause is one
+  issue. At most ten a run; a debug build only logs them, so a breakpoint never reaches Sentry.
+- **Telemetry counts the services.** Each run records how long an output was live and how many
+  stalls past 500 ms began while it was; the next launch's ping sends them as `liveMinutes` and
+  `liveStalls`. A run with live minutes is a service.
+
+**The gate.** Once a release with this has been out four to six weeks: if more than 1% of services
+have a live stall past 500 ms, the output process is scheduled. The hot stacks are fixed either way.
+
+### The output guard: a crash shows the last slide, not the desktop
+
+A hang freezes the last frame, which an audience may not notice; a crash takes the output windows
+away and puts the desktop on the projector. The output guard (`:output-guard`, dev mode only) is the
+narrowest process that helps: it moves no composition out of the app.
+
+- **It is the app started again** with `--output-guard <folder>`; `main` runs the guard and nothing
+  else. It opens one borderless window per output, at normal level under the output's always-on-top
+  window, showing the output's last still — black before the first.
+- **The app keeps it told** through a memory-mapped file: its pid, a heartbeat from a thread of its
+  own, a tick from the event thread, whether anything is live, and where each output is. A moment
+  after anything on air changes, it saves a still of each output — read from the window's Skia
+  surface, off the event thread — and the live Bible and song state.
+- **When the app dies** the guard raises its windows over everything on those screens, starts the
+  app again with `--relaunched-by-output-guard`, and leaves once the new app's outputs are up. The
+  new app puts the live verse or song slide back on air; other content comes back empty.
+- **On a hang** it covers the outputs with their stills only when *Cover a frozen app* is on, after
+  3 s without a tick while live, and drops back when the app answers.
+- **A quit on purpose** — the switch off, the app closing, a shutdown hook — tells it to leave.
+
+Checked on macOS (2026-10-15): a guard window stays under a live output even when pushed to the
+front at its own level, and covers the screen, over other apps' windows, the moment the app is
+killed. Windows and Linux are not yet checked; Wayland gives no window order between clients.
+
 ## Migration
 
 Each step shippable on its own, each keeping every existing test green:

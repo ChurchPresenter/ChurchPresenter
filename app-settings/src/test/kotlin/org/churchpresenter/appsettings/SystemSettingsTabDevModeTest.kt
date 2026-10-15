@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 import kotlin.test.Test
 import org.churchpresenter.profiles.LocalSettingsDevMode
 
-/** The System tab's Dev mode only card: preview mode and the test event, and only in dev mode. */
+/** The System tab's Dev mode only card: preview mode, the output guard and the test event, and only in dev mode. */
 @OptIn(ExperimentalTestApi::class)
 class SystemSettingsTabDevModeTest {
 
@@ -78,6 +78,46 @@ class SystemSettingsTabDevModeTest {
             onAllNodesWithText("Send test event").assertCountEquals(0)
             onAllNodesWithText("Preview mode").assertCountEquals(0)
         }
+
+    @Test
+    fun `the output guard switches on, and only then offers to cover a frozen app`() = runComposeUiTest {
+        var settings by mutableStateOf(analytics(false))
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalSettingsDevMode provides true) {
+                    SystemSettingsTab(settings = settings, onSettingsChange = { settings = it(settings) })
+                }
+            }
+        }
+        onAllNodesWithText("Cover a frozen app").assertCountEquals(0)
+
+        onNodeWithText("Output guard").performScrollTo().performClick()
+        waitForIdle()
+        assertTrue(settings.projectionSettings.outputGuardEnabled)
+        assertFalse(settings.projectionSettings.outputGuardOnHang)
+
+        onNodeWithText("Cover a frozen app").performScrollTo().performClick()
+        waitForIdle()
+        assertTrue(settings.projectionSettings.outputGuardOnHang)
+
+        onNodeWithText("Output guard").performScrollTo().performClick()
+        waitForIdle()
+        assertFalse(settings.projectionSettings.outputGuardEnabled)
+        onAllNodesWithText("Cover a frozen app").assertCountEquals(0)
+    }
+
+    @Test
+    fun `outside dev mode there is no output guard switch`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalSettingsDevMode provides false) {
+                    SystemSettingsTab(settings = analytics(false))
+                }
+            }
+        }
+
+        onAllNodesWithText("Output guard").assertCountEquals(0)
+    }
 
     @Test
     fun `the Helper card is there in dev mode or once Wick was started, and not before`() = runComposeUiTest {

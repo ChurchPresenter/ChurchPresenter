@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.Color
@@ -52,6 +53,7 @@ fun DropdownSelector(
     modifier: Modifier = Modifier,
     compact: Boolean = false,
     itemTrailingContent: (@Composable RowScope.(key: String, index: Int) -> Unit)? = null,
+    enabled: Boolean = true,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val displayText = options.firstOrNull { it.first == value }?.second ?: value
@@ -59,9 +61,14 @@ fun DropdownSelector(
 
     Box(
         modifier = sizeModifier
+            .then(if (enabled) Modifier else Modifier.alpha(DISABLED_ALPHA))
             .keyboardFocusRing(AppShape(8.dp))
             .dropdownField(AppShape(8.dp), open = expanded)
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+            .clickable(
+                enabled = enabled,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) {
                 expanded = true
             }
             .padding(
@@ -151,6 +158,9 @@ fun DropdownSelector(
         }
     }
 }
+
+/** Material's alpha for a control that cannot be used yet. */
+private const val DISABLED_ALPHA = 0.38f
 
 /** Material's menu item height; the list is sized from it so short menus stay short. */
 private val MENU_ITEM_HEIGHT = 48.dp

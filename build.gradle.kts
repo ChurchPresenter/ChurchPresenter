@@ -54,11 +54,14 @@ tasks.register("coverageFloors") {
 // Every module's project dependencies, test fixtures included, one module per line:
 // `MODULE <path> <dependency path>...`. CI's change detection (.github/ci/affected_modules.py) reads
 // this to decide which suites a change can affect, so the graph is the build's own, not a copy.
+// detekt's plugins are left out: :detekt-rules lints every module, but no module's code or tests
+// run it, so a change to the rules affects no suite but its own.
 tasks.register("moduleGraph") {
     group = "help"
     description = "Prints each module's project dependencies, for CI's change detection."
     val graph = subprojects.sortedBy { it.path }.map { project ->
         val dependencies = project.configurations
+            .filter { it.name != "detektPlugins" }
             .flatMap { configuration -> configuration.dependencies.withType(ProjectDependency::class.java) }
             .map { it.path }
             .filter { it != project.path }
@@ -66,6 +69,30 @@ tasks.register("moduleGraph") {
         "MODULE ${project.path} ${dependencies.joinToString(" ")}".trimEnd()
     }
     doLast { graph.forEach(::println) }
+}
+
+// ── Live-safe allowlist ───────────────────────────────────────────────────────
+// config/architecture/live-safe-allowed.txt names the blocking calls :detekt-rules lets stay on the
+// event thread. detekt reports a line whose call is gone from its file, but it never visits a file
+// that is gone, so this fails on a line naming one. The list only shrinks (AGENT.md, "Live-safe
+// output paths").
+tasks.register("checkLiveSafeAllowlist") {
+    group = "verification"
+    description = "Fails on a live-safe allowlist line that names a file that no longer exists."
+    val allowlist = layout.projectDirectory.file("config/architecture/live-safe-allowed.txt").asFile
+    val root = layout.projectDirectory.asFile
+    inputs.file(allowlist)
+    doLast {
+        val lines = allowlist.readLines().map { it.substringBefore('#').trim() }.filter { it.isNotEmpty() }
+        val gone = lines.filterNot { root.resolve(it.substringBefore(':').trim()).isFile }
+        if (gone.isNotEmpty()) {
+            throw GradleException(
+                "Live-safe allowlist lines naming a file that is gone -- delete them:\n" +
+                    gone.joinToString("\n") { "  $it" }
+            )
+        }
+        logger.lifecycle("Live-safe allowlist: ${lines.size} lines, every file present.")
+    }
 }
 
 // ── Layers ────────────────────────────────────────────────────────────────────

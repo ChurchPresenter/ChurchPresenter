@@ -703,6 +703,8 @@ internal val awtOutputWindow: OutputWindowHost = { spec, content ->
         alwaysOnTop = spec.alwaysOnTop,
     ) {
         spec.hideCursor?.let { HideOutputWindowCursor(window, it) }
+        // The output guard keeps this window's last still under it, while the guard is on.
+        LocalOutputGuard.current?.let { guard -> GuardedOutputWindow(guard, window) }
         content()
     }
 }

@@ -192,12 +192,12 @@ private fun rememberDefaultBackgroundBitmap(
             // chose, so it can be a CMYK JPEG, a TIFF, or a HEIC named .jpg — all of which Skia
             // alone refuses, leaving a black screen on the output with nothing said.
             val file = File(imagePath)
-            if (file.exists()) {
-                withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
+                if (file.exists()) {
                     PictureDecoder.decodeScaledOrNull(file, maxWidth, maxHeight)?.toComposeImageBitmap()
+                } else {
+                    null
                 }
-            } else {
-                null
             }
         } else {
             null

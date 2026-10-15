@@ -48,4 +48,17 @@ object DevFlags {
             ?: System.getProperty("churchpresenter.forceAvcodec")?.toBoolean()
             ?: true
     }
+
+    /**
+     * Whether a debug build logs every blocking call its event thread makes (EventThreadIoMonitor,
+     * AGENT.md "Live-safe output paths"). Off unless asked for -- env var
+     * CHURCHPRESENTER_WATCH_EVENT_THREAD_IO=true, or -Dchurchpresenter.watchEventThreadIo=true --
+     * because the JFR recording behind it costs a launch about 150 ms and 140 MB of memory. The
+     * soak test runs it always.
+     */
+    val watchEventThreadIo: Boolean by lazy {
+        System.getenv("CHURCHPRESENTER_WATCH_EVENT_THREAD_IO")?.toBoolean()
+            ?: System.getProperty("churchpresenter.watchEventThreadIo")?.toBoolean()
+            ?: false
+    }
 }

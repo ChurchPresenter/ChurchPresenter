@@ -103,29 +103,38 @@ class UsageEventsTest {
     }
 
     @Test
-    fun `a session length is kept until it is reported, then cleared`() {
-        assertEquals(0, store.lastSessionMinutes(), "an install with no previous run reports nothing")
+    fun `a run's record is kept until it is reported, then cleared`() {
+        assertTrue(store.lastRun().isEmpty, "an install with no previous run reports nothing")
 
-        store.recordSessionMinutes(95)
-        assertEquals(95, UsageEventStore(::file).lastSessionMinutes(), "it must survive to the next launch")
+        store.recordRun(RunRecord(sessionMinutes = 95, liveMinutes = 74, liveStalls = 2))
+        assertEquals(RunRecord(95, 74, 2), UsageEventStore(::file).lastRun(), "it must survive to the next launch")
 
-        store.clearSessionMinutes()
-        assertEquals(0, store.lastSessionMinutes(), "reported once, not on every launch after it")
+        store.clearLastRun()
+        assertTrue(store.lastRun().isEmpty, "reported once, not on every launch after it")
     }
 
     @Test
-    fun `a run shorter than a minute is not recorded as a session`() {
-        store.recordSessionMinutes(0)
-        assertEquals(0, store.lastSessionMinutes())
+    fun `a run with nothing to report leaves the last run's record waiting`() {
+        store.recordRun(RunRecord(sessionMinutes = 30, liveMinutes = 20, liveStalls = 1))
+        store.recordRun(RunRecord())
+
+        assertEquals(RunRecord(30, 20, 1), store.lastRun())
     }
 
     @Test
-    fun `session length and event counts do not overwrite each other`() {
+    fun `a run counts as something to report for any one of its numbers`() {
+        assertFalse(RunRecord(sessionMinutes = 1).isEmpty)
+        assertFalse(RunRecord(liveMinutes = 1).isEmpty)
+        assertFalse(RunRecord(liveStalls = 1).isEmpty)
+    }
+
+    @Test
+    fun `a run's record and event counts do not overwrite each other`() {
         store.record(event)
-        store.recordSessionMinutes(42)
+        store.recordRun(RunRecord(sessionMinutes = 42))
 
         val reopened = UsageEventStore(::file)
-        assertEquals(42, reopened.lastSessionMinutes())
+        assertEquals(42, reopened.lastRun().sessionMinutes)
         assertEquals(mapOf(event to 1), reopened.unreported())
     }
 

@@ -2,8 +2,10 @@ name: Render benchmark
 
 # Holds main's off-screen render times, once a week, against a baseline recorded on this same kind
 # of runner -- see RenderBenchmark and compareWithBaseline. A scheduled run that finds a regression
-# opens an issue (or comments on the open one), so a slowdown is reported without a run on every
-# pull request; dispatch it by hand to check a branch. The hosted runners are ~10x slower than
+# opens an issue (or comments on the open one). A pull request runs it too when it changes what an
+# output draws -- the output modules, or the benchmark itself -- so a slowdown there is caught
+# before it merges (AGENT.md, "Live-safe output paths"); other pull requests skip it, and a branch
+# can be checked by dispatching it by hand. The hosted runners are ~10x slower than
 # the reference Mac behind composeApp/benchmarks/results.json, so the absolute frame budget cannot
 # be checked here; what can is "this got meaningfully slower than it was", against
 # composeApp/benchmarks/ci/results.json. A row fails past baseline x 1.5 + 1 ms on its typical
@@ -18,6 +20,19 @@ name: Render benchmark
 # while no baseline is committed; either uploads `ci-render-baseline`, which a maintainer downloads
 # and commits as the two files in composeApp/benchmarks/ci/.
 on:
+  pull_request:
+    paths:
+      - 'live-output/**'
+      - 'presenter/**'
+      - 'slides-engine/**'
+      - 'media-engine/**'
+      - 'canvas-engine/**'
+      - 'lower-third-engine/**'
+      - 'web-engine/**'
+      - 'stt-engine/**'
+      - 'composeApp/src/jvmTest/kotlin/org/churchpresenter/app/churchpresenter/benchmark/**'
+      - 'composeApp/benchmarks/ci/**'
+      - '.github/workflows/render-benchmark.yml'
   schedule:
     # Mondays 06:00 UTC, on main (a schedule always runs the default branch).
     - cron: '0 6 * * 1'

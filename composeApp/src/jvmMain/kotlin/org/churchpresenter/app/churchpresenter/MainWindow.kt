@@ -245,6 +245,8 @@ private fun AppRootState.MainWindow(
             // The first frame the operator sees; the startup benchmark's end point (StartupProbe).
             withFrameNanos { }
             StartupProbe.firstFrame(exit = { exitProcess(0) })
+            // UI stalls count from shortly after this: a first launch stalls while it loads.
+            uiStallReporter.firstFrame()
         }
         MacMenuBarActivationFix()
         LanguageProvider(language = currentLanguage) {

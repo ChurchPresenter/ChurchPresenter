@@ -102,9 +102,12 @@ class SlidesFileChooserTest {
             onNodeWithText(PictureLabel.SELECT_FOLDER).performClick()
             awaitAnswered(chooser)
             waitUntil("the chosen folder's pictures", ANSWER_TIMEOUT_MS) { vm.images.size == 3 }
-
-            assertEquals(chosen.absolutePath, reports.settingsAfterChange?.pictureSettings?.storageDirectory)
-            assertTrue(chosen.absolutePath in RecentPictureFolders.folders)
+            // Saved and remembered after the pictures are asked for, a step later on the tab's own
+            // dispatcher: waited for too, or a fast load reads the settings before they are written.
+            waitUntil("the folder saved and remembered", ANSWER_TIMEOUT_MS) {
+                reports.settingsAfterChange?.pictureSettings?.storageDirectory == chosen.absolutePath &&
+                    chosen.absolutePath in RecentPictureFolders.folders
+            }
         }
     }
 
@@ -131,9 +134,10 @@ class SlidesFileChooserTest {
             onNodeWithText(SELECT_FILE).performClick()
             awaitAnswered(chooser)
             waitUntil("the chosen deck to be added", ANSWER_TIMEOUT_MS) { vm.presentations.isNotEmpty() }
+            // Remembered just after it is added, so waited for rather than read at once.
+            waitUntil("the deck remembered", ANSWER_TIMEOUT_MS) { deck.absolutePath in RecentPresentationFiles.files }
 
             assertEquals(listOf(File(deck.absolutePath)), vm.presentations)
-            assertTrue(deck.absolutePath in RecentPresentationFiles.files)
         }
     }
 

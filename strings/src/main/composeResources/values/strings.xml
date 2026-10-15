@@ -1821,6 +1821,10 @@
     <string name="overlay_end_clears_display_hint">When a lower third or announcement finishes on its own, clear everything. Turn off to take down only the lower third or announcement; outputs that show it over the content keep the song, verse or slide under it</string>
     <string name="preview_mode">Preview mode</string>
     <string name="preview_mode_hint">Going live with a new passage, song, picture, presentation, lower third or announcement cues it on Preview first; Take puts it on air. Stepping through what is already on air still goes straight out</string>
+    <string name="output_guard">Output guard</string>
+    <string name="output_guard_hint">If the app quits unexpectedly, each output keeps its last picture on screen instead of showing the desktop, and the app starts again</string>
+    <string name="output_guard_on_hang">Cover a frozen app</string>
+    <string name="output_guard_on_hang_hint">While something is live and the app has stopped responding for three seconds, each output shows its last picture until the app answers again</string>
     <string name="preview_bus_label">Preview</string>
     <string name="preview_take">Take</string>
     <string name="shortcut_description_take">Take: put what is on Preview on air</string>
