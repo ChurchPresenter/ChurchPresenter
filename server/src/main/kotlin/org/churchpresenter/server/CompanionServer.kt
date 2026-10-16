@@ -95,6 +95,9 @@ class CompanionServer(
 ) {
     internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /** One thread's worth of [Dispatchers.Default]: [publishSongs] and [publishBible] run on it in turn. */
+    internal val publishing = Dispatchers.Default.limitedParallelism(1)
+
     private var _qaEventJob: Job? = null
     var qaManager: QAManager? = null
         set(value) {
