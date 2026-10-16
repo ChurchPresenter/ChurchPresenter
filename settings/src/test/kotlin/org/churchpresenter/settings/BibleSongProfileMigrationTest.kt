@@ -182,4 +182,19 @@ class BibleSongProfileMigrationTest {
         val moved = settings.copy(projectionSettings = unassigned)
         assertEquals(40, moved.operatorSongSettings().marginTop, "still a, the first profile")
     }
+
+    @Test
+    fun `a change elsewhere in the document keeps the answer, and one to the section redoes it`() {
+        val settings = decode(v21)
+        val songs = settings.operatorSongSettings()
+        val bible = settings.operatorBibleSettings()
+
+        val elsewhere = settings.copy(serverSettings = ServerSettings(port = 8081))
+        assertSame(songs, elsewhere.operatorSongSettings())
+        assertSame(bible, elsewhere.operatorBibleSettings())
+
+        val newFolder = settings.copy(songSettings = settings.songSettings.copy(storageDirectory = "/elsewhere"))
+        assertEquals("/elsewhere", newFolder.operatorSongSettings().storageDirectory)
+        assertEquals(40, newFolder.operatorSongSettings().marginTop, "and still the profile's look")
+    }
 }

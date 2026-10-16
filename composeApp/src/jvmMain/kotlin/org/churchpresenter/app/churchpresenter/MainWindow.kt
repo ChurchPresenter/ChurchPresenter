@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.sharedui.guide.LocalGuideSession
 import org.churchpresenter.sharedui.guide.LocalWickCorner
+import org.churchpresenter.sharedui.guide.LocalWickPlace
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.unit.DpSize
@@ -261,7 +262,10 @@ private fun AppRootState.MainWindow(
                     },
                     LocalGuideSession provides helperState.session,
                     // Settings and the other windows Wick's tours reach carry the lamp too.
-                    LocalWickCorner provides remember { { placed: Modifier -> WickLamp(placed) } },
+                    // Each window says where it is (LocalWickPlace), which picks what its lamp offers.
+                    LocalWickCorner provides remember {
+                        { placed: Modifier -> WickLamp(placed, LocalWickPlace.current) }
+                    },
                     // A window in a module below the helper (the Bible catalogue) wraps itself in this.
                     LocalSpotlightHost provides remember {
                         { modifier: Modifier, content: @Composable BoxScope.() -> Unit ->

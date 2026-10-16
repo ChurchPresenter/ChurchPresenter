@@ -2,10 +2,34 @@ package org.churchpresenter.appsettings
 
 import org.churchpresenter.appsettings.AutoStartManager.Platform
 import com.sun.jna.platform.win32.Advapi32Util
+import com.sun.jna.platform.win32.Win32Exception
+import com.sun.jna.platform.win32.WinError
 import com.sun.jna.platform.win32.WinReg
 import java.io.File
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.updater.StorePackage
+
+/** How a change to Launch at login ended. */
+enum class AutoStartChange {
+    /** The OS now has the registration that was asked for. */
+    DONE,
+
+    /** This copy cannot register itself -- a run from Gradle, or a Store install -- so nothing was tried. */
+    UNSUPPORTED,
+
+    /** Windows refused the write: a policy or security software on the machine, not the app. Not reported. */
+    REFUSED,
+
+    /** It failed some other way, and was reported. */
+    FAILED,
+}
+
+/** What the Launch at login switch asks of the OS: [AutoStartManager] in the app, a stand-in in a test. */
+interface AutoStartSwitch {
+    fun isEnabled(): Boolean
+    fun setEnabled(enabled: Boolean): AutoStartChange
+}
 
 /**
  * Registers/unregisters the app to launch automatically when the user logs in.
@@ -19,7 +43,7 @@ import org.churchpresenter.updater.StorePackage
  * tested directly; the only genuinely platform-bound step is the Windows registry, reached through
  * [WindowsRunKey] so tests can drive its control flow with an in-memory stand-in off Windows.
  */
-object AutoStartManager {
+object AutoStartManager : AutoStartSwitch {
 
     private const val RUN_KEY = "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
     internal const val APP_NAME = "ChurchPresenter"
@@ -86,7 +110,7 @@ object AutoStartManager {
             Advapi32Util.registryDeleteValue(WinReg.HKEY_CURRENT_USER, RUN_KEY, APP_NAME)
     }
 
-    fun isEnabled(): Boolean = isEnabledFor(currentPlatform)
+    override fun isEnabled(): Boolean = isEnabledFor(currentPlatform)
 
     // Throwable, not Exception: a missing/broken JNA native dispatch library (jnidispatch.dll
     // failing to extract, or a prior failed Native.<clinit> leaving NoClassDefFoundError on every
@@ -100,8 +124,8 @@ object AutoStartManager {
         false
     }
 
-    fun setEnabled(enabled: Boolean): Boolean {
-        val exe = exePath ?: return false
+    override fun setEnabled(enabled: Boolean): AutoStartChange {
+        val exe = exePath ?: return AutoStartChange.UNSUPPORTED
         return setEnabledFor(exe, currentPlatform, enabled)
     }
 
@@ -110,13 +134,25 @@ object AutoStartManager {
         platform: Platform,
         enabled: Boolean,
         runKey: WindowsRunKey = realRunKey,
-    ): Boolean = try {
+    ): AutoStartChange = try {
         if (enabled) AutostartEntries.register(exe, platform, runKey) else AutostartEntries.unregister(platform, runKey)
-        true
+        AutoStartChange.DONE
     } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
-        CrashReporter.reportException(e, context = "AutoStartManager.setEnabled($enabled)")
-        false
+        if (isRefusal(e)) {
+            Log.warn("AutoStart", "Windows refused to change the Run key: ${e.message}")
+            AutoStartChange.REFUSED
+        } else {
+            CrashReporter.reportException(e, context = "AutoStartManager.setEnabled($enabled)")
+            AutoStartChange.FAILED
+        }
     }
+
+    /**
+     * Whether [e] is Windows saying no -- access denied on the Run key -- which the machine decides,
+     * not the app. Read from the error code, so it holds in every language Windows speaks.
+     */
+    internal fun isRefusal(e: Throwable): Boolean =
+        e is Win32Exception && e.errorCode == WinError.ERROR_ACCESS_DENIED
 
     /**
      * Repairs a stale registration after the install location changes (update,
@@ -136,7 +172,8 @@ object AutoStartManager {
             if (registered == AutostartEntries.registrationContent(exe, platform)) return
             AutostartEntries.register(exe, platform, runKey)
         } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
-            CrashReporter.reportException(e, context = "AutoStartManager.syncRegistration")
+            if (isRefusal(e)) Log.warn("AutoStart", "Windows refused to repair the Run key: ${e.message}")
+            else CrashReporter.reportException(e, context = "AutoStartManager.syncRegistration")
         }
     }
 

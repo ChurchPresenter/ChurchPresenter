@@ -11,6 +11,8 @@ import org.churchpresenter.helper.display.DisplayStep
 import org.churchpresenter.helper.display.DisplaySetupFlow
 import org.churchpresenter.helper.intent.Resolution
 import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.SettingsPage
+import org.churchpresenter.sharedui.guide.WickPlace
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.strings.generated.resources.Res
@@ -216,5 +218,24 @@ class HelperStateTest {
         state.sharingChat = true
         state.clear()
         assertEquals(false, state.sharingChat)
+    }
+
+    @Test
+    fun `a tour started in Settings skips pressing Settings, and only there`() {
+        val pressSettings = GuideStep(GuideTargets.SETTINGS_BUTTON, HelperText.Plain("settings"))
+        val serverPage = GuideStep(
+            GuideTargets.settingsPage(SettingsPage.SERVER),
+            HelperText.Plain("server"),
+            before = HelperAction.OpenSettings(SettingsPage.SERVER),
+        )
+        val state = HelperState()
+        state.run(HelperAction.Highlight(GuideTour(listOf(pressSettings, serverPage))), done)
+        assertEquals(GuideTargets.SETTINGS_BUTTON, state.session.activeTarget)
+        state.place = WickPlace.Settings(SettingsPage.PROFILES)
+        state.run(HelperAction.Highlight(GuideTour(listOf(pressSettings, serverPage))), done)
+        assertEquals(GuideTargets.settingsPage(SettingsPage.SERVER), state.session.activeTarget)
+        // A tour that is nothing but that step is still shown, not dropped.
+        state.run(HelperAction.Highlight(GuideTour(listOf(pressSettings))), done)
+        assertEquals(GuideTargets.SETTINGS_BUTTON, state.session.activeTarget)
     }
 }

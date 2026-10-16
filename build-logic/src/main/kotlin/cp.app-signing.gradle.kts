@@ -3,6 +3,8 @@ import org.churchpresenter.buildlogic.gitCommitCount
 import org.churchpresenter.buildlogic.isConfigured
 import org.churchpresenter.buildlogic.signingProps
 import org.churchpresenter.buildlogic.versionYear
+import org.churchpresenter.buildlogic.webEngineRecommends
+import org.churchpresenter.buildlogic.withPreT64Alternatives
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -189,6 +191,45 @@ tasks.register("packageMsix") {
         val result = process.exitValue()
         if (result != 0) error("makeappx failed with exit code $result")
         logger.lifecycle("MSIX packaged: ${msix.name}")
+    }
+}
+
+// ── Linux .deb dependencies ───────────────────────────────────────────────────
+// Every package the .deb needs that Debian renamed for 64-bit time_t also accepts its old name, so
+// the .deb can install on releases from before the rename, Ubuntu 22.04 among them (issue #875) --
+// see withPreT64Alternatives. jpackage has no option to say this, so the control file is rewritten
+// after packaging and before signing. The same rewrite adds a Recommends: of the web engine's system
+// libraries, which JCEF, downloaded on first use, needs and jpackage cannot see (webEngineRecommends).
+fun rewriteDebDepends(deb: File) {
+    val root = java.nio.file.Files.createTempDirectory("deb-depends").toFile()
+    try {
+        runCommand("dpkg-deb", "-R", deb.absolutePath, root.absolutePath)
+        val control = File(root, "DEBIAN/control")
+        val lines = control.readLines()
+        val fixed = lines.filterNot { it.startsWith("Recommends:") }.flatMap { line ->
+            if (line.startsWith("Depends:")) {
+                listOf(
+                    "Depends: " + withPreT64Alternatives(line.removePrefix("Depends:")),
+                    "Recommends: $webEngineRecommends",
+                )
+            } else listOf(line)
+        }
+        if (fixed == lines) return
+        control.writeText(fixed.joinToString("\n", postfix = "\n"))
+        // Root-owned, as jpackage's own build under fakeroot left every file.
+        runCommand("dpkg-deb", "--root-owner-group", "-b", root.absolutePath, deb.absolutePath)
+        logger.lifecycle("${deb.name}: ${fixed.first { it.startsWith("Depends:") }}")
+        logger.lifecycle("${deb.name}: ${fixed.first { it.startsWith("Recommends:") }}")
+    } finally {
+        root.deleteRecursively()
+    }
+}
+
+tasks.matching { it.name == "packageDeb" }.configureEach {
+    doLast {
+        layout.buildDirectory.dir("compose/binaries/main/deb").get().asFile
+            .listFiles { f -> f.extension.equals("deb", ignoreCase = true) }
+            ?.forEach(::rewriteDebDepends)
     }
 }
 

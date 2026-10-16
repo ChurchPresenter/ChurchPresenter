@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.bibletab.standardEnglishBookName
+import org.churchpresenter.sharedui.guide.WickPlace
 import org.churchpresenter.bible.Bible
 import androidx.compose.runtime.Composable
 import java.awt.GraphicsDevice
@@ -106,6 +107,7 @@ internal fun AppRootState.HelperHost(
         modifier.padding(bottom = lift).onGloballyPositioned {
             cornerBottom = it.boundsInRoot().bottom + liftPx
         },
+        WickPlace.Main(helperCurrentTab),
     )
     if (wickIntroShowing) {
         WickIntro(
@@ -124,14 +126,18 @@ internal fun AppRootState.HelperHost(
  * window Wick's tours reach (Settings, the song editor), which share the one conversation.
  */
 @Composable
-internal fun AppRootState.WickLamp(modifier: Modifier) {
+internal fun AppRootState.WickLamp(modifier: Modifier, place: WickPlace) {
     if (!wickAvailable) return
-    WickLamp(modifier, rememberScreenDevices())
+    WickLamp(modifier, rememberScreenDevices(), place)
 }
 
 /** [WickLamp] with the connected screens given — polled by the caller, so this part draws without a display. */
 @Composable
-internal fun AppRootState.WickLamp(modifier: Modifier, devices: Array<GraphicsDevice>) {
+internal fun AppRootState.WickLamp(
+    modifier: Modifier,
+    devices: Array<GraphicsDevice>,
+    place: WickPlace = WickPlace.Main(helperCurrentTab),
+) {
     val projection = appSettings.projectionSettings
     val screens = remember(devices.size, projection.screenAssignments, projection.screenNames) {
         helperScreens(appSettings)
@@ -165,6 +171,7 @@ internal fun AppRootState.WickLamp(modifier: Modifier, devices: Array<GraphicsDe
                 bibleBooks = remember(primaryBibleForInstanceLink) { helperBibleBooks(primaryBibleForInstanceLink) },
             ),
             anythingLive = anythingLive,
+            place = place,
             onSendChat = { transcript, email -> sendWickChat(transcript, email, packVersion = WickPacks.versionLabel) },
         ),
         executor = executor,

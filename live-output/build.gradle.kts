@@ -53,6 +53,8 @@ dependencies {
     testImplementation(testFixtures(projects.presentationEngine))
     testImplementation(testFixtures(projects.ndi))
     testImplementation(testFixtures(projects.omt))
+    // DeckLinkComposeOutputTest drives the output over a fake card.
+    testImplementation(testFixtures(projects.canvasEngine))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)

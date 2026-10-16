@@ -30,11 +30,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.canvas.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkOutputSessions
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.diagnostics.CrashReporter
@@ -46,12 +49,13 @@ import java.awt.Dimension
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
-private const val OPEN_RETRY_ATTEMPTS = 3
-private const val OPEN_RETRY_DELAY_MS = 100L
 private const val OPAQUE_ALPHA = 0xFF
 private const val ALPHA_SHIFT = 24
 private const val RED_SHIFT = 16
 private const val GREEN_SHIFT = 8
+
+/** How long the capture loop waits before trying again when the layer has no picture to read. */
+private const val FRAME_RETRY_MS = 16L
 
 /**
  * Renders Compose content to a DeckLink device using ComposePanel + SkiaLayer.screenshot().
@@ -70,6 +74,8 @@ fun DeckLinkComposeOutput(
     /** The merged picture this device shows a tile of, and its output key in it -- see [mergeTile]. */
     merge: ResolvedMerge? = null,
     mergeOutput: String = "",
+    /** Where the device is opened and closed; the app's own [DeckLinkManager.outputs] unless a test gives a fake. */
+    outputs: DeckLinkOutputSessions = DeckLinkManager.outputs,
     content: @Composable BoxScope.() -> Unit
 ) {
     val currentAppSettings by rememberUpdatedState(appSettings)
@@ -79,50 +85,49 @@ fun DeckLinkComposeOutput(
     val appIconImage = rememberAppIconImage()
     val frameTitle = stringResource(Res.string.decklink_output_title, deviceIndex)
 
-    DisposableEffect(deviceIndex) {
-        if (!DeckLinkManager.isAvailable()) return@DisposableEffect onDispose {}
-        val opened = DeckLinkManager.open(deviceIndex)
-        if (!opened) return@DisposableEffect onDispose {}
+    // For DeckLink key output: render as FILL (black bg + normal content)
+    // and convert to key signal at pixel level. The Compose keySignal() modifier
+    // doesn't capture correctly via SkiaLayer.screenshot().
+    val renderRole = if (outputRole == Constants.OUTPUT_ROLE_KEY) Constants.OUTPUT_ROLE_FILL else outputRole
+    val isKeyCapture = outputRole == Constants.OUTPUT_ROLE_KEY
 
-        val info = DeckLinkManager.getOutputInfo(deviceIndex)
-        val w = info?.width ?: 1920
-        val h = info?.height ?: 1080
-        Log.info("DeckLink", "Device $deviceIndex: ${w}x$h @ ${info?.fps} fps, role=$outputRole")
-
-        val jframe = offscreenFrame(frameTitle, w, h, appIconImage)
-
-        val composePanel = ComposePanel().apply {
-            preferredSize = Dimension(w, h)
-            setSize(w, h)
-        }
-
-        // For DeckLink key output: render as FILL (black bg + normal content)
-        // and convert to key signal at pixel level. The Compose keySignal() modifier
-        // doesn't capture correctly via SkiaLayer.screenshot().
-        val renderRole = if (outputRole == Constants.OUTPUT_ROLE_KEY) Constants.OUTPUT_ROLE_FILL else outputRole
-        val isKeyCapture = outputRole == Constants.OUTPUT_ROLE_KEY
-
-        composePanel.setContent {
-            CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                // The background too is part of the picture, so the whole screen is the tile.
-                MergedTile(currentMerge, mergeOutput) {
-                    PresenterScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        appSettings = currentAppSettings,
-                        outputRole = renderRole,
-                        isLowerThird = currentIsLowerThird
-                    ) {
-                        content()
-                    }
-                }
-            }
-        }
-
-        jframe.contentPane.add(composePanel)
-        jframe.isVisible = true
+    DisposableEffect(deviceIndex, outputs) {
+        // Opened, and later closed, on the DeckLink output thread: the card is never waited on here.
+        val session = outputs.open(deviceIndex)
+        // Read and written on the event thread only: built there once the device is open.
+        var jframe: JFrame? = null
 
         val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         val captureJob = scope.launch {
+            val info = session.awaitOpened() ?: return@launch
+            val w = info.width
+            val h = info.height
+            Log.info("DeckLink", "Device $deviceIndex: ${w}x$h @ ${info.fps} fps, role=$outputRole")
+
+            // Not run once the effect is disposed: the dispose cancels this job on the same thread.
+            val composePanel = withContext(Dispatchers.Main) {
+                val panel = deckLinkPanel(w, h) {
+                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                        // The background too is part of the picture, so the whole screen is the tile.
+                        MergedTile(currentMerge, mergeOutput) {
+                            PresenterScreen(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = currentAppSettings,
+                                outputRole = renderRole,
+                                isLowerThird = currentIsLowerThird
+                            ) {
+                                content()
+                            }
+                        }
+                    }
+                }
+                jframe = offscreenFrame(frameTitle, w, h, appIconImage).apply {
+                    contentPane.add(panel)
+                    isVisible = true
+                }
+                panel
+            }
+
             val layer = awaitSkiaLayer(composePanel)
             if (layer == null) {
                 Log.warn("DeckLink", "Device $deviceIndex: Could not find SkiaLayer")
@@ -133,65 +138,75 @@ fun DeckLinkComposeOutput(
                 return@launch
             }
             Log.info("DeckLink", "Device $deviceIndex: SkiaLayer found, starting capture, role=$outputRole")
-
-            val pixels = IntArray(w * h)
-            val byteBuf = ByteArray(w * h * 4)
-            var framesSent = 0L
-
-            while (isActive) {
-                try {
-                    // screenshot() safely reads the Skia backing surface
-                    val bitmap = layer.screenshot()
-                    if (bitmap != null && bitmap.width > 0 && bitmap.height > 0) {
-                        // peekPixels gives direct access to the bitmap buffer
-                        val pixmap = bitmap.peekPixels()
-                        if (pixmap != null) {
-                            val data = pixmap.buffer
-                            val bytes = data.getBytes(0, (w * h * 4).coerceAtMost(data.size))
-                            System.arraycopy(bytes, 0, byteBuf, 0, bytes.size)
-
-                            skiaBgraToArgbPixels(byteBuf, pixels, w * h)
-
-                            // For key output: convert rendered fill to key signal.
-                            // Content on black bg → white where content is, black where it isn't.
-                            if (isKeyCapture) {
-                                convertToKeySignal(pixels)
-                            }
-
-                            framesSent++
-                            DeckLinkManager.sendFrame(deviceIndex, pixels, w, h)
-                        } else {
-                            delay(16)
-                        }
-                        bitmap.close()
-                    } else {
-                        bitmap?.close()
-                        delay(16)
-                    }
-                } catch (_: Throwable) {
-                    delay(16)
-                }
-            }
+            captureFrames(layer, w, h, isKeyCapture) { pixels -> session.sendFrame(pixels, w, h) }
         }
 
         onDispose {
             captureJob.cancel()
-            scope.cancel()
-            // Send black frames to clear the output before closing.
-            // Multiple frames + delay ensures the device displays them
-            // before DisableVideoOutput is called.
-            try {
-                val blackPixels = IntArray(w * h)
-                repeat(OPEN_RETRY_ATTEMPTS) {
-                    DeckLinkManager.sendFrame(deviceIndex, blackPixels, w, h)
+            // The close waits for the frame in flight, sends black and closes the device, all on the
+            // output thread; the frame goes once the device has closed.
+            session.close(captureJob) {
+                SwingUtilities.invokeLater {
+                    jframe?.isVisible = false
+                    jframe?.dispose()
+                    scope.cancel()
                 }
-                Thread.sleep(OPEN_RETRY_DELAY_MS)
-            } catch (_: Exception) {}
-            DeckLinkManager.close(deviceIndex)
-            SwingUtilities.invokeLater {
-                jframe.isVisible = false
-                jframe.dispose()
             }
+        }
+    }
+}
+
+/** The panel the device's content is composed in, at the device's own size. */
+private fun deckLinkPanel(width: Int, height: Int, content: @Composable () -> Unit) = ComposePanel().apply {
+    preferredSize = Dimension(width, height)
+    setSize(width, height)
+    setContent(content)
+}
+
+/**
+ * Reads [layer]'s picture into packed ARGB -- converted to a key signal when [isKeyCapture] -- and
+ * hands each frame to [send], until the job is cancelled.
+ */
+private suspend fun captureFrames(
+    layer: SkiaLayer,
+    w: Int,
+    h: Int,
+    isKeyCapture: Boolean,
+    send: (IntArray) -> Unit,
+) = coroutineScope {
+    val pixels = IntArray(w * h)
+    val byteBuf = ByteArray(w * h * 4)
+    while (isActive) {
+        try {
+            // screenshot() safely reads the Skia backing surface
+            val bitmap = layer.screenshot()
+            if (bitmap != null && bitmap.width > 0 && bitmap.height > 0) {
+                // peekPixels gives direct access to the bitmap buffer
+                val pixmap = bitmap.peekPixels()
+                if (pixmap != null) {
+                    val data = pixmap.buffer
+                    val bytes = data.getBytes(0, (w * h * 4).coerceAtMost(data.size))
+                    System.arraycopy(bytes, 0, byteBuf, 0, bytes.size)
+
+                    skiaBgraToArgbPixels(byteBuf, pixels, w * h)
+
+                    // For key output: convert rendered fill to key signal.
+                    // Content on black bg → white where content is, black where it isn't.
+                    if (isKeyCapture) {
+                        convertToKeySignal(pixels)
+                    }
+
+                    send(pixels)
+                } else {
+                    delay(FRAME_RETRY_MS)
+                }
+                bitmap.close()
+            } else {
+                bitmap?.close()
+                delay(FRAME_RETRY_MS)
+            }
+        } catch (_: Throwable) {
+            delay(FRAME_RETRY_MS)
         }
     }
 }

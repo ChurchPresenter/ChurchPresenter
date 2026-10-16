@@ -38,6 +38,8 @@ import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.helperDayOf
 import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.sharedui.guide.SettingsPage
+import org.churchpresenter.sharedui.guide.WickPlace
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
@@ -59,6 +61,7 @@ class WickPanelTest {
         tab: Tabs? = null,
         live: Boolean = false,
         now: Long = 0L,
+        place: WickPlace = WickPlace.Main(null),
     ) {
         setContent {
             ChurchPresenterTheme(themeMode = ThemeMode.DARK) {
@@ -71,6 +74,7 @@ class WickPanelTest {
                         screens = emptyList(),
                         context = ResolveContext(currentTab = tab, language = "en"),
                         anythingLive = live,
+                        place = place,
                         nowMillis = { now },
                     ),
                     executor = executor,
@@ -278,6 +282,35 @@ class WickPanelTest {
         assertEquals(1, state.tipOffset)
         press("Previous")
         assertEquals(0, state.tipOffset)
+    }
+
+    @Test
+    fun `the greeting offers what the tab showing is for`() = runComposeUiTest {
+        val state = HelperState().apply { isOpen = true }
+        wick(state, place = WickPlace.Main(Tabs.BIBLE))
+        onNodeWithText("Search the Bible").assertExists()
+        onNodeWithText("Where do I add a song?").assertDoesNotExist()
+        assertEquals(WickPlace.Main(Tabs.BIBLE), state.place)
+    }
+
+    @Test
+    fun `a Settings page with nothing to offer shows only the greeting`() = runComposeUiTest {
+        settings = HelperSettings(tipsEnabled = true)
+        wick(HelperState().apply { isOpen = true }, place = WickPlace.Settings(SettingsPage.ATEM))
+        onNodeWithText("Hi, I'm Wick", substring = true).assertExists()
+        onNodeWithText("Suggestions").assertDoesNotExist()
+        onNodeWithText("Tip of the day").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a Settings page offers its own chips and tip`() = runComposeUiTest {
+        settings = HelperSettings(tipsEnabled = true)
+        wick(HelperState().apply { isOpen = true }, place = WickPlace.Settings(SettingsPage.PROFILES))
+        onNodeWithText("Tip of the day").assertExists()
+        settings = HelperSettings(tipsEnabled = false)
+        waitForIdle()
+        onNodeWithText("Make the lyrics bold").assertExists()
+        onNodeWithText("Show John 3:16").assertDoesNotExist()
     }
 
     @Test

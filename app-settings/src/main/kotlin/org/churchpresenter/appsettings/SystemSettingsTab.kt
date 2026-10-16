@@ -59,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -73,6 +74,8 @@ import org.churchpresenter.strings.generated.resources.general
 import org.churchpresenter.strings.generated.resources.import_settings
 import org.churchpresenter.strings.generated.resources.import_settings_confirm
 import org.churchpresenter.strings.generated.resources.launch_on_login
+import org.churchpresenter.strings.generated.resources.launch_on_login_failed
+import org.churchpresenter.strings.generated.resources.launch_on_login_refused
 import org.churchpresenter.strings.generated.resources.remote_uploads_cleared
 import org.churchpresenter.strings.generated.resources.reset_settings
 import org.churchpresenter.strings.generated.resources.reset_settings_confirm
@@ -234,6 +237,8 @@ private val SIDE_COLUMN_WIDTH = 400.dp
 private fun GeneralToggleRow(
     label: StringResource,
     hint: String? = null,
+    /** Why the last change did not take, shown under the label in the error colour. */
+    problem: String? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -261,6 +266,14 @@ private fun GeneralToggleRow(
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
+            if (problem != null) {
+                Text(
+                    text = problem,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
         RaisedSwitch(
             checked = checked,
@@ -271,6 +284,9 @@ private fun GeneralToggleRow(
     }
 }
 
+/** The switch Launch at login drives: the app's [AutoStartManager], unless a test provides another. */
+internal val LocalAutoStart = staticCompositionLocalOf<AutoStartSwitch> { AutoStartManager }
+
 @Composable
 private fun GeneralCard(
     settings: AppSettings,
@@ -280,14 +296,24 @@ private fun GeneralCard(
     SettingsCard(title = stringResource(Res.string.general)) {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             // Launch at login — the OS registration is the source of truth, not settings.json
-            var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
+            val autoStart = LocalAutoStart.current
+            var autoStartEnabled by remember { mutableStateOf(autoStart.isEnabled()) }
+            // Says why a change did not take, until one does: a switch that only refuses to move
+            // gets pressed again and again.
+            var lastAutoStartChange by remember { mutableStateOf<AutoStartChange?>(null) }
             GeneralToggleRow(
                 label = Res.string.launch_on_login,
+                problem = when (lastAutoStartChange) {
+                    AutoStartChange.REFUSED -> stringResource(Res.string.launch_on_login_refused)
+                    AutoStartChange.FAILED -> stringResource(Res.string.launch_on_login_failed)
+                    AutoStartChange.DONE, AutoStartChange.UNSUPPORTED, null -> null
+                },
                 checked = autoStartEnabled,
                 onCheckedChange = { enabled ->
                     scope.launch {
-                        val ok = withContext(Dispatchers.IO) { AutoStartManager.setEnabled(enabled) }
-                        if (ok) autoStartEnabled = enabled
+                        val change = withContext(Dispatchers.IO) { autoStart.setEnabled(enabled) }
+                        if (change == AutoStartChange.DONE) autoStartEnabled = enabled
+                        lastAutoStartChange = change
                     }
                 }
             )

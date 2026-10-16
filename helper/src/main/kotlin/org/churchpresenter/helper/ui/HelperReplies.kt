@@ -66,6 +66,7 @@ import org.churchpresenter.helper.action.describe
 import org.churchpresenter.helper.action.optionLabel
 import org.churchpresenter.helper.resolve
 import org.churchpresenter.helper.suggest.SuggestedRequest
+import org.churchpresenter.helper.suggest.chipsFor
 import org.churchpresenter.helper.suggest.Suggestion
 import org.churchpresenter.helper.suggest.SuggestionIds
 import org.churchpresenter.helper.suggest.Tip
@@ -248,7 +249,7 @@ internal fun ReplyBody(
         HelperReply.Commands -> CommandsTable(ask)
         HelperReply.Greeting -> {
             Said(HelperText.Res(Res.string.helper_greeting))
-            RequestChips(SuggestedRequest.DEFAULTS, ask)
+            RequestChips(chipsFor(inputs.place), ask)
         }
         is HelperReply.Touring -> TourBody(state, reply, executor)
         HelperReply.DisplaySetup -> DisplaySetupPanel(state, inputs.screens, executor)
@@ -272,7 +273,7 @@ private fun IdleBody(
     if (state.thread.entries.isNotEmpty()) return
     if (tip == null || !inputs.settings.tipsEnabled) {
         Said(HelperText.Res(Res.string.helper_greeting))
-        RequestChips(SuggestedRequest.DEFAULTS, ask)
+        RequestChips(chipsFor(inputs.place), ask)
         return
     }
     // Opening the bubble is what counts as the day's tip having been offered.
@@ -388,6 +389,8 @@ internal fun RequestChips(
     ask: Ask,
     caption: StringResource = Res.string.helper_suggestions_label,
 ) {
+    // No chips, no caption over nothing.
+    if (requests.isEmpty()) return
     NoticeCaption(stringResource(caption))
     val labels = requests.map { stringResource(it.label) }
     val options = remember(requests, labels) {
