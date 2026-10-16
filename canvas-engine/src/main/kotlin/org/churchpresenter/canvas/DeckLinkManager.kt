@@ -13,6 +13,7 @@ import org.churchpresenter.canvas.DeckLinkManager.DeviceStatus
 import org.churchpresenter.canvas.DeckLinkManager.InputMode
 import org.churchpresenter.canvas.DeckLinkManager.OutputInfo
 import org.churchpresenter.canvas.DeckLinkManager.VideoConnection
+import org.churchpresenter.diagnostics.Log
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
@@ -480,7 +481,10 @@ interface DeckLinkKeyerNatives {
     fun nativeListOutputConnections(deviceIndex: Int): Array<String>
 }
 
-/** Loads `decklink_jni` from the app's resources, or from the library path; false when it is not there. */
+/**
+ * Loads `decklink_jni` from the app's resources, or from the library path; false when it is not
+ * there, with the reason (a missing file, a glibc the library needs and the machine lacks) logged.
+ */
 internal fun loadDeckLinkLibrary(): Boolean = try {
     val resDir = System.getProperty("compose.application.resources.dir")
     val libName = when {
@@ -495,6 +499,7 @@ internal fun loadDeckLinkLibrary(): Boolean = try {
         System.loadLibrary("decklink_jni")
     }
     true
-} catch (_: UnsatisfiedLinkError) {
+} catch (e: UnsatisfiedLinkError) {
+    Log.warn("DeckLink", "DeckLink is off: the native library did not load: ${e.message}")
     false
 }

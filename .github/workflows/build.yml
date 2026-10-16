@@ -704,13 +704,46 @@ jobs:
 
       # The runner's Ubuntu names some libraries differently from 22.04 (libasound2t64, not
       # libasound2), and jpackage writes the runner's names. Installing it on 22.04 here is what
-      # proves the .deb also accepts the old ones (issue #875).
+      # proves the .deb also accepts the old ones (issue #875). The step then checks that what was
+      # installed also loads there: ldd on every ELF file under /opt/churchpresenter fails on a
+      # "not found", a missing library or a GLIBC/GLIBCXX version 22.04 lacks. A library built on a
+      # newer Linux installs fine and then cannot load. libdecklink_jni.so opens Blackmagic's driver
+      # with dlopen, so ldd does not ask for it; that is expected, not a failure.
       - name: Install the .deb on Ubuntu 22.04
         run: |
           docker run --rm -e DEBIAN_FRONTEND=noninteractive \
             -v "$PWD/composeApp/build/compose/binaries/main/deb:/deb:ro" \
             ubuntu:22.04@sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401 \
-            bash -c 'apt-get update -qq && apt-get install -y -qq /deb/*.deb && dpkg -s "$(dpkg-deb -f /deb/*.deb Package)" | grep -E "^(Status|Depends):"'
+            bash -c '
+              set -e
+              apt-get update -qq && apt-get install -y -qq /deb/*.deb
+              dpkg -s "$(dpkg-deb -f /deb/*.deb Package)" | grep -E "^(Status|Depends|Recommends):"
+              # Each Recommends entry (with its alternatives) must have one package installed.
+              echo "Recommends:"
+              recommends_missing=0
+              while IFS= read -r entry; do
+                found=""
+                for alt in $(echo "$entry" | tr "|" " " | sed "s/([^)]*)//g"); do
+                  if dpkg -s "$alt" 2>/dev/null | grep -q "^Status: install ok installed"; then found=$alt; break; fi
+                done
+                if [ -n "$found" ]; then echo "  installed: $found"; else echo "::error::Recommends not installed: $entry"; recommends_missing=1; fi
+              done < <(dpkg-deb -f /deb/*.deb Recommends | tr "," "\n" | sed "s/^ *//; s/ *\$//" | grep .)
+              failed=$recommends_missing
+              count=0
+              while IFS= read -r -d "" f; do
+                [ "$(head -c 4 "$f" | od -An -c | tr -d " ")" = "177ELF" ] || continue
+                count=$((count + 1))
+                missing=$(ldd "$f" 2>&1 | grep "not found" || true)
+                if [ -n "$missing" ]; then
+                  failed=1
+                  echo "::error::$f cannot load on Ubuntu 22.04:"
+                  echo "$missing" | sed "s/^/    /"
+                fi
+              done < <(find /opt/churchpresenter -type f -print0)
+              echo "ldd checked $count ELF files under /opt/churchpresenter"
+              [ "$count" -gt 0 ] || { echo "::error::no ELF files found to check"; exit 1; }
+              exit $failed
+            '
 
       - name: Rename DEB (add DEBIAN-x64 label)
         run: |
