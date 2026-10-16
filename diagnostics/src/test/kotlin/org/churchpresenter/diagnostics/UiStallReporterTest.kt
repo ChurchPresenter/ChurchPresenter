@@ -98,6 +98,28 @@ class UiStallReporterTest {
     }
 
     @Test
+    fun `a stall sampled as the thread answered the ping is counted but not sent`() {
+        // The stack a real one carried: the event thread already inside the watchdog's own ping.
+        val answering = listOf(
+            StackTraceElement(StallDetector::class.java.name, "answered", "UiWatchdog.kt", 49),
+            StackTraceElement(UiWatchdog::class.java.name, "watch\$lambda\$0", "UiWatchdog.kt", 127),
+            StackTraceElement("java.awt.event.InvocationEvent", "dispatch", "InvocationEvent.java", 318),
+        )
+        settled()
+        reporter.outputLive(true)
+        now += 1_000
+
+        reporter.stalled(stall(700, answering))
+
+        assertTrue(sent.isEmpty(), "a stack of the watchdog itself says nothing about the stall")
+        assertEquals(1, reporter.liveStallsPastGate(), "but the stall still happened")
+
+        now += 1_000
+        reporter.stalled(stall(700))
+        assertEquals(1, sent.size, "and the next stall with a real stack is sent")
+    }
+
+    @Test
     fun `a run with nothing ever live has no live minutes`() {
         now = 3_600_000
 

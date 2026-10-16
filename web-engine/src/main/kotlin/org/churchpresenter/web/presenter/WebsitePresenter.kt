@@ -204,7 +204,8 @@ internal object JcefInstall {
         // would work in one language.
         blockerFor = { root ->
             val installDir = File(root, "jcef")
-            installBlocker(directoryIsWritable(installDir), installDir.usableSpace)
+            clearIncompleteInstall(installDir, ::installIsComplete)
+                ?: installBlocker(directoryIsWritable(installDir), installDir.usableSpace)
         },
         stopRetrying = { policyBlock(it.message) != null || missingSystemLibrary(it) != null },
         attempt = attempt,

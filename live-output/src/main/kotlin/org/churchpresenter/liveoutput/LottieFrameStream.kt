@@ -55,9 +55,6 @@ class LottieFrameStream(
         const val RETAIN_FRAMES = 3
         const val CLOSE_LINGER_MS = 250L
 
-        /** Sampled frames must be >1% opaque or the whole pre-render is considered blank. */
-        const val BLANK_OPAQUE_FRACTION = 0.01f
-
         // Where along a clip open() samples: an early frame, then the quarter points.
         const val EARLY_SAMPLE_DIVISOR = 10
         const val QUARTERS = 4
@@ -195,20 +192,14 @@ class LottieFrameStream(
             .distinct()
 
     /**
-     * Roughly estimates whether a frame is meaningfully blank (near-fully transparent).
-     * Samples pixels at a stride rather than scanning the whole frame to stay cheap.
+     * Whether [frame] has nothing visible in it at all -- what a capture that failed produces.
+     *
+     * One visible pixel is enough. A lower third is a small thing on a large frame -- a name strip
+     * covers well under 1% of 1080p -- so any share of a frame, or a strided sample of its pixels,
+     * can call a good render blank, and a render called blank is deleted and redone on every play
+     * (CHURCH-PRESENTER-DESKTOP-AQ). Only a blank frame is read to its end; any other stops at its
+     * first visible pixel.
      */
-    internal fun isFrameBlank(frame: IntArray): Boolean {
-        if (frame.isEmpty()) return true
-        val sampleStep = maxOf(1, frame.size / 500)
-        var sampled = 0
-        var opaqueCount = 0
-        var i = 0
-        while (i < frame.size) {
-            sampled++
-            if ((frame[i] ushr ALPHA_SHIFT) and BYTE_MASK > MIN_VISIBLE_ALPHA) opaqueCount++
-            i += sampleStep
-        }
-        return opaqueCount.toFloat() / sampled < BLANK_OPAQUE_FRACTION
-    }
+    internal fun isFrameBlank(frame: IntArray): Boolean =
+        frame.none { (it ushr ALPHA_SHIFT) and BYTE_MASK > MIN_VISIBLE_ALPHA }
 }

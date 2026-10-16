@@ -2,6 +2,8 @@ package org.churchpresenter.sharedui.filechooser
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
+import org.freedesktop.dbus.errors.ServiceUnknown
+import org.freedesktop.dbus.exceptions.AddressResolvingException
 import org.freedesktop.dbus.types.UInt32
 import org.freedesktop.dbus.types.Variant
 import java.io.File
@@ -18,6 +20,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * The logic every file dialog shares, regardless of which platform implementation runs underneath.
@@ -917,6 +920,34 @@ class XdgPortalRequestTest {
         } finally {
             XdgFileChooser.nativeDialogsBroken = false
         }
+    }
+
+    @Test
+    fun `a session with no bus to reach falls back and latches like one with no portal`() = runBlocking {
+        XdgFileChooser.nativeDialogsBroken = false
+        try {
+            val result = XdgFileChooser.withNativeDialog(
+                context = "test",
+                attempt = { throw AddressResolvingException("Cannot Resolve Session Bus Address") },
+                fallback = { "swing" },
+            )
+
+            assertEquals("swing", result, "no session bus must still leave the operator a dialog")
+            assertEquals(true, XdgFileChooser.nativeDialogsBroken, "the process must only ask once")
+        } finally {
+            XdgFileChooser.nativeDialogsBroken = false
+        }
+    }
+
+    @Test
+    fun `no portal, no portal owner and no session bus are the machine, anything else is reported`() {
+        assertTrue(isNoPortal(PortalUnavailableException()))
+        assertTrue(isNoPortal(ServiceUnknown("org.freedesktop.portal.Desktop")))
+        assertTrue(isNoPortal(AddressResolvingException("Cannot Resolve Session Bus Address")))
+        assertFalse(
+            isNoPortal(IndexOutOfBoundsException("Index 0 out of bounds for length 0")),
+            "a portal that answered wrongly is a fault worth seeing",
+        )
     }
 
     @Test
