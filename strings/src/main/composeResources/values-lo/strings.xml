@@ -2772,4 +2772,13 @@
     <string name="helper_command_look_12_does">ສະແດງການຕັ້ງຄ່າຂໍ້ຄວາມຂອງຂໍ້ພຣະຄຳ</string>
     <string name="helper_command_look_13">ປັບຮູບແບບການອ້າງອີງພຣະຄຳພີແນວໃດ</string>
     <string name="helper_command_look_13_does">ສະແດງການຕັ້ງຄ່າຂໍ້ຄວາມຂອງຂໍ້ອ້າງອີງ</string>
+    <string name="message_purpose">ສະແດງຂໍ້ຄວາມໜຶ່ງແຖວທັບສິ່ງທີ່ກຳລັງອອກອາກາດ.</string>
+    <string name="message_preview_empty">ຂໍ້ຄວາມຂອງທ່ານຈະປາກົດຢູ່ນີ້</string>
+    <string name="message_stays_up">ສະແດງໄວ້ເປັນເວລາ</string>
+    <string name="message_seconds_short">%1$d ວິ</string>
+    <string name="message_one_minute">1 ນາທີ</string>
+    <string name="message_duration_custom">ກຳນົດເອງ</string>
+    <string name="message_insert_blank">ແຊກຊ່ອງວ່າງ</string>
+    <string name="props_purpose">ສິ່ງທີ່ຢູ່ເທິງໜ້າຈໍທັບທຸກຢ່າງ.</string>
+    <string name="macros_purpose">ເອີ້ນໃຊ້ຫຼາຍຄຳສັ່ງດ້ວຍການຄລິກ ຫຼື ປຸ່ມດຽວ.</string>
 </resources>

@@ -2760,4 +2760,13 @@
     <string name="helper_command_look_12_does">Näitab salmi teksti seadeid</string>
     <string name="helper_command_look_13">kuidas kujundada piibliviidet</string>
     <string name="helper_command_look_13_does">Näitab viite tekstiseadeid</string>
+    <string name="message_purpose">Näitab tekstirida kõige otse-eetris oleva kohal.</string>
+    <string name="message_preview_empty">Sinu sõnum ilmub siia</string>
+    <string name="message_stays_up">Jääb nähtavale</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Kohandatud</string>
+    <string name="message_insert_blank">Lisa tühik</string>
+    <string name="props_purpose">Elemendid, mis jäävad ekraanile kõige peale.</string>
+    <string name="macros_purpose">Käivita mitu toimingut ühe klõpsu või klahviga.</string>
 </resources>

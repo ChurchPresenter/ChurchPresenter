@@ -2755,4 +2755,13 @@
     <string name="helper_command_look_12_does">Affiche les réglages du texte des versets</string>
     <string name="helper_command_look_13">comment styliser la référence biblique</string>
     <string name="helper_command_look_13_does">Affiche les réglages du texte de la référence</string>
+    <string name="message_purpose">Affiche une ligne de texte par-dessus ce qui est en direct.</string>
+    <string name="message_preview_empty">Votre message s’affiche ici</string>
+    <string name="message_stays_up">Reste affiché</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Personnalisé</string>
+    <string name="message_insert_blank">Insérer un champ</string>
+    <string name="props_purpose">Des éléments qui restent à l’écran par-dessus tout.</string>
+    <string name="macros_purpose">Lancez plusieurs actions d’un clic ou d’une touche.</string>
 </resources>

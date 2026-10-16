@@ -1,5 +1,20 @@
 package org.churchpresenter.dialogs
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.strings.generated.resources.props_purpose
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -12,10 +27,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -112,16 +125,28 @@ internal fun PropsDialogContent(
 ) {
     var editing by remember { mutableStateOf<PropDefinition?>(null) }
     Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Text(stringResource(Res.string.props_title), style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.padding(top = 12.dp))
-            HorizontalDivider()
+        Column {
+            LiveToolDialogHeader(
+                tool = LiveTool.PROPS,
+                painter = rememberVectorPainter(Icons.Outlined.Layers),
+                title = stringResource(Res.string.props_title),
+                purpose = stringResource(Res.string.props_purpose),
+                onClose = onDismiss,
+            )
             Column(
-                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = LIVE_TOOL_BODY_PADDING, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 if (props.isEmpty() && editing == null) {
-                    Text(stringResource(Res.string.props_empty), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(Res.string.props_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth().liveToolPanel().padding(14.dp),
+                    )
                 }
                 props.forEach { prop ->
                     PropRow(prop, prop.id in onAir, editing?.id == prop.id, { onSwitch(prop.id, it) }) {
@@ -129,33 +154,36 @@ internal fun PropsDialogContent(
                     }
                 }
                 editing?.let { draft ->
-                    HorizontalDivider()
+                    Spacer(Modifier.height(8.dp))
                     PropEditor(draft, onChange = { editing = it }, onChoosePicture = onChoosePicture)
                 }
             }
-            HorizontalDivider()
-            Spacer(Modifier.padding(top = 12.dp))
-            PropButtons(
-                editing = editing,
-                isSaved = editing?.let { draft -> props.any { it.id == draft.id } } == true,
-                onAdd = { editing = PropDefinition(id = newPropId(props), name = "") },
-                onSave = { draft ->
-                    val saved = draft.copy(name = draft.name.ifBlank { draft.kind.name.lowercase() })
-                    onPropsChange(props.filterNot { it.id == saved.id } + saved)
-                    editing = null
-                },
-                onDelete = { draft ->
-                    if (draft.id in onAir) onSwitch(draft.id, false)
-                    onPropsChange(props.filterNot { it.id == draft.id })
-                    editing = null
-                },
-                onDismiss = onDismiss,
-            )
+            LiveToolDialogFooter {
+                PropButtons(
+                    editing = editing,
+                    isSaved = editing?.let { draft -> props.any { it.id == draft.id } } == true,
+                    onAdd = { editing = PropDefinition(id = newPropId(props), name = "") },
+                    onSave = { draft ->
+                        val saved = draft.copy(name = draft.name.ifBlank { draft.kind.name.lowercase() })
+                        onPropsChange(props.filterNot { it.id == saved.id } + saved)
+                        editing = null
+                    },
+                    onDelete = { draft ->
+                        if (draft.id in onAir) onSwitch(draft.id, false)
+                        onPropsChange(props.filterNot { it.id == draft.id })
+                        editing = null
+                    },
+                    onDismiss = onDismiss,
+                )
+            }
         }
     }
 }
 
-/** One prop: its on-air switch, its name and kind; clicking the name opens it for editing. */
+/**
+ * One prop, as a panel: its chip -- red while it is up -- its name and where it sits, which open
+ * it for editing, and its on-air switch.
+ */
 @Composable
 private fun PropRow(
     prop: PropDefinition,
@@ -164,15 +192,44 @@ private fun PropRow(
     onSwitch: (Boolean) -> Unit,
     onEdit: () -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Switch(checked = on, onCheckedChange = onSwitch, modifier = Modifier.testTag(propSwitchTag(prop.id)))
-        Spacer(Modifier.width(12.dp))
-        FilterChip(
-            selected = editing,
-            onClick = onEdit,
-            label = { Text(prop.name + "  ·  " + stringResource(prop.kind.label)) },
-            modifier = Modifier.testTag(propEditTag(prop.id)),
-        )
+    val shape = RoundedCornerShape(10.dp)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(PROP_ROW_HEIGHT)
+            .liveToolPanel()
+            .then(if (editing) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+            .padding(start = 10.dp, end = 6.dp),
+    ) {
+        LiveToolChip(LiveTool.PROPS, rememberVectorPainter(Icons.Outlined.Layers), onAir = on)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .clickable(onClick = onEdit)
+                .testTag(propEditTag(prop.id)),
+        ) {
+            Text(
+                prop.name,
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                stringResource(prop.kind.label) + " · " + stringResource(prop.corner.label),
+                fontSize = 11.5.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
+        }
+        RaisedSwitch(checked = on, onCheckedChange = onSwitch, modifier = Modifier.testTag(propSwitchTag(prop.id)))
     }
 }
 
@@ -253,7 +310,7 @@ private fun PropEditor(
 
 @Composable
 @Suppress("LongParameterList")
-private fun PropButtons(
+private fun RowScope.PropButtons(
     editing: PropDefinition?,
     isSaved: Boolean,
     onAdd: () -> Unit,
@@ -261,25 +318,23 @@ private fun PropButtons(
     onDelete: (PropDefinition) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        GhostButton(shape = AppShape(6.dp), onClick = onAdd, modifier = Modifier.testTag(PROP_ADD_TAG)) {
-            Text(stringResource(Res.string.props_add))
+    GhostButton(shape = AppShape(9.dp), onClick = onAdd, modifier = Modifier.testTag(PROP_ADD_TAG)) {
+        Text(stringResource(Res.string.props_add), color = MaterialTheme.colorScheme.primary)
+    }
+    if (editing != null && isSaved) {
+        GhostButton(shape = AppShape(9.dp), onClick = { onDelete(editing) }) {
+            Text(stringResource(Res.string.delete_saved_string))
         }
-        if (editing != null && isSaved) {
-            GhostButton(shape = AppShape(6.dp), onClick = { onDelete(editing) }) {
-                Text(stringResource(Res.string.delete_saved_string))
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        GhostButton(shape = AppShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
-        if (editing != null) {
-            RaisedButton(
-                shape = AppShape(6.dp),
-                onClick = { onSave(editing) },
-                modifier = Modifier.testTag(PROP_SAVE_TAG),
-            ) {
-                Text(stringResource(Res.string.props_save))
-            }
+    }
+    Spacer(Modifier.weight(1f))
+    KeyButton(shape = AppShape(10.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
+    if (editing != null) {
+        RaisedButton(
+            shape = AppShape(10.dp),
+            onClick = { onSave(editing) },
+            modifier = Modifier.testTag(PROP_SAVE_TAG),
+        ) {
+            Text(stringResource(Res.string.props_save), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -323,3 +378,4 @@ internal fun propCornerTag(corner: PropCorner) = "prop_corner_${corner.name}"
 private val SIZE_FIELD_WIDTH = 200.dp
 private val TEXT_FIELD_WIDTH = 260.dp
 private const val TIME_CHARS = 5
+private val PROP_ROW_HEIGHT = 44.dp

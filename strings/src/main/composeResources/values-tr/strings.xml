@@ -2772,4 +2772,13 @@
     <string name="helper_command_look_12_does">Ayet metni ayarlarını gösterir</string>
     <string name="helper_command_look_13">kutsal kitap referansını nasıl biçimlendiririm</string>
     <string name="helper_command_look_13_does">Referansın metin ayarlarını gösterir</string>
+    <string name="message_purpose">Canlı olan her şeyin üzerinde bir satır metin gösterir.</string>
+    <string name="message_preview_empty">Mesajınız burada görünür</string>
+    <string name="message_stays_up">Ekranda kalma süresi</string>
+    <string name="message_seconds_short">%1$d sn</string>
+    <string name="message_one_minute">1 dk</string>
+    <string name="message_duration_custom">Özel</string>
+    <string name="message_insert_blank">Boşluk ekle</string>
+    <string name="props_purpose">Her şeyin üzerinde ekranda kalan öğeler.</string>
+    <string name="macros_purpose">Birden çok işlemi tek tıklama veya tuşla çalıştırın.</string>
 </resources>

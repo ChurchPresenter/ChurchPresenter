@@ -1,5 +1,26 @@
 package org.churchpresenter.dialogs
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.strings.generated.resources.macros_purpose
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,8 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -91,71 +110,124 @@ internal fun MacrosDialogContent(
 ) {
     var editing by remember { mutableStateOf<Macro?>(null) }
     Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Text(stringResource(Res.string.macros_title), style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.padding(top = 4.dp))
-            Text(
-                stringResource(Res.string.macros_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Column {
+            LiveToolDialogHeader(
+                tool = LiveTool.MACROS,
+                painter = rememberVectorPainter(Icons.Outlined.PlayCircle),
+                title = stringResource(Res.string.macros_title),
+                purpose = stringResource(Res.string.macros_purpose),
+                onClose = onDismiss,
             )
-            Spacer(Modifier.padding(top = 12.dp))
-            HorizontalDivider()
             Column(
-                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = LIVE_TOOL_BODY_PADDING, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 if (macros.isEmpty() && editing == null) {
-                    Text(stringResource(Res.string.macros_empty), style = MaterialTheme.typography.bodyMedium)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth().liveToolPanel().padding(14.dp),
+                    ) {
+                        Text(stringResource(Res.string.macros_empty), style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            stringResource(Res.string.macros_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
-                macros.forEach { macro ->
-                    MacroRow(macro, editing?.id == macro.id, { onRun(macro) }) { editing = macro }
+                macros.forEachIndexed { index, macro ->
+                    MacroRow(index + 1, macro, editing?.id == macro.id, { onRun(macro) }) { editing = macro }
                 }
                 editing?.let { draft ->
-                    HorizontalDivider()
+                    Spacer(Modifier.height(8.dp))
                     MacroEditor(draft, rows) { editing = it }
                 }
             }
-            HorizontalDivider()
-            Spacer(Modifier.padding(top = 12.dp))
-            MacroButtons(
-                editing = editing,
-                isSaved = editing?.let { draft -> macros.any { it.id == draft.id } } == true,
-                onAdd = { editing = Macro(id = newMacroId(macros), name = "") },
-                onSave = { draft ->
-                    val saved = draft.copy(name = draft.name.trim().ifBlank { draft.id })
-                    val isNew = macros.none { it.id == saved.id }
-                    onMacrosChange(if (isNew) macros + saved else macros.map { if (it.id == saved.id) saved else it })
-                    editing = null
-                },
-                onDelete = { draft ->
-                    onMacrosChange(macros.filterNot { it.id == draft.id })
-                    editing = null
-                },
-                onOpenControl = onOpenControl,
-                onDismiss = onDismiss,
-            )
+            LiveToolDialogFooter {
+                MacroButtons(
+                    editing = editing,
+                    isSaved = editing?.let { draft -> macros.any { it.id == draft.id } } == true,
+                    onAdd = { editing = Macro(id = newMacroId(macros), name = "") },
+                    onSave = { draft ->
+                        val saved = draft.copy(name = draft.name.trim().ifBlank { draft.id })
+                        val isNew = macros.none { it.id == saved.id }
+                        onMacrosChange(
+                            if (isNew) macros + saved else macros.map { if (it.id == saved.id) saved else it },
+                        )
+                        editing = null
+                    },
+                    onDelete = { draft ->
+                        onMacrosChange(macros.filterNot { it.id == draft.id })
+                        editing = null
+                    },
+                    onOpenControl = onOpenControl,
+                    onDismiss = onDismiss,
+                )
+            }
         }
     }
 }
 
-/** One macro: its Run button, then its name; clicking the name opens it for editing. */
+/**
+ * One macro, as a panel: its number -- the Run macro key that runs it -- its name, which opens it
+ * for editing, and its Run.
+ */
 @Composable
-private fun MacroRow(macro: Macro, editing: Boolean, onRun: () -> Unit, onEdit: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+private fun MacroRow(number: Int, macro: Macro, editing: Boolean, onRun: () -> Unit, onEdit: () -> Unit) {
+    val shape = RoundedCornerShape(10.dp)
+    val tint = LiveTool.MACROS.tint
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(MACRO_ROW_HEIGHT)
+            .liveToolPanel()
+            .then(if (editing) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+            .padding(start = 10.dp, end = 6.dp),
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(22.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+        ) {
+            Text(
+                number.toString(),
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            macro.name,
+            fontSize = 13.5.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onEdit)
+                .padding(vertical = 8.dp)
+                .testTag(macroEditTag(macro.id)),
+        )
         RaisedButton(
-            shape = AppShape(6.dp),
+            shape = AppShape(8.dp),
             onClick = onRun,
             enabled = macro.actions.isNotEmpty(),
-            modifier = Modifier.testTag(macroRunTag(macro.id)),
-        ) { Text(stringResource(Res.string.macros_run)) }
-        Spacer(Modifier.width(12.dp))
-        FilterChip(
-            selected = editing,
-            onClick = onEdit,
-            label = { Text(macro.name) },
-            modifier = Modifier.testTag(macroEditTag(macro.id)),
-        )
+            colors = ButtonDefaults.buttonColors(containerColor = tint.chip, contentColor = tint.icon),
+            contentPadding = PaddingValues(horizontal = 10.dp),
+            modifier = Modifier.height(28.dp).testTag(macroRunTag(macro.id)),
+        ) {
+            Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(14.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(Res.string.macros_run), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
     }
 }
 
@@ -176,7 +248,7 @@ private fun MacroEditor(draft: Macro, rows: List<ScheduleItem>, onChange: (Macro
 
 @Composable
 @Suppress("LongParameterList")
-private fun MacroButtons(
+private fun RowScope.MacroButtons(
     editing: Macro?,
     isSaved: Boolean,
     onAdd: () -> Unit,
@@ -185,32 +257,30 @@ private fun MacroButtons(
     onOpenControl: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        GhostButton(shape = AppShape(6.dp), onClick = onAdd, modifier = Modifier.testTag(MACRO_ADD_TAG)) {
-            Text(stringResource(Res.string.macros_add))
+    GhostButton(shape = AppShape(9.dp), onClick = onAdd, modifier = Modifier.testTag(MACRO_ADD_TAG)) {
+        Text(stringResource(Res.string.macros_add), color = MaterialTheme.colorScheme.primary)
+    }
+    if (onOpenControl != null) {
+        GhostButton(
+            shape = AppShape(9.dp),
+            onClick = onOpenControl,
+            modifier = Modifier.testTag(MACRO_CONTROL_TAG),
+        ) { Text(stringResource(Res.string.control_open)) }
+    }
+    if (editing != null && isSaved) {
+        GhostButton(shape = AppShape(9.dp), onClick = { onDelete(editing) }) {
+            Text(stringResource(Res.string.delete_saved_string))
         }
-        if (onOpenControl != null) {
-            GhostButton(
-                shape = AppShape(6.dp),
-                onClick = onOpenControl,
-                modifier = Modifier.testTag(MACRO_CONTROL_TAG),
-            ) { Text(stringResource(Res.string.control_open)) }
-        }
-        if (editing != null && isSaved) {
-            GhostButton(shape = AppShape(6.dp), onClick = { onDelete(editing) }) {
-                Text(stringResource(Res.string.delete_saved_string))
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        GhostButton(shape = AppShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
-        if (editing != null) {
-            RaisedButton(
-                shape = AppShape(6.dp),
-                onClick = { onSave(editing) },
-                modifier = Modifier.testTag(MACRO_SAVE_TAG),
-            ) {
-                Text(stringResource(Res.string.macros_save))
-            }
+    }
+    Spacer(Modifier.weight(1f))
+    KeyButton(shape = AppShape(10.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
+    if (editing != null) {
+        RaisedButton(
+            shape = AppShape(10.dp),
+            onClick = { onSave(editing) },
+            modifier = Modifier.testTag(MACRO_SAVE_TAG),
+        ) {
+            Text(stringResource(Res.string.macros_save), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -230,3 +300,4 @@ internal fun macroEditTag(id: String) = "macro_edit_$id"
 
 private val MACROS_DIALOG_WIDTH = 640.dp
 private val MACROS_DIALOG_HEIGHT = 600.dp
+private val MACRO_ROW_HEIGHT = 44.dp

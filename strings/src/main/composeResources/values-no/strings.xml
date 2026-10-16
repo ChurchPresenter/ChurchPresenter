@@ -2772,4 +2772,13 @@
     <string name="helper_command_look_12_does">Viser innstillingene for versetekst</string>
     <string name="helper_command_look_13">hvordan endrer jeg stilen på bibelreferansen</string>
     <string name="helper_command_look_13_does">Viser tekstinnstillingene for referansen</string>
+    <string name="message_purpose">Viser en tekstlinje over alt som er direkte.</string>
+    <string name="message_preview_empty">Meldingen din vises her</string>
+    <string name="message_stays_up">Vises i</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Egendefinert</string>
+    <string name="message_insert_blank">Sett inn felt</string>
+    <string name="props_purpose">Ting som blir på skjermen over alt annet.</string>
+    <string name="macros_purpose">Kjør flere handlinger med ett klikk eller én tast.</string>
 </resources>

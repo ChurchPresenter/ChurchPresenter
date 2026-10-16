@@ -2730,4 +2730,13 @@
     <string name="helper_command_look_12_does">Показывает настройки текста стихов</string>
     <string name="helper_command_look_13">как оформить ссылку на стих</string>
     <string name="helper_command_look_13_does">Показывает настройки текста ссылки</string>
+    <string name="message_purpose">Показывает строку текста поверх всего, что в эфире.</string>
+    <string name="message_preview_empty">Здесь появится ваше сообщение</string>
+    <string name="message_stays_up">Показывать</string>
+    <string name="message_seconds_short">%1$d с</string>
+    <string name="message_one_minute">1 мин</string>
+    <string name="message_duration_custom">Своё</string>
+    <string name="message_insert_blank">Вставить поле</string>
+    <string name="props_purpose">То, что остаётся на экране поверх всего.</string>
+    <string name="macros_purpose">Запускайте несколько действий одним нажатием или клавишей.</string>
 </resources>

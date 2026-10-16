@@ -2728,4 +2728,13 @@
     <string name="helper_command_look_12_does">Аят мәтінінің баптауларын көрсетеді</string>
     <string name="helper_command_look_13">киелі кітап сілтемесін қалай безендіремін</string>
     <string name="helper_command_look_13_does">Сілтеме мәтінінің баптауларын көрсетеді</string>
+    <string name="message_purpose">Эфирдегі барлық нәрсенің үстінен мәтін жолын көрсетеді.</string>
+    <string name="message_preview_empty">Хабарыңыз осында көрінеді</string>
+    <string name="message_stays_up">Экранда тұрады</string>
+    <string name="message_seconds_short">%1$d с</string>
+    <string name="message_one_minute">1 мин</string>
+    <string name="message_duration_custom">Өзіндік</string>
+    <string name="message_insert_blank">Бос орын қою</string>
+    <string name="props_purpose">Барлығының үстінде экранда қалатын элементтер.</string>
+    <string name="macros_purpose">Бірнеше әрекетті бір басумен немесе пернемен іске қосыңыз.</string>
 </resources>

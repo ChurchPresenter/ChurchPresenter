@@ -2755,4 +2755,13 @@
     <string name="helper_command_look_12_does">Muestra los ajustes de texto del versículo</string>
     <string name="helper_command_look_13">cómo cambio el estilo de la referencia bíblica</string>
     <string name="helper_command_look_13_does">Muestra los ajustes de texto de la referencia</string>
+    <string name="message_purpose">Muestra una línea de texto sobre lo que esté en vivo.</string>
+    <string name="message_preview_empty">Tu mensaje aparece aquí</string>
+    <string name="message_stays_up">Permanece durante</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Personalizado</string>
+    <string name="message_insert_blank">Insertar campo</string>
+    <string name="props_purpose">Elementos que permanecen en pantalla sobre todo lo demás.</string>
+    <string name="macros_purpose">Ejecuta varias acciones con un clic o una tecla.</string>
 </resources>

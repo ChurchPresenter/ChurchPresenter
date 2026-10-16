@@ -2727,4 +2727,13 @@
     <string name="helper_command_look_12_does">Показує налаштування тексту віршів</string>
     <string name="helper_command_look_13">як оформити посилання на вірш</string>
     <string name="helper_command_look_13_does">Показує налаштування тексту посилання</string>
+    <string name="message_purpose">Показує рядок тексту поверх усього, що в ефірі.</string>
+    <string name="message_preview_empty">Тут з’явиться ваше повідомлення</string>
+    <string name="message_stays_up">Показувати</string>
+    <string name="message_seconds_short">%1$d с</string>
+    <string name="message_one_minute">1 хв</string>
+    <string name="message_duration_custom">Своє</string>
+    <string name="message_insert_blank">Вставити поле</string>
+    <string name="props_purpose">Те, що лишається на екрані поверх усього.</string>
+    <string name="macros_purpose">Запускайте кілька дій одним натисканням або клавішею.</string>
 </resources>

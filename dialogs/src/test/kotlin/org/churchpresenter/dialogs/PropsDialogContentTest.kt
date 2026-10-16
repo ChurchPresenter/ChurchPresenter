@@ -18,6 +18,7 @@ import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.PropKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import androidx.compose.ui.test.onNodeWithContentDescription
 
 /** The Props dialog: switching props on and off, and adding, editing and deleting them. */
 class PropsDialogContentTest {
@@ -123,5 +124,19 @@ class PropsDialogContentTest {
         assertEquals("prop2", newPropId(listOf(logo)))
         assertEquals("prop3", newPropId(listOf(logo, logo.copy(id = "prop2"))))
         assertEquals("prop3", newPropId(listOf(logo.copy(id = "prop2"))), "past an id already taken")
+    }
+
+    @Test
+    fun `the header names the tool and its close closes`() = dialog { seen ->
+        onNodeWithText("Things that stay on screen over everything.").assertExists()
+        onNodeWithContentDescription("Close").performClick()
+        assertEquals(1, seen.dismissed)
+    }
+
+    @Test
+    fun `a prop's row says what it is and where it sits, and opens it for editing`() = dialog { _ ->
+        onNodeWithText("Picture · Top right").assertExists()
+        onNodeWithTag(propEditTag("prop1")).performClick()
+        onNodeWithTag(PROP_NAME_TAG).assertExists()
     }
 }

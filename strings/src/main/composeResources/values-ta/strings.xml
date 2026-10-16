@@ -2778,4 +2778,13 @@
     <string name="helper_command_look_12_does">வசன உரை அமைப்புகளைக் காட்டும்</string>
     <string name="helper_command_look_13">வேதாகமக் குறிப்பின் பாணியை மாற்றுவது எப்படி</string>
     <string name="helper_command_look_13_does">குறிப்பின் உரை அமைப்புகளைக் காட்டும்</string>
+    <string name="message_purpose">நேரலையில் உள்ள எதன் மீதும் ஒரு வரி உரையைக் காட்டும்.</string>
+    <string name="message_preview_empty">உங்கள் செய்தி இங்கே தோன்றும்</string>
+    <string name="message_stays_up">காட்டப்படும் நேரம்</string>
+    <string name="message_seconds_short">%1$d வி</string>
+    <string name="message_one_minute">1 நிமி</string>
+    <string name="message_duration_custom">தனிப்பயன்</string>
+    <string name="message_insert_blank">காலியிடத்தைச் செருகு</string>
+    <string name="props_purpose">எல்லாவற்றின் மேலும் திரையில் இருக்கும் உருப்படிகள்.</string>
+    <string name="macros_purpose">ஒரே கிளிக் அல்லது விசையில் பல செயல்களை இயக்கவும்.</string>
 </resources>

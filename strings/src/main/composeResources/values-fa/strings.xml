@@ -2772,4 +2772,13 @@
     <string name="helper_command_look_12_does">تنظیمات متن آیه را نشان می‌دهد</string>
     <string name="helper_command_look_13">چطور آدرس کتاب‌مقدس را قالب‌بندی کنم</string>
     <string name="helper_command_look_13_does">تنظیمات متن آدرس را نشان می‌دهد</string>
+    <string name="message_purpose">یک خط متن را روی هر آنچه پخش زنده است نشان می‌دهد.</string>
+    <string name="message_preview_empty">پیام شما اینجا نمایش داده می‌شود</string>
+    <string name="message_stays_up">مدت نمایش</string>
+    <string name="message_seconds_short">%1$d ث</string>
+    <string name="message_one_minute">۱ دقیقه</string>
+    <string name="message_duration_custom">سفارشی</string>
+    <string name="message_insert_blank">درج جای خالی</string>
+    <string name="props_purpose">مواردی که روی همه‌چیز روی صفحه می‌مانند.</string>
+    <string name="macros_purpose">چند کار را با یک کلیک یا کلید اجرا کنید.</string>
 </resources>
