@@ -15,6 +15,7 @@ import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -148,6 +149,8 @@ fun ScheduleTab(
     val viewModel = scheduleViewModel ?: remember {
         ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) })
     }
+    // A view model the tab made is the tab's to dispose; one passed in belongs to its caller.
+    DisposableEffect(viewModel) { onDispose { if (scheduleViewModel == null) viewModel.dispose() } }
     viewModel.openFailure?.let { failure -> ScheduleOpenFailedDialog(failure) { viewModel.openFailure = null } }
     ScheduleAutoRestorePrompt(viewModel)
     val files = rememberScheduleFileCommands(viewModel)

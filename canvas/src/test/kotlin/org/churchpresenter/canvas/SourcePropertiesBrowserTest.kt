@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
@@ -78,6 +79,41 @@ class SourcePropertiesBrowserTest {
         }
 
     // ── URL ───────────────────────────────────────────────────────────────────
+
+    /**
+     * A page can move on by itself -- a redirect, a link the page follows. The panel then shows where
+     * it is now under the address it was given, so the operator can see the two differ.
+     */
+    @Test
+    fun `a running page that has moved on shows where it is now`() {
+        val release = holdLiveBrowserSource(Fixture.browser("web-moved").id, "https://example.org/after-redirect")
+        try {
+            sourcePanel(Fixture.browser("web-moved")) { _ ->
+                waitUntil(timeoutMillis = 5_000) {
+                    onAllNodesWithText("https://example.org/after-redirect")
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+                }
+            }
+        } finally {
+            release()
+        }
+    }
+
+    @Test
+    fun `a running page still at its own address shows nothing more`() {
+        val release = holdLiveBrowserSource(Fixture.browser("web-home").id, Fixture.browser().url)
+        try {
+            sourcePanel(Fixture.browser("web-home")) { _ ->
+                waitUntil(timeoutMillis = 5_000) {
+                    SharedBrowserFrameCache.getCurrentUrl("web-home")?.value == Fixture.browser().url
+                }
+                waitForIdle()
+                assertEquals(1, countOf(Fixture.browser().url), "only the URL field shows the address")
+            }
+        } finally {
+            release()
+        }
+    }
 
     @Test
     fun `typing a URL stores it and nothing else`() = sourcePanel(Fixture.browser()) { get ->

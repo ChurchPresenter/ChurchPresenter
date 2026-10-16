@@ -52,7 +52,7 @@ import org.churchpresenter.strings.generated.resources.song_folder_with_count
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.profiles.ScanningRow
+import org.churchpresenter.sharedui.composables.ScanningRow
 import org.churchpresenter.bibletab.catalog.BibleCatalogBrowserDialog
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.bibleformats.catalog.BibleInstallSupport

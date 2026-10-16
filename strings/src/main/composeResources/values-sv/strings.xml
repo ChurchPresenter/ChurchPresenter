@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Den här utgången visar inte detta innehåll just nu.</string>
     <string name="preview_settings_show_labels">Visa utgångsetiketter</string>
     <string name="preview_settings_show_modes">Visa visningstyp</string>
+    <string name="preview_section_display">Visning</string>
+    <string name="preview_section_layout">Layout</string>
+    <string name="preview_layout_rename">Byt namn på layout</string>
     <string name="song_add_translation">Lägg till ett språk</string>
     <string name="song_fourth_language">Språk 4</string>
     <string name="song_pane_translation">Språk %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">Visar inställningarna för verstext</string>
     <string name="helper_command_look_13">hur ändrar jag stilen på bibelhänvisningen</string>
     <string name="helper_command_look_13_does">Visar hänvisningens textinställningar</string>
+    <string name="message_purpose">Visar en textrad ovanpå allt som är live.</string>
+    <string name="message_preview_empty">Ditt meddelande visas här</string>
+    <string name="message_stays_up">Visas i</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Anpassad</string>
+    <string name="message_insert_blank">Infoga fält</string>
+    <string name="props_purpose">Saker som stannar på skärmen ovanpå allt.</string>
+    <string name="macros_purpose">Kör flera åtgärder med ett klick eller en tangent.</string>
 </resources>

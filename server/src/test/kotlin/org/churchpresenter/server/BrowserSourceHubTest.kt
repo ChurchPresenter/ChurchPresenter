@@ -12,6 +12,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.output.BrowserSourceFrame
+import org.churchpresenter.core.models.output.FrameRect
 
 class BrowserSourceHubTest {
 
@@ -23,7 +25,7 @@ class BrowserSourceHubTest {
     private fun frame(
         x: Int = 0, y: Int = 0, w: Int = 0, h: Int = 0,
         fullW: Int = 0, fullH: Int = 0, png: ByteArray = ByteArray(0),
-    ) = BrowserSourceFrame(x, y, w, h, fullW, fullH, png)
+    ) = BrowserSourceFrame(FrameRect(x, y, w, h), fullW, fullH, png)
 
     @Test
     fun `outputs are addressable by index once published`() {

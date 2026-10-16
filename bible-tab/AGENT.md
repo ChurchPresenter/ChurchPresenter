@@ -18,11 +18,11 @@ Its consumers are `:composeApp` and `:live-output`. Besides the tab the app uses
 (Planning Center scripture detection, the calendar) and the long-verse constants (Profiles → Bible).
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:bible`,
-`:bible-formats`, `:bible-engine`, `:diagnostics` and `:stt`, and nothing of `:composeApp`'s.
+`:bible-formats`, `:bible-engine`, `:diagnostics` and `:stt-engine`, and nothing of `:composeApp`'s.
 
 ## Seams to the app
 
-- **`BibleOutput`**: the verses on screen and hold mode. `LiveBible` extends it, so the app
+- **`BibleOutput`** (`:output-api`): the verses on screen and hold mode. `LiveBible` extends it, so the app
   passes `PresenterManager` directly. Tests use `FakeBibleOutput`.
 - **`BibleEngineStatus`**: whether the detection engine and its speech feed are up.
   `BibleEngineClient` implements it; it lives here and the app builds it in `MainDesktopViewModels`.

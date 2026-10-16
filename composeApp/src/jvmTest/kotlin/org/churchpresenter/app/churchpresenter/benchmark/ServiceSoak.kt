@@ -3,7 +3,9 @@ package org.churchpresenter.app.churchpresenter.benchmark
 import androidx.compose.runtime.mutableIntStateOf
 import org.churchpresenter.diagnostics.HungTestReporter
 import org.churchpresenter.diagnostics.ThreadDump
+import org.churchpresenter.diagnostics.EventThreadIoMonitor
 import org.churchpresenter.diagnostics.UiWatchdog
+import java.util.concurrent.CopyOnWriteArrayList
 import java.io.File
 import java.lang.management.ManagementFactory
 import java.util.Locale
@@ -57,7 +59,11 @@ class ServiceSoak {
         val cue = mutableIntStateOf(0)
         var cuesShown = 0
         val limits = SoakLimits()
-        UiWatchdog.start(budgetMs = limits.uiStallMs.toLong(), onAnswered = uiStalls::record)
+        UiWatchdog.start(budgetMs = { limits.uiStallMs.toLong() }, onAnswered = uiStalls::record)
+        // Every blocking call the event thread makes, however deep in a helper: AGENT.md, "Live-safe
+        // output paths". Started before the output is built, since a first composition counts too.
+        val blocked = CopyOnWriteArrayList<String>()
+        val io = EventThreadIoMonitor(onBlocked = { blocked += it.describe() }).start()
         // Watched like a frame: building the output composes it for the first time, and a soak once
         // hung right there, before the frame loop and its own watchdog had started.
         val built = SoakStallWatchdog(
@@ -77,9 +83,10 @@ class ServiceSoak {
             }
         }
         UiWatchdog.stop()
+        io.close()
         photo.parentFile.deleteRecursively()
 
-        val verdict = judge(run.samples, limits)
+        val verdict = judge(run.samples, limits, eventThreadIo = blocked.toList())
         val description = "${scenarios.size} content types in turn, ${cueSeconds}s a cue, on one " +
             "${WIDTH}x$HEIGHT off-screen output at $fps fps for $minutes minutes; sampled every " +
             "${sampleSeconds}s. The first pass through every content type is warm-up."

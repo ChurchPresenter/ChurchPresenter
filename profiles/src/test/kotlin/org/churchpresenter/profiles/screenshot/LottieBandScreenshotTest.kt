@@ -76,6 +76,7 @@ import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Lottie lower third: the generated band the Bible and Songs presenters play instead of the
@@ -256,9 +257,11 @@ class LottieBandScreenshotTest {
     private fun shoot(name: String, clock: BibleBandClock, content: @Composable () -> Unit) =
         runSkikoComposeUiTest(size = frame, density = Density(1f)) {
         setContent {
-            MaterialTheme {
-                CompositionLocalProvider(LocalLottieBandClock provides mutableStateOf(clock)) {
-                    Box(screen) { content() }
+            PinnedFonts {
+                MaterialTheme {
+                    CompositionLocalProvider(LocalLottieBandClock provides mutableStateOf(clock)) {
+                        Box(screen) { content() }
+                    }
                 }
             }
         }
@@ -286,9 +289,11 @@ class LottieBandScreenshotTest {
         stackedThemes(SECTION, name) { mode, file ->
             runSkikoComposeUiTest(size = window, density = Density(1f)) {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.size(window.width.dp, window.height.dp)) {
-                            BibleLottieGenApp(outputDir = null, onFileSaved = null, seed = seed)
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.size(window.width.dp, window.height.dp)) {
+                                BibleLottieGenApp(outputDir = null, onFileSaved = null, seed = seed)
+                            }
                         }
                     }
                 }

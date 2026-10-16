@@ -73,6 +73,7 @@ import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.serverPortOrNull
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
@@ -193,7 +194,7 @@ private fun ServerCard(
         ServerEnableRow(
             isRunning = isRunning,
             onEnable = { enable ->
-                val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
+                val port = serverPortOrNull(portText) ?: Constants.SERVER_DEFAULT_PORT
                 if (enable) {
                     companionServer.start(port, hostText.trim())
                     onSettingsChange { s ->
@@ -216,14 +217,14 @@ private fun ServerCard(
             isRunning = isRunning,
             onPortText = { v ->
                 portText = v
-                v.toIntOrNull()?.let { port ->
+                serverPortOrNull(v)?.let { port ->
                     onSettingsChange { s ->
                         s.copy(serverSettings = s.serverSettings.copy(port = port))
                     }
                 }
             },
             onRestart = {
-                val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
+                val port = serverPortOrNull(portText) ?: Constants.SERVER_DEFAULT_PORT
                 companionServer.stop()
                 companionServer.start(port, hostText.trim())
             },

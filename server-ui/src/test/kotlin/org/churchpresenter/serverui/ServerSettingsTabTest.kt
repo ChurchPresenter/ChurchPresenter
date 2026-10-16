@@ -81,6 +81,13 @@ class ServerSettingsTabTest {
         assertEquals(65535, get().serverSettings.port, "five digits must be accepted")
     }
 
+    /** Five digits past the last port fit the field but are no port, so they are never stored. */
+    @Test
+    fun `a five-digit number past the last port is not stored`() = serverTab { get, _ ->
+        retypeField(Constants.SERVER_DEFAULT_PORT.toString(), "87659")
+        assertEquals(Constants.SERVER_DEFAULT_PORT, get().serverSettings.port, "87659 must not be stored")
+    }
+
     // ── Host override ───────────────────────────────────────────────────────────────────────────
 
     @Test

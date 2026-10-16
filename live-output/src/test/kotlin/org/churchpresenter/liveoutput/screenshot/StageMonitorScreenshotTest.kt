@@ -12,10 +12,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onRoot
-import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.liveoutput.StageMonitorScreen
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.MetronomePosition
 import org.churchpresenter.settings.QASettings
@@ -43,6 +41,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
+import org.churchpresenter.sharedui.screenshot.captureTo
+import java.io.File
 
 /**
  * The stage monitor — the screen the worship leader and the speaker read from.
@@ -94,35 +95,37 @@ class StageMonitorScreenshotTest {
         awaitPicture: Boolean = false,
     ) = runDesktopComposeUiTest(width = output.width, height = output.height) {
         setContent {
-            MaterialTheme {
-                Box(Modifier.fillMaxSize()) {
-                    StageMonitorScreen(
-                        sm = settings,
-                        showChords = showChords,
-                        transposeSteps = transposeSteps,
-                        slideContent = presenting,
-                        announcementActive = announcementActive,
-                        currentLyricSection = section,
-                        allLyricSections = sections,
-                        songDisplaySectionIndex = sectionIndex,
-                        displayedVerses = verses,
-                        nextVerses = nextVerses,
-                        announcementText = announcementText,
-                        displayedImagePath = imagePath,
-                        displayedSlide = slide,
-                        presenterNotes = notes,
-                        activeScene = scene,
-                        displayedQuestion = question,
-                        displayedDictionaryEntry = entry,
-                        qaSettings = QASettings(),
-                        dictionarySettings = DictionarySettings(),
-                        // Pinned, never read from the machine. The clock zone drew the real wall
-                        // clock, so 22 of these images changed on every run and the suite could not
-                        // be read as pass/fail. 24-hour is pinned too: the host's locale decides
-                        // that, so a US mac and a CI box disagreed even with the instant fixed.
-                        now = { PINNED_CLOCK },
-                        use24Hour = false,
-                    )
+            PinnedFonts {
+                MaterialTheme {
+                    Box(Modifier.fillMaxSize()) {
+                        StageMonitorScreen(
+                            sm = settings,
+                            showChords = showChords,
+                            transposeSteps = transposeSteps,
+                            slideContent = presenting,
+                            announcementActive = announcementActive,
+                            currentLyricSection = section,
+                            allLyricSections = sections,
+                            songDisplaySectionIndex = sectionIndex,
+                            displayedVerses = verses,
+                            nextVerses = nextVerses,
+                            announcementText = announcementText,
+                            displayedImagePath = imagePath,
+                            displayedSlide = slide,
+                            presenterNotes = notes,
+                            activeScene = scene,
+                            displayedQuestion = question,
+                            displayedDictionaryEntry = entry,
+                            qaSettings = QASettings(),
+                            dictionarySettings = DictionarySettings(),
+                            // Pinned, never read from the machine. The clock zone drew the real wall
+                            // clock, so 22 of these images changed on every run and the suite could not
+                            // be read as pass/fail. 24-hour is pinned too: the host's locale decides
+                            // that, so a US mac and a CI box disagreed even with the instant fixed.
+                            now = { PINNED_CLOCK },
+                            use24Hour = false,
+                        )
+                    }
                 }
             }
         }
@@ -138,7 +141,7 @@ class StageMonitorScreenshotTest {
     }
 
     private fun ComposeUiTest.capture(name: String) {
-        onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
+        captureTo(File("$SCREENSHOT_ROOT/$SECTION/$name.png"))
     }
 
     // ── Nothing live ────────────────────────────────────────────────────────────────────────────

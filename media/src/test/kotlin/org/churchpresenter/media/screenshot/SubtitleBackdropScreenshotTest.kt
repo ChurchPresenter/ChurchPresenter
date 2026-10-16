@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.media.presenter.SubtitleOverlay
 import org.churchpresenter.media.subtitles.SubtitleCue
@@ -18,6 +16,9 @@ import org.churchpresenter.settings.MediaSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
+import org.churchpresenter.sharedui.screenshot.captureTo
+import java.io.File
 
 /**
  * Video subtitles carrying a backdrop, on a full output, so a clip at the parent of the text shows.
@@ -27,12 +28,14 @@ class SubtitleBackdropScreenshotTest {
 
     private fun shootSubtitles(name: String, settings: MediaSettings) = runComposeUiTest {
         setContent {
-            MaterialTheme {
-                Box(Modifier.size(1280.dp, 720.dp)) { SubtitleOverlay(cue = CUE, mediaSettings = settings) }
+            PinnedFonts {
+                MaterialTheme {
+                    Box(Modifier.size(1280.dp, 720.dp)) { SubtitleOverlay(cue = CUE, mediaSettings = settings) }
+                }
             }
         }
         waitForIdle()
-        onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
+        captureTo(File("$SCREENSHOT_ROOT/$SECTION/$name.png"))
     }
 
     @Test

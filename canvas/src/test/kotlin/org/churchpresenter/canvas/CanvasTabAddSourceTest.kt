@@ -7,6 +7,7 @@ import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import androidx.compose.ui.test.performClick
 
 /**
  * Every type the Add-source menu offers, and what each one actually adds.
@@ -133,5 +134,18 @@ class CanvasTabAddSourceTest {
             assertEquals(false, source.preview)
             // The layer draws its own placeholder rather than a black rectangle.
             onAllNodesWithText("No OMT source selected")[0].assertExists()
+        }
+
+    @Test
+    fun `the add menu closes without adding anything when dismissed`() =
+        canvasTab(seed = { addScene("Scene") }) { vm, _ ->
+            canvasButton(CanvasLabel.ADD_SOURCE).performClick()
+            waitForIdle()
+            assertTrue(onAllNodesWithText("QR Code").fetchSemanticsNodes().isNotEmpty(), "the menu is open")
+
+            dismissPopup()
+
+            assertTrue(onAllNodesWithText("QR Code").fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty())
+            assertEquals(emptyList(), vm.sourceNames())
         }
 }

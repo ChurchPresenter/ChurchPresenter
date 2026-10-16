@@ -58,7 +58,7 @@ import org.churchpresenter.strings.generated.resources.dictionary_loading
 import org.churchpresenter.strings.generated.resources.dictionary_no_results
 import org.churchpresenter.strings.generated.resources.dictionary_search_hint
 import org.churchpresenter.theme.components.DropdownSelector
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.BibleListRowShape
@@ -104,11 +104,11 @@ internal fun DictionaryListPane(
             focus = searchFocus,
         )
 
-        // Book / chapter filter for the entry list (visible once interlinear data is loaded)
-        if (viewModel.isInterlinearDataLoaded) {
-            BibleSelector(viewModel)
-            PassageFilterRow(viewModel, getBookName)
-        }
+        // The Bible the verse rows quote, and the book / chapter filter for the entry list. The
+        // filter is there from the start, its book picker disabled until the interlinear data has
+        // loaded: a row that appeared only then would push the list down under the pointer.
+        BibleSelector(viewModel)
+        PassageFilterRow(viewModel, getBookName)
 
         ListStatus(viewModel, results.size)
         EntryList(viewModel, results, listState)
@@ -194,6 +194,7 @@ private fun PassageFilterRow(viewModel: DictionaryViewModel, getBookName: ((book
             getBookName = getBookName,
             onSelect = viewModel::filterEntryListByBook,
             modifier = Modifier.weight(BOOK_FILTER_WEIGHT),
+            enabled = viewModel.isInterlinearDataLoaded,
         )
         if (viewModel.entryBookFilter != null && viewModel.entryAvailableChapters.size > 1) {
             InScriptureChapterDropdown(

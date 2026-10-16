@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 
 /**
  * Initialises the JavaFX toolkit exactly once for the lifetime of the process.
@@ -58,18 +59,15 @@ private object JfxInit {
                     // plugged/unplugged) while Prism's GraphicsPipeline isn't fully initialised.
                     // The whole stack is JavaFX-internal with no app frames, so it can't be guarded
                     // with a try/catch at a call site — install a thread-local handler instead that
-                    // downgrades just this known race to a warning and defers everything else to
-                    // the JVM's default handler.
+                    // absorbs just this known race and defers everything else to the JVM's default
+                    // handler. It is logged, not sent: the toolkit carries on, nothing of ours is on
+                    // the stack, and a report could only ever say the race happened again.
                     Platform.runLater {
                         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
                         Thread.currentThread()
                             .uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread, throwable ->
                             if (isJavaFxScreenReconfigRace(throwable)) {
-                                CrashReporter.reportWarning(
-                                    "JavaFX screen-reconfiguration NPE (suppressed, known Prism/Glass race)",
-                                    throwable = throwable,
-                                    tags = mapOf("subsystem" to "javafx_screen")
-                                )
+                                Log.warn("JavaFX", "Screen-reconfiguration NPE absorbed (known Prism/Glass race)")
                             } else {
                                 defaultHandler?.uncaughtException(thread, throwable)
                             }

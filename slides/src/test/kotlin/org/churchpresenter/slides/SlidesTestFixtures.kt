@@ -7,14 +7,7 @@ import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
-import java.awt.Color
-import java.awt.image.BufferedImage
 import java.io.File
-import java.nio.file.Files
-import javax.imageio.ImageIO
-
-/** A fresh temp directory for one test's files. */
-fun tempDir(prefix: String): File = Files.createTempDirectory(prefix).toFile()
 
 /** A real PDF of [pages] text slides — what the loader rasterises like any deck a church hands over. */
 fun pdfDeck(dir: File, pages: Int = 3, name: String = "deck.pdf"): File {
@@ -34,17 +27,6 @@ fun pdfDeck(dir: File, pages: Int = 3, name: String = "deck.pdf"): File {
         doc.save(file)
     }
     return file
-}
-
-/** A small image filled with one [color], written as [name] in [dir]. */
-fun solidImage(dir: File, name: String, color: Color, width: Int = 16, height: Int = 9): File {
-    val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-    image.createGraphics().apply {
-        this.color = color
-        fillRect(0, 0, width, height)
-        dispose()
-    }
-    return File(dir, name).also { ImageIO.write(image, name.substringAfterLast('.'), it) }
 }
 
 /** Waits for [vm] to finish loading whatever it was given, on the deck's own signal. */

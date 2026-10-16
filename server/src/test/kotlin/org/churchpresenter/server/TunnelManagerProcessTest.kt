@@ -7,6 +7,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -228,6 +229,21 @@ class TunnelManagerProcessTest {
         // writes are ordered only by timing, so an operator who presses Stop can be shown a
         // disconnect error for a tunnel they closed themselves. Asserting either value here would be
         // asserting on that race; `tunnelUrl` is null on both paths, so it is the honest assertion.
+    }
+
+    @Test
+    fun `a shutdown hook is held only while cloudflared runs`() {
+        skipOnWindows()
+        fakeCloudflared("${banner(URL)}\nsleep 30")
+        val tunnel = manager()
+        assertFalse(tunnel.holdsShutdownHook, "a manager that has started nothing registers nothing")
+
+        tunnel.start(localPort = 8_765)
+        awaitUntil("the tunnel to come up") { tunnel.tunnelUrl.value != null }
+        assertTrue(tunnel.holdsShutdownHook, "cloudflared is killed if the app ends without stopping it")
+
+        tunnel.stop()
+        assertFalse(tunnel.holdsShutdownHook, "a stopped tunnel takes its hook back")
     }
 
     @Test

@@ -21,6 +21,7 @@ import java.net.http.HttpResponse
 import java.security.MessageDigest
 import java.time.Duration
 import java.util.Properties
+import org.churchpresenter.sharedui.utils.GuardedShutdownHook
 import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 
 private const val HTTP_OK = 200
@@ -122,6 +123,16 @@ class TunnelManager {
     private var process: Process? = null
     private var monitorJob: Job? = null
 
+    /**
+     * Kills [process] if the app ends without stopping the tunnel. Registered when a process starts
+     * and taken back by [stop], since the JVM keeps a hook until exit: a manager that never starts
+     * one -- every server made in a test -- registers nothing.
+     */
+    @Volatile
+    private var processHook: GuardedShutdownHook? = null
+
+    internal val holdsShutdownHook: Boolean get() = processHook != null
+
     private val dataDir = File(System.getProperty("user.home"), ".churchpresenter")
 
     private val os = System.getProperty("os.name").lowercase()
@@ -138,12 +149,6 @@ class TunnelManager {
     private val versionFile = File(dataDir, "cloudflared.version")
     private val pins = CloudflaredPins.load()
     private val asset = cloudflaredAsset(isWin, isMac, isArm)
-
-    init {
-        addGuardedShutdownHook("tunnel") {
-            process?.destroyForcibly()
-        }
-    }
 
     fun start(localPort: Int) {
         if (_status.value is TunnelStatus.Downloading || _status.value is TunnelStatus.Starting) return
@@ -178,6 +183,8 @@ class TunnelManager {
         monitorJob = null
         process?.destroyForcibly()
         process = null
+        processHook?.remove()
+        processHook = null
         _tunnelUrl.value = null
         _status.value = TunnelStatus.Idle
     }
@@ -240,6 +247,8 @@ class TunnelManager {
 
         val proc = pb.start()
         process = proc
+        processHook?.remove()
+        processHook = addGuardedShutdownHook("tunnel") { proc.destroyForcibly() }
 
         monitorJob = scope.launch {
             var foundUrl = false

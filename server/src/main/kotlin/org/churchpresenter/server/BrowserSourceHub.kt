@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 
 /**
  * The OBS/vMix Browser Source outputs: which outputs exist, the frame stream each renderer
@@ -129,10 +130,10 @@ internal class BrowserSourceHub(
      */
     internal fun encodeBrowserSourceFrameMessage(frame: BrowserSourceFrame): ByteArray {
         val buf = java.nio.ByteBuffer.allocate(24 + frame.png.size)
-        buf.putInt(frame.x)
-        buf.putInt(frame.y)
-        buf.putInt(frame.rectWidth)
-        buf.putInt(frame.rectHeight)
+        buf.putInt(frame.rect.x)
+        buf.putInt(frame.rect.y)
+        buf.putInt(frame.rect.width)
+        buf.putInt(frame.rect.height)
         buf.putInt(frame.fullWidth)
         buf.putInt(frame.fullHeight)
         buf.put(frame.png)

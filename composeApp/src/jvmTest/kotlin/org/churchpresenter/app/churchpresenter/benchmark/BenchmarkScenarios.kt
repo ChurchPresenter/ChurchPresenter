@@ -27,7 +27,7 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.lowerthird.render.LottieRenderCache
@@ -39,7 +39,7 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.presenter.PicturePresenter
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.stt.presenter.STTPresenter
 import kotlinx.coroutines.runBlocking
 import java.awt.Color
@@ -89,7 +89,7 @@ object BenchmarkScenarios {
             "bible two translations" to { frame ->
                 Fill {
                     BiblePresenter(
-                        selectedVerses = listOf(bibleVerse(frame), bibleVerse(frame, "rst.spb", RUSSIAN)),
+                        selectedVerses = listOf(bibleVerse(frame), bibleVerse(frame, "rst.spb", RUSSIAN[frame % 2])),
                         appSettings = TWO_TRANSLATIONS,
                     )
                 }
@@ -249,7 +249,12 @@ private val BIBLE = listOf(
     "For God so loved the world, that he gave his only begotten Son.",
     "For God sent not his Son into the world to condemn the world.",
 )
-private const val RUSSIAN = "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного."
+
+// The same two verses as BIBLE, so the second translation changes with the first.
+private val RUSSIAN = listOf(
+    "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного.",
+    "Ибо не послал Бог Сына Своего в мир, чтобы судить мир.",
+)
 private val QUESTIONS = listOf(
     "How do I join a small group?",
     "How should a small group decide what to study together, and how often should it change?",

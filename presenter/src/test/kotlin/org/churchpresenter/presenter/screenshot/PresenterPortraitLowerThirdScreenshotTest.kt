@@ -42,6 +42,7 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.jetbrains.compose.resources.decodeToImageBitmap
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The portrait/mobile-aspect counterpart of [PresenterLowerThirdScreenshotTest] -- every one of its
@@ -58,7 +59,7 @@ class PresenterPortraitLowerThirdScreenshotTest {
 
     private fun shoot(name: String, content: @Composable () -> Unit) =
         runDesktopComposeUiTest(width = 1080, height = 1920) {
-            setContent { MaterialTheme { Box(screen) { content() } } }
+            setContent { PinnedFonts { MaterialTheme { Box(screen) { content() } } } }
             waitForIdle()
             capture(name)
         }

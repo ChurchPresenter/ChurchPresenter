@@ -77,6 +77,19 @@ class SoakAnalysisTest {
     }
 
     @Test
+    fun `a blocking call on the event thread fails the run, and the summary lists every place`() {
+        val places = listOf("file read /a.jpg for 3.0 ms at A.draw(line 1)", "sleep for 100.0 ms at B.close(line 2)")
+        val verdict = judge(steady(), eventThreadIo = places)
+
+        assertFalse(verdict.passed)
+        val failure = verdict.failures.single()
+        assertTrue("blocked in 2 place(s), first: ${places.first()}" in failure, failure)
+        val summary = soakMarkdown("a run", verdict, SoakLimits())
+        assertTrue("| Blocking calls on the event thread | 2 |" in summary, summary)
+        places.forEach { assertTrue("- $it" in summary, summary) }
+    }
+
+    @Test
     fun `a UI stall during warm-up is not judged`() {
         val verdict = judge(listOf(sample(0, 200.0, warmup = true, uiStalls = 3, maxUiStallMs = 900.0)) + steady())
         assertTrue(verdict.passed, verdict.failures.toString())

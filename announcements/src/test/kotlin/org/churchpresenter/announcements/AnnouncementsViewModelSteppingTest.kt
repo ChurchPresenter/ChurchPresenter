@@ -26,21 +26,6 @@ class AnnouncementsViewModelSteppingTest {
         created.clear()
     }
 
-    // ── formatTimer ─────────────────────────────────────────────────────────────
-
-    @Test
-    fun `under an hour formats as minutes and seconds`() {
-        assertEquals("00:00", AnnouncementsViewModel.formatTimer(0))
-        assertEquals("01:05", AnnouncementsViewModel.formatTimer(65))
-        assertEquals("59:59", AnnouncementsViewModel.formatTimer(3599))
-    }
-
-    @Test
-    fun `an hour or more adds the hours field`() {
-        assertEquals("1:00:00", AnnouncementsViewModel.formatTimer(3600))
-        assertEquals("1:01:01", AnnouncementsViewModel.formatTimer(3661))
-    }
-
     // ── plain field setters and clamps ──────────────────────────────────────────
 
     @Test

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Hindi kasalukuyang ipinapakita ng output na ito ang nilalamang ito.</string>
     <string name="preview_settings_show_labels">Ipakita ang mga label ng output</string>
     <string name="preview_settings_show_modes">Ipakita ang uri ng display</string>
+    <string name="preview_section_display">Display</string>
+    <string name="preview_section_layout">Layout</string>
+    <string name="preview_layout_rename">Palitan ang pangalan ng layout</string>
     <string name="song_add_translation">Magdagdag ng wika</string>
     <string name="song_fourth_language">Wika 4</string>
     <string name="song_pane_translation">Wika %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">Ipinapakita ang mga setting ng text ng talata</string>
     <string name="helper_command_look_13">paano i-istilo ang reperensya ng Biblia</string>
     <string name="helper_command_look_13_does">Ipinapakita ang mga setting ng text ng reperensya</string>
+    <string name="message_purpose">Nagpapakita ng isang linya ng teksto sa ibabaw ng anumang live.</string>
+    <string name="message_preview_empty">Lalabas dito ang iyong mensahe</string>
+    <string name="message_stays_up">Mananatili nang</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Custom</string>
+    <string name="message_insert_blank">Magsingit ng blangko</string>
+    <string name="props_purpose">Mga bagay na nananatili sa screen sa ibabaw ng lahat.</string>
+    <string name="macros_purpose">Magpatakbo ng ilang aksyon sa isang click o key.</string>
 </resources>

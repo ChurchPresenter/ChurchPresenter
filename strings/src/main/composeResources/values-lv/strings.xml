@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Šis izvads pašlaik nerāda šo saturu.</string>
     <string name="preview_settings_show_labels">Rādīt izvadu etiķetes</string>
     <string name="preview_settings_show_modes">Rādīt attēlošanas veidu</string>
+    <string name="preview_section_display">Attēlojums</string>
+    <string name="preview_section_layout">Izkārtojums</string>
+    <string name="preview_layout_rename">Pārsaukt izkārtojumu</string>
     <string name="song_add_translation">Pievienot valodu</string>
     <string name="song_fourth_language">4. valoda</string>
     <string name="song_pane_translation">%1$d. valoda</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">Rāda panta teksta iestatījumus</string>
     <string name="helper_command_look_13">kā noformēt bībeles norādi</string>
     <string name="helper_command_look_13_does">Rāda norādes teksta iestatījumus</string>
+    <string name="message_purpose">Parāda teksta rindu pāri visam, kas ir ēterā.</string>
+    <string name="message_preview_empty">Šeit parādīsies jūsu ziņojums</string>
+    <string name="message_stays_up">Paliek redzams</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Pielāgots</string>
+    <string name="message_insert_blank">Ievietot lauku</string>
+    <string name="props_purpose">Elementi, kas paliek ekrānā virs visa.</string>
+    <string name="macros_purpose">Palaidiet vairākas darbības ar vienu klikšķi vai taustiņu.</string>
 </resources>

@@ -25,6 +25,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.output.BrowserSourceFrame
+import org.churchpresenter.core.models.output.FrameRect
 
 /**
  * `/browser-source/{index}` — the OBS overlay page and its guards. All configuration ([updateBrowserSourceOutputs]),
@@ -133,10 +135,7 @@ class CompanionServerBrowserSourceTest {
     @Test
     fun `encodeBrowserSourceFrameMessage packs a 24-byte big-endian header followed by the raw PNG bytes`() {
         val frame = BrowserSourceFrame(
-            x = 10,
-            y = 20,
-            rectWidth = 30,
-            rectHeight = 40,
+            rect = FrameRect(10, 20, 30, 40),
             fullWidth = 1920,
             fullHeight = 1080,
             png = byteArrayOf(1, 2, 3),
@@ -158,7 +157,7 @@ class CompanionServerBrowserSourceTest {
 
     @Test
     fun `encodeBrowserSourceFrameMessage with an empty PNG payload is just the header`() {
-        val frame = BrowserSourceFrame(0, 0, 0, 0, 0, 0, png = ByteArray(0))
+        val frame = BrowserSourceFrame(FrameRect(0, 0, 0, 0), 0, 0, png = ByteArray(0))
         assertEquals(24, server.browserSource.encodeBrowserSourceFrameMessage(frame).size)
     }
 
@@ -213,10 +212,7 @@ class CompanionServerBrowserSourceTest {
         val frames = MutableSharedFlow<BrowserSourceFrame>(extraBufferCapacity = 4)
         server.registerBrowserSourceFrames(0, frames)
         val frame = BrowserSourceFrame(
-            x = 1,
-            y = 2,
-            rectWidth = 3,
-            rectHeight = 4,
+            rect = FrameRect(1, 2, 3, 4),
             fullWidth = 5,
             fullHeight = 6,
             png = byteArrayOf(9, 8, 7),

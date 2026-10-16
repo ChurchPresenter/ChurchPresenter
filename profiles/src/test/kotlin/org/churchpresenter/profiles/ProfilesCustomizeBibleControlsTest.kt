@@ -14,6 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.retypeNumberField
 
 /**
  * Driving the Bible pane's controls, and reading back what each one stored.

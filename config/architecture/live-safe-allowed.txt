@@ -1,0 +1,10 @@
+# Blocking calls the live-safe rule lets stay on the event thread (BlockingCallOnEventThread, in
+# :detekt-rules; AGENT.md, "Live-safe output paths"). One line each:
+#
+#   <path from the repo root>: <function> <call>  # why it stays
+#
+# Written by hand and only ever shortened: nothing writes this file, a line whose call is gone fails
+# detekt in that file, and a line naming a file that is gone fails checkLiveSafeAllowlist. Never add
+# a line without asking.
+
+live-output/src/main/kotlin/org/churchpresenter/liveoutput/DeckLinkComposeOutput.kt: DeckLinkComposeOutput Thread.sleep  # on dispose only: the black frames must reach the device before DeckLinkManager.close

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">لا يعرض هذا المخرج هذا المحتوى حاليًا.</string>
     <string name="preview_settings_show_labels">إظهار تسميات المخارج</string>
     <string name="preview_settings_show_modes">إظهار نوع العرض</string>
+    <string name="preview_section_display">العرض</string>
+    <string name="preview_section_layout">التخطيط</string>
+    <string name="preview_layout_rename">إعادة تسمية التخطيط</string>
     <string name="song_add_translation">إضافة لغة</string>
     <string name="song_fourth_language">اللغة 4</string>
     <string name="song_pane_translation">اللغة %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">يعرض إعدادات نص الآية</string>
     <string name="helper_command_look_13">كيف أنسّق مرجع الكتاب المقدس</string>
     <string name="helper_command_look_13_does">يعرض إعدادات نص المرجع</string>
+    <string name="message_purpose">يعرض سطرًا من النص فوق كل ما هو مباشر.</string>
+    <string name="message_preview_empty">تظهر رسالتك هنا</string>
+    <string name="message_stays_up">تبقى ظاهرة لمدة</string>
+    <string name="message_seconds_short">%1$d ث</string>
+    <string name="message_one_minute">1 د</string>
+    <string name="message_duration_custom">مخصص</string>
+    <string name="message_insert_blank">إدراج فراغ</string>
+    <string name="props_purpose">عناصر تبقى على الشاشة فوق كل شيء.</string>
+    <string name="macros_purpose">شغّل عدة إجراءات بنقرة أو مفتاح واحد.</string>
 </resources>

@@ -1,5 +1,7 @@
 package org.churchpresenter.settings
 
+import org.churchpresenter.settings.utils.Constants
+
 /**
  * What an output assigned to [profile] actually renders with: the global document's content
  * (library folder, file lists, translation-stack membership, column widths -- see
@@ -118,3 +120,9 @@ private class LastResult<T>(private val compute: (AppSettings) -> T) {
 fun ProjectionSettings.profileFor(assignment: ScreenAssignment): OutputProfile? =
     if (assignment.activeProfileId == BLANK_OUTPUT_PROFILE_ID) BLANK_OUTPUT_PROFILE
     else assignment.activeProfileId?.let { id -> outputProfiles.find { it.id == id } }
+
+/** The screens whose output profile is a stage monitor, by their index among the assignments. */
+fun stageMonitorScreenIndices(proj: ProjectionSettings): List<Int> =
+    proj.screenAssignments.indices.filter {
+        proj.profileFor(proj.screenAssignments[it])?.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
+    }

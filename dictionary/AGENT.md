@@ -8,13 +8,16 @@ The **Strong's dictionary**:
 - the tab (`DictionaryTab` and its panes);
 - `DictionaryViewModel`;
 - the interlinear index (`InterlinearRepository`);
-- `DictionaryPresenter` (`presenter/`), the entry's card on an output;
+- not `DictionaryPresenter`, the entry's card on an output: that is `:presenter`'s, in this module's
+  `presenter` package, so the output can draw it without depending on a tab;
 - the data both read: the Strong's dictionaries, in English and Russian, and the Greek and Hebrew
   interlinear files.
 
 A real Gradle module of this build: `include(":dictionary")`, `implementation(projects.dictionary)`.
 Its consumers are `:composeApp` and `:live-output`. Its companion server serves the same data
-through its own `StrongsDictionaryRepository`, and its stage monitor shows a `StrongsEntry`.
+through its own `StrongsDictionaryRepository`, and its stage monitor shows a `StrongsEntry`. That one
+entry is a model in `:core-models` (`core.models.dictionary`), since the output, the server and this
+module all carry it.
 
 It takes `:shared-ui`, `:core-models`, `:strings`, `:icons`, `:settings`, `:theme` and `:bible`, and nothing of
 `:composeApp`'s.

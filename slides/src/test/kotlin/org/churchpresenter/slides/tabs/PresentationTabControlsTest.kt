@@ -2,6 +2,9 @@
 
 package org.churchpresenter.slides.tabs
 
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsEnabled
@@ -260,9 +263,28 @@ class PresentationTabControlsTest {
     }
 
     // ── Remote control dialog ─────────────────────────────────────────────────────
-    // Not tested: PresentationRemoteDialog constructs a real java.awt.Window (via
-    // ComposeDialog/JDialog), which throws HeadlessException in this test JVM — the same
-    // fundamentally headless-incompatible class of gap as BibleTab's "Copy Verse" clipboard call.
+    // The app's PresentationRemoteDialog opens a real window, which a headless JVM cannot; the tab
+    // takes it as a slot, so these pass their own and assert the tab opens and closes it.
+
+    @Test
+    fun `the remote button opens the host's remote dialog, which closes itself`() {
+        presentationTab(
+            remoteDialog = { onDismiss ->
+                Text("Remote dialog")
+                Button(onClick = onDismiss) { Text("Close remote") }
+            },
+        ) { _, _ ->
+            onNodeWithText("Remote dialog").assertDoesNotExist()
+
+            presentationButton(PresentationLabel.REMOTE).performClick()
+            waitForIdle()
+            onNodeWithText("Remote dialog").assertExists()
+
+            onNodeWithText("Close remote").performClick()
+            waitForIdle()
+            onNodeWithText("Remote dialog").assertDoesNotExist()
+        }
+    }
 
     @Test
     fun `clicking the freeze button reports to the host`() {

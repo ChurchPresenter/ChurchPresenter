@@ -26,6 +26,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Companion Surface tab: the hint with nothing configured, one surface's button grid, and the
@@ -88,12 +89,14 @@ class CompanionSurfaceTabScreenshotTest {
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val vm = CompanionSatelliteViewModel().also { created += it }.apply(withButtons)
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Surface(Modifier.fillMaxSize()) {
-                        CompanionSurfaceTab(
-                            appSettings = AppSettings(companionSatelliteConnections = connections),
-                            viewModel = vm,
-                        )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Surface(Modifier.fillMaxSize()) {
+                            CompanionSurfaceTab(
+                                appSettings = AppSettings(companionSatelliteConnections = connections),
+                                viewModel = vm,
+                            )
+                        }
                     }
                 }
             }

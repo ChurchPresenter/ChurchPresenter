@@ -10,6 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.retypeNumberField
 
 /**
  * The strip under the Bible preview: the four margins, the fades, the band's height and the rows

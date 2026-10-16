@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">यह आउटपुट अभी यह सामग्री नहीं दिखा रहा है।</string>
     <string name="preview_settings_show_labels">आउटपुट लेबल दिखाएँ</string>
     <string name="preview_settings_show_modes">प्रदर्शन प्रकार दिखाएँ</string>
+    <string name="preview_section_display">प्रदर्शन</string>
+    <string name="preview_section_layout">लेआउट</string>
+    <string name="preview_layout_rename">लेआउट का नाम बदलें</string>
     <string name="song_add_translation">एक भाषा जोड़ें</string>
     <string name="song_fourth_language">भाषा 4</string>
     <string name="song_pane_translation">भाषा %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">पद के टेक्स्ट की सेटिंग दिखाता है</string>
     <string name="helper_command_look_13">बाइबल संदर्भ की स्टाइल कैसे बदलें</string>
     <string name="helper_command_look_13_does">संदर्भ की टेक्स्ट सेटिंग दिखाता है</string>
+    <string name="message_purpose">जो भी लाइव है उसके ऊपर टेक्स्ट की एक पंक्ति दिखाता है।</string>
+    <string name="message_preview_empty">आपका संदेश यहाँ दिखेगा</string>
+    <string name="message_stays_up">कितनी देर दिखे</string>
+    <string name="message_seconds_short">%1$d से</string>
+    <string name="message_one_minute">1 मि</string>
+    <string name="message_duration_custom">कस्टम</string>
+    <string name="message_insert_blank">रिक्त स्थान डालें</string>
+    <string name="props_purpose">चीज़ें जो हर चीज़ के ऊपर स्क्रीन पर बनी रहती हैं।</string>
+    <string name="macros_purpose">एक क्लिक या कुंजी से कई कार्य चलाएँ।</string>
 </resources>

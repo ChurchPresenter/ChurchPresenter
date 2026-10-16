@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Ovaj izlaz trenutačno ne prikazuje ovaj sadržaj.</string>
     <string name="preview_settings_show_labels">Prikaži oznake izlaza</string>
     <string name="preview_settings_show_modes">Prikaži vrstu prikaza</string>
+    <string name="preview_section_display">Prikaz</string>
+    <string name="preview_section_layout">Raspored</string>
+    <string name="preview_layout_rename">Preimenuj raspored</string>
     <string name="song_add_translation">Dodaj jezik</string>
     <string name="song_fourth_language">Jezik 4</string>
     <string name="song_pane_translation">Jezik %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">Prikazuje postavke teksta retka</string>
     <string name="helper_command_look_13">kako oblikovati biblijsku referencu</string>
     <string name="helper_command_look_13_does">Prikazuje postavke teksta reference</string>
+    <string name="message_purpose">Prikazuje redak teksta preko svega što je uživo.</string>
+    <string name="message_preview_empty">Ovdje će se pojaviti vaša poruka</string>
+    <string name="message_stays_up">Ostaje prikazano</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Prilagođeno</string>
+    <string name="message_insert_blank">Umetni polje</string>
+    <string name="props_purpose">Elementi koji ostaju na zaslonu iznad svega.</string>
+    <string name="macros_purpose">Pokrenite više radnji jednim klikom ili tipkom.</string>
 </resources>

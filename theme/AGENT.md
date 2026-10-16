@@ -100,7 +100,7 @@ All three run in CI, gated on this directory or the shared build files changing.
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, `src/main/kotlin` and
   `src/test/kotlin` both in scope. Must be clean.
-- **Coverage**: the root build's default six counters at 85%, all of them — this module declares
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — this module declares
   **no** `coverageFloors` and no `coverageExcludes`. Keep it that way; a new palette is data and is
   covered by the schema tests.
 - Tests run with `java.awt.headless=true`; the Compose render tests use `compose.uiTest` and

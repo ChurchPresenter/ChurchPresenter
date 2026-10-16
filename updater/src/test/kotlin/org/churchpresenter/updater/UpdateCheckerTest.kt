@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
  * [UpdateChecker.isNewerVersion] decides whether the app nags the operator to update. A false
  * positive re-prompts forever; a false negative silently strands users on an old build.
  *
- * Versions here follow this project's own scheme (see `gitCommitCount()` in build.gradle.kts):
+ * Versions here follow this project's own scheme (see `appVersion()` in build-logic's AppBuild.kt):
  * `MAJOR.MINOR.PATCH` where MAJOR is the 2-digit year and MINOR/PATCH derive from the commit
  * count, so the numbers roll over frequently and comparisons are exercised hard in practice.
  */

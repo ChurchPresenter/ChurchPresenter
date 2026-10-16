@@ -4,21 +4,23 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 ## What it is
 
-The **Media** tab and the playback under it: the tab itself, `MediaViewModel`, the VLC players
+The **Media** tab: the tab itself, the media settings tab, the recent media files and the
+Pexels/Pixabay stock search. The playback under it -- `MediaViewModel`, the VLC players
 (`VideoPlayer`, `SoftwareVideoPlayer`, the shared frame buffer and the VLC availability checks), the
-`EmbeddedVideoDecoder` a presentation's video layers play through, `MediaPresenter` and the subtitle
-overlay, the subtitle parser, the media settings tab, the recent media files and the Pexels/Pixabay
-stock search. A real Gradle module of this build — `include(":media")`,
-`implementation(projects.media)`. Its consumers are `:composeApp` and `:live-output`.
+`EmbeddedVideoDecoder` a presentation's video layers play through, `MediaPresenter`, the subtitle
+overlay and parser -- is `:media-engine`'s, in this module's packages, which this module takes with
+`api`. A real Gradle module of this build — `include(":media")`,
+`implementation(projects.media)`. Its consumers are `:composeApp` and `:profiles` (the stock
+browser).
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme` and
-`:diagnostics`, plus vlcj and the Ktor client — and nothing of `:composeApp`'s.
+It takes `:media-engine`, `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`
+and `:diagnostics`, plus the Ktor client — and nothing of `:composeApp`'s.
 
 ## What stays outside
 
 - **Who plays what where** — the output windows, the stage monitor and `PresentationPlayer`
   (`:live-output`), the live preview and scenes use
-  `VideoPlayer`/`EmbeddedVideoDecoder`/`MediaPresenter` from here.
+  `VideoPlayer`/`EmbeddedVideoDecoder`/`MediaPresenter` from `:media-engine`.
 - **The remote-control side** — `MediaRemoteWiring` and the media routes, which reach the server.
 - **The preview-output picker** — it reads the app's outputs; the tab draws it through its
   `previewOutputPicker` slot, which the app supplies.
@@ -26,7 +28,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## The one interface
 
-**`MediaOutput`** is everything the tab needs from the live output: presenting mode, whether the
+**`MediaOutput`** (`:output-api`, in this package) is everything the tab needs from the live output: presenting mode, whether the
 presenter window is up, and the calls that put media on screen or clear it. `:live-output`'s
 `PresenterMediaOutput` implements it by passing every call to `PresenterManager` (reached as
 `presenterManager.mediaOutput`); the tab takes it, never the manager. Tests use `FakeMediaOutput`.

@@ -217,6 +217,66 @@ class CrashReporterStartupTest {
         assertEquals(CrashKind.OTHER, CrashReporter.classifyCrash(first))
     }
 
+    // ── A development build's own output changing under it ─────────────────────
+
+    private fun thrownAt(throwable: Throwable, vararg classNames: String) = throwable.apply {
+        stackTrace = classNames.map { StackTraceElement(it, "run", "$it.kt", 1) }.toTypedArray()
+    }
+
+    /** What a rebuild under a running app throws: one of our classes no longer on the classpath. */
+    private fun ourClassGone() = thrownAt(
+        NoClassDefFoundError("org/churchpresenter/songs/SongEditorRequest"),
+        "org.churchpresenter.app.churchpresenter.BibleAndSongsPaneWiringKt",
+        "androidx.compose.runtime.RecomposeScopeImpl",
+    )
+
+    /** And a jar on the classpath rewritten while Compose read a string out of it. */
+    private fun classpathJarRewritten() = thrownAt(
+        java.util.zip.ZipException("invalid LOC header (bad signature)"),
+        "java.util.zip.ZipFile\$ZipFileInputStream",
+        "org.jetbrains.compose.resources.JvmResourceReader",
+    )
+
+    @Test
+    fun `one of our classes gone, or a classpath jar rewritten, is stale build output`() {
+        assertTrue(CrashReporter.isStaleBuildOutput(ourClassGone()))
+        assertTrue(CrashReporter.isStaleBuildOutput(classpathJarRewritten()))
+        assertTrue(
+            CrashReporter.isStaleBuildOutput(RuntimeException("while composing", ourClassGone())),
+            "wrapped is the same thing",
+        )
+    }
+
+    @Test
+    fun `a missing library class, or a broken zip the operator opened, is not`() {
+        val libraryClassGone = thrownAt(NoClassDefFoundError("org/apache/poi/Foo"), "org.apache.poi.Bar")
+        val brokenDeck = thrownAt(
+            java.util.zip.ZipException("invalid LOC header (bad signature)"),
+            "java.util.zip.ZipFile",
+            "org.churchpresenter.presentation.PptxReader",
+        )
+
+        assertFalse(CrashReporter.isStaleBuildOutput(libraryClassGone))
+        assertFalse(CrashReporter.isStaleBuildOutput(brokenDeck))
+        assertFalse(CrashReporter.isStaleBuildOutput(null))
+    }
+
+    @Test
+    fun `a development build does not send a crash from its own output changing`() {
+        startUp(analyticsReportingEnabled = false, BuildIdentity(isRelease = false))
+        val event = io.sentry.SentryEvent(ourClassGone()).apply { level = SentryLevel.FATAL }
+
+        assertNull(CrashReporter.crashAttachingBeforeSend().execute(event, io.sentry.Hint()))
+    }
+
+    @Test
+    fun `a release build still sends it, since no installed copy should ever lose a class`() {
+        startUp(analyticsReportingEnabled = false, BuildIdentity(isRelease = true))
+        val event = io.sentry.SentryEvent(ourClassGone()).apply { level = SentryLevel.FATAL }
+
+        assertEquals(event, CrashReporter.crashAttachingBeforeSend().execute(event, io.sentry.Hint()))
+    }
+
     @Test
     fun `the installed handler records what kind of crash it was`() {
         startUp(analyticsReportingEnabled = false)

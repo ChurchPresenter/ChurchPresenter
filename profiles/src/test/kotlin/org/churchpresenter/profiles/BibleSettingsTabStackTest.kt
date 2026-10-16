@@ -26,6 +26,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.composables.SCANNING_ROW_TAG
 
 /**
  * Swapping, clearing and promoting slots in the Bible tab's translation stack.

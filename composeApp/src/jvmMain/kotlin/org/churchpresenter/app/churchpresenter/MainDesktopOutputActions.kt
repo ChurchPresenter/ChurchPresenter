@@ -6,7 +6,7 @@ import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.cueOrSetAnnouncementText
 import org.churchpresenter.liveoutput.showLowerThird
 import org.churchpresenter.presentationengine.model.Deck
-import org.churchpresenter.profiles.stageMonitorScreenIndices
+import org.churchpresenter.settings.stageMonitorScreenIndices
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.sharedui.models.Presenting

@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
+import java.util.Collections
 
 /*
  * Addressing one value of a profile by its path into the profile's serialized settings -- see
@@ -51,10 +52,10 @@ internal fun OutputProfile.tree(): JsonObject = linkJson.encodeToJsonElement(thi
 internal fun JsonObject.toProfile(): OutputProfile = linkJson.decodeFromJsonElement(OutputProfile.serializer(), this)
 
 /** Every value of [this] by its path, identity and document-owned keys left out. */
-fun OutputProfile.settingPaths(): Map<String, JsonElement> {
+fun OutputProfile.settingPaths(): Map<String, JsonElement> = RecentSettingPaths.of(this) { profile ->
     val out = LinkedHashMap<String, JsonElement>()
-    tree().forEach { (key, value) -> if (key !in IDENTITY_KEYS) flattenTopLevel(key, value, out) }
-    return out
+    profile.tree().forEach { (key, value) -> if (key !in IDENTITY_KEYS) flattenTopLevel(key, value, out) }
+    Collections.unmodifiableMap(out)
 }
 
 /** One of the profile's own fields: a settings object is flattened without its document-owned keys. */

@@ -63,7 +63,7 @@ Both run in CI, gated on this directory or the shared build files changing.
 
 ## Gates
 
-Coverage uses the root build's six counters at the 85% default (see the root `AGENT.md`) — no
+Coverage uses `cp.test`'s six counters at the 85% default (see the root `AGENT.md`) — no
 `coverageFloors`, no `coverageExcludes`: everything here is testable against `FakeCompanion`, and
 the wire helpers directly (`SatelliteProtocolTest`).
 

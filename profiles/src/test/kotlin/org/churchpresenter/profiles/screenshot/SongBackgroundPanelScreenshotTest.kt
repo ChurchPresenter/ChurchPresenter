@@ -35,6 +35,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.PinnedRecentColors
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Background panel on its own, at the size it really opens at.
@@ -68,23 +69,25 @@ class SongBackgroundPanelScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
-                // Thumbnails decode inside the composition's own work, so waitForIdle covers them
-                CompositionLocalProvider(LocalThumbnailContext provides Dispatchers.Unconfined) {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, height)) {
-                            SongBackgroundPanel(
-                                background = background,
-                                lowerThirdBackground = lowerThirdBackground,
-                                onBackgroundChange = {},
-                                onLowerThirdBackgroundChange = {},
-                                sampleLine = SAMPLE_LINE,
-                                onApplyToSongbook = applyToSongbook,
-                                onDismiss = {},
-                            )
+                PinnedFonts {
+                    // Thumbnails decode inside the composition's own work, so waitForIdle covers them
+                    CompositionLocalProvider(LocalThumbnailContext provides Dispatchers.Unconfined) {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                            Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, height)) {
+                                SongBackgroundPanel(
+                                    background = background,
+                                    lowerThirdBackground = lowerThirdBackground,
+                                    onBackgroundChange = {},
+                                    onLowerThirdBackgroundChange = {},
+                                    sampleLine = SAMPLE_LINE,
+                                    onApplyToSongbook = applyToSongbook,
+                                    onDismiss = {},
+                                )
+                            }
                         }
                     }
-                }
+                    }
                 }
             }
             drive()

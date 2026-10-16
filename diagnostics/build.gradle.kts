@@ -1,19 +1,11 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.detekt)
+    id("cp.jvm-module")
     // CrashReportSweep is published from here because it exists for CrashReporter's own design:
     // the report directory is resolved once per JVM, so a test that reports an exception really
     // writes into the developer's own ~/.churchpresenter/crash-reports and has to put it back.
     // HungTestReporter is too: the root build puts these fixtures on every module's test runtime,
     // and their service file registers it, so a hung fork anywhere leaves a thread dump.
     `java-test-fixtures`
-    jacoco
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
 }
 
 dependencies {
@@ -51,20 +43,3 @@ tasks.withType<Test>().configureEach {
     systemProperty("churchpresenter.telemetry.disabled", "true")
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin", "src/testFixtures/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

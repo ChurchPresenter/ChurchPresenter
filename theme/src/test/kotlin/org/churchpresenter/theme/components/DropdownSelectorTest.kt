@@ -2,8 +2,13 @@ package org.churchpresenter.theme.components
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
@@ -134,6 +139,31 @@ class DropdownSelectorTest {
 
         assertEquals("b", current, "choosing Banana must report its key, not its display label")
         onAllNodesWithText("Banana").assertCountEquals(0)
+    }
+
+    @Test
+    fun `a disabled selector says so and opens no menu until it is enabled`() = runComposeUiTest {
+        var enabled by mutableStateOf(false)
+        setContent {
+            MaterialTheme {
+                DropdownSelector(
+                    label = "Fruit",
+                    value = "a",
+                    options = listOf("a" to "Apple", "b" to "Banana"),
+                    onValueChange = { },
+                    enabled = enabled,
+                )
+            }
+        }
+        onNodeWithText("FRUIT", substring = true).assertIsNotEnabled()
+        onNodeWithText("Apple").performClick()
+        onAllNodesWithText("Banana").assertCountEquals(0)
+
+        enabled = true
+
+        onNodeWithText("FRUIT", substring = true).assertIsEnabled()
+        onNodeWithText("Apple").performClick()
+        onAllNodesWithText("Banana").onLast().assertExists("the same press opens it once enabled")
     }
 
     @Test

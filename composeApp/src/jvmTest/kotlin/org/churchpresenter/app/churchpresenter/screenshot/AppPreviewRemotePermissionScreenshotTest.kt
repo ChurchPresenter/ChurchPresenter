@@ -19,6 +19,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 class AppPreviewRemotePermissionScreenshotTest {
 
@@ -31,37 +32,39 @@ class AppPreviewRemotePermissionScreenshotTest {
     ) = THEMES.forEach { (suffix, mode) ->
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Box(
-                        // The size the real DialogWindow opens at (DialogSizes.kt); without a
-                        // height the content stretches and leaves a gap the operator never sees.
-                        //
-                        // No backdrop behind it, and no padding around it: this shot is exported to
-                        // the website, which frames it itself. A painted margin inside the image
-                        // fought that frame — 24dp of surfaceVariant on all four sides, invisible
-                        // against the dark page and an obvious grey slab against the light one.
-                        // Safe to sit flush because the content is an opaque Surface with no shape
-                        // (RemoteEventDialog.kt), so there are no rounded corners to expose.
-                        Modifier.size(500.dp, 290.dp)
-                    ) {
-                        RemoteEventDialogContent(
-                            event = event,
-                            actionLabel = actionLabel,
-                            typeIcon = Icons.Filled.CalendarMonth,
-                            typeAccent = MaterialTheme.colorScheme.primary,
-                            bodyTitle = event.title,
-                            remaining = remaining,
-                            showAllowPermanently = true,
-                            isClientKnownAllowed = isClientKnownAllowed,
-                            isClientKnownBlocked = false,
-                            isInstanceLinkFollower = false,
-                            onAllow = {},
-                            onAllowForSession = {},
-                            onAllowPermanently = {},
-                            onBlockForSession = {},
-                            onBlockPermanently = {},
-                            onDeny = {},
-                        )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Box(
+                            // The size the real DialogWindow opens at (DialogSizes.kt); without a
+                            // height the content stretches and leaves a gap the operator never sees.
+                            //
+                            // No backdrop behind it, and no padding around it: this shot is exported to
+                            // the website, which frames it itself. A painted margin inside the image
+                            // fought that frame — 24dp of surfaceVariant on all four sides, invisible
+                            // against the dark page and an obvious grey slab against the light one.
+                            // Safe to sit flush because the content is an opaque Surface with no shape
+                            // (RemoteEventDialog.kt), so there are no rounded corners to expose.
+                            Modifier.size(500.dp, 290.dp)
+                        ) {
+                            RemoteEventDialogContent(
+                                event = event,
+                                actionLabel = actionLabel,
+                                typeIcon = Icons.Filled.CalendarMonth,
+                                typeAccent = MaterialTheme.colorScheme.primary,
+                                bodyTitle = event.title,
+                                remaining = remaining,
+                                showAllowPermanently = true,
+                                isClientKnownAllowed = isClientKnownAllowed,
+                                isClientKnownBlocked = false,
+                                isInstanceLinkFollower = false,
+                                onAllow = {},
+                                onAllowForSession = {},
+                                onAllowPermanently = {},
+                                onBlockForSession = {},
+                                onBlockPermanently = {},
+                                onDeny = {},
+                            )
+                        }
                     }
                 }
             }

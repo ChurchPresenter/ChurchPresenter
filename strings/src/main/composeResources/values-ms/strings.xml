@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Output ini tidak memaparkan kandungan ini pada masa ini.</string>
     <string name="preview_settings_show_labels">Tunjukkan label output</string>
     <string name="preview_settings_show_modes">Tunjukkan jenis paparan</string>
+    <string name="preview_section_display">Paparan</string>
+    <string name="preview_section_layout">Susun atur</string>
+    <string name="preview_layout_rename">Namakan semula susun atur</string>
     <string name="song_add_translation">Tambah bahasa</string>
     <string name="song_fourth_language">Bahasa 4</string>
     <string name="song_pane_translation">Bahasa %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">Menunjukkan tetapan teks ayat</string>
     <string name="helper_command_look_13">bagaimana nak gayakan rujukan alkitab</string>
     <string name="helper_command_look_13_does">Menunjukkan tetapan teks rujukan</string>
+    <string name="message_purpose">Memaparkan satu baris teks di atas apa sahaja yang sedang disiarkan.</string>
+    <string name="message_preview_empty">Mesej anda dipaparkan di sini</string>
+    <string name="message_stays_up">Kekal dipaparkan selama</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Tersuai</string>
+    <string name="message_insert_blank">Sisip ruang kosong</string>
+    <string name="props_purpose">Perkara yang kekal di skrin di atas segalanya.</string>
+    <string name="macros_purpose">Jalankan beberapa tindakan dengan satu klik atau kekunci.</string>
 </resources>

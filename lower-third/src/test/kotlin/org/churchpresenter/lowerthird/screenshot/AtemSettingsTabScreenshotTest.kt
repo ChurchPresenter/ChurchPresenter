@@ -20,6 +20,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The ATEM tab of the settings dialog, in both themes.
@@ -145,14 +146,16 @@ class AtemSettingsTabScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        Box(Modifier.fillMaxSize()) {
-                            var current by remember { mutableStateOf(settings) }
-                            AtemSettingsTab(
-                                settings = current,
-                                onSettingsChange = { transform -> current = transform(current) },
-                            )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                            Box(Modifier.fillMaxSize()) {
+                                var current by remember { mutableStateOf(settings) }
+                                AtemSettingsTab(
+                                    settings = current,
+                                    onSettingsChange = { transform -> current = transform(current) },
+                                )
+                            }
                         }
                     }
                 }

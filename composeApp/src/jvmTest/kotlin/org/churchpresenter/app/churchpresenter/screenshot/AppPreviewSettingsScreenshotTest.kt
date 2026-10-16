@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.profiles.SCANNING_ROW_TAG
+import org.churchpresenter.sharedui.composables.SCANNING_ROW_TAG
 import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SettingsManager
@@ -32,6 +32,7 @@ import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 class AppPreviewSettingsScreenshotTest {
 
@@ -56,26 +57,28 @@ class AppPreviewSettingsScreenshotTest {
         THEMES.forEach { (suffix, mode) ->
             runSkikoComposeUiTest(size = Size(1400f, 900f), density = Density(1f)) {
                 setContent {
-                    // Every font name drawn in one face rather than its own. The dialog's font
-                    // dropdowns otherwise render against the host's font book, which is what made
-                    // `settings_bible` disagree from machine to machine. See `LocalFontPreviewFace`.
-                    // And the calendar's default folder with it: the System tab prints it, and with
-                    // none configured it is the machine's app data folder — which under test lands
-                    // inside the working copy. See `LocalDefaultCalendarFolder` (issue #617).
-                    CompositionLocalProvider(
-                        LocalFontPreviewFace provides { FontFamily.Default },
-                        LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER,
-                    ) {
-                        OptionsDialogContent(
-                            theme = mode,
-                            settingsManager = SettingsManager(),
-                            companionServer = CompanionServer(shutdownGraceMs = 0),
-                            remoteClientManager = RemoteClientManager(),
-                            onDismiss = {},
-                            initialTab = tab,
-                            initialSettings = appSettings,
-                            detectScreens = { emptyList() },
-                        )
+                    PinnedFonts {
+                        // Every font name drawn in one face rather than its own. The dialog's font
+                        // dropdowns otherwise render against the host's font book, which is what made
+                        // `settings_bible` disagree from machine to machine. See `LocalFontPreviewFace`.
+                        // And the calendar's default folder with it: the System tab prints it, and with
+                        // none configured it is the machine's app data folder — which under test lands
+                        // inside the working copy. See `LocalDefaultCalendarFolder` (issue #617).
+                        CompositionLocalProvider(
+                            LocalFontPreviewFace provides { FontFamily.Default },
+                            LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER,
+                        ) {
+                            OptionsDialogContent(
+                                theme = mode,
+                                settingsManager = SettingsManager(),
+                                companionServer = CompanionServer(shutdownGraceMs = 0),
+                                remoteClientManager = RemoteClientManager(),
+                                onDismiss = {},
+                                initialTab = tab,
+                                initialSettings = appSettings,
+                                detectScreens = { emptyList() },
+                            )
+                        }
                     }
                 }
                 waitForIdle()

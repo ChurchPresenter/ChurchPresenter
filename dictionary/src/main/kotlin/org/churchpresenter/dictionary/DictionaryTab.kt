@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.sharedui.composables.DragHandle
 import org.churchpresenter.sharedui.composables.SearchFieldFocus
 import org.churchpresenter.sharedui.composables.goLiveKeyTarget

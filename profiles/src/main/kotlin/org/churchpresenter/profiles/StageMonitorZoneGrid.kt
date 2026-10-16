@@ -72,6 +72,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.BoxScope
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.sharedui.composables.TvScreenBox
+import org.churchpresenter.sharedui.composables.tvScreenBoxWidthFor
+import org.churchpresenter.sharedui.composables.MetronomeDot
+import org.churchpresenter.sharedui.composables.toAlignment
 
 /**
  * The stage monitor grid on the Screen Content card, and the controls that resize it.

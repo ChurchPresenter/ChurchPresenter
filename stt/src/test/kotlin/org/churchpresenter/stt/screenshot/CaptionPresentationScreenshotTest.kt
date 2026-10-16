@@ -14,7 +14,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.stt.presenter.STTPresenter
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_BREAK_SENTENCE
@@ -23,6 +23,7 @@ import org.churchpresenter.settings.CaptionReading
 import org.churchpresenter.settings.STTSettings
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The ways captions can be put on screen: pop-on, a full-width band (flush and floating), the two
@@ -36,16 +37,18 @@ class CaptionPresentationScreenshotTest {
 
     private fun shoot(name: String, settings: STTSettings, translated: Boolean = false) = runComposeUiTest {
         setContent {
-            MaterialTheme {
-                Box(screen) {
-                    STTPresenter(
-                        segments = ENGLISH,
-                        inProgressText = "",
-                        translationSegments = if (translated) SPANISH else emptyList(),
-                        inProgressTranslation = "",
-                        highlightedWords = emptyList(),
-                        sttSettings = settings.copy(dripFeedEnabled = false),
-                    )
+            PinnedFonts {
+                MaterialTheme {
+                    Box(screen) {
+                        STTPresenter(
+                            segments = ENGLISH,
+                            inProgressText = "",
+                            translationSegments = if (translated) SPANISH else emptyList(),
+                            inProgressTranslation = "",
+                            highlightedWords = emptyList(),
+                            sttSettings = settings.copy(dripFeedEnabled = false),
+                        )
+                    }
                 }
             }
         }

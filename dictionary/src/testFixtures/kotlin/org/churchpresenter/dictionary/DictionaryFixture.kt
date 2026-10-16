@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.dictionary.data.DictionaryFiles
 import org.churchpresenter.dictionary.data.InterlinearVerse
 import org.churchpresenter.dictionary.data.InterlinearWord
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.CopyOnWriteArrayList

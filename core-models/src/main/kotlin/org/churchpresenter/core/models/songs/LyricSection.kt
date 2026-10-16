@@ -1,16 +1,21 @@
 package org.churchpresenter.core.models.songs
 
+import kotlinx.serialization.Serializable
+
 /**
  * One language's share of a single slide.
  *
  * [title] is that language's song title, carried per slide for the same reason the section's own is:
  * the presenter is handed a section and never the [SongItem] it came from.
  */
+@Serializable
 data class SectionTranslation(
     val title: String = "",
     val lines: List<String> = emptyList(),
 )
 
+/** Serializable so an app the output guard relaunches can put the live slide back. */
+@Serializable
 data class LyricSection(
     val header: String? = null,
     val labelName: String = "",

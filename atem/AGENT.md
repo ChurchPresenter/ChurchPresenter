@@ -40,8 +40,8 @@ inside `ConstantsKt` is exactly how a sibling rename silently rewrote a `mockkSt
 it is uploading. Those are the two app-side dependencies the client itself does not have, and
 keeping them out is the whole reason this module cuts cleanly. `AtemBridgeTest`,
 `CompanionServerAtemUploadTest`, `CompanionServerAtemKeyTest` and `AtemUploadTracedTest` stay with
-it; they, and `:lower-third`'s `LowerThirdSequencerKeyTest`, `LowerThirdAtemUploadTest` and
-`AtemSettingsTab*` suites, drive `FakeAtemSwitcher` through `testFixtures(projects.atem)`.
+it; they, `:lower-third-engine`'s `LowerThirdSequencerKeyTest`, and `:lower-third`'s
+`LowerThirdAtemUploadTest` and `AtemSettingsTab*` suites, drive `FakeAtemSwitcher` through `testFixtures(projects.atem)`.
 
 **If a change here needs a setting or a ViewModel, it belongs in the bridge, not in this module.**
 
@@ -84,7 +84,7 @@ it; they, and `:lower-third`'s `LowerThirdSequencerKeyTest`, `LowerThirdAtemUplo
   builder/parser into a separate object still leaves ~29, so no refactor reaches it.
 
   **Do not add a baseline file to this module, and do not add a `@Suppress` without asking.**
-- **Coverage**: **no `coverageFloors` override and no `coverageExcludes`.** The root build's
+- **Coverage**: **no `coverageFloors` override and no `coverageExcludes`.** `cp.test`'s
   default six counters at 85%, as written, and all six pass:
   INSTRUCTION 95.8%, BRANCH 88.0%, LINE 99.1%, COMPLEXITY 85.8%, METHOD 99.3%, CLASS 100%.
 

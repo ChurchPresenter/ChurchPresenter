@@ -45,6 +45,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.settings.WindowLayoutSettings
+import org.churchpresenter.core.models.schedule.formatTimer
 
 /**
  * Everything the Announcements tab's pieces read, for one composition: its parameters, its
@@ -271,7 +272,7 @@ internal class AnnouncementsTabScope(inputs: AnnouncementsTabInputs, environment
     val AnnouncementsViewModel.previewText get() = when {
         isTimerExpired -> timerExpiredText.ifBlank { timerExpiredLabel }
         isTimerRunning && timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY -> liveClockText
-        isTimerRunning -> AnnouncementsViewModel.formatTimer(timerDisplayValue)
+        isTimerRunning -> formatTimer(timerDisplayValue)
         else -> text
     }
 

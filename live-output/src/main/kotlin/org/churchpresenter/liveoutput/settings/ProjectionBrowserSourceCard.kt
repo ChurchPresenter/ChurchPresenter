@@ -34,7 +34,6 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +67,6 @@ import org.churchpresenter.strings.generated.resources.remove
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.addBrowserSourceOutput
 import org.churchpresenter.settings.removeBrowserSourceOutput
@@ -93,7 +91,7 @@ private val BROWSER_SOURCE_FRAME_RATES = listOf(10, 15, 24, 30, 60)
 internal fun BrowserSourceOutputsCard(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    companionServer: CompanionServer,
+    serverUrl: String,
     onIdentifyBrowserSource: (Int) -> Unit,
 ) {
     val proj = settings.projectionSettings
@@ -105,8 +103,6 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     Spacer(modifier = Modifier.height(8.dp))
-
-    val serverUrl by companionServer.serverUrl.collectAsState()
 
     proj.browserSourceOutputs.forEachIndexed { i, output ->
         val update: (ScreenAssignment) -> Unit = { updated ->

@@ -17,6 +17,8 @@ import org.churchpresenter.settings.SongTranslationSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.sharedui.testing.retypeNumberField
+import org.churchpresenter.sharedui.testing.assertNumberFieldShows
 
 /**
  * The second-language switch inside the Song pane.

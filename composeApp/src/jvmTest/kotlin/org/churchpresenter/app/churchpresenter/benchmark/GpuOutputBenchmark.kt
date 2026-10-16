@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.benchmark
 
+import org.churchpresenter.diagnostics.UiStallReporter
+import org.churchpresenter.diagnostics.UiWatchdog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,11 +40,16 @@ private const val FALLBACK_REFRESH_HZ = 60
  * what is recorded is the gap between consecutive frames, which is what the audience sees: on a
  * 60 Hz display a steady output is 16.7 ms apart, and a gap past one and a half refreshes is a
  * dropped frame. The report goes to `gpuBenchmark.reportDir`, and to `gpuBenchmark.baselineDir`
- * when `gpuBenchmark.record` is set.
+ * when `gpuBenchmark.record` is set. With `gpuBenchmark.watchdog` set, the UI watchdog pings the
+ * event thread throughout at the budget it uses while an output is live, so a run with and one
+ * without show what the watchdog costs the outputs.
  */
 fun main() {
     val renderApi = preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)
     renderApi?.let { System.setProperty("skiko.renderApi", it) }
+    if (System.getProperty("gpuBenchmark.watchdog").toBoolean()) {
+        UiWatchdog.start(budgetMs = { UiStallReporter.LIVE_BUDGET_MS })
+    }
     val warmupFrames = System.getProperty("gpuBenchmark.warmupFrames")?.toIntOrNull() ?: DEFAULT_WARMUP_FRAMES
     val frames = System.getProperty("gpuBenchmark.frames")?.toIntOrNull() ?: DEFAULT_FRAMES
 
@@ -95,6 +102,8 @@ fun main() {
             LaunchedEffect(Unit) { exitApplication() }
         }
     }
+    // Its pings keep the event queue busy, which would keep AWT -- and this JVM -- from ever ending.
+    UiWatchdog.stop()
 
     photo.parentFile.deleteRecursively()
     val info = RunInfo.current(warmupFrames, frames)

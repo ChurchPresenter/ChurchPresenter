@@ -24,6 +24,7 @@ import androidx.compose.ui.text.AnnotatedString
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import org.churchpresenter.sharedui.composables.searchBarCard
+import org.churchpresenter.core.models.stt.HighlightedWord
 
 @Composable
 fun STTTab(

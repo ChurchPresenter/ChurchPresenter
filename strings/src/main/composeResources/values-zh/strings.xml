@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">此输出当前未显示此内容。</string>
     <string name="preview_settings_show_labels">显示输出标签</string>
     <string name="preview_settings_show_modes">显示显示类型</string>
+    <string name="preview_section_display">显示</string>
+    <string name="preview_section_layout">布局</string>
+    <string name="preview_layout_rename">重命名布局</string>
     <string name="song_add_translation">添加语言</string>
     <string name="song_fourth_language">语言 4</string>
     <string name="song_pane_translation">语言 %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">显示经文的文字设置</string>
     <string name="helper_command_look_13">怎么设置圣经出处的样式</string>
     <string name="helper_command_look_13_does">显示出处的文字设置</string>
+    <string name="message_purpose">在正在直播的内容上方显示一行文字。</string>
+    <string name="message_preview_empty">您的消息将显示在这里</string>
+    <string name="message_stays_up">显示时长</string>
+    <string name="message_seconds_short">%1$d 秒</string>
+    <string name="message_one_minute">1 分钟</string>
+    <string name="message_duration_custom">自定义</string>
+    <string name="message_insert_blank">插入空格</string>
+    <string name="props_purpose">始终显示在所有内容之上的元素。</string>
+    <string name="macros_purpose">一键或一个快捷键运行多个操作。</string>
 </resources>

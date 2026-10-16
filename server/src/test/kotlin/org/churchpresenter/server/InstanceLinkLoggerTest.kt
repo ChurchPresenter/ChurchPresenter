@@ -31,6 +31,7 @@ class InstanceLinkLoggerTest {
 
     /** Parses every line, then returns the last one carrying [event]. */
     private fun lastRowFor(event: String): JsonObject {
+        InstanceLinkLogger.flush()
         val rows = logFile().readLines().filter { it.isNotBlank() }.map { line ->
             runCatching { Json.parseToJsonElement(line) as JsonObject }
                 .getOrElse { e -> throw AssertionError("emitted invalid JSON: $line", e) }

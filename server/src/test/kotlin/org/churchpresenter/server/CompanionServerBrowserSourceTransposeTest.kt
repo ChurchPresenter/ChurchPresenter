@@ -29,6 +29,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.output.BrowserSourceFrame
+import org.churchpresenter.core.models.output.FrameRect
 
 /**
  * The musicians' transpose buttons on a Browser Source page (issue #649): the handshake that asks
@@ -224,7 +226,7 @@ class CompanionServerBrowserSourceTransposeTest {
                 frames.subscriptionCount.first { it > 0 }
                 // The transpose job starts beside the frame job; a frame emitted after both are
                 // subscribed is the first thing a page with no buttons may receive.
-                frames.emit(BrowserSourceFrame(0, 0, 1, 1, 1, 1, png = byteArrayOf(1)))
+                frames.emit(BrowserSourceFrame(FrameRect(0, 0, 1, 1), 1, 1, png = byteArrayOf(1)))
                 first = incoming.receive()
             }
         }

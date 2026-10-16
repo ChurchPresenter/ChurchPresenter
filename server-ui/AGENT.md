@@ -23,9 +23,9 @@ A real Gradle module of this build: `include(":server-ui")`, `implementation(pro
 Instance Link windows, `ScheduleSidebar` the status row, `CalendarManagerWindow` the invite, and
 `MainWindowScope` holds the `RemoteClientManager`.
 
-It takes `:server`, `:shared-ui`, `:strings`, `:settings`, `:theme`, `:calendar`, `:lower-third`
-(which JSON files are lower thirds) and `:profiles` (the settings card kit), and nothing of
-`:composeApp`'s.
+It takes `:server`, `:shared-ui`, `:strings`, `:settings`, `:theme`, `:calendar` and
+`:lower-third-engine` (which JSON files are lower thirds), and nothing of `:composeApp`'s. Its
+suites read the folder rows through `:profiles`' test fixtures.
 
 ## Seams to the app
 
@@ -60,5 +60,5 @@ It takes `:server`, `:shared-ui`, `:strings`, `:settings`, `:theme`, `:calendar`
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**.
-- **Coverage**: the root build's default six counters at 85% — no `coverageFloors`, no
+- **Coverage**: `cp.test`'s default six counters at 85% — no `coverageFloors`, no
   `coverageExcludes`.

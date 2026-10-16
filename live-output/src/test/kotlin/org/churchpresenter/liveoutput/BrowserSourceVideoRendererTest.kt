@@ -4,7 +4,8 @@ import org.churchpresenter.settings.MediaLook
 import org.churchpresenter.settings.OutputLook
 import org.churchpresenter.settings.SlideLook
 import org.churchpresenter.presenter.showsContentFor
-import org.churchpresenter.server.BrowserSourceFrame
+import org.churchpresenter.core.models.output.BrowserSourceFrame
+import org.churchpresenter.core.models.output.FrameRect
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -110,8 +111,8 @@ class BrowserSourceVideoRendererTest {
 
     @Test
     fun `BrowserSourceFrame equality is reference-based on the png bytes`() {
-        val a = BrowserSourceFrame(0, 0, 4, 4, 4, 4, byteArrayOf(1, 2, 3))
-        val b = BrowserSourceFrame(0, 0, 4, 4, 4, 4, byteArrayOf(1, 2, 3))
+        val a = BrowserSourceFrame(FrameRect(0, 0, 4, 4), 4, 4, byteArrayOf(1, 2, 3))
+        val b = BrowserSourceFrame(FrameRect(0, 0, 4, 4), 4, 4, byteArrayOf(1, 2, 3))
         assertNotEquals(a, b)
         assertEquals(a, a)
     }
@@ -477,17 +478,17 @@ class BrowserSourceVideoRendererTest {
         val first = solid(W, H, OPAQUE_RED)
         r.onFrame(first, W, H, elapsedMs = 0)
         val full = r.frames.replayCache.last()
-        assertEquals(W, full.rectWidth)
-        assertEquals(H, full.rectHeight)
+        assertEquals(W, full.rect.width)
+        assertEquals(H, full.rect.height)
 
         val next = first.copyOf().also { it[1 * W + 5] = 0xFF00FF00.toInt() }
         r.onFrame(next, W, H, elapsedMs = 10)
 
         val delta = r.frames.replayCache.last()
-        assertEquals(5, delta.x)
-        assertEquals(1, delta.y)
-        assertEquals(1, delta.rectWidth)
-        assertEquals(1, delta.rectHeight)
+        assertEquals(5, delta.rect.x)
+        assertEquals(1, delta.rect.y)
+        assertEquals(1, delta.rect.width)
+        assertEquals(1, delta.rect.height)
         assertEquals(W, delta.fullWidth)
     }
 

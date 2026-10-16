@@ -1,22 +1,13 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.detekt)
-    jacoco
+    id("cp.jvm-module")
+    id("cp.compose")
 }
-
-group = "org.churchpresenter"
 
 // Coverage for the crossword data layer. The UI package is Compose desktop composables that need
 // a real display, so it is excluded rather than counted as permanently uncovered.
 extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/ComposableSingletons*")
-
-kotlin {
-    jvmToolchain(21)
-}
 
 dependencies {
     implementation(projects.theme)
@@ -45,20 +36,3 @@ compose.desktop {
     }
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

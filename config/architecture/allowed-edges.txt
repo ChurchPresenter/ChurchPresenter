@@ -1,0 +1,4 @@
+# Dependencies the layer rules forbid, each with what it uses. There are none: every forbidden edge
+# that existed was cut. `checkModuleLayers` fails on a forbidden edge missing from this list AND on a
+# line here that no longer names one. Never add a line without asking the person running the work.
+

@@ -60,23 +60,6 @@ internal fun AppSettings.withSongLanguage(target: SongStyleTarget, language: Str
         if (target.isLowerThird) profile.isLowerThird else profile.displayMode == Constants.DISPLAY_MODE_FULLSCREEN
     }
 
-/** True when any profile that is showing songs is showing two languages. */
-internal val AppSettings.songIsBilingual: Boolean
-    get() = projectionSettings.outputProfiles.any {
-        it.songMode != Constants.SONG_LANG_OFF && it.songMode != Constants.SONG_LANG_PRIMARY
-    }
-
-/**
- * Every profile set to one language or two -- the coarse switch in the rail.
- *
- * Bilingual restores "both" rather than any previous per-profile choice, and Single writes
- * "primary" over a "secondary" profile as well: this is the control that says how many languages
- * the church is presenting in, and the per-target one on the element row is where a finer answer
- * is given.
- */
-internal fun AppSettings.withSongBilingual(bilingual: Boolean): AppSettings =
-    mapSongModes(if (bilingual) Constants.SONG_LANG_BOTH else Constants.SONG_LANG_PRIMARY) { true }
-
 private fun AppSettings.mapSongModes(
     language: String,
     matches: (OutputProfile) -> Boolean,

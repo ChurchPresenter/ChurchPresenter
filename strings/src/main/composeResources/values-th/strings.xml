@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">เอาต์พุตนี้ยังไม่แสดงเนื้อหานี้ในขณะนี้</string>
     <string name="preview_settings_show_labels">แสดงป้ายชื่อเอาต์พุต</string>
     <string name="preview_settings_show_modes">แสดงประเภทการแสดงผล</string>
+    <string name="preview_section_display">การแสดงผล</string>
+    <string name="preview_section_layout">เลย์เอาต์</string>
+    <string name="preview_layout_rename">เปลี่ยนชื่อเลย์เอาต์</string>
     <string name="song_add_translation">เพิ่มภาษา</string>
     <string name="song_fourth_language">ภาษา 4</string>
     <string name="song_pane_translation">ภาษา %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">แสดงการตั้งค่าข้อความพระคัมภีร์</string>
     <string name="helper_command_look_13">ปรับรูปแบบอ้างอิงพระคัมภีร์ยังไง</string>
     <string name="helper_command_look_13_does">แสดงการตั้งค่าข้อความของอ้างอิง</string>
+    <string name="message_purpose">แสดงข้อความหนึ่งบรรทัดทับสิ่งที่กำลังออกอากาศ</string>
+    <string name="message_preview_empty">ข้อความของคุณจะแสดงที่นี่</string>
+    <string name="message_stays_up">แสดงค้างไว้</string>
+    <string name="message_seconds_short">%1$d วิ</string>
+    <string name="message_one_minute">1 นาที</string>
+    <string name="message_duration_custom">กำหนดเอง</string>
+    <string name="message_insert_blank">แทรกช่องว่าง</string>
+    <string name="props_purpose">สิ่งที่อยู่บนหน้าจอทับทุกอย่าง</string>
+    <string name="macros_purpose">เรียกใช้หลายคำสั่งด้วยคลิกหรือปุ่มเดียว</string>
 </resources>

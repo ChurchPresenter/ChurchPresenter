@@ -158,7 +158,7 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test both in scope.
   The three findings that came over with the code are `@Suppress`ed at the declaration with a
   reason, the way `:converter` and `:songlibrary` do it — do not add a baseline file here.
-- **Coverage**: the root build's default six counters at 85%, all of them — **no**
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no**
   `coverageFloors`, **no** `coverageExcludes`. The tightest is METHOD, because every data class
   contributes generated `copy`/`componentN` accessors nothing calls; a new settings class with many
   fields and no test moves that number before it moves any other.

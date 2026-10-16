@@ -2286,6 +2286,9 @@
     <string name="preview_output_mode_disabled_warning">Deze uitgang toont deze inhoud momenteel niet.</string>
     <string name="preview_settings_show_labels">Uitganglabels tonen</string>
     <string name="preview_settings_show_modes">Weergavetype tonen</string>
+    <string name="preview_section_display">Weergave</string>
+    <string name="preview_section_layout">Indeling</string>
+    <string name="preview_layout_rename">Indeling hernoemen</string>
     <string name="song_add_translation">Taal toevoegen</string>
     <string name="song_fourth_language">Taal 4</string>
     <string name="song_pane_translation">Taal %1$d</string>
@@ -2752,4 +2755,13 @@
     <string name="helper_command_look_12_does">Toont de instellingen voor verstekst</string>
     <string name="helper_command_look_13">hoe verander ik de stijl van de bijbelreferentie</string>
     <string name="helper_command_look_13_does">Toont de tekstinstellingen van de referentie</string>
+    <string name="message_purpose">Toont een regel tekst over alles wat live is.</string>
+    <string name="message_preview_empty">Je bericht verschijnt hier</string>
+    <string name="message_stays_up">Blijft staan</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Aangepast</string>
+    <string name="message_insert_blank">Invulveld invoegen</string>
+    <string name="props_purpose">Elementen die boven alles op het scherm blijven.</string>
+    <string name="macros_purpose">Voer meerdere acties uit met één klik of toets.</string>
 </resources>

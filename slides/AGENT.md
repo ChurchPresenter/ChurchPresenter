@@ -4,10 +4,11 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 ## What it is
 
-The **Pictures** and **Presentation** tabs: the tabs themselves, their viewmodels, the presenters
-that draw a picture or a deck on an output, picture decoding (HEIC included), the hidden-slide store
-and the recent folders and files. A real Gradle module of this build — `include(":slides")`,
-`implementation(projects.slides)`. Its consumers are `:composeApp` and `:live-output`.
+The **Pictures** and **Presentation** tabs: the tabs themselves, their viewmodels, the hidden-slide
+store and the recent folders and files. The presenters that draw a picture or a deck on an output
+and picture decoding (HEIC included) are `:slides-engine`'s, in this module's packages, which this
+module takes with `api`. A real Gradle module of this build — `include(":slides")`,
+`implementation(projects.slides)`. Its consumer is `:composeApp`.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`
 and `:presentation-engine` (as `api`: a caller passes `Deck`s) — and nothing of `:composeApp`'s.
@@ -16,7 +17,7 @@ and `:presentation-engine` (as `api`: a caller passes `Deck`s) — and nothing o
 
 - **`PresentationPlayer`** (`:live-output`) — the animated-deck runtime. `PresenterManager` owns
   it, and it drives VLC (`EmbeddedVideoDecoder`) and the Lottie stream. It produces the
-  [`PresentationFrame`] this module's presenter draws.
+  [`PresentationFrame`] (`:output-api`) that `:slides-engine`'s presenter draws.
 - **The remote-control side** — `PresentationRoutes`, `PresentationRemoteRoutes`,
   `PresentationStore`, `PictureLibrary` and `PresentationRemoteDialog`, which reach the server and the
   tunnel. The tab draws the dialog through its `remoteDialog` slot; the app supplies it.
@@ -24,7 +25,7 @@ and `:presentation-engine` (as `api`: a caller passes `Deck`s) — and nothing o
 
 ## The one interface
 
-**`SlidesOutput`** is everything the tabs need from the live output: presenting mode, screen locks,
+**`SlidesOutput`** (`:output-api`, in this package, with the `PresentationFrame` it hands over) is everything the tabs need from the live output: presenting mode, screen locks,
 the live deck frame, and the calls that put a picture or a slide on screen — split into
 `LiveOutput`, `PictureOutput` and `DeckOutput` so none outgrows detekt's function limit.
 `:live-output`'s `PresenterSlidesOutput` implements it by passing every call to `PresenterManager`

@@ -2268,6 +2268,9 @@
     <string name="preview_output_mode_disabled_warning">Tento výstup momentálně tento obsah nezobrazuje.</string>
     <string name="preview_settings_show_labels">Zobrazit štítky výstupů</string>
     <string name="preview_settings_show_modes">Zobrazit typ zobrazení</string>
+    <string name="preview_section_display">Zobrazení</string>
+    <string name="preview_section_layout">Rozvržení</string>
+    <string name="preview_layout_rename">Přejmenovat rozvržení</string>
     <string name="song_add_translation">Přidat jazyk</string>
     <string name="song_fourth_language">Jazyk 4</string>
     <string name="song_pane_translation">Jazyk %1$d</string>
@@ -2734,4 +2737,13 @@
     <string name="helper_command_look_12_does">Ukáže nastavení textu veršů</string>
     <string name="helper_command_look_13">jak nastavím styl biblického odkazu</string>
     <string name="helper_command_look_13_does">Ukáže nastavení textu odkazu</string>
+    <string name="message_purpose">Zobrazí řádek textu přes vše, co je živě.</string>
+    <string name="message_preview_empty">Zde se zobrazí vaše zpráva</string>
+    <string name="message_stays_up">Zůstane zobrazeno</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Vlastní</string>
+    <string name="message_insert_blank">Vložit pole</string>
+    <string name="props_purpose">Prvky, které zůstávají na obrazovce nad vším.</string>
+    <string name="macros_purpose">Spusťte několik akcí jedním kliknutím nebo klávesou.</string>
 </resources>

@@ -185,3 +185,21 @@ formatting:
     active: true
   UnnecessaryParenthesesBeforeTrailingLambda:
     active: true
+
+# The build's own rules, from :detekt-rules. BlockingCallOnEventThread keeps disk, network, decodes
+# and sleeps out of composition on the output paths (AGENT.md, "Live-safe output paths"); a call
+# that must stay is a line of config/architecture/live-safe-allowed.txt, with its reason.
+live-safe:
+  active: true
+  BlockingCallOnEventThread:
+    active: true
+    allowlist: 'config/architecture/live-safe-allowed.txt'
+    includes:
+      - '**/live-output/src/main/**'
+      - '**/presenter/src/main/**'
+      - '**/slides-engine/src/main/**'
+      - '**/media-engine/src/main/**'
+      - '**/canvas-engine/src/main/**'
+      - '**/lower-third-engine/src/main/**'
+      - '**/web-engine/src/main/**'
+      - '**/stt-engine/src/main/**'

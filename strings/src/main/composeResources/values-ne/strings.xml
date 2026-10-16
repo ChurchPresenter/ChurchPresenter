@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">यो आउटपुटले अहिले यो सामग्री देखाउँदैन।</string>
     <string name="preview_settings_show_labels">आउटपुट लेबलहरू देखाउनुहोस्</string>
     <string name="preview_settings_show_modes">प्रदर्शन प्रकार देखाउनुहोस्</string>
+    <string name="preview_section_display">प्रदर्शन</string>
+    <string name="preview_section_layout">लेआउट</string>
+    <string name="preview_layout_rename">लेआउटको नाम बदल्नुहोस्</string>
     <string name="song_add_translation">भाषा थप्नुहोस्</string>
     <string name="song_fourth_language">भाषा ४</string>
     <string name="song_pane_translation">भाषा %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">पदको पाठ सेटिङ देखाउँछ</string>
     <string name="helper_command_look_13">बाइबल सन्दर्भको शैली कसरी मिलाउने</string>
     <string name="helper_command_look_13_does">सन्दर्भको पाठ सेटिङ देखाउँछ</string>
+    <string name="message_purpose">प्रत्यक्षमा जे छ त्यसमाथि पाठको एक लाइन देखाउँछ।</string>
+    <string name="message_preview_empty">तपाईंको सन्देश यहाँ देखिन्छ</string>
+    <string name="message_stays_up">कति समय देखिने</string>
+    <string name="message_seconds_short">%1$d से</string>
+    <string name="message_one_minute">१ मि</string>
+    <string name="message_duration_custom">आफ्नै</string>
+    <string name="message_insert_blank">खाली ठाउँ घुसाउनुहोस्</string>
+    <string name="props_purpose">सबैमाथि पर्दामा रहिरहने कुराहरू।</string>
+    <string name="macros_purpose">एक क्लिक वा कुञ्जीले धेरै कार्य चलाउनुहोस्।</string>
 </resources>

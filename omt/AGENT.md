@@ -15,7 +15,7 @@ rule, which apply here unchanged. This file records where OMT differs.
 
 The app-side wiring is outside, as NDI's is: `OmtVideoRenderer`, `OmtOutputRegistry` and
 `OmtManager` for outputs in `:live-output`, `ProjectionOmtCard` for their settings in `:composeApp`,
-and `OmtFrameCache` for the Canvas source in `:canvas`. `OmtFrameCache` and `NdiFrameCache` share
+and `OmtFrameCache` for the Canvas source in `:canvas-engine`. `OmtFrameCache` and `NdiFrameCache` share
 their capture loop through `ReceivedFrameCache`.
 
 ## **The app ships libomt, unlike libndi**
@@ -146,7 +146,7 @@ process, frames flagged as carrying alpha.
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test in scope.
-- **Coverage**: the root build's default six counters at 85%, with no floors and no excludes, as
+- **Coverage**: `cp.test`'s default six counters at 85%, with no floors and no excludes, as
   `:ndi` has it — the JNA marshalling is covered against a stand-in `OmtLibC`, leaving
   `JnaOmtLibrary.load` the one uncovered call.
 

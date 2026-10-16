@@ -1,25 +1,15 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    id("cp.jvm-module")
+    id("cp.test-home")
+    id("cp.compose")
+    // Committed, beside the module, as :composeApp's and the other tab modules' are.
+    id("cp.screenshots")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.roborazzi)
-    jacoco
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
-}
-
-// The strings and icons come from :strings and :icons; this module ships no resources of its own.
-compose.resources {
-    generateResClass = never
 }
 
 dependencies {
+    // The port to the live outputs this module implements.
+    implementation(projects.outputApi)
     implementation(projects.sharedUi)
     implementation(projects.strings)
     implementation(projects.icons)
@@ -29,21 +19,15 @@ dependencies {
     implementation(projects.diagnostics)
     implementation(projects.presenter)
     implementation(projects.liveShow)
-    implementation(projects.canvas)
-    implementation(projects.slides)
-    implementation(projects.media)
-    implementation(projects.web)
+    implementation(projects.canvasEngine)
+    implementation(projects.slidesEngine)
+    implementation(projects.mediaEngine)
+    implementation(projects.webEngine)
     implementation(projects.presentationEngine)
-    implementation(projects.qa)
-    implementation(projects.stt)
-    implementation(projects.dictionary)
-    implementation(projects.announcements)
-    implementation(projects.lowerThird)
-    implementation(projects.profiles)
+    implementation(projects.sttEngine)
+    implementation(projects.lowerThirdEngine)
     implementation(projects.songChords)
-    implementation(projects.server)
     implementation(projects.lottieGenerator)
-    implementation(projects.bibleTab)
     implementation(projects.ndi)
     implementation(projects.omt)
 
@@ -59,6 +43,8 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
+    // AnnouncementsTimerControlTest drives the real tab view model against the manager.
+    testImplementation(projects.announcements)
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(testFixtures(projects.coreModels))
@@ -67,7 +53,6 @@ dependencies {
     testImplementation(testFixtures(projects.presentationEngine))
     testImplementation(testFixtures(projects.ndi))
     testImplementation(testFixtures(projects.omt))
-    testImplementation(testFixtures(projects.profiles))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -76,33 +61,3 @@ dependencies {
     testImplementation(libs.roborazzi.composeDesktop)
 }
 
-// The suite gets a home of its own under build/ so a test can never touch the real ~/.churchpresenter.
-tasks.withType<Test>().configureEach {
-    val testHome = layout.buildDirectory.dir("test-home").get().asFile
-    doFirst { testHome.mkdirs() }
-    systemProperty("user.home", testHome.absolutePath)
-    systemProperty("java.awt.headless", "true")
-}
-
-// Committed, beside the module, as :composeApp's and the other tab modules' are.
-roborazzi {
-    outputDir.set(layout.projectDirectory.dir("screenshots"))
-}
-
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

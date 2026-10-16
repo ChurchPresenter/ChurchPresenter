@@ -23,7 +23,7 @@ demand.
   composable that owns it (no `onViewModelReady` callbacks, no getters, no external refs).
 - Expose data via typed callbacks, state parameters, or a `StateFlow` consumed internally.
 - Only acceptable exception: a rendering bridge whose panel lifecycle is tightly coupled to the
-  ViewModel (`MediaPresenter`/`VideoPlayer`, `PresentationPlayer`, `LottieFrameStream`) — document
+  ViewModel (`MediaPresenter`/`VideoPlayer` over `MediaViewModel`, all `:media-engine`'s, `PresentationPlayer`, `LottieFrameStream`) — document
   it explicitly at the site.
 - Known standing deviation: `MainDesktop.kt` and its wiring pass ViewModels top-down —
   `MainDesktopScope`/`MainDesktopViewModels`, the `*Wiring.kt` files, `MainDesktopEffects.kt`,
@@ -128,22 +128,29 @@ module-specific notes there, not here.**
 | `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
 | `bible/`               | `:bible`               | The Bible itself: a loaded `.spb` translation, its books, verses and search        | [AGENT.md](bible/AGENT.md)               |
 | `calendar/`            | `:calendar`            | The Calendar Manager — planned services on a month grid, each with a run of show   | [AGENT.md](calendar/AGENT.md)            |
+| `calendar-core/`       | `:calendar-core`       | The Calendar Manager's model without its window: run of show, clocks, cues, reference parser, PDF export | [AGENT.md](calendar-core/AGENT.md)       |
 | `strings/`             | `:strings`             | The app's user-facing strings, every locale, and the `Res` class generated from them | [AGENT.md](strings/AGENT.md)             |
 | `icons/`               | `:icons`               | The UI drawables and the window-icon frames — not the installer icons               | [AGENT.md](icons/AGENT.md)               |
 | `shared-ui/`           | `:shared-ui`           | The composables and helpers more than one feature uses — fields, pickers, buttons, text styling | [AGENT.md](shared-ui/AGENT.md)           |
+| `slides-engine/`       | `:slides-engine`       | What the picture and presentation outputs draw: `PicturePresenter`, `PresentationPresenter`, `PictureDecoder` | [AGENT.md](slides-engine/AGENT.md)       |
 | `slides/`              | `:slides`              | The Pictures and Presentation tabs: their viewmodels, presenters, picture decoding and recent files | [AGENT.md](slides/AGENT.md)              |
+| `media-engine/`        | `:media-engine`        | The playback under the Media tab: the VLC and software players, VLC discovery, subtitles, `MediaPresenter`, `MediaViewModel` | [AGENT.md](media-engine/AGENT.md)        |
 | `media/`               | `:media`               | The Media tab and the VLC playback under it: player, decoder, subtitles, stock media search | [AGENT.md](media/AGENT.md)               |
-| `web/`                 | `:web`                 | The Web tab and the embedded Chromium (JCEF) it and the output window browse with | [AGENT.md](web/AGENT.md)                 |
+| `web-engine/`          | `:web-engine`          | The embedded Chromium (JCEF): its install, the embedded browser, `WebsitePresenter` | [AGENT.md](web-engine/AGENT.md)          |
+| `web/`                 | `:web`                 | The Web tab                                                                       | [AGENT.md](web/AGENT.md)                 |
 | `crossword-tab/`       | `:crossword-tab`       | The hidden Crossword tab and the decoder for the puzzles it plays                  | [AGENT.md](crossword-tab/AGENT.md)       |
 | `qa/`                  | `:qa`                  | The Q&A tab and `QAManager`, the session behind it                                 | [AGENT.md](qa/AGENT.md)                  |
 | `dictionary/`          | `:dictionary`          | The Strong's dictionary tab, its view model, and the Strong's and interlinear data   | [AGENT.md](dictionary/AGENT.md)          |
-| `stt/`                 | `:stt`                 | The STT tab and `STTManager`, the caption server's socket.io client                 | [AGENT.md](stt/AGENT.md)                 |
+| `stt-engine/`          | `:stt-engine`          | `STTManager`, the caption server's socket.io client, without the tab                | [AGENT.md](stt-engine/AGENT.md)          |
+| `stt/`                 | `:stt`                 | The STT tab                                                                         | [AGENT.md](stt/AGENT.md)                 |
 | `announcements/`       | `:announcements`       | The Announcements tab and its timer                                                 | [AGENT.md](announcements/AGENT.md)       |
-| `lower-third/`         | `:lower-third`         | The Lower Third tab, its ATEM render cache and sequencer, and the bundled lottie fonts | [AGENT.md](lower-third/AGENT.md)         |
+| `lower-third-engine/`  | `:lower-third-engine`  | What a lower third plays and uploads with: the render cache, `LowerThirdPresenter`, the ATEM sequencer, the bundled lottie fonts | [AGENT.md](lower-third-engine/AGENT.md)  |
+| `lower-third/`         | `:lower-third`         | The Lower Third tab and the ATEM settings page                                      | [AGENT.md](lower-third/AGENT.md)         |
 | `songs/`               | `:songs`               | The Songs tab, `SongsViewModel` and the song library on disk                        | [AGENT.md](songs/AGENT.md)               |
 | `bible-tab/`           | `:bible-tab`           | The Bible tab, `BibleViewModel`, the cross references and the verse-sequence log     | [AGENT.md](bible-tab/AGENT.md)           |
 | `schedule/`            | `:schedule`            | The Schedule tab, `ScheduleViewModel` and the `.schedule` files                      | [AGENT.md](schedule/AGENT.md)            |
-| `canvas/`              | `:canvas`              | The Canvas tab, `SceneViewModel`, the scene renderer and its capture sources (cameras, screen, NDI/OMT in, DeckLink) | [AGENT.md](canvas/AGENT.md)              |
+| `canvas-engine/`       | `:canvas-engine`       | What a scene is drawn from: `SceneCanvas`, the renderer, `ScenePresenter`, and the capture sources (cameras, screen, browser, NDI/OMT in, DeckLink) | [AGENT.md](canvas-engine/AGENT.md)       |
+| `canvas/`              | `:canvas`              | The Canvas tab: `SceneViewModel`, the scene editor and the source property editors | [AGENT.md](canvas/AGENT.md)              |
 | `presenter/`           | `:presenter`           | What the song and Bible outputs draw: slides, looks, layouts, backgrounds, the Lottie bands and the style models | [AGENT.md](presenter/AGENT.md)           |
 | `profiles/`            | `:profiles`            | The Profiles settings pages (looks, layout, backgrounds, previews), the song background panel and the settings row kit every settings page uses | [AGENT.md](profiles/AGENT.md)            |
 | `server/`              | `:server`              | The companion server and Instance Link: the Ktor API, tunnel, SSL, ATEM bridge, calendar sync | [AGENT.md](server/AGENT.md)              |
@@ -152,6 +159,9 @@ module-specific notes there, not here.**
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
 | `show-control/`        | `:show-control`        | The action vocabulary and `ActionRunner`, played through the app's `ShowHost` (see `docs/SHOW_CONTROL.md`) | [AGENT.md](show-control/AGENT.md)        |
 | `control-in/`          | `:control-in`          | MIDI and OSC in and out: the codecs, the ports and the hub that maps what arrives to actions | [AGENT.md](control-in/AGENT.md)          |
+| `detekt-rules/`        | `:detekt-rules`        | The build's own detekt rules: the live-safe check on the output modules, run by every module's detekt | [AGENT.md](detekt-rules/AGENT.md)        |
+| `output-api/`          | `:output-api`          | What each tab needs of the live output, as interfaces, and the frame a deck plays: declared against by the tabs, implemented by `:live-output` | [AGENT.md](output-api/AGENT.md)          |
+| `output-guard/`        | `:output-guard`        | The output guard: a second process that keeps each output's last still under it and shows it if the app dies (dev mode only) | [AGENT.md](output-guard/AGENT.md)        |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 | `helper/`              | `:helper`              | Wick, the helper lamp — tips, display setup, typed requests, the spotlight that rings controls | [AGENT.md](helper/AGENT.md)              |
 | `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
@@ -163,7 +173,79 @@ module-specific notes there, not here.**
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
-from `gradle/libs.versions.toml`, `version` from the root `subprojects` block — don't re-declare it.
+from `gradle/libs.versions.toml`, `group` and `version` from its convention plugin — don't re-declare
+them.
+
+### Build conventions live in `build-logic/`
+What every module shares is written **once**, as precompiled convention plugins in the included
+build `build-logic/` (`pluginManagement { includeBuild("build-logic") }`). A module's `plugins { }`
+block names the ones it is, and its build file carries only its dependencies and what differs:
+
+| Plugin | What it is |
+|---|---|
+| `cp.jvm-module` | The usual module: `cp.kotlin-jvm` + `cp.detekt` + `cp.test` |
+| `cp.kotlin-jvm` | Kotlin/JVM, Java 21, the build's group and version (`cp.base`) |
+| `cp.base` | The version and the okhttp/org.json security floors — on every module, the app included |
+| `cp.detekt` | detekt on `config/detekt/detekt.yml`, detekt-formatting, `src/main` + `src/test` (+ `src/testFixtures` with fixtures) |
+| `cp.test` | `useJUnitPlatform()`, the 10-minute timeout, `HungTestReporter`, JaCoCo and its floor |
+| `cp.test-home` | A suite whose code reads `user.home`: its own `build/test-home`, headless |
+| `cp.compose` | The Compose plugins; no `Res` class unless the module has `src/main/composeResources` |
+| `cp.screenshots` | Roborazzi, writing to `<module>/screenshots/` |
+| `cp.pitest` | Mutation testing, for the core-logic modules |
+| `cp.app-*` | `:composeApp` only — `provenance` (BuildConfig), `benchmarks`, `coverage`, `signing`, `natives` |
+
+The plugins compile against the third-party plugins but **only apply them by id**: the root
+`build.gradle.kts` loads each once (`apply false`), and a second copy from `build-logic` would be a
+second Kotlin Gradle plugin in another classloader. `:composeApp` applies its `cp.app-*` plugins
+with `apply(plugin = …)` at the point in its script where their tasks have to be configured —
+order matters there (a benchmark task's own forks and heap stick only when it is registered after
+the app's Test settings). What the app's script shares with them (version, git provenance, signing,
+the JDK) is `build-logic/src/main/kotlin/org/churchpresenter/buildlogic/AppBuild.kt`.
+
+### Layers — what may depend on what
+Every module has a layer (`config/architecture/layers.properties`), and `./gradlew checkModuleLayers`
+— a CI step — fails on a dependency the table below forbids. It reads what main code and test
+fixtures declare; a test's own classpath may reach anything.
+
+| Layer | Modules | May depend on |
+|---|---|---|
+| foundation | theme, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
+| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, output-guard, calendar-core, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
+| feature | a tab or a window with its view model | foundation, engine |
+| output | live-output | foundation, engine |
+| integration | server, server-ui, profiles, dialogs, app-settings, telemetry | everything below, and integration |
+| app | composeApp | everything |
+
+So a tab never depends on another tab or on the output: what it needs of the output is a port
+(`BibleOutput`, `QAOutput`, …) in `:output-api`, an engine both depend on, which `:live-output`
+implements and `:composeApp` hands the tab. What two features both need goes down
+a layer — into an engine module, or into `:shared-ui` or `:core-models` when it knows no feature.
+
+**`config/architecture/allowed-edges.txt` is empty, and stays that way**: it is where a forbidden
+edge would be recorded, the check fails on an entry that is no longer a forbidden edge, and nothing
+writes the file. **Never add a line to it without asking** — an edge that seems to need one is a
+sign that something belongs a layer down (DEVELOPMENT_GUIDE.md, "Adding a module"). A new module gets its layer in `layers.properties`; the check fails
+on one that has none.
+
+### Live-safe output paths — nothing blocks the event thread
+Every output window composes on the AWT event thread, and the off-screen outputs are confined to it
+(`docs/SHOW_CONTROL.md`, Output isolation), so a blocking call there freezes the projector for as
+long as it takes. **An output composable reads state only; loading happens in a `Dispatchers.IO`
+coroutine that writes that state** (`rememberFileExists` in `:shared-ui` is the pattern).
+- **`BlockingCallOnEventThread`** (`:detekt-rules`, `live-safe:` in `config/detekt/detekt.yml`)
+  fails detekt on a file, network, decode or sleep call in a `@Composable` function of `:live-output`,
+  `:presenter` and the six engines — in its body, a `remember`, or an effect that never leaves the
+  thread. It reads names, not types.
+- **`config/architecture/live-safe-allowed.txt`** holds the calls that stay, one line each with its
+  reason. It only shrinks: a line whose call is gone fails detekt, a line whose file is gone fails
+  `./gradlew checkLiveSafeAllowlist` (a CI step), and nothing writes it. **Never add a line without
+  asking**; move the work off the thread instead.
+- **`EventThreadIoMonitor`** (`:diagnostics`) watches the event thread through JFR for what a source
+  rule cannot see — a file, socket or sleep behind a helper. `soakTest` fails on any; a debug build
+  started with `-Dchurchpresenter.watchEventThreadIo=true` logs each place once (off by default: the
+  recording costs a launch about 150 ms and 140 MB).
+- `render-benchmark.yml` runs the render regression check on every pull request that touches an
+  output module.
 
 ### POI is shared by four modules
 `:presentation-engine`, `:converter`, `:statistics` and `:composeApp` all pull Apache POI, and
@@ -173,13 +255,13 @@ jar (its XLS export is HSSF), so it brings no schema jar. The version lives in
 `gradle/libs.versions.toml` (`apache-poi`) and nowhere else, and `:composeApp` excludes the lite
 module graph-wide in a `configurations.configureEach` block.
 
-### JaCoCo lives in the root build
+### JaCoCo lives in `cp.test`
 The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all six) are written
-**once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block. A
-module's build file carries only what differs, set **above everything else** in the file:
+**once**, in `build-logic`'s `cp.test`. A module's build file carries only what differs, set right
+after its `plugins { }` block:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
-  counters that need a different number. `:canvas` and `:profiles` name one each
-  (COMPLEXITY); every other module names none.
+  counters that need a different number. No module names any today; every one is on the
+  shared 85%.
   Each is the measured value rounded down — a ratchet, raised as tests are added and deleted once
   the counter clears 85%. Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
@@ -187,8 +269,8 @@ module's build file carries only what differs, set **above everything else** in 
 
 **Do not re-declare `jacocoTestReport`/`jacocoTestCoverageVerification` in a module** — configuring
 it there realizes the task before the `extra` above is set, and a second `violationRules` block adds
-rules rather than replacing them. `:composeApp` (Kotlin Multiplatform) registers its own task and is
-out of scope of the shared block.
+rules rather than replacing them. `:composeApp` (Kotlin Multiplatform) registers its own tasks, in
+`cp.app-coverage`, and does not apply `cp.test`.
 
 ### **NEVER exclude code from coverage without asking first**
 An exclude does not make code tested; it makes the gate stop asking, and it is invisible in the
@@ -256,7 +338,7 @@ Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass
 `LongParameterList` with `ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers are
 not flagged.
 
-**Formatting is detekt-formatting (ktlint)**, added to every module once from the root build. The
+**Formatting is detekt-formatting (ktlint)**, added to every module once by `cp.detekt`. The
 rules that are on are clean and auto-correctable — `./gradlew detekt --auto-correct` fixes what it
 finds. Deliberately **off**, each for rewriting a large share of the tree: `Indentation`,
 `ArgumentListWrapping`, `Wrapping`, `ImportOrdering`, `MultiLineIfElse`, `NoMultipleSpaces`,
@@ -289,6 +371,10 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
   host's devices, installed fonts — see `PinnedFaces`/`LocalFontPreviewFace`), the remedy is always
   the same: take it as a parameter or a composition local and let the test pin it — never widen the
   threshold.
+- **Text is drawn in pinned fonts.** The system font differs between macOS versions, so every
+  capture is taken inside `PinnedFonts` (`:shared-ui`'s test fixtures), which answers the system
+  font's name with bundled Inter and JetBrains Mono. A new suite wraps its `setContent` body in it;
+  `captureTo` fails a capture that is not inside it.
 - Every state is shot in **both themes stacked into one image** — go through `stackedThemes` or
   `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture written elsewhere is never
   compared). One folder per test class. **Name the class `…ScreenshotTest`** or CI never renders it.
@@ -344,7 +430,7 @@ failures that only appear under load:
   listed in `serialTestClasses` (`composeApp/build.gradle.kts`). `jvmTest` excludes them and is
   `finalizedBy` it. Passing `--tests` stands the exclusion down and runs the named class in `jvmTest`.
 - **A hung fork is killed with a diagnosis.** `HungTestReporter` (`:diagnostics` test fixtures,
-  on every module's test runtime from the root build) dumps every thread and halts the fork
+  on every module's test runtime from `cp.test`) dumps every thread and halts the fork
   (exit 93) once a test runs past its threshold (5 min, 150s in CI); the dump also goes to
   `<module>/build/test-results/<task>/hung-test-dump.txt`. Tighten it with `-PhangThresholdMs=30000`.
   Off-screen Compose scenes (`LowerThirdOffscreenRenderer`, `ComposeScenePump`) confine themselves

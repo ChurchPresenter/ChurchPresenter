@@ -30,16 +30,20 @@ What is on air, and everything that puts it on a screen or a wire:
   output holds its pixel size from `LowerThirdCue`; a larger size gets frames pre-rendered at the
   size it draws them, at most two sizes at once, closed when no output of that size is left.
 
-A real Gradle module of this build: `include(":live-output")`, `implementation(projects.liveOutput)`.
-`:composeApp` is its only consumer: the root screen, the window wiring (`PresenterWindows`,
-`VirtualOutputs`), the remote and Instance Link wiring, and the live preview panel. It takes the
-feature modules whose presenters it draws, and nothing of `:composeApp`'s.
+The output layer (root AGENT.md, "Layers"): `include(":live-output")`. `:composeApp` uses it for the
+root screen, the window wiring (`PresenterWindows`, `VirtualOutputs`), the remote and Instance Link
+wiring, and the live preview panel; `:telemetry` reads the NDI and OMT status for its device report,
+`:app-settings` the preview mode (`withPreviewMode`) and `:dialogs` the clearable layers.
+It takes `:output-api` (the ports it implements), `:presenter`, `:live-show` and the engines whose
+content it draws — `:canvas-engine`, `:slides-engine`, `:media-engine`, `:web-engine`,
+`:stt-engine`, `:lower-third-engine`, `:presentation-engine`, `:lottieGenerator`, `:song-chords`,
+`:ndi` and `:omt` — and no tab and nothing of `:composeApp`'s.
 
 ## Seams to the app
 
 - **`OffscreenOutputContext.appVersion`**: the version an OMT sender reports. The app passes
   `BuildConfig.APP_VERSION`, which this module cannot see.
-- **`AppNetworkInputs`**: installed by `main` first thing, as `:canvas`'s `NetworkInputs`.
+- **`AppNetworkInputs`**: installed by `main` first thing, as `:canvas-engine`'s `NetworkInputs`.
 
 ## Package
 

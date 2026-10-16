@@ -33,6 +33,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 class AppPreviewStatisticsScreenshotTest {
 
@@ -52,8 +53,10 @@ class AppPreviewStatisticsScreenshotTest {
                 density = Density(1f),
             ) {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.size(width, height)) { content(mode) }
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.size(width, height)) { content(mode) }
+                        }
                     }
                 }
                 waitForIdle()

@@ -18,3 +18,12 @@ data class ServerSettings(
     /** Maximum media-file upload size (in MB) accepted from companion devices. */
     val maxMediaUploadMb: Int = Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB
 )
+
+/** The ports a TCP server can listen on. */
+val SERVER_PORTS = 1..65_535
+
+/**
+ * [text] as a port the companion server can listen on, or null when it is not one -- blank, or
+ * past 65535, which the five-digit port field lets through and `ServerSocket` throws on.
+ */
+fun serverPortOrNull(text: String): Int? = text.toIntOrNull()?.takeIf { it in SERVER_PORTS }

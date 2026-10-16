@@ -8,8 +8,8 @@ The **Q&A** tab and the session behind it. It holds:
 - `QAManager`, the questions phones send in, what the operator does with them and what is on
   screen;
 - `QATab`, the operator's view of that session;
-- `QAPresenter` and `QAQRCodePresenter` (`presenter/`), the question and the QR code on an output.
-  The QR image is `generateQRCodeBitmap` in `:shared-ui`, which the presentation remote also draws.
+- not `QAPresenter` and `QAQRCodePresenter`, the question and the QR code on an output: they are
+  `:presenter`'s, in this module's `presenter` package. The QR image is `generateQRCodeBitmap` in `:shared-ui`, which the presentation remote also draws.
 
 A real Gradle module of this build: `include(":qa")`, `implementation(projects.qa)`. Its consumers
 are `:composeApp` and `:live-output`. The app's Companion server and the remote dialog drive the
@@ -20,7 +20,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Seams to the app
 
-- **`QAOutput`** is what the tab needs of the output: what is presenting, the screen locks, and the
+- **`QAOutput`** (`:output-api`, in this package) is what the tab needs of the output: what is presenting, the screen locks, and the
   question or QR code to put up. `:live-output` implements it as `PresenterQAOutput` over
   `PresenterManager` (`presenterManager.qaOutput`). Tests use `FakeQAOutput`.
 - **`remoteDialog`** is a slot. The remote-access dialog needs the server and the tunnel, so the app

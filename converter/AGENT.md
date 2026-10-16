@@ -72,7 +72,7 @@ in one of the `modules` groups; detekt runs on every change.
   **silently** — detekt over zero files is a passing detekt — so the module was gating only its
   tests until it was noticed. An exclude cannot fail that way round: if `**/ui/**` stops matching,
   the gate analyzes too much and says so.
-- **Coverage** (the root build's six counters — see the root `AGENT.md`): no
+- **Coverage** (`cp.test`'s six counters — see the root `AGENT.md`): no
   `extra["coverageFloors"]`: all six counters are held at the 85% default — never add a floor
   below it. `extra["coverageExcludes"]` is the default (`**/ComposableSingletons*`) and nothing
   more: `ui/**` and `main` are measured. That `extra` block must stay **above everything else** in

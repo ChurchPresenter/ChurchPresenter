@@ -18,7 +18,6 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.omt.OmtRuntimeStatus
-import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
@@ -45,7 +44,7 @@ class ProjectionCardDefaultsTest {
                     ProjectionSettingsTab(
                         settings = settings,
                         onSettingsChange = { settings = it(settings) },
-                        companionServer = CompanionServer(shutdownGraceMs = 0),
+                        serverUrl = "",
                         onIdentifyScreen = { identified += "screen" },
                         onIdentifyBrowserSource = { identified += "browser $it" },
                         onIdentifyNdi = { identified += "ndi $it" },
@@ -87,7 +86,7 @@ class ProjectionCardDefaultsTest {
                 ProjectionSettingsTab(
                     settings = state,
                     onSettingsChange = { state = it(state) },
-                    companionServer = CompanionServer(shutdownGraceMs = 0),
+                    serverUrl = "",
                     detectScreens = { emptyList() },
                     ndiStatus = { NdiRuntimeStatus.NotInstalled },
                     omtStatus = { OmtRuntimeStatus.NotInstalled },

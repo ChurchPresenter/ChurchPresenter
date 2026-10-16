@@ -348,6 +348,32 @@ class SourcePropertiesBibleTest {
     }
 
     @Test
+    fun `the verse's Outline strokes only the verse`() = sourcePanel(Fixture.bible()) { get ->
+        clickStyleButton("Outline", StyleRow.VERSE)
+
+        assertEquals(Fixture.bible().copy(outline = Fixture.bible().outline.copy(enabled = true)), get())
+    }
+
+    @Test
+    fun `the reference's Outline strokes only the reference`() = sourcePanel(Fixture.bible()) { get ->
+        clickStyleButton("Outline", StyleRow.REFERENCE)
+
+        assertEquals(
+            Fixture.bible().copy(referenceOutline = Fixture.bible().referenceOutline.copy(enabled = true)), get(),
+            "the reference's outline must not reach the verse's own",
+        )
+    }
+
+    @Test
+    fun `the verse font dropdown stores the family chosen and nothing else`() = sourcePanel(Fixture.bible()) { get ->
+        val chosen = uniquelyNamedFont()
+
+        chooseFont(showing = Fixture.bible().fontFamily, option = chosen)
+
+        assertEquals(Fixture.bible().copy(fontFamily = chosen), get())
+    }
+
+    @Test
     fun `a face stored on is turned back off by its own button`() {
         sourcePanel(Fixture.bible().copy(bold = true, referenceBold = true)) { get ->
             clickStyleButton("Bold", StyleRow.VERSE)

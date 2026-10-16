@@ -25,6 +25,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Crossword tab, in both themes.
@@ -47,17 +48,19 @@ class CrosswordTabScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
-                var settings by remember { mutableStateOf(AppSettings()) }
-                ChurchPresenterTheme(themeMode = mode) {
-                    // The tab paints no ground of its own — in the app it sits on the window's
-                    // `colorScheme.background`. Without this the capture is transparent wherever
-                    // the tab does not draw, so the dark shot came out light-text-on-white.
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                            CrosswordTab(
-                                appSettings = settings,
-                                onSettingsChange = { transform -> settings = transform(settings) },
-                            )
+                PinnedFonts {
+                    var settings by remember { mutableStateOf(AppSettings()) }
+                    ChurchPresenterTheme(themeMode = mode) {
+                        // The tab paints no ground of its own — in the app it sits on the window's
+                        // `colorScheme.background`. Without this the capture is transparent wherever
+                        // the tab does not draw, so the dark shot came out light-text-on-white.
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                            Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                                CrosswordTab(
+                                    appSettings = settings,
+                                    onSettingsChange = { transform -> settings = transform(settings) },
+                                )
+                            }
                         }
                     }
                 }

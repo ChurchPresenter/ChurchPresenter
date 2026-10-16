@@ -1,17 +1,8 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    id("cp.jvm-module")
+    id("cp.compose")
+    id("cp.screenshots")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.roborazzi)
-    jacoco
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
 }
 
 compose.resources {
@@ -23,6 +14,8 @@ dependencies {
     // A run of show is a List<ScheduleItem> and nothing else, so the planner and the Schedule tab
     // speak one model; SongLibrary is how the add-item picker reads the song folder.
     implementation(projects.coreModels)
+    // The model the window draws: in this module's API, since its public functions take it.
+    api(projects.calendarCore)
     // What an obsScene or atemKey cue does is an action, run by the app.
     api(projects.showControl)
     implementation(projects.theme)
@@ -39,6 +32,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     testImplementation(kotlin("test"))
+    testImplementation(testFixtures(projects.calendarCore))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(projects.sharedUi))
@@ -46,25 +40,3 @@ dependencies {
     testImplementation(libs.roborazzi.composeDesktop)
 }
 
-// Committed, beside the module, as the other modules' suites are.
-roborazzi {
-    outputDir.set(layout.projectDirectory.dir("screenshots"))
-}
-
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

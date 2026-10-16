@@ -97,7 +97,7 @@ Schedule. `PlanningCenterSettings` is in `:settings`, where every persisted sett
   which is 14 request functions, one per PCO endpoint this integration uses. Its eight
   `TooGenericExceptionCaught` entries were **not** carried over from `:composeApp`'s baseline — the
   catches were narrowed to the three clauses above instead, which is what the rule was asking for.
-- **Coverage**: the root build's default six counters at 85%, all of them — **no**
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no**
   `coverageFloors`, **no** `coverageExcludes`. It currently runs 87.0% complexity / 89.3% branches,
   the tightest counters, so a new untested branch is what will break it first.
   The import window is held to the same floor: its rows, its import and its entry point are

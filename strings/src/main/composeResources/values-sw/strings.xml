@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Tokeo hili kwa sasa halionyeshi maudhui haya.</string>
     <string name="preview_settings_show_labels">Onyesha lebo za matokeo</string>
     <string name="preview_settings_show_modes">Onyesha aina ya uonyeshaji</string>
+    <string name="preview_section_display">Onyesho</string>
+    <string name="preview_section_layout">Mpangilio</string>
+    <string name="preview_layout_rename">Badilisha jina la mpangilio</string>
     <string name="song_add_translation">Ongeza lugha</string>
     <string name="song_fourth_language">Lugha 4</string>
     <string name="song_pane_translation">Lugha %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">Huonyesha mipangilio ya maandishi ya mstari</string>
     <string name="helper_command_look_13">ninawekaje mtindo wa rejeleo la Biblia</string>
     <string name="helper_command_look_13_does">Huonyesha mipangilio ya maandishi ya rejeleo</string>
+    <string name="message_purpose">Huonyesha mstari wa maandishi juu ya chochote kilicho hewani.</string>
+    <string name="message_preview_empty">Ujumbe wako utaonekana hapa</string>
+    <string name="message_stays_up">Unabaki kwa</string>
+    <string name="message_seconds_short">sek %1$d</string>
+    <string name="message_one_minute">dak 1</string>
+    <string name="message_duration_custom">Maalum</string>
+    <string name="message_insert_blank">Weka nafasi</string>
+    <string name="props_purpose">Vitu vinavyobaki kwenye skrini juu ya kila kitu.</string>
+    <string name="macros_purpose">Endesha vitendo kadhaa kwa mbofyo mmoja au kitufe kimoja.</string>
 </resources>

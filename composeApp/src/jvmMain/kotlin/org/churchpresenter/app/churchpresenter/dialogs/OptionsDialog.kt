@@ -101,6 +101,7 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import org.churchpresenter.profiles.LocalSettingsDevMode
 import org.churchpresenter.profiles.LocalApplySettings
+import androidx.compose.runtime.collectAsState
 
 // Values must equal each tab's own position in SettingsTabStrip's row: PrimaryScrollableTabRow's
 // selectedTabIndex/tabIndicatorOffset key off *position*, so a value that outruns its row slot
@@ -414,7 +415,7 @@ private fun SettingsTabContent(
         TAB_PROJECTION -> ProjectionSettingsTab(
             settings = settings,
             onSettingsChange = onSettingsChange,
-            companionServer = companionServer,
+            serverUrl = companionServer.serverUrl.collectAsState().value,
             onIdentifyScreen = { onIdentifyScreen() },
             onIdentifyBrowserSource = { index -> onIdentifyBrowserSource(index) },
             onIdentifyNdi = { index -> onIdentifyNdi(index) },

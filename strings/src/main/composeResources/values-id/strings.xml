@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Output ini saat ini tidak menampilkan konten ini.</string>
     <string name="preview_settings_show_labels">Tampilkan label output</string>
     <string name="preview_settings_show_modes">Tampilkan jenis tampilan</string>
+    <string name="preview_section_display">Tampilan</string>
+    <string name="preview_section_layout">Tata letak</string>
+    <string name="preview_layout_rename">Ganti nama tata letak</string>
     <string name="song_add_translation">Tambah bahasa</string>
     <string name="song_fourth_language">Bahasa 4</string>
     <string name="song_pane_translation">Bahasa %1$d</string>
@@ -2769,4 +2772,13 @@
     <string name="helper_command_look_12_does">Menunjukkan pengaturan teks ayat</string>
     <string name="helper_command_look_13">bagaimana mengubah gaya referensi alkitab</string>
     <string name="helper_command_look_13_does">Menunjukkan pengaturan teks referensi</string>
+    <string name="message_purpose">Menampilkan satu baris teks di atas apa pun yang sedang tayang.</string>
+    <string name="message_preview_empty">Pesan Anda muncul di sini</string>
+    <string name="message_stays_up">Tetap tampil selama</string>
+    <string name="message_seconds_short">%1$d dtk</string>
+    <string name="message_one_minute">1 mnt</string>
+    <string name="message_duration_custom">Kustom</string>
+    <string name="message_insert_blank">Sisipkan isian</string>
+    <string name="props_purpose">Hal-hal yang tetap di layar di atas segalanya.</string>
+    <string name="macros_purpose">Jalankan beberapa tindakan dengan satu klik atau tombol.</string>
 </resources>

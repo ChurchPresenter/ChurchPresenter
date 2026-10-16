@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.dictionary.data.InterlinearVerse
 import org.churchpresenter.dictionary.data.InterlinearWord
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.dictionary.DictionaryLabel
 import org.churchpresenter.dictionary.clickLanguageFilter
 import org.churchpresenter.dictionary.dictButton

@@ -1,5 +1,6 @@
 package org.churchpresenter.diagnostics
 
+import io.sentry.ITransaction
 import io.sentry.Attachment
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -16,6 +17,7 @@ import java.io.StringWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import java.util.zip.ZipException
 import kotlin.system.exitProcess
 
 private const val FLUSH_TIMEOUT_MS = 3_000L
@@ -94,6 +96,13 @@ internal enum class CrashKind {
 }
 
 private const val UNKNOWN_VERSION = "unknown"
+
+/** The app's own classes. */
+private const val APP_PACKAGE = "org.churchpresenter."
+
+/** What reads the app's own jars after startup: the class loaders and Compose's resource reader. */
+private val CLASSPATH_READERS =
+    listOf("jdk.internal.loader.", "java.lang.ClassLoader", "org.jetbrains.compose.resources.")
 
 /** What [BuildIdentity] reports for build provenance it was not told. */
 private const val UNKNOWN_BUILD = "unknown"
@@ -268,13 +277,16 @@ object CrashReporter {
      * sentence: interpolating a file name, a count or a device into it splits one recurring problem
      * into one issue per value. Everything that varies belongs in [tags] (short, searchable,
      * low-cardinality) or in [extras] (the detail you want to read once the issue is open).
-     * Both are PII-scrubbed on the way out, like the message itself.
+     * Both are PII-scrubbed on the way out, like the message itself. A non-empty [fingerprint]
+     * replaces Sentry's own grouping -- for an event whose cause is a value, such as where a stalled
+     * UI thread was stuck.
      */
     fun reportWarning(
         context: String,
         throwable: Throwable? = null,
         tags: Map<String, String> = emptyMap(),
         extras: Map<String, String> = emptyMap(),
+        fingerprint: List<String> = emptyList(),
     ) {
         try {
             if (!Sentry.isEnabled()) return
@@ -284,6 +296,7 @@ object CrashReporter {
                 message = Message().apply { message = context }
                 tags.forEach { (k, v) -> setTag(k, v) }
                 extras.forEach { (k, v) -> setExtra(k, v) }
+                if (fingerprint.isNotEmpty()) fingerprints = fingerprint
             }
             Sentry.captureEvent(event)
         } catch (_: Exception) {}
@@ -342,6 +355,28 @@ object CrashReporter {
             current = current.cause
         }
         return CrashKind.OTHER
+    }
+
+    /**
+     * Whether [throwable] is a development build's own output changing under it: a class of ours
+     * gone from the classpath, or a jar on it rewritten while it was being read -- what rebuilding
+     * while the app runs does. The developer watches it happen, and no installed copy can, so a
+     * report of it only buries real ones. Classified by type and the frame it came from, never by
+     * message.
+     */
+    internal fun isStaleBuildOutput(throwable: Throwable?): Boolean {
+        val seen = mutableSetOf<Throwable>()
+        var current = throwable
+        while (current != null && seen.add(current)) {
+            val frames = current.stackTrace
+            val ourClassGone = current is NoClassDefFoundError &&
+                frames.firstOrNull()?.className?.startsWith(APP_PACKAGE) == true
+            val classpathJarRewritten = current is ZipException &&
+                frames.any { frame -> CLASSPATH_READERS.any { frame.className.startsWith(it) } }
+            if (ourClassGone || classpathJarRewritten) return true
+            current = current.cause
+        }
+        return false
     }
 
     internal fun readCrashCount(): Int = try {
@@ -485,18 +520,30 @@ object CrashReporter {
      * Performance. Falls back to running [block] directly when Sentry is disabled.
      */
     inline fun <T> trace(operation: String, name: String, block: () -> T): T {
-        if (!isEnabled()) return block()
-        val tx = try { Sentry.startTransaction(name, operation) } catch (_: Exception) { null } ?: return block()
+        val transaction = startTransaction(operation, name)
+        // [block] is inlined here once, whether or not a transaction started: a traced function
+        // compiles to one copy of its own body, not one per path through this function.
         // runCatching so the failure is recorded and rethrown unchanged without naming a type: the
         // block is arbitrary caller code, and an Error — an OOM mid-render is the realistic one —
         // has to mark the transaction failed just as an exception does.
         val outcome = runCatching { block() }
-        outcome.exceptionOrNull()?.let { failure ->
-            tx.throwable = failure
-            tx.status = SpanStatus.INTERNAL_ERROR
-        }
-        try { tx.finish() } catch (_: Exception) {}
+        if (transaction != null) finishTransaction(transaction, outcome.exceptionOrNull())
         return outcome.getOrThrow()
+    }
+
+    /** The transaction [trace] runs its block under; null while Sentry is off, or will not start one. */
+    @PublishedApi
+    internal fun startTransaction(operation: String, name: String): ITransaction? =
+        if (!isEnabled()) null else try { Sentry.startTransaction(name, operation) } catch (_: Exception) { null }
+
+    /** Marks [transaction] failed with [failure], when there is one, and finishes it. */
+    @PublishedApi
+    internal fun finishTransaction(transaction: ITransaction, failure: Throwable?) {
+        if (failure != null) {
+            transaction.throwable = failure
+            transaction.status = SpanStatus.INTERNAL_ERROR
+        }
+        try { transaction.finish() } catch (_: Exception) {}
     }
 
     /** Sends user-provided feedback (e.g. after a crash) as a Sentry event + user feedback. */
@@ -726,9 +773,11 @@ object CrashReporter {
     /**
      * Scrubs PII from every outgoing event, then attaches the most recent local crash-report file
      * (also scrubbed) to error and fatal events. Neither step may block delivery, which is why
-     * both are wrapped.
+     * both are wrapped. A development build's crash from its own output changing under it
+     * ([isStaleBuildOutput]) is the one event dropped.
      */
     internal fun crashAttachingBeforeSend() = SentryOptions.BeforeSendCallback { event, hint ->
+        if (!build.isRelease && isStaleBuildOutput(event.throwable)) return@BeforeSendCallback null
         try { scrubEvent(event) } catch (_: Exception) { /* never block delivery */ }
         try {
             if (event.level == SentryLevel.ERROR || event.level == SentryLevel.FATAL) {

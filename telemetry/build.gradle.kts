@@ -1,14 +1,7 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
+    id("cp.jvm-module")
+    id("cp.test-home")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
-    jacoco
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
 }
 
 dependencies {
@@ -23,9 +16,9 @@ dependencies {
     implementation(projects.calendar)
     implementation(projects.converter)
     implementation(projects.songlibrary)
-    implementation(projects.canvas)
-    implementation(projects.media)
-    implementation(projects.web)
+    implementation(projects.canvasEngine)
+    implementation(projects.mediaEngine)
+    implementation(projects.webEngine)
     implementation(projects.liveOutput)
     implementation(projects.ndi)
     implementation(projects.omt)
@@ -41,28 +34,3 @@ dependencies {
     testImplementation(testFixtures(projects.diagnostics))
 }
 
-// The suite gets a home of its own under build/ so a test can never touch the real ~/.churchpresenter.
-tasks.withType<Test>().configureEach {
-    val testHome = layout.buildDirectory.dir("test-home").get().asFile
-    doFirst { testHome.mkdirs() }
-    systemProperty("user.home", testHome.absolutePath)
-    systemProperty("java.awt.headless", "true")
-}
-
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

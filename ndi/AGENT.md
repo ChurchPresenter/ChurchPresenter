@@ -123,7 +123,7 @@ hand-copied literal.
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test in scope (not
   `testFixtures`, as `:atem` does it). The two ABI suppressions above are at the declaration.
-- **Coverage**: the root build's default six counters at 85%, all of them — **no**
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no**
   `coverageFloors`, **no** `coverageExcludes`, and it should stay that way. Covering the JNA
   marshalling against a fake `NdiLibC` is what earns that; an exclude for "it needs a runtime"
   would have hidden a real bug — `Memory(0)` throws, so a zero-sized frame took the render loop

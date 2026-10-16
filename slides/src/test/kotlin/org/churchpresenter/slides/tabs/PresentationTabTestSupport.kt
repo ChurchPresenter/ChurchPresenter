@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures for the `PresentationTab` test classes.
@@ -90,6 +91,8 @@ internal fun presentationTab(
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     width: Dp? = null,
     themeMode: ThemeMode? = null,
+    /** The remote-control dialog the host draws; the app's opens a real window, so tests pass their own. */
+    remoteDialog: @Composable (onDismiss: () -> Unit) -> Unit = {},
     block: ComposeUiTest.(vm: PresentationViewModel, reports: PresentationReports) -> Unit,
 ) {
     val appSettings = settings(AppSettings())
@@ -97,30 +100,33 @@ internal fun presentationTab(
     val vm = PresentationViewModel(appSettings)
     runComposeUiTest {
         setContent {
-            ThemedForTest(themeMode) {
-                Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    PresentationTab(
-                        appSettings = appSettings,
-                        viewModel = vm,
-                        presenterManager = presenterManager,
-                        onAddToSchedule =
-                            { path, name, count, type -> reports.scheduled += "$path:$name:$count:$type" },
-                        onSettingsChange = { transform ->
-                            reports.settingsChanges++
-                            reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
-                        },
-                        presentationFrozen = presentationFrozen,
-                        onFreezeToggle = { reports.freezeToggles++ },
-                        onClearPresentation = { reports.clears++ },
-                        vlcAvailable = vlcAvailable,
-                        vlcArchMismatch = vlcArchMismatch,
-                        vlcLoadFailed = vlcLoadFailed,
-                        selectedPresentationItem = selectedPresentationItem,
-                        instanceLinkFetchPresentationSlideBytes = instanceLinkFetchPresentationSlideBytes,
-                        onInstanceLinkSendNextSlide = onInstanceLinkSendNextSlide,
-                        onInstanceLinkSendPreviousSlide = onInstanceLinkSendPreviousSlide,
-                        onInstanceLinkSendProject = onInstanceLinkSendProject,
-                    )
+            PinnedFonts {
+                ThemedForTest(themeMode) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        PresentationTab(
+                            appSettings = appSettings,
+                            viewModel = vm,
+                            presenterManager = presenterManager,
+                            onAddToSchedule =
+                                { path, name, count, type -> reports.scheduled += "$path:$name:$count:$type" },
+                            onSettingsChange = { transform ->
+                                reports.settingsChanges++
+                                reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
+                            },
+                            presentationFrozen = presentationFrozen,
+                            onFreezeToggle = { reports.freezeToggles++ },
+                            onClearPresentation = { reports.clears++ },
+                            vlcAvailable = vlcAvailable,
+                            vlcArchMismatch = vlcArchMismatch,
+                            vlcLoadFailed = vlcLoadFailed,
+                            selectedPresentationItem = selectedPresentationItem,
+                            instanceLinkFetchPresentationSlideBytes = instanceLinkFetchPresentationSlideBytes,
+                            onInstanceLinkSendNextSlide = onInstanceLinkSendNextSlide,
+                            onInstanceLinkSendPreviousSlide = onInstanceLinkSendPreviousSlide,
+                            onInstanceLinkSendProject = onInstanceLinkSendProject,
+                            remoteDialog = remoteDialog,
+                        )
+                    }
                 }
             }
         }

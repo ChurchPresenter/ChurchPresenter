@@ -1,14 +1,6 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
+    id("cp.jvm-module")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
-    jacoco
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
 }
 
 dependencies {
@@ -17,13 +9,13 @@ dependencies {
     implementation(projects.sharedUi)
     implementation(projects.diagnostics)
     implementation(projects.calendar)
-    implementation(projects.lowerThird)
+    implementation(projects.lowerThirdEngine)
     implementation(projects.presentationEngine)
     implementation(projects.atem)
     implementation(projects.dictionary)
     implementation(projects.bible)
     implementation(projects.songs)
-    implementation(projects.slides)
+    implementation(projects.slidesEngine)
     implementation(projects.qa)
 
     implementation(libs.kotlinx.coroutines.core)
@@ -87,20 +79,3 @@ tasks.withType<Test>().configureEach {
     inputs.file(rootProject.file("COMPANION_API.md")).withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

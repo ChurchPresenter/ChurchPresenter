@@ -1,0 +1,586 @@
+package org.churchpresenter.web.presenter
+
+import java.io.File
+import java.nio.file.Files
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+
+class CefManagerTest {
+
+    private lateinit var dir: File
+
+    @BeforeTest
+    fun setUp() {
+        dir = Files.createTempDirectory("cp-cefmanager").toFile()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        dir.deleteRecursively()
+    }
+
+    private fun awaitUntil(timeoutMs: Long = 2_000, condition: () -> Boolean) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (condition()) return
+            Thread.sleep(10)
+        }
+        throw AssertionError("timed out after ${timeoutMs}ms waiting for condition")
+    }
+
+    @Test
+    fun `isUnsupportedMacOS is false on non-macOS operating systems`() {
+        assertFalse(CefManager.isUnsupportedMacOS(osName = "Windows 11", osVersion = "10.0"))
+        assertFalse(CefManager.isUnsupportedMacOS(osName = "Linux", osVersion = "6.1"))
+    }
+
+    @Test
+    fun `isUnsupportedMacOS is false on macOS 12 and newer`() {
+        assertFalse(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = "12.0"))
+        assertFalse(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = "15.5"))
+    }
+
+    @Test
+    fun `isUnsupportedMacOS is true below macOS 12`() {
+        assertTrue(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = "11.7"))
+        assertTrue(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = "10.15"))
+    }
+
+    @Test
+    fun `the web engine is refused on every Windows older than 10`() {
+        listOf("Windows 7", "Windows 8", "Windows 8.1", "Windows Server 2012 R2").forEach {
+            assertTrue(isUnsupportedWindowsForJcef(osName = it), it)
+        }
+    }
+
+    @Test
+    fun `the web engine is allowed on Windows 10 and later, and on every other OS`() {
+        listOf("Windows 10", "Windows 11", "Windows Server 2019", "Mac OS X", "Linux", "").forEach {
+            assertFalse(isUnsupportedWindowsForJcef(osName = it), it)
+        }
+    }
+
+    @Test
+    fun `isUnsupportedMacOS is false when the version cannot be parsed`() {
+        assertFalse(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = ""))
+        assertFalse(CefManager.isUnsupportedMacOS(osName = "Mac OS X", osVersion = "unknown"))
+    }
+
+    @Test
+    fun `rootCandidates on Windows offers ProgramData first and the home directory second`() {
+        val home = File(dir, "home").apply { mkdirs() }
+        val roots = JcefInstall.rootCandidates(
+            osName = "Windows 11",
+            programData = dir.absolutePath,
+            homeDir = home.absolutePath,
+        )
+        assertEquals(
+            listOf(File(dir, "ChurchPresenter").absolutePath, File(home, ".churchpresenter").absolutePath),
+            roots.map { it.absolutePath },
+        )
+    }
+
+    @Test
+    fun `rootCandidates on non-Windows offers only the home directory`() {
+        val home = File(dir, "home").apply { mkdirs() }
+        val roots = JcefInstall.rootCandidates(
+            osName = "Mac OS X",
+            programData = dir.absolutePath,
+            homeDir = home.absolutePath,
+        )
+        assertEquals(listOf(File(home, ".churchpresenter").absolutePath), roots.map { it.absolutePath })
+    }
+
+    @Test
+    fun `rootCandidates falls back to the literal ProgramData path when the variable is unset`() {
+        val roots = JcefInstall.rootCandidates(
+            osName = "Windows 10",
+            programData = null,
+            homeDir = File(dir, "home").absolutePath,
+        )
+        assertEquals("ChurchPresenter", roots.first().name)
+        assertTrue(roots.first().absolutePath.contains("ProgramData"))
+    }
+
+    @Test
+    fun `directoryIsWritable is true for a real directory and leaves no probe behind`() {
+        val target = File(dir, "writable")
+        assertTrue(JcefInstall.directoryIsWritable(target))
+        assertTrue(target.isDirectory, "the probe creates the directory it is asked about")
+        assertEquals(emptyList(), target.listFiles()!!.map { it.name }, "the probe file must be removed")
+    }
+
+    @Test
+    fun `directoryIsWritable is false when a plain file sits at the path`() {
+        val target = File(dir, "occupied")
+        target.writeText("not a directory")
+        assertFalse(JcefInstall.directoryIsWritable(target))
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot installs into the first root when it works`() {
+        val attempted = mutableListOf<File>()
+        val first = File(dir, "first")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(first, File(dir, "second")),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { attempted += it },
+        )
+        assertEquals(JcefInstall.Outcome.Installed(first), outcome)
+        assertEquals(listOf(first), attempted, "a working first root must not cost a second attempt")
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot retries the next root when the first attempt throws`() {
+        val attempted = mutableListOf<File>()
+        val first = File(dir, "programdata")
+        val second = File(dir, "home")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(first, second),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { root ->
+                attempted += root
+                if (root == first) throw java.io.FileNotFoundException("chrome_elf.dll (Access is denied)")
+            },
+        )
+        assertEquals(JcefInstall.Outcome.Installed(second), outcome)
+        assertEquals(listOf(first, second), attempted)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot skips a blocked root without attempting it`() {
+        val attempted = mutableListOf<File>()
+        val blocked = File(dir, "blocked")
+        val usable = File(dir, "usable")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(blocked, usable),
+            blockerFor = { if (it == blocked) "permission_denied" else null },
+            stopRetrying = { false },
+            attempt = { attempted += it },
+        )
+        assertEquals(JcefInstall.Outcome.Installed(usable), outcome)
+        assertEquals(listOf(usable), attempted)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot reports the last blocker when every root is ruled out`() {
+        val attempted = mutableListOf<File>()
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(File(dir, "a"), File(dir, "b")),
+            blockerFor = { if (it.name == "a") "permission_denied" else "disk_space" },
+            stopRetrying = { false },
+            attempt = { attempted += it },
+        )
+        assertEquals(JcefInstall.Outcome.Blocked("disk_space"), outcome)
+        assertEquals(emptyList(), attempted)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot stops after a failure the machine will repeat`() {
+        val attempted = mutableListOf<File>()
+        val first = File(dir, "first")
+        val policy = IllegalStateException("blocked by group policy")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(first, File(dir, "second")),
+            blockerFor = { null },
+            stopRetrying = { JcefInstall.policyBlock(it.message) != null },
+            attempt = { root ->
+                attempted += root
+                throw policy
+            },
+        )
+        assertEquals(JcefInstall.Outcome.Failed(first, policy), outcome)
+        assertEquals(listOf(first), attempted, "a policy block applies machine-wide; a second root cannot help")
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot reports the last failure when every root throws`() {
+        val second = File(dir, "second")
+        val last = RuntimeException("second failed")
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = listOf(File(dir, "first"), second),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { root -> throw if (root == second) last else RuntimeException("first failed") },
+        )
+        assertEquals(JcefInstall.Outcome.Failed(second, last), outcome)
+    }
+
+    @Test
+    fun `installIntoFirstUsableRoot reports a blocker when there is nothing to try`() {
+        val outcome = JcefInstall.installIntoFirstUsableRoot(
+            roots = emptyList(),
+            blockerFor = { null },
+            stopRetrying = { false },
+            attempt = { error("must not be called") },
+        )
+        assertEquals(JcefInstall.Outcome.Blocked("no_install_dir"), outcome)
+    }
+
+    @Test
+    fun `cleanupLegacyJcef does nothing when the active root is the home directory`() {
+        val home = dir.absolutePath
+        val churchDir = File(dir, ".churchpresenter")
+        val legacyJcef = File(churchDir, "jcef").apply { mkdirs() }
+
+        CefManager.cleanupLegacyJcef(activeRoot = churchDir, homeDir = home)
+
+        assertTrue(
+            legacyJcef.isDirectory,
+            "nothing should be deleted when the active root already is the home directory",
+        )
+    }
+
+    @Test
+    fun `cleanupLegacyJcef does nothing when there is no legacy footprint`() {
+        val home = File(dir, "home").apply { mkdirs() }
+        val activeRoot = File(dir, "programdata-root").apply { mkdirs() }
+
+        CefManager.cleanupLegacyJcef(activeRoot = activeRoot, homeDir = home.absolutePath)
+    }
+
+    @Test
+    fun `cleanupLegacyJcef deletes the legacy jcef and webview-cache directories when relocated`() {
+        val home = File(dir, "home").apply { mkdirs() }
+        val churchDir = File(home, ".churchpresenter")
+        val legacyJcef = File(churchDir, "jcef").apply { mkdirs() }
+        val legacyCache = File(churchDir, "webview-cache").apply { mkdirs() }
+        val activeRoot = File(dir, "programdata-root").apply { mkdirs() }
+
+        CefManager.cleanupLegacyJcef(activeRoot = activeRoot, homeDir = home.absolutePath)
+
+        awaitUntil { !legacyJcef.exists() && !legacyCache.exists() }
+    }
+
+    @Test
+    fun `cleanupLegacyJcef deletes only the legacy directories that actually exist`() {
+        val home = File(dir, "home").apply { mkdirs() }
+        val churchDir = File(home, ".churchpresenter")
+        val legacyJcef = File(churchDir, "jcef").apply { mkdirs() }
+        val activeRoot = File(dir, "programdata-root").apply { mkdirs() }
+
+        CefManager.cleanupLegacyJcef(activeRoot = activeRoot, homeDir = home.absolutePath)
+
+        awaitUntil { !legacyJcef.exists() }
+    }
+
+    @Test
+    fun `isUnsupportedMacOS with no arguments reads the real OS properties`() {
+        assertEquals(
+            CefManager.isUnsupportedMacOS(System.getProperty("os.name", ""), System.getProperty("os.version", "")),
+            CefManager.isUnsupportedMacOS(),
+        )
+    }
+
+    @Test
+    fun `rootCandidates with no arguments resolves to churchpresenter directories`() {
+        val roots = JcefInstall.rootCandidates()
+        assertTrue(roots.isNotEmpty())
+        assertTrue(roots.all { it.name == ".churchpresenter" || it.name == "ChurchPresenter" }, "got $roots")
+    }
+
+    @Test
+    fun `cleanupLegacyJcef with no home override reads the real user home`() {
+        val home = System.getProperty("user.home")
+        CefManager.cleanupLegacyJcef(activeRoot = File(home, ".churchpresenter"))
+    }
+
+    @Test
+    fun `macOsUnsupported defaults to false since init is never called in tests`() {
+        assertFalse(CefManager.macOsUnsupported)
+    }
+
+    @Test
+    fun `patchJcefModuleAccess runs without throwing`() {
+        CefManager.patchJcefModuleAccess()
+    }
+
+    @Test
+    fun `isVirtualizedEnvironment matches a known VM or hypervisor DMI string`() {
+        assertTrue(isVirtualizedEnvironment(listOf("Standard PC (i440FX + PIIX, 1996)")))
+        assertTrue(isVirtualizedEnvironment(listOf("innotek GmbH", "VirtualBox")))
+        assertTrue(isVirtualizedEnvironment(listOf("QEMU")))
+    }
+
+    @Test
+    fun `isVirtualizedEnvironment does not match real hardware vendors`() {
+        assertFalse(isVirtualizedEnvironment(listOf("Apple Inc.", "MacBookPro18,1")))
+        assertFalse(isVirtualizedEnvironment(emptyList()))
+    }
+
+    @Test
+    fun `dispose is a no-op`() {
+        CefManager.dispose()
+    }
+
+    @Test
+    fun `createClient returns null before init has run`() {
+        assertNull(CefManager.createClient())
+    }
+
+    @Test
+    fun `routeAudioToDevice with a blank device id does nothing`() {
+        CefManager.routeAudioToDevice("")
+    }
+
+    @Test
+    fun `routeAudioToDevice swallows the failure when the pactl tool is unavailable`() {
+        CefManager.routeAudioToDevice("some-sink")
+    }
+
+    @Test
+    fun `sinkInputIndicesForProcess finds only the sink inputs belonging to our pid`() {
+        val output = """
+            Sink Input #12
+                application.process.id = "4321"
+            Sink Input #13
+                application.process.id = "9999"
+            Sink Input #14
+                application.process.id = "4321"
+        """.trimIndent()
+
+        assertEquals(listOf("12", "14"), sinkInputIndicesForProcess(output, pid = 4321))
+    }
+
+    @Test
+    fun `sinkInputIndicesForProcess returns nothing when no block matches`() {
+        val output = """
+            Sink Input #1
+                application.process.id = "1"
+        """.trimIndent()
+
+        assertEquals(emptyList(), sinkInputIndicesForProcess(output, pid = 4321))
+    }
+
+    @Test
+    fun `sinkInputIndicesForProcess handles a match in the last block`() {
+        val output = """
+            Sink Input #7
+                application.process.id = "555"
+        """.trimIndent()
+
+        assertEquals(listOf("7"), sinkInputIndicesForProcess(output, pid = 555))
+    }
+
+    @Test
+    fun `sinkInputIndicesForProcess on empty output finds nothing`() {
+        assertEquals(emptyList(), sinkInputIndicesForProcess("", pid = 1))
+    }
+
+    /** A process id ahead of the first header belongs to no input, however the blocks after it read. */
+    @Test
+    fun `sinkInputIndicesForProcess ignores a process id that comes before any sink input`() {
+        val output = """
+            application.process.id = "4321"
+            Sink Input #7
+                application.process.id = "1"
+        """.trimIndent()
+        val preambleOnly = "application.process.id = \"4321\""
+
+        assertEquals(emptyList(), sinkInputIndicesForProcess(output, pid = 4321))
+        assertEquals(emptyList(), sinkInputIndicesForProcess(preambleOnly, pid = 4321))
+    }
+
+    // ── What the Web tab reads before the engine has started ────────────────────
+
+    /**
+     * Until [CefManager.init] runs there is no engine and nothing to explain: the tab's "web engine
+     * unavailable" panel reads these to pick its message, and none may name a cause that has not
+     * happened. No suite here starts the engine, so this is the state every test sees.
+     */
+    @Test
+    fun `before init the engine is not running and names no reason why`() {
+        assertFalse(CefManager.initialized)
+        assertFalse(CefManager.windowsUnsupported)
+        assertFalse(CefManager.blockedByPolicy)
+        assertNull(CefManager.missingLibrary)
+        assertNull(CefManager.installRoot, "nothing has been installed")
+        assertNull(CefManager.webviewCacheDir, "so there is no cache to clear")
+    }
+
+    // ── Whether the install is worth attempting at all ──────────────────────────
+
+    private val plentyOfSpace = 10L * 1024 * 1024 * 1024
+
+    @Test
+    fun `a directory that cannot be written to blocks the install`() {
+        // ProgramData ACLs vary and a locked-down corporate build is normal, not a defect.
+        assertEquals(
+            "permission_denied",
+            JcefInstall.installBlocker(writable = false, usableSpaceBytes = plentyOfSpace),
+        )
+    }
+
+    @Test
+    fun `a disk without room for a bundled Chromium blocks the install`() {
+        assertEquals(
+            "disk_space",
+            JcefInstall.installBlocker(writable = true, usableSpaceBytes = 50L * 1024 * 1024),
+        )
+    }
+
+    // ── An install jcefmaven would discard ──────────────────────────────────────
+
+    /** A half-extracted install: a library and a nested folder, one file of it marked read-only. */
+    private fun partialInstall(): File = File(dir, "jcef").apply {
+        File(this, "swiftshader").mkdirs()
+        File(this, "libcef.dll").writeText("x")
+        File(this, "swiftshader/vk_swiftshader.dll").apply { writeText("x") }.setReadOnly()
+    }
+
+    @Test
+    fun `a complete install is left alone`() {
+        val installDir = partialInstall()
+
+        assertNull(clearIncompleteInstall(installDir, isComplete = { true }))
+        assertTrue(File(installDir, "libcef.dll").exists(), "a working install must never be deleted")
+    }
+
+    @Test
+    fun `an incomplete install is cleared, read-only files included`() {
+        val installDir = partialInstall()
+
+        assertNull(clearIncompleteInstall(installDir, isComplete = { false }))
+        assertFalse(installDir.exists(), "jcefmaven can only create the directory if it is gone")
+    }
+
+    @Test
+    fun `a file that will not go blocks the root instead of failing the install`() {
+        val installDir = partialInstall()
+        val held = File(installDir, "libcef.dll")
+
+        val blocker = clearIncompleteInstall(
+            installDir,
+            isComplete = { false },
+            delete = { it != held && it != installDir && it.delete() },
+        )
+
+        assertEquals("install_in_use", blocker)
+    }
+
+    @Test
+    fun `a half-extracted install is not one jcefmaven would use`() {
+        assertFalse(installIsComplete(partialInstall()), "no install.lock, so jcefmaven would start again")
+    }
+
+    @Test
+    fun `no install yet is nothing to clear`() {
+        assertNull(clearIncompleteInstall(File(dir, "jcef"), isComplete = { false }))
+    }
+
+    @Test
+    fun `a writable directory with room goes ahead`() {
+        assertNull(JcefInstall.installBlocker(writable = true, usableSpaceBytes = plentyOfSpace))
+    }
+
+    @Test
+    fun `an unknown free-space figure is not treated as a full disk`() {
+        // File.usableSpace answers 0 when it cannot determine the figure, which is not the same as
+        // a full disk — reading it that way would block the install wherever the filesystem does
+        // not report one. The real attempt decides instead.
+        assertNull(JcefInstall.installBlocker(writable = true, usableSpaceBytes = 0))
+    }
+
+    @Test
+    fun `permission is answered before space when neither is available`() {
+        assertEquals(
+            "permission_denied",
+            JcefInstall.installBlocker(writable = false, usableSpaceBytes = 0),
+        )
+    }
+
+    @Test
+    fun `a machine policy blocking the engine is named, and nothing else is`() {
+        // Windows Application Control (WDAC/AppLocker) blocks jcef.dll on managed installs, which
+        // this app cannot fix: JCEF is downloaded at first use rather than shipped signed by us.
+        // Twelve reports across five churches, every launch, and the Web tab meanwhile told them to
+        // install a Visual C++ redistributable that would not have helped.
+        assertEquals(
+            "policy",
+            JcefInstall.policyBlock(
+                "C:\\ProgramData\\ChurchPresenter\\jcef\\jcef.dll: " +
+                    "An Application Control policy has blocked this file"
+            ),
+        )
+
+        // Everything else keeps being reported. Matching a message is a weak test and this only
+        // ever suppresses an event, so falling through is the safe direction to be wrong in.
+        assertNull(JcefInstall.policyBlock("The specified module could not be found"))
+        assertNull(JcefInstall.policyBlock(null))
+    }
+
+    @Test
+    fun `a library the system lacks is named, and the engine's own files are not`() {
+        val missingNspr = UnsatisfiedLinkError(
+            "/home/u/.churchpresenter/jcef/libjcef.so: libnspr4.so: " +
+                "cannot open shared object file: No such file or directory",
+        )
+        assertEquals("libnspr4.so", missingSystemLibrary(missingNspr))
+        assertEquals(
+            "libgbm.so.1",
+            missingSystemLibrary(
+                UnsatisfiedLinkError("/opt/jcef/libcef.so: libgbm.so.1: cannot open shared object file: No such file"),
+            ),
+        )
+
+        // A file of the engine's own is a broken extraction, which a fresh one can fix.
+        assertNull(
+            missingSystemLibrary(
+                UnsatisfiedLinkError("/home/u/.churchpresenter/jcef/libjcef.so: cannot open shared object file"),
+            ),
+        )
+        assertNull(missingSystemLibrary(UnsatisfiedLinkError("The specified procedure could not be found")))
+        assertNull(
+            missingSystemLibrary(IllegalStateException("libnspr4.so: cannot open shared object file")),
+            "only a failed native load",
+        )
+    }
+
+    @Test
+    fun `a broken extraction is wiped and built again, but a missing system library is not`() {
+        val root = File(dir, "root").apply { File(this, "jcef").mkdirs() }
+        var builds = 0
+        val rebuilt = JcefInstall.buildRepairing(root) {
+            builds++
+            if (builds == 1) throw UnsatisfiedLinkError("libcef.dll: The specified procedure could not be found")
+            "built"
+        }
+        assertEquals("built", rebuilt)
+        assertEquals(2, builds)
+        assertFalse(File(root, "jcef").exists(), "the mismatched files were wiped before the second try")
+
+        File(root, "jcef").mkdirs()
+        builds = 0
+        val missing = UnsatisfiedLinkError("/r/jcef/libjcef.so: libnspr4.so: cannot open shared object file")
+        val thrown = assertFailsWith<UnsatisfiedLinkError> {
+            JcefInstall.buildRepairing(root) {
+                builds++
+                throw missing
+            }
+        }
+        assertSame(missing, thrown)
+        assertEquals(1, builds, "a download cannot supply a library the system lacks")
+        assertTrue(File(root, "jcef").exists(), "and the install is left alone")
+    }
+
+    @Test
+    fun `no CefApp means no client, and no throw`() {
+        // The suite never initialises JCEF, so this is the uninitialised branch — the one that has
+        // to answer null rather than dereference. The failed-native branch beside it cannot be
+        // reached without a real CefApp whose native side has died, which is exactly the state a
+        // test cannot construct; the guarantee that matters is shared and asserted here: every
+        // caller sees null, never an exception, because the only call site is inside a `remember`.
+        assertFalse(CefManager.initialized)
+        assertNull(CefManager.createClient())
+        assertFalse(CefManager.initialized, "answering null must not flip the flag on")
+    }
+}

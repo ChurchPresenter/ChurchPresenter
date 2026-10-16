@@ -331,6 +331,31 @@ class LiveMapReporterTest {
     }
 
     @Test
+    fun `the previous run's live time and live stalls are reported when it had any`() {
+        val url = LiveMapReporter.buildPingUrl(
+            "linux", "26.1.0", null, isDevBuild = false,
+            setup = LiveMapReporter.SetupFacts(liveMinutes = 80, liveStalls = 3),
+        )
+        assertTrue("liveMinutes=80" in url, url)
+        assertTrue("liveStalls=3" in url, url)
+
+        val nothingLive = LiveMapReporter.buildPingUrl(
+            "linux", "26.1.0", null, isDevBuild = false,
+            setup = LiveMapReporter.SetupFacts(sessionMinutes = 20),
+        )
+        assertFalse("liveMinutes" in nothingLive, nothingLive)
+        assertFalse("liveStalls" in nothingLive, nothingLive)
+    }
+
+    @Test
+    fun `setup facts carry the live time and live stalls they are given`() {
+        val facts = LiveMapReporter.setupFacts(AppSettings(), screenCount = 1, liveMinutes = 64, liveStalls = 2)
+
+        assertEquals(64, facts.liveMinutes)
+        assertEquals(2, facts.liveStalls)
+    }
+
+    @Test
     fun `song counts from an unset song folder are zero rather than an error`() {
         assertEquals(0 to 0, LiveMapReporter.gatherSongCounts(AppSettings()))
     }

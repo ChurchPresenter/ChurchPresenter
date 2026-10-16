@@ -14,6 +14,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import org.churchpresenter.sharedui.utils.previewOutputSize
 
 /**
  * The lens the settings tab edits through: one control set standing for four stored profiles.

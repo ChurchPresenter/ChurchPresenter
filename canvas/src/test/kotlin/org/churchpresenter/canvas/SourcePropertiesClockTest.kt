@@ -37,7 +37,7 @@ class SourcePropertiesClockTest {
 
     /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
     @AfterTest
-    fun stopTimers() = TimerStateManager.clear()
+    fun stopTimers() = clearSceneTimers()
 
     /** Ordinals of the clock panel's fields — the header owns the first six. */
     private object Field {
@@ -247,6 +247,15 @@ class SourcePropertiesClockTest {
     }
 
     // ── Letter spacing and curve ──────────────────────────────────────────────
+
+    @Test
+    fun `the Outline button strokes the read-out and changes nothing else`() =
+        sourcePanel(Fixture.clock("clk-outline")) { get ->
+            clickStyleButton("Outline")
+
+            val clock = Fixture.clock("clk-outline")
+            assertEquals(clock.copy(outline = clock.outline.copy(enabled = true)), get())
+        }
 
     @Test
     fun `typing a letter spacing stores it`() = sourcePanel(Fixture.clock("clk-tracking")) { get ->

@@ -21,7 +21,6 @@ import org.churchpresenter.strings.generated.resources.props_picture
 import org.churchpresenter.strings.generated.resources.tooltip_props
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.outlined.DisplaySettings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,7 +66,7 @@ import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.composables.TooltipIconButton
-import org.churchpresenter.profiles.previewOutputSize
+import org.churchpresenter.sharedui.utils.previewOutputSize
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.liveoutput.clearMessage
@@ -85,6 +81,10 @@ import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.activeLayout
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.foundation.layout.size
+import org.churchpresenter.dialogs.LiveActionButton
+import org.churchpresenter.dialogs.LiveTool
+import org.churchpresenter.theme.AppShape
 
 /**
  * A Companion surface drawn in one of the main screen's sidebars: the connection it shows and where.
@@ -349,12 +349,15 @@ private fun SidebarButtons(
     }
     if (showControl.devMode) {
         DevModeBox {
-            MessageButton(presenterManager, appSettings, onSettingsChange)
-            PropsButton(presenterManager, appSettings, onSettingsChange)
-            MacrosButton(appSettings, showControl, onSettingsChange)
-            ClearLayersButton(presenterManager, appSettings, onSettingsChange)
-            PreviewModeToggle(appSettings.projectionSettings.previewModeEnabled) { on ->
-                onSettingsChange { it.withPreviewMode(on) }
+            LiveToolStrip {
+                MessageButton(presenterManager, appSettings, onSettingsChange)
+                PropsButton(presenterManager, appSettings, onSettingsChange)
+                MacrosButton(appSettings, showControl, onSettingsChange)
+                LiveToolDivider()
+                ClearLayersButton(presenterManager, appSettings, onSettingsChange)
+                PreviewModeToggle(appSettings.projectionSettings.previewModeEnabled) { on ->
+                    onSettingsChange { it.withPreviewMode(on) }
+                }
             }
             if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
         }
@@ -371,12 +374,12 @@ private fun MessageButton(
 ) {
     var open by remember { mutableStateOf(false) }
     val onAir = presenterManager.messageOnAir
-    TooltipIconButton(
+    LiveToolButton(
+        tool = LiveTool.MESSAGE,
         painter = rememberVectorPainter(Icons.AutoMirrored.Filled.Message),
-        text = stringResource(Res.string.tooltip_message),
+        label = stringResource(Res.string.tooltip_message),
         onClick = { open = true },
-        buttonSize = 36.dp,
-        iconTint = if (onAir != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        onAir = onAir != null,
         modifier = Modifier.testTag(MESSAGE_BUTTON_TAG),
     )
     LocalSidebarDialogs.current.Message(
@@ -405,12 +408,12 @@ private fun PropsButton(
     var open by remember { mutableStateOf(false) }
     val onAir = presenterManager.propsOnAir
     val chooseTitle = stringResource(Res.string.props_picture)
-    TooltipIconButton(
+    LiveToolButton(
+        tool = LiveTool.PROPS,
         painter = rememberVectorPainter(Icons.Outlined.Layers),
-        text = stringResource(Res.string.tooltip_props),
+        label = stringResource(Res.string.tooltip_props),
         onClick = { open = true },
-        buttonSize = 36.dp,
-        iconTint = if (onAir.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        onAir = onAir.isNotEmpty(),
         modifier = Modifier.testTag(PROPS_BUTTON_TAG),
     )
     LocalSidebarDialogs.current.Props(
@@ -446,11 +449,11 @@ private fun ClearLayersButton(
     var menuOpen by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf(false) }
     Box {
-        TooltipIconButton(
+        LiveToolButton(
+            tool = LiveTool.CLEAR,
             painter = rememberVectorPainter(Icons.Outlined.LayersClear),
-            text = stringResource(Res.string.tooltip_clear_layers),
+            label = stringResource(Res.string.tooltip_clear_layers),
             onClick = { menuOpen = true },
-            buttonSize = 36.dp,
             modifier = Modifier.testTag(CLEAR_LAYERS_BUTTON_TAG),
         )
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
@@ -508,19 +511,13 @@ private fun PreviewSettingsButton(
 @Composable
 internal fun RowScope.PreviewTakeButton(presenterManager: PresenterManager) {
     val bus = presenterManager.previewBus
-    Spacer(Modifier.weight(1f))
-    Button(
-        onClick = bus::take,
+    LiveActionButton(
+        label = stringResource(Res.string.preview_take),
         enabled = bus.anythingCued,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError,
-        ),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        modifier = Modifier.height(36.dp).testTag(PREVIEW_TAKE_TAG).guideTarget(GuideTargets.TAKE),
-    ) {
-        Text(stringResource(Res.string.preview_take))
-    }
+        onClick = bus::take,
+        shape = AppShape(12.dp),
+        modifier = Modifier.height(40.dp).testTag(PREVIEW_TAKE_TAG).guideTarget(GuideTargets.TAKE),
+    )
 }
 
 /** Test handle for preview mode's Take button. */

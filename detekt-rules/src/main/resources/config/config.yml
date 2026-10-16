@@ -1,0 +1,5 @@
+live-safe:
+  active: true
+  BlockingCallOnEventThread:
+    active: true
+    allowlist: ''

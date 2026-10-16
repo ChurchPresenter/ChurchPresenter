@@ -48,6 +48,7 @@ internal fun InScriptureBookDropdown(
     getBookName: ((bookId: Int) -> String?)?,
     onSelect: (Int?) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val options = listOf("" to allBooksLabel) +
         availableBooks.map { it.toString() to (getBookName?.invoke(it) ?: "Book $it") }
@@ -57,6 +58,7 @@ internal fun InScriptureBookDropdown(
         options = options,
         onValueChange = { onSelect(it.toIntOrNull()) },
         modifier = modifier,
+        enabled = enabled,
     )
 }
 

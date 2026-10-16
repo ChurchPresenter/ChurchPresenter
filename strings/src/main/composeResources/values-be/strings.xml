@@ -2258,6 +2258,9 @@
     <string name="preview_output_mode_disabled_warning">Гэты выхад зараз не паказвае гэты змест.</string>
     <string name="preview_settings_show_labels">Паказваць подпісы выхадаў</string>
     <string name="preview_settings_show_modes">Паказваць тып адлюстравання</string>
+    <string name="preview_section_display">Адлюстраванне</string>
+    <string name="preview_section_layout">Макет</string>
+    <string name="preview_layout_rename">Перайменаваць макет</string>
     <string name="song_add_translation">Дадаць мову</string>
     <string name="song_fourth_language">Мова 4</string>
     <string name="song_pane_translation">Мова %1$d</string>
@@ -2724,4 +2727,13 @@
     <string name="helper_command_look_12_does">Паказвае налады тэксту вершаў</string>
     <string name="helper_command_look_13">як аформіць спасылку на верш</string>
     <string name="helper_command_look_13_does">Паказвае налады тэксту спасылкі</string>
+    <string name="message_purpose">Паказвае радок тэксту па-над усім, што ў эфіры.</string>
+    <string name="message_preview_empty">Тут з’явіцца ваша паведамленне</string>
+    <string name="message_stays_up">Застаецца на экране</string>
+    <string name="message_seconds_short">%1$d с</string>
+    <string name="message_one_minute">1 хв</string>
+    <string name="message_duration_custom">Свой</string>
+    <string name="message_insert_blank">Уставіць пропуск</string>
+    <string name="props_purpose">Тое, што застаецца на экране па-над усім.</string>
+    <string name="macros_purpose">Запускайце некалькі дзеянняў адным націскам або клавішай.</string>
 </resources>

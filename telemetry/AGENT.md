@@ -20,7 +20,7 @@ A real Gradle module of this build: `include(":telemetry")`, `implementation(pro
 tabs and the tool windows record usage events, `ContactUsDialog` submits, and `AboutDialog` saves the
 device report.
 
-It reads the feature modules whose devices and usage it counts (`:canvas`, `:media`, `:web`,
+It reads the modules whose devices and usage it counts (`:canvas-engine`, `:media-engine`, `:web-engine`,
 `:live-output`, `:ndi`, `:omt`, `:calendar`, `:converter`, `:songlibrary`, `:song-chords`) and takes
 nothing of `:composeApp`'s. It has no Compose.
 
@@ -52,5 +52,5 @@ nothing of `:composeApp`'s. It has no Compose.
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**.
-- **Coverage**: the root build's default six counters at 85% — no `coverageFloors`, no
+- **Coverage**: `cp.test`'s default six counters at 85% — no `coverageFloors`, no
   `coverageExcludes`. `GpuInfo.enumerate`'s Windows call is the one step left uncovered on purpose.

@@ -27,6 +27,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `LowerThirdTab` test classes.
@@ -168,59 +169,63 @@ fun lowerThirdTab(
     try {
         runComposeUiTest {
             setContent {
-                var appSettings by remember {
-                    mutableStateOf(
-                        settings(
-                            AppSettings(
-                                streamingSettings = StreamingSettings(
-                                    lowerThirdFolder = folder?.absolutePath ?: ""
-                                ),
-                                atemSettings = if (atemReachable) {
-                                    AtemSettings(
-                                        host = atemHost,
-                                        port = atemPort,
-                                        quickUpload = quickUpload,
-                                        renderWidth = atemRenderWidth,
-                                        renderHeight = atemRenderHeight,
-                                    )
-                                } else {
-                                    AtemSettings()
-                                },
+                PinnedFonts {
+                    var appSettings by remember {
+                        mutableStateOf(
+                            settings(
+                                AppSettings(
+                                    streamingSettings = StreamingSettings(
+                                        lowerThirdFolder = folder?.absolutePath ?: ""
+                                    ),
+                                    atemSettings = if (atemReachable) {
+                                        AtemSettings(
+                                            host = atemHost,
+                                            port = atemPort,
+                                            quickUpload = quickUpload,
+                                            renderWidth = atemRenderWidth,
+                                            renderHeight = atemRenderHeight,
+                                        )
+                                    } else {
+                                        AtemSettings()
+                                    },
+                                )
                             )
                         )
-                    )
-                }
-                val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = { transform ->
-                    appSettings = transform(appSettings)
-                    reports.settingsChanges++
-                    reports.settings = appSettings
-                }
-                val preview = previewFor?.invoke(appSettings) ?: previewOutput ?: FallbackLowerThirdPreview
-                ThemedForTest(themeMode) {
-                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                        LowerThirdTab(
-                            appSettings = appSettings,
-                            onSettingsChange = onSettingsChange,
-                            outputPicker = { modifier -> pickerFor?.invoke(appSettings, onSettingsChange, modifier) },
-                            onAddToSchedule = { id, label, pause, pauseMs ->
-                                reports.scheduled += listOf(id, label, pause, pauseMs)
-                            },
-                            onGoLive = { json, _, _, _, presetName ->
-                                reports.live += presetName
-                                reports.liveJson = json
-                            },
-                            selectedLowerThirdItem = selectedLowerThirdItem,
-                            previewOutput = preview,
-                            queryAtemState = queryAtemState,
-                            probeAtemReachable = { _, _ -> atemReachable },
-                            onOpenLottieGen = onOpenLottieGen,
-                            liveLowerThirdName = liveLowerThirdName,
-                            confirmRemove = { _, _, onConfirmed ->
-                                reports.removeAsked++
-                                if (confirmRemove) onConfirmed()
-                            },
-                            preRender = { file, _ -> reports.preRendered += file.nameWithoutExtension },
-                        )
+                    }
+                    val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = { transform ->
+                        appSettings = transform(appSettings)
+                        reports.settingsChanges++
+                        reports.settings = appSettings
+                    }
+                    val preview = previewFor?.invoke(appSettings) ?: previewOutput ?: FallbackLowerThirdPreview
+                    ThemedForTest(themeMode) {
+                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                            LowerThirdTab(
+                                appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
+                                outputPicker = { modifier ->
+                                    pickerFor?.invoke(appSettings, onSettingsChange, modifier)
+                                },
+                                onAddToSchedule = { id, label, pause, pauseMs ->
+                                    reports.scheduled += listOf(id, label, pause, pauseMs)
+                                },
+                                onGoLive = { json, _, _, _, presetName ->
+                                    reports.live += presetName
+                                    reports.liveJson = json
+                                },
+                                selectedLowerThirdItem = selectedLowerThirdItem,
+                                previewOutput = preview,
+                                queryAtemState = queryAtemState,
+                                probeAtemReachable = { _, _ -> atemReachable },
+                                onOpenLottieGen = onOpenLottieGen,
+                                liveLowerThirdName = liveLowerThirdName,
+                                confirmRemove = { _, _, onConfirmed ->
+                                    reports.removeAsked++
+                                    if (confirmRemove) onConfirmed()
+                                },
+                                preRender = { file, _ -> reports.preRendered += file.nameWithoutExtension },
+                            )
+                        }
                     }
                 }
             }

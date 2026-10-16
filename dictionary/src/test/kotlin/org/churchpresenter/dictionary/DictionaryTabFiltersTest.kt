@@ -3,9 +3,12 @@
 package org.churchpresenter.dictionary
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -132,6 +135,32 @@ class DictionaryTabFiltersTest {
         assertTrue(widthOf("BOOK") > 0f)
         assertTrue(widthOf("CHAPTER") > 0f)
         assertTrue(widthOf("VERSE") > 0f, "the verse filter must not be squeezed out either")
+    }
+
+    /**
+     * The interlinear data loads after the entries, in the background. The entry-list filter is on
+     * screen the whole time, its book picker disabled until then: a row that appeared only when the
+     * data arrived would push the list down under a pointer about to press one of its rows.
+     */
+    @Test
+    fun `the entry-list filter waits disabled for the interlinear data, and the list does not move`() {
+        val interlinearLoad = CompletableDeferred<Unit>()
+        dictionaryTab(
+            booksWithGreekData = listOf(43),
+            getBookName = { "John" },
+            interlinearLoad = interlinearLoad,
+        ) { vm, _ ->
+            val rowTop = { onNode(rowOf(agape)).fetchSemanticsNode().boundsInRoot.top }
+            val before = rowTop()
+            onNodeWithText("BOOK", substring = true).assertIsNotEnabled()
+
+            interlinearLoad.complete(Unit)
+            waitUntil("the interlinear data to load") { vm.isInterlinearDataLoaded }
+            waitForIdle()
+
+            onNodeWithText("BOOK", substring = true).assertIsEnabled()
+            assertEquals(before, rowTop(), "the list must not move when the data arrives")
+        }
     }
 
     @Test

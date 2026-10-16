@@ -1,5 +1,6 @@
 package org.churchpresenter.liveoutput
 
+import kotlinx.serialization.Serializable
 import androidx.compose.runtime.IntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.State
@@ -237,6 +238,7 @@ class PresenterManager private constructor(
      * the state a restored slide wants anyway, and capturing a value mid-fade would restore a
      * half-faded screen.
      */
+    @Serializable
     data class LiveStateSnapshot(
         val mode: Presenting,
         val selectedVerse: SelectedVerse,

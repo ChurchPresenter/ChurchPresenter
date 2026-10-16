@@ -2258,6 +2258,9 @@
     <string name="preview_output_mode_disabled_warning">To wyjście obecnie nie wyświetla tej zawartości.</string>
     <string name="preview_settings_show_labels">Pokaż etykiety wyjść</string>
     <string name="preview_settings_show_modes">Pokaż typ wyświetlania</string>
+    <string name="preview_section_display">Wyświetlanie</string>
+    <string name="preview_section_layout">Układ</string>
+    <string name="preview_layout_rename">Zmień nazwę układu</string>
     <string name="song_add_translation">Dodaj język</string>
     <string name="song_fourth_language">Język 4</string>
     <string name="song_pane_translation">Język %1$d</string>
@@ -2724,4 +2727,13 @@
     <string name="helper_command_look_12_does">Pokazuje ustawienia tekstu wersetów</string>
     <string name="helper_command_look_13">jak sformatować odwołanie biblijne</string>
     <string name="helper_command_look_13_does">Pokazuje ustawienia tekstu odwołania</string>
+    <string name="message_purpose">Wyświetla wiersz tekstu nad wszystkim, co jest na żywo.</string>
+    <string name="message_preview_empty">Tutaj pojawi się Twoja wiadomość</string>
+    <string name="message_stays_up">Widoczna przez</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Własny</string>
+    <string name="message_insert_blank">Wstaw pole</string>
+    <string name="props_purpose">Elementy, które pozostają na ekranie ponad wszystkim.</string>
+    <string name="macros_purpose">Uruchamiaj kilka działań jednym kliknięciem lub klawiszem.</string>
 </resources>

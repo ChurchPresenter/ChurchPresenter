@@ -13,12 +13,11 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import io.github.takahirom.roborazzi.captureRoboImage
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Color as ComposeColor
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
@@ -57,6 +56,8 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 /**
  * What the congregation sees, full screen — every variation the two main surfaces have.
@@ -81,7 +82,7 @@ class PresenterFullScreenScreenshotTest {
     private val screen = Modifier.size(1920.dp, 1080.dp)
 
     private fun shoot(name: String, content: @Composable () -> Unit) = runComposeUiTest {
-        setContent { MaterialTheme { Box(screen) { content() } } }
+        setContent { PinnedFonts { MaterialTheme { Box(screen) { content() } } } }
         waitForIdle()
         if (photoRequested) awaitPhoto()
         capture(name)
@@ -107,7 +108,7 @@ class PresenterFullScreenScreenshotTest {
     }
 
     private fun ComposeUiTest.capture(name: String) {
-        onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
+        captureTo(File("$SCREENSHOT_ROOT/$SECTION/$name.png"))
     }
 
     // ── The backdrop and the outline, on a real output ──────────────────────────────────────────

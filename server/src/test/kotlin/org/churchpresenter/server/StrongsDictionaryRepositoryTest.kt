@@ -3,7 +3,7 @@ package org.churchpresenter.server
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.dictionary.DictionaryFixture
 import org.churchpresenter.dictionary.data.DictionaryFiles
 import kotlin.test.Test

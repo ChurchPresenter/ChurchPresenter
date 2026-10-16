@@ -23,7 +23,9 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
 - **The spotlight** is split: tagging (`Modifier.guideTarget`, `GuideTargets`, `GuideSession`,
   `GuideTargetRegistry`) is in `:shared-ui`'s `guide` package, because `:songs` tags a control too;
   drawing (`GuideSpotlightHost`) is here. Every window that holds tagged controls wraps its content in
-  its own host — the main window and the Settings dialog do.
+  its own host — the main window and the Settings dialog do. A window in a module that may not depend
+  on this one (a tab's, such as the Bible catalogue) wraps itself in `LocalSpotlightHost` instead,
+  which the app provides with `GuideSpotlightHost`.
 - **Persisted state** is `HelperSettings` in `:settings` (`AppSettings.helper`). Suggestion ids in
   `SuggestionIds` are stored there — never rename one.
 - **Send this chat** goes out only through `HelperInputs.onSendChat`, which the app wires to Contact Us

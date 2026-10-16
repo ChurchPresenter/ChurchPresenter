@@ -2259,6 +2259,9 @@
     <string name="preview_output_mode_disabled_warning">Dieser Ausgang zeigt diesen Inhalt derzeit nicht an.</string>
     <string name="preview_settings_show_labels">Ausgangsbeschriftungen anzeigen</string>
     <string name="preview_settings_show_modes">Anzeigetyp anzeigen</string>
+    <string name="preview_section_display">Anzeige</string>
+    <string name="preview_section_layout">Layout</string>
+    <string name="preview_layout_rename">Layout umbenennen</string>
     <string name="song_add_translation">Sprache hinzufügen</string>
     <string name="song_fourth_language">Sprache 4</string>
     <string name="song_pane_translation">Sprache %1$d</string>
@@ -2725,4 +2728,13 @@
     <string name="helper_command_look_12_does">Zeigt die Einstellungen für den Verstext</string>
     <string name="helper_command_look_13">wie gestalte ich die Bibelreferenz</string>
     <string name="helper_command_look_13_does">Zeigt die Texteinstellungen der Referenz</string>
+    <string name="message_purpose">Zeigt eine Textzeile über allem, was live ist.</string>
+    <string name="message_preview_empty">Hier erscheint deine Nachricht</string>
+    <string name="message_stays_up">Bleibt sichtbar für</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 Min.</string>
+    <string name="message_duration_custom">Eigene</string>
+    <string name="message_insert_blank">Platzhalter einfügen</string>
+    <string name="props_purpose">Elemente, die über allem auf dem Bildschirm bleiben.</string>
+    <string name="macros_purpose">Mehrere Aktionen mit einem Klick oder einer Taste ausführen.</string>
 </resources>

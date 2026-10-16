@@ -12,7 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.sharedui.testing.showsContainingText
 
 // ── Reading and driving what was rendered ───────────────────────────────────────────────────────
@@ -63,8 +63,8 @@ fun ComposeUiTest.detailShows(entry: StrongsEntry): Boolean =
 /**
  * Clicks one of the three language chips above the list.
  *
- * Addressed as the topmost node with that label: once interlinear data is available the tab also
- * shows book and chapter filters, which have an "All" of their own, so a bare lookup is ambiguous.
+ * Addressed as the topmost node with that label: the book and chapter filters under the chips have
+ * an "All" of their own, so a bare lookup is ambiguous.
  */
 fun ComposeUiTest.clickLanguageFilter(label: String) {
     val nodes = onAllNodesWithText(label).fetchSemanticsNodes(atLeastOneRootRequired = false)

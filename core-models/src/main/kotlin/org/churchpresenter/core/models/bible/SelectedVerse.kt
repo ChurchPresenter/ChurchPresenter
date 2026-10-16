@@ -1,5 +1,9 @@
 package org.churchpresenter.core.models.bible
 
+import kotlinx.serialization.Serializable
+
+/** Serializable so an app the output guard relaunches can put the live verse back. */
+@Serializable
 data class SelectedVerse(
     /** Persisted Bible module file name; keeps verse content tied to its own style profile. */
     val translationFileName: String = "",

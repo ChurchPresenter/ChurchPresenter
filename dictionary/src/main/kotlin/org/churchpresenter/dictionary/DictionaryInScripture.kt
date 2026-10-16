@@ -44,7 +44,7 @@ import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.strings.generated.resources.verse
 import org.churchpresenter.dictionary.data.InterlinearVerse
 import org.churchpresenter.dictionary.data.InterlinearWord
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.RaisedChip
 import org.churchpresenter.theme.elevationPalette

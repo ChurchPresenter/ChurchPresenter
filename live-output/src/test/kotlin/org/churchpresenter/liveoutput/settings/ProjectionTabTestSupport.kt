@@ -22,7 +22,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.media.composables.VlcAudioDevice
-import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.omt.OmtRuntimeStatus
 import org.churchpresenter.settings.AppSettings
@@ -77,12 +76,13 @@ internal fun projectionTab(
      */
     vlcInstalled: Boolean = true,
     audioDevices: List<VlcAudioDevice> = emptyList(),
+    /** What VLC says once a folder is chosen for it; the real answer loads libvlc. */
+    vlcRechecked: Boolean = vlcInstalled,
     /** What the tab's file and folder pickers answer; the platform chooser would block the run. */
     chooser: PathChooser = PathChooser { _, _, _ -> null },
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
-    val server = CompanionServer(shutdownGraceMs = 0)
     setContent {
         MaterialTheme {
             var state by remember { mutableStateOf(current) }
@@ -90,7 +90,7 @@ internal fun projectionTab(
             ProjectionSettingsTab(
                 settings = state,
                 onSettingsChange = { transform -> state = transform(state); current = state },
-                companionServer = server,
+                serverUrl = "",
                 detectScreens = { screens },
                 ndiStatus = { ndiStatus },
                 ndiReceiverCount = { 0 },
@@ -100,6 +100,7 @@ internal fun projectionTab(
                 ffmpegProbe = { ffmpegStatus },
                 vlcProbe = { vlcInstalled },
                 audioDeviceProbe = { audioDevices },
+                vlcRecheck = { vlcRechecked },
             )
             }
         }

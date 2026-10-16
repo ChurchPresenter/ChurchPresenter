@@ -29,10 +29,10 @@ class SceneViewModel {
         prettyPrint = true
     }
 
-    internal val _scenes = mutableStateListOf<Scene>()
+    private val _scenes = mutableStateListOf<Scene>()
     val scenes: List<Scene> get() = _scenes
 
-    internal val _currentSceneId = mutableStateOf<String?>(null)
+    private val _currentSceneId = mutableStateOf<String?>(null)
     val currentSceneId: State<String?> = _currentSceneId
 
     val currentScene: Scene?

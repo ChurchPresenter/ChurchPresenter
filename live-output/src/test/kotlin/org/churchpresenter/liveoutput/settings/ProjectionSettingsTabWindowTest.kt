@@ -3,7 +3,7 @@
 package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.ui.test.ComposeUiTest
-import org.churchpresenter.profiles.retypeNumberField
+import org.churchpresenter.sharedui.testing.retypeNumberField
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithText

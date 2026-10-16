@@ -16,6 +16,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Customize Theme window, opened from View → Customize Theme…, in both themes.
@@ -34,15 +35,17 @@ class CustomizeThemeDialogScreenshotTest {
         stackedThemes(SECTION, name) { mode, file ->
             runComposeUiTest {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.size(CUSTOMIZE_THEME_DIALOG_WIDTH, CUSTOMIZE_THEME_DIALOG_HEIGHT)) {
-                            CustomizeThemeContent(
-                                currentTheme = mode,
-                                initial = choice,
-                                previewDensity = LocalDensity.current,
-                                onApply = {},
-                                onDismiss = {},
-                            )
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.size(CUSTOMIZE_THEME_DIALOG_WIDTH, CUSTOMIZE_THEME_DIALOG_HEIGHT)) {
+                                CustomizeThemeContent(
+                                    currentTheme = mode,
+                                    initial = choice,
+                                    previewDensity = LocalDensity.current,
+                                    onApply = {},
+                                    onDismiss = {},
+                                )
+                            }
                         }
                     }
                 }

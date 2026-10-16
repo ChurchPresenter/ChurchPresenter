@@ -1,21 +1,12 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.detekt)
-    jacoco
+    id("cp.jvm-module")
+    id("cp.compose")
 }
-
-group = "org.churchpresenter"
 
 // The default exclude only: the Compose UI and `main` are measured like everything else.
 extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
-
-kotlin {
-    jvmToolchain(21)
-}
 
 dependencies {
     // The .spb converters and Bible catalogues this window offers — extracted so the app can
@@ -49,8 +40,6 @@ dependencies {
 }
 
 detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
     // Whole source set in, `ui/**` back out again below.
     //
     // This used to name `src/main/kotlin/converter` and carve `ui/**` out by simply not listing it.
@@ -60,7 +49,6 @@ detekt {
     // included is what stops that happening again: if `ui/**` ever stops matching, the gate
     // analyses too much and says so, instead of too little and saying nothing.
     source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {

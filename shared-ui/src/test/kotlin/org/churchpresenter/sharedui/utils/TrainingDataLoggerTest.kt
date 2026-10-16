@@ -19,7 +19,7 @@ import kotlin.test.assertTrue
  * substrings, which is what actually catches that class of bug.
  *
  * The logger resolves its directory from `user.home` on every write, and the test task points each
- * fork at its own `build/test-home` (see build.gradle.kts), so this never touches a real
+ * fork at its own `build/test-home` (build-logic's `cp.test-home`), so this never touches a real
  * `~/.churchpresenter`. Each test uses a distinct sessionId, which gives it its own file.
  */
 class TrainingDataLoggerTest {
