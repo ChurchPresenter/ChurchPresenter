@@ -3,6 +3,10 @@ package org.churchpresenter.canvas
 import java.util.Collections
 import java.util.concurrent.Executor
 
+/** A 1x1 input frame, and a status that reads as locked, not busy, mode 42. */
+private val INPUT_FRAME = intArrayOf(1, 1, 7)
+private val DEVICE_STATUS = intArrayOf(1, 0, 42)
+
 /**
  * A card that records what it was asked and answers from what the test set. Safe to call from the
  * output thread, a capture loop and the test at once.
@@ -12,10 +16,6 @@ import java.util.concurrent.Executor
  * [onSettle] run inside an open and inside a close's wait for its black frames, for a test to hold
  * either there.
  */
-/** A 1x1 input frame, and a status that reads as locked, not busy, mode 42. */
-private val INPUT_FRAME = intArrayOf(1, 1, 7)
-private val DEVICE_STATUS = intArrayOf(1, 0, 42)
-
 class FakeDeckLinkCard : DeckLinkNatives {
     val calls: MutableList<String> = Collections.synchronizedList(mutableListOf())
     val events: MutableList<String> = Collections.synchronizedList(mutableListOf())
