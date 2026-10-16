@@ -471,10 +471,11 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
 }
 
 /**
- * `-Prgba=1`: frames are kept as RGBA rather than Chromium's BGRA, swapped during the copy, to find out
- * whether a GPU driver converts BGRA on the CPU while uploading it.
+ * Frames are kept as RGBA rather than Chromium's BGRA, swapped during the copy, on Linux by default:
+ * NVIDIA's driver converts BGRA on the CPU while uploading it. `-Prgba=1` or `-Prgba=0` overrides it.
  */
-internal val rgba = System.getProperty("osr.rgba") != null
+internal val rgba = System.getProperty("osr.rgba")?.let { it != "0" }
+    ?: System.getProperty("os.name").startsWith("Linux")
 
 /** `-PplainPreview=1`: no levels, so the preview draws the whole view with plain bilinear sampling. */
 internal val plainPreview = System.getProperty("osr.plainPreview") != null

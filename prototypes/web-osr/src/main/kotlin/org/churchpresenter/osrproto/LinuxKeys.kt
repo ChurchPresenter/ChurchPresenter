@@ -11,20 +11,24 @@ import java.awt.event.KeyEvent
  * Delete, so it deletes. A Ctrl chord carries a control character and a Cyrillic letter its Unicode
  * value, neither a keysym, so the page gets key code 0 and Ctrl+A, C and V do nothing. So a press or
  * a release is re-made with the keysym of its key in place of its character. Typed characters, which
- * insert the text, go through untouched, and Latin characters are their own keysyms already.
+ * insert the text, go through untouched, and Latin characters are their own keysyms already, except
+ * Enter: AWT types it as a line feed, which the page gets as charCode 10 and ignores, so it goes as
+ * Return's keysym, which JCEF turns into the carriage return the page expects.
  *
  * Chromium also reads the keysym as a hardware key code for the event's `code`, so `code` is still
  * wrong on Linux; `key`, `keyCode` and shortcuts are right.
  */
 internal fun linuxKeyEvent(e: KeyEvent): KeyEvent {
-    if (e.id == KeyEvent.KEY_TYPED) return e
+    if (e.id == KeyEvent.KEY_TYPED) return if (e.keyChar == '\n') e.withChar(XK_RETURN) else e
     val char = e.keyChar.code
     val latin = char in 0x20..0x7e || char in 0xa0..0xff
     val ctrl = e.modifiersEx and KeyEvent.CTRL_DOWN_MASK != 0
     val keysym = if (latin && !ctrl) char else keysymFor(e.keyCode, e.keyLocation) ?: 0
-    if (keysym == char) return e
-    return KeyEvent(e.component, e.id, e.`when`, e.modifiersEx, e.keyCode, keysym.toChar(), e.keyLocation)
+    return if (keysym == char) e else e.withChar(keysym)
 }
+
+private fun KeyEvent.withChar(keysym: Int) =
+    KeyEvent(component, id, `when`, modifiersEx, keyCode, keysym.toChar(), keyLocation)
 
 /** The X keysym of AWT key [code] on a US layout, or null for a key with none here. */
 internal fun keysymFor(code: Int, location: Int): Int? {
@@ -45,6 +49,7 @@ internal fun keysymFor(code: Int, location: Int): Int? {
 }
 
 private const val XK_F1 = 0xffbe
+private const val XK_RETURN = 0xff0d
 
 /** Keysyms for keys that have one regardless of side. */
 private val FIXED = mapOf(
