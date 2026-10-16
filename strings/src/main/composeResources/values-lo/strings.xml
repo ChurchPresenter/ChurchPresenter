@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">ເບິ່ງຢ່າງດຽວ</string>
     <string name="calendar_computer_add_create">ສ້າງລະຫັດເຂົ້າຮ່ວມ</string>
     <string name="calendar_computer_add_failed">ບໍ່ສາມາດເພີ່ມຄອມພິວເຕີໄດ້.</string>
-    <string name="calendar_computer_join_ready">ໃນຄອມພິວເຕີອີກເຄື່ອງ, ເປີດການຕັ້ງຄ່າ → ປະຕິທິນໃນໂທລະສັບ ແລະ ແທັບເລັດ → ເຂົ້າຮ່ວມເຄື່ອງອື່ນ… ແລ້ວວາງລະຫັດນີ້. ໃຜກໍຕາມທີ່ມີລະຫັດນີ້ສາມາດອ່ານປະຕິທິນໄດ້, ສະນັ້ນສົ່ງໃຫ້ບຸກຄົນນັ້ນໂດຍກົງ.</string>
+    <string name="calendar_computer_join_ready">ໃນຄອມພິວເຕີອີກເຄື່ອງ, ເປີດການຕັ້ງຄ່າ → ຊິງຄ໌ປະຕິທິນ → ເຂົ້າຮ່ວມເຄື່ອງອື່ນ… ແລ້ວວາງລະຫັດນີ້. ໃຜກໍຕາມທີ່ມີລະຫັດນີ້ສາມາດອ່ານປະຕິທິນໄດ້, ສະນັ້ນສົ່ງໃຫ້ບຸກຄົນນັ້ນໂດຍກົງ.</string>
     <string name="calendar_computer_save_file">ບັນທຶກເປັນໄຟລ໌…</string>
     <string name="calendar_computer_saved">ບັນທຶກໄປທີ່ %1$s ແລ້ວ</string>
     <string name="calendar_computer_copy_code">ສຳເນົາລະຫັດ</string>
     <string name="calendar_computer_copied">ສຳເນົາແລ້ວ</string>
     <string name="calendar_computer_email">ອີເມວ…</string>
     <string name="calendar_computer_email_subject">ເຂົ້າຮ່ວມປະຕິທິນ Church Presenter</string>
-    <string name="calendar_computer_email_body">ໃນຄອມພິວເຕີອີກເຄື່ອງ, ເປີດ Church Presenter → ການຕັ້ງຄ່າ → ເຊີບເວີ → ປະຕິທິນໃນໂທລະສັບ ແລະ ແທັບເລັດ → ເຂົ້າຮ່ວມເຄື່ອງອື່ນ…, ແລ້ວວາງລະຫັດນີ້:\n\n%1$s\n\nໃຊ້ໄດ້ເທື່ອດຽວພາຍໃນ 24 ຊົ່ວໂມງ. ກະລຸນາຢ່າສົ່ງຕໍ່ອີເມວນີ້.</string>
+    <string name="calendar_computer_email_body">ໃນຄອມພິວເຕີອີກເຄື່ອງ, ເປີດ Church Presenter → ການຕັ້ງຄ່າ → ເຊີບເວີ → ຊິງຄ໌ປະຕິທິນ → ເຂົ້າຮ່ວມເຄື່ອງອື່ນ…, ແລ້ວວາງລະຫັດນີ້:\n\n%1$s\n\nໃຊ້ໄດ້ເທື່ອດຽວພາຍໃນ 24 ຊົ່ວໂມງ. ກະລຸນາຢ່າສົ່ງຕໍ່ອີເມວນີ້.</string>
     <string name="calendar_join_title">ເຂົ້າຮ່ວມປະຕິທິນອື່ນ</string>
     <string name="calendar_join_body">ວາງລະຫັດຈາກຄອມພິວເຕີຫຼັກ, ຫຼື ເປີດໄຟລ໌ທີ່ເຄື່ອງນັ້ນບັນທຶກໄວ້.</string>
     <string name="calendar_join_code">ລະຫັດເຂົ້າຮ່ວມ</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">ລະຫັດນີ້ໝົດອາຍຸແລ້ວ. ຂໍລະຫັດໃໝ່ຈາກຄອມພິວເຕີຫຼັກ.</string>
     <string name="calendar_join_replaces">ໂທລະສັບທີ່ຈັບຄູ່ກັບເຄື່ອງນີ້ຈະຢຸດຊິງຄ໌ນຳ, ແລະ ທ່ານຈະວາງແຜນຈາກປະຕິທິນຂອງຄອມພິວເຕີຫຼັກແທນ.</string>
     <string name="calendar_join_failed">ເຂົ້າຮ່ວມບໍ່ສຳເລັດ. ກວດສອບລະຫັດ ແລະ ການເຊື່ອມຕໍ່ອິນເຕີເນັດ.</string>
+    <string name="calendar_sync_card_title">ຊິງຄ໌ປະຕິທິນ</string>
+    <string name="calendar_sync_description_computers">ວາງແຜນພິທີຈາກໂທລະສັບ, ແທັບເລັດ ແລະ ຄອມພິວເຕີເຄື່ອງອື່ນໄດ້ຕະຫຼອດອາທິດ ເຖິງແມ່ນຄອມພິວເຕີເຄື່ອງນີ້ຈະປິດຢູ່. ຄອມພິວເຕີເຄື່ອງນີ້ຍັງຄົງເປັນແຫຼ່ງຂໍ້ມູນຫຼັກ.</string>
     <string name="calendar_sync_pill_off">ປິດ</string>
     <string name="calendar_sync_pill_offline">ອອບລາຍ</string>
     <string name="calendar_sync_pill_unpaired">ຍັງບໍ່ລົງທະບຽນ</string>

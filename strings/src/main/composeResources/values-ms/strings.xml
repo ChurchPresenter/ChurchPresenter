@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Lihat sahaja</string>
     <string name="calendar_computer_add_create">Cipta kod sertai</string>
     <string name="calendar_computer_add_failed">Tidak dapat menambah komputer.</string>
-    <string name="calendar_computer_join_ready">Pada komputer lain, buka Tetapan → Kalendar pada telefon &amp; tablet → Sertai yang lain… dan tampal kod ini. Sesiapa yang memilikinya boleh membaca kalendar, jadi hantarkannya terus kepada orang itu.</string>
+    <string name="calendar_computer_join_ready">Pada komputer lain, buka Tetapan → Penyegerakan kalendar → Sertai yang lain… dan tampal kod ini. Sesiapa yang memilikinya boleh membaca kalendar, jadi hantarkannya terus kepada orang itu.</string>
     <string name="calendar_computer_save_file">Simpan sebagai fail…</string>
     <string name="calendar_computer_saved">Disimpan ke %1$s</string>
     <string name="calendar_computer_copy_code">Salin kod</string>
     <string name="calendar_computer_copied">Disalin</string>
     <string name="calendar_computer_email">E-mel…</string>
     <string name="calendar_computer_email_subject">Sertai kalendar Church Presenter</string>
-    <string name="calendar_computer_email_body">Pada komputer lain, buka Church Presenter → Tetapan → Pelayan → Kalendar pada telefon &amp; tablet → Sertai yang lain…, dan tampal kod ini:\n\n%1$s\n\nKod ini berfungsi sekali sahaja, selama 24 jam. Sila jangan majukan e-mel ini.</string>
+    <string name="calendar_computer_email_body">Pada komputer lain, buka Church Presenter → Tetapan → Pelayan → Penyegerakan kalendar → Sertai yang lain…, dan tampal kod ini:\n\n%1$s\n\nKod ini berfungsi sekali sahaja, selama 24 jam. Sila jangan majukan e-mel ini.</string>
     <string name="calendar_join_title">Sertai kalendar lain</string>
     <string name="calendar_join_body">Tampal kod daripada komputer utama, atau buka fail yang disimpannya.</string>
     <string name="calendar_join_code">Kod sertai</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Kod itu telah tamat tempoh. Minta kod baharu daripada komputer utama.</string>
     <string name="calendar_join_replaces">Telefon yang dipasangkan dengannya juga akan berhenti menyegerak, dan anda akan merancang daripada kalendar komputer utama.</string>
     <string name="calendar_join_failed">Tidak dapat menyertai. Semak kod dan sambungan internet.</string>
+    <string name="calendar_sync_card_title">Penyegerakan kalendar</string>
+    <string name="calendar_sync_description_computers">Rancang ibadat dari telefon, tablet dan komputer lain sepanjang minggu, walaupun komputer ini dimatikan. Komputer ini kekal sebagai sumber utama.</string>
     <string name="calendar_sync_pill_off">Mati</string>
     <string name="calendar_sync_pill_offline">Luar talian</string>
     <string name="calendar_sync_pill_unpaired">Belum didaftar</string>

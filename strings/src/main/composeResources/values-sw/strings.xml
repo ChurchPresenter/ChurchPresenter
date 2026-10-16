@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Kutazama tu</string>
     <string name="calendar_computer_add_create">Unda msimbo wa kujiunga</string>
     <string name="calendar_computer_add_failed">Imeshindwa kuongeza kompyuta.</string>
-    <string name="calendar_computer_join_ready">Kwenye kompyuta nyingine, fungua Mipangilio → Kalenda kwenye simu na kompyuta kibao → Jiunga na nyingine… na ubandike msimbo huu. Yeyote aliye nao anaweza kusoma kalenda, kwa hiyo mtumie mtu huyo moja kwa moja.</string>
+    <string name="calendar_computer_join_ready">Kwenye kompyuta nyingine, fungua Mipangilio → Usawazishaji wa kalenda → Jiunga na nyingine… na ubandike msimbo huu. Yeyote aliye nao anaweza kusoma kalenda, kwa hiyo mtumie mtu huyo moja kwa moja.</string>
     <string name="calendar_computer_save_file">Hifadhi kama faili…</string>
     <string name="calendar_computer_saved">Imehifadhiwa kwenye %1$s</string>
     <string name="calendar_computer_copy_code">Nakili msimbo</string>
     <string name="calendar_computer_copied">Imenakiliwa</string>
     <string name="calendar_computer_email">Barua pepe…</string>
     <string name="calendar_computer_email_subject">Jiunga na kalenda ya Church Presenter</string>
-    <string name="calendar_computer_email_body">Kwenye kompyuta nyingine, fungua Church Presenter → Mipangilio → Seva → Kalenda kwenye simu na kompyuta kibao → Jiunga na nyingine…, na ubandike msimbo huu:\n\n%1$s\n\nUnafanya kazi mara moja tu, kwa saa 24. Tafadhali usisambaze barua pepe hii.</string>
+    <string name="calendar_computer_email_body">Kwenye kompyuta nyingine, fungua Church Presenter → Mipangilio → Seva → Usawazishaji wa kalenda → Jiunga na nyingine…, na ubandike msimbo huu:\n\n%1$s\n\nUnafanya kazi mara moja tu, kwa saa 24. Tafadhali usisambaze barua pepe hii.</string>
     <string name="calendar_join_title">Jiunga na kalenda nyingine</string>
     <string name="calendar_join_body">Bandika msimbo kutoka kompyuta kuu, au fungua faili iliyohifadhi.</string>
     <string name="calendar_join_code">Msimbo wa kujiunga</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Msimbo huo umeisha muda. Omba mpya kutoka kompyuta kuu.</string>
     <string name="calendar_join_replaces">Simu zilizooanishwa nayo pia zitaacha kusawazisha, na utapanga kutoka kalenda ya kompyuta kuu badala yake.</string>
     <string name="calendar_join_failed">Imeshindwa kujiunga. Kagua msimbo na muunganisho wa intaneti.</string>
+    <string name="calendar_sync_card_title">Usawazishaji wa kalenda</string>
+    <string name="calendar_sync_description_computers">Panga ibada kutoka kwa simu, kompyuta kibao na kompyuta nyingine wiki nzima, hata kompyuta hii ikiwa imezimwa. Kompyuta hii inabaki kuwa chanzo kikuu.</string>
     <string name="calendar_sync_pill_off">Imezimwa</string>
     <string name="calendar_sync_pill_offline">Nje ya mtandao</string>
     <string name="calendar_sync_pill_unpaired">Haijasajiliwa</string>

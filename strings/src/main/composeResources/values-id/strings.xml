@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Hanya lihat</string>
     <string name="calendar_computer_add_create">Buat kode gabung</string>
     <string name="calendar_computer_add_failed">Tidak dapat menambahkan komputer.</string>
-    <string name="calendar_computer_join_ready">Di komputer lain, buka Pengaturan → Kalender di ponsel &amp; tablet → Gabung ke yang lain… lalu tempel kode ini. Siapa pun yang memilikinya dapat membaca kalender, jadi kirim langsung ke orangnya.</string>
+    <string name="calendar_computer_join_ready">Di komputer lain, buka Pengaturan → Sinkronisasi kalender → Gabung ke yang lain… lalu tempel kode ini. Siapa pun yang memilikinya dapat membaca kalender, jadi kirim langsung ke orangnya.</string>
     <string name="calendar_computer_save_file">Simpan sebagai file…</string>
     <string name="calendar_computer_saved">Disimpan ke %1$s</string>
     <string name="calendar_computer_copy_code">Salin kode</string>
     <string name="calendar_computer_copied">Tersalin</string>
     <string name="calendar_computer_email">Email…</string>
     <string name="calendar_computer_email_subject">Bergabung dengan kalender Church Presenter</string>
-    <string name="calendar_computer_email_body">Di komputer lain, buka Church Presenter → Pengaturan → Server → Kalender di ponsel &amp; tablet → Gabung ke yang lain…, lalu tempel kode ini:\n\n%1$s\n\nKode ini hanya berlaku sekali, selama 24 jam. Mohon jangan teruskan email ini.</string>
+    <string name="calendar_computer_email_body">Di komputer lain, buka Church Presenter → Pengaturan → Server → Sinkronisasi kalender → Gabung ke yang lain…, lalu tempel kode ini:\n\n%1$s\n\nKode ini hanya berlaku sekali, selama 24 jam. Mohon jangan teruskan email ini.</string>
     <string name="calendar_join_title">Gabung ke kalender lain</string>
     <string name="calendar_join_body">Tempel kode dari komputer utama, atau buka file yang disimpannya.</string>
     <string name="calendar_join_code">Kode gabung</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Kode itu sudah kedaluwarsa. Minta kode baru dari komputer utama.</string>
     <string name="calendar_join_replaces">Ponsel yang dipasangkan dengannya juga akan berhenti menyinkronkan, dan Anda akan merencanakan dari kalender komputer utama.</string>
     <string name="calendar_join_failed">Tidak dapat bergabung. Periksa kode dan koneksi internet.</string>
+    <string name="calendar_sync_card_title">Sinkronisasi kalender</string>
+    <string name="calendar_sync_description_computers">Rencanakan ibadah dari ponsel, tablet, dan komputer lain sepanjang minggu, bahkan saat komputer ini mati. Komputer ini tetap menjadi sumber utama.</string>
     <string name="calendar_sync_pill_off">Mati</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Belum terdaftar</string>

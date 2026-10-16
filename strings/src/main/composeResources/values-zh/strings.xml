@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">仅查看</string>
     <string name="calendar_computer_add_create">创建加入码</string>
     <string name="calendar_computer_add_failed">无法添加电脑。</string>
-    <string name="calendar_computer_join_ready">在另一台电脑上，打开“设置 → 手机和平板上的日历 → 加入其他日历…”，然后粘贴此代码。任何拿到此代码的人都能读取日历，请直接发送给对方。</string>
+    <string name="calendar_computer_join_ready">在另一台电脑上，打开“设置 → 日历同步 → 加入其他日历…”，然后粘贴此代码。任何拿到此代码的人都能读取日历，请直接发送给对方。</string>
     <string name="calendar_computer_save_file">另存为文件…</string>
     <string name="calendar_computer_saved">已保存到 %1$s</string>
     <string name="calendar_computer_copy_code">复制代码</string>
     <string name="calendar_computer_copied">已复制</string>
     <string name="calendar_computer_email">电子邮件…</string>
     <string name="calendar_computer_email_subject">加入 Church Presenter 日历</string>
-    <string name="calendar_computer_email_body">在另一台电脑上，打开“Church Presenter → 设置 → 服务器 → 手机和平板上的日历 → 加入其他日历…”，然后粘贴此代码：\n\n%1$s\n\n此代码仅可使用一次，24 小时内有效。请勿转发此邮件。</string>
+    <string name="calendar_computer_email_body">在另一台电脑上，打开“Church Presenter → 设置 → 服务器 → 日历同步 → 加入其他日历…”，然后粘贴此代码：\n\n%1$s\n\n此代码仅可使用一次，24 小时内有效。请勿转发此邮件。</string>
     <string name="calendar_join_title">加入其他日历</string>
     <string name="calendar_join_body">粘贴主电脑提供的代码，或打开它保存的文件。</string>
     <string name="calendar_join_code">加入码</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">该代码已过期。请向主电脑索取新代码。</string>
     <string name="calendar_join_replaces">与此电脑配对的手机也将停止同步，之后你将使用主电脑的日历进行规划。</string>
     <string name="calendar_join_failed">无法加入。请检查代码和网络连接。</string>
+    <string name="calendar_sync_card_title">日历同步</string>
+    <string name="calendar_sync_description_computers">整周都可以通过手机、平板和其他电脑规划聚会，即使这台电脑处于关机状态。这台电脑始终是权威数据源。</string>
     <string name="calendar_sync_pill_off">关闭</string>
     <string name="calendar_sync_pill_offline">离线</string>
     <string name="calendar_sync_pill_unpaired">未注册</string>

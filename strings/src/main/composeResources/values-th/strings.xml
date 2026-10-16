@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">ดูอย่างเดียว</string>
     <string name="calendar_computer_add_create">สร้างรหัสเข้าร่วม</string>
     <string name="calendar_computer_add_failed">ไม่สามารถเพิ่มคอมพิวเตอร์ได้</string>
-    <string name="calendar_computer_join_ready">บนคอมพิวเตอร์อีกเครื่อง เปิดการตั้งค่า → ปฏิทินบนโทรศัพท์และแท็บเล็ต → เข้าร่วมเครื่องอื่น… แล้ววางรหัสนี้ ใครก็ตามที่มีรหัสนี้สามารถอ่านปฏิทินได้ จึงควรส่งให้บุคคลนั้นโดยตรง</string>
+    <string name="calendar_computer_join_ready">บนคอมพิวเตอร์อีกเครื่อง เปิดการตั้งค่า → ซิงค์ปฏิทิน → เข้าร่วมเครื่องอื่น… แล้ววางรหัสนี้ ใครก็ตามที่มีรหัสนี้สามารถอ่านปฏิทินได้ จึงควรส่งให้บุคคลนั้นโดยตรง</string>
     <string name="calendar_computer_save_file">บันทึกเป็นไฟล์…</string>
     <string name="calendar_computer_saved">บันทึกไปที่ %1$s แล้ว</string>
     <string name="calendar_computer_copy_code">คัดลอกรหัส</string>
     <string name="calendar_computer_copied">คัดลอกแล้ว</string>
     <string name="calendar_computer_email">อีเมล…</string>
     <string name="calendar_computer_email_subject">เข้าร่วมปฏิทิน Church Presenter</string>
-    <string name="calendar_computer_email_body">บนคอมพิวเตอร์อีกเครื่อง เปิด Church Presenter → การตั้งค่า → เซิร์ฟเวอร์ → ปฏิทินบนโทรศัพท์และแท็บเล็ต → เข้าร่วมเครื่องอื่น… แล้ววางรหัสนี้:\n\n%1$s\n\nใช้ได้ครั้งเดียวภายใน 24 ชั่วโมง โปรดอย่าส่งต่ออีเมลนี้</string>
+    <string name="calendar_computer_email_body">บนคอมพิวเตอร์อีกเครื่อง เปิด Church Presenter → การตั้งค่า → เซิร์ฟเวอร์ → ซิงค์ปฏิทิน → เข้าร่วมเครื่องอื่น… แล้ววางรหัสนี้:\n\n%1$s\n\nใช้ได้ครั้งเดียวภายใน 24 ชั่วโมง โปรดอย่าส่งต่ออีเมลนี้</string>
     <string name="calendar_join_title">เข้าร่วมปฏิทินอื่น</string>
     <string name="calendar_join_body">วางรหัสจากคอมพิวเตอร์หลัก หรือเปิดไฟล์ที่เครื่องนั้นบันทึกไว้</string>
     <string name="calendar_join_code">รหัสเข้าร่วม</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">รหัสนี้หมดอายุแล้ว ขอรหัสใหม่จากคอมพิวเตอร์หลัก</string>
     <string name="calendar_join_replaces">โทรศัพท์ที่จับคู่กับเครื่องนี้จะหยุดซิงค์ด้วย และคุณจะวางแผนจากปฏิทินของคอมพิวเตอร์หลักแทน</string>
     <string name="calendar_join_failed">เข้าร่วมไม่สำเร็จ ตรวจสอบรหัสและการเชื่อมต่ออินเทอร์เน็ต</string>
+    <string name="calendar_sync_card_title">ซิงค์ปฏิทิน</string>
+    <string name="calendar_sync_description_computers">วางแผนพิธีจากโทรศัพท์ แท็บเล็ต และคอมพิวเตอร์เครื่องอื่นได้ตลอดสัปดาห์ แม้คอมพิวเตอร์เครื่องนี้จะปิดอยู่ คอมพิวเตอร์เครื่องนี้ยังคงเป็นแหล่งข้อมูลหลัก</string>
     <string name="calendar_sync_pill_off">ปิด</string>
     <string name="calendar_sync_pill_offline">ออฟไลน์</string>
     <string name="calendar_sync_pill_unpaired">ยังไม่ลงทะเบียน</string>

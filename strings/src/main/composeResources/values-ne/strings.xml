@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">हेर्न मात्र</string>
     <string name="calendar_computer_add_create">जोडिने कोड बनाउनुहोस्</string>
     <string name="calendar_computer_add_failed">कम्प्युटर थप्न सकिएन।</string>
-    <string name="calendar_computer_join_ready">अर्को कम्प्युटरमा सेटिङ → फोन र ट्याब्लेटमा पात्रो → अर्कोमा जोडिनुहोस्… खोलेर यो कोड टाँस्नुहोस्। यो कोड भएको जो कोहीले पात्रो पढ्न सक्छ, त्यसैले सिधै सम्बन्धित व्यक्तिलाई पठाउनुहोस्।</string>
+    <string name="calendar_computer_join_ready">अर्को कम्प्युटरमा सेटिङ → पात्रो सिंक → अर्कोमा जोडिनुहोस्… खोलेर यो कोड टाँस्नुहोस्। यो कोड भएको जो कोहीले पात्रो पढ्न सक्छ, त्यसैले सिधै सम्बन्धित व्यक्तिलाई पठाउनुहोस्।</string>
     <string name="calendar_computer_save_file">फाइलको रूपमा सेभ गर्नुहोस्…</string>
     <string name="calendar_computer_saved">%1$s मा सेभ गरियो</string>
     <string name="calendar_computer_copy_code">कोड कपी गर्नुहोस्</string>
     <string name="calendar_computer_copied">कपी गरियो</string>
     <string name="calendar_computer_email">इमेल…</string>
     <string name="calendar_computer_email_subject">Church Presenter पात्रोमा जोडिनुहोस्</string>
-    <string name="calendar_computer_email_body">अर्को कम्प्युटरमा Church Presenter → सेटिङ → सर्भर → फोन र ट्याब्लेटमा पात्रो → अर्कोमा जोडिनुहोस्… खोलेर यो कोड टाँस्नुहोस्:\n\n%1$s\n\nयो २४ घण्टाभित्र एक पटक मात्र काम गर्छ। कृपया यो इमेल अरूलाई नपठाउनुहोस्।</string>
+    <string name="calendar_computer_email_body">अर्को कम्प्युटरमा Church Presenter → सेटिङ → सर्भर → पात्रो सिंक → अर्कोमा जोडिनुहोस्… खोलेर यो कोड टाँस्नुहोस्:\n\n%1$s\n\nयो २४ घण्टाभित्र एक पटक मात्र काम गर्छ। कृपया यो इमेल अरूलाई नपठाउनुहोस्।</string>
     <string name="calendar_join_title">अर्को पात्रोमा जोडिनुहोस्</string>
     <string name="calendar_join_body">मुख्य कम्प्युटरबाट आएको कोड टाँस्नुहोस्, वा त्यसले सेभ गरेको फाइल खोल्नुहोस्।</string>
     <string name="calendar_join_code">जोडिने कोड</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">यो कोडको म्याद सकियो। मुख्य कम्प्युटरसँग नयाँ कोड माग्नुहोस्।</string>
     <string name="calendar_join_replaces">यससँग जोडा बनाइएका फोनहरूले पनि सिंक गर्न छोड्नेछन्, र तपाईं यसको सट्टा मुख्य कम्प्युटरको पात्रोबाट योजना बनाउनुहुनेछ।</string>
     <string name="calendar_join_failed">जोडिन सकिएन। कोड र इन्टरनेट जडान जाँच गर्नुहोस्।</string>
+    <string name="calendar_sync_card_title">पात्रो सिंक</string>
+    <string name="calendar_sync_description_computers">यो कम्प्युटर बन्द हुँदा पनि हप्ताभरि फोन, ट्याब्लेट र अन्य कम्प्युटरहरूबाट सेवाहरू योजना गर्नुहोस्। यो कम्प्युटर नै मुख्य स्रोत रहन्छ।</string>
     <string name="calendar_sync_pill_off">बन्द</string>
     <string name="calendar_sync_pill_offline">अफलाइन</string>
     <string name="calendar_sync_pill_unpaired">दर्ता नभएको</string>

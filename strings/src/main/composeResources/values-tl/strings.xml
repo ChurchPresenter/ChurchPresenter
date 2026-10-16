@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Pagtingin lang</string>
     <string name="calendar_computer_add_create">Gumawa ng join code</string>
     <string name="calendar_computer_add_failed">Hindi maidagdag ang computer.</string>
-    <string name="calendar_computer_join_ready">Sa kabilang computer, buksan ang Mga Setting → Kalendaryo sa mga telepono at tablet → Sumali sa iba… at i-paste ang code na ito. Mababasa ng sinumang may hawak nito ang kalendaryo, kaya ipadala ito nang direkta sa tao.</string>
+    <string name="calendar_computer_join_ready">Sa kabilang computer, buksan ang Mga Setting → Pag-sync ng kalendaryo → Sumali sa iba… at i-paste ang code na ito. Mababasa ng sinumang may hawak nito ang kalendaryo, kaya ipadala ito nang direkta sa tao.</string>
     <string name="calendar_computer_save_file">I-save bilang file…</string>
     <string name="calendar_computer_saved">Na-save sa %1$s</string>
     <string name="calendar_computer_copy_code">Kopyahin ang code</string>
     <string name="calendar_computer_copied">Nakopya</string>
     <string name="calendar_computer_email">Email…</string>
     <string name="calendar_computer_email_subject">Sumali sa kalendaryo ng Church Presenter</string>
-    <string name="calendar_computer_email_body">Sa kabilang computer, buksan ang Church Presenter → Mga Setting → Server → Kalendaryo sa mga telepono at tablet → Sumali sa iba…, at i-paste ang code na ito:\n\n%1$s\n\nGumagana ito nang isang beses, sa loob ng 24 na oras. Pakiusap, huwag ipasa ang email na ito.</string>
+    <string name="calendar_computer_email_body">Sa kabilang computer, buksan ang Church Presenter → Mga Setting → Server → Pag-sync ng kalendaryo → Sumali sa iba…, at i-paste ang code na ito:\n\n%1$s\n\nGumagana ito nang isang beses, sa loob ng 24 na oras. Pakiusap, huwag ipasa ang email na ito.</string>
     <string name="calendar_join_title">Sumali sa ibang kalendaryo</string>
     <string name="calendar_join_body">I-paste ang code mula sa pangunahing computer, o buksan ang file na sine-save nito.</string>
     <string name="calendar_join_code">Join code</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Nag-expire na ang code na iyan. Humingi ng bago sa pangunahing computer.</string>
     <string name="calendar_join_replaces">Titigil din sa pag-sync ang mga teleponong ipinares dito, at magpaplano ka mula sa kalendaryo ng pangunahing computer sa halip.</string>
     <string name="calendar_join_failed">Hindi makasali. Suriin ang code at ang koneksyon sa internet.</string>
+    <string name="calendar_sync_card_title">Pag-sync ng kalendaryo</string>
+    <string name="calendar_sync_description_computers">Magplano ng mga serbisyo mula sa mga telepono, tablet at iba pang computer buong linggo, kahit naka-off ang computer na ito. Nananatiling pinagmumulan ng katotohanan ang computer na ito.</string>
     <string name="calendar_sync_pill_off">Naka-off</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Hindi nakarehistro</string>

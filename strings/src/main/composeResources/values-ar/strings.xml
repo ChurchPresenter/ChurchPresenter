@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">عرض فقط</string>
     <string name="calendar_computer_add_create">إنشاء رمز الانضمام</string>
     <string name="calendar_computer_add_failed">تعذّرت إضافة الحاسوب.</string>
-    <string name="calendar_computer_join_ready">على الحاسوب الآخر، افتح الإعدادات ← التقويم على الهواتف والأجهزة اللوحية ← الانضمام إلى آخر… والصق هذا الرمز. يستطيع أي شخص يملكه قراءة التقويم، لذا أرسله مباشرة إلى الشخص المعني.</string>
+    <string name="calendar_computer_join_ready">على الحاسوب الآخر، افتح الإعدادات ← مزامنة التقويم ← الانضمام إلى آخر… والصق هذا الرمز. يستطيع أي شخص يملكه قراءة التقويم، لذا أرسله مباشرة إلى الشخص المعني.</string>
     <string name="calendar_computer_save_file">حفظ كملف…</string>
     <string name="calendar_computer_saved">تم الحفظ في %1$s</string>
     <string name="calendar_computer_copy_code">نسخ الرمز</string>
     <string name="calendar_computer_copied">تم النسخ</string>
     <string name="calendar_computer_email">بريد إلكتروني…</string>
     <string name="calendar_computer_email_subject">انضم إلى تقويم Church Presenter</string>
-    <string name="calendar_computer_email_body">على الحاسوب الآخر، افتح Church Presenter ← الإعدادات ← الخادم ← التقويم على الهواتف والأجهزة اللوحية ← الانضمام إلى آخر…، والصق هذا الرمز:\n\n%1$s\n\nيعمل مرة واحدة خلال 24 ساعة. يُرجى عدم إعادة توجيه هذه الرسالة.</string>
+    <string name="calendar_computer_email_body">على الحاسوب الآخر، افتح Church Presenter ← الإعدادات ← الخادم ← مزامنة التقويم ← الانضمام إلى آخر…، والصق هذا الرمز:\n\n%1$s\n\nيعمل مرة واحدة خلال 24 ساعة. يُرجى عدم إعادة توجيه هذه الرسالة.</string>
     <string name="calendar_join_title">الانضمام إلى تقويم آخر</string>
     <string name="calendar_join_body">الصق الرمز من الحاسوب الرئيسي، أو افتح الملف الذي حفظه.</string>
     <string name="calendar_join_code">رمز الانضمام</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا من الحاسوب الرئيسي.</string>
     <string name="calendar_join_replaces">ستتوقف الهواتف المقترنة به عن المزامنة أيضًا، وستخطط من تقويم الحاسوب الرئيسي بدلًا من ذلك.</string>
     <string name="calendar_join_failed">تعذّر الانضمام. تحقق من الرمز ومن الاتصال بالإنترنت.</string>
+    <string name="calendar_sync_card_title">مزامنة التقويم</string>
+    <string name="calendar_sync_description_computers">خطّط الخدمات من الهواتف والأجهزة اللوحية والحواسيب الأخرى طوال الأسبوع، حتى عندما يكون هذا الحاسوب مطفأً. يبقى هذا الحاسوب هو المصدر الأساسي.</string>
     <string name="calendar_sync_pill_off">متوقف</string>
     <string name="calendar_sync_pill_offline">غير متصل</string>
     <string name="calendar_sync_pill_unpaired">غير مسجَّل</string>

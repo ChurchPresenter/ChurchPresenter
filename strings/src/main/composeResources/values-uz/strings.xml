@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Faqat ko‘rish</string>
     <string name="calendar_computer_add_create">Qo‘shilish kodini yaratish</string>
     <string name="calendar_computer_add_failed">Kompyuterni qo‘shib bo‘lmadi.</string>
-    <string name="calendar_computer_join_ready">Boshqa kompyuterda Sozlamalar → Telefon va planshetlardagi taqvim → Boshqasiga qo‘shilish… ni oching va ushbu kodni joylang. Kodga ega har kim taqvimni o‘qiy oladi, shuning uchun uni to‘g‘ridan-to‘g‘ri kerakli odamga yuboring.</string>
+    <string name="calendar_computer_join_ready">Boshqa kompyuterda Sozlamalar → Taqvim sinxronlash → Boshqasiga qo‘shilish… ni oching va ushbu kodni joylang. Kodga ega har kim taqvimni o‘qiy oladi, shuning uchun uni to‘g‘ridan-to‘g‘ri kerakli odamga yuboring.</string>
     <string name="calendar_computer_save_file">Fayl sifatida saqlash…</string>
     <string name="calendar_computer_saved">%1$s ga saqlandi</string>
     <string name="calendar_computer_copy_code">Kodni nusxalash</string>
     <string name="calendar_computer_copied">Nusxalandi</string>
     <string name="calendar_computer_email">Email…</string>
     <string name="calendar_computer_email_subject">Church Presenter taqvimiga qo‘shiling</string>
-    <string name="calendar_computer_email_body">Boshqa kompyuterda Church Presenter → Sozlamalar → Server → Telefon va planshetlardagi taqvim → Boshqasiga qo‘shilish… ni oching va ushbu kodni joylang:\n\n%1$s\n\nU 24 soat ichida bir marta ishlaydi. Iltimos, bu xatni boshqalarga yubormang.</string>
+    <string name="calendar_computer_email_body">Boshqa kompyuterda Church Presenter → Sozlamalar → Server → Taqvim sinxronlash → Boshqasiga qo‘shilish… ni oching va ushbu kodni joylang:\n\n%1$s\n\nU 24 soat ichida bir marta ishlaydi. Iltimos, bu xatni boshqalarga yubormang.</string>
     <string name="calendar_join_title">Boshqa taqvimga qo‘shilish</string>
     <string name="calendar_join_body">Asosiy kompyuterdagi kodni joylang yoki u saqlagan faylni oching.</string>
     <string name="calendar_join_code">Qo‘shilish kodi</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Kodning muddati tugagan. Asosiy kompyuterdan yangisini so‘rang.</string>
     <string name="calendar_join_replaces">U bilan juftlangan telefonlar ham sinxronlashni to‘xtatadi, siz esa asosiy kompyuterning taqvimida rejalashtirasiz.</string>
     <string name="calendar_join_failed">Qo‘shilib bo‘lmadi. Kodni va internet aloqasini tekshiring.</string>
+    <string name="calendar_sync_card_title">Taqvim sinxronlash</string>
+    <string name="calendar_sync_description_computers">Xizmatlarni telefonlar, planshetlar va boshqa kompyuterlardan butun hafta, hatto bu kompyuter o‘chiq bo‘lganda ham rejalashtiring. Bu kompyuter asosiy manba bo‘lib qoladi.</string>
     <string name="calendar_sync_pill_off">O‘chiq</string>
     <string name="calendar_sync_pill_offline">Oflayn</string>
     <string name="calendar_sync_pill_unpaired">Ro‘yxatdan o‘tmagan</string>

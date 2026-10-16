@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Kun visning</string>
     <string name="calendar_computer_add_create">Opprett tilkoblingskode</string>
     <string name="calendar_computer_add_failed">Kunne ikke legge til datamaskinen.</string>
-    <string name="calendar_computer_join_ready">Åpne Innstillinger → Kalender på telefoner og nettbrett → Koble til en annen… på den andre datamaskinen, og lim inn denne koden. Alle som har den kan lese kalenderen, så send den direkte til personen.</string>
+    <string name="calendar_computer_join_ready">Åpne Innstillinger → Kalendersynkronisering → Koble til en annen… på den andre datamaskinen, og lim inn denne koden. Alle som har den kan lese kalenderen, så send den direkte til personen.</string>
     <string name="calendar_computer_save_file">Lagre som fil…</string>
     <string name="calendar_computer_saved">Lagret i %1$s</string>
     <string name="calendar_computer_copy_code">Kopier kode</string>
     <string name="calendar_computer_copied">Kopiert</string>
     <string name="calendar_computer_email">E-post…</string>
     <string name="calendar_computer_email_subject">Bli med i Church Presenter-kalenderen</string>
-    <string name="calendar_computer_email_body">Åpne Church Presenter → Innstillinger → Server → Kalender på telefoner og nettbrett → Koble til en annen… på den andre datamaskinen, og lim inn denne koden:\n\n%1$s\n\nDen virker én gang, i 24 timer. Ikke videresend denne e-posten.</string>
+    <string name="calendar_computer_email_body">Åpne Church Presenter → Innstillinger → Server → Kalendersynkronisering → Koble til en annen… på den andre datamaskinen, og lim inn denne koden:\n\n%1$s\n\nDen virker én gang, i 24 timer. Ikke videresend denne e-posten.</string>
     <string name="calendar_join_title">Koble til en annen kalender</string>
     <string name="calendar_join_body">Lim inn koden fra hovedmaskinen, eller åpne filen den lagret.</string>
     <string name="calendar_join_code">Tilkoblingskode</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Koden har utløpt. Be hovedmaskinen om en ny.</string>
     <string name="calendar_join_replaces">Telefoner som er paret med den slutter også å synkronisere, og du planlegger i hovedmaskinens kalender i stedet.</string>
     <string name="calendar_join_failed">Kunne ikke koble til. Sjekk koden og internettforbindelsen.</string>
+    <string name="calendar_sync_card_title">Kalendersynkronisering</string>
+    <string name="calendar_sync_description_computers">Planlegg gudstjenester fra telefoner, nettbrett og andre datamaskiner hele uken, selv når denne datamaskinen er av. Denne datamaskinen forblir kilden til sannhet.</string>
     <string name="calendar_sync_pill_off">Av</string>
     <string name="calendar_sync_pill_offline">Frakoblet</string>
     <string name="calendar_sync_pill_unpaired">Ikke registrert</string>

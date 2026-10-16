@@ -2294,14 +2294,14 @@
     <string name="calendar_computer_add_viewer">Só leitura</string>
     <string name="calendar_computer_add_create">Criar código de adesão</string>
     <string name="calendar_computer_add_failed">Não foi possível adicionar o computador.</string>
-    <string name="calendar_computer_join_ready">No outro computador, abra Definições → Calendário em telemóveis e tablets → Aderir a outro… e cole este código. Quem o tiver pode ler o calendário, por isso envie-o diretamente à pessoa.</string>
+    <string name="calendar_computer_join_ready">No outro computador, abra Definições → Sincronização do calendário → Aderir a outro… e cole este código. Quem o tiver pode ler o calendário, por isso envie-o diretamente à pessoa.</string>
     <string name="calendar_computer_save_file">Guardar como ficheiro…</string>
     <string name="calendar_computer_saved">Guardado em %1$s</string>
     <string name="calendar_computer_copy_code">Copiar código</string>
     <string name="calendar_computer_copied">Copiado</string>
     <string name="calendar_computer_email">Email…</string>
     <string name="calendar_computer_email_subject">Aderir ao calendário do Church Presenter</string>
-    <string name="calendar_computer_email_body">No outro computador, abra Church Presenter → Definições → Servidor → Calendário em telemóveis e tablets → Aderir a outro… e cole este código:\n\n%1$s\n\nFunciona uma vez, durante 24 horas. Por favor, não reencaminhe este email.</string>
+    <string name="calendar_computer_email_body">No outro computador, abra Church Presenter → Definições → Servidor → Sincronização do calendário → Aderir a outro… e cole este código:\n\n%1$s\n\nFunciona uma vez, durante 24 horas. Por favor, não reencaminhe este email.</string>
     <string name="calendar_join_title">Aderir a outro calendário</string>
     <string name="calendar_join_body">Cole o código do computador principal ou abra o ficheiro que ele guardou.</string>
     <string name="calendar_join_code">Código de adesão</string>
@@ -2312,6 +2312,8 @@
     <string name="calendar_join_expired">Esse código expirou. Peça um novo ao computador principal.</string>
     <string name="calendar_join_replaces">Os telemóveis emparelhados com ele também deixam de sincronizar, e passará a planear a partir do calendário do computador principal.</string>
     <string name="calendar_join_failed">Não foi possível aderir. Verifique o código e a ligação à internet.</string>
+    <string name="calendar_sync_card_title">Sincronização do calendário</string>
+    <string name="calendar_sync_description_computers">Planeie cultos a partir de telemóveis, tablets e outros computadores durante toda a semana, mesmo com este computador desligado. Este computador continua a ser a fonte de verdade.</string>
     <string name="calendar_sync_pill_off">Desligado</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Não registado</string>

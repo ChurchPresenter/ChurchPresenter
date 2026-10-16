@@ -2268,14 +2268,14 @@
     <string name="calendar_computer_add_viewer">Только просмотр</string>
     <string name="calendar_computer_add_create">Создать код присоединения</string>
     <string name="calendar_computer_add_failed">Не удалось добавить компьютер.</string>
-    <string name="calendar_computer_join_ready">На другом компьютере откройте Настройки → Календарь на телефонах и планшетах → Присоединиться к другому… и вставьте этот код. Любой, у кого он есть, может читать календарь, поэтому отправьте его прямо нужному человеку.</string>
+    <string name="calendar_computer_join_ready">На другом компьютере откройте Настройки → Синхронизация календаря → Присоединиться к другому… и вставьте этот код. Любой, у кого он есть, может читать календарь, поэтому отправьте его прямо нужному человеку.</string>
     <string name="calendar_computer_save_file">Сохранить в файл…</string>
     <string name="calendar_computer_saved">Сохранено в %1$s</string>
     <string name="calendar_computer_copy_code">Копировать код</string>
     <string name="calendar_computer_copied">Скопировано</string>
     <string name="calendar_computer_email">Эл. почта…</string>
     <string name="calendar_computer_email_subject">Присоединитесь к календарю Church Presenter</string>
-    <string name="calendar_computer_email_body">На другом компьютере откройте Church Presenter → Настройки → Сервер → Календарь на телефонах и планшетах → Присоединиться к другому… и вставьте этот код:\n\n%1$s\n\nОн действует один раз в течение 24 часов. Пожалуйста, не пересылайте это письмо.</string>
+    <string name="calendar_computer_email_body">На другом компьютере откройте Church Presenter → Настройки → Сервер → Синхронизация календаря → Присоединиться к другому… и вставьте этот код:\n\n%1$s\n\nОн действует один раз в течение 24 часов. Пожалуйста, не пересылайте это письмо.</string>
     <string name="calendar_join_title">Присоединиться к другому календарю</string>
     <string name="calendar_join_body">Вставьте код с основного компьютера или откройте сохранённый им файл.</string>
     <string name="calendar_join_code">Код присоединения</string>
@@ -2286,6 +2286,8 @@
     <string name="calendar_join_expired">Срок действия кода истёк. Попросите новый на основном компьютере.</string>
     <string name="calendar_join_replaces">Связанные с ним телефоны тоже перестанут синхронизироваться, а планировать вы будете в календаре основного компьютера.</string>
     <string name="calendar_join_failed">Не удалось присоединиться. Проверьте код и подключение к интернету.</string>
+    <string name="calendar_sync_card_title">Синхронизация календаря</string>
+    <string name="calendar_sync_description_computers">Планируйте служения с телефонов, планшетов и других компьютеров всю неделю, даже когда этот компьютер выключен. Этот компьютер остаётся основным источником.</string>
     <string name="calendar_sync_pill_off">Выкл.</string>
     <string name="calendar_sync_pill_offline">Не в сети</string>
     <string name="calendar_sync_pill_unpaired">Не зарегистрирован</string>

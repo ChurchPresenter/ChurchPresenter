@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">केवल देखें</string>
     <string name="calendar_computer_add_create">जुड़ने का कोड बनाएँ</string>
     <string name="calendar_computer_add_failed">कंप्यूटर नहीं जोड़ा जा सका।</string>
-    <string name="calendar_computer_join_ready">दूसरे कंप्यूटर पर सेटिंग्स → फ़ोन और टैबलेट पर कैलेंडर → दूसरे से जुड़ें… खोलें और यह कोड पेस्ट करें। जिसके पास भी यह कोड है वह कैलेंडर पढ़ सकता है, इसलिए इसे सीधे उसी व्यक्ति को भेजें।</string>
+    <string name="calendar_computer_join_ready">दूसरे कंप्यूटर पर सेटिंग्स → कैलेंडर सिंक → दूसरे से जुड़ें… खोलें और यह कोड पेस्ट करें। जिसके पास भी यह कोड है वह कैलेंडर पढ़ सकता है, इसलिए इसे सीधे उसी व्यक्ति को भेजें।</string>
     <string name="calendar_computer_save_file">फ़ाइल के रूप में सहेजें…</string>
     <string name="calendar_computer_saved">%1$s में सहेजा गया</string>
     <string name="calendar_computer_copy_code">कोड कॉपी करें</string>
     <string name="calendar_computer_copied">कॉपी किया गया</string>
     <string name="calendar_computer_email">ईमेल…</string>
     <string name="calendar_computer_email_subject">Church Presenter कैलेंडर से जुड़ें</string>
-    <string name="calendar_computer_email_body">दूसरे कंप्यूटर पर Church Presenter → सेटिंग्स → सर्वर → फ़ोन और टैबलेट पर कैलेंडर → दूसरे से जुड़ें… खोलें और यह कोड पेस्ट करें:\n\n%1$s\n\nयह 24 घंटे के भीतर केवल एक बार काम करता है। कृपया यह ईमेल आगे न भेजें।</string>
+    <string name="calendar_computer_email_body">दूसरे कंप्यूटर पर Church Presenter → सेटिंग्स → सर्वर → कैलेंडर सिंक → दूसरे से जुड़ें… खोलें और यह कोड पेस्ट करें:\n\n%1$s\n\nयह 24 घंटे के भीतर केवल एक बार काम करता है। कृपया यह ईमेल आगे न भेजें।</string>
     <string name="calendar_join_title">दूसरे कैलेंडर से जुड़ें</string>
     <string name="calendar_join_body">मुख्य कंप्यूटर से मिला कोड पेस्ट करें, या उसकी सहेजी गई फ़ाइल खोलें।</string>
     <string name="calendar_join_code">जुड़ने का कोड</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">इस कोड की समय-सीमा समाप्त हो गई है। मुख्य कंप्यूटर से नया कोड माँगें।</string>
     <string name="calendar_join_replaces">इससे पेयर किए गए फ़ोन भी सिंक करना बंद कर देंगे, और आप इसके बजाय मुख्य कंप्यूटर के कैलेंडर से योजना बनाएँगे।</string>
     <string name="calendar_join_failed">जुड़ नहीं सके। कोड और इंटरनेट कनेक्शन जाँचें।</string>
+    <string name="calendar_sync_card_title">कैलेंडर सिंक</string>
+    <string name="calendar_sync_description_computers">पूरे सप्ताह फ़ोन, टैबलेट और अन्य कंप्यूटरों से सेवाओं की योजना बनाएँ, तब भी जब यह कंप्यूटर बंद हो। यह कंप्यूटर ही मुख्य स्रोत बना रहता है।</string>
     <string name="calendar_sync_pill_off">बंद</string>
     <string name="calendar_sync_pill_offline">ऑफ़लाइन</string>
     <string name="calendar_sync_pill_unpaired">पंजीकृत नहीं</string>

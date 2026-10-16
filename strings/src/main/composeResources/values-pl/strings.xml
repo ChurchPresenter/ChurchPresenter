@@ -2265,14 +2265,14 @@
     <string name="calendar_computer_add_viewer">Tylko podgląd</string>
     <string name="calendar_computer_add_create">Utwórz kod dołączenia</string>
     <string name="calendar_computer_add_failed">Nie udało się dodać komputera.</string>
-    <string name="calendar_computer_join_ready">Na drugim komputerze otwórz Ustawienia → Kalendarz na telefonach i tabletach → Dołącz do innego… i wklej ten kod. Każdy, kto go ma, może czytać kalendarz, więc wyślij go bezpośrednio do właściwej osoby.</string>
+    <string name="calendar_computer_join_ready">Na drugim komputerze otwórz Ustawienia → Synchronizacja kalendarza → Dołącz do innego… i wklej ten kod. Każdy, kto go ma, może czytać kalendarz, więc wyślij go bezpośrednio do właściwej osoby.</string>
     <string name="calendar_computer_save_file">Zapisz jako plik…</string>
     <string name="calendar_computer_saved">Zapisano w %1$s</string>
     <string name="calendar_computer_copy_code">Kopiuj kod</string>
     <string name="calendar_computer_copied">Skopiowano</string>
     <string name="calendar_computer_email">E-mail…</string>
     <string name="calendar_computer_email_subject">Dołącz do kalendarza Church Presenter</string>
-    <string name="calendar_computer_email_body">Na drugim komputerze otwórz Church Presenter → Ustawienia → Serwer → Kalendarz na telefonach i tabletach → Dołącz do innego… i wklej ten kod:\n\n%1$s\n\nDziała jeden raz, przez 24 godziny. Prosimy nie przekazywać tej wiadomości dalej.</string>
+    <string name="calendar_computer_email_body">Na drugim komputerze otwórz Church Presenter → Ustawienia → Serwer → Synchronizacja kalendarza → Dołącz do innego… i wklej ten kod:\n\n%1$s\n\nDziała jeden raz, przez 24 godziny. Prosimy nie przekazywać tej wiadomości dalej.</string>
     <string name="calendar_join_title">Dołącz do innego kalendarza</string>
     <string name="calendar_join_body">Wklej kod z komputera głównego lub otwórz zapisany przez niego plik.</string>
     <string name="calendar_join_code">Kod dołączenia</string>
@@ -2283,6 +2283,8 @@
     <string name="calendar_join_expired">Ten kod wygasł. Poproś komputer główny o nowy.</string>
     <string name="calendar_join_replaces">Sparowane z nim telefony również przestaną się synchronizować, a planować będziesz w kalendarzu komputera głównego.</string>
     <string name="calendar_join_failed">Nie udało się dołączyć. Sprawdź kod i połączenie z internetem.</string>
+    <string name="calendar_sync_card_title">Synchronizacja kalendarza</string>
+    <string name="calendar_sync_description_computers">Planuj nabożeństwa z telefonów, tabletów i innych komputerów przez cały tydzień, nawet gdy ten komputer jest wyłączony. Ten komputer pozostaje źródłem prawdy.</string>
     <string name="calendar_sync_pill_off">Wył.</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Niezarejestrowany</string>

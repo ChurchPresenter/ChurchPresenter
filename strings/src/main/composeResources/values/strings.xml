@@ -3800,14 +3800,14 @@
     <string name="calendar_computer_add_viewer">View only</string>
     <string name="calendar_computer_add_create">Create join code</string>
     <string name="calendar_computer_add_failed">Couldn't add the computer.</string>
-    <string name="calendar_computer_join_ready">On the other computer, open Settings → Calendar on phones &amp; tablets → Join another… and paste this code. Anyone with it can read the calendar, so send it straight to the person.</string>
+    <string name="calendar_computer_join_ready">On the other computer, open Settings → Calendar sync → Join another… and paste this code. Anyone with it can read the calendar, so send it straight to the person.</string>
     <string name="calendar_computer_save_file">Save as file…</string>
     <string name="calendar_computer_saved">Saved to %1$s</string>
     <string name="calendar_computer_copy_code">Copy code</string>
     <string name="calendar_computer_copied">Copied</string>
     <string name="calendar_computer_email">Email…</string>
     <string name="calendar_computer_email_subject">Join the Church Presenter calendar</string>
-    <string name="calendar_computer_email_body">On the other computer, open Church Presenter → Settings → Server → Calendar on phones &amp; tablets → Join another…, and paste this code:\n\n%1$s\n\nIt works once, for 24 hours. Please don't forward this email.</string>
+    <string name="calendar_computer_email_body">On the other computer, open Church Presenter → Settings → Server → Calendar sync → Join another…, and paste this code:\n\n%1$s\n\nIt works once, for 24 hours. Please don't forward this email.</string>
     <string name="calendar_join_title">Join another calendar</string>
     <string name="calendar_join_body">Paste the code from the main computer, or open the file it saved.</string>
     <string name="calendar_join_code">Join code</string>
@@ -3818,6 +3818,8 @@
     <string name="calendar_join_expired">That code has expired. Ask the main computer for a new one.</string>
     <string name="calendar_join_replaces">Phones paired with it will stop syncing too, and you'll plan from the main computer's calendar instead.</string>
     <string name="calendar_join_failed">Couldn't join. Check the code and the internet connection.</string>
+    <string name="calendar_sync_card_title">Calendar sync</string>
+    <string name="calendar_sync_description_computers">Plan services from phones, tablets and other computers all week, even while this computer is off. This computer stays the source of truth.</string>
     <string name="calendar_sync_pill_off">Off</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Not registered</string>

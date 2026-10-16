@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">閲覧のみ</string>
     <string name="calendar_computer_add_create">参加コードを作成</string>
     <string name="calendar_computer_add_failed">コンピューターを追加できませんでした。</string>
-    <string name="calendar_computer_join_ready">もう一方のコンピューターで「設定 → 電話とタブレットのカレンダー → 別のカレンダーに参加…」を開き、このコードを貼り付けてください。コードを持つ人は誰でもカレンダーを読めるので、本人に直接送ってください。</string>
+    <string name="calendar_computer_join_ready">もう一方のコンピューターで「設定 → カレンダー同期 → 別のカレンダーに参加…」を開き、このコードを貼り付けてください。コードを持つ人は誰でもカレンダーを読めるので、本人に直接送ってください。</string>
     <string name="calendar_computer_save_file">ファイルとして保存…</string>
     <string name="calendar_computer_saved">%1$s に保存しました</string>
     <string name="calendar_computer_copy_code">コードをコピー</string>
     <string name="calendar_computer_copied">コピーしました</string>
     <string name="calendar_computer_email">メール…</string>
     <string name="calendar_computer_email_subject">Church Presenter のカレンダーに参加</string>
-    <string name="calendar_computer_email_body">もう一方のコンピューターで「Church Presenter → 設定 → サーバー → 電話とタブレットのカレンダー → 別のカレンダーに参加…」を開き、このコードを貼り付けてください:\n\n%1$s\n\nこのコードは 24 時間以内に 1 回だけ使えます。このメールは転送しないでください。</string>
+    <string name="calendar_computer_email_body">もう一方のコンピューターで「Church Presenter → 設定 → サーバー → カレンダー同期 → 別のカレンダーに参加…」を開き、このコードを貼り付けてください:\n\n%1$s\n\nこのコードは 24 時間以内に 1 回だけ使えます。このメールは転送しないでください。</string>
     <string name="calendar_join_title">別のカレンダーに参加</string>
     <string name="calendar_join_body">メインのコンピューターからのコードを貼り付けるか、保存されたファイルを開いてください。</string>
     <string name="calendar_join_code">参加コード</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">このコードは期限切れです。メインのコンピューターで新しいコードを発行してもらってください。</string>
     <string name="calendar_join_replaces">このコンピューターとペアリングした電話も同期を停止し、今後はメインのコンピューターのカレンダーで計画します。</string>
     <string name="calendar_join_failed">参加できませんでした。コードとインターネット接続を確認してください。</string>
+    <string name="calendar_sync_card_title">カレンダー同期</string>
+    <string name="calendar_sync_description_computers">このコンピューターの電源が切れていても、週を通して電話、タブレット、他のコンピューターから礼拝を計画できます。このコンピューターが正となるデータ元です。</string>
     <string name="calendar_sync_pill_off">オフ</string>
     <string name="calendar_sync_pill_offline">オフライン</string>
     <string name="calendar_sync_pill_unpaired">未登録</string>

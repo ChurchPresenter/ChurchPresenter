@@ -2266,14 +2266,14 @@
     <string name="calendar_computer_add_viewer">Тек көру</string>
     <string name="calendar_computer_add_create">Қосылу кодын жасау</string>
     <string name="calendar_computer_add_failed">Компьютерді қосу мүмкін болмады.</string>
-    <string name="calendar_computer_join_ready">Басқа компьютерде Баптаулар → Телефондар мен планшеттердегі күнтізбе → Басқасына қосылу… ашып, осы кодты қойыңыз. Кодты білетін кез келген адам күнтізбені оқи алады, сондықтан оны тікелей қажетті адамға жіберіңіз.</string>
+    <string name="calendar_computer_join_ready">Басқа компьютерде Баптаулар → Күнтізбені синхрондау → Басқасына қосылу… ашып, осы кодты қойыңыз. Кодты білетін кез келген адам күнтізбені оқи алады, сондықтан оны тікелей қажетті адамға жіберіңіз.</string>
     <string name="calendar_computer_save_file">Файл ретінде сақтау…</string>
     <string name="calendar_computer_saved">%1$s ішіне сақталды</string>
     <string name="calendar_computer_copy_code">Кодты көшіру</string>
     <string name="calendar_computer_copied">Көшірілді</string>
     <string name="calendar_computer_email">Электрондық пошта…</string>
     <string name="calendar_computer_email_subject">Church Presenter күнтізбесіне қосылыңыз</string>
-    <string name="calendar_computer_email_body">Басқа компьютерде Church Presenter → Баптаулар → Сервер → Телефондар мен планшеттердегі күнтізбе → Басқасына қосылу… ашып, осы кодты қойыңыз:\n\n%1$s\n\nОл 24 сағат ішінде бір рет жұмыс істейді. Бұл хатты басқаға жібермеңіз.</string>
+    <string name="calendar_computer_email_body">Басқа компьютерде Church Presenter → Баптаулар → Сервер → Күнтізбені синхрондау → Басқасына қосылу… ашып, осы кодты қойыңыз:\n\n%1$s\n\nОл 24 сағат ішінде бір рет жұмыс істейді. Бұл хатты басқаға жібермеңіз.</string>
     <string name="calendar_join_title">Басқа күнтізбеге қосылу</string>
     <string name="calendar_join_body">Негізгі компьютердегі кодты қойыңыз немесе ол сақтаған файлды ашыңыз.</string>
     <string name="calendar_join_code">Қосылу коды</string>
@@ -2284,6 +2284,8 @@
     <string name="calendar_join_expired">Кодтың мерзімі өтті. Негізгі компьютерден жаңасын сұраңыз.</string>
     <string name="calendar_join_replaces">Онымен жұптасқан телефондар да синхрондауды тоқтатады, ал сіз негізгі компьютердің күнтізбесінде жоспарлайтын боласыз.</string>
     <string name="calendar_join_failed">Қосылу мүмкін болмады. Кодты және интернет байланысын тексеріңіз.</string>
+    <string name="calendar_sync_card_title">Күнтізбені синхрондау</string>
+    <string name="calendar_sync_description_computers">Қызметтерді телефондардан, планшеттерден және басқа компьютерлерден апта бойы, тіпті осы компьютер өшірулі кезде де жоспарлаңыз. Негізгі дереккөз осы компьютер болып қалады.</string>
     <string name="calendar_sync_pill_off">Өшірулі</string>
     <string name="calendar_sync_pill_offline">Желіден тыс</string>
     <string name="calendar_sync_pill_unpaired">Тіркелмеген</string>

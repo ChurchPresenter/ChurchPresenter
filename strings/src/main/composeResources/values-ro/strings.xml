@@ -2295,14 +2295,14 @@
     <string name="calendar_computer_add_viewer">Doar vizualizare</string>
     <string name="calendar_computer_add_create">Creează cod de alăturare</string>
     <string name="calendar_computer_add_failed">Computerul nu a putut fi adăugat.</string>
-    <string name="calendar_computer_join_ready">Pe celălalt computer, deschide Setări → Calendar pe telefoane și tablete → Alătură-te altuia… și lipește acest cod. Oricine îl are poate citi calendarul, așa că trimite-l direct persoanei.</string>
+    <string name="calendar_computer_join_ready">Pe celălalt computer, deschide Setări → Sincronizare calendar → Alătură-te altuia… și lipește acest cod. Oricine îl are poate citi calendarul, așa că trimite-l direct persoanei.</string>
     <string name="calendar_computer_save_file">Salvează ca fișier…</string>
     <string name="calendar_computer_saved">Salvat în %1$s</string>
     <string name="calendar_computer_copy_code">Copiază codul</string>
     <string name="calendar_computer_copied">Copiat</string>
     <string name="calendar_computer_email">E-mail…</string>
     <string name="calendar_computer_email_subject">Alătură-te calendarului Church Presenter</string>
-    <string name="calendar_computer_email_body">Pe celălalt computer, deschide Church Presenter → Setări → Server → Calendar pe telefoane și tablete → Alătură-te altuia… și lipește acest cod:\n\n%1$s\n\nFuncționează o singură dată, timp de 24 de ore. Te rugăm să nu redirecționezi acest e-mail.</string>
+    <string name="calendar_computer_email_body">Pe celălalt computer, deschide Church Presenter → Setări → Server → Sincronizare calendar → Alătură-te altuia… și lipește acest cod:\n\n%1$s\n\nFuncționează o singură dată, timp de 24 de ore. Te rugăm să nu redirecționezi acest e-mail.</string>
     <string name="calendar_join_title">Alătură-te altui calendar</string>
     <string name="calendar_join_body">Lipește codul de pe computerul principal sau deschide fișierul salvat de acesta.</string>
     <string name="calendar_join_code">Cod de alăturare</string>
@@ -2313,6 +2313,8 @@
     <string name="calendar_join_expired">Codul a expirat. Cere unul nou de la computerul principal.</string>
     <string name="calendar_join_replaces">Telefoanele asociate cu el se vor opri și ele din sincronizare, iar tu vei planifica din calendarul computerului principal.</string>
     <string name="calendar_join_failed">Nu s-a putut face alăturarea. Verifică codul și conexiunea la internet.</string>
+    <string name="calendar_sync_card_title">Sincronizare calendar</string>
+    <string name="calendar_sync_description_computers">Planifică servicii de pe telefoane, tablete și alte computere toată săptămâna, chiar și când acest computer este oprit. Acest computer rămâne sursa de adevăr.</string>
     <string name="calendar_sync_pill_off">Oprit</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Neînregistrat</string>

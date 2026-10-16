@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Yalnızca görüntüleme</string>
     <string name="calendar_computer_add_create">Katılım kodu oluştur</string>
     <string name="calendar_computer_add_failed">Bilgisayar eklenemedi.</string>
-    <string name="calendar_computer_join_ready">Diğer bilgisayarda Ayarlar → Telefon ve tabletlerde takvim → Başka birine katıl… yolunu açın ve bu kodu yapıştırın. Kodu olan herkes takvimi okuyabilir, bu yüzden doğrudan ilgili kişiye gönderin.</string>
+    <string name="calendar_computer_join_ready">Diğer bilgisayarda Ayarlar → Takvim eşitleme → Başka birine katıl… yolunu açın ve bu kodu yapıştırın. Kodu olan herkes takvimi okuyabilir, bu yüzden doğrudan ilgili kişiye gönderin.</string>
     <string name="calendar_computer_save_file">Dosya olarak kaydet…</string>
     <string name="calendar_computer_saved">%1$s konumuna kaydedildi</string>
     <string name="calendar_computer_copy_code">Kodu kopyala</string>
     <string name="calendar_computer_copied">Kopyalandı</string>
     <string name="calendar_computer_email">E-posta…</string>
     <string name="calendar_computer_email_subject">Church Presenter takvimine katılın</string>
-    <string name="calendar_computer_email_body">Diğer bilgisayarda Church Presenter → Ayarlar → Sunucu → Telefon ve tabletlerde takvim → Başka birine katıl… yolunu açın ve bu kodu yapıştırın:\n\n%1$s\n\nBir kez ve 24 saat boyunca geçerlidir. Lütfen bu e-postayı başkasına iletmeyin.</string>
+    <string name="calendar_computer_email_body">Diğer bilgisayarda Church Presenter → Ayarlar → Sunucu → Takvim eşitleme → Başka birine katıl… yolunu açın ve bu kodu yapıştırın:\n\n%1$s\n\nBir kez ve 24 saat boyunca geçerlidir. Lütfen bu e-postayı başkasına iletmeyin.</string>
     <string name="calendar_join_title">Başka bir takvime katıl</string>
     <string name="calendar_join_body">Ana bilgisayardaki kodu yapıştırın veya kaydettiği dosyayı açın.</string>
     <string name="calendar_join_code">Katılım kodu</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Bu kodun süresi doldu. Ana bilgisayardan yenisini isteyin.</string>
     <string name="calendar_join_replaces">Onunla eşleştirilmiş telefonlar da eşitlemeyi bırakır ve bunun yerine ana bilgisayarın takviminden planlarsınız.</string>
     <string name="calendar_join_failed">Katılınamadı. Kodu ve internet bağlantısını kontrol edin.</string>
+    <string name="calendar_sync_card_title">Takvim eşitleme</string>
+    <string name="calendar_sync_description_computers">Hizmetleri tüm hafta boyunca, bu bilgisayar kapalıyken bile telefonlardan, tabletlerden ve diğer bilgisayarlardan planlayın. Bu bilgisayar asıl kaynak olmaya devam eder.</string>
     <string name="calendar_sync_pill_off">Kapalı</string>
     <string name="calendar_sync_pill_offline">Çevrimdışı</string>
     <string name="calendar_sync_pill_unpaired">Kayıtlı değil</string>

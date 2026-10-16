@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Vain katselu</string>
     <string name="calendar_computer_add_create">Luo liittymiskoodi</string>
     <string name="calendar_computer_add_failed">Tietokoneen lisääminen epäonnistui.</string>
-    <string name="calendar_computer_join_ready">Avaa toisella tietokoneella Asetukset → Kalenteri puhelimissa ja tableteissa → Liity toiseen… ja liitä tämä koodi. Kuka tahansa, jolla se on, voi lukea kalenteria, joten lähetä se suoraan henkilölle.</string>
+    <string name="calendar_computer_join_ready">Avaa toisella tietokoneella Asetukset → Kalenterin synkronointi → Liity toiseen… ja liitä tämä koodi. Kuka tahansa, jolla se on, voi lukea kalenteria, joten lähetä se suoraan henkilölle.</string>
     <string name="calendar_computer_save_file">Tallenna tiedostona…</string>
     <string name="calendar_computer_saved">Tallennettu: %1$s</string>
     <string name="calendar_computer_copy_code">Kopioi koodi</string>
     <string name="calendar_computer_copied">Kopioitu</string>
     <string name="calendar_computer_email">Sähköposti…</string>
     <string name="calendar_computer_email_subject">Liity Church Presenter -kalenteriin</string>
-    <string name="calendar_computer_email_body">Avaa toisella tietokoneella Church Presenter → Asetukset → Palvelin → Kalenteri puhelimissa ja tableteissa → Liity toiseen… ja liitä tämä koodi:\n\n%1$s\n\nSe toimii kerran, 24 tunnin ajan. Älä välitä tätä sähköpostia eteenpäin.</string>
+    <string name="calendar_computer_email_body">Avaa toisella tietokoneella Church Presenter → Asetukset → Palvelin → Kalenterin synkronointi → Liity toiseen… ja liitä tämä koodi:\n\n%1$s\n\nSe toimii kerran, 24 tunnin ajan. Älä välitä tätä sähköpostia eteenpäin.</string>
     <string name="calendar_join_title">Liity toiseen kalenteriin</string>
     <string name="calendar_join_body">Liitä päätietokoneen koodi tai avaa sen tallentama tiedosto.</string>
     <string name="calendar_join_code">Liittymiskoodi</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Koodi on vanhentunut. Pyydä päätietokoneelta uusi.</string>
     <string name="calendar_join_replaces">Siihen paritetut puhelimet lopettavat myös synkronoinnin, ja suunnittelet sen sijaan päätietokoneen kalenterissa.</string>
     <string name="calendar_join_failed">Liittyminen epäonnistui. Tarkista koodi ja internetyhteys.</string>
+    <string name="calendar_sync_card_title">Kalenterin synkronointi</string>
+    <string name="calendar_sync_description_computers">Suunnittele tilaisuuksia puhelimista, tableteista ja muista tietokoneista koko viikon, vaikka tämä tietokone olisi pois päältä. Tämä tietokone pysyy ensisijaisena lähteenä.</string>
     <string name="calendar_sync_pill_off">Pois</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Ei rekisteröity</string>

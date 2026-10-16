@@ -2293,14 +2293,14 @@
     <string name="calendar_computer_add_viewer">Solo lectura</string>
     <string name="calendar_computer_add_create">Crear código de unión</string>
     <string name="calendar_computer_add_failed">No se pudo añadir el ordenador.</string>
-    <string name="calendar_computer_join_ready">En el otro ordenador, abre Ajustes → Calendario en teléfonos y tabletas → Unirse a otro… y pega este código. Cualquiera que lo tenga puede leer el calendario, así que envíalo directamente a la persona.</string>
+    <string name="calendar_computer_join_ready">En el otro ordenador, abre Ajustes → Sincronización del calendario → Unirse a otro… y pega este código. Cualquiera que lo tenga puede leer el calendario, así que envíalo directamente a la persona.</string>
     <string name="calendar_computer_save_file">Guardar como archivo…</string>
     <string name="calendar_computer_saved">Guardado en %1$s</string>
     <string name="calendar_computer_copy_code">Copiar código</string>
     <string name="calendar_computer_copied">Copiado</string>
     <string name="calendar_computer_email">Correo…</string>
     <string name="calendar_computer_email_subject">Únete al calendario de Church Presenter</string>
-    <string name="calendar_computer_email_body">En el otro ordenador, abre Church Presenter → Ajustes → Servidor → Calendario en teléfonos y tabletas → Unirse a otro… y pega este código:\n\n%1$s\n\nFunciona una sola vez, durante 24 horas. Por favor, no reenvíes este correo.</string>
+    <string name="calendar_computer_email_body">En el otro ordenador, abre Church Presenter → Ajustes → Servidor → Sincronización del calendario → Unirse a otro… y pega este código:\n\n%1$s\n\nFunciona una sola vez, durante 24 horas. Por favor, no reenvíes este correo.</string>
     <string name="calendar_join_title">Unirse a otro calendario</string>
     <string name="calendar_join_body">Pega el código del ordenador principal o abre el archivo que guardó.</string>
     <string name="calendar_join_code">Código de unión</string>
@@ -2311,6 +2311,8 @@
     <string name="calendar_join_expired">Ese código ha caducado. Pide uno nuevo al ordenador principal.</string>
     <string name="calendar_join_replaces">Los teléfonos emparejados con él también dejarán de sincronizarse, y planificarás desde el calendario del ordenador principal.</string>
     <string name="calendar_join_failed">No se pudo unir. Comprueba el código y la conexión a internet.</string>
+    <string name="calendar_sync_card_title">Sincronización del calendario</string>
+    <string name="calendar_sync_description_computers">Planifica servicios desde teléfonos, tabletas y otros ordenadores toda la semana, incluso con este ordenador apagado. Este ordenador sigue siendo la fuente de verdad.</string>
     <string name="calendar_sync_pill_off">Desactivado</string>
     <string name="calendar_sync_pill_offline">Sin conexión</string>
     <string name="calendar_sync_pill_unpaired">No registrado</string>

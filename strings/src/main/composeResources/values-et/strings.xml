@@ -2298,14 +2298,14 @@
     <string name="calendar_computer_add_viewer">Ainult vaatamine</string>
     <string name="calendar_computer_add_create">Loo liitumiskood</string>
     <string name="calendar_computer_add_failed">Arvutit ei õnnestunud lisada.</string>
-    <string name="calendar_computer_join_ready">Ava teises arvutis Seaded → Kalender telefonides ja tahvelarvutites → Liitu teisega… ja kleebi see kood. Igaüks, kellel see on, saab kalendrit lugeda, seega saada see otse isikule.</string>
+    <string name="calendar_computer_join_ready">Ava teises arvutis Seaded → Kalendri sünkroonimine → Liitu teisega… ja kleebi see kood. Igaüks, kellel see on, saab kalendrit lugeda, seega saada see otse isikule.</string>
     <string name="calendar_computer_save_file">Salvesta failina…</string>
     <string name="calendar_computer_saved">Salvestatud: %1$s</string>
     <string name="calendar_computer_copy_code">Kopeeri kood</string>
     <string name="calendar_computer_copied">Kopeeritud</string>
     <string name="calendar_computer_email">E-post…</string>
     <string name="calendar_computer_email_subject">Liitu Church Presenteri kalendriga</string>
-    <string name="calendar_computer_email_body">Ava teises arvutis Church Presenter → Seaded → Server → Kalender telefonides ja tahvelarvutites → Liitu teisega… ja kleebi see kood:\n\n%1$s\n\nSee töötab üks kord, 24 tundi. Palun ära edasta seda e-kirja.</string>
+    <string name="calendar_computer_email_body">Ava teises arvutis Church Presenter → Seaded → Server → Kalendri sünkroonimine → Liitu teisega… ja kleebi see kood:\n\n%1$s\n\nSee töötab üks kord, 24 tundi. Palun ära edasta seda e-kirja.</string>
     <string name="calendar_join_title">Liitu teise kalendriga</string>
     <string name="calendar_join_body">Kleebi peaarvuti kood või ava selle salvestatud fail.</string>
     <string name="calendar_join_code">Liitumiskood</string>
@@ -2316,6 +2316,8 @@
     <string name="calendar_join_expired">See kood on aegunud. Küsi peaarvutilt uus.</string>
     <string name="calendar_join_replaces">Sellega seotud telefonid lõpetavad samuti sünkroonimise ja sa planeerid edaspidi peaarvuti kalendris.</string>
     <string name="calendar_join_failed">Liitumine ebaõnnestus. Kontrolli koodi ja internetiühendust.</string>
+    <string name="calendar_sync_card_title">Kalendri sünkroonimine</string>
+    <string name="calendar_sync_description_computers">Planeeri teenistusi telefonidest, tahvelarvutitest ja teistest arvutitest terve nädala, ka siis, kui see arvuti on välja lülitatud. See arvuti jääb tõe allikaks.</string>
     <string name="calendar_sync_pill_off">Väljas</string>
     <string name="calendar_sync_pill_offline">Võrguühenduseta</string>
     <string name="calendar_sync_pill_unpaired">Pole registreeritud</string>

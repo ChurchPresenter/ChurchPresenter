@@ -98,7 +98,7 @@ class ServerUiStatesTest {
                 endpoints = RelayEndpoints("https://relay.example", "https://relay.example/key"),
             )
             serverTab(calendarSync = sync, builtInRelayUrl = "https://relay.built-in") { _, _ ->
-                onNodeWithText("Calendar on phones & tablets").performScrollTo().assertExists()
+                onNodeWithText("Calendar sync").performScrollTo().assertExists()
             }
         } finally {
             folder.deleteRecursively()

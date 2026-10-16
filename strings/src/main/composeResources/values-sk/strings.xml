@@ -2295,14 +2295,14 @@
     <string name="calendar_computer_add_viewer">Iba na čítanie</string>
     <string name="calendar_computer_add_create">Vytvoriť kód na pripojenie</string>
     <string name="calendar_computer_add_failed">Počítač sa nepodarilo pridať.</string>
-    <string name="calendar_computer_join_ready">Na druhom počítači otvorte Nastavenia → Kalendár na telefónoch a tabletoch → Pripojiť sa k inému… a vložte tento kód. Ktokoľvek, kto ho má, môže čítať kalendár, preto ho pošlite priamo danej osobe.</string>
+    <string name="calendar_computer_join_ready">Na druhom počítači otvorte Nastavenia → Synchronizácia kalendára → Pripojiť sa k inému… a vložte tento kód. Ktokoľvek, kto ho má, môže čítať kalendár, preto ho pošlite priamo danej osobe.</string>
     <string name="calendar_computer_save_file">Uložiť ako súbor…</string>
     <string name="calendar_computer_saved">Uložené do %1$s</string>
     <string name="calendar_computer_copy_code">Kopírovať kód</string>
     <string name="calendar_computer_copied">Skopírované</string>
     <string name="calendar_computer_email">E-mail…</string>
     <string name="calendar_computer_email_subject">Pripojte sa ku kalendáru Church Presenter</string>
-    <string name="calendar_computer_email_body">Na druhom počítači otvorte Church Presenter → Nastavenia → Server → Kalendár na telefónoch a tabletoch → Pripojiť sa k inému… a vložte tento kód:\n\n%1$s\n\nFunguje raz, počas 24 hodín. Tento e-mail prosím nepreposielajte.</string>
+    <string name="calendar_computer_email_body">Na druhom počítači otvorte Church Presenter → Nastavenia → Server → Synchronizácia kalendára → Pripojiť sa k inému… a vložte tento kód:\n\n%1$s\n\nFunguje raz, počas 24 hodín. Tento e-mail prosím nepreposielajte.</string>
     <string name="calendar_join_title">Pripojiť sa k inému kalendáru</string>
     <string name="calendar_join_body">Vložte kód z hlavného počítača alebo otvorte súbor, ktorý uložil.</string>
     <string name="calendar_join_code">Kód na pripojenie</string>
@@ -2313,6 +2313,8 @@
     <string name="calendar_join_expired">Platnosť kódu vypršala. Požiadajte hlavný počítač o nový.</string>
     <string name="calendar_join_replaces">Telefóny spárované s ním tiež prestanú synchronizovať a plánovať budete z kalendára hlavného počítača.</string>
     <string name="calendar_join_failed">Pripojenie zlyhalo. Skontrolujte kód a internetové pripojenie.</string>
+    <string name="calendar_sync_card_title">Synchronizácia kalendára</string>
+    <string name="calendar_sync_description_computers">Plánujte bohoslužby z telefónov, tabletov a ďalších počítačov celý týždeň, aj keď je tento počítač vypnutý. Tento počítač zostáva zdrojom pravdy.</string>
     <string name="calendar_sync_pill_off">Vypnuté</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Nezaregistrované</string>

@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Tikai skatīšana</string>
     <string name="calendar_computer_add_create">Izveidot pievienošanās kodu</string>
     <string name="calendar_computer_add_failed">Neizdevās pievienot datoru.</string>
-    <string name="calendar_computer_join_ready">Otrā datorā atveriet Iestatījumi → Kalendārs tālruņos un planšetdatoros → Pievienoties citam… un ielīmējiet šo kodu. Ikviens, kam tas ir, var lasīt kalendāru, tāpēc sūtiet to tieši attiecīgajai personai.</string>
+    <string name="calendar_computer_join_ready">Otrā datorā atveriet Iestatījumi → Kalendāra sinhronizācija → Pievienoties citam… un ielīmējiet šo kodu. Ikviens, kam tas ir, var lasīt kalendāru, tāpēc sūtiet to tieši attiecīgajai personai.</string>
     <string name="calendar_computer_save_file">Saglabāt kā failu…</string>
     <string name="calendar_computer_saved">Saglabāts: %1$s</string>
     <string name="calendar_computer_copy_code">Kopēt kodu</string>
     <string name="calendar_computer_copied">Nokopēts</string>
     <string name="calendar_computer_email">E-pasts…</string>
     <string name="calendar_computer_email_subject">Pievienojieties Church Presenter kalendāram</string>
-    <string name="calendar_computer_email_body">Otrā datorā atveriet Church Presenter → Iestatījumi → Serveris → Kalendārs tālruņos un planšetdatoros → Pievienoties citam… un ielīmējiet šo kodu:\n\n%1$s\n\nTas darbojas vienu reizi, 24 stundas. Lūdzu, nepārsūtiet šo e-pastu.</string>
+    <string name="calendar_computer_email_body">Otrā datorā atveriet Church Presenter → Iestatījumi → Serveris → Kalendāra sinhronizācija → Pievienoties citam… un ielīmējiet šo kodu:\n\n%1$s\n\nTas darbojas vienu reizi, 24 stundas. Lūdzu, nepārsūtiet šo e-pastu.</string>
     <string name="calendar_join_title">Pievienoties citam kalendāram</string>
     <string name="calendar_join_body">Ielīmējiet kodu no galvenā datora vai atveriet tā saglabāto failu.</string>
     <string name="calendar_join_code">Pievienošanās kods</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Šī koda derīgums ir beidzies. Palūdziet galvenajam datoram jaunu.</string>
     <string name="calendar_join_replaces">Ar to savienotie tālruņi arī pārtrauks sinhronizāciju, un jūs plānosiet galvenā datora kalendārā.</string>
     <string name="calendar_join_failed">Neizdevās pievienoties. Pārbaudiet kodu un interneta savienojumu.</string>
+    <string name="calendar_sync_card_title">Kalendāra sinhronizācija</string>
+    <string name="calendar_sync_description_computers">Plānojiet dievkalpojumus no tālruņiem, planšetdatoriem un citiem datoriem visu nedēļu, pat kad šis dators ir izslēgts. Šis dators paliek galvenais avots.</string>
     <string name="calendar_sync_pill_off">Izslēgts</string>
     <string name="calendar_sync_pill_offline">Bezsaistē</string>
     <string name="calendar_sync_pill_unpaired">Nav reģistrēts</string>

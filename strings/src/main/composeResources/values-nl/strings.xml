@@ -2293,14 +2293,14 @@
     <string name="calendar_computer_add_viewer">Alleen bekijken</string>
     <string name="calendar_computer_add_create">Deelnamecode maken</string>
     <string name="calendar_computer_add_failed">Kan de computer niet toevoegen.</string>
-    <string name="calendar_computer_join_ready">Open op de andere computer Instellingen → Kalender op telefoons &amp; tablets → Aansluiten bij een andere… en plak deze code. Iedereen met de code kan de kalender lezen, dus stuur hem rechtstreeks naar de persoon.</string>
+    <string name="calendar_computer_join_ready">Open op de andere computer Instellingen → Kalendersynchronisatie → Aansluiten bij een andere… en plak deze code. Iedereen met de code kan de kalender lezen, dus stuur hem rechtstreeks naar de persoon.</string>
     <string name="calendar_computer_save_file">Opslaan als bestand…</string>
     <string name="calendar_computer_saved">Opgeslagen in %1$s</string>
     <string name="calendar_computer_copy_code">Code kopiëren</string>
     <string name="calendar_computer_copied">Gekopieerd</string>
     <string name="calendar_computer_email">E-mail…</string>
     <string name="calendar_computer_email_subject">Sluit je aan bij de Church Presenter-kalender</string>
-    <string name="calendar_computer_email_body">Open op de andere computer Church Presenter → Instellingen → Server → Kalender op telefoons &amp; tablets → Aansluiten bij een andere… en plak deze code:\n\n%1$s\n\nHij werkt één keer, 24 uur lang. Stuur deze e-mail niet door.</string>
+    <string name="calendar_computer_email_body">Open op de andere computer Church Presenter → Instellingen → Server → Kalendersynchronisatie → Aansluiten bij een andere… en plak deze code:\n\n%1$s\n\nHij werkt één keer, 24 uur lang. Stuur deze e-mail niet door.</string>
     <string name="calendar_join_title">Aansluiten bij een andere kalender</string>
     <string name="calendar_join_body">Plak de code van de hoofdcomputer of open het bestand dat die heeft opgeslagen.</string>
     <string name="calendar_join_code">Deelnamecode</string>
@@ -2311,6 +2311,8 @@
     <string name="calendar_join_expired">Die code is verlopen. Vraag de hoofdcomputer om een nieuwe.</string>
     <string name="calendar_join_replaces">Telefoons die eraan gekoppeld zijn stoppen ook met synchroniseren, en je plant voortaan in de kalender van de hoofdcomputer.</string>
     <string name="calendar_join_failed">Aansluiten mislukt. Controleer de code en de internetverbinding.</string>
+    <string name="calendar_sync_card_title">Kalendersynchronisatie</string>
+    <string name="calendar_sync_description_computers">Plan de hele week diensten vanaf telefoons, tablets en andere computers, ook als deze computer uit staat. Deze computer blijft de bron van waarheid.</string>
     <string name="calendar_sync_pill_off">Uit</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Niet geregistreerd</string>

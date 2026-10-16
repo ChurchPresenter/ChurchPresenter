@@ -52,6 +52,7 @@ import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.calendar_sync_connection_details
 import org.churchpresenter.strings.generated.resources.calendar_sync_description
+import org.churchpresenter.strings.generated.resources.calendar_sync_description_computers
 import org.churchpresenter.strings.generated.resources.calendar_sync_devices_hint
 import org.churchpresenter.strings.generated.resources.calendar_sync_enable
 import org.churchpresenter.strings.generated.resources.calendar_sync_instance
@@ -64,7 +65,7 @@ import org.churchpresenter.strings.generated.resources.calendar_sync_revoke
 import org.churchpresenter.strings.generated.resources.calendar_sync_start_over
 import org.churchpresenter.strings.generated.resources.calendar_sync_status_syncing
 import org.churchpresenter.strings.generated.resources.calendar_sync_sync_now
-import org.churchpresenter.strings.generated.resources.calendar_sync_title
+import org.churchpresenter.strings.generated.resources.calendar_sync_card_title
 import org.churchpresenter.strings.generated.resources.calendar_sync_unpair_available_on
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.GhostButton
@@ -190,7 +191,13 @@ internal fun CalendarSyncCardContent(
             .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = if (current.enabled) 18.dp else 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        CardHeader(enabled = current.enabled, status = status, clock = clock, onEnabledChange = setEnabled)
+        CardHeader(
+            enabled = current.enabled,
+            status = status,
+            clock = clock,
+            computers = computerActions != null,
+            onEnabledChange = setEnabled,
+        )
         if (current.enabled) {
             StatusBanner(status, onRetry = onSyncNow)
             if (current.isJoined) {
@@ -242,6 +249,8 @@ private fun CardHeader(
     enabled: Boolean,
     status: CalendarSyncStatus,
     clock: LocalTimeText,
+    /** Other computers can join -- dev mode, for now -- so the description names them too. */
+    computers: Boolean,
     onEnabledChange: (Boolean) -> Unit,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -249,14 +258,20 @@ private fun CardHeader(
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    stringResource(Res.string.calendar_sync_title),
+                    stringResource(Res.string.calendar_sync_card_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
                 StatusPill(enabled, status, clock)
             }
             Text(
-                text = stringResource(Res.string.calendar_sync_description),
+                text = stringResource(
+                    if (computers) {
+                        Res.string.calendar_sync_description_computers
+                    } else {
+                        Res.string.calendar_sync_description
+                    },
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

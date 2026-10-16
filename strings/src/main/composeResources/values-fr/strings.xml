@@ -2293,14 +2293,14 @@
     <string name="calendar_computer_add_viewer">Lecture seule</string>
     <string name="calendar_computer_add_create">Créer un code d’accès</string>
     <string name="calendar_computer_add_failed">Impossible d’ajouter l’ordinateur.</string>
-    <string name="calendar_computer_join_ready">Sur l’autre ordinateur, ouvrez Paramètres → Calendrier sur téléphones &amp; tablettes → Rejoindre un autre… et collez ce code. Toute personne qui l’a peut lire le calendrier : envoyez-le directement à la personne concernée.</string>
+    <string name="calendar_computer_join_ready">Sur l’autre ordinateur, ouvrez Paramètres → Synchronisation du calendrier → Rejoindre un autre… et collez ce code. Toute personne qui l’a peut lire le calendrier : envoyez-le directement à la personne concernée.</string>
     <string name="calendar_computer_save_file">Enregistrer comme fichier…</string>
     <string name="calendar_computer_saved">Enregistré dans %1$s</string>
     <string name="calendar_computer_copy_code">Copier le code</string>
     <string name="calendar_computer_copied">Copié</string>
     <string name="calendar_computer_email">E-mail…</string>
     <string name="calendar_computer_email_subject">Rejoindre le calendrier Church Presenter</string>
-    <string name="calendar_computer_email_body">Sur l’autre ordinateur, ouvrez Church Presenter → Paramètres → Serveur → Calendrier sur téléphones &amp; tablettes → Rejoindre un autre…, puis collez ce code :\n\n%1$s\n\nIl fonctionne une seule fois, pendant 24 heures. Merci de ne pas transférer cet e-mail.</string>
+    <string name="calendar_computer_email_body">Sur l’autre ordinateur, ouvrez Church Presenter → Paramètres → Serveur → Synchronisation du calendrier → Rejoindre un autre…, puis collez ce code :\n\n%1$s\n\nIl fonctionne une seule fois, pendant 24 heures. Merci de ne pas transférer cet e-mail.</string>
     <string name="calendar_join_title">Rejoindre un autre calendrier</string>
     <string name="calendar_join_body">Collez le code de l’ordinateur principal ou ouvrez le fichier qu’il a enregistré.</string>
     <string name="calendar_join_code">Code d’accès</string>
@@ -2311,6 +2311,8 @@
     <string name="calendar_join_expired">Ce code a expiré. Demandez-en un nouveau à l’ordinateur principal.</string>
     <string name="calendar_join_replaces">Les téléphones associés à cet ordinateur cesseront aussi de se synchroniser, et vous planifierez depuis le calendrier de l’ordinateur principal.</string>
     <string name="calendar_join_failed">Impossible de rejoindre. Vérifiez le code et la connexion Internet.</string>
+    <string name="calendar_sync_card_title">Synchronisation du calendrier</string>
+    <string name="calendar_sync_description_computers">Planifiez les services depuis des téléphones, des tablettes et d’autres ordinateurs toute la semaine, même lorsque cet ordinateur est éteint. Cet ordinateur reste la source de référence.</string>
     <string name="calendar_sync_pill_off">Désactivé</string>
     <string name="calendar_sync_pill_offline">Hors ligne</string>
     <string name="calendar_sync_pill_unpaired">Non enregistré</string>

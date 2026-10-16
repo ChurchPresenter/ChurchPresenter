@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">Endast visning</string>
     <string name="calendar_computer_add_create">Skapa anslutningskod</string>
     <string name="calendar_computer_add_failed">Det gick inte att lägga till datorn.</string>
-    <string name="calendar_computer_join_ready">Öppna Inställningar → Kalender på telefoner &amp; surfplattor → Anslut till en annan… på den andra datorn och klistra in den här koden. Alla som har den kan läsa kalendern, så skicka den direkt till personen.</string>
+    <string name="calendar_computer_join_ready">Öppna Inställningar → Kalendersynkronisering → Anslut till en annan… på den andra datorn och klistra in den här koden. Alla som har den kan läsa kalendern, så skicka den direkt till personen.</string>
     <string name="calendar_computer_save_file">Spara som fil…</string>
     <string name="calendar_computer_saved">Sparad i %1$s</string>
     <string name="calendar_computer_copy_code">Kopiera kod</string>
     <string name="calendar_computer_copied">Kopierad</string>
     <string name="calendar_computer_email">E-post…</string>
     <string name="calendar_computer_email_subject">Anslut till Church Presenter-kalendern</string>
-    <string name="calendar_computer_email_body">Öppna Church Presenter → Inställningar → Server → Kalender på telefoner &amp; surfplattor → Anslut till en annan… på den andra datorn och klistra in den här koden:\n\n%1$s\n\nDen fungerar en gång, i 24 timmar. Vidarebefordra inte det här mejlet.</string>
+    <string name="calendar_computer_email_body">Öppna Church Presenter → Inställningar → Server → Kalendersynkronisering → Anslut till en annan… på den andra datorn och klistra in den här koden:\n\n%1$s\n\nDen fungerar en gång, i 24 timmar. Vidarebefordra inte det här mejlet.</string>
     <string name="calendar_join_title">Anslut till en annan kalender</string>
     <string name="calendar_join_body">Klistra in koden från huvuddatorn eller öppna filen den sparade.</string>
     <string name="calendar_join_code">Anslutningskod</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">Koden har gått ut. Be huvuddatorn om en ny.</string>
     <string name="calendar_join_replaces">Telefoner som är ihopparade med den slutar också synkronisera, och du planerar i huvuddatorns kalender i stället.</string>
     <string name="calendar_join_failed">Det gick inte att ansluta. Kontrollera koden och internetanslutningen.</string>
+    <string name="calendar_sync_card_title">Kalendersynkronisering</string>
+    <string name="calendar_sync_description_computers">Planera gudstjänster från telefoner, surfplattor och andra datorer hela veckan, även när den här datorn är av. Den här datorn förblir den sanna källan.</string>
     <string name="calendar_sync_pill_off">Av</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Inte registrerad</string>

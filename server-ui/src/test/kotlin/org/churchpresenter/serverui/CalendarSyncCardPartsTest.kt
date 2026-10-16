@@ -297,6 +297,32 @@ class CalendarSyncCardPartsTest {
     }
 
     @Test
+    fun `the description names other computers only where they can join`() = runComposeUiTest {
+        var dev by mutableStateOf(false)
+        setContent {
+            MaterialTheme {
+                CalendarSyncCardContent(
+                    settings = AppSettings(calendarSync = main),
+                    onSettingsChange = {},
+                    status = CalendarSyncStatus.Off,
+                    devices = emptyList(),
+                    labelFor = { "" },
+                    onSyncNow = {},
+                    onUnpair = {},
+                    onRevoke = {},
+                    now = now,
+                    computerActions = if (dev) ComputerActions(emptyList(), {}, {}, {}, {}, {}) else null,
+                )
+            }
+        }
+        onNodeWithText("Calendar sync").assertExists()
+        onNodeWithText("Plan services from the mobile app", substring = true).assertExists()
+        dev = true
+        waitForIdle()
+        onNodeWithText("Plan services from phones, tablets and other computers", substring = true).assertExists()
+    }
+
+    @Test
     fun `out of dev mode a joined computer shows only the status`() = runComposeUiTest {
         card(follower, CalendarSyncStatus.Syncing, Calls(), multiComputer = false)
         onNodeWithText("Leave").assertDoesNotExist()

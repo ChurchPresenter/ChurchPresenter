@@ -2310,14 +2310,14 @@
     <string name="calendar_computer_add_viewer">فقط مشاهده</string>
     <string name="calendar_computer_add_create">ساخت کد پیوستن</string>
     <string name="calendar_computer_add_failed">افزودن رایانه ممکن نشد.</string>
-    <string name="calendar_computer_join_ready">در رایانهٔ دیگر، تنظیمات ← تقویم روی تلفن‌ها و تبلت‌ها ← پیوستن به دیگری… را باز کنید و این کد را جای‌گذاری کنید. هر کسی که آن را داشته باشد می‌تواند تقویم را بخواند، پس آن را مستقیم برای همان شخص بفرستید.</string>
+    <string name="calendar_computer_join_ready">در رایانهٔ دیگر، تنظیمات ← همگام‌سازی تقویم ← پیوستن به دیگری… را باز کنید و این کد را جای‌گذاری کنید. هر کسی که آن را داشته باشد می‌تواند تقویم را بخواند، پس آن را مستقیم برای همان شخص بفرستید.</string>
     <string name="calendar_computer_save_file">ذخیره به‌صورت فایل…</string>
     <string name="calendar_computer_saved">در %1$s ذخیره شد</string>
     <string name="calendar_computer_copy_code">کپی کد</string>
     <string name="calendar_computer_copied">کپی شد</string>
     <string name="calendar_computer_email">ایمیل…</string>
     <string name="calendar_computer_email_subject">به تقویم Church Presenter بپیوندید</string>
-    <string name="calendar_computer_email_body">در رایانهٔ دیگر، Church Presenter ← تنظیمات ← سرور ← تقویم روی تلفن‌ها و تبلت‌ها ← پیوستن به دیگری… را باز کنید و این کد را جای‌گذاری کنید:\n\n%1$s\n\nفقط یک بار و تا ۲۴ ساعت کار می‌کند. لطفاً این ایمیل را برای دیگران نفرستید.</string>
+    <string name="calendar_computer_email_body">در رایانهٔ دیگر، Church Presenter ← تنظیمات ← سرور ← همگام‌سازی تقویم ← پیوستن به دیگری… را باز کنید و این کد را جای‌گذاری کنید:\n\n%1$s\n\nفقط یک بار و تا ۲۴ ساعت کار می‌کند. لطفاً این ایمیل را برای دیگران نفرستید.</string>
     <string name="calendar_join_title">پیوستن به تقویم دیگر</string>
     <string name="calendar_join_body">کد رایانهٔ اصلی را جای‌گذاری کنید یا فایلی را که ذخیره کرده باز کنید.</string>
     <string name="calendar_join_code">کد پیوستن</string>
@@ -2328,6 +2328,8 @@
     <string name="calendar_join_expired">این کد منقضی شده است. از رایانهٔ اصلی کد جدیدی بخواهید.</string>
     <string name="calendar_join_replaces">تلفن‌هایی که با آن جفت شده‌اند نیز همگام‌سازی را متوقف می‌کنند و به‌جای آن از تقویم رایانهٔ اصلی برنامه‌ریزی می‌کنید.</string>
     <string name="calendar_join_failed">پیوستن ممکن نشد. کد و اتصال اینترنت را بررسی کنید.</string>
+    <string name="calendar_sync_card_title">همگام‌سازی تقویم</string>
+    <string name="calendar_sync_description_computers">خدمات را در تمام هفته از تلفن‌ها، تبلت‌ها و رایانه‌های دیگر برنامه‌ریزی کنید، حتی وقتی این رایانه خاموش است. این رایانه منبع اصلی باقی می‌ماند.</string>
     <string name="calendar_sync_pill_off">خاموش</string>
     <string name="calendar_sync_pill_offline">آفلاین</string>
     <string name="calendar_sync_pill_unpaired">ثبت‌نشده</string>

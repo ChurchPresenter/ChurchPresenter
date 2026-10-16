@@ -2266,14 +2266,14 @@
     <string name="calendar_computer_add_viewer">Nur ansehen</string>
     <string name="calendar_computer_add_create">Beitrittscode erstellen</string>
     <string name="calendar_computer_add_failed">Der Computer konnte nicht hinzugefügt werden.</string>
-    <string name="calendar_computer_join_ready">Öffne auf dem anderen Computer Einstellungen → Kalender auf Telefonen &amp; Tablets → Anderem beitreten… und füge diesen Code ein. Wer ihn hat, kann den Kalender lesen – schicke ihn also direkt an die Person.</string>
+    <string name="calendar_computer_join_ready">Öffne auf dem anderen Computer Einstellungen → Kalender-Synchronisierung → Anderem beitreten… und füge diesen Code ein. Wer ihn hat, kann den Kalender lesen – schicke ihn also direkt an die Person.</string>
     <string name="calendar_computer_save_file">Als Datei speichern…</string>
     <string name="calendar_computer_saved">Gespeichert unter %1$s</string>
     <string name="calendar_computer_copy_code">Code kopieren</string>
     <string name="calendar_computer_copied">Kopiert</string>
     <string name="calendar_computer_email">E-Mail…</string>
     <string name="calendar_computer_email_subject">Dem Church Presenter-Kalender beitreten</string>
-    <string name="calendar_computer_email_body">Öffne auf dem anderen Computer Church Presenter → Einstellungen → Server → Kalender auf Telefonen &amp; Tablets → Anderem beitreten… und füge diesen Code ein:\n\n%1$s\n\nEr funktioniert einmal, 24 Stunden lang. Bitte leite diese E-Mail nicht weiter.</string>
+    <string name="calendar_computer_email_body">Öffne auf dem anderen Computer Church Presenter → Einstellungen → Server → Kalender-Synchronisierung → Anderem beitreten… und füge diesen Code ein:\n\n%1$s\n\nEr funktioniert einmal, 24 Stunden lang. Bitte leite diese E-Mail nicht weiter.</string>
     <string name="calendar_join_title">Einem anderen Kalender beitreten</string>
     <string name="calendar_join_body">Füge den Code vom Hauptcomputer ein oder öffne die Datei, die er gespeichert hat.</string>
     <string name="calendar_join_code">Beitrittscode</string>
@@ -2284,6 +2284,8 @@
     <string name="calendar_join_expired">Dieser Code ist abgelaufen. Bitte den Hauptcomputer um einen neuen.</string>
     <string name="calendar_join_replaces">Damit gekoppelte Telefone hören ebenfalls auf zu synchronisieren, und du planst stattdessen im Kalender des Hauptcomputers.</string>
     <string name="calendar_join_failed">Beitritt fehlgeschlagen. Prüfe den Code und die Internetverbindung.</string>
+    <string name="calendar_sync_card_title">Kalender-Synchronisierung</string>
+    <string name="calendar_sync_description_computers">Plane Gottesdienste die ganze Woche über von Telefonen, Tablets und anderen Computern aus, auch wenn dieser Computer aus ist. Dieser Computer bleibt die maßgebliche Quelle.</string>
     <string name="calendar_sync_pill_off">Aus</string>
     <string name="calendar_sync_pill_offline">Offline</string>
     <string name="calendar_sync_pill_unpaired">Nicht registriert</string>

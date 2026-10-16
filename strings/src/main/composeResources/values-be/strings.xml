@@ -2265,14 +2265,14 @@
     <string name="calendar_computer_add_viewer">Толькі прагляд</string>
     <string name="calendar_computer_add_create">Стварыць код далучэння</string>
     <string name="calendar_computer_add_failed">Не ўдалося дадаць камп’ютар.</string>
-    <string name="calendar_computer_join_ready">На іншым камп’ютары адкрыйце Налады → Каляндар на тэлефонах і планшэтах → Далучыцца да іншага… і ўстаўце гэты код. Любы, у каго ён ёсць, можа чытаць каляндар, таму адпраўце яго непасрэдна патрэбнаму чалавеку.</string>
+    <string name="calendar_computer_join_ready">На іншым камп’ютары адкрыйце Налады → Сінхранізацыя календара → Далучыцца да іншага… і ўстаўце гэты код. Любы, у каго ён ёсць, можа чытаць каляндар, таму адпраўце яго непасрэдна патрэбнаму чалавеку.</string>
     <string name="calendar_computer_save_file">Захаваць у файл…</string>
     <string name="calendar_computer_saved">Захавана ў %1$s</string>
     <string name="calendar_computer_copy_code">Капіяваць код</string>
     <string name="calendar_computer_copied">Скапіявана</string>
     <string name="calendar_computer_email">Эл. пошта…</string>
     <string name="calendar_computer_email_subject">Далучыцеся да календара Church Presenter</string>
-    <string name="calendar_computer_email_body">На іншым камп’ютары адкрыйце Church Presenter → Налады → Сервер → Каляндар на тэлефонах і планшэтах → Далучыцца да іншага… і ўстаўце гэты код:\n\n%1$s\n\nЁн дзейнічае адзін раз на працягу 24 гадзін. Калі ласка, не перасылайце гэты ліст.</string>
+    <string name="calendar_computer_email_body">На іншым камп’ютары адкрыйце Church Presenter → Налады → Сервер → Сінхранізацыя календара → Далучыцца да іншага… і ўстаўце гэты код:\n\n%1$s\n\nЁн дзейнічае адзін раз на працягу 24 гадзін. Калі ласка, не перасылайце гэты ліст.</string>
     <string name="calendar_join_title">Далучыцца да іншага календара</string>
     <string name="calendar_join_body">Устаўце код з асноўнага камп’ютара або адкрыйце захаваны ім файл.</string>
     <string name="calendar_join_code">Код далучэння</string>
@@ -2283,6 +2283,8 @@
     <string name="calendar_join_expired">Тэрмін дзеяння кода скончыўся. Папрасіце новы на асноўным камп’ютары.</string>
     <string name="calendar_join_replaces">Звязаныя з ім тэлефоны таксама спыняць сінхранізацыю, а планаваць вы будзеце ў календары асноўнага камп’ютара.</string>
     <string name="calendar_join_failed">Не ўдалося далучыцца. Праверце код і падключэнне да інтэрнэту.</string>
+    <string name="calendar_sync_card_title">Сінхранізацыя календара</string>
+    <string name="calendar_sync_description_computers">Плануйце служэнні з тэлефонаў, планшэтаў і іншых камп’ютараў увесь тыдзень, нават калі гэты камп’ютар выключаны. Гэты камп’ютар застаецца асноўнай крыніцай.</string>
     <string name="calendar_sync_pill_off">Выкл.</string>
     <string name="calendar_sync_pill_offline">Не ў сетцы</string>
     <string name="calendar_sync_pill_unpaired">Не зарэгістраваны</string>
