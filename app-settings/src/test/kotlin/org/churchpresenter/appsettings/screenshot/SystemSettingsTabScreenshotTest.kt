@@ -10,9 +10,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.runtime.CompositionLocalProvider
+import org.churchpresenter.appsettings.AutoStartChange
+import org.churchpresenter.appsettings.AutoStartManager
+import org.churchpresenter.appsettings.AutoStartSwitch
+import org.churchpresenter.appsettings.LocalAutoStart
 import org.churchpresenter.appsettings.LocalDefaultCalendarFolder
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
@@ -61,9 +67,10 @@ class SystemSettingsTabScreenshotTest {
         settings: AppSettings = AppSettings(),
         width: Int = WIDE_WIDTH,
         height: Int = WIDE_HEIGHT,
+        autoStart: AutoStartSwitch = AutoStartManager,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
-        systemSettingsTab(settings = settings, themeMode = mode, width = width, height = height) {
+        systemSettingsTab(settings, mode, width, height, autoStart) {
             drive()
             waitForIdle()
             captureTo(file)
@@ -114,6 +121,23 @@ class SystemSettingsTabScreenshotTest {
     @Test
     fun `with the tab spacing set to medium-large`() =
         shoot("tab_spacing_medium_large", settings = AppSettings(tabLabelMargin = TabLabelMargin.NORMAL_LARGE))
+
+    // ── Launch at login ─────────────────────────────────────────────────────────────────────────
+
+    /** Windows refused the change: the switch stays off and the row says why. */
+    @Test
+    fun `launch at login refused by Windows`() = shoot("launch_at_login_refused", autoStart = Refusing) {
+        onNodeWithText("Launch at login").performClick()
+        waitUntil(timeoutMillis = WAIT_MS) {
+            onAllNodesWithText("Windows blocked this change", substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    /** The OS stand-in for the refused shot: unregistered, and every change refused. */
+    private object Refusing : AutoStartSwitch {
+        override fun isEnabled() = false
+        override fun setEnabled(enabled: Boolean) = AutoStartChange.REFUSED
+    }
 
     // ── Folder states ───────────────────────────────────────────────────────────────────────────
 
@@ -183,6 +207,7 @@ class SystemSettingsTabScreenshotTest {
         themeMode: ThemeMode,
         width: Int = WIDE_WIDTH,
         height: Int = WIDE_HEIGHT,
+        autoStart: AutoStartSwitch = AutoStartManager,
         block: ComposeUiTest.() -> Unit,
     ) = runDesktopComposeUiTest(width = width, height = height) {
         setContent {
@@ -191,7 +216,10 @@ class SystemSettingsTabScreenshotTest {
                 // machine's app data folder — which under test lands inside the working copy, so the
                 // committed images carried the absolute path of whichever checkout recorded them and
                 // failed everywhere else. See `LocalDefaultCalendarFolder` (issue #617).
-                CompositionLocalProvider(LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER) {
+                CompositionLocalProvider(
+                    LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER,
+                    LocalAutoStart provides autoStart,
+                ) {
                     ChurchPresenterTheme(themeMode = themeMode) {
                         Surface(color = MaterialTheme.colorScheme.background) {
                             Box(Modifier.fillMaxSize()) {
@@ -210,6 +238,9 @@ class SystemSettingsTabScreenshotTest {
 
     private companion object {
         const val SECTION = "systemSettingsTab"
+
+        /** Only fails a capture whose state never arrives. */
+        const val WAIT_MS = 5_000L
 
         /**
          * Stands in for the machine's app data folder, which the Calendar row prints.
