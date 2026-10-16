@@ -38,6 +38,7 @@ import org.churchpresenter.strings.generated.resources.identify_screen
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.helperText
 import org.churchpresenter.sharedui.guide.SettingsPage
+import org.churchpresenter.sharedui.guide.WickPlace
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.strings.generated.resources.Res
@@ -51,8 +52,16 @@ import org.churchpresenter.strings.generated.resources.helper_tip_shortcut
 import org.churchpresenter.strings.generated.resources.helper_tip_tell_me
 import org.churchpresenter.strings.generated.resources.helper_tip_verse_typing
 
-/** A tip of the day, with what the helper can open to show it. */
-data class Tip(val text: HelperText, val action: HelperAction? = null)
+/**
+ * A tip of the day, with what the helper can open to show it. [tabs] are the main tabs it is about and
+ * [pages] the Settings pages; a tip with no tab is for the main window wherever it is.
+ */
+data class Tip(
+    val text: HelperText,
+    val action: HelperAction? = null,
+    val tabs: Set<Tabs> = emptySet(),
+    val pages: Set<SettingsPage> = emptySet(),
+)
 
 /** The shortcuts worth a tip — the everyday ones, not the whole list. */
 private val TIP_SHORTCUTS = listOf(
@@ -83,17 +92,30 @@ private val FEATURE_TIPS = listOf(
                 ),
             ),
         ),
+        pages = setOf(SettingsPage.PROJECTION),
     ),
     Tip(helperText(Res.string.helper_tip_quick_background)),
-    Tip(helperText(Res.string.helper_tip_profiles), HelperAction.OpenSettings(SettingsPage.PROFILES)),
-    Tip(helperText(Res.string.helper_tip_auto_fit)),
+    Tip(
+        helperText(Res.string.helper_tip_profiles), HelperAction.OpenSettings(SettingsPage.PROFILES),
+        pages = setOf(SettingsPage.PROFILES),
+    ),
+    Tip(helperText(Res.string.helper_tip_auto_fit), pages = setOf(SettingsPage.PROFILES)),
     Tip(helperText(Res.string.helper_tip_schedule_drag)),
-    Tip(helperText(Res.string.helper_tip_verse_typing)),
-    Tip(helperText(Res.string.helper_tip_remote), HelperAction.OpenSettings(SettingsPage.SERVER)),
+    Tip(helperText(Res.string.helper_tip_verse_typing), tabs = setOf(Tabs.BIBLE)),
+    Tip(
+        helperText(Res.string.helper_tip_remote), HelperAction.OpenSettings(SettingsPage.SERVER),
+        pages = setOf(SettingsPage.SERVER),
+    ),
     Tip(helperText(Res.string.helper_tip_calendar), HelperAction.OpenCalendar()),
     Tip(helperText(Res.string.helper_tip_presets), HelperAction.OpenCalendar()),
-    Tip(helperText(Res.string.helper_tip_lottie_background), HelperAction.OpenSettings(SettingsPage.BACKGROUND)),
-    Tip(helperText(Res.string.helper_tip_two_translations), HelperAction.OpenSettings(SettingsPage.PROFILES)),
+    Tip(
+        helperText(Res.string.helper_tip_lottie_background), HelperAction.OpenSettings(SettingsPage.BACKGROUND),
+        pages = setOf(SettingsPage.BACKGROUND, SettingsPage.PROFILES),
+    ),
+    Tip(
+        helperText(Res.string.helper_tip_two_translations), HelperAction.OpenSettings(SettingsPage.PROFILES),
+        tabs = setOf(Tabs.BIBLE, Tabs.SONGS), pages = setOf(SettingsPage.PROFILES),
+    ),
     // Shows where: the eye is on a thumbnail, so with no pictures yet the tour starts at choosing them.
     Tip(
         helperText(Res.string.helper_tip_hide_slides),
@@ -109,11 +131,15 @@ private val FEATURE_TIPS = listOf(
                 ),
             ),
         ),
+        tabs = setOf(Tabs.PICTURES, Tabs.PRESENTATION),
     ),
-    Tip(helperText(Res.string.helper_tip_song_features), HelperAction.SelectTab(Tabs.SONGS)),
-    Tip(helperText(Res.string.helper_tip_stt), HelperAction.SelectTab(Tabs.STT)),
-    Tip(helperText(Res.string.helper_tip_song_library), HelperAction.OpenSongLibrary()),
-    Tip(helperText(Res.string.helper_tip_compare_translations), HelperAction.OpenSongLibrary(compare = true)),
+    Tip(helperText(Res.string.helper_tip_song_features), HelperAction.SelectTab(Tabs.SONGS), tabs = setOf(Tabs.SONGS)),
+    Tip(helperText(Res.string.helper_tip_stt), HelperAction.SelectTab(Tabs.STT), tabs = setOf(Tabs.STT)),
+    Tip(helperText(Res.string.helper_tip_song_library), HelperAction.OpenSongLibrary(), tabs = setOf(Tabs.SONGS)),
+    Tip(
+        helperText(Res.string.helper_tip_compare_translations), HelperAction.OpenSongLibrary(compare = true),
+        tabs = setOf(Tabs.SONGS),
+    ),
     // Shows where: the song editor's Tempo, reached through the Songs tab and Edit Song.
     Tip(
         helperText(Res.string.helper_tip_metronome),
@@ -133,6 +159,7 @@ private val FEATURE_TIPS = listOf(
                 ),
             ),
         ),
+        tabs = setOf(Tabs.SONGS),
     ),
     // Shows where: the Q&A tab's sharing dialog, and its public access (the tunnel).
     Tip(
@@ -156,6 +183,7 @@ private val FEATURE_TIPS = listOf(
                 ),
             ),
         ),
+        tabs = setOf(Tabs.QA),
     ),
     Tip(helperText(Res.string.helper_tip_calendar_cues), HelperAction.OpenCalendar(CalendarTopic.AUTOMATE)),
     // Shows where: the sync switch on the Server page.
@@ -172,6 +200,7 @@ private val FEATURE_TIPS = listOf(
                 ),
             ),
         ),
+        pages = setOf(SettingsPage.SERVER),
     ),
 )
 
@@ -204,3 +233,18 @@ fun allTips(
 
 /** The tip at rotation position [index], wrapping round. */
 fun tipAt(tips: List<Tip>, index: Int): Tip? = if (tips.isEmpty()) null else tips[Math.floorMod(index, tips.size)]
+
+/**
+ * The tip to offer at [place]: the day's ([day]) moved on by [offset] steps. On a main tab the day's tip
+ * is one of that tab's own when it has any, and stepping goes on through the tips for anywhere in the
+ * main window; on a Settings page only that page's tips are offered, and in any other window none.
+ */
+fun tipFor(tips: List<Tip>, place: WickPlace, day: Int, offset: Int): Tip? = when (place) {
+    is WickPlace.Main -> {
+        val here = tips.filter { place.tab != null && place.tab in it.tabs }
+        val start = if (here.isEmpty()) day else Math.floorMod(day, here.size)
+        tipAt(here + tips.filter { it.tabs.isEmpty() }, start + offset)
+    }
+    is WickPlace.Settings -> tipAt(tips.filter { place.page != null && place.page in it.pages }, day + offset)
+    WickPlace.Other -> null
+}

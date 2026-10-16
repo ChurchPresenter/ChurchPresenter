@@ -88,7 +88,9 @@ import org.churchpresenter.helper.suggest.Suggestion
 import org.churchpresenter.helper.suggest.Tip
 import org.churchpresenter.helper.suggest.allTips
 import org.churchpresenter.helper.pack.WickPacks
-import org.churchpresenter.helper.suggest.tipAt
+import org.churchpresenter.helper.suggest.tipFor
+import org.churchpresenter.sharedui.guide.WickPlace
+import androidx.compose.runtime.SideEffect
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.helperDayOf
 import org.churchpresenter.settings.tipDue
@@ -125,6 +127,8 @@ class HelperInputs(
     val screens: List<HelperScreen>,
     val context: ResolveContext,
     val anythingLive: Boolean,
+    /** Where this lamp is, which picks the chips and tips it offers. */
+    val place: WickPlace = WickPlace.Main(null),
     val nowMillis: () -> Long = System::currentTimeMillis,
     /** Sends a chat the operator chose to share with the team; null leaves "Send this chat" out. */
     val onSendChat: ChatSender? = null,
@@ -152,9 +156,11 @@ fun HelperOverlay(
             idleLongEnough = true
         }
     }
-    val tipWaiting = idleLongEnough && inputs.settings.tipsEnabled && inputs.settings.tipDue(inputs.nowMillis())
-    val waiting = if (inputs.anythingLive) 0 else inputs.suggestions.size + if (tipWaiting) 1 else 0
+    SideEffect { state.place = inputs.place }
     val tip = todaysTip(state, inputs)
+    val tipWaiting = tip != null && idleLongEnough && inputs.settings.tipsEnabled &&
+        inputs.settings.tipDue(inputs.nowMillis())
+    val waiting = if (inputs.anythingLive) 0 else inputs.suggestions.size + if (tipWaiting) 1 else 0
     // Opening Wick, whatever the bubble then shows, is the day's tip having been offered.
     val open = {
         if (tipWaiting) inputs.onSettingsChange(inputs.settings.tipShown(inputs.nowMillis()))
@@ -238,7 +244,7 @@ private fun todaysTip(state: HelperState, inputs: HelperInputs): Tip? {
     // Today's tip stays today's once offered: the rotation moved on when it was, so step back one.
     val offeredToday = inputs.settings.lastTipDay == helperDayOf(inputs.nowMillis())
     val todaysIndex = inputs.settings.nextTipIndex - if (offeredToday) 1 else 0
-    return tipAt(tips, todaysIndex + state.tipOffset)
+    return tipFor(tips, inputs.place, todaysIndex, state.tipOffset)
 }
 
 private fun moodFor(reply: HelperReply): LampMood = when (reply) {
