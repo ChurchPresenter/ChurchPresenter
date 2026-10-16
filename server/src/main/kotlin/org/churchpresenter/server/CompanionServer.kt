@@ -51,9 +51,20 @@ import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.BackgroundSettings
+import org.churchpresenter.settings.SERVER_PORTS
 import org.churchpresenter.settings.utils.Constants
 
 private const val PORT_SCAN_RANGE = 40
+
+/**
+ * The ports [CompanionServer.start] tries, in order, for [requested]: it and the next few, never past
+ * the last port. A saved port no server can listen on -- one past 65535, which the port field let
+ * through -- starts from the default instead of throwing out of `ServerSocket` on the event thread.
+ */
+internal fun serverPortCandidates(requested: Int): IntRange {
+    val first = requested.takeIf { it in SERVER_PORTS } ?: Constants.SERVER_DEFAULT_PORT
+    return first..minOf(first + PORT_SCAN_RANGE - 1, SERVER_PORTS.last)
+}
 private const val WEBSOCKET_PING_PERIOD_MS = 10_000L
 private const val WEBSOCKET_TIMEOUT_MS = 20_000L
 private const val SHUTDOWN_GRACE_MS = 1_000L
@@ -577,11 +588,9 @@ class CompanionServer(
         }
     }
 
-    private fun findFreePort(startPort: Int): Int {
-        for (candidate in startPort until startPort + PORT_SCAN_RANGE) {
-            if (isPortFree(candidate)) return candidate
-        }
-        return startPort
+    private fun findFreePort(requested: Int): Int {
+        val candidates = serverPortCandidates(requested)
+        return candidates.firstOrNull(::isPortFree) ?: candidates.first
     }
 
     private fun isPortFree(port: Int): Boolean = try {

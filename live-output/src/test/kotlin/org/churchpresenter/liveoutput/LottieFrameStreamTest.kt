@@ -99,17 +99,30 @@ class LottieFrameStreamTest {
     }
 
     @Test
-    fun `exactly the 1 percent opaque threshold does not count as blank`() {
+    fun `a small lower third on a full HD frame is not blank`() {
+        // A 300x40 name strip near the bottom: about 0.6% of the frame, which the old check --
+        // under 1% of 500 strided samples visible -- called blank.
+        val width = 1920
+        val frame = IntArray(width * 1080) { transparent }
+        for (y in 960 until 1000) for (x in 100 until 400) frame[y * width + x] = opaqueRed
         val stream = LottieFrameStream(writeCacheFile(1, 1, emptyList()), newScope()) {}
-        val frame = IntArray(100) { transparent }
-        frame[0] = opaqueRed
+
         assertFalse(stream.isFrameBlank(frame))
     }
 
     @Test
-    fun `just under the threshold is blank`() {
+    fun `one visible pixel is enough`() {
         val stream = LottieFrameStream(writeCacheFile(1, 1, emptyList()), newScope()) {}
-        assertTrue(stream.isFrameBlank(IntArray(100) { transparent }))
+        val frame = IntArray(100) { transparent }
+        frame[57] = opaqueRed
+        assertFalse(stream.isFrameBlank(frame))
+    }
+
+    @Test
+    fun `pixels too faint to see still leave a frame blank`() {
+        val stream = LottieFrameStream(writeCacheFile(1, 1, emptyList()), newScope()) {}
+        val faint = 0x08FF0000
+        assertTrue(stream.isFrameBlank(IntArray(100) { faint }))
     }
 
     @Test
