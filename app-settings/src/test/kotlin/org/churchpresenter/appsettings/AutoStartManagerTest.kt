@@ -1,5 +1,8 @@
 package org.churchpresenter.appsettings
 
+import com.sun.jna.platform.win32.W32Errors
+import com.sun.jna.platform.win32.Win32Exception
+import com.sun.jna.platform.win32.WinError
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -18,6 +21,11 @@ import kotlin.test.assertTrue
  * Windows. Only the real registry binding itself stays uncovered — it can only run on Windows.
  */
 class AutoStartManagerTest {
+
+    private fun assertDone(change: AutoStartChange, message: String? = null) =
+        assertEquals(AutoStartChange.DONE, change, message)
+
+    private fun assertFailed(change: AutoStartChange) = assertEquals(AutoStartChange.FAILED, change)
 
     // AutoStartManager resolves its plist/desktop paths from user.home at call time. Isolate it to a
     // per-test temp dir so registering/unregistering — and the cleanup below — never touch, or delete,
@@ -58,8 +66,8 @@ class AutoStartManagerTest {
 
     @Test
     fun `enabling is refused when unsupported, rather than half-registering`() {
-        assertFalse(AutoStartManager.setEnabled(true), "must report failure, not silently do nothing")
-        assertFalse(AutoStartManager.setEnabled(false))
+        assertEquals(AutoStartChange.UNSUPPORTED, AutoStartManager.setEnabled(true), "says it did nothing")
+        assertEquals(AutoStartChange.UNSUPPORTED, AutoStartManager.setEnabled(false))
     }
 
     @Test
@@ -160,12 +168,12 @@ class AutoStartManagerTest {
         val exe = "/opt/ChurchPresenter/bin/ChurchPresenter"
         assertFalse(AutoStartManager.isEnabledFor(platform), "starts unregistered")
 
-        assertTrue(AutoStartManager.setEnabledFor(exe, platform, enabled = true), "register reports success")
+        assertDone(AutoStartManager.setEnabledFor(exe, platform, enabled = true), "register reports success")
         assertTrue(file.exists(), "registration writes the backing file")
         assertEquals(AutostartEntries.registrationContent(exe, platform), file.readText(), "writes the exact payload")
         assertTrue(AutoStartManager.isEnabledFor(platform), "now reported enabled")
 
-        assertTrue(AutoStartManager.setEnabledFor(exe, platform, enabled = false), "unregister reports success")
+        assertDone(AutoStartManager.setEnabledFor(exe, platform, enabled = false), "unregister reports success")
         assertFalse(file.exists(), "unregister removes the file")
         assertFalse(AutoStartManager.isEnabledFor(platform))
     }
@@ -204,12 +212,12 @@ class AutoStartManagerTest {
     }
 
     @Test
-    fun `a failed registration is swallowed into a false result, never thrown`() {
+    fun `a failed registration is swallowed into a FAILED result, never thrown`() {
         // A directory sitting at the plist's path makes writeText fail: register throws, the failure
-        // is reported and turns into false (the toggle stays off) instead of propagating to the UI.
+        // is reported and turns into FAILED (the toggle stays off) instead of propagating to the UI.
         macPlist.parentFile?.mkdirs()
         macPlist.mkdir()
-        assertFalse(AutoStartManager.setEnabledFor("/opt/CP/cp", AutoStartManager.Platform.MAC, enabled = true))
+        assertFailed(AutoStartManager.setEnabledFor("/opt/CP/cp", AutoStartManager.Platform.MAC, enabled = true))
     }
 
     @Test
@@ -230,11 +238,11 @@ class AutoStartManagerTest {
         val win = AutoStartManager.Platform.WINDOWS
 
         assertFalse(AutoStartManager.isEnabledFor(win, key))
-        assertTrue(AutoStartManager.setEnabledFor(exe, win, enabled = true, runKey = key))
+        assertDone(AutoStartManager.setEnabledFor(exe, win, enabled = true, runKey = key))
         assertEquals(AutostartEntries.windowsRunValue(exe), key.value, "writes the quoted launcher path")
         assertTrue(AutoStartManager.isEnabledFor(win, key))
 
-        assertTrue(AutoStartManager.setEnabledFor(exe, win, enabled = false, runKey = key))
+        assertDone(AutoStartManager.setEnabledFor(exe, win, enabled = false, runKey = key))
         assertNull(key.value, "unregister clears the value")
         assertFalse(AutoStartManager.isEnabledFor(win, key))
     }
@@ -242,7 +250,7 @@ class AutoStartManagerTest {
     @Test
     fun `on windows unregister is a no-op when nothing is registered`() {
         val key = FakeRunKey()
-        assertTrue(AutoStartManager.setEnabledFor(
+        assertDone(AutoStartManager.setEnabledFor(
             "C:\\CP.exe",
             AutoStartManager.Platform.WINDOWS,
             enabled = false,
@@ -290,7 +298,7 @@ class AutoStartManagerTest {
     @Test
     fun `setEnabledFor reports failure instead of crashing when the native library is broken`() {
         val key = ThrowingRunKey(UnsatisfiedLinkError("jnidispatch.dll missing"))
-        assertFalse(AutoStartManager.setEnabledFor(
+        assertFailed(AutoStartManager.setEnabledFor(
             "C:\\CP.exe",
             AutoStartManager.Platform.WINDOWS,
             enabled = true,
@@ -304,5 +312,55 @@ class AutoStartManagerTest {
         // Must return normally rather than throw — this runs on a background thread at startup
         // whose uncaught exception would otherwise take the whole app down.
         AutoStartManager.syncRegistrationFor("C:\\CP.exe", AutoStartManager.Platform.WINDOWS, key)
+    }
+
+    // ── Windows saying no ─────────────────────────────────────────────────────────
+
+    /** A Windows error with [code], built without the native call JNA makes to word its message. */
+    private class WindowsError(code: Int) : Win32Exception(code, W32Errors.HRESULT_FROM_WIN32(code), "error $code")
+
+    /**
+     * The crash-report folder under the test's own home, made as the app's start makes it: without
+     * it a report is dropped, and "nothing was reported" would hold whatever the code did.
+     */
+    private fun crashReportDir(): File = File(tempHome, ".churchpresenter/crash-reports").apply { mkdirs() }
+
+    /** Every crash report in [dir], as text. */
+    private fun reportsIn(dir: File): List<String> = dir.listFiles()?.map { it.readText() }.orEmpty()
+
+    @Test
+    fun `access denied on the Run key is a refusal, and stays out of the crash reports`() {
+        val reports = crashReportDir()
+        val key = ThrowingRunKey(WindowsError(WinError.ERROR_ACCESS_DENIED))
+
+        val change = AutoStartManager.setEnabledFor("C:\\CP.exe", AutoStartManager.Platform.WINDOWS, true, key)
+
+        assertEquals(AutoStartChange.REFUSED, change)
+        assertEquals(emptyList(), reportsIn(reports))
+    }
+
+    @Test
+    fun `any other Windows error is a failure, and is reported`() {
+        val reports = crashReportDir()
+        val key = ThrowingRunKey(WindowsError(WinError.ERROR_FILE_NOT_FOUND))
+
+        assertFailed(AutoStartManager.setEnabledFor("C:\\CP.exe", AutoStartManager.Platform.WINDOWS, true, key))
+        assertTrue(reportsIn(reports).any { "AutoStartManager.setEnabled(true)" in it }, "reported")
+    }
+
+    @Test
+    fun `a repair at startup that Windows refuses is not reported either`() {
+        val reports = crashReportDir()
+        // Registered from an old location, so the repair writes -- and the write is refused.
+        val key = object : AutoStartManager.WindowsRunKey {
+            override fun exists() = true
+            override fun read() = AutostartEntries.windowsRunValue("C:\\old\\CP.exe")
+            override fun write(value: String) = throw WindowsError(WinError.ERROR_ACCESS_DENIED)
+            override fun delete() = Unit
+        }
+
+        AutoStartManager.syncRegistrationFor("C:\\CP.exe", AutoStartManager.Platform.WINDOWS, key)
+
+        assertEquals(emptyList(), reportsIn(reports))
     }
 }

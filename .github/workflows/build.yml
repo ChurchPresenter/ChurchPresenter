@@ -702,6 +702,16 @@ jobs:
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
         run: ./gradlew :composeApp:signLinuxDeb
 
+      # The runner's Ubuntu names some libraries differently from 22.04 (libasound2t64, not
+      # libasound2), and jpackage writes the runner's names. Installing it on 22.04 here is what
+      # proves the .deb also accepts the old ones (issue #875).
+      - name: Install the .deb on Ubuntu 22.04
+        run: |
+          docker run --rm -e DEBIAN_FRONTEND=noninteractive \
+            -v "$PWD/composeApp/build/compose/binaries/main/deb:/deb:ro" \
+            ubuntu:22.04@sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401 \
+            bash -c 'apt-get update -qq && apt-get install -y -qq /deb/*.deb && dpkg -s "$(dpkg-deb -f /deb/*.deb Package)" | grep -E "^(Status|Depends):"'
+
       - name: Rename DEB (add DEBIAN-x64 label)
         run: |
           for f in composeApp/build/compose/binaries/main/deb/*.deb; do

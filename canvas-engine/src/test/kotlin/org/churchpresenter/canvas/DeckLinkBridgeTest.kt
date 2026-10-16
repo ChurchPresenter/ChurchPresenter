@@ -16,63 +16,10 @@ import kotlin.test.assertTrue
 
 class DeckLinkBridgeTest {
 
-    /** A card that records what it was asked and answers from what the test set. */
-    private class FakeCard : DeckLinkNatives {
-        val calls = mutableListOf<String>()
-        var opens = true
-        var outputInfo = intArrayOf(1280, 720, 60000, 1001)
-        var inputAudio: ShortArray? = shortArrayOf(2, 2, 1, 2, 3, 4)
-        var fails = false
-
-        private fun <T> answer(call: String, value: T): T {
-            calls += call
-            if (fails) error("the card went away")
-            return value
-        }
-
-        override fun nativeListDevices() = answer("list", arrayOf("Mini Recorder", "Duo 2"))
-        override fun nativeOpen(deviceIndex: Int, width: Int, height: Int) =
-            answer("open $deviceIndex ${width}x$height", opens)
-        override fun nativeSendFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int) =
-            answer("send $deviceIndex ${width}x$height", Unit)
-        override fun nativeStartScheduledPlayback(deviceIndex: Int, fps: Double) =
-            answer("start $deviceIndex $fps", true)
-        override fun nativeScheduleFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int) =
-            answer("schedule $deviceIndex", Unit)
-        override fun nativeStopPlayback(deviceIndex: Int) = answer("stop $deviceIndex", Unit)
-        override fun nativeClose(deviceIndex: Int) = answer("close $deviceIndex", Unit)
-        override fun nativeGetOutputInfo(deviceIndex: Int) = answer("info $deviceIndex", outputInfo)
-        override fun nativeListInputModes(deviceIndex: Int) = answer("modes $deviceIndex", arrayOf("1080p30|Hp30"))
-        override fun nativeListVideoConnections(deviceIndex: Int) =
-            answer("conns $deviceIndex", arrayOf("SDI|1", "HDMI|2"))
-        override fun nativeOpenInput(deviceIndex: Int, mode: String, connection: Int) =
-            answer("openInput $deviceIndex $mode $connection", opens)
-        override fun nativeGetInputFrame(deviceIndex: Int) = answer("frame $deviceIndex", intArrayOf(1, 1, 7))
-        override fun nativeCloseInput(deviceIndex: Int) = answer("closeInput $deviceIndex", Unit)
-        override fun nativeGetDeviceStatus(deviceIndex: Int) = answer("status $deviceIndex", intArrayOf(1, 0, 42))
-        override fun nativeEnableAudioInput(deviceIndex: Int, channels: Int) =
-            answer("audioIn $deviceIndex $channels", true)
-        override fun nativeGetInputAudio(deviceIndex: Int) = answer("audio $deviceIndex", inputAudio)
-        override fun nativeEnableAudioOutput(deviceIndex: Int, channels: Int) =
-            answer("audioOut $deviceIndex $channels", true)
-        override fun nativeWriteAudioSamples(deviceIndex: Int, samples: ShortArray, sampleFrameCount: Int) =
-            answer("write $deviceIndex $sampleFrameCount", sampleFrameCount)
-        override fun nativeDisableAudioOutput(deviceIndex: Int) = answer("audioOff $deviceIndex", Unit)
-        override fun nativeEnableKeyer(deviceIndex: Int, isExternal: Boolean) =
-            answer("keyer $deviceIndex $isExternal", true)
-        override fun nativeSetKeyerLevel(deviceIndex: Int, level: Int) = answer("level $deviceIndex $level", Unit)
-        override fun nativeKeyerRampUp(deviceIndex: Int, frames: Int) = answer("up $deviceIndex $frames", Unit)
-        override fun nativeKeyerRampDown(deviceIndex: Int, frames: Int) = answer("down $deviceIndex $frames", Unit)
-        override fun nativeDisableKeyer(deviceIndex: Int) = answer("keyerOff $deviceIndex", Unit)
-        override fun nativeSetOutputConnection(deviceIndex: Int, connectionType: Int) =
-            answer("outConn $deviceIndex $connectionType", true)
-        override fun nativeListOutputConnections(deviceIndex: Int) = answer("outConns $deviceIndex", arrayOf("SDI|1"))
-    }
-
-    private val card = FakeCard()
+    private val card = FakeDeckLinkCard()
     private var loads = 0
-    private val bridge = DeckLinkBridge(card) { loads++; true }
-    private val absent = DeckLinkBridge(card) { false }
+    private val bridge = DeckLinkBridge(card, loadLibrary = { loads++; true }, settle = {})
+    private val absent = DeckLinkBridge(card, loadLibrary = { false })
 
     private lateinit var home: File
     private var realHome: String? = null

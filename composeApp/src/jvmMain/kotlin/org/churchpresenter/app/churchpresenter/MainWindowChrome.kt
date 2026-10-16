@@ -9,13 +9,13 @@ import org.churchpresenter.server.broadcastFreezeChange
 import org.churchpresenter.server.broadcastSlideChange
 import org.churchpresenter.server.clearPresentationState
 import org.churchpresenter.server.getImageFile
-import org.churchpresenter.server.updateBible
+import org.churchpresenter.server.publishBible
+import org.churchpresenter.server.publishSongs
 import org.churchpresenter.server.updateBibleFilePaths
 import org.churchpresenter.server.updatePictures
 import org.churchpresenter.server.updatePresentation
 import org.churchpresenter.server.updateSchedule
 import org.churchpresenter.server.updateSecondaryBibleFilePath
-import org.churchpresenter.server.updateSongs
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
@@ -250,13 +250,13 @@ private fun MainWindowScope.mainDesktopPublishers(): MainDesktopPublishers = wit
         onSongsLoaded = { songs ->
             helperSongCount = songs.size
             helperSongs = songs
-            companionServer.updateSongs(songs)
+            companionServer.publishSongs(songs)
         },
         onCurrentTabChange = { tab -> helperCurrentTab = tab },
         onScenesChanged = { scenes -> scenesForInstanceLink = scenes },
         onBibleLoaded = { bible, translation ->
             primaryBibleForInstanceLink = bible
-            companionServer.updateBible(
+            companionServer.publishBible(
                 bible,
                 translation,
                 filePath = bibleFilePath(

@@ -79,7 +79,7 @@ class DeckLinkManagerTest {
         DeckLinkManager.scheduleFrame(0, IntArray(0), 0, 0)
         DeckLinkManager.stopPlayback(0)
         DeckLinkManager.close(0)
-        DeckLinkManager.closeAllOutputs() // no devices ever opened — loop body never runs
+        // Not closeAllOutputs: it shuts this JVM's outputs for good. DeckLinkBridgeTest covers it over a fake card.
     }
 
     @Test

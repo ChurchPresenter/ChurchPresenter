@@ -82,31 +82,43 @@ fun ProjectionSettings.operatorProfile(): OutputProfile? {
 /**
  * The song settings the operator's window goes by -- see [operatorProfile].
  *
- * Remembered for the last document asked about: the main window asks on every recomposition, and
- * resolving decodes the whole section. Settings are immutable, so the same instance is the same answer.
+ * Remembered for the last song settings and profile asked about: the main window asks on every
+ * recomposition, and resolving decodes the whole section. Settings are immutable, so the same two
+ * instances are the same answer, whatever else in the document changed since.
  */
 fun AppSettings.operatorSongSettings(): SongSettings = operatorSongs.of(this)
 
 /** The Bible settings the operator's window goes by -- see [operatorProfile] and [operatorSongSettings]. */
 fun AppSettings.operatorBibleSettings(): BibleSettings = operatorBible.of(this)
 
-private val operatorSongs = LastResult { s: AppSettings ->
-    s.projectionSettings.operatorProfile()?.let { s.songSettingsFor(it) } ?: s.songSettings
-}
+private val operatorSongs = LastResult(
+    inputs = { s -> listOf(s.songSettings, s.projectionSettings.operatorProfile()) },
+) { s -> s.projectionSettings.operatorProfile()?.let { s.songSettingsFor(it) } ?: s.songSettings }
 
-private val operatorBible = LastResult { s: AppSettings ->
-    s.projectionSettings.operatorProfile()?.let { s.bibleSettingsFor(it) } ?: s.bibleSettings
-}
+private val operatorBible = LastResult(
+    inputs = { s -> listOf(s.bibleSettings, s.projectionSettings.operatorProfile()) },
+) { s -> s.projectionSettings.operatorProfile()?.let { s.bibleSettingsFor(it) } ?: s.bibleSettings }
 
-/** [compute]'s answer for the last [AppSettings] instance it was asked about. */
-private class LastResult<T>(private val compute: (AppSettings) -> T) {
-    @Volatile private var last: Pair<AppSettings, T>? = null
+/**
+ * [compute]'s answer for the last [inputs] it was asked about, compared by identity. [inputs] are
+ * the parts of the document the answer reads, so a change anywhere else -- a column width, a recent
+ * file -- does not decode the section again.
+ */
+private class LastResult<T>(
+    private val inputs: (AppSettings) -> List<Any?>,
+    private val compute: (AppSettings) -> T,
+) {
+    @Volatile private var last: Pair<List<Any?>, T>? = null
 
     fun of(settings: AppSettings): T {
-        last?.let { (key, value) -> if (key === settings) return value }
-        return compute(settings).also { last = settings to it }
+        val now = inputs(settings)
+        last?.let { (seen, value) -> if (sameInstances(seen, now)) return value }
+        return compute(settings).also { last = now to it }
     }
 }
+
+private fun sameInstances(a: List<Any?>, b: List<Any?>): Boolean =
+    a.size == b.size && a.indices.all { a[it] === b[it] }
 
 /**
  * The profile [assignment] follows, or `null` when its [ScreenAssignment.activeProfileId] names no

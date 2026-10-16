@@ -2,12 +2,22 @@
 
 package org.churchpresenter.liveoutput
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.canvas.FakeDeckLinkCard
+import org.churchpresenter.canvas.bridgeOver
+import org.churchpresenter.canvas.outputsOver
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.media.viewmodel.MediaViewModel
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class DeckLinkComposeOutputTest {
 
@@ -88,6 +98,47 @@ class DeckLinkComposeOutputTest {
         waitForIdle()
     }
 
+    @Test
+    fun `disposing the output returns while the card is still opening, and the close follows it`() = runComposeUiTest {
+        val card = FakeDeckLinkCard()
+        val reached = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        card.onOpen = {
+            reached.countDown()
+            release.await(WAIT_S, TimeUnit.SECONDS)
+        }
+        val worker = Executors.newSingleThreadExecutor()
+        try {
+            var mounted by mutableStateOf(true)
+            setContent {
+                if (mounted) {
+                    DeckLinkComposeOutput(
+                        deviceIndex = 0,
+                        outputRole = Constants.OUTPUT_ROLE_NORMAL,
+                        appSettings = AppSettings(),
+                        mediaViewModel = MediaViewModel(),
+                        outputs = outputsOver(bridgeOver(card), worker),
+                    ) {}
+                }
+            }
+            assertTrue(reached.await(WAIT_S, TimeUnit.SECONDS))
+
+            mounted = false
+            waitForIdle()
+
+            // The dispose is done, and the card is still held inside its open.
+            assertEquals(emptyList(), card.eventsNow())
+            release.countDown()
+            val drained = CountDownLatch(1)
+            worker.execute { drained.countDown() }
+            assertTrue(drained.await(WAIT_S, TimeUnit.SECONDS))
+            assertEquals(listOf("open 0", "black 0", "black 0", "black 0", "close 0"), card.eventsNow())
+        } finally {
+            release.countDown()
+            worker.shutdownNow()
+        }
+    }
+
     // ── skiaBgraToArgbPixels ──────────────────────────────────────────────────────────────────────
 
     @Test
@@ -140,5 +191,9 @@ class DeckLinkComposeOutputTest {
         skiaBgraToArgbPixels(bytes, pixels, 1)
         assertEquals(0xFF332211.toInt(), pixels[0])
         assertEquals(0, pixels[1])
+    }
+
+    private companion object {
+        const val WAIT_S = 5L
     }
 }
