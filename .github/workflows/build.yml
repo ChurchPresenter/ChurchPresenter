@@ -716,6 +716,9 @@ jobs:
             ubuntu:22.04@sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401 \
             bash -c '
               set -e
+              # The package'"'"'s post-install runs xdg-desktop-menu, which needs the menu directories
+              # every desktop has and a bare container lacks.
+              mkdir -p /etc/xdg/menus/applications-merged /usr/share/desktop-directories
               apt-get update -qq && apt-get install -y -qq /deb/*.deb
               dpkg -s "$(dpkg-deb -f /deb/*.deb Package)" | grep -E "^(Status|Depends|Recommends):"
               # Each Recommends entry (with its alternatives) must have one package installed.
