@@ -29,7 +29,7 @@ compose.desktop {
 // diagnostics for the language-switch freeze), `-PsmoothScroll=1` keeps Chromium's smooth scrolling on (off by default),
 // `-Prgba=1|0` keeps frames as RGBA or BGRA (RGBA by default on Linux only), `-PplainPreview=1` draws the preview from the full frame with plain bilinear, `-PnoOutput=1` opens the Preview alone,
 // `-PcefArgs="--disable-gpu"` adds Chromium switches. For the window side: `-PrenderApi=OPENGL|SOFTWARE_FAST|…`
-// picks skiko's renderer, `-Pvsync=false` turns its vsync off, and `-PglYield=USLEEP` sets NVIDIA's `__GL_YIELD`.
+// picks skiko's renderer, `-Pvsync=false|true` turns its vsync off or on (off by default on Linux only), and `-PglYield=USLEEP` sets NVIDIA's `__GL_YIELD`.
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
     listOf("url", "size", "fps", "scale", "logKeys", "noIme", "noSentPump", "smoothScroll", "plainPreview", "noOutput", "cefArgs", "rgba").forEach { key ->
         project.findProperty(key)?.let { systemProperty("osr.$key", it) }

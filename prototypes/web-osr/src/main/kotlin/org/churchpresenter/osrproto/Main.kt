@@ -159,6 +159,10 @@ fun main() {
         println("Uncaught on ${thread.name}:")
         e.printStackTrace(System.out)
     }
+    // On Linux skiko waits for the screen's refresh inside the buffer swap on the AWT event thread,
+    // which with windowless rendering is also Chromium's browser thread, so on video paints miss
+    // refreshes and both windows fall to about 55/s. `-Pvsync=true` turns it back on.
+    if (isLinux && System.getProperty("skiko.vsync.enabled") == null) System.setProperty("skiko.vsync.enabled", "false")
     val cfg = config()
     println("OSR prototype: ${cfg.width}x${cfg.height} px @ ${cfg.fps} fps, scale ${cfg.scale}, ${cfg.url}")
     val stats = Stats()
