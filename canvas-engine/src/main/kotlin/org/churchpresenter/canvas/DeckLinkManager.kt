@@ -13,9 +13,12 @@ import org.churchpresenter.canvas.DeckLinkManager.DeviceStatus
 import org.churchpresenter.canvas.DeckLinkManager.InputMode
 import org.churchpresenter.canvas.DeckLinkManager.OutputInfo
 import org.churchpresenter.canvas.DeckLinkManager.VideoConnection
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
-private const val OPEN_RETRY_ATTEMPTS = 3
-private const val OPEN_RETRY_DELAY_MS = 100L
+/** How many black frames an output is sent before it closes, and how long the card is given to show them. */
+private const val BLACK_FRAMES = 3
+private const val BLACK_SETTLE_MS = 100L
 private const val OUTPUT_INFO_FIELDS = 4
 private const val OUTPUT_INFO_FPS_NUM = 2
 private const val OUTPUT_INFO_FPS_DEN = 3
@@ -27,6 +30,12 @@ private const val DEVICE_STATUS_FIELDS = 3
  * call is a no-op. The logic is [DeckLinkBridge]'s, over the JNI entry points.
  */
 object DeckLinkManager : DeckLinkBridge(DeckLinkJni, ::loadDeckLinkLibrary) {
+
+    /** The outputs, opened and closed on a thread of their own -- see [DeckLinkOutputSessions]. */
+    val outputs = DeckLinkOutputSessions(
+        this,
+        Executors.newSingleThreadExecutor { Thread(it, "decklink-output").apply { isDaemon = true } },
+    )
 
     data class DeckLinkDevice(val index: Int, val name: String)
 
@@ -52,7 +61,12 @@ object DeckLinkManager : DeckLinkBridge(DeckLinkJni, ::loadDeckLinkLibrary) {
 
 /**
  * What [DeckLinkManager] does, over [natives] -- the JNI entry points in the app, a fake card in a
- * test -- and a library that [loadLibrary] loads once.
+ * test -- and a library that [loadLibrary] loads once. [settle] is the wait that lets the card show
+ * its black frames before an output closes.
+ *
+ * Opening, closing and blacking out an output hold that device's lock, as does a frame sent through
+ * a [DeckLinkOutputSession], so a close on the output thread and [closeAllOutputs] at exit never
+ * interleave on one device.
  *
  * Over detekt's function count on purpose: each JNI entry point has its wrapper here.
  */
@@ -60,11 +74,17 @@ object DeckLinkManager : DeckLinkBridge(DeckLinkJni, ::loadDeckLinkLibrary) {
 open class DeckLinkBridge internal constructor(
     private val natives: DeckLinkNatives,
     private val loadLibrary: () -> Boolean,
+    private val settle: () -> Unit = { Thread.sleep(BLACK_SETTLE_MS) },
 ) {
     private var available: Boolean? = null
-    private val outputDevices: MutableSet<Int> = java.util.concurrent.ConcurrentHashMap.newKeySet()
-    private val inputDevices: MutableSet<Int> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+    private val outputDevices: MutableSet<Int> = ConcurrentHashMap.newKeySet()
+    private val inputDevices: MutableSet<Int> = ConcurrentHashMap.newKeySet()
+    private val outputLocks = ConcurrentHashMap<Int, Any>()
     private var shutdownHookRegistered = false
+
+    /** Set by [closeAllOutputs]: the app is quitting, and no output opens again. */
+    @Volatile
+    private var shutDown = false
 
     // ── Public API ──────────────────────────────────────────────────────
 
@@ -86,18 +106,24 @@ open class DeckLinkBridge internal constructor(
 
     fun open(deviceIndex: Int, width: Int = 1920, height: Int = 1080): Boolean {
         if (!isAvailable()) return false
-        return try {
-            val result = natives.nativeOpen(deviceIndex, width, height)
-            if (result) {
-                outputDevices.add(deviceIndex)
-                registerShutdownHook()
-                UsageEvents.recordOncePerRun(UsageEvent.DECKLINK_OUTPUT)
+        return withOutputLock(deviceIndex) {
+            try {
+                val result = !shutDown && natives.nativeOpen(deviceIndex, width, height)
+                if (result) {
+                    outputDevices.add(deviceIndex)
+                    registerShutdownHook()
+                    UsageEvents.recordOncePerRun(UsageEvent.DECKLINK_OUTPUT)
+                }
+                result
+            } catch (_: Throwable) {
+                false
             }
-            result
-        } catch (_: Throwable) {
-            false
         }
     }
+
+    /** Runs [block] holding [deviceIndex]'s output lock. */
+    internal fun <T> withOutputLock(deviceIndex: Int, block: () -> T): T =
+        synchronized(outputLocks.computeIfAbsent(deviceIndex) { Any() }, block)
 
     private fun registerShutdownHook() {
         if (shutdownHookRegistered) return
@@ -107,22 +133,35 @@ open class DeckLinkBridge internal constructor(
         }
     }
 
-    /** Send black frames and close all open DeckLink outputs. */
+    /**
+     * Send black frames and close all open DeckLink outputs, for good. Every device ever locked is
+     * visited, so an open or a close in flight on the output thread is waited for -- the one closed
+     * here, the other not closed twice -- and one still waiting to open never does.
+     */
     fun closeAllOutputs() {
-        for (deviceIndex in outputDevices.toSet()) {
+        shutDown = true
+        for (deviceIndex in outputLocks.keys + outputDevices) blackOutAndClose(deviceIndex)
+    }
+
+    /**
+     * Sends [deviceIndex] black, gives the card [settle] to show it, and closes it -- if it is still
+     * open by the time its lock is held.
+     */
+    internal fun blackOutAndClose(deviceIndex: Int) = withOutputLock(deviceIndex) {
+        if (deviceIndex in outputDevices) {
             try {
                 val info = getOutputInfo(deviceIndex)
                 val w = info?.width ?: 1920
                 val h = info?.height ?: 1080
                 val blackPixels = IntArray(w * h)
-                repeat(OPEN_RETRY_ATTEMPTS) {
+                repeat(BLACK_FRAMES) {
                     natives.nativeSendFrame(deviceIndex, blackPixels, w, h)
                 }
-                Thread.sleep(OPEN_RETRY_DELAY_MS)
+                settle()
                 natives.nativeClose(deviceIndex)
             } catch (_: Throwable) {}
+            outputDevices.remove(deviceIndex)
         }
-        outputDevices.clear()
     }
 
     fun getOutputInfo(deviceIndex: Int): OutputInfo? {
@@ -172,11 +211,13 @@ open class DeckLinkBridge internal constructor(
 
     fun close(deviceIndex: Int) {
         if (!isAvailable()) return
-        try {
-            natives.nativeClose(deviceIndex)
-            outputDevices.remove(deviceIndex)
-        } catch (_: Throwable) {
-            // silently ignore
+        withOutputLock(deviceIndex) {
+            try {
+                natives.nativeClose(deviceIndex)
+                outputDevices.remove(deviceIndex)
+            } catch (_: Throwable) {
+                // silently ignore
+            }
         }
     }
 
