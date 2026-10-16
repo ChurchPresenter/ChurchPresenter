@@ -11,9 +11,11 @@ The Compose face of `:server`, which deliberately has no UI toolkit. It holds:
   in `~/.churchpresenter/remote_clients.json`;
 - the Companion triggers card (`CompanionTriggersCard`, `CompanionTriggerUrls.kt`): the URLs a
   Companion button calls for each lower third, the ATEM keys and the takedowns;
-- calendar sync's card (`CalendarSyncCard`) and its phone invite (`CalendarEnrollQrDialog`); the
-  other computers on one calendar (`CalendarComputersSection`, `CalendarComputerDialogs`), dev mode
-  only;
+- calendar sync's card (`CalendarSyncCard`, its status pill and banners in
+  `CalendarSyncStatusViews`) and its phone invite (`CalendarEnrollQrDialog`); the other computers on
+  one calendar (`CalendarComputersSection`, `CalendarComputerDialogs` in the `CalendarDialogFrame`
+  window), dev mode only. The card's and dialogs' shared pieces — icon chips, sub-cards, list rows,
+  banners, compact buttons — are `CalendarSyncParts` and `CalendarSyncButtons`;
 - Instance Link's windows: `InstanceLinkDialog`, its layer picker (`InstanceLinkLayers`), its
   failure toast (`InstanceLinkToastHost`) and the status row the schedule sidebar shows
   (`ConnectionStatusRow`).
@@ -23,9 +25,10 @@ A real Gradle module of this build: `include(":server-ui")`, `implementation(pro
 Instance Link windows, `ScheduleSidebar` the status row, `CalendarManagerWindow` the invite, and
 `MainWindowScope` holds the `RemoteClientManager`.
 
-It takes `:server`, `:shared-ui`, `:strings`, `:settings`, `:theme`, `:calendar` and
-`:lower-third-engine` (which JSON files are lower thirds), and nothing of `:composeApp`'s. Its
-suites read the folder rows through `:profiles`' test fixtures.
+It takes `:server`, `:shared-ui`, `:strings`, `:settings`, `:theme`, `:calendar`,
+`:lower-third-engine` (which JSON files are lower thirds) and `:profiles` (`LocalSettingsDevMode`,
+which gates the other computers), and nothing of `:composeApp`'s. Its suites read the folder rows
+through `:profiles`' test fixtures.
 
 ## Seams to the app
 
