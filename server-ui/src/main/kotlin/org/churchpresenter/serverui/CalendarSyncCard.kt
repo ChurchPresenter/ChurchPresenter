@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.calendar.sync.JoinedComputer
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.profiles.LocalSettingsDevMode
 import org.churchpresenter.server.CalendarInvite
@@ -112,13 +111,18 @@ internal fun CalendarSyncCard(
         onUnpair = { sync.unpair() },
         onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
         onInvite = { scope.launch { invite = sync.invitePhone().asInvite(sync) } },
-        multiComputer = multiComputer,
-        computers = computers,
-        onAddComputer = { addingComputer = true },
-        onRemoveComputer = { id -> scope.launch { sync.computers.remove(id) } },
-        onMakeMain = { id -> scope.launch { sync.computers.promote(id, ownName) } },
-        onJoin = { joining = true },
-        onTakeOver = { scope.launch { sync.computers.takeOver() } },
+        computerActions = if (multiComputer) {
+            ComputerActions(
+                computers = computers,
+                onAdd = { addingComputer = true },
+                onRemove = { id -> scope.launch { sync.computers.remove(id) } },
+                onMakeMain = { id -> scope.launch { sync.computers.promote(id, ownName) } },
+                onJoin = { joining = true },
+                onTakeOver = { scope.launch { sync.computers.takeOver() } },
+            )
+        } else {
+            null
+        },
     )
     invite?.let { CalendarEnrollQrDialog(invite = it, onDismiss = { invite = null }) }
     if (addingComputer) {
@@ -170,14 +174,8 @@ internal fun CalendarSyncCardContent(
     now: Instant = Instant.now(),
     /** The relay shown when settings name none -- see [CalendarSyncCard]. */
     builtInRelayUrl: String = "",
-    /** Whether other computers may join or be joined -- dev mode, for now. */
-    multiComputer: Boolean = false,
-    computers: List<JoinedComputer> = emptyList(),
-    onAddComputer: () -> Unit = {},
-    onRemoveComputer: (String) -> Unit = {},
-    onMakeMain: (String) -> Unit = {},
-    onJoin: () -> Unit = {},
-    onTakeOver: () -> Unit = {},
+    /** The other computers on this calendar and what to do about them; null outside dev mode, for now. */
+    computerActions: ComputerActions? = null,
 ) {
     val current = settings.calendarSync
     val clock = remember(zone, locale) { LocalTimeText(zone, locale) }
@@ -196,7 +194,7 @@ internal fun CalendarSyncCardContent(
         if (current.enabled) {
             StatusBanner(status, onRetry = onSyncNow)
             if (current.isJoined) {
-                if (multiComputer) {
+                if (computerActions != null) {
                     JoinedSection(
                         settings = current,
                         mainLastSeen = (status as? CalendarSyncStatus.Synced)?.outcome?.mainLastSeen.orEmpty(),
@@ -205,7 +203,7 @@ internal fun CalendarSyncCardContent(
                         zone = zone,
                         onSyncNow = onSyncNow,
                         onLeave = onUnpair,
-                        onTakeOver = onTakeOver,
+                        onTakeOver = computerActions.onTakeOver,
                     )
                 }
             } else {
@@ -220,16 +218,8 @@ internal fun CalendarSyncCardContent(
                         onRevoke = onRevoke,
                     )
                 }
-                if (multiComputer) {
-                    ComputersSection(
-                        computers = computers,
-                        clock = clock,
-                        canAdd = current.isPaired,
-                        onAdd = onAddComputer,
-                        onJoin = onJoin,
-                        onRemove = onRemoveComputer,
-                        onMakeMain = onMakeMain,
-                    )
+                if (computerActions != null) {
+                    ComputersSection(actions = computerActions, clock = clock, canAdd = current.isPaired)
                 }
                 if (current.isPaired) {
                     CardFooter(

@@ -49,7 +49,7 @@ internal fun DimText(text: String, modifier: Modifier = Modifier, small: Boolean
 }
 
 internal val COMPACT_PADDING = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
-internal val COMPACT_HEIGHT = 32.dp
+private val COMPACT_HEIGHT = 32.dp
 
 /** A button row's height in the card. */
 internal fun Modifier.compactButton(): Modifier = this.height(COMPACT_HEIGHT)

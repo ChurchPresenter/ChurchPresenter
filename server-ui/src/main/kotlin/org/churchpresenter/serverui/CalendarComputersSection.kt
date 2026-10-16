@@ -50,15 +50,8 @@ import java.util.Locale
  * another's. [canAdd] once this computer is registered: before that there is no calendar to add to.
  */
 @Composable
-internal fun ComputersSection(
-    computers: List<JoinedComputer>,
-    clock: LocalTimeText,
-    canAdd: Boolean,
-    onAdd: () -> Unit,
-    onJoin: () -> Unit,
-    onRemove: (String) -> Unit,
-    onMakeMain: (String) -> Unit,
-) {
+internal fun ComputersSection(actions: ComputerActions, clock: LocalTimeText, canAdd: Boolean) {
+    val computers = actions.computers
     SubCard {
         SubCardHeader(
             icon = Icons.Outlined.Computer,
@@ -67,15 +60,15 @@ internal fun ComputersSection(
             count = if (canAdd) computers.size else null,
             hint = stringResource(Res.string.calendar_computers_hint),
         ) {
-            CompactKey(stringResource(Res.string.calendar_computers_join), onJoin)
-            if (canAdd) CompactPrimary(stringResource(Res.string.calendar_computers_add), onAdd)
+            CompactKey(stringResource(Res.string.calendar_computers_join), actions.onJoin)
+            if (canAdd) CompactPrimary(stringResource(Res.string.calendar_computers_add), actions.onAdd)
         }
         if (canAdd) {
             if (computers.isEmpty()) {
                 EmptyNote(stringResource(Res.string.calendar_computers_none))
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    computers.forEach { computer -> ComputerRow(computer, clock, onRemove, onMakeMain) }
+                    computers.forEach { computer -> ComputerRow(computer, clock, actions.onRemove, actions.onMakeMain) }
                 }
             }
         }

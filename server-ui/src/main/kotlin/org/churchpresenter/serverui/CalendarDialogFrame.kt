@@ -1,5 +1,15 @@
 package org.churchpresenter.serverui
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.Icon
+import androidx.compose.ui.semantics.contentDescription
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.calendar_computer_code_expiry
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.semantic
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -124,6 +135,12 @@ internal fun DialogFooter(content: @Composable RowScope.() -> Unit) {
 }
 
 /**
+ * Draws a calendar dialog in place instead of in a window of its own -- for a test, which has no
+ * screen to open one on. The app never sets it.
+ */
+internal val LocalCalendarDialogInPlace = staticCompositionLocalOf { false }
+
+/**
  * The window both dialogs share, over the main one in the app's theme. It takes the height its
  * content needs, measured each time that changes -- a step that adds a line grows the window.
  */
@@ -134,6 +151,10 @@ internal fun CalendarDialog(
     width: Dp = CALENDAR_DIALOG_WIDTH,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    if (LocalCalendarDialogInPlace.current) {
+        Column(content = content)
+        return
+    }
     val isDark = MaterialTheme.colorScheme.background.luminance() < DARK_LUMINANCE
     val mainWindowState = LocalMainWindowState.current
     val state = rememberDialogState(
@@ -185,7 +206,7 @@ internal fun DialogPrimaryButton(text: String, enabled: Boolean = true, onClick:
                 .defaultMinSize(ButtonDefaults.MinWidth, ButtonDefaults.MinHeight)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest, shape)
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
-                .semantics {
+                .semantics(mergeDescendants = true) {
                     role = Role.Button
                     disabled()
                 }
@@ -202,3 +223,38 @@ internal fun DialogPrimaryButton(text: String, enabled: Boolean = true, onClick:
 }
 
 private const val DISABLED_INK_ALPHA = 0.45f
+
+@Composable
+internal fun ExpiryChip() {
+    val warning = MaterialTheme.semantic.warning
+    Row(
+        modifier = Modifier
+            .background(warning.copy(alpha = CHIP_WASH_ALPHA), CircleShape)
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Icon(Icons.Outlined.Schedule, contentDescription = null, tint = warning, modifier = Modifier.size(11.dp))
+        Text(
+            stringResource(Res.string.calendar_computer_code_expiry),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = warning,
+        )
+    }
+}
+
+@Composable
+internal fun RowScope.WideKey(text: String, icon: ImageVector, onClick: () -> Unit) {
+    KeyButton(
+        shape = AppShape(8.dp),
+        contentPadding = COMPACT_PADDING,
+        modifier = Modifier.weight(1f).height(34.dp),
+        onClick = onClick,
+    ) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(7.dp))
+        Text(text, style = MaterialTheme.typography.labelMedium)
+    }
+}
+private const val CHIP_WASH_ALPHA = 0.16f

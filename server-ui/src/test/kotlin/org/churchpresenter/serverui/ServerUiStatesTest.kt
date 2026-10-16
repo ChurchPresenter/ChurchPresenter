@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.calendar.sync.PairedDevice
@@ -127,10 +128,15 @@ class ServerUiStatesTest {
                 )
             }
         }
+        // The relay sits folded under "Connection details" until it is opened.
+        onNodeWithText("https://relay.built-in", substring = true).assertDoesNotExist()
+        onNodeWithText("Connection details").performClick()
         onNodeWithText("https://relay.built-in", substring = true).assertExists()
         relay = "https://relay.own"
         waitForIdle()
         onNodeWithText("https://relay.own", substring = true).assertExists()
         onNodeWithText("https://relay.built-in", substring = true).assertDoesNotExist()
+        onNodeWithText("Connection details").performClick()
+        onNodeWithText("https://relay.own", substring = true).assertDoesNotExist()
     }
 }

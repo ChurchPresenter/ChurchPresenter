@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -24,7 +22,6 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.MailOutline
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Icon
@@ -54,9 +51,6 @@ import org.churchpresenter.server.CalendarJoin
 import org.churchpresenter.server.JoinParse
 import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.sharedui.composables.tabMovesFocus
-import org.churchpresenter.sharedui.filechooser.SwingFileChooser
-import org.churchpresenter.sharedui.utils.SystemClipboard
-import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.calendar_computer_add_create
 import org.churchpresenter.strings.generated.resources.calendar_computer_add_failed
@@ -69,7 +63,6 @@ import org.churchpresenter.strings.generated.resources.calendar_computer_add_sub
 import org.churchpresenter.strings.generated.resources.calendar_computer_add_title
 import org.churchpresenter.strings.generated.resources.calendar_computer_add_viewer
 import org.churchpresenter.strings.generated.resources.calendar_computer_add_viewer_hint
-import org.churchpresenter.strings.generated.resources.calendar_computer_code_expiry
 import org.churchpresenter.strings.generated.resources.calendar_computer_code_for
 import org.churchpresenter.strings.generated.resources.calendar_computer_code_for_default
 import org.churchpresenter.strings.generated.resources.calendar_computer_code_subtitle
@@ -122,10 +115,22 @@ internal fun AddComputerDialog(
     onCreate: suspend (role: String, name: String) -> CalendarJoin?,
     onDismiss: () -> Unit,
 ) {
+    CalendarDialog(title = stringResource(Res.string.calendar_computer_add_title), onDismiss = onDismiss) {
+        AddComputerContent(onCreate, onDismiss)
+    }
+}
+
+/** What [AddComputerDialog] holds, without its window -- what a test draws. */
+@Composable
+internal fun AddComputerContent(
+    onCreate: suspend (role: String, name: String) -> CalendarJoin?,
+    onDismiss: () -> Unit,
+    io: JoinCodeIo = SystemJoinCodeIo,
+) {
     var join by remember { mutableStateOf<CalendarJoin?>(null) }
     var name by remember { mutableStateOf("") }
     val ready = join
-    CalendarDialog(title = stringResource(Res.string.calendar_computer_add_title), onDismiss = onDismiss) {
+    Column {
         DialogHeader(
             icon = Icons.Outlined.Computer,
             tint = MaterialTheme.semantic.contentSongs,
@@ -143,7 +148,7 @@ internal fun AddComputerDialog(
                 join = it
             }
         } else {
-            JoinReady(ready, name.trim(), onDone = onDismiss)
+            JoinReady(ready, name.trim(), io, onDone = onDismiss)
         }
     }
 }
@@ -249,7 +254,7 @@ private fun RoleCard(
 
 /** The join code made, Copy built into its box, and the other two ways to hand it over. */
 @Composable
-private fun JoinReady(join: CalendarJoin, name: String, onDone: () -> Unit) {
+private fun JoinReady(join: CalendarJoin, name: String, io: JoinCodeIo, onDone: () -> Unit) {
     val scope = rememberCoroutineScope()
     val code = remember(join) { join.toCode() }
     var note by remember { mutableStateOf("") }
@@ -289,7 +294,7 @@ private fun JoinReady(join: CalendarJoin, name: String, onDone: () -> Unit) {
                 shape = AppShape(8.dp),
                 contentPadding = COMPACT_PADDING,
                 modifier = Modifier.height(28.dp),
-                onClick = { if (SystemClipboard.copy(code)) copied = true },
+                onClick = { if (io.copy(code)) copied = true },
             ) {
                 Icon(Icons.Outlined.ContentCopy, contentDescription = null, modifier = Modifier.size(13.dp))
                 Spacer(Modifier.width(6.dp))
@@ -304,15 +309,10 @@ private fun JoinReady(join: CalendarJoin, name: String, onDone: () -> Unit) {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             WideKey(text = saveTitle, icon = Icons.Outlined.FolderOpen) {
-                scope.launch {
-                    val path = SwingFileChooser.save(null, CalendarJoin.FILE_NAME, listOf(filter), saveTitle)
-                        ?: return@launch
-                    val written = withContext(Dispatchers.IO) { runCatching { path.toFile().writeText(join.toJson()) } }
-                    if (written.isSuccess) note = savedFormat.format(path.parent?.toString().orEmpty())
-                }
+                scope.launch { io.save(join, saveTitle, filter)?.let { note = savedFormat.format(it) } }
             }
             WideKey(text = stringResource(Res.string.calendar_computer_email), icon = Icons.Outlined.MailOutline) {
-                UrlOpener.open("mailto:?subject=${mailEncode(subject)}&body=${mailEncode(body)}")
+                io.email("mailto:?subject=${mailEncode(subject)}&body=${mailEncode(body)}")
             }
         }
         if (note.isNotEmpty()) {
@@ -333,40 +333,6 @@ private fun JoinReady(join: CalendarJoin, name: String, onDone: () -> Unit) {
     }
 }
 
-@Composable
-private fun ExpiryChip() {
-    val warning = MaterialTheme.semantic.warning
-    Row(
-        modifier = Modifier
-            .background(warning.copy(alpha = CHIP_WASH_ALPHA), CircleShape)
-            .padding(horizontal = 8.dp, vertical = 3.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-    ) {
-        Icon(Icons.Outlined.Schedule, contentDescription = null, tint = warning, modifier = Modifier.size(11.dp))
-        Text(
-            stringResource(Res.string.calendar_computer_code_expiry),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = warning,
-        )
-    }
-}
-
-@Composable
-private fun RowScope.WideKey(text: String, icon: ImageVector, onClick: () -> Unit) {
-    KeyButton(
-        shape = AppShape(8.dp),
-        contentPadding = COMPACT_PADDING,
-        modifier = Modifier.weight(1f).height(34.dp),
-        onClick = onClick,
-    ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
-        Spacer(Modifier.width(7.dp))
-        Text(text, style = MaterialTheme.typography.labelMedium)
-    }
-}
-
 /**
  * Joining another computer's calendar from its code or file. [replacesOwn] when this computer is
  * the main one of a calendar of its own, which joining ends.
@@ -378,6 +344,19 @@ internal fun JoinCalendarDialog(
     onDismiss: () -> Unit,
 ) {
     CalendarDialog(title = stringResource(Res.string.calendar_join_title), onDismiss = onDismiss) {
+        JoinCalendarContent(replacesOwn, onJoin, onDismiss)
+    }
+}
+
+/** What [JoinCalendarDialog] holds, without its window -- what a test draws. */
+@Composable
+internal fun JoinCalendarContent(
+    replacesOwn: Boolean,
+    onJoin: suspend (CalendarJoin) -> Boolean,
+    onDismiss: () -> Unit,
+    io: JoinCodeIo = SystemJoinCodeIo,
+) {
+    Column {
         val scope = rememberCoroutineScope()
         var text by remember { mutableStateOf("") }
         var file by remember { mutableStateOf<File?>(null) }
@@ -397,19 +376,12 @@ internal fun JoinCalendarDialog(
                 text = text,
                 parsed = parsed,
                 onTextChange = { text = it; file = null; failed = false },
-                onPaste = { SystemClipboard.paste()?.let { text = it.trim(); file = null; failed = false } },
+                onPaste = { io.paste()?.let { text = it.trim(); file = null; failed = false } },
                 onOpenFile = {
                     scope.launch {
-                        val path = SwingFileChooser.chooseSingle(
-                            null,
-                            listOf(filter),
-                            openTitle,
-                            selectDirectory = false,
-                        ) ?: return@launch
-                        val read = withContext(Dispatchers.IO) { runCatching { path.toFile().readText() } }.getOrNull()
-                        if (read != null) {
+                        io.open(openTitle, filter)?.let { (read, opened) ->
                             text = read
-                            file = path.toFile()
+                            file = opened
                             failed = false
                         }
                     }
@@ -541,5 +513,4 @@ private fun mailEncode(text: String): String =
 
 private const val CODE_LINES = 4
 private const val SELECTED_ALPHA = 0.10f
-private const val CHIP_WASH_ALPHA = 0.16f
 private const val PLACEHOLDER_ALPHA = 0.6f
