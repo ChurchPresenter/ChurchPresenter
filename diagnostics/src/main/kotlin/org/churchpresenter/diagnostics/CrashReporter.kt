@@ -48,6 +48,9 @@ private val CLIPBOARD_PEERS = setOf(
     "sun.awt.windows.WClipboard",
 )
 
+/** The JDK's Windows shell-folder classes, which throw when Explorer will not bind an item. */
+private const val WINDOWS_SHELL_FOLDER = "sun.awt.shell.Win32ShellFolder"
+
 /**
  * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
  * and whether it is a release.
@@ -741,7 +744,7 @@ object CrashReporter {
      * Whether [throwable] is a platform refusal the event thread carries straight on from, so
      * ending the process over it would be the more damaging of the two outcomes.
      *
-     * **Deliberately one case, not a class of them.** The exit this guards was added for #518,
+     * **Deliberately named cases, not a class of them.** The exit this guards was added for #518,
      * where a dead event thread left every audience-facing output frozen rather than closing, and
      * that argument holds for anything that genuinely breaks the thread. What it does not cover is
      * Windows declining the clipboard: `WClipboard.openClipboard0` throws
@@ -756,6 +759,12 @@ object CrashReporter {
      * of a service, on a machine where something else happened to touch the clipboard first
      * (Sentry CHURCH-PRESENTER-DESKTOP-42, two churches).
      *
+     * The second case has the same shape: the JDK's Windows shell-folder bridge throws an
+     * `InternalError` ("Unable to bind … to parent") when Explorer will not bind an item it was
+     * asked about -- a stray file in `Network Shortcuts` is the one seen -- out of a Swing file
+     * list's own loading, with no frame of ours in it. The folder simply lists without that item
+     * (Sentry CHURCH-PRESENTER-DESKTOP-C7).
+     *
      * Widen this only for something with the same two properties: a named platform condition, and
      * a thread that demonstrably survives it.
      *
@@ -767,8 +776,11 @@ object CrashReporter {
      * same in all thirty-four locales.
      */
     internal fun isRecoverableInteraction(throwable: Throwable): Boolean =
-        throwable is IllegalStateException &&
-            throwable.stackTrace.any { frame -> frame.className in CLIPBOARD_PEERS }
+        (throwable is IllegalStateException && throwable.thrownFrom { it in CLIPBOARD_PEERS }) ||
+            (throwable is InternalError && throwable.thrownFrom { it.startsWith(WINDOWS_SHELL_FOLDER) })
+
+    private fun Throwable.thrownFrom(matches: (className: String) -> Boolean): Boolean =
+        stackTrace.any { frame -> matches(frame.className) }
 
     /**
      * Scrubs PII from every outgoing event, then attaches the most recent local crash-report file

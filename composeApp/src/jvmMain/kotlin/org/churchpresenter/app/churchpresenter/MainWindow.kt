@@ -248,6 +248,10 @@ private fun AppRootState.MainWindow(
             StartupProbe.firstFrame(exit = { exitProcess(0) })
             // UI stalls count from shortly after this: a first launch stalls while it loads.
             uiStallReporter.firstFrame()
+            // render.api is what was asked for; skiko falls back to drawing in software on a GPU
+            // it cannot use, which makes every frame slow, so a stall report says which it got.
+            CrashReporter.setTag("render.api.actual", window.renderApi.name)
+            uiStallReporter.softwareRendering(window.renderApi.name.startsWith("SOFTWARE"))
         }
         MacMenuBarActivationFix()
         LanguageProvider(language = currentLanguage) {

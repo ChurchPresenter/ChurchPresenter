@@ -268,14 +268,15 @@ kotlin {
             runtimeOnly("me.friwi:jcef-natives-${currentJcefPlatform()}:$jcefNativesVersion")
             // JavaFX for WebView (website presenter)
             val jfxClassifier = currentOsClassifier()
+            val jfxVersion = libs.versions.javafx.get()
             val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")
             jfxModules.forEach { module ->
-                implementation("org.openjfx:$module:21:$jfxClassifier")
+                implementation("org.openjfx:$module:$jfxVersion:$jfxClassifier")
             }
             // Windows-specific: also pull win natives when building on Windows
             if (jfxClassifier == "win") {
                 jfxModules.forEach { module ->
-                    runtimeOnly("org.openjfx:$module:21:win")
+                    runtimeOnly("org.openjfx:$module:$jfxVersion:win")
                 }
             }
             // DBus for Linux file chooser integration.

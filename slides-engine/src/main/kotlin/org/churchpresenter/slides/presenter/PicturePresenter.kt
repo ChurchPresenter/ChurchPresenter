@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -26,6 +30,8 @@ import org.churchpresenter.strings.generated.resources.presented_image
 import org.churchpresenter.strings.generated.resources.presented_slide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import org.churchpresenter.core.models.presentation.AnimationType
@@ -140,20 +146,19 @@ private fun ImageContent(currentImagePath: String?, contentScale: ContentScale) 
         val screenHeight = containerSize.height.takeIf { it > 0 } ?: 1080
 
         val cover = contentScale != ContentScale.Fit
-        val imageBitmap = remember(currentImagePath, screenWidth, screenHeight, cover) {
-            loadAndDownscaleImage(currentImagePath, screenWidth, screenHeight, cover)
-        }
+        val key = PictureKey(currentImagePath, screenWidth, screenHeight, cover)
+        val loaded = rememberPicture(key)
 
-        if (imageBitmap != null) {
-            Image(
-                bitmap = imageBitmap,
+        when (loaded) {
+            null -> Unit // still decoding: the black behind shows, never the failure text
+            is LoadedPicture.Decoded -> Image(
+                bitmap = loaded.bitmap,
                 contentDescription = stringResource(Res.string.presented_image),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = contentScale,
                 colorFilter = null
             )
-        } else {
-            Text(
+            LoadedPicture.Failed -> Text(
                 text = stringResource(Res.string.failed_to_load_image),
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
@@ -166,6 +171,56 @@ private fun ImageContent(currentImagePath: String?, contentScale: ContentScale) 
             color = Color.White
         )
     }
+}
+
+/** One decode the output asks for: the file, the size it is drawn at, and whether it covers. */
+internal data class PictureKey(val path: String, val width: Int, val height: Int, val cover: Boolean)
+
+/** What a decode came to: the picture, or that it could not be read. */
+internal sealed interface LoadedPicture {
+    data class Decoded(val bitmap: ImageBitmap) : LoadedPicture
+    data object Failed : LoadedPicture
+}
+
+/**
+ * The last few pictures the outputs decoded, so the output window, its preview tile and a
+ * transition's two halves share one decode, and a picture that was on screen a moment ago comes back
+ * at once rather than through the black of a fresh decode.
+ */
+internal object PictureCache {
+    private const val SIZE = 4
+    private const val LOAD_FACTOR = 0.75f
+
+    private val entries = object : LinkedHashMap<PictureKey, LoadedPicture.Decoded>(SIZE, LOAD_FACTOR, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<PictureKey, LoadedPicture.Decoded>) =
+            size > SIZE
+    }
+
+    @Synchronized fun get(key: PictureKey): LoadedPicture? = entries[key]
+
+    /**
+     * Decodes [key] -- call this off the UI thread -- and remembers a picture it read. A failure is
+     * not remembered, so a file copied in after it was first asked for is read the next time.
+     */
+    fun load(key: PictureKey): LoadedPicture {
+        val bitmap = loadAndDownscaleImage(key.path, key.width, key.height, key.cover)
+            ?: return LoadedPicture.Failed
+        return LoadedPicture.Decoded(bitmap).also { synchronized(this) { entries[key] = it } }
+    }
+}
+
+/**
+ * The picture for [key], decoded on `Dispatchers.IO`: an output composes on the event thread, where
+ * reading and scaling a photo froze the projector for as long as it took. Null while it decodes; a
+ * picture decoded before answers at once.
+ */
+@Composable
+private fun rememberPicture(key: PictureKey): LoadedPicture? {
+    var loaded by remember(key) { mutableStateOf(PictureCache.get(key)) }
+    LaunchedEffect(key) {
+        if (loaded == null) loaded = withContext(Dispatchers.IO) { PictureCache.load(key) }
+    }
+    return loaded
 }
 
 internal fun loadAndDownscaleImage(

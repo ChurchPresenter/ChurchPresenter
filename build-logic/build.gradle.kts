@@ -1,3 +1,17 @@
+// `kotlin-dsl` brings the Kotlin Gradle plugin Gradle embeds, older than the build's own and open to
+// unsafe deserialization in the Kotlin build cache (fixed in 2.4.20). The conventions compile with
+// the build's version instead -- the one every module already uses.
+buildscript {
+    configurations.classpath {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin-gradle-plugin")) {
+                useVersion(libs.versions.kotlin.get())
+                because("Unsafe deserialization in the Kotlin build cache before 2.4.20")
+            }
+        }
+    }
+}
+
 plugins {
     `kotlin-dsl`
 }

@@ -367,6 +367,39 @@ class CrashReporterStartupTest {
         assertTrue(logs.single().readText().contains("WClipboard"), "and says where it came from")
     }
 
+    /** The error the Windows shell-folder bridge throws when Explorer will not bind an item. */
+    private fun shellFolderRefusal() = InternalError("Unable to bind a shortcut to parent").apply {
+        stackTrace = arrayOf(
+            StackTraceElement("sun.awt.shell.Win32ShellFolder2\$4", "call", null, -1),
+            StackTraceElement("sun.awt.shell.Win32ShellFolderManager2\$ComInvoker", "invoke", null, -1),
+            StackTraceElement("sun.awt.shell.Win32ShellFolder2", "getIShellFolder", null, -1),
+        )
+    }
+
+    @Test
+    fun `a shell folder Windows will not bind is logged but does not end the process`() {
+        // Sentry CHURCH-PRESENTER-DESKTOP-C7: a stray file in Network Shortcuts, thrown out of a
+        // Swing file list's own loading. The folder lists without it; quitting is the worse outcome.
+        startUp(analyticsReportingEnabled = false)
+        val handler = assertNotNull(handler)
+
+        handler.uncaughtException(Thread.currentThread(), shellFolderRefusal())
+
+        assertNull(exitCode, "a shell folder Windows refused must not end the process")
+        val logs = crashDir.listFiles()?.filter { it.name.startsWith("crash_") }.orEmpty()
+        assertEquals(1, logs.size, "it is still written down, so it can still be found")
+    }
+
+    @Test
+    fun `an internal error from anywhere else still ends the process`() {
+        startUp(analyticsReportingEnabled = false)
+        val handler = assertNotNull(handler)
+
+        handler.uncaughtException(Thread.currentThread(), InternalError("Unable to bind a shortcut to parent"))
+
+        assertEquals(EXIT_CODE_FATAL_CRASH, exitCode, "only the shell-folder bridge is the known case")
+    }
+
     @Test
     fun `the same exception type from anywhere else still ends the process`() {
         // The guard is the clipboard peer, not the exception type and not the wording: recovering

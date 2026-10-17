@@ -3,6 +3,7 @@ cyclonedx = "3.5.0"
 # Not a dependency of the app: the floor for the Jackson the CycloneDX plugin loads (see composeApp).
 jackson-core = "2.22.3"
 jna = "5.19.1"
+javafx = "21.0.12"
 vlcj = "4.8.3"
 androidx-lifecycle = "2.11.0"
 sentry = "8.60.0"
@@ -54,6 +55,10 @@ detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref 
 # The JSON reader BibleEngineClient parses the engine's messages with -- and, through the root build's
 # security floor, the one socket.io-client parses with too.
 org-json = { module = "org.json:json", version = "20260814" }
+# Security floors, not dependencies: what cp.base lifts each to when something older asks for it.
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version = "2.25.5" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
+guava = { module = "com.google.guava:guava", version = "33.7.2" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
