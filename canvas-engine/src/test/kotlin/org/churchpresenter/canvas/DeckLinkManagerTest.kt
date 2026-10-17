@@ -3,7 +3,9 @@ package org.churchpresenter.canvas
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.PrintStream
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -62,6 +64,23 @@ class DeckLinkManagerTest {
     }
 
     @Test
+    fun `a library that fails to load is reported with its reason`() {
+        val captured = ByteArrayOutputStream()
+        val realErr = System.err
+        val loaded = try {
+            System.setErr(PrintStream(captured, true))
+            loadDeckLinkLibrary()
+        } finally {
+            System.setErr(realErr)
+        }
+
+        assertFalse(loaded)
+        val reported = captured.toString()
+        assertTrue(reported.contains("[DeckLink]"), "nothing was reported: '$reported'")
+        assertTrue(reported.contains("decklink_jni"), "the reason is missing: '$reported'")
+    }
+
+    @Test
     fun `listDevices is empty when unavailable`() {
         assertEquals(emptyList(), DeckLinkManager.listDevices())
     }
@@ -79,7 +98,7 @@ class DeckLinkManagerTest {
         DeckLinkManager.scheduleFrame(0, IntArray(0), 0, 0)
         DeckLinkManager.stopPlayback(0)
         DeckLinkManager.close(0)
-        DeckLinkManager.closeAllOutputs() // no devices ever opened — loop body never runs
+        // Not closeAllOutputs: it shuts this JVM's outputs for good. DeckLinkBridgeTest covers it over a fake card.
     }
 
     @Test

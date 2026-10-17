@@ -29,6 +29,7 @@ import org.churchpresenter.helper.display.HelperScreen
 import org.churchpresenter.helper.helperText
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.dialogs.optionsTabIndexOf
+import org.churchpresenter.app.churchpresenter.dialogs.optionsPageAt
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.SettingsPage
 import org.churchpresenter.sharedui.models.ShortcutAction
@@ -241,6 +242,15 @@ class WickActionsTest {
         assertTrue(root.showOptionsDialog)
         assertEquals(optionsTabIndexOf(SettingsPage.PROFILES), root.optionsDialogInitialTab)
         assertDone()
+    }
+
+    @Test
+    fun `each Settings tab is its page, with or without OBS`() {
+        SettingsPage.entries.forEach { assertEquals(it, optionsPageAt(optionsTabIndexOf(it), hasObs = true)) }
+        assertEquals(SettingsPage.ATEM, optionsPageAt(optionsTabIndexOf(SettingsPage.ATEM), hasObs = false))
+        // Without OBS, Integrations' place is Companion Satellite's, which is no page.
+        assertNull(optionsPageAt(optionsTabIndexOf(SettingsPage.INTEGRATIONS), hasObs = false))
+        assertNull(optionsPageAt(optionsTabIndexOf(SettingsPage.INTEGRATIONS) + 1, hasObs = true))
     }
 
     @Test

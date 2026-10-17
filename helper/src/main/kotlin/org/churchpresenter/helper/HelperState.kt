@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.churchpresenter.helper.action.ActionOutcome
 import org.churchpresenter.helper.action.GuideTour
+import org.churchpresenter.sharedui.guide.WickPlace
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.action.UndoStack
 import org.churchpresenter.helper.display.DisplaySetupFlow
@@ -106,6 +107,10 @@ class HelperState(
         internal set
     var displayFlow by mutableStateOf(DisplaySetupFlow())
 
+    /** Where the lamp being talked to is — set by the overlay, read when a tour starts. */
+    var place: WickPlace = WickPlace.Main(null)
+        internal set
+
     /** Steps the operator moved through the tips by hand, on top of today's tip. */
     var tipOffset by mutableIntStateOf(0)
 
@@ -186,7 +191,7 @@ class HelperState(
         when (action) {
             is HelperAction.Highlight -> {
                 onUsed()
-                showStep(action.tour, 0, executor)
+                showStep(fromHere(action.tour), 0, executor)
             }
             is HelperAction.ShowShortcut -> {
                 onUsed()
@@ -223,7 +228,7 @@ class HelperState(
             is ActionOutcome.Refused -> show(HelperReply.Message(outcome.reason, offer = outcome.instead))
             is ActionOutcome.Guide -> {
                 onUsed()
-                showStep(outcome.tour, 0, executor)
+                showStep(fromHere(outcome.tour), 0, executor)
             }
             ActionOutcome.DisplaySetup -> {
                 onUsed()

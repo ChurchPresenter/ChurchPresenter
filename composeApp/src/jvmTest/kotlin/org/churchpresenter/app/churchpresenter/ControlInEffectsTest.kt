@@ -91,7 +91,7 @@ class ControlInEffectsTest {
         setContent { MaterialTheme { ControlInEffects(hub, settings, manager) } }
         waitUntil(timeoutMillis = 5_000) { hub.status.value.midiOutput == PortState.OPEN }
         settings = ControlSettings()
-        waitUntil(timeoutMillis = 5_000) { hub.status.value.midiOutput == PortState.OFF }
-        assertTrue(closed.isNotEmpty())
+        // apply() publishes OFF before it closes the old port, outside its lock: wait for both.
+        waitUntil(timeoutMillis = 5_000) { hub.status.value.midiOutput == PortState.OFF && closed.isNotEmpty() }
     }
 }

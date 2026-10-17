@@ -36,6 +36,8 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.SettingsPage
+import org.churchpresenter.sharedui.guide.LocalWickPlace
+import org.churchpresenter.sharedui.guide.WickPlace
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -124,6 +126,12 @@ internal fun optionsTabIndexOf(page: SettingsPage): Int = when (page) {
     SettingsPage.ATEM -> TAB_ATEM
     SettingsPage.INTEGRATIONS -> TAB_INTEGRATIONS
 }
+
+/** The page at [index] in the dialog's tab row; null for Companion Satellite, which is not a [SettingsPage]. */
+internal fun optionsPageAt(index: Int, hasObs: Boolean): SettingsPage? =
+    SettingsPage.entries
+        .filter { hasObs || it != SettingsPage.INTEGRATIONS }
+        .firstOrNull { optionsTabIndexOf(it) == index }
 
 @Composable
 fun OptionsDialog(
@@ -228,63 +236,67 @@ internal fun OptionsDialogContent(
     }
 
     AppWindowRoot(theme = theme) {
-        // This window's own spotlight: the helper's tours point at its tabs from the main window.
-        GuideSpotlightHost(Modifier.fillMaxSize()) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    SettingsTabStrip(
-                        selectedIndex = safeTabIndex,
-                        scrollState = tabScrollState,
-                        labelStyle = currentSettings.tabLabelStyle,
-                        labelMargin = currentSettings.tabLabelMargin,
-                        hasObs = obsManager != null,
-                        companionSatelliteTabIndex = companionSatelliteTabIndex,
-                        onSelect = { selectedTabIndex = it },
-                    )
+        // This window's own spotlight: the helper's tours point at its tabs from the main window. Its
+        // lamp offers what the page showing is for.
+        val place = WickPlace.Settings(optionsPageAt(safeTabIndex, hasObs = obsManager != null))
+        CompositionLocalProvider(LocalWickPlace provides place) {
+            GuideSpotlightHost(Modifier.fillMaxSize()) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        SettingsTabStrip(
+                            selectedIndex = safeTabIndex,
+                            scrollState = tabScrollState,
+                            labelStyle = currentSettings.tabLabelStyle,
+                            labelMargin = currentSettings.tabLabelMargin,
+                            hasObs = obsManager != null,
+                            companionSatelliteTabIndex = companionSatelliteTabIndex,
+                            onSelect = { selectedTabIndex = it },
+                        )
 
-                    // Tab Content
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
-                    ) {
-                        CompositionLocalProvider(
-                            LocalApplySettings provides applySettings,
-                            LocalSettingsDevMode provides devMode,
+                        // Tab Content
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.background)
                         ) {
-                            SettingsTabContent(
-                                tabIndex = safeTabIndex,
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn -> currentSettings = updateFn(currentSettings) },
-                                settingsManager = settingsManager,
-                                companionServer = companionServer,
-                                remoteClientManager = remoteClientManager,
-                                calendarSync = calendarSync,
-                                onIdentifyScreen = onIdentifyScreen,
-                                onIdentifyBrowserSource = onIdentifyBrowserSource,
-                                onIdentifyNdi = onIdentifyNdi,
-                                onIdentifyOmt = onIdentifyOmt,
-                                scenes = scenes,
-                                obsManager = obsManager,
-                                companionSatelliteViewModel = companionSatelliteViewModel,
-                                companionSatelliteTabIndex = companionSatelliteTabIndex,
-                                detectScreens = detectScreens,
-                            )
+                            CompositionLocalProvider(
+                                LocalApplySettings provides applySettings,
+                                LocalSettingsDevMode provides devMode,
+                            ) {
+                                SettingsTabContent(
+                                    tabIndex = safeTabIndex,
+                                    settings = currentSettings,
+                                    onSettingsChange = { updateFn -> currentSettings = updateFn(currentSettings) },
+                                    settingsManager = settingsManager,
+                                    companionServer = companionServer,
+                                    remoteClientManager = remoteClientManager,
+                                    calendarSync = calendarSync,
+                                    onIdentifyScreen = onIdentifyScreen,
+                                    onIdentifyBrowserSource = onIdentifyBrowserSource,
+                                    onIdentifyNdi = onIdentifyNdi,
+                                    onIdentifyOmt = onIdentifyOmt,
+                                    scenes = scenes,
+                                    obsManager = obsManager,
+                                    companionSatelliteViewModel = companionSatelliteViewModel,
+                                    companionSatelliteTabIndex = companionSatelliteTabIndex,
+                                    detectScreens = detectScreens,
+                                )
+                            }
                         }
-                    }
 
-                    SettingsDialogButtons(
-                        onCancel = onDismiss,
-                        onApply = applySettings,
-                        onOk = {
-                            applySettings()
-                            onDismiss()
-                        },
-                    )
+                        SettingsDialogButtons(
+                            onCancel = onDismiss,
+                            onApply = applySettings,
+                            onOk = {
+                                applySettings()
+                                onDismiss()
+                            },
+                        )
+                    }
                 }
             }
         }
