@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.churchpresenter.dictionary.data.DictionaryFiles
 import org.churchpresenter.dictionary.data.InterlinearRepository
@@ -133,11 +134,8 @@ class DictionaryViewModel private constructor(
         state.isLoading = true
         viewModelScope.launch {
             try {
-                val json = Json { ignoreUnknownKeys = true }
                 val (hFile, gFile) = DictionaryFiles.strongsFor(state.dictLanguage)
-                val hEntries = json.decodeFromString<List<StrongsEntry>>(files.read(hFile).decodeToString())
-                val gEntries = json.decodeFromString<List<StrongsEntry>>(files.read(gFile).decodeToString())
-                state.entries = hEntries.sortedBy { it.numericValue } + gEntries.sortedBy { it.numericValue }
+                state.entries = readStrongs(hFile, gFile)
                 state.pendingSelectionNumber?.let { num ->
                     onEntrySelected(state.entries.find { it.number == num }, addToHistory = false)
                     state.pendingSelectionNumber = null
@@ -156,6 +154,21 @@ class DictionaryViewModel private constructor(
                     state.isInterlinearDataLoaded = true
                 } catch (_: Exception) { }
             }
+        }
+    }
+
+    /**
+     * Both Strong's lists, read, parsed and sorted off the event thread: the files are megabytes of
+     * JSON, and this scope runs on the UI's dispatcher.
+     */
+    private suspend fun readStrongs(hebrewFile: String, greekFile: String): List<StrongsEntry> {
+        val hebrew = files.read(hebrewFile)
+        val greek = files.read(greekFile)
+        return withContext(Dispatchers.Default) {
+            val json = Json { ignoreUnknownKeys = true }
+            val hEntries = json.decodeFromString<List<StrongsEntry>>(hebrew.decodeToString())
+            val gEntries = json.decodeFromString<List<StrongsEntry>>(greek.decodeToString())
+            hEntries.sortedBy { it.numericValue } + gEntries.sortedBy { it.numericValue }
         }
     }
 
