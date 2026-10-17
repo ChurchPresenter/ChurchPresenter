@@ -5,12 +5,14 @@ import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.calendar.sync.CatalogSync
 import org.churchpresenter.calendar.sync.CatalogSyncStore
 import org.churchpresenter.calendar.sync.Envelope
+import org.churchpresenter.calendar.sync.FollowerShadowStore
 import org.churchpresenter.calendar.sync.PushedStateStore
 import org.churchpresenter.calendar.sync.RelayClient
 import org.churchpresenter.calendar.sync.RelayFailure
 import org.churchpresenter.calendar.sync.RelayTransport
 import org.churchpresenter.calendar.sync.Sealing
 import org.churchpresenter.calendar.sync.SyncCoordinator
+import org.churchpresenter.calendar.sync.SyncRole
 import org.churchpresenter.calendar.sync.fetchClientKey
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongLibrary
@@ -28,8 +30,8 @@ import java.util.UUID
 internal class CalendarRelayAccess(
     private val folder: File,
     private val songFolder: File?,
-    private val settings: () -> CalendarSyncSettings,
-    private val saveSettings: (CalendarSyncSettings) -> Unit,
+    val settings: () -> CalendarSyncSettings,
+    val saveSettings: (CalendarSyncSettings) -> Unit,
     private val transport: RelayTransport,
     private val onSaved: () -> Unit,
     /** How long a song usually runs here, for the catalog the phones plan with; null when never measured. */
@@ -38,6 +40,9 @@ internal class CalendarRelayAccess(
 ) {
     /** The relay this desktop talks to: the one in its settings, or else the one it was built with. */
     fun relayUrl(): String = settings().relayUrl.ifBlank { endpoints.relayUrl }
+
+    /** The relay this build was made for, which a join file naming the same one need not repeat. */
+    val builtInRelayUrl: String get() = endpoints.relayUrl
 
     /**
      * Runs [block] with a client key, fetching one first if none is cached and once more if the
@@ -67,7 +72,7 @@ internal class CalendarRelayAccess(
     /** Registers with a fresh instance id, trying again once if the relay already knows the id. */
     fun ensureRegistered(): String {
         val current = settings()
-        if (current.isPaired) return current.desktopToken
+        if (current.isPaired) return current.token
         var instanceId = current.instanceId.ifBlank { UUID.randomUUID().toString() }
         val installId = current.installId.ifBlank { UUID.randomUUID().toString() }
         val key = Envelope.encodeKey(Envelope.newKey())
@@ -106,6 +111,8 @@ internal class CalendarRelayAccess(
         songs = ::songs,
         onSaved = onSaved,
         pushed = PushedStateStore(folder),
+        role = settings().syncRole,
+        shadow = FollowerShadowStore(folder),
     )
 
     /** The songbooks kept on the relay for the phones -- pushed on its own, after a round. */
@@ -125,7 +132,7 @@ internal class CalendarRelayAccess(
         return fresh
     }
 
-    val token: String get() = settings().desktopToken
+    val token: String get() = settings().token
     val cursor: Long get() = settings().cursor
 
     @Volatile
@@ -144,7 +151,7 @@ internal class CalendarRelayAccess(
         private const val TOKEN_BYTES = 32
         private const val REGISTER_ATTEMPTS = 2
 
-        /** A phone's bearer token: 32 random bytes, URL-safe so the QR carries it as-is. */
+        /** A phone's or a joined computer's bearer token: 32 random bytes, URL-safe so the QR carries it as-is. */
         fun newDeviceToken(): String =
             Base64.getUrlEncoder().withoutPadding().encodeToString(ByteArray(TOKEN_BYTES).also(random::nextBytes))
 
@@ -153,3 +160,11 @@ internal class CalendarRelayAccess(
             MessageDigest.getInstance("SHA-256").digest(text.toByteArray()).joinToString("") { "%02x".format(it) }
     }
 }
+
+/** What this computer is to its instance, as its settings say. */
+internal val CalendarSyncSettings.syncRole: SyncRole
+    get() = when (role) {
+        CalendarSyncSettings.ROLE_FOLLOWER -> SyncRole.FOLLOWER
+        CalendarSyncSettings.ROLE_VIEWER -> SyncRole.VIEWER
+        else -> SyncRole.MAIN
+    }

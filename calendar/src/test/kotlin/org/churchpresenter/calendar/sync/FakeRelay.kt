@@ -20,6 +20,11 @@ class FakeRelay(
     var presetsBox = ""
     val devices = LinkedHashMap<String, RemoteDevice>()
     var lastDesktopInstall = ""
+
+    /** What the changes reply says this token is, and when the main computer was last heard from. */
+    var role = ""
+    var mainLastSeen = ""
+    val desktops = LinkedHashMap<String, RemoteComputer>()
     val calls = mutableListOf<String>()
 
     /** Every state push as it arrived, before [records] collapsed it by id. */
@@ -84,6 +89,9 @@ class FakeRelay(
                             tombstones = tombstones.values.toList(),
                             devices = devices.values.toList(),
                             lastDesktopInstall = lastDesktopInstall,
+                            role = role,
+                            mainLastSeen = mainLastSeen,
+                            desktops = desktops.values.toList(),
                         ),
                     ),
                 )

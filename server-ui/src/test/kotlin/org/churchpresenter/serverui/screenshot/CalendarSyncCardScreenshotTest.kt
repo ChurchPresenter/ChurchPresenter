@@ -130,6 +130,21 @@ class CalendarSyncCardScreenshotTest {
     fun `the relay could not be reached`() = card("failed", status = CalendarSyncStatus.Failed("connection refused"))
 
     @Test
+    fun `the relay's own words, opened under the failure`() = card(
+        "failed_details",
+        status = CalendarSyncStatus.Failed("relay rejected the request (500): {\"error\":\"internal\"}"),
+        drive = { onAllNodesWithText("Details")[0].performClick() },
+    )
+
+    @Test
+    fun `the connection details, unfolded`() = card(
+        "connection_details",
+        status = CalendarSyncStatus.Synced(AT, outcome()),
+        devices = devices,
+        drive = { onAllNodesWithText("Connection details")[0].performClick() },
+    )
+
+    @Test
     fun `the startup round timed out`() = card("timed_out", status = CalendarSyncStatus.TimedOut)
 
     @Test
@@ -166,7 +181,7 @@ class CalendarSyncCardScreenshotTest {
                 }
             }
             onAllNodesWithText("Sync now")[0].performClick()
-            onAllNodesWithText("Start over with a new key")[0].performClick()
+            onAllNodesWithText("Start over with a new key…")[0].performClick()
             onAllNodesWithText("Revoke")[1].performClick()
             waitForIdle()
         }

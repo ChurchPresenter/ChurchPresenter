@@ -35,6 +35,12 @@ class Resolver(
     private val presets: List<ItemPreset>,
     private val today: LocalDate,
     private val now: Instant = Instant.now(),
+    /**
+     * On a computer that joined another's calendar: a row the main computer authored and this one
+     * never had is kept as a flagged placeholder instead of dropped, so the run of show still shows
+     * it and its place. What goes back to the relay is the row as it arrived -- see [FollowerPush].
+     */
+    private val keepForeignRows: Boolean = false,
 ) {
     private val songsById = songs.associateBy { it.songId }
     private val songsByTitle = songs.groupBy { it.title.trim().lowercase() }
@@ -105,7 +111,23 @@ class Resolver(
             detail = Sanitize.cleanText(row.detail, WireLimits.DETAIL_CHARS),
         )
         is RemoteRow.Preset -> resolvePreset(row, unresolved)
-        is RemoteRow.Ref -> localRows[row.id]
+        is RemoteRow.Ref -> if (keepForeignRows) foreignRow(row, localRows[row.id], unresolved) else localRows[row.id]
+    }
+
+    /**
+     * A ref row on a joined computer: the real item when this computer has it (it was the main one
+     * once), otherwise a placeholder named after the row. A real ministry row never travels as a ref,
+     * so a ministry item under a ref's id is an earlier placeholder, and is rebuilt from the row.
+     */
+    private fun foreignRow(
+        row: RemoteRow.Ref,
+        local: ScheduleItem?,
+        unresolved: MutableMap<String, String>,
+    ): ScheduleItem {
+        if (local != null && local !is ScheduleItem.MinistryItem) return local
+        unresolved[row.id] = UNRESOLVED_ELSEWHERE
+        val title = Sanitize.cleanText(row.title, WireLimits.TITLE_CHARS).ifEmpty { DEFAULT_MINISTRY }
+        return ScheduleItem.MinistryItem(id = row.id, title = title)
     }
 
     private fun resolveSong(row: RemoteRow.Song, unresolved: MutableMap<String, String>): ScheduleItem {
@@ -179,6 +201,9 @@ class Resolver(
         const val UNRESOLVED_SONG = "song"
         const val UNRESOLVED_REFERENCE = "reference"
         const val UNRESOLVED_PRESET = "preset"
+
+        /** A row only the main computer can open: media, pictures, a presentation and the like. */
+        const val UNRESOLVED_ELSEWHERE = "elsewhere"
         private const val BOOKS_IN_BIBLE = 66
         private const val DEFAULT_NAME = "Service"
         private const val DEFAULT_SECTION = "Section"

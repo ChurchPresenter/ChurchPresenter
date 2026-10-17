@@ -141,6 +141,27 @@ data class PresetIndex(val presets: List<RemotePreset> = emptyList())
 @Serializable
 data class RemoteDevice(val id: String, val nameBox: String = "", val pairedAt: String = "", val lastSeen: String = "")
 
+/** A follower or viewer computer, for the main computer's list. [nameBox] is its name, sealed under record id [id]. */
+@Serializable
+data class RemoteComputer(
+    val id: String,
+    val role: String = "",
+    val nameBox: String = "",
+    val pairedAt: String = "",
+    val lastSeen: String = "",
+)
+
+/** `PUT /i/{id}/desktops/{desktopId}` — the main computer adding a follower or viewer. */
+@Serializable
+data class AddComputerRequest(val tokenHash: String, val role: String, val nameBox: String = "")
+
+/**
+ * `POST /i/{id}/desktops/{desktopId}/promote` — with [keepFormer], the old main token stays on as
+ * follower [formerId].
+ */
+@Serializable
+data class PromoteRequest(val keepFormer: Boolean, val formerId: String = "", val formerNameBox: String = "")
+
 @Serializable
 data class RegisterResponse(val desktopToken: String)
 
@@ -160,7 +181,20 @@ data class ChangesResponse(
     val devices: List<RemoteDevice> = emptyList(),
     /** The install id of the desktop that last pushed, so a second machine on this instance is noticed. */
     val lastDesktopInstall: String = "",
+    /** `main`, `follower` or `viewer` — what the relay takes this token for; empty from a relay that predates roles. */
+    val role: String = "",
+    /** When the main computer was last heard from; sent to a follower or viewer. */
+    val mainLastSeen: String = "",
+    /** The computers that joined this instance; sent to the main computer. */
+    val desktops: List<RemoteComputer> = emptyList(),
 )
+
+/** The roles [ChangesResponse.role] spells. */
+object RemoteRole {
+    const val MAIN = "main"
+    const val FOLLOWER = "follower"
+    const val VIEWER = "viewer"
+}
 
 /** `PUT /i/{id}/state` — the desktop's authoritative picture, replacing the relay's. */
 @Serializable

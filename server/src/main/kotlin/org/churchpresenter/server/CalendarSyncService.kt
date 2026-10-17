@@ -19,6 +19,7 @@ import org.churchpresenter.calendar.sync.HttpRelayTransport
 import org.churchpresenter.calendar.sync.EnrollRequest
 import org.churchpresenter.calendar.sync.RelayFailure
 import org.churchpresenter.calendar.sync.RelayTransport
+import org.churchpresenter.calendar.sync.RemoteRole
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncCoordinator
 import org.churchpresenter.calendar.sync.SyncOutcome
@@ -91,6 +92,8 @@ class CalendarSyncService(
     private val usage: UsageEventStore = UsageEvents,
     private val endpoints: RelayEndpoints = RelayEndpoints.NONE,
     private val now: () -> Instant = Instant::now,
+    /** Whether other computers may join this calendar or this one join another's -- dev mode, for now. */
+    private val multiComputer: () -> Boolean = { false },
 ) {
     private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
@@ -108,6 +111,17 @@ class CalendarSyncService(
         CalendarRelayAccess(
             folder, songFolder, settings, saveSettings, transport, watcher::savedHere, typicalSeconds, endpoints,
         )
+
+    /** The other computers on this calendar -- see [CalendarComputers]. */
+    val computers = CalendarComputers(
+        relay = relay,
+        lock = lock,
+        enabled = multiComputer,
+        onFailure = { _status.value = failure(it) },
+        syncNow = ::syncNow,
+        io = io,
+        now = now,
+    )
 
     /** The startup round — pull, merge, push — within [timeoutMs]. Returns whether it completed. */
     suspend fun syncOnStartup(timeoutMs: Long = STARTUP_TIMEOUT_MS): Boolean {
@@ -153,7 +167,7 @@ class CalendarSyncService(
 
     /** The songbooks the phones plan with, written only where they changed; never in a round's way. */
     suspend fun pushCatalog(): Int {
-        if (!settings().enabled || !settings().isPaired) return 0
+        if (!settings().enabled || !settings().isPaired || settings().isJoined) return 0
         return withContext(io) {
             // Background work over a library this code did not write: whatever it throws is a
             // report, never the app going down. A relay failure is shown where the calendar's own
@@ -209,7 +223,7 @@ class CalendarSyncService(
 
     /** Registers with the relay when sync is on and this desktop never has; nothing to do otherwise. */
     suspend fun registerIfNeeded(): Boolean = lock.withLock {
-        if (!settings().enabled || settings().isPaired) return@withLock settings().isPaired
+        if (!settings().enabled || settings().isPaired || settings().isJoined) return@withLock settings().isPaired
         withContext(io) {
             try {
                 relay.withClientKey { relay.ensureRegistered() }
@@ -237,6 +251,11 @@ class CalendarSyncService(
      */
     fun unpair(): Boolean {
         val current = settings()
+        if (current.isJoined) {
+            computers.leave()
+            _status.value = CalendarSyncStatus.Unpaired
+            return true
+        }
         val at = now()
         if (current.nextRotationAt(at) != null) return false
         saveSettings(
@@ -250,7 +269,7 @@ class CalendarSyncService(
     }
 
     private suspend fun round(work: (SyncCoordinator) -> SyncOutcome): Boolean = lock.withLock {
-        if (!settings().enabled) {
+        if (!settings().enabled || (settings().isJoined && !multiComputer())) {
             _status.value = CalendarSyncStatus.Off
             return@withLock false
         }
@@ -263,8 +282,9 @@ class CalendarSyncService(
             try {
                 val outcome = relay.withClientKey { work(relay.coordinator()) }
                 val at = Instant.now().toString()
-                saveSettings(settings().copy(cursor = outcome.cursor, lastSyncAt = at))
+                saveSettings(settings().copy(cursor = outcome.cursor, lastSyncAt = at).withRelayRole(outcome.role))
                 if (outcome.devices.isNotEmpty() || outcome.phoneChanges > 0) _devices.value = outcome.devices
+                if (outcome.role == RemoteRole.MAIN) computers.update(outcome.computers)
                 _status.value = if (outcome.otherDesktop.isNotEmpty()) {
                     CalendarSyncStatus.OtherDesktop(outcome.otherDesktop)
                 } else {
