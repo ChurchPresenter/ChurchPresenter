@@ -7,7 +7,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -64,7 +69,8 @@ class CompanionTriggersCardTest {
     }
 
     private fun ComposeUiTest.press(label: String) {
-        onNodeWithText(label).performScrollTo().performClick()
+        // The "+ Key" half of a split button is named in full for a screen reader: "Go Live + Key".
+        onNode(hasClickAction() and (hasText(label) or hasContentDescription(label))).performScrollTo().performClick()
         waitForIdle()
     }
 
@@ -178,6 +184,29 @@ class CompanionTriggersCardTest {
             waitForIdle()
             buttons.forEach { press(it) }
             assertEquals(buttons.size, elsewhere.size)
+        }
+    }
+
+    @Test
+    fun `the filter narrows the rows, and says so when nothing matches`() {
+        lottie("Pastor - 01")
+        lottie("Welcome")
+        card { _ ->
+            waitUntil("the folder scan lists Welcome") {
+                onAllNodesWithText("Welcome").fetchSemanticsNodes().isNotEmpty()
+            }
+            // A trailing "- 01" is drawn as a tag of its own beside the name.
+            onNodeWithText("Pastor").assertExists()
+            onNodeWithText("01").assertExists()
+
+            onNode(hasSetTextAction()).performTextInput("past")
+            waitForIdle()
+            onNodeWithText("Pastor").assertExists()
+            assertTrue(onAllNodesWithText("Welcome").fetchSemanticsNodes().isEmpty(), "Welcome is filtered out")
+
+            onNode(hasSetTextAction()).performTextInput("zzz")
+            waitForIdle()
+            onNodeWithText("No lower thirds match that.").assertExists()
         }
     }
 }

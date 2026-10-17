@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">Bu kodun süresi doldu. Ana bilgisayardan yenisini isteyin.</string>
     <string name="calendar_join_replaces">Onunla eşleştirilmiş telefonlar da eşitlemeyi bırakır ve bunun yerine ana bilgisayarın takviminden planlarsınız.</string>
     <string name="calendar_join_failed">Katılınamadı. Kodu ve internet bağlantısını kontrol edin.</string>
+    <string name="remote_clients_tab_allowed">İzin verilen</string>
+    <string name="remote_clients_tab_blocked">Engellenen</string>
+    <string name="remote_clients_unnamed">Adsız cihaz</string>
+    <string name="companion_lt_filter">Alt bantları filtrele</string>
+    <string name="companion_lt_no_match">Eşleşen alt bant yok.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">Yüklemeler birkaç saniye sürer</string>
+    <string name="server_url_copy">Kopyala</string>
+    <string name="max_media_upload_minutes">≈ %1$d dk HD video</string>
+    <string name="max_media_upload_under_minute">≈ bir dakikadan az HD video</string>
     <string name="calendar_sync_card_title">Takvim eşitleme</string>
     <string name="calendar_sync_description_computers">Hizmetleri tüm hafta boyunca, bu bilgisayar kapalıyken bile telefonlardan, tabletlerden ve diğer bilgisayarlardan planlayın. Bu bilgisayar asıl kaynak olmaya devam eder.</string>
     <string name="calendar_sync_pill_off">Kapalı</string>

@@ -95,6 +95,7 @@ class ServerSettingsTabRecompositionTest {
             onNodeWithText(ServerLabel.SECTION_CLIENTS).assertExists()
             onNodeWithText("Booth iPad").assertExists("the rows must survive a no-op re-render")
             onNodeWithText("alpha").assertExists()
+            showBlockedClients()
             onNodeWithText("zulu").assertExists()
         }
     }
@@ -122,7 +123,9 @@ class ServerSettingsTabRecompositionTest {
             set { copy(apiKeyEnabled = true, fileUploadEnabled = true) }
 
             onNodeWithText("Middle One").assertExists("the label must survive unrelated churn")
-            for (id in listOf("alpha", "mike", "zulu")) onNodeWithText(id).assertExists()
+            for (id in listOf("alpha", "mike")) onNodeWithText(id).assertExists()
+            showBlockedClients()
+            onNodeWithText("zulu").assertExists()
             assertEquals(setOf("alpha", "mike"), clients.allowedClients, "and nothing may have moved list")
             assertEquals(setOf("zulu"), clients.blockedClients)
         }

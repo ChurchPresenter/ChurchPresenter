@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">Msimbo huo umeisha muda. Omba mpya kutoka kompyuta kuu.</string>
     <string name="calendar_join_replaces">Simu zilizooanishwa nayo pia zitaacha kusawazisha, na utapanga kutoka kalenda ya kompyuta kuu badala yake.</string>
     <string name="calendar_join_failed">Imeshindwa kujiunga. Kagua msimbo na muunganisho wa intaneti.</string>
+    <string name="remote_clients_tab_allowed">Walioruhusiwa</string>
+    <string name="remote_clients_tab_blocked">Waliozuiwa</string>
+    <string name="remote_clients_unnamed">Kifaa kisicho na jina</string>
+    <string name="companion_lt_filter">Chuja mistari ya chini</string>
+    <string name="companion_lt_no_match">Hakuna mstari wa chini unaolingana.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">Upakiaji huchukua sekunde chache</string>
+    <string name="server_url_copy">Nakili</string>
+    <string name="max_media_upload_minutes">≈ dakika %1$d za video ya HD</string>
+    <string name="max_media_upload_under_minute">≈ chini ya dakika moja ya video ya HD</string>
     <string name="calendar_sync_card_title">Usawazishaji wa kalenda</string>
     <string name="calendar_sync_description_computers">Panga ibada kutoka kwa simu, kompyuta kibao na kompyuta nyingine wiki nzima, hata kompyuta hii ikiwa imezimwa. Kompyuta hii inabaki kuwa chanzo kikuu.</string>
     <string name="calendar_sync_pill_off">Imezimwa</string>

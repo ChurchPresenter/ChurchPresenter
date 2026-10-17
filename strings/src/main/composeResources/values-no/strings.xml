@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">Koden har utløpt. Be hovedmaskinen om en ny.</string>
     <string name="calendar_join_replaces">Telefoner som er paret med den slutter også å synkronisere, og du planlegger i hovedmaskinens kalender i stedet.</string>
     <string name="calendar_join_failed">Kunne ikke koble til. Sjekk koden og internettforbindelsen.</string>
+    <string name="remote_clients_tab_allowed">Tillatte</string>
+    <string name="remote_clients_tab_blocked">Blokkerte</string>
+    <string name="remote_clients_unnamed">Enhet uten navn</string>
+    <string name="companion_lt_filter">Filtrer undertekstbokser</string>
+    <string name="companion_lt_no_match">Ingen undertekstbokser samsvarer.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">Opplastinger tar noen sekunder</string>
+    <string name="server_url_copy">Kopier</string>
+    <string name="max_media_upload_minutes">≈ %1$d min HD-video</string>
+    <string name="max_media_upload_under_minute">≈ under ett minutt HD-video</string>
     <string name="calendar_sync_card_title">Kalendersynkronisering</string>
     <string name="calendar_sync_description_computers">Planlegg gudstjenester fra telefoner, nettbrett og andre datamaskiner hele uken, selv når denne datamaskinen er av. Denne datamaskinen forblir kilden til sannhet.</string>
     <string name="calendar_sync_pill_off">Av</string>

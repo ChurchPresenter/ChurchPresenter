@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">该代码已过期。请向主电脑索取新代码。</string>
     <string name="calendar_join_replaces">与此电脑配对的手机也将停止同步，之后你将使用主电脑的日历进行规划。</string>
     <string name="calendar_join_failed">无法加入。请检查代码和网络连接。</string>
+    <string name="remote_clients_tab_allowed">已允许</string>
+    <string name="remote_clients_tab_blocked">已阻止</string>
+    <string name="remote_clients_unnamed">未命名设备</string>
+    <string name="companion_lt_filter">筛选下三分之一</string>
+    <string name="companion_lt_no_match">没有匹配的下三分之一。</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">上传需要几秒钟</string>
+    <string name="server_url_copy">复制</string>
+    <string name="max_media_upload_minutes">≈ %1$d 分钟高清视频</string>
+    <string name="max_media_upload_under_minute">≈ 不到一分钟高清视频</string>
     <string name="calendar_sync_card_title">日历同步</string>
     <string name="calendar_sync_description_computers">整周都可以通过手机、平板和其他电脑规划聚会，即使这台电脑处于关机状态。这台电脑始终是权威数据源。</string>
     <string name="calendar_sync_pill_off">关闭</string>

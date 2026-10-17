@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">Taj je kod istekao. Zatražite novi od glavnog računala.</string>
     <string name="calendar_join_replaces">Telefoni upareni s njim također će prestati sinkronizirati, a planirat ćete iz kalendara glavnog računala.</string>
     <string name="calendar_join_failed">Pridruživanje nije uspjelo. Provjerite kod i internetsku vezu.</string>
+    <string name="remote_clients_tab_allowed">Dopušteni</string>
+    <string name="remote_clients_tab_blocked">Blokirani</string>
+    <string name="remote_clients_unnamed">Uređaj bez naziva</string>
+    <string name="companion_lt_filter">Filtriraj donje trake</string>
+    <string name="companion_lt_no_match">Nijedna donja traka ne odgovara.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">Prijenos traje nekoliko sekundi</string>
+    <string name="server_url_copy">Kopiraj</string>
+    <string name="max_media_upload_minutes">≈ %1$d min HD videa</string>
+    <string name="max_media_upload_under_minute">≈ manje od minute HD videa</string>
     <string name="calendar_sync_card_title">Sinkronizacija kalendara</string>
     <string name="calendar_sync_description_computers">Planirajte bogoslužja s telefona, tableta i drugih računala cijeli tjedan, čak i dok je ovo računalo isključeno. Ovo računalo ostaje izvor istine.</string>
     <string name="calendar_sync_pill_off">Isključeno</string>

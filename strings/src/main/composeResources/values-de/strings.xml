@@ -2284,6 +2284,16 @@
     <string name="calendar_join_expired">Dieser Code ist abgelaufen. Bitte den Hauptcomputer um einen neuen.</string>
     <string name="calendar_join_replaces">Damit gekoppelte Telefone hören ebenfalls auf zu synchronisieren, und du planst stattdessen im Kalender des Hauptcomputers.</string>
     <string name="calendar_join_failed">Beitritt fehlgeschlagen. Prüfe den Code und die Internetverbindung.</string>
+    <string name="remote_clients_tab_allowed">Erlaubt</string>
+    <string name="remote_clients_tab_blocked">Gesperrt</string>
+    <string name="remote_clients_unnamed">Unbenanntes Gerät</string>
+    <string name="companion_lt_filter">Bauchbinden filtern</string>
+    <string name="companion_lt_no_match">Keine passenden Bauchbinden.</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">Uploads dauern einige Sekunden</string>
+    <string name="server_url_copy">Kopieren</string>
+    <string name="max_media_upload_minutes">≈ %1$d Min. HD-Video</string>
+    <string name="max_media_upload_under_minute">≈ unter einer Minute HD-Video</string>
     <string name="calendar_sync_card_title">Kalender-Synchronisierung</string>
     <string name="calendar_sync_description_computers">Plane Gottesdienste die ganze Woche über von Telefonen, Tablets und anderen Computern aus, auch wenn dieser Computer aus ist. Dieser Computer bleibt die maßgebliche Quelle.</string>
     <string name="calendar_sync_pill_off">Aus</string>

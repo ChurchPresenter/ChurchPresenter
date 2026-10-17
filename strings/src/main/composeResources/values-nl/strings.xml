@@ -2311,6 +2311,16 @@
     <string name="calendar_join_expired">Die code is verlopen. Vraag de hoofdcomputer om een nieuwe.</string>
     <string name="calendar_join_replaces">Telefoons die eraan gekoppeld zijn stoppen ook met synchroniseren, en je plant voortaan in de kalender van de hoofdcomputer.</string>
     <string name="calendar_join_failed">Aansluiten mislukt. Controleer de code en de internetverbinding.</string>
+    <string name="remote_clients_tab_allowed">Toegestaan</string>
+    <string name="remote_clients_tab_blocked">Geblokkeerd</string>
+    <string name="remote_clients_unnamed">Naamloos apparaat</string>
+    <string name="companion_lt_filter">Ondertitels filteren</string>
+    <string name="companion_lt_no_match">Geen ondertitels gevonden.</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">Uploads duren enkele seconden</string>
+    <string name="server_url_copy">Kopiëren</string>
+    <string name="max_media_upload_minutes">≈ %1$d min HD-video</string>
+    <string name="max_media_upload_under_minute">≈ minder dan een minuut HD-video</string>
     <string name="calendar_sync_card_title">Kalendersynchronisatie</string>
     <string name="calendar_sync_description_computers">Plan de hele week diensten vanaf telefoons, tablets en andere computers, ook als deze computer uit staat. Deze computer blijft de bron van waarheid.</string>
     <string name="calendar_sync_pill_off">Uit</string>

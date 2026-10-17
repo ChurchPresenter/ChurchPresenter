@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">Kodning muddati tugagan. Asosiy kompyuterdan yangisini so‘rang.</string>
     <string name="calendar_join_replaces">U bilan juftlangan telefonlar ham sinxronlashni to‘xtatadi, siz esa asosiy kompyuterning taqvimida rejalashtirasiz.</string>
     <string name="calendar_join_failed">Qo‘shilib bo‘lmadi. Kodni va internet aloqasini tekshiring.</string>
+    <string name="remote_clients_tab_allowed">Ruxsat berilgan</string>
+    <string name="remote_clients_tab_blocked">Bloklangan</string>
+    <string name="remote_clients_unnamed">Nomsiz qurilma</string>
+    <string name="companion_lt_filter">Quyi lavhalarni saralash</string>
+    <string name="companion_lt_no_match">Mos quyi lavha yo‘q.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">Yuklash bir necha soniya oladi</string>
+    <string name="server_url_copy">Nusxa olish</string>
+    <string name="max_media_upload_minutes">≈ %1$d daqiqa HD video</string>
+    <string name="max_media_upload_under_minute">≈ bir daqiqadan kam HD video</string>
     <string name="calendar_sync_card_title">Taqvim sinxronlash</string>
     <string name="calendar_sync_description_computers">Xizmatlarni telefonlar, planshetlar va boshqa kompyuterlardan butun hafta, hatto bu kompyuter o‘chiq bo‘lganda ham rejalashtiring. Bu kompyuter asosiy manba bo‘lib qoladi.</string>
     <string name="calendar_sync_pill_off">O‘chiq</string>

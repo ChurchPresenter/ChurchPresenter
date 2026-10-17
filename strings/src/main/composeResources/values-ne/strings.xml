@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">यो कोडको म्याद सकियो। मुख्य कम्प्युटरसँग नयाँ कोड माग्नुहोस्।</string>
     <string name="calendar_join_replaces">यससँग जोडा बनाइएका फोनहरूले पनि सिंक गर्न छोड्नेछन्, र तपाईं यसको सट्टा मुख्य कम्प्युटरको पात्रोबाट योजना बनाउनुहुनेछ।</string>
     <string name="calendar_join_failed">जोडिन सकिएन। कोड र इन्टरनेट जडान जाँच गर्नुहोस्।</string>
+    <string name="remote_clients_tab_allowed">अनुमति दिइएका</string>
+    <string name="remote_clients_tab_blocked">रोकिएका</string>
+    <string name="remote_clients_unnamed">नाम नभएको उपकरण</string>
+    <string name="companion_lt_filter">तल्लो पट्टी फिल्टर गर्नुहोस्</string>
+    <string name="companion_lt_no_match">कुनै तल्लो पट्टी मेल खाँदैन।</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">अपलोडमा केही सेकेन्ड लाग्छ</string>
+    <string name="server_url_copy">प्रतिलिपि गर्नुहोस्</string>
+    <string name="max_media_upload_minutes">≈ %1$d मिनेट HD भिडियो</string>
+    <string name="max_media_upload_under_minute">≈ एक मिनेटभन्दा कम HD भिडियो</string>
     <string name="calendar_sync_card_title">पात्रो सिंक</string>
     <string name="calendar_sync_description_computers">यो कम्प्युटर बन्द हुँदा पनि हप्ताभरि फोन, ट्याब्लेट र अन्य कम्प्युटरहरूबाट सेवाहरू योजना गर्नुहोस्। यो कम्प्युटर नै मुख्य स्रोत रहन्छ।</string>
     <string name="calendar_sync_pill_off">बन्द</string>

@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">این کد منقضی شده است. از رایانهٔ اصلی کد جدیدی بخواهید.</string>
     <string name="calendar_join_replaces">تلفن‌هایی که با آن جفت شده‌اند نیز همگام‌سازی را متوقف می‌کنند و به‌جای آن از تقویم رایانهٔ اصلی برنامه‌ریزی می‌کنید.</string>
     <string name="calendar_join_failed">پیوستن ممکن نشد. کد و اتصال اینترنت را بررسی کنید.</string>
+    <string name="remote_clients_tab_allowed">مجاز</string>
+    <string name="remote_clients_tab_blocked">مسدود</string>
+    <string name="remote_clients_unnamed">دستگاه بی‌نام</string>
+    <string name="companion_lt_filter">پالایش نوارهای پایینی</string>
+    <string name="companion_lt_no_match">هیچ نوار پایینی مطابقت ندارد.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">بارگذاری چند ثانیه طول می‌کشد</string>
+    <string name="server_url_copy">رونوشت</string>
+    <string name="max_media_upload_minutes">≈ %1$d دقیقه ویدیوی HD</string>
+    <string name="max_media_upload_under_minute">≈ کمتر از یک دقیقه ویدیوی HD</string>
     <string name="calendar_sync_card_title">همگام‌سازی تقویم</string>
     <string name="calendar_sync_description_computers">خدمات را در تمام هفته از تلفن‌ها، تبلت‌ها و رایانه‌های دیگر برنامه‌ریزی کنید، حتی وقتی این رایانه خاموش است. این رایانه منبع اصلی باقی می‌ماند.</string>
     <string name="calendar_sync_pill_off">خاموش</string>

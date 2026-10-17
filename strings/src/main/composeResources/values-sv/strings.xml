@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">Koden har gått ut. Be huvuddatorn om en ny.</string>
     <string name="calendar_join_replaces">Telefoner som är ihopparade med den slutar också synkronisera, och du planerar i huvuddatorns kalender i stället.</string>
     <string name="calendar_join_failed">Det gick inte att ansluta. Kontrollera koden och internetanslutningen.</string>
+    <string name="remote_clients_tab_allowed">Tillåtna</string>
+    <string name="remote_clients_tab_blocked">Blockerade</string>
+    <string name="remote_clients_unnamed">Namnlös enhet</string>
+    <string name="companion_lt_filter">Filtrera nedre tredjedelar</string>
+    <string name="companion_lt_no_match">Inga nedre tredjedelar matchar.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">Uppladdningar tar några sekunder</string>
+    <string name="server_url_copy">Kopiera</string>
+    <string name="max_media_upload_minutes">≈ %1$d min HD-video</string>
+    <string name="max_media_upload_under_minute">≈ under en minut HD-video</string>
     <string name="calendar_sync_card_title">Kalendersynkronisering</string>
     <string name="calendar_sync_description_computers">Planera gudstjänster från telefoner, surfplattor och andra datorer hela veckan, även när den här datorn är av. Den här datorn förblir den sanna källan.</string>
     <string name="calendar_sync_pill_off">Av</string>
