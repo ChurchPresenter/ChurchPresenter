@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -21,6 +23,9 @@ import kotlin.test.Test
  * freezing on the last picture, and a path that cannot be decoded says "Failed to load image"
  * instead of a blank screen the operator reads as "it's working". Each is asserted on the node that
  * lands on screen — the image's content description, or the fallback text — so nothing races a fade.
+ *
+ * The picture decodes on `Dispatchers.IO`, which `waitForIdle` does not wait for, so the two cases
+ * that read a file wait for the node itself.
  *
  * The valid-image case writes a real PNG to a temp file because the loader decodes actual bytes off
  * disk; the two failure cases need no file.
@@ -43,6 +48,9 @@ class PicturePresenterRenderTest {
         }
         runComposeUiTest {
             setContent { Box(screen) { PicturePresenter(imagePath = png.absolutePath) } }
+            waitUntil(timeoutMillis = DECODE_TIMEOUT_MS) {
+                onAllNodesWithContentDescription(presentedImage).fetchSemanticsNodes().isNotEmpty()
+            }
             onNodeWithContentDescription(presentedImage).assertExists("a valid image must actually render")
             onNodeWithText(failedToLoad, substring = true).assertDoesNotExist()
             onNodeWithText(noImages, substring = true).assertDoesNotExist()
@@ -59,7 +67,14 @@ class PicturePresenterRenderTest {
     @Test
     fun `an undecodable path reports the failure instead of a blank screen`() = runComposeUiTest {
         setContent { Box(screen) { PicturePresenter(imagePath = "/no/such/file/does-not-exist.png") } }
+        waitUntil(timeoutMillis = DECODE_TIMEOUT_MS) {
+            onAllNodesWithText(failedToLoad, substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
         onNodeWithText(failedToLoad, substring = true)
             .assertExists("a missing file must surface an error, not read as a working blank output")
+    }
+
+    private companion object {
+        const val DECODE_TIMEOUT_MS = 5_000L
     }
 }

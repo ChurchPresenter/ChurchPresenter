@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.delay
@@ -58,7 +59,16 @@ class AppPreviewOutputScreenshotTest {
         return library()
     }
 
-    private fun output(name: String, settings: AppSettings = settings(), content: @Composable () -> Unit) =
+    /**
+     * [awaitDescription] names a node that only appears once something loaded off the UI thread --
+     * a picture decodes on `Dispatchers.IO`, which `waitForIdle` does not wait for.
+     */
+    private fun output(
+        name: String,
+        settings: AppSettings = settings(),
+        awaitDescription: String? = null,
+        content: @Composable () -> Unit,
+    ) =
         runSkikoComposeUiTest(
             size = Size(OUTPUT_WIDTH.toFloat(), OUTPUT_HEIGHT.toFloat()) * PREVIEW_DENSITY,
             density = Density(PREVIEW_DENSITY),
@@ -71,6 +81,11 @@ class AppPreviewOutputScreenshotTest {
                 }
             }
             waitForIdle()
+            awaitDescription?.let { description ->
+                waitUntil(timeoutMillis = LOAD_TIMEOUT_MS) {
+                    onAllNodesWithContentDescription(description).fetchSemanticsNodes().isNotEmpty()
+                }
+            }
             captureTo(File("$SCREENSHOT_ROOT/output/$name.png"))
         }
 
@@ -115,7 +130,7 @@ class AppPreviewOutputScreenshotTest {
 
     // The gallery image `the pictures tab` clicks and puts live, so the two shots agree.
     @Test
-    fun `picture on screen`() = output("picture") {
+    fun `picture on screen`() = output("picture", awaitDescription = "Presented Image") {
         PicturePresenter(
             imagePath = File(LIBRARY, "Gallery/04 Church.png").absolutePath,
         )
@@ -242,6 +257,7 @@ class AppPreviewOutputScreenshotTest {
          */
         const val LOWER_THIRD_PROGRESS = 0.5f
         const val FRAME_MS = 16L
+        const val LOAD_TIMEOUT_MS = 10_000L
 
         /** ~1s of scene time for the painter to arrive; only reached when it never does. */
         const val PAINTER_FRAMES = 60
