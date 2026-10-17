@@ -64,7 +64,10 @@ generated Compose resources. Those are one `./gradlew clean`, not ten bugs.
 
 **UI stalls are one issue per cause**, titled "UI thread stalled" and grouped on the first frame of
 the app's own code. Filter `stall.live:true` for the ones an audience saw; `stall.length` says how
-long, in ranges.
+long, in ranges. Only stalls of 250 ms or more are sent. Two kinds group as one issue each and
+carry `stall.cause`: `software-renderer` (the main window fell back to drawing in software —
+`render.api.actual` says so) and `cold-load` (the JVM loading code, or Compose reading a string, for
+the first time).
 
 **Not every issue is a crash.** `logback.xml` forwards every `ERROR` log line to Sentry as its own
 issue and every `WARN` as a breadcrumb, so an issue whose only frame is a log call came from

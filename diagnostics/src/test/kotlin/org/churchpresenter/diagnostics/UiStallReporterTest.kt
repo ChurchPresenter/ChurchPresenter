@@ -42,9 +42,9 @@ class UiStallReporterTest {
         reporter.firstFrame()
         now = 20_000
         reporter.firstFrame()
-        now = UiStallReporter.SETTLE_MS + 100
+        now = UiStallReporter.SETTLE_MS + 400
 
-        reporter.stalled(stall(50))
+        reporter.stalled(stall(300))
 
         assertEquals(1, sent.size)
     }
@@ -95,6 +95,59 @@ class UiStallReporterTest {
 
         assertEquals(UiStallReporter.MAX_EVENTS, sent.size)
         assertEquals(12, reporter.liveStallsPastGate())
+    }
+
+    @Test
+    fun `a stall shorter than the send minimum is counted but not sent`() {
+        settled()
+        reporter.outputLive(true)
+        now += 1_000
+
+        reporter.stalled(stall(UiStallReporter.SEND_MIN_MS - 1))
+        assertTrue(sent.isEmpty(), "a frame a little over budget is ordinary drawing")
+
+        now += 1_000
+        reporter.stalled(stall(UiStallReporter.SEND_MIN_MS))
+        assertEquals(1, sent.size)
+    }
+
+    @Test
+    fun `every stall on a window drawn in software groups as one issue`() {
+        settled()
+        reporter.softwareRendering(true)
+        now += 1_000
+
+        reporter.stalled(stall(600))
+
+        val event = sent.single()
+        assertEquals(listOf("ui-stall", STALL_CAUSE_SOFTWARE), event.fingerprint)
+        assertEquals(STALL_CAUSE_SOFTWARE, event.tags["stall.cause"])
+    }
+
+    @Test
+    fun `a stall loading code or a string for the first time groups as one issue`() {
+        val classLoad = StackTraceElement("java.lang.ClassLoader", "defineClass1", null, -2)
+        val resource = StackTraceElement(
+            "org.jetbrains.compose.resources.ResourceState_blockingKt", "rememberResourceState", null, 15,
+        )
+
+        val loaded = stallEvent(Stall(600, 100, listOf(classLoad, appFrame)), live = false)
+        val string = stallEvent(Stall(600, 100, listOf(resource, appFrame)), live = false)
+
+        assertEquals(listOf("ui-stall", STALL_CAUSE_COLD_LOAD), loaded.fingerprint)
+        assertEquals(listOf("ui-stall", STALL_CAUSE_COLD_LOAD), string.fingerprint)
+        assertEquals(STALL_CAUSE_COLD_LOAD, loaded.tags["stall.cause"])
+    }
+
+    @Test
+    fun `a class loaded below the app's own frame is not a cold load`() {
+        // The app frame is where the thread was stuck; a loader further out is how it got there.
+        val classLoad = StackTraceElement("jdk.internal.loader.BuiltinClassLoader", "loadClass", null, -1)
+
+        val event = stallEvent(Stall(600, 100, listOf(jdkFrame, appFrame, classLoad)), live = false)
+
+        assertEquals(listOf("ui-stall", "${appFrame.className}.${appFrame.methodName}"), event.fingerprint)
+        assertTrue("stall.cause" !in event.tags)
     }
 
     @Test

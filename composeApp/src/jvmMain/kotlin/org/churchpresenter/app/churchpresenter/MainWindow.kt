@@ -251,6 +251,7 @@ private fun AppRootState.MainWindow(
             // render.api is what was asked for; skiko falls back to drawing in software on a GPU
             // it cannot use, which makes every frame slow, so a stall report says which it got.
             CrashReporter.setTag("render.api.actual", window.renderApi.name)
+            uiStallReporter.softwareRendering(window.renderApi.name.startsWith("SOFTWARE"))
         }
         MacMenuBarActivationFix()
         LanguageProvider(language = currentLanguage) {

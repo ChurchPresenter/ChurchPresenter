@@ -11,8 +11,14 @@ import java.util.concurrent.Executors
  *   shows content -- six frames at 60 Hz -- and [idleBudgetMs] otherwise.
  * - **Startup is skipped**: nothing counts until [SETTLE_MS] after the main window's first frame,
  *   since a first launch stalls for a second or more while it loads.
+ * - **Only stalls of [SEND_MIN_MS] or more are sent.** A frame a little over the live budget is
+ *   ordinary drawing, and a single sample of it lands on whatever happened to be running.
  * - **At most [MAX_EVENTS] events a run**, one per stall. The live-stall count is kept whatever
  *   was sent.
+ * - **Two causes group as one issue each** rather than one per page they surface on: the JVM
+ *   loading code or Compose reading a string for the first time ([STALL_CAUSE_COLD_LOAD]), and any
+ *   stall on a machine whose main window draws in software ([STALL_CAUSE_SOFTWARE]), where every
+ *   frame is slow.
  *
  * [send] is handed each event on the thread that answered the ping -- the event thread -- so the
  * app's sender passes it to a thread of its own ([sendToSentry]).
@@ -26,6 +32,8 @@ class UiStallReporter(
 
     @Volatile private var countsFrom = Long.MAX_VALUE
 
+    @Volatile private var software = false
+
     private var liveSince = NONE
     private var liveMs = 0L
     private var liveStalls = 0
@@ -37,6 +45,11 @@ class UiStallReporter(
     /** The main window drew its first frame: stalls count from [SETTLE_MS] after this. */
     fun firstFrame() {
         if (countsFrom == Long.MAX_VALUE) countsFrom = clock() + SETTLE_MS
+    }
+
+    /** Whether the main window ended up drawing in software, told once it has drawn. */
+    fun softwareRendering(isSoftware: Boolean) {
+        software = isSoftware
     }
 
     /** Whether any output is showing content, told on every change. */
@@ -59,9 +72,9 @@ class UiStallReporter(
         if (startedAt < countsFrom) return
         val wasLive = liveSince != NONE && liveSince <= startedAt
         if (wasLive && stall.lateMs > GATE_MS) liveStalls++
-        if (sent >= MAX_EVENTS || sampledAsItAnswered(stall)) return
+        if (stall.lateMs < SEND_MIN_MS || sent >= MAX_EVENTS || sampledAsItAnswered(stall)) return
         sent++
-        send(stallEvent(stall, wasLive))
+        send(stallEvent(stall, wasLive, software))
     }
 
     /** Minutes an output has been live this run, an interval still open included. */
@@ -84,6 +97,9 @@ class UiStallReporter(
 
         /** How long after the first frame stalls start to count. */
         const val SETTLE_MS = 30_000L
+
+        /** The shortest stall sent; shorter ones are counted but not sent. */
+        const val SEND_MIN_MS = 250L
 
         /** The most stall events one run sends. */
         const val MAX_EVENTS = 10
@@ -126,17 +142,48 @@ data class StallEvent(
 
 /**
  * The event for [stall]. It groups on the first frame of the app's own code, so one cause is one
- * issue; a stall stuck wholly in the JDK or a library groups on its top frame instead.
+ * issue; a stall stuck wholly in the JDK or a library groups on its top frame instead. A stall on a
+ * [software]-drawn window, or one stuck loading code or a string for the first time, groups with
+ * the rest of its kind, and says which in `stall.cause`.
  */
-fun stallEvent(stall: Stall, live: Boolean): StallEvent {
-    val cause = stall.frames.firstOrNull { it.className.startsWith(APP_PACKAGE) } ?: stall.frames.firstOrNull()
+fun stallEvent(stall: Stall, live: Boolean, software: Boolean = false): StallEvent {
+    val appFrame = stall.frames.indexOfFirst { it.className.startsWith(APP_PACKAGE) }
+    val cause = stall.frames.getOrNull(appFrame) ?: stall.frames.firstOrNull()
+    val kind = when {
+        software -> STALL_CAUSE_SOFTWARE
+        isColdLoad(stall.frames, appFrame) -> STALL_CAUSE_COLD_LOAD
+        else -> null
+    }
+    val tags = mapOf("stall.live" to live.toString(), "stall.length" to lengthBucket(stall.lateMs))
     return StallEvent(
         frames = stall.frames,
-        tags = mapOf("stall.live" to live.toString(), "stall.length" to lengthBucket(stall.lateMs)),
+        tags = kind?.let { tags + ("stall.cause" to it) } ?: tags,
         extras = mapOf("stall.ms" to stall.lateMs.toString(), "stall.budget.ms" to stall.budgetMs.toString()),
-        fingerprint = listOf("ui-stall", cause?.let { "${it.className}.${it.methodName}" } ?: "no-frames"),
+        fingerprint = listOf("ui-stall", kind ?: cause?.let { "${it.className}.${it.methodName}" } ?: "no-frames"),
     )
 }
+
+/** `stall.cause` for a stall on a main window that draws in software. */
+const val STALL_CAUSE_SOFTWARE = "software-renderer"
+
+/** `stall.cause` for a stall loading code from the jar, or a string through Compose, the first time. */
+const val STALL_CAUSE_COLD_LOAD = "cold-load"
+
+/**
+ * Whether the thread was inside the class loader or Compose's resource reader, above the app's own
+ * code ([appFrame], or the whole stack when there is none): a first use, paid once a run.
+ */
+internal fun isColdLoad(frames: List<StackTraceElement>, appFrame: Int): Boolean {
+    val above = if (appFrame < 0) frames else frames.subList(0, appFrame)
+    return above.any { frame -> COLD_LOADERS.any { frame.className.startsWith(it) } }
+}
+
+private val COLD_LOADERS = listOf(
+    "java.lang.ClassLoader",
+    "jdk.internal.loader.",
+    "java.lang.invoke.InnerClassLambdaMetafactory",
+    "org.jetbrains.compose.resources.",
+)
 
 /**
  * Whether [stall]'s stack is the event thread already running the watchdog's own ping: the stall
