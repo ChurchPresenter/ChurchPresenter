@@ -2311,6 +2311,16 @@
     <string name="calendar_join_expired">Ese código ha caducado. Pide uno nuevo al ordenador principal.</string>
     <string name="calendar_join_replaces">Los teléfonos emparejados con él también dejarán de sincronizarse, y planificarás desde el calendario del ordenador principal.</string>
     <string name="calendar_join_failed">No se pudo unir. Comprueba el código y la conexión a internet.</string>
+    <string name="remote_clients_tab_allowed">Permitidos</string>
+    <string name="remote_clients_tab_blocked">Bloqueados</string>
+    <string name="remote_clients_unnamed">Dispositivo sin nombre</string>
+    <string name="companion_lt_filter">Filtrar rótulos</string>
+    <string name="companion_lt_no_match">Ningún rótulo coincide.</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">Las cargas tardan unos segundos</string>
+    <string name="server_url_copy">Copiar</string>
+    <string name="max_media_upload_minutes">≈ %1$d min de vídeo HD</string>
+    <string name="max_media_upload_under_minute">≈ menos de un minuto de vídeo HD</string>
     <string name="calendar_sync_card_title">Sincronización del calendario</string>
     <string name="calendar_sync_description_computers">Planifica servicios desde teléfonos, tabletas y otros ordenadores toda la semana, incluso con este ordenador apagado. Este ordenador sigue siendo la fuente de verdad.</string>
     <string name="calendar_sync_pill_off">Desactivado</string>

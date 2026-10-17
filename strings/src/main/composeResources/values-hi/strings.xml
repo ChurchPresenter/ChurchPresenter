@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">इस कोड की समय-सीमा समाप्त हो गई है। मुख्य कंप्यूटर से नया कोड माँगें।</string>
     <string name="calendar_join_replaces">इससे पेयर किए गए फ़ोन भी सिंक करना बंद कर देंगे, और आप इसके बजाय मुख्य कंप्यूटर के कैलेंडर से योजना बनाएँगे।</string>
     <string name="calendar_join_failed">जुड़ नहीं सके। कोड और इंटरनेट कनेक्शन जाँचें।</string>
+    <string name="remote_clients_tab_allowed">अनुमति वाले</string>
+    <string name="remote_clients_tab_blocked">अवरुद्ध</string>
+    <string name="remote_clients_unnamed">बिना नाम का डिवाइस</string>
+    <string name="companion_lt_filter">लोअर थर्ड फ़िल्टर करें</string>
+    <string name="companion_lt_no_match">कोई लोअर थर्ड मेल नहीं खाता।</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">अपलोड में कुछ सेकंड लगते हैं</string>
+    <string name="server_url_copy">कॉपी करें</string>
+    <string name="max_media_upload_minutes">≈ %1$d मिनट HD वीडियो</string>
+    <string name="max_media_upload_under_minute">≈ एक मिनट से कम HD वीडियो</string>
     <string name="calendar_sync_card_title">कैलेंडर सिंक</string>
     <string name="calendar_sync_description_computers">पूरे सप्ताह फ़ोन, टैबलेट और अन्य कंप्यूटरों से सेवाओं की योजना बनाएँ, तब भी जब यह कंप्यूटर बंद हो। यह कंप्यूटर ही मुख्य स्रोत बना रहता है।</string>
     <string name="calendar_sync_pill_off">बंद</string>

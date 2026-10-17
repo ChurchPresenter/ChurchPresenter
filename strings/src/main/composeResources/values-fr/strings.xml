@@ -2311,6 +2311,16 @@
     <string name="calendar_join_expired">Ce code a expiré. Demandez-en un nouveau à l’ordinateur principal.</string>
     <string name="calendar_join_replaces">Les téléphones associés à cet ordinateur cesseront aussi de se synchroniser, et vous planifierez depuis le calendrier de l’ordinateur principal.</string>
     <string name="calendar_join_failed">Impossible de rejoindre. Vérifiez le code et la connexion Internet.</string>
+    <string name="remote_clients_tab_allowed">Autorisés</string>
+    <string name="remote_clients_tab_blocked">Bloqués</string>
+    <string name="remote_clients_unnamed">Appareil sans nom</string>
+    <string name="companion_lt_filter">Filtrer les synthés</string>
+    <string name="companion_lt_no_match">Aucun synthé ne correspond.</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">Les téléversements prennent quelques secondes</string>
+    <string name="server_url_copy">Copier</string>
+    <string name="max_media_upload_minutes">≈ %1$d min de vidéo HD</string>
+    <string name="max_media_upload_under_minute">≈ moins d’une minute de vidéo HD</string>
     <string name="calendar_sync_card_title">Synchronisation du calendrier</string>
     <string name="calendar_sync_description_computers">Planifiez les services depuis des téléphones, des tablettes et d’autres ordinateurs toute la semaine, même lorsque cet ordinateur est éteint. Cet ordinateur reste la source de référence.</string>
     <string name="calendar_sync_pill_off">Désactivé</string>

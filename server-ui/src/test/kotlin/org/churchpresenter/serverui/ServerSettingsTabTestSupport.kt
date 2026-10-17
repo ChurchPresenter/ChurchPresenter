@@ -21,6 +21,8 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
@@ -161,13 +163,13 @@ internal object ServerLabel {
     const val STOPPED = "Stopped"
     const val PORT = "Port"
     const val HOST = "Host Override"
-    const val SERVER_URL = "Server URL"
+    const val SERVER_URL = "SERVER URL"
     const val API_KEY_PROTECTION = "API Key Protection"
-    const val API_KEY = "API Key"
+    const val API_KEY = "API KEY"
     const val ALLOW_UPLOAD = "Allow File Upload"
     const val MAX_UPLOAD = "Max media upload (MB)"
-    const val ALLOWED = "✓  Allowed Clients"
-    const val BLOCKED = "⛔  Blocked Clients"
+    const val ALLOWED = "Allowed"
+    const val BLOCKED = "Blocked"
     const val NO_TRIGGERS_SERVER_OFF = "Start the server to get trigger URLs"
     const val RESTART = "Restart"
     const val QR = "QR"
@@ -240,6 +242,12 @@ internal fun ComposeUiTest.assertFieldShows(value: String, what: String) {
 /** Any text box displaying [value], whether or not it is editable. */
 internal fun ComposeUiTest.boxShowing(value: String): SemanticsNodeInteraction =
     onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.EditableText) and hasText(value))
+
+/** Opens the Remote Clients card's Blocked tab; the Allowed one is open to begin with. */
+internal fun ComposeUiTest.showBlockedClients() {
+    onNode(hasClickAction() and hasText(ServerLabel.BLOCKED)).performScrollTo().performClick()
+    waitForIdle()
+}
 
 /** How many times [text] is rendered. */
 internal fun ComposeUiTest.countOf(text: String): Int =

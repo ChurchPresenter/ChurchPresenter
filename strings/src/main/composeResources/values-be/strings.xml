@@ -2283,6 +2283,16 @@
     <string name="calendar_join_expired">Тэрмін дзеяння кода скончыўся. Папрасіце новы на асноўным камп’ютары.</string>
     <string name="calendar_join_replaces">Звязаныя з ім тэлефоны таксама спыняць сінхранізацыю, а планаваць вы будзеце ў календары асноўнага камп’ютара.</string>
     <string name="calendar_join_failed">Не ўдалося далучыцца. Праверце код і падключэнне да інтэрнэту.</string>
+    <string name="remote_clients_tab_allowed">Дазволеныя</string>
+    <string name="remote_clients_tab_blocked">Заблакаваныя</string>
+    <string name="remote_clients_unnamed">Прылада без назвы</string>
+    <string name="companion_lt_filter">Фільтр цітраў</string>
+    <string name="companion_lt_no_match">Няма адпаведных цітраў.</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">Загрузка займае некалькі секунд</string>
+    <string name="server_url_copy">Капіяваць</string>
+    <string name="max_media_upload_minutes">≈ %1$d хв відэа HD</string>
+    <string name="max_media_upload_under_minute">≈ менш за хвіліну відэа HD</string>
     <string name="calendar_sync_card_title">Сінхранізацыя календара</string>
     <string name="calendar_sync_description_computers">Плануйце служэнні з тэлефонаў, планшэтаў і іншых камп’ютараў увесь тыдзень, нават калі гэты камп’ютар выключаны. Гэты камп’ютар застаецца асноўнай крыніцай.</string>
     <string name="calendar_sync_pill_off">Выкл.</string>

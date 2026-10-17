@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">ລະຫັດນີ້ໝົດອາຍຸແລ້ວ. ຂໍລະຫັດໃໝ່ຈາກຄອມພິວເຕີຫຼັກ.</string>
     <string name="calendar_join_replaces">ໂທລະສັບທີ່ຈັບຄູ່ກັບເຄື່ອງນີ້ຈະຢຸດຊິງຄ໌ນຳ, ແລະ ທ່ານຈະວາງແຜນຈາກປະຕິທິນຂອງຄອມພິວເຕີຫຼັກແທນ.</string>
     <string name="calendar_join_failed">ເຂົ້າຮ່ວມບໍ່ສຳເລັດ. ກວດສອບລະຫັດ ແລະ ການເຊື່ອມຕໍ່ອິນເຕີເນັດ.</string>
+    <string name="remote_clients_tab_allowed">ອະນຸຍາດ</string>
+    <string name="remote_clients_tab_blocked">ບລັອກ</string>
+    <string name="remote_clients_unnamed">ອຸປະກອນທີ່ບໍ່ມີຊື່</string>
+    <string name="companion_lt_filter">ກັ່ນຕອງແຖບລຸ່ມ</string>
+    <string name="companion_lt_no_match">ບໍ່ມີແຖບລຸ່ມທີ່ກົງກັນ.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">ການອັບໂຫຼດໃຊ້ເວລາສອງສາມວິນາທີ</string>
+    <string name="server_url_copy">ສຳເນົາ</string>
+    <string name="max_media_upload_minutes">≈ ວິດີໂອ HD %1$d ນາທີ</string>
+    <string name="max_media_upload_under_minute">≈ ວິດີໂອ HD ບໍ່ເຖິງໜຶ່ງນາທີ</string>
     <string name="calendar_sync_card_title">ຊິງຄ໌ປະຕິທິນ</string>
     <string name="calendar_sync_description_computers">ວາງແຜນພິທີຈາກໂທລະສັບ, ແທັບເລັດ ແລະ ຄອມພິວເຕີເຄື່ອງອື່ນໄດ້ຕະຫຼອດອາທິດ ເຖິງແມ່ນຄອມພິວເຕີເຄື່ອງນີ້ຈະປິດຢູ່. ຄອມພິວເຕີເຄື່ອງນີ້ຍັງຄົງເປັນແຫຼ່ງຂໍ້ມູນຫຼັກ.</string>
     <string name="calendar_sync_pill_off">ປິດ</string>

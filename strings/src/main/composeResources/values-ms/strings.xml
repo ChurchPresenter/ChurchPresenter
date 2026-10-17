@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">Kod itu telah tamat tempoh. Minta kod baharu daripada komputer utama.</string>
     <string name="calendar_join_replaces">Telefon yang dipasangkan dengannya juga akan berhenti menyegerak, dan anda akan merancang daripada kalendar komputer utama.</string>
     <string name="calendar_join_failed">Tidak dapat menyertai. Semak kod dan sambungan internet.</string>
+    <string name="remote_clients_tab_allowed">Dibenarkan</string>
+    <string name="remote_clients_tab_blocked">Dihalang</string>
+    <string name="remote_clients_unnamed">Peranti tanpa nama</string>
+    <string name="companion_lt_filter">Tapis lower third</string>
+    <string name="companion_lt_no_match">Tiada lower third yang sepadan.</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">Muat naik mengambil masa beberapa saat</string>
+    <string name="server_url_copy">Salin</string>
+    <string name="max_media_upload_minutes">≈ %1$d min video HD</string>
+    <string name="max_media_upload_under_minute">≈ kurang seminit video HD</string>
     <string name="calendar_sync_card_title">Penyegerakan kalendar</string>
     <string name="calendar_sync_description_computers">Rancang ibadat dari telefon, tablet dan komputer lain sepanjang minggu, walaupun komputer ini dimatikan. Komputer ini kekal sebagai sumber utama.</string>
     <string name="calendar_sync_pill_off">Mati</string>

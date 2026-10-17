@@ -36,6 +36,7 @@ class ServerSettingsTabClientsTest {
         assertTrue(clients.blockedClients.isEmpty(), "fixture: nothing blocked")
         onNodeWithText(ServerLabel.NO_ALLOWED)
             .assertExists("the allowed list must say it is empty")
+        showBlockedClients()
         onNodeWithText(ServerLabel.NO_BLOCKED)
             .assertExists("the blocked list must say it is empty")
     }
@@ -72,11 +73,15 @@ class ServerSettingsTabClientsTest {
                 blockPermanently("blocked-one")
             },
         ) { _, _ ->
+            // Each list is a tab of its own, with one row and so one Remove button.
             onNodeWithText("allowed-one").assertExists()
+            onNodeWithText("blocked-one").assertDoesNotExist()
+            onAllNodes(hasClickAction() and hasText(ServerLabel.REMOVE)).assertCountEquals(1)
+            showBlockedClients()
             onNodeWithText("blocked-one").assertExists()
-            // One row each, so one Remove button each.
-            onAllNodes(hasClickAction() and hasText(ServerLabel.REMOVE)).assertCountEquals(2)
-            onAllNodesWithContentDescription(ServerLabel.SET_LABEL).assertCountEquals(2)
+            onNodeWithText("allowed-one").assertDoesNotExist()
+            onAllNodes(hasClickAction() and hasText(ServerLabel.REMOVE)).assertCountEquals(1)
+            onAllNodesWithContentDescription(ServerLabel.SET_LABEL).assertCountEquals(1)
         }
     }
 
@@ -131,6 +136,7 @@ class ServerSettingsTabClientsTest {
     @Test
     fun `Remove takes a client off the blocked list`() {
         serverTab(seedClients = { blockPermanently("blocked-one") }) { _, clients ->
+            showBlockedClients()
             onNode(hasClickAction() and hasText(ServerLabel.REMOVE)).performScrollTo().performClick()
             waitForIdle()
 
@@ -152,13 +158,14 @@ class ServerSettingsTabClientsTest {
                 blockPermanently("blocked-one")
             },
         ) { _, clients ->
-            // The allowed list composes first, so its Remove is the first of the two.
-            onAllNodes(hasClickAction() and hasText(ServerLabel.REMOVE))[0].performScrollTo().performClick()
+            // The Allowed tab is open, so the only Remove on screen is the allowed client's.
+            onNode(hasClickAction() and hasText(ServerLabel.REMOVE)).performScrollTo().performClick()
             waitForIdle()
 
             assertTrue(!clients.isAllowed("allowed-one"), "the allowed client must be gone")
             assertTrue(clients.isBlocked("blocked-one"), "the blocked client must remain")
-            onNodeWithText("blocked-one").assertExists("and still be on screen")
+            showBlockedClients()
+            onNodeWithText("blocked-one").assertExists("and still be listed")
         }
     }
 

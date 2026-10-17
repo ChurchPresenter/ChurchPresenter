@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">このコードは期限切れです。メインのコンピューターで新しいコードを発行してもらってください。</string>
     <string name="calendar_join_replaces">このコンピューターとペアリングした電話も同期を停止し、今後はメインのコンピューターのカレンダーで計画します。</string>
     <string name="calendar_join_failed">参加できませんでした。コードとインターネット接続を確認してください。</string>
+    <string name="remote_clients_tab_allowed">許可済み</string>
+    <string name="remote_clients_tab_blocked">ブロック済み</string>
+    <string name="remote_clients_unnamed">名前のないデバイス</string>
+    <string name="companion_lt_filter">ローワーサードを絞り込む</string>
+    <string name="companion_lt_no_match">一致するローワーサードはありません。</string>
+    <string name="companion_lt_plus_key">+ Key</string>
+    <string name="companion_atem_upload_pill">アップロードには数秒かかります</string>
+    <string name="server_url_copy">コピー</string>
+    <string name="max_media_upload_minutes">≈ HD動画 %1$d 分</string>
+    <string name="max_media_upload_under_minute">≈ HD動画 1分未満</string>
     <string name="calendar_sync_card_title">カレンダー同期</string>
     <string name="calendar_sync_description_computers">このコンピューターの電源が切れていても、週を通して電話、タブレット、他のコンピューターから礼拝を計画できます。このコンピューターが正となるデータ元です。</string>
     <string name="calendar_sync_pill_off">オフ</string>

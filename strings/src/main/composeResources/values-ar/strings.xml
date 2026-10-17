@@ -2328,6 +2328,16 @@
     <string name="calendar_join_expired">انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا من الحاسوب الرئيسي.</string>
     <string name="calendar_join_replaces">ستتوقف الهواتف المقترنة به عن المزامنة أيضًا، وستخطط من تقويم الحاسوب الرئيسي بدلًا من ذلك.</string>
     <string name="calendar_join_failed">تعذّر الانضمام. تحقق من الرمز ومن الاتصال بالإنترنت.</string>
+    <string name="remote_clients_tab_allowed">المسموح لهم</string>
+    <string name="remote_clients_tab_blocked">المحظورون</string>
+    <string name="remote_clients_unnamed">جهاز بلا اسم</string>
+    <string name="companion_lt_filter">تصفية الأشرطة السفلية</string>
+    <string name="companion_lt_no_match">لا توجد أشرطة سفلية مطابقة.</string>
+    <string name="companion_lt_plus_key">+ key</string>
+    <string name="companion_atem_upload_pill">يستغرق الرفع بضع ثوانٍ</string>
+    <string name="server_url_copy">نسخ</string>
+    <string name="max_media_upload_minutes">≈ %1$d دقيقة من فيديو HD</string>
+    <string name="max_media_upload_under_minute">≈ أقل من دقيقة من فيديو HD</string>
     <string name="calendar_sync_card_title">مزامنة التقويم</string>
     <string name="calendar_sync_description_computers">خطّط الخدمات من الهواتف والأجهزة اللوحية والحواسيب الأخرى طوال الأسبوع، حتى عندما يكون هذا الحاسوب مطفأً. يبقى هذا الحاسوب هو المصدر الأساسي.</string>
     <string name="calendar_sync_pill_off">متوقف</string>
