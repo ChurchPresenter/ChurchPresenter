@@ -1,29 +1,27 @@
 package org.churchpresenter.serverui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
-import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.PhoneIphone
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.SettingsTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,138 +32,140 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import org.churchpresenter.sharedui.utils.AppWindowRoot
-import org.churchpresenter.theme.ThemeMode
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.allowed_clients
 import org.churchpresenter.strings.generated.resources.allowed_clients_description
-import org.churchpresenter.strings.generated.resources.blocked_clients
 import org.churchpresenter.strings.generated.resources.blocked_clients_description
 import org.churchpresenter.strings.generated.resources.client_label_cancel
 import org.churchpresenter.strings.generated.resources.client_label_edit_tooltip
 import org.churchpresenter.strings.generated.resources.client_label_placeholder
-import org.churchpresenter.strings.generated.resources.save
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.connection_qr_title
-import org.churchpresenter.strings.generated.resources.no_allowed_clients
-import org.churchpresenter.strings.generated.resources.no_blocked_clients
 import org.churchpresenter.strings.generated.resources.instance_link_follower_badge
 import org.churchpresenter.strings.generated.resources.instance_link_followers_connected_count
+import org.churchpresenter.strings.generated.resources.no_allowed_clients
+import org.churchpresenter.strings.generated.resources.no_blocked_clients
 import org.churchpresenter.strings.generated.resources.remote_clients_description
+import org.churchpresenter.strings.generated.resources.remote_clients_tab_allowed
+import org.churchpresenter.strings.generated.resources.remote_clients_tab_blocked
 import org.churchpresenter.strings.generated.resources.remote_clients_title
+import org.churchpresenter.strings.generated.resources.remote_clients_unnamed
 import org.churchpresenter.strings.generated.resources.remove
-import org.churchpresenter.sharedui.composables.SettingsSection
-import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.strings.generated.resources.save
+import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun RemoteClientsCard(companionServer: CompanionServer, remoteClientManager: RemoteClientManager) {
-    SettingsSection(title = stringResource(Res.string.remote_clients_title)) {
-        Text(
-            text = stringResource(Res.string.remote_clients_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(Modifier.height(4.dp))
-
-        val connectedInstanceLinkFollowers by companionServer.connectedInstanceLinkFollowers
-            .collectAsState()
-        if (connectedInstanceLinkFollowers.isNotEmpty()) {
+    val followers by companionServer.connectedInstanceLinkFollowers.collectAsState()
+    var showBlocked by remember { mutableStateOf(false) }
+    val allowed = remoteClientManager.allowedClients.toList().sorted()
+    val blocked = remoteClientManager.blockedClients.toList().sorted()
+    ServerSettingsCard(
+        icon = Icons.Outlined.PhoneIphone,
+        tint = MaterialTheme.semantic.success,
+        title = stringResource(Res.string.remote_clients_title),
+        description = stringResource(Res.string.remote_clients_description),
+    ) {
+        if (followers.isNotEmpty()) {
             Text(
-                text = stringResource(
-                    Res.string.instance_link_followers_connected_count,
-                    connectedInstanceLinkFollowers.size
-                ),
+                text = stringResource(Res.string.instance_link_followers_connected_count, followers.size),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 10.dp),
             )
-            Spacer(Modifier.height(4.dp))
         }
-
-        // ── Allowed clients list ──────────────────────────────────────
-        ClientList(
-            title = stringResource(Res.string.allowed_clients),
-            description = stringResource(Res.string.allowed_clients_description),
-            emptyText = stringResource(Res.string.no_allowed_clients),
-            clients = remoteClientManager.allowedClients.toList().sorted(),
-            statusColor = MaterialTheme.colorScheme.primary,
-            remoteClientManager = remoteClientManager,
-            followers = connectedInstanceLinkFollowers,
-            onRemove = remoteClientManager::removeAllowed,
-        )
-
-        Spacer(Modifier.height(4.dp))
-
-        // ── Blocked clients list ──────────────────────────────────────
-        ClientList(
-            title = stringResource(Res.string.blocked_clients),
-            description = stringResource(Res.string.blocked_clients_description),
-            emptyText = stringResource(Res.string.no_blocked_clients),
-            clients = remoteClientManager.blockedClients.toList().sorted(),
-            statusColor = MaterialTheme.colorScheme.error,
-            remoteClientManager = remoteClientManager,
-            followers = connectedInstanceLinkFollowers,
-            onRemove = remoteClientManager::removeBlocked,
-        )
+        Row(modifier = Modifier.padding(horizontal = 12.dp).padding(top = 4.dp)) {
+            CardTab(
+                icon = Icons.Outlined.Check,
+                iconTint = MaterialTheme.semantic.success,
+                label = stringResource(Res.string.remote_clients_tab_allowed),
+                count = allowed.size,
+                selected = !showBlocked,
+                onSelect = { showBlocked = false },
+            )
+            CardTab(
+                icon = Icons.Outlined.Block,
+                iconTint = MaterialTheme.colorScheme.error,
+                label = stringResource(Res.string.remote_clients_tab_blocked),
+                count = blocked.size,
+                selected = showBlocked,
+                onSelect = { showBlocked = true },
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        CardBlock {
+            if (showBlocked) {
+                ClientList(
+                    description = stringResource(Res.string.blocked_clients_description),
+                    emptyText = stringResource(Res.string.no_blocked_clients),
+                    clients = blocked,
+                    blocked = true,
+                    remoteClientManager = remoteClientManager,
+                    followers = followers,
+                    onRemove = remoteClientManager::removeBlocked,
+                )
+            } else {
+                ClientList(
+                    description = stringResource(Res.string.allowed_clients_description),
+                    emptyText = stringResource(Res.string.no_allowed_clients),
+                    clients = allowed,
+                    blocked = false,
+                    remoteClientManager = remoteClientManager,
+                    followers = followers,
+                    onRemove = remoteClientManager::removeAllowed,
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun ClientList(
-    title: String,
     description: String,
     emptyText: String,
     clients: List<String>,
-    statusColor: Color,
+    blocked: Boolean,
     remoteClientManager: RemoteClientManager,
     followers: Set<String>,
     onRemove: (String) -> Unit,
 ) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold,
-        color = statusColor
-    )
-    Text(
-        text = description,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-
+    DimText(description, small = true)
     if (clients.isEmpty()) {
-        Text(
-            text = emptyText,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            modifier = Modifier.padding(vertical = 4.dp)
-        )
+        EmptyNote(emptyText)
     } else {
-        clients.forEach { clientId ->
-            key(clientId) {
-                ClientRow(
-                    clientId = clientId,
-                    label = remoteClientManager.getLabel(clientId),
-                    onSetLabel = { remoteClientManager.setLabel(clientId, it) },
-                    statusColor = statusColor,
-                    statusLabel = title,
-                    onRemove = { onRemove(clientId) },
-                    isInstanceLinkFollower = clientId in followers
-                )
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            clients.forEach { clientId ->
+                key(clientId) {
+                    ClientRow(
+                        clientId = clientId,
+                        label = remoteClientManager.getLabel(clientId),
+                        onSetLabel = { remoteClientManager.setLabel(clientId, it) },
+                        blocked = blocked,
+                        onRemove = { onRemove(clientId) },
+                        isInstanceLinkFollower = clientId in followers,
+                    )
+                }
             }
         }
     }
@@ -176,109 +176,83 @@ private fun ClientRow(
     clientId: String,
     label: String,
     onSetLabel: (String) -> Unit,
-    statusColor: Color,
-    statusLabel: String,
+    blocked: Boolean,
     onRemove: () -> Unit,
-    isInstanceLinkFollower: Boolean = false
+    isInstanceLinkFollower: Boolean = false,
 ) {
     var editing by remember { mutableStateOf(false) }
     var editText by remember(label) { mutableStateOf(label) }
-
-    Column(
+    val shape = AppShape(10.dp)
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                AppShape(4.dp)
-            )
-            .padding(horizontal = 10.dp, vertical = 6.dp)
+            .heightIn(min = 54.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow, shape)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(11.dp),
     ) {
-        // ── Top row: identity + action buttons ───────────────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            ClientIdentity(
-                clientId, label, statusColor, statusLabel, isInstanceLinkFollower,
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(Modifier.width(8.dp))
-            // Edit (pencil) button
-            KeyIconButton(
-                onClick = { editing = !editing; editText = label },
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    Icons.Filled.Edit,
-                    contentDescription = stringResource(Res.string.client_label_edit_tooltip),
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.width(4.dp))
-            RaisedButton(
-                shape = AppShape(6.dp),
-                onClick = onRemove,
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                )
-            ) {
-                Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
-            }
-        }
-
-        // ── Inline label editor (shown when editing) ──────────────────────────
+        IconChip(
+            Icons.Outlined.PhoneIphone,
+            if (blocked) MaterialTheme.colorScheme.error else MaterialTheme.semantic.success,
+            size = 30.dp,
+            iconSize = 15.dp,
+        )
         if (editing) {
-            Spacer(Modifier.height(6.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                SettingsTextField(
-                    value = editText,
-                    onValueChange = { editText = it },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    placeholder = {
-                        Text(
-                            stringResource(Res.string.client_label_placeholder),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                )
-                // Confirm
-                KeyIconButton(
-                    onClick = {
-                        onSetLabel(editText)
-                        editing = false
-                    },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.Check,
-                        contentDescription = stringResource(Res.string.save),
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.primary
+            SettingsTextField(
+                value = editText,
+                onValueChange = { editText = it },
+                modifier = Modifier.weight(1f),
+                fillWidth = true,
+                singleLine = true,
+                placeholder = {
+                    Text(
+                        stringResource(Res.string.client_label_placeholder),
+                        style = MaterialTheme.typography.bodySmall,
                     )
-                }
-                // Cancel
-                KeyIconButton(
-                    onClick = { editing = false; editText = label },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(Res.string.client_label_cancel),
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                },
+            )
+            RowIconButton(Icons.Filled.Check, stringResource(Res.string.save), MaterialTheme.colorScheme.primary) {
+                onSetLabel(editText)
+                editing = false
             }
+            RowIconButton(Icons.Filled.Close, stringResource(Res.string.client_label_cancel)) {
+                editing = false
+                editText = label
+            }
+            // The pencil stays a toggle: pressed again, it closes the editor without saving.
+            RowIconButton(Icons.Outlined.Edit, stringResource(Res.string.client_label_edit_tooltip)) {
+                editing = false
+                editText = label
+            }
+        } else {
+            ClientIdentity(clientId, label, isInstanceLinkFollower, modifier = Modifier.weight(1f))
+            RowIconButton(Icons.Outlined.Edit, stringResource(Res.string.client_label_edit_tooltip)) {
+                editing = true
+                editText = label
+            }
+            RemoveButton(stringResource(Res.string.remove), onClick = onRemove)
         }
     }
+}
+
+/** A small flat icon button inside a row, named for a screen reader and shown as a tooltip. */
+@Composable
+private fun RowIconButton(
+    icon: ImageVector,
+    name: String,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: () -> Unit,
+) {
+    TooltipIconButton(
+        painter = rememberVectorPainter(icon),
+        text = name,
+        onClick = onClick,
+        iconSize = 16.dp,
+        buttonSize = 30.dp,
+        iconTint = tint,
+    )
 }
 
 @Composable
@@ -356,55 +330,44 @@ internal fun ConnectionQrDialogContent(serverUrl: String, apiKey: String?, onDis
     }
 }
 
-// ── URL building ────────────────────────────────────────────────────────────────
-// Pulled out of the composables above so the trigger URLs an operator copies into a Stream Deck can
-// be tested directly. They were local functions closing over the settings, reachable only by
-// clicking a Copy button — and that writes to the system clipboard, which throws HeadlessException
-// under the test JVM, so none of this logic could be exercised at all. The composables call these
-// and nothing else builds URLs.
-
-/** Who a connected client is: its label if it has one, its device id, its status, and whether it is a follower. */
+/** Who a connected client is: its label (or that it has none), its device id, and whether it is a follower. */
 @Composable
 private fun ClientIdentity(
     clientId: String,
     label: String,
-    statusColor: Color,
-    statusLabel: String,
     isInstanceLinkFollower: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        // Friendly label (if set)
-        if (label.isNotBlank()) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = label,
+                text = label.ifBlank { stringResource(Res.string.remote_clients_unnamed) },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = statusColor
+                color = if (label.isBlank()) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
             )
+            if (isInstanceLinkFollower) {
+                Pill(
+                    stringResource(Res.string.instance_link_follower_badge),
+                    MaterialTheme.colorScheme.primary,
+                    round = false,
+                )
+            }
         }
-        // Raw device ID
         Text(
             text = clientId,
-            style = if (label.isNotBlank()) MaterialTheme.typography.labelSmall
-                    else MaterialTheme.typography.bodyMedium,
-            fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.onSurface.copy(
-                alpha = if (label.isNotBlank()) 0.6f else 1f
-            )
-        )
-        Text(
-            text = statusLabel,
             style = MaterialTheme.typography.labelSmall,
-            color = statusColor
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        if (isInstanceLinkFollower) {
-            Text(
-                text = stringResource(Res.string.instance_link_follower_badge),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
     }
 }

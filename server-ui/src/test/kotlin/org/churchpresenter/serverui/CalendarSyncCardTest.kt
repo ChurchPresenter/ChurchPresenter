@@ -141,7 +141,7 @@ class CalendarSyncCardTest {
                 }
             }
             waitForIdle()
-            onAllNodesWithText("Start over with a new key")[0].performClick()
+            onAllNodesWithText("Start over with a new key…")[0].performClick()
             waitForIdle()
         }
 
@@ -166,7 +166,7 @@ class CalendarSyncCardTest {
                 }
             }
             waitForIdle()
-            onAllNodesWithText("Start over with a new key")[0].assertIsNotEnabled()
+            onAllNodesWithText("Start over with a new key…")[0].assertIsNotEnabled()
             onAllNodesWithText("available again on", substring = true).assertCountEquals(1)
         }
     }

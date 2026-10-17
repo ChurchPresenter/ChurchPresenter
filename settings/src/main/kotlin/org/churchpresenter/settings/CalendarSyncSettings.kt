@@ -26,8 +26,24 @@ data class CalendarSyncSettings(
      *  refreshed when the relay stops accepting it. */
     val clientKey: String = "",
     val rotatedAt: String = "",
+    /** Blank on the main computer; [ROLE_FOLLOWER] or [ROLE_VIEWER] on one that joined another's calendar. */
+    val role: String = "",
+    /** This computer's id on the relay, when it joined another's calendar. */
+    val computerId: String = "",
+    /**
+     * The token a joined computer syncs with. Kept apart from [desktopToken] so a build that knows
+     * nothing of joining reads this computer as unpaired rather than pushing as the main one.
+     */
+    val computerToken: String = "",
+    /** What the main computer is called, as the join file named it, for the status line. */
+    val mainName: String = "",
 ) {
-    val isPaired: Boolean get() = instanceId.isNotBlank() && desktopToken.isNotBlank() && instanceKey.isNotBlank()
+    val isJoined: Boolean get() = role == ROLE_FOLLOWER || role == ROLE_VIEWER
+
+    /** The bearer token this computer syncs with, whichever role it has. */
+    val token: String get() = if (isJoined) computerToken else desktopToken
+
+    val isPaired: Boolean get() = instanceId.isNotBlank() && token.isNotBlank() && instanceKey.isNotBlank()
 
     /**
      * When "Start over" may be used again, or null when it may be used now: at most once in
@@ -41,5 +57,7 @@ data class CalendarSyncSettings(
 
     companion object {
         val ROTATION_INTERVAL: Duration = Duration.ofDays(7)
+        const val ROLE_FOLLOWER = "follower"
+        const val ROLE_VIEWER = "viewer"
     }
 }

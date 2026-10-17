@@ -4,7 +4,10 @@ package org.churchpresenter.serverui
 
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasClickAction
 import org.churchpresenter.server.CompanionServer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -81,7 +84,7 @@ class ServerSettingsTabRunningTest {
     /** Only offered while running — there is nothing to restart otherwise. */
     @Test
     fun `Restart is offered while running`() = serverTab(server = server) { _, _ ->
-        onNodeWithText(ServerLabel.RESTART).assertExists("Restart must be offered while running")
+        onNodeWithContentDescription(ServerLabel.RESTART).assertExists("Restart must be offered while running")
     }
 
     /**
@@ -108,7 +111,8 @@ class ServerSettingsTabRunningTest {
     fun `the server URL row appears with the address the server is listening on`() =
         serverTab(server = server) { _, _ ->
             onNodeWithText(ServerLabel.SERVER_URL).assertExists("the URL row must appear")
-            assertFieldShows(url, "the URL field")
+            // Selectable text in a well now, not a read-only field.
+            onNodeWithText(url).assertExists("the URL must be shown")
         }
 
     /**
@@ -123,7 +127,7 @@ class ServerSettingsTabRunningTest {
     @Test
     fun `neither the URL row nor Restart nor QR exists while stopped`() = serverTab { _, _ ->
         onNodeWithText(ServerLabel.SERVER_URL).assertDoesNotExist()
-        onNodeWithText(ServerLabel.RESTART).assertDoesNotExist()
+        onNodeWithContentDescription(ServerLabel.RESTART).assertDoesNotExist()
         onNodeWithText(ServerLabel.QR).assertDoesNotExist()
         onNodeWithText(ServerLabel.STOPPED).assertExists()
     }
@@ -154,5 +158,11 @@ class ServerSettingsTabRunningTest {
     fun `the shared server is listening on the port it was given`() {
         assertTrue(server.isRunning.value, "the class's server must still be up")
         assertEquals(url, server.serverUrl.value, "and publishing the URL the tab renders")
+    }
+
+    @Test
+    fun `the URL can be copied as well as shown as a QR`() = serverTab(server = server) { _, _ ->
+        onNode(hasClickAction() and hasText("Copy")).assertExists("Copy sits beside the URL")
+        onNode(hasClickAction() and hasText("QR")).assertExists()
     }
 }

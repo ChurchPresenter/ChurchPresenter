@@ -4,6 +4,7 @@ package org.churchpresenter.serverui
 
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -98,7 +99,7 @@ class ServerSettingsTabLifecycleTest {
             val urlBefore = server.serverUrl.value
             assertTrue(urlBefore.endsWith(":$port"), "fixture: it must be up on the chosen port")
 
-            onNodeWithText(ServerLabel.RESTART).performScrollTo().performClick()
+            onNodeWithContentDescription(ServerLabel.RESTART).performScrollTo().performClick()
             awaitRunning(server, true)
             waitForIdle()
 

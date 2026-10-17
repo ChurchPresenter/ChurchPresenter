@@ -98,9 +98,9 @@ class RelayClient(
     private val transport: RelayTransport = HttpRelayTransport(),
     private val clientKey: String = "",
 ) {
-    private val base = relayUrl.trimEnd('/') + "/i/" + instanceId
+    internal val base = relayUrl.trimEnd('/') + "/i/" + instanceId
 
-    private val json = Json {
+    internal val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
         classDiscriminator = "type"
@@ -149,7 +149,7 @@ class RelayClient(
         call("DELETE", "$base/devices/$deviceId", token, body = null)
     }
 
-    private fun call(
+    internal fun call(
         method: String,
         url: String,
         token: String?,

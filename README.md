@@ -2,6 +2,7 @@
 
 Everything a church needs to put words on the screen — songs, scripture, slides, video, captions and
 broadcast graphics — in one free, open-source desktop app for Windows, macOS and Linux.
+On Linux it installs from a `.deb` on Ubuntu 22.04, Debian 12, Linux Mint 21 or newer.
 
 It is a Compose Multiplatform app on the JVM. [FEATURES.md](FEATURES.md) lists every feature and
 where its source lives.

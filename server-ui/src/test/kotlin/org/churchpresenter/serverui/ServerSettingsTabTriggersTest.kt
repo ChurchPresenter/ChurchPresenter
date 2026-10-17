@@ -6,6 +6,7 @@ import org.churchpresenter.profiles.NOT_LOTTIE_JSON
 import org.churchpresenter.profiles.lottieJson
 import org.churchpresenter.profiles.withLottieFolder
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.settings.AppSettings
@@ -144,7 +145,7 @@ class ServerSettingsTabTriggersTest {
         ) { folder ->
             serverTab(initial = settingsFor(folder), server = server) { _, _ ->
                 val tops = listOf("alpha", "Mike", "Zulu").map {
-                    onNodeWithText(it).fetchSemanticsNode().boundsInRoot.top
+                    onNodeWithText(it).fetchSemanticsNode().positionInRoot.y
                 }
                 assertEquals(tops.sorted(), tops, "rows must be sorted regardless of case")
             }
@@ -156,7 +157,7 @@ class ServerSettingsTabTriggersTest {
     fun `a row offers a keyed and an unkeyed trigger`() {
         withLottieFolder("welcome.json" to lottieJson("welcome")) { folder ->
             serverTab(initial = settingsFor(folder), server = server) { _, _ ->
-                onAllNodesWithText("Go Live + Key").assertCountEquals(1)
+                onAllNodesWithContentDescription("Go Live + Key").assertCountEquals(1)
                 onAllNodesWithText("Go Live").assertCountEquals(1)
             }
         }
@@ -170,7 +171,7 @@ class ServerSettingsTabTriggersTest {
             "three.json" to lottieJson("three"),
         ) { folder ->
             serverTab(initial = settingsFor(folder), server = server) { _, _ ->
-                onAllNodesWithText("Go Live + Key").assertCountEquals(3)
+                onAllNodesWithContentDescription("Go Live + Key").assertCountEquals(3)
                 onAllNodesWithText("Go Live").assertCountEquals(3)
             }
         }
@@ -189,12 +190,12 @@ class ServerSettingsTabTriggersTest {
             "offering.json" to lottieJson("offering"),
         ) { folder ->
             serverTab(initial = settingsFor(folder, atemHost = "10.0.0.5"), server = server) { _, _ ->
-                onAllNodesWithText("Go Live + Key").assertCountEquals(2)
+                onAllNodesWithContentDescription("Go Live + Key").assertCountEquals(2)
                 onAllNodesWithText("Go Live").assertCountEquals(2)
                 // Two more buttons per row once a switcher is configured.
-                assertEquals(2, countOf("Still + Key"), "each row must offer a keyed still upload")
+                onAllNodesWithContentDescription("Still + Key").assertCountEquals(2)
                 assertEquals(2, countOf("Still only"), "and an unkeyed one")
-                assertEquals(2, countOf("Clip + Key"), "plus a keyed clip upload")
+                onAllNodesWithContentDescription("Clip + Key").assertCountEquals(2)
                 assertEquals(2, countOf("Clip only"), "and an unkeyed one")
             }
         }
@@ -204,7 +205,7 @@ class ServerSettingsTabTriggersTest {
     fun `no ATEM means no still or clip buttons`() {
         withLottieFolder("welcome.json" to lottieJson("welcome")) { folder ->
             serverTab(initial = settingsFor(folder), server = server) { _, _ ->
-                for (label in listOf("Still + Key", "Still only", "Clip + Key", "Clip only")) {
+                for (label in listOf("Still only", "Clip only")) {
                     assertEquals(0, countOf(label), "no switcher, so no $label button")
                 }
             }

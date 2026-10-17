@@ -61,9 +61,12 @@ class Sealing(private val envelope: Envelope, val instanceId: String) {
     fun sealText(text: String, recordId: String): String = envelope.seal(text.toByteArray(), instanceId, recordId)
 
     /** A phone's sealed name, or empty when it does not open. */
-    fun openDeviceName(device: RemoteDevice): String {
-        if (device.nameBox.isEmpty() || device.nameBox.length > MAX_BOX_CHARS) return ""
-        val bytes = envelope.open(device.nameBox, instanceId, device.id) ?: return ""
+    fun openDeviceName(device: RemoteDevice): String = openName(device.nameBox, device.id)
+
+    /** A name sealed under [recordId] -- a phone's or a computer's -- or empty when it does not open. */
+    fun openName(nameBox: String, recordId: String): String {
+        if (nameBox.isEmpty() || nameBox.length > MAX_BOX_CHARS) return ""
+        val bytes = envelope.open(nameBox, instanceId, recordId) ?: return ""
         return Sanitize.cleanText(bytes.decodeToString(), WireLimits.NAME_CHARS)
     }
 }
