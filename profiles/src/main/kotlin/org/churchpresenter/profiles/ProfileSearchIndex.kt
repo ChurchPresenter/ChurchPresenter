@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -92,7 +94,11 @@ import org.churchpresenter.strings.generated.resources.tab_dictionary
 import org.churchpresenter.strings.generated.resources.tab_qa
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
 /** The rows every text page has. */
 private val TEXT_ROWS = listOf(
@@ -184,12 +190,23 @@ internal fun ProfilePage.stableName(): String = when (this) {
     is ProfilePage.Appearance -> pane.name
 }
 
-/** Every page of [profile] with its searchable words, run together. */
+/**
+ * Every page of [profile] with its searchable words, run together. The words are read on
+ * `Dispatchers.IO`: a string's first `stringResource` blocks the event thread on a resource read, and
+ * this asks for dozens of them that no page has drawn yet. Until they land, a page is found by its
+ * name alone.
+ */
 @Composable
-internal fun profileSearchIndex(profile: OutputProfile): Map<ProfilePage, String> =
-    profileNavSections(profile).flatMap { it.pages }.associateWith { page ->
-        (page.searchTerms().map { stringResource(it) } + page.label()).joinToString(" ")
+internal fun profileSearchIndex(profile: OutputProfile): Map<ProfilePage, String> {
+    val pages = profileNavSections(profile).flatMap { it.pages }
+    val labels = pages.associateWith { it.label() }
+    val terms by produceState(emptyMap(), pages, Locale.getDefault()) {
+        value = withContext(Dispatchers.IO) {
+            pages.associateWith { page -> page.searchTerms().map { getString(it) }.joinToString(" ") }
+        }
     }
+    return labels.mapValues { (page, label) -> listOfNotNull(terms[page], label).joinToString(" ") }
+}
 
 /** The context card of a profile linked to nothing. */
 @Composable
