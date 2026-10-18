@@ -10,6 +10,9 @@ import java.awt.Color
 import java.awt.Rectangle
 import java.io.File
 import java.nio.file.Files
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -201,5 +204,75 @@ class PresentationLoaderFormatTest {
         assertTrue(deck.slides[0].notes.contains("note one"))
         assertEquals("", deck.slides[1].notes, "a slide with no notes has none, rather than the previous slide's")
         assertTrue(deck.slides[2].notes.contains("note three"))
+    }
+
+    // ── Templates, slideshows and macro-enabled decks ─────────────────────────
+
+    private val presentationMain = "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"
+
+    /**
+     * A two-slide deck saved as [extension], its main part labelled [mainContentType] — how a
+     * template, slideshow or macro-enabled file differs from a plain .pptx.
+     */
+    private fun relabelledDeck(extension: String, mainContentType: String): File {
+        val plain = File(temp, "plain-$extension.pptx")
+        XMLSlideShow().use { ppt ->
+            repeat(2) { ppt.createSlide() }
+            plain.outputStream().use { ppt.write(it) }
+        }
+        val file = File(temp, "deck.$extension")
+        ZipFile(plain).use { zip ->
+            ZipOutputStream(file.outputStream()).use { out ->
+                for (entry in zip.entries()) {
+                    out.putNextEntry(ZipEntry(entry.name))
+                    out.write(relabel(entry.name, zip.getInputStream(entry).readBytes(), mainContentType))
+                    out.closeEntry()
+                }
+            }
+        }
+        return file
+    }
+
+    /** [bytes] of the part [name], with the main part's content type swapped when it is the type map. */
+    private fun relabel(name: String, bytes: ByteArray, mainContentType: String): ByteArray {
+        if (name != "[Content_Types].xml") return bytes
+        val types = bytes.decodeToString()
+        assertTrue(presentationMain in types, "the fixture must carry the plain main type")
+        return types.replace(presentationMain, mainContentType).encodeToByteArray()
+    }
+
+    @Test
+    fun `a template, a slideshow and a macro-enabled deck load like a presentation`() {
+        val variants = mapOf(
+            "potx" to "application/vnd.openxmlformats-officedocument.presentationml.template.main+xml",
+            "ppsx" to "application/vnd.openxmlformats-officedocument.presentationml.slideshow.main+xml",
+            "pptm" to "application/vnd.ms-powerpoint.presentation.macroEnabled.main+xml",
+        )
+        for ((extension, contentType) in variants) {
+            val result = PresentationLoader.load(relabelledDeck(extension, contentType))
+            val deck = assertIs<LoadResult.Success>(result, ".$extension loads: $result").deck
+            assertEquals(DeckFormat.PPTX, deck.format, ".$extension is read as Open XML")
+            assertEquals(2, deck.slides.size, ".$extension keeps its slides")
+        }
+    }
+
+    @Test
+    fun `a legacy slideshow and template load like a legacy ppt`() {
+        for (extension in listOf("pps", "pot")) {
+            val file = File(temp, "deck.$extension")
+            HSLFSlideShow().use { ppt ->
+                ppt.createSlide()
+                file.outputStream().use { ppt.write(it) }
+            }
+            val deck = assertIs<LoadResult.Success>(PresentationLoader.load(file), ".$extension loads").deck
+            assertEquals(DeckFormat.PPT, deck.format)
+            assertEquals(1, deck.slides.size)
+        }
+    }
+
+    @Test
+    fun `every PowerPoint form the engine reads is a supported extension`() {
+        val powerPoint = PresentationLoader.POWERPOINT_XML_EXTENSIONS + PresentationLoader.POWERPOINT_BINARY_EXTENSIONS
+        assertTrue(PresentationLoader.SUPPORTED_EXTENSIONS.containsAll(powerPoint + setOf("pdf", "key")))
     }
 }

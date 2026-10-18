@@ -172,9 +172,15 @@ private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationV
     RaisedButton(
         onClick = {
             scope.launch {
-                val allFilter =
-                    FileNameExtensionFilter("All Presentation Files", "ppt", "pptx", "key", "pdf")
-                val pptFilter = FileNameExtensionFilter("PowerPoint Files (*.ppt, *.pptx)", "ppt", "pptx")
+                // The forms PresentationLoader reads: templates and slideshows open like presentations.
+                val allFilter = FileNameExtensionFilter(
+                    "All Presentation Files",
+                    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot", "key", "pdf",
+                )
+                val pptFilter = FileNameExtensionFilter(
+                    "PowerPoint Files (*.pptx, *.ppt, *.ppsx, *.potx, *.pptm)",
+                    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot",
+                )
                 val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
                 val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
                 val files = FileChooser.platformInstance.chooseMultiple(

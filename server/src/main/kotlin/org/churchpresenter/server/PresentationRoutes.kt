@@ -22,11 +22,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.settings.utils.Constants
 
 private const val MAX_UPLOAD_MB = 200
 private const val BYTES_PER_MB = 1024 * 1024
-private val UPLOADABLE_DECK_EXTENSIONS = setOf("pdf", "ppt", "pptx", "key")
+private val UPLOADABLE_DECK_EXTENSIONS = PresentationLoader.SUPPORTED_EXTENSIONS
 
 /**
  * Routes serving presentation catalogues and rendered slide images.
