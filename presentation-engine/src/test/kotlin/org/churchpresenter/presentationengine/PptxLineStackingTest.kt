@@ -97,4 +97,50 @@ class PptxLineStackingTest {
             assertEquals(2 * 1.2 * size + 12, textHeight(box, SlideDrawFactory), 0.5)
         }
     }
+
+    @Test
+    fun `space before given as a percentage is that share of the line height`() {
+        withTextBox({ box ->
+            box.addLines("First line", "Second line")
+            box.textParagraphs[1].spaceBefore = 50.0 // OOXML: positive is a percentage
+        }) { box ->
+            assertEquals(2.5 * 1.2 * size, textHeight(box, SlideDrawFactory), 0.5)
+        }
+    }
+
+    @Test
+    fun `a paragraph opening with a line break starts with an empty line`() {
+        withTextBox({ box ->
+            val paragraph = box.addNewTextParagraph()
+            // The break carries its own size, POI's 18pt default unless set.
+            paragraph.addLineBreak().fontSize = size
+            paragraph.addNewTextRun().apply { setText("After the break"); fontSize = size; fontFamily = "Arial" }
+        }) { box ->
+            assertEquals(2 * 1.2 * size, textHeight(box, SlideDrawFactory), 0.5)
+        }
+    }
+
+    @Test
+    fun `text in a freeform shape stacks like text in a text box`() {
+        XMLSlideShow().use { ppt ->
+            val shape = ppt.createSlide().createFreeform()
+            shape.path = java.awt.geom.Path2D.Double(Rectangle(0, 0, 600, 400))
+            shape.anchor = Rectangle(0, 0, 600, 400)
+            shape.clearText()
+            for (text in listOf("First line", "Second line")) {
+                val run = shape.addNewTextParagraph().addNewTextRun()
+                run.setText(text)
+                run.fontSize = size
+                run.fontFamily = "Arial"
+            }
+            val graphics: Graphics2D = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics()
+            try {
+                graphics.setRenderingHint(Drawable.DRAW_FACTORY, SlideDrawFactory)
+                val drawable = DrawFactory.getInstance(graphics).getDrawable(shape) as DrawTextShape
+                assertEquals(2 * 1.2 * size, drawable.getTextHeight(graphics), 0.5)
+            } finally {
+                graphics.dispose()
+            }
+        }
+    }
 }

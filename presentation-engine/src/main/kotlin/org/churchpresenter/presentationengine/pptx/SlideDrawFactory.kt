@@ -5,13 +5,11 @@ import org.apache.poi.sl.draw.DrawFreeformShape
 import org.apache.poi.sl.draw.DrawPictureShape
 import org.apache.poi.sl.draw.DrawTextBox
 import org.apache.poi.sl.draw.DrawTextFragment
-import org.apache.poi.sl.draw.DrawTextParagraph
 import org.apache.poi.sl.draw.DrawTextShape
 import org.apache.poi.sl.usermodel.FreeformShape
 import org.apache.poi.sl.usermodel.PictureShape
 import org.apache.poi.sl.usermodel.ShapeType
 import org.apache.poi.sl.usermodel.TextBox
-import org.apache.poi.sl.usermodel.TextParagraph
 import org.apache.poi.sl.usermodel.TextShape
 import java.awt.Graphics2D
 import java.awt.font.TextAttribute
@@ -33,6 +31,7 @@ import java.text.CharacterIterator
  *   an extra descent — a fifth of the font size for Arial. Lyrics and verse slides put every line in
  *   a paragraph of its own, so the text grows a fifth taller than PowerPoint's, spills out of its
  *   box, and a bottom-anchored box pushes it up into the title above.
+ * - A justified line is drawn justified (see [PowerPointLine.draw]).
  * - A line is 1.2 times its largest font size tall, as PowerPoint draws single spacing whatever the
  *   font. POI takes the height from the font's own metrics, which for Arial and Times New Roman is
  *   1.15 — so a verse slide's lines sit closer together than on the screen it was made on.
@@ -104,9 +103,25 @@ private class PowerPointLine(layout: TextLayout, str: AttributedString) : DrawTe
         (size * SINGLE_LINE_HEIGHT - layout.ascent - layout.descent).toFloat()
     }
 
+    private var drawX = 0.0
+    private var drawY = 0.0
+
     override fun getLeading(): Float = leading ?: super.getLeading()
 
-    override fun setPosition(x: Double, y: Double) = super.setPosition(x, y + getLeading())
+    override fun setPosition(x: Double, y: Double) {
+        drawX = x
+        drawY = y + getLeading()
+        super.setPosition(drawX, drawY)
+    }
+
+    /**
+     * Draws the laid-out line itself. POI draws the line's attributed text with `drawString`,
+     * which lays it out afresh and so drops the justification `getJustifiedLayout` gave it — a
+     * justified paragraph came out ragged. Drawing the layout draws exactly what was measured.
+     */
+    override fun draw(graphics: Graphics2D) {
+        layout.draw(graphics, drawX.toFloat(), (drawY + layout.ascent).toFloat())
+    }
 }
 
 private fun largestFontSize(str: AttributedString): Double? {
@@ -120,19 +135,6 @@ private fun largestFontSize(str: AttributedString): Double? {
         c = text.current()
     }
     return largest
-}
-
-/**
- * A paragraph drawable that reports the descent of its last line once it has been laid out, and
- * opens the two steps POI's own stacking calls from inside its package.
- */
-private class MeasuredParagraph(paragraph: TextParagraph<*, *, *>) : DrawTextParagraph(paragraph) {
-    val lastLineDescent: Double
-        get() = lines.lastOrNull()?.layout?.descent?.toDouble() ?: 0.0
-
-    fun layOut(graphics: Graphics2D) = breakText(graphics)
-
-    fun markFirst(first: Boolean) = setFirstParagraph(first)
 }
 
 private class StackedTextShape(private val text: TextShape<*, *>) : DrawTextShape(text) {
@@ -167,7 +169,7 @@ private fun stackParagraphs(shape: TextShape<*, *>, graphics: Graphics2D, x: Dou
     val paragraphs = shape.iterator()
     while (paragraphs.hasNext()) {
         val paragraph = paragraphs.next()
-        val drawable = MeasuredParagraph(paragraph)
+        val drawable = KernedParagraph(paragraph)
         val bullets = paragraph.bulletStyle
         if (bullets?.autoNumberingScheme == null) {
             autoNumberIndex = -1
