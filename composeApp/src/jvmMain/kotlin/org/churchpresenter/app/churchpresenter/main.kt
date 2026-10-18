@@ -200,6 +200,8 @@ private fun setLatchedSystemProperties() {
 }
 
 fun main(args: Array<String>) {
+    // Before anything can touch AWT, the output guard included; see initXlibThreads.
+    initXlibThreads()
     if (runAsOutputGuard(args)) return
     setLatchedSystemProperties()
     // Off unless the startup benchmark asked for it; see StartupProbe.
