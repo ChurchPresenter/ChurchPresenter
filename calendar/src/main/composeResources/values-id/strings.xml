@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Tambah ibadah</string>
     <string name="calendar_edit_service">Ubah ibadah</string>
+    <string name="calendar_service_date">Tanggal</string>
+    <string name="calendar_template_schedule">Tab Jadwal</string>
+    <string name="calendar_template_schedule_sub">%1$d baris, seperti saat ini</string>
     <string name="calendar_service_name">Nama</string>
     <string name="calendar_service_start">Waktu mulai</string>
     <string name="calendar_service_type">Jenis</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d ibadah direncanakan · %2$s</string>
     <string name="calendar_header_sub_other">%1$d ibadah direncanakan · %2$s</string>
     <string name="calendar_all_saved">Semua perubahan tersimpan</string>
+    <string name="calendar_next_sync_in">Sinkronisasi berikutnya dalam %1$s</string>
+    <string name="calendar_syncing">Menyinkronkan…</string>
     <string name="calendar_day_services_one">%1$d ibadah</string>
     <string name="calendar_day_services_other">%1$d ibadah</string>
     <string name="calendar_day_no_services">Tidak ada ibadah</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Sisipkan</string>
     <string name="calendar_auto_load">Muat ibadah secara otomatis</string>
     <string name="calendar_auto_load_sub">Menaruh susunan acara di tab Jadwal sebelum item pertamanya, dan mengosongkan isi yang ada</string>
+    <string name="calendar_auto_load_off">Ibadah tidak dimuat ke Jadwal dengan sendirinya. Aktifkan “Muat ibadah secara otomatis” agar setiap ibadah sudah ada di sana sebelum dimulai.</string>
+    <string name="calendar_auto_load_turn_on">Aktifkan</string>
     <string name="calendar_auto_load_lead">Berapa lama sebelumnya</string>
     <string name="calendar_auto_load_lead_sub">Menit sebelum item pertama, dari %1$d sampai %2$d</string>
     <string name="calendar_default_sermon">Durasi khotbah bawaan</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d mnt</string>
     <string name="calendar_cue_fired_title">Penanda dijalankan</string>
     <string name="calendar_cue_toast_close">Sembunyikan</string>
+    <string name="calendar_export_saved_title">PDF tersimpan</string>
+    <string name="calendar_export_failed_title">Tidak dapat menyimpan PDF</string>
     <string name="calendar_preset_kind_all">Semua</string>
     <string name="calendar_preset_kind_slides">Tayangan gambar</string>
     <string name="calendar_preset_kind_presentations">Presentasi</string>

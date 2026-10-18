@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">เพิ่มการนมัสการ</string>
     <string name="calendar_edit_service">แก้ไขการนมัสการ</string>
+    <string name="calendar_service_date">วันที่</string>
+    <string name="calendar_template_schedule">แท็บรายการ</string>
+    <string name="calendar_template_schedule_sub">%1$d แถว ตามที่มีอยู่ตอนนี้</string>
     <string name="calendar_service_name">ชื่อ</string>
     <string name="calendar_service_start">เวลาเริ่ม</string>
     <string name="calendar_service_type">ประเภท</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">วางแผนไว้ %1$d การนมัสการ · %2$s</string>
     <string name="calendar_header_sub_other">วางแผนไว้ %1$d การนมัสการ · %2$s</string>
     <string name="calendar_all_saved">บันทึกการเปลี่ยนแปลงทั้งหมดแล้ว</string>
+    <string name="calendar_next_sync_in">ซิงค์ครั้งถัดไปในอีก %1$s</string>
+    <string name="calendar_syncing">กำลังซิงค์…</string>
     <string name="calendar_day_services_one">%1$d การนมัสการ</string>
     <string name="calendar_day_services_other">%1$d การนมัสการ</string>
     <string name="calendar_day_no_services">ไม่มีการนมัสการ</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">แทรก</string>
     <string name="calendar_auto_load">โหลดการนมัสการอัตโนมัติ</string>
     <string name="calendar_auto_load_sub">ใส่ลำดับรายการลงแท็บกำหนดการก่อนรายการแรก และล้างสิ่งที่อยู่ที่นั่น</string>
+    <string name="calendar_auto_load_off">การนมัสการจะไม่โหลดเข้ารายการเอง เปิด “โหลดการนมัสการอัตโนมัติ” เพื่อให้แต่ละรายการอยู่ที่นั่นก่อนเริ่ม</string>
+    <string name="calendar_auto_load_turn_on">เปิด</string>
     <string name="calendar_auto_load_lead">ล่วงหน้านานเท่าใด</string>
     <string name="calendar_auto_load_lead_sub">นาทีก่อนรายการแรก ตั้งแต่ %1$d ถึง %2$d</string>
     <string name="calendar_default_sermon">ความยาวคำเทศนาเริ่มต้น</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d นาที</string>
     <string name="calendar_cue_fired_title">เครื่องหมายทำงานแล้ว</string>
     <string name="calendar_cue_toast_close">ซ่อน</string>
+    <string name="calendar_export_saved_title">บันทึก PDF แล้ว</string>
+    <string name="calendar_export_failed_title">บันทึก PDF ไม่ได้</string>
     <string name="calendar_preset_kind_all">ทั้งหมด</string>
     <string name="calendar_preset_kind_slides">สไลด์โชว์</string>
     <string name="calendar_preset_kind_presentations">งานนำเสนอ</string>

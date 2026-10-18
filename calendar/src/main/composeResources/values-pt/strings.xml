@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Adicionar culto</string>
     <string name="calendar_edit_service">Editar culto</string>
+    <string name="calendar_service_date">Data</string>
+    <string name="calendar_template_schedule">A aba Roteiro</string>
+    <string name="calendar_template_schedule_sub">%1$d linhas, como estão agora</string>
     <string name="calendar_service_name">Nome</string>
     <string name="calendar_service_start">Hora de início</string>
     <string name="calendar_service_type">Tipo</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d culto planeado · %2$s</string>
     <string name="calendar_header_sub_other">%1$d cultos planeados · %2$s</string>
     <string name="calendar_all_saved">Todas as alterações guardadas</string>
+    <string name="calendar_next_sync_in">Próxima sincronização em %1$s</string>
+    <string name="calendar_syncing">Sincronizando…</string>
     <string name="calendar_day_services_one">%1$d culto</string>
     <string name="calendar_day_services_other">%1$d cultos</string>
     <string name="calendar_day_no_services">Sem cultos</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Inserir</string>
     <string name="calendar_auto_load">Carregar o culto automaticamente</string>
     <string name="calendar_auto_load_sub">Coloca a ordem do culto no separador do programa antes do seu primeiro item, limpando o que lá estiver</string>
+    <string name="calendar_auto_load_off">Os cultos não são carregados no Roteiro sozinhos. Ative “Carregar o culto automaticamente” para que cada um esteja lá antes de começar.</string>
+    <string name="calendar_auto_load_turn_on">Ativar</string>
     <string name="calendar_auto_load_lead">Com que antecedência</string>
     <string name="calendar_auto_load_lead_sub">Minutos antes do primeiro item, de %1$d a %2$d</string>
     <string name="calendar_default_sermon">Duração predefinida da pregação</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Marca disparada</string>
     <string name="calendar_cue_toast_close">Ocultar</string>
+    <string name="calendar_export_saved_title">PDF salvo</string>
+    <string name="calendar_export_failed_title">Não foi possível salvar o PDF</string>
     <string name="calendar_preset_kind_all">Todas</string>
     <string name="calendar_preset_kind_slides">Apresentações de imagens</string>
     <string name="calendar_preset_kind_presentations">Apresentações</string>

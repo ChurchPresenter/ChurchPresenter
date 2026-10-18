@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Legg til gudstjeneste</string>
     <string name="calendar_edit_service">Rediger gudstjeneste</string>
+    <string name="calendar_service_date">Dato</string>
+    <string name="calendar_template_schedule">Kjøreplan-fanen</string>
+    <string name="calendar_template_schedule_sub">%1$d rader, slik de er der nå</string>
     <string name="calendar_service_name">Navn</string>
     <string name="calendar_service_start">Starttid</string>
     <string name="calendar_service_type">Type</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d gudstjeneste planlagt · %2$s</string>
     <string name="calendar_header_sub_other">%1$d gudstjenester planlagt · %2$s</string>
     <string name="calendar_all_saved">Alle endringer lagret</string>
+    <string name="calendar_next_sync_in">Neste synkronisering om %1$s</string>
+    <string name="calendar_syncing">Synkroniserer…</string>
     <string name="calendar_day_services_one">%1$d gudstjeneste</string>
     <string name="calendar_day_services_other">%1$d gudstjenester</string>
     <string name="calendar_day_no_services">Ingen gudstjenester</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Sett inn</string>
     <string name="calendar_auto_load">Last inn gudstjenesten automatisk</string>
     <string name="calendar_auto_load_sub">Legger kjøreplanen i fanen Program før den første posten, og tømmer det som står der</string>
+    <string name="calendar_auto_load_off">Gudstjenester lastes ikke inn i kjøreplanen av seg selv. Slå på «Last inn gudstjenesten automatisk» så hver av dem er der før de starter.</string>
+    <string name="calendar_auto_load_turn_on">Slå på</string>
     <string name="calendar_auto_load_lead">Hvor lenge før</string>
     <string name="calendar_auto_load_lead_sub">Minutter før den første posten, fra %1$d til %2$d</string>
     <string name="calendar_default_sermon">Standard prekenlengde</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Merke utløst</string>
     <string name="calendar_cue_toast_close">Skjul</string>
+    <string name="calendar_export_saved_title">PDF lagret</string>
+    <string name="calendar_export_failed_title">Kunne ikke lagre PDF-en</string>
     <string name="calendar_preset_kind_all">Alle</string>
     <string name="calendar_preset_kind_slides">Lysbildeserier</string>
     <string name="calendar_preset_kind_presentations">Presentasjoner</string>

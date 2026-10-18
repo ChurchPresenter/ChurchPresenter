@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Gottesdienst hinzufügen</string>
     <string name="calendar_edit_service">Gottesdienst bearbeiten</string>
+    <string name="calendar_service_date">Datum</string>
+    <string name="calendar_template_schedule">Der Programm-Tab</string>
+    <string name="calendar_template_schedule_sub">%1$d Zeilen, so wie sie jetzt dort sind</string>
     <string name="calendar_service_name">Name</string>
     <string name="calendar_service_start">Beginn</string>
     <string name="calendar_service_type">Typ</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d Gottesdienst geplant · %2$s</string>
     <string name="calendar_header_sub_other">%1$d Gottesdienste geplant · %2$s</string>
     <string name="calendar_all_saved">Alle Änderungen gespeichert</string>
+    <string name="calendar_next_sync_in">Nächste Synchronisierung in %1$s</string>
+    <string name="calendar_syncing">Synchronisiere…</string>
     <string name="calendar_day_services_one">%1$d Gottesdienst</string>
     <string name="calendar_day_services_other">%1$d Gottesdienste</string>
     <string name="calendar_day_no_services">Keine Gottesdienste</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Einfügen</string>
     <string name="calendar_auto_load">Gottesdienst automatisch laden</string>
     <string name="calendar_auto_load_sub">Setzt den Ablauf vor seinem ersten Element in den Ablaufplan-Tab und leert, was dort steht</string>
+    <string name="calendar_auto_load_off">Gottesdienste werden nicht von selbst ins Programm geladen. Schalten Sie „Gottesdienst automatisch laden“ ein, damit jeder vor Beginn dort ist.</string>
+    <string name="calendar_auto_load_turn_on">Einschalten</string>
     <string name="calendar_auto_load_lead">Wie lange vorher</string>
     <string name="calendar_auto_load_lead_sub">Minuten vor dem ersten Element, von %1$d bis %2$d</string>
     <string name="calendar_default_sermon">Standard-Predigtdauer</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d Min</string>
     <string name="calendar_cue_fired_title">Marker ausgelöst</string>
     <string name="calendar_cue_toast_close">Ausblenden</string>
+    <string name="calendar_export_saved_title">PDF gespeichert</string>
+    <string name="calendar_export_failed_title">PDF konnte nicht gespeichert werden</string>
     <string name="calendar_preset_kind_all">Alle</string>
     <string name="calendar_preset_kind_slides">Diashows</string>
     <string name="calendar_preset_kind_presentations">Präsentationen</string>

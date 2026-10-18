@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">ເພີ່ມການນະມັດສະການ</string>
     <string name="calendar_edit_service">ແກ້ໄຂການນະມັດສະການ</string>
+    <string name="calendar_service_date">ວັນທີ</string>
+    <string name="calendar_template_schedule">ແຖບລາຍການ</string>
+    <string name="calendar_template_schedule_sub">%1$d ແຖວ, ຕາມທີ່ມີຢູ່ຕອນນີ້</string>
     <string name="calendar_service_name">ຊື່</string>
     <string name="calendar_service_start">ເວລາເລີ່ມ</string>
     <string name="calendar_service_type">ປະເພດ</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">ວາງແຜນ %1$d ການນະມັດສະການ · %2$s</string>
     <string name="calendar_header_sub_other">ວາງແຜນ %1$d ການນະມັດສະການ · %2$s</string>
     <string name="calendar_all_saved">ບັນທຶກການປ່ຽນແປງທັງໝົດແລ້ວ</string>
+    <string name="calendar_next_sync_in">ຊິ້ງຄັ້ງຕໍ່ໄປໃນ %1$s</string>
+    <string name="calendar_syncing">ກຳລັງຊິ້ງ…</string>
     <string name="calendar_day_services_one">%1$d ການນະມັດສະການ</string>
     <string name="calendar_day_services_other">%1$d ການນະມັດສະການ</string>
     <string name="calendar_day_no_services">ບໍ່ມີການນະມັດສະການ</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">ແຊກ</string>
     <string name="calendar_auto_load">ໂຫຼດການນະມັດສະການອັດຕະໂນມັດ</string>
     <string name="calendar_auto_load_sub">ໃສ່ລຳດັບລາຍການລົງແຖບກຳນົດການກ່ອນລາຍການທຳອິດ ແລະ ລ້າງສິ່ງທີ່ຢູ່ນັ້ນ</string>
+    <string name="calendar_auto_load_off">ການນະມັດສະການບໍ່ໄດ້ໂຫຼດເຂົ້າລາຍການເອງ. ເປີດ “ໂຫຼດການນະມັດສະການອັດຕະໂນມັດ” ເພື່ອໃຫ້ແຕ່ລະອັນຢູ່ທີ່ນັ້ນກ່ອນເລີ່ມ.</string>
+    <string name="calendar_auto_load_turn_on">ເປີດ</string>
     <string name="calendar_auto_load_lead">ລ່ວງໜ້າດົນປານໃດ</string>
     <string name="calendar_auto_load_lead_sub">ນາທີກ່ອນລາຍການທຳອິດ ຈາກ %1$d ຫາ %2$d</string>
     <string name="calendar_default_sermon">ຄວາມຍາວຄຳເທດເລີ່ມຕົ້ນ</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d ນາທີ</string>
     <string name="calendar_cue_fired_title">ເຄື່ອງໝາຍເຮັດວຽກແລ້ວ</string>
     <string name="calendar_cue_toast_close">ເຊື່ອງ</string>
+    <string name="calendar_export_saved_title">ບັນທຶກ PDF ແລ້ວ</string>
+    <string name="calendar_export_failed_title">ບໍ່ສາມາດບັນທຶກ PDF ໄດ້</string>
     <string name="calendar_preset_kind_all">ທັງໝົດ</string>
     <string name="calendar_preset_kind_slides">ສະໄລ້ໂຊ</string>
     <string name="calendar_preset_kind_presentations">ການນຳສະເໜີ</string>

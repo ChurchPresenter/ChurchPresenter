@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Dodaj nabożeństwo</string>
     <string name="calendar_edit_service">Edytuj nabożeństwo</string>
+    <string name="calendar_service_date">Data</string>
+    <string name="calendar_template_schedule">Karta Program</string>
+    <string name="calendar_template_schedule_sub">Wiersze: %1$d, w obecnej postaci</string>
     <string name="calendar_service_name">Nazwa</string>
     <string name="calendar_service_start">Godzina rozpoczęcia</string>
     <string name="calendar_service_type">Rodzaj</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d zaplanowane nabożeństwo · %2$s</string>
     <string name="calendar_header_sub_other">%1$d zaplanowanych nabożeństw · %2$s</string>
     <string name="calendar_all_saved">Wszystkie zmiany zapisane</string>
+    <string name="calendar_next_sync_in">Następna synchronizacja za %1$s</string>
+    <string name="calendar_syncing">Synchronizowanie…</string>
     <string name="calendar_day_services_one">%1$d nabożeństwo</string>
     <string name="calendar_day_services_other">%1$d nabożeństw</string>
     <string name="calendar_day_no_services">Brak nabożeństw</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Wstaw</string>
     <string name="calendar_auto_load">Wczytuj nabożeństwo automatycznie</string>
     <string name="calendar_auto_load_sub">Umieszcza przebieg nabożeństwa na karcie harmonogramu przed jego pierwszą pozycją, usuwając to, co tam jest</string>
+    <string name="calendar_auto_load_off">Nabożeństwa nie wczytują się same do programu. Włącz „Wczytuj nabożeństwo automatycznie”, aby każde było tam przed rozpoczęciem.</string>
+    <string name="calendar_auto_load_turn_on">Włącz</string>
     <string name="calendar_auto_load_lead">Z jakim wyprzedzeniem</string>
     <string name="calendar_auto_load_lead_sub">Minuty przed pierwszą pozycją, od %1$d do %2$d</string>
     <string name="calendar_default_sermon">Domyślny czas kazania</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Znacznik uruchomiony</string>
     <string name="calendar_cue_toast_close">Ukryj</string>
+    <string name="calendar_export_saved_title">Zapisano plik PDF</string>
+    <string name="calendar_export_failed_title">Nie udało się zapisać pliku PDF</string>
     <string name="calendar_preset_kind_all">Wszystkie</string>
     <string name="calendar_preset_kind_slides">Pokazy slajdów</string>
     <string name="calendar_preset_kind_presentations">Prezentacje</string>

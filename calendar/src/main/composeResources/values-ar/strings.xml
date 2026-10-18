@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">إضافة اجتماع</string>
     <string name="calendar_edit_service">تعديل الاجتماع</string>
+    <string name="calendar_service_date">التاريخ</string>
+    <string name="calendar_template_schedule">تبويب البرنامج</string>
+    <string name="calendar_template_schedule_sub">%1$d صفوف، كما هي الآن</string>
     <string name="calendar_service_name">الاسم</string>
     <string name="calendar_service_start">وقت البدء</string>
     <string name="calendar_service_type">النوع</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d اجتماع مُخطَّط · %2$s</string>
     <string name="calendar_header_sub_other">%1$d اجتماعات مُخطَّطة · %2$s</string>
     <string name="calendar_all_saved">حُفظت كل التغييرات</string>
+    <string name="calendar_next_sync_in">المزامنة التالية بعد %1$s</string>
+    <string name="calendar_syncing">جارٍ المزامنة…</string>
     <string name="calendar_day_services_one">%1$d اجتماع</string>
     <string name="calendar_day_services_other">%1$d اجتماعات</string>
     <string name="calendar_day_no_services">لا توجد اجتماعات</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">إدراج</string>
     <string name="calendar_auto_load">تحميل الاجتماع تلقائيًا</string>
     <string name="calendar_auto_load_sub">يضع ترتيب الاجتماع في تبويب البرنامج قبل عنصره الأول، ويمسح ما فيه</string>
+    <string name="calendar_auto_load_off">لا تُحمَّل الاجتماعات في البرنامج من تلقاء نفسها. فعّل «تحميل الاجتماع تلقائيًا» ليكون كل اجتماع جاهزًا قبل أن يبدأ.</string>
+    <string name="calendar_auto_load_turn_on">تفعيل</string>
     <string name="calendar_auto_load_lead">قبل الموعد بكم</string>
     <string name="calendar_auto_load_lead_sub">دقائق قبل العنصر الأول، من %1$d إلى %2$d</string>
     <string name="calendar_default_sermon">المدة الافتراضية للعظة</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d دقيقة</string>
     <string name="calendar_cue_fired_title">عملت العلامة</string>
     <string name="calendar_cue_toast_close">إخفاء</string>
+    <string name="calendar_export_saved_title">تم حفظ ملف PDF</string>
+    <string name="calendar_export_failed_title">تعذّر حفظ ملف PDF</string>
     <string name="calendar_preset_kind_all">الكل</string>
     <string name="calendar_preset_kind_slides">عروض الصور</string>
     <string name="calendar_preset_kind_presentations">العروض التقديمية</string>

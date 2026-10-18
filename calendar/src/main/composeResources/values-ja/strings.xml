@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">礼拝を追加</string>
     <string name="calendar_edit_service">礼拝を編集</string>
+    <string name="calendar_service_date">日付</string>
+    <string name="calendar_template_schedule">進行表タブ</string>
+    <string name="calendar_template_schedule_sub">%1$d 行（現在の内容のまま）</string>
     <string name="calendar_service_name">名前</string>
     <string name="calendar_service_start">開始時刻</string>
     <string name="calendar_service_type">種類</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">礼拝 %1$d 件の予定 · %2$s</string>
     <string name="calendar_header_sub_other">礼拝 %1$d 件の予定 · %2$s</string>
     <string name="calendar_all_saved">すべての変更を保存しました</string>
+    <string name="calendar_next_sync_in">次の同期まで %1$s</string>
+    <string name="calendar_syncing">同期中…</string>
     <string name="calendar_day_services_one">%1$d 件の礼拝</string>
     <string name="calendar_day_services_other">%1$d 件の礼拝</string>
     <string name="calendar_day_no_services">礼拝なし</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">挿入</string>
     <string name="calendar_auto_load">礼拝を自動で読み込む</string>
     <string name="calendar_auto_load_sub">最初の項目の前に進行表をスケジュールタブへ入れ、そこにあるものを消します</string>
+    <string name="calendar_auto_load_off">礼拝は進行表に自動では読み込まれません。「礼拝を自動で読み込む」をオンにすると、各礼拝が始まる前に読み込まれます。</string>
+    <string name="calendar_auto_load_turn_on">オンにする</string>
     <string name="calendar_auto_load_lead">どれくらい前に</string>
     <string name="calendar_auto_load_lead_sub">最初の項目の何分前か（%1$d〜%2$d）</string>
     <string name="calendar_default_sermon">説教の既定の長さ</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d 分</string>
     <string name="calendar_cue_fired_title">キューを実行しました</string>
     <string name="calendar_cue_toast_close">閉じる</string>
+    <string name="calendar_export_saved_title">PDF を保存しました</string>
+    <string name="calendar_export_failed_title">PDF を保存できませんでした</string>
     <string name="calendar_preset_kind_all">すべて</string>
     <string name="calendar_preset_kind_slides">スライドショー</string>
     <string name="calendar_preset_kind_presentations">プレゼン</string>

@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Tambah kebaktian</string>
     <string name="calendar_edit_service">Edit kebaktian</string>
+    <string name="calendar_service_date">Tarikh</string>
+    <string name="calendar_template_schedule">Tab Jadual</string>
+    <string name="calendar_template_schedule_sub">%1$d baris, seperti sekarang</string>
     <string name="calendar_service_name">Nama</string>
     <string name="calendar_service_start">Waktu mula</string>
     <string name="calendar_service_type">Jenis</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d kebaktian dirancang · %2$s</string>
     <string name="calendar_header_sub_other">%1$d kebaktian dirancang · %2$s</string>
     <string name="calendar_all_saved">Semua perubahan disimpan</string>
+    <string name="calendar_next_sync_in">Penyegerakan seterusnya dalam %1$s</string>
+    <string name="calendar_syncing">Menyegerak…</string>
     <string name="calendar_day_services_one">%1$d kebaktian</string>
     <string name="calendar_day_services_other">%1$d kebaktian</string>
     <string name="calendar_day_no_services">Tiada kebaktian</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Sisip</string>
     <string name="calendar_auto_load">Muat kebaktian secara automatik</string>
     <string name="calendar_auto_load_sub">Meletakkan aturcara dalam tab Jadual sebelum item pertamanya, dan mengosongkan apa yang ada di sana</string>
+    <string name="calendar_auto_load_off">Kebaktian tidak dimuatkan ke dalam Jadual dengan sendirinya. Hidupkan “Muat kebaktian secara automatik” supaya setiap satu sudah ada sebelum bermula.</string>
+    <string name="calendar_auto_load_turn_on">Hidupkan</string>
     <string name="calendar_auto_load_lead">Berapa awal</string>
     <string name="calendar_auto_load_lead_sub">Minit sebelum item pertama, dari %1$d hingga %2$d</string>
     <string name="calendar_default_sermon">Tempoh khutbah lalai</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Penanda dipicu</string>
     <string name="calendar_cue_toast_close">Sembunyikan</string>
+    <string name="calendar_export_saved_title">PDF disimpan</string>
+    <string name="calendar_export_failed_title">Tidak dapat menyimpan PDF</string>
     <string name="calendar_preset_kind_all">Semua</string>
     <string name="calendar_preset_kind_slides">Tayangan slaid</string>
     <string name="calendar_preset_kind_presentations">Persembahan</string>

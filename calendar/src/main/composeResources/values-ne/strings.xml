@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">सभा थप्नुहोस्</string>
     <string name="calendar_edit_service">सभा सम्पादन गर्नुहोस्</string>
+    <string name="calendar_service_date">मिति</string>
+    <string name="calendar_template_schedule">तालिका ट्याब</string>
+    <string name="calendar_template_schedule_sub">%1$d पङ्क्ति, अहिले जस्तै</string>
     <string name="calendar_service_name">नाम</string>
     <string name="calendar_service_start">सुरु हुने समय</string>
     <string name="calendar_service_type">प्रकार</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d सभा योजना गरिएको · %2$s</string>
     <string name="calendar_header_sub_other">%1$d सभा योजना गरिएका · %2$s</string>
     <string name="calendar_all_saved">सबै परिवर्तन सुरक्षित</string>
+    <string name="calendar_next_sync_in">अर्को सिंक %1$s मा</string>
+    <string name="calendar_syncing">सिंक हुँदैछ…</string>
     <string name="calendar_day_services_one">%1$d सभा</string>
     <string name="calendar_day_services_other">%1$d सभा</string>
     <string name="calendar_day_no_services">कुनै सभा छैन</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">घुसाउनुहोस्</string>
     <string name="calendar_auto_load">सभा स्वतः लोड गर्नुहोस्</string>
     <string name="calendar_auto_load_sub">सभाको क्रमलाई यसको पहिलो वस्तुअघि कार्यक्रम ट्याबमा राख्छ, र त्यहाँ भएको कुरा खाली गर्छ</string>
+    <string name="calendar_auto_load_off">सभाहरू आफैँ तालिकामा लोड हुँदैनन्। हरेक सभा सुरु हुनुअघि त्यहाँ होस् भन्नका लागि “सभा स्वतः लोड गर्नुहोस्” सक्रिय गर्नुहोस्।</string>
+    <string name="calendar_auto_load_turn_on">सक्रिय गर्नुहोस्</string>
     <string name="calendar_auto_load_lead">कति अघि</string>
     <string name="calendar_auto_load_lead_sub">पहिलो वस्तुभन्दा अघिका मिनेट, %1$d देखि %2$d सम्म</string>
     <string name="calendar_default_sermon">पूर्वनिर्धारित प्रवचन अवधि</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d मिनेट</string>
     <string name="calendar_cue_fired_title">चिन्ह चल्यो</string>
     <string name="calendar_cue_toast_close">लुकाउनुहोस्</string>
+    <string name="calendar_export_saved_title">PDF सुरक्षित भयो</string>
+    <string name="calendar_export_failed_title">PDF सुरक्षित गर्न सकिएन</string>
     <string name="calendar_preset_kind_all">सबै</string>
     <string name="calendar_preset_kind_slides">स्लाइड शो</string>
     <string name="calendar_preset_kind_presentations">प्रस्तुतिहरू</string>

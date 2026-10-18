@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Lisa teenistus</string>
     <string name="calendar_edit_service">Muuda teenistust</string>
+    <string name="calendar_service_date">Kuupäev</string>
+    <string name="calendar_template_schedule">Kava vahekaart</string>
+    <string name="calendar_template_schedule_sub">%1$d rida, nagu need praegu seal on</string>
     <string name="calendar_service_name">Nimi</string>
     <string name="calendar_service_start">Algusaeg</string>
     <string name="calendar_service_type">Liik</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d teenistus plaanitud · %2$s</string>
     <string name="calendar_header_sub_other">%1$d teenistust plaanitud · %2$s</string>
     <string name="calendar_all_saved">Kõik muudatused salvestatud</string>
+    <string name="calendar_next_sync_in">Järgmine sünkroonimine %1$s pärast</string>
+    <string name="calendar_syncing">Sünkroonimine…</string>
     <string name="calendar_day_services_one">%1$d teenistus</string>
     <string name="calendar_day_services_other">%1$d teenistust</string>
     <string name="calendar_day_no_services">Teenistusi pole</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Lisa</string>
     <string name="calendar_auto_load">Laadi teenistus automaatselt</string>
     <string name="calendar_auto_load_sub">Paneb kava Kava vahekaardile enne selle esimest punkti ja tühjendab sealse sisu</string>
+    <string name="calendar_auto_load_off">Teenistused ei laadita kavasse iseenesest. Lülita sisse „Laadi teenistus automaatselt“, et iga teenistus oleks seal enne algust.</string>
+    <string name="calendar_auto_load_turn_on">Lülita sisse</string>
     <string name="calendar_auto_load_lead">Kui palju varem</string>
     <string name="calendar_auto_load_lead_sub">Minutit enne esimest punkti, %1$d kuni %2$d</string>
     <string name="calendar_default_sermon">Jutluse vaikekestus</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Märge käivitus</string>
     <string name="calendar_cue_toast_close">Peida</string>
+    <string name="calendar_export_saved_title">PDF salvestatud</string>
+    <string name="calendar_export_failed_title">PDF-i ei saanud salvestada</string>
     <string name="calendar_preset_kind_all">Kõik</string>
     <string name="calendar_preset_kind_slides">Slaidiseansid</string>
     <string name="calendar_preset_kind_presentations">Esitlused</string>

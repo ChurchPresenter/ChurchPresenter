@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">添加聚会</string>
     <string name="calendar_edit_service">编辑聚会</string>
+    <string name="calendar_service_date">日期</string>
+    <string name="calendar_template_schedule">程序单标签页</string>
+    <string name="calendar_template_schedule_sub">%1$d 行，保持当前内容</string>
     <string name="calendar_service_name">名称</string>
     <string name="calendar_service_start">开始时间</string>
     <string name="calendar_service_type">类型</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">已安排 %1$d 场聚会 · %2$s</string>
     <string name="calendar_header_sub_other">已安排 %1$d 场聚会 · %2$s</string>
     <string name="calendar_all_saved">所有更改已保存</string>
+    <string name="calendar_next_sync_in">%1$s 后再次同步</string>
+    <string name="calendar_syncing">正在同步…</string>
     <string name="calendar_day_services_one">%1$d 场聚会</string>
     <string name="calendar_day_services_other">%1$d 场聚会</string>
     <string name="calendar_day_no_services">没有聚会</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">插入</string>
     <string name="calendar_auto_load">自动载入聚会</string>
     <string name="calendar_auto_load_sub">在第一个项目之前把聚会流程放入节目单标签页，并清空原有内容</string>
+    <string name="calendar_auto_load_off">聚会不会自动载入程序单。开启“自动载入聚会”，每场聚会都会在开始前出现在那里。</string>
+    <string name="calendar_auto_load_turn_on">开启</string>
     <string name="calendar_auto_load_lead">提前多久</string>
     <string name="calendar_auto_load_lead_sub">第一个项目之前的分钟数，%1$d 到 %2$d</string>
     <string name="calendar_default_sermon">默认讲道时长</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d 分钟</string>
     <string name="calendar_cue_fired_title">标记已触发</string>
     <string name="calendar_cue_toast_close">隐藏</string>
+    <string name="calendar_export_saved_title">PDF 已保存</string>
+    <string name="calendar_export_failed_title">无法保存 PDF</string>
     <string name="calendar_preset_kind_all">全部</string>
     <string name="calendar_preset_kind_slides">幻灯片放映</string>
     <string name="calendar_preset_kind_presentations">演示文稿</string>

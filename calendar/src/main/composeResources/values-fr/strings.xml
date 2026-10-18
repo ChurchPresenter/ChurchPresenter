@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Ajouter un culte</string>
     <string name="calendar_edit_service">Modifier le culte</string>
+    <string name="calendar_service_date">Date</string>
+    <string name="calendar_template_schedule">L’onglet Programme</string>
+    <string name="calendar_template_schedule_sub">%1$d lignes, telles qu’elles sont maintenant</string>
     <string name="calendar_service_name">Nom</string>
     <string name="calendar_service_start">Heure de début</string>
     <string name="calendar_service_type">Type</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d culte prévu · %2$s</string>
     <string name="calendar_header_sub_other">%1$d cultes prévus · %2$s</string>
     <string name="calendar_all_saved">Toutes les modifications enregistrées</string>
+    <string name="calendar_next_sync_in">Prochaine synchronisation dans %1$s</string>
+    <string name="calendar_syncing">Synchronisation…</string>
     <string name="calendar_day_services_one">%1$d culte</string>
     <string name="calendar_day_services_other">%1$d cultes</string>
     <string name="calendar_day_no_services">Aucun culte</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Insérer</string>
     <string name="calendar_auto_load">Charger le culte automatiquement</string>
     <string name="calendar_auto_load_sub">Place le déroulé dans l'onglet Programme avant son premier élément, en vidant ce qui s'y trouve</string>
+    <string name="calendar_auto_load_off">Les cultes ne se chargent pas d’eux-mêmes dans le Programme. Activez « Charger le culte automatiquement » pour que chacun y soit avant de commencer.</string>
+    <string name="calendar_auto_load_turn_on">Activer</string>
     <string name="calendar_auto_load_lead">Combien de temps avant</string>
     <string name="calendar_auto_load_lead_sub">Minutes avant le premier élément, de %1$d à %2$d</string>
     <string name="calendar_default_sermon">Durée de prédication par défaut</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Repère déclenché</string>
     <string name="calendar_cue_toast_close">Masquer</string>
+    <string name="calendar_export_saved_title">PDF enregistré</string>
+    <string name="calendar_export_failed_title">Impossible d’enregistrer le PDF</string>
     <string name="calendar_preset_kind_all">Tous</string>
     <string name="calendar_preset_kind_slides">Diaporamas</string>
     <string name="calendar_preset_kind_presentations">Présentations</string>

@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Lisää tilaisuus</string>
     <string name="calendar_edit_service">Muokkaa tilaisuutta</string>
+    <string name="calendar_service_date">Päivämäärä</string>
+    <string name="calendar_template_schedule">Ohjelma-välilehti</string>
+    <string name="calendar_template_schedule_sub">%1$d riviä sellaisina kuin ne nyt ovat</string>
     <string name="calendar_service_name">Nimi</string>
     <string name="calendar_service_start">Alkamisaika</string>
     <string name="calendar_service_type">Tyyppi</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d tilaisuus suunniteltu · %2$s</string>
     <string name="calendar_header_sub_other">%1$d tilaisuutta suunniteltu · %2$s</string>
     <string name="calendar_all_saved">Kaikki muutokset tallennettu</string>
+    <string name="calendar_next_sync_in">Seuraava synkronointi %1$s kuluttua</string>
+    <string name="calendar_syncing">Synkronoidaan…</string>
     <string name="calendar_day_services_one">%1$d tilaisuus</string>
     <string name="calendar_day_services_other">%1$d tilaisuutta</string>
     <string name="calendar_day_no_services">Ei tilaisuuksia</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Lisää</string>
     <string name="calendar_auto_load">Lataa tilaisuus automaattisesti</string>
     <string name="calendar_auto_load_sub">Vie kulkusuunnitelman Ohjelma-välilehdelle ennen ensimmäistä kohtaa ja tyhjentää siellä olevan</string>
+    <string name="calendar_auto_load_off">Tilaisuudet eivät lataudu ohjelmaan itsestään. Ota käyttöön ”Lataa tilaisuus automaattisesti”, niin jokainen on siellä ennen alkua.</string>
+    <string name="calendar_auto_load_turn_on">Ota käyttöön</string>
     <string name="calendar_auto_load_lead">Kuinka paljon etuajassa</string>
     <string name="calendar_auto_load_lead_sub">Minuuttia ennen ensimmäistä kohtaa, %1$d–%2$d</string>
     <string name="calendar_default_sermon">Saarnan oletuskesto</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Merkki laukesi</string>
     <string name="calendar_cue_toast_close">Piilota</string>
+    <string name="calendar_export_saved_title">PDF tallennettu</string>
+    <string name="calendar_export_failed_title">PDF-tiedostoa ei voitu tallentaa</string>
     <string name="calendar_preset_kind_all">Kaikki</string>
     <string name="calendar_preset_kind_slides">Diaesitykset</string>
     <string name="calendar_preset_kind_presentations">Esitykset</string>
