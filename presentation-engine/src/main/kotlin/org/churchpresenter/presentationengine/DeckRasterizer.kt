@@ -21,6 +21,7 @@ import org.churchpresenter.presentationengine.model.RasterLayer
 import org.churchpresenter.presentationengine.model.RectPt
 import org.churchpresenter.presentationengine.pptx.PowerPointDeckSupport
 import org.churchpresenter.presentationengine.pptx.PptxSlideRasterizer
+import org.churchpresenter.presentationengine.pptx.SlideDrawFactory
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.RenderingHints
@@ -264,6 +265,7 @@ class DeckRasterizer(
             graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
             graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
             graphics.setRenderingHint(Drawable.FONT_HANDLER, SlideFontRegistry.drawFontManager)
+            graphics.setRenderingHint(Drawable.DRAW_FACTORY, SlideDrawFactory)
             graphics.scale(canvas.scale, canvas.scale)
             draw(graphics)
         } finally {

@@ -85,7 +85,13 @@ internal sealed interface KnDrawable {
         override val geometry: KnGeometry,
         /** Optional shape background behind the text (text boxes can carry fill/stroke). */
         val shape: Shape?,
-        val paragraphs: List<KnParagraph>
+        val paragraphs: List<KnParagraph>,
+        /** Keynote's "Shrink text to fit": the text is scaled down until it fits the box's height. */
+        val shrinkToFit: Boolean = false,
+        /** 0=top, 1=middle, 2=bottom (3, justify, is drawn as top). */
+        val verticalAlignment: Int = 0,
+        /** The inset between the box's edges and its text. */
+        val padding: KnPadding = KnPadding.NONE
     ) : KnDrawable
 
     data class Group(
@@ -101,6 +107,12 @@ internal sealed interface KnDrawable {
         /** File name under Data/ for the poster frame; null = no static fallback available. */
         val posterFile: String?
     ) : KnDrawable
+}
+
+internal data class KnPadding(val left: Double, val top: Double, val right: Double, val bottom: Double) {
+    companion object {
+        val NONE = KnPadding(0.0, 0.0, 0.0, 0.0)
+    }
 }
 
 internal data class KnParagraph(

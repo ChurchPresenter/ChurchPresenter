@@ -36,17 +36,28 @@ object PresentationLoader {
     private const val FALLBACK_SLIDE_W_PT = 720.0
     private const val FALLBACK_SLIDE_H_PT = 405.0
 
-    val SUPPORTED_EXTENSIONS = setOf("pdf", "pptx", "ppt", "key")
+    /** PowerPoint's Open XML family: presentation, macro-enabled, template and slideshow forms. */
+    val POWERPOINT_XML_EXTENSIONS = setOf("pptx", "pptm", "potx", "potm", "ppsx", "ppsm")
+
+    /** PowerPoint 97–2003's binary family: presentation, slideshow and template. */
+    val POWERPOINT_BINARY_EXTENSIONS = setOf("ppt", "pps", "pot")
+
+    /**
+     * Every file a deck can be loaded from. A template or a slideshow is the same document as a
+     * presentation with a different label on its main part — and choir decks saved as templates
+     * by mistake are still the decks people mean to show. Macros are never run: POI reads none.
+     */
+    val SUPPORTED_EXTENSIONS = setOf("pdf", "key") + POWERPOINT_XML_EXTENSIONS + POWERPOINT_BINARY_EXTENSIONS
 
     fun load(file: File): LoadResult {
         if (!file.exists()) return LoadResult.Failure(DeckLoadError.PARSE_FAILED, "File not found: ${file.path}")
         return try {
-            when (file.extension.lowercase()) {
+            when (val extension = file.extension.lowercase()) {
                 "pdf" -> loadPdf(file)
-                "pptx" -> loadPowerPoint(file, isPptx = true)
-                "ppt" -> loadPowerPoint(file, isPptx = false)
+                in POWERPOINT_XML_EXTENSIONS -> loadPowerPoint(file, isPptx = true)
+                in POWERPOINT_BINARY_EXTENSIONS -> loadPowerPoint(file, isPptx = false)
                 "key" -> loadKeynote(file)
-                else -> LoadResult.Failure(DeckLoadError.UNSUPPORTED_FORMAT, file.extension)
+                else -> LoadResult.Failure(DeckLoadError.UNSUPPORTED_FORMAT, extension)
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             // A deck is parsed by POI and PDFBox, which throw whatever their internals do (NPEs and

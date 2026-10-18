@@ -296,7 +296,7 @@ class PlanningCenterImportViewModel(
 
         val ext = file.extension.lowercase()
         when (ext) {
-            "ppt", "pptx", "key", "pdf" -> {
+            in PRESENTATION_EXTENSIONS -> {
                 val slideCount = services.countSlides(file)
                 ImportedMedia.Presentation(
                     filePath = file.absolutePath,

@@ -13,7 +13,10 @@ import kotlin.test.assertTrue
 class DroppedFileClassifierTest {
 
     @Test fun `presentation decks classify as presentation`() {
-        for (ext in listOf("ppt", "pptx", "key", "pdf")) {
+        // Templates, slideshows and macro-enabled decks are presentations too: choir decks get
+        // saved as templates by mistake and are still what people mean to show.
+        val decks = listOf("ppt", "pptx", "key", "pdf", "pptm", "potx", "potm", "ppsx", "ppsm", "pps", "pot")
+        for (ext in decks) {
             assertEquals(DroppedFileAction.PRESENTATION, classifyDroppedFile(ext), ext)
         }
     }

@@ -55,7 +55,7 @@ class SlideDiskCache(
          * **Bump it in the same commit as any change to what a rendered slide looks like** —
          * layout, fonts, colour, fidelity gating. It costs one re-render per cached deck.
          */
-        const val RENDERER_VERSION = 1
+        const val RENDERER_VERSION = 2
 
         /** Stable id per source path — same derivation the companion API has always used. */
         fun idFor(absolutePath: String): String = absolutePath.hashCode().toUInt().toString(HEX_RADIX)

@@ -5,6 +5,7 @@ import org.churchpresenter.presentationengine.keynote.KeynoteSceneRasterizer
 import org.churchpresenter.presentationengine.keynote.KnDrawable
 import org.churchpresenter.presentationengine.keynote.KnFill
 import org.churchpresenter.presentationengine.keynote.KnGeometry
+import org.churchpresenter.presentationengine.keynote.KnPadding
 import org.churchpresenter.presentationengine.keynote.KnParagraph
 import org.churchpresenter.presentationengine.keynote.KnPlacedDrawable
 import org.churchpresenter.presentationengine.keynote.KnSlide
@@ -50,11 +51,17 @@ class KeynoteTextRenderTest {
         boxW: Double = 1000.0,
         boxH: Double = 600.0,
         background: KnFill? = KnFill(color = Color.WHITE),
+        shrinkToFit: Boolean = false,
+        verticalAlignment: Int = 0,
+        padding: KnPadding = KnPadding.NONE,
     ): KeynoteScene {
         val text = KnDrawable.Text(
             geometry = KnGeometry(boxX, boxY, boxW, boxH, 0.0, hFlip = false, vFlip = false),
             shape = null,
             paragraphs = paragraphs.toList(),
+            shrinkToFit = shrinkToFit,
+            verticalAlignment = verticalAlignment,
+            padding = padding,
         )
         return KeynoteScene(
             file = File("in-memory.key"),
@@ -267,6 +274,70 @@ class KeynoteTextRenderTest {
     fun `text with no strong direction is treated as left-to-right`() {
         val digits = checkNotNull(inkColumns(render(scene(paragraph("12345", alignment = 0)))))
         assertTrue(digits.first < 100, "digits start at the left edge of the box, got $digits")
+    }
+
+    // ── Fitting and placing text in its box ──────────────────────────────────
+
+    /** Rendered at 500px for a 1000pt slide: a point is half a pixel. */
+    private fun px(pt: Double) = (pt / 2).toInt()
+
+    @Test
+    fun `shrink to fit scales text down until it fits the box`() {
+        val lines = arrayOf(paragraph("Joy to the world"), paragraph(""), paragraph(""), paragraph(""))
+        val boxH = 100.0
+        val overflowing = checkNotNull(inkRows(render(scene(*lines, boxH = boxH))))
+        val fitted = checkNotNull(inkRows(render(scene(*lines, boxH = boxH, shrinkToFit = true))))
+        val shrunk = checkNotNull(
+            inkRows(render(scene(paragraph("Joy to the world", sizePt = 10.0), boxH = boxH, shrinkToFit = true)))
+        )
+
+        assertTrue(fitted.last - fitted.first < overflowing.last - overflowing.first, "the text got smaller")
+        assertTrue(fitted.last <= px(boxH), "and it fits: ink to row ${fitted.last} of a ${px(boxH)}-row box")
+        // Text that already fits is left at its own size.
+        val small = checkNotNull(inkRows(render(scene(paragraph("Joy to the world", sizePt = 10.0), boxH = boxH))))
+        assertEquals(small, shrunk)
+    }
+
+    @Test
+    fun `middle and bottom aligned text sits lower in its box than top aligned`() {
+        val top = checkNotNull(inkRows(render(scene(paragraph("Grace"), boxH = 400.0))))
+        val middle = checkNotNull(inkRows(render(scene(paragraph("Grace"), boxH = 400.0, verticalAlignment = 1))))
+        val bottom = checkNotNull(inkRows(render(scene(paragraph("Grace"), boxH = 400.0, verticalAlignment = 2))))
+
+        assertTrue(top.first < middle.first && middle.first < bottom.first, "$top / $middle / $bottom")
+        assertTrue(bottom.last <= px(400.0), "bottom-aligned text ends inside the box: $bottom")
+        val centre = (middle.first + middle.last) / 2
+        assertTrue(centre in px(200.0) - 8..px(200.0) + 8, "middle-aligned text is centred at ${px(200.0)}: $middle")
+    }
+
+    @Test
+    fun `a soft return starts a new line within the paragraph`() {
+        val oneLine = checkNotNull(inkRows(render(scene(paragraph("Come and worship")))))
+        val twoLines = checkNotNull(inkRows(render(scene(paragraph("Come and worship,\u2028Come and worship")))))
+        assertTrue(
+            twoLines.last - twoLines.first > (oneLine.last - oneLine.first) * 2,
+            "two lines are more than twice one line's height: $twoLines vs $oneLine",
+        )
+    }
+
+    @Test
+    fun `a soft return at the end opens an empty line that alignment counts`() {
+        val plain = checkNotNull(inkRows(render(scene(paragraph("Grace"), boxH = 400.0, verticalAlignment = 1))))
+        val trailing = checkNotNull(
+            inkRows(render(scene(paragraph("Grace\u2028"), boxH = 400.0, verticalAlignment = 1)))
+        )
+        assertTrue(trailing.first < plain.first, "the empty line below lifts the centred text: $trailing vs $plain")
+    }
+
+    @Test
+    fun `padding insets the text from the box edges`() {
+        val padding = KnPadding(40.0, 40.0, 0.0, 0.0)
+        val flush = render(scene(paragraph("Grace")))
+        val inset = render(scene(paragraph("Grace"), padding = padding))
+        val across = checkNotNull(inkColumns(inset)).first - checkNotNull(inkColumns(flush)).first
+        val down = checkNotNull(inkRows(inset)).first - checkNotNull(inkRows(flush)).first
+        assertTrue(across in px(40.0) - 1..px(40.0) + 1, "the left padding moves the text right by it: $across")
+        assertTrue(down in px(40.0) - 1..px(40.0) + 1, "the top padding moves it down by it: $down")
     }
 
     // ── Nothing to draw ───────────────────────────────────────────────────────
