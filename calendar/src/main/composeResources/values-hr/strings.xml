@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Dodaj bogoslužje</string>
     <string name="calendar_edit_service">Uredi bogoslužje</string>
+    <string name="calendar_service_date">Datum</string>
+    <string name="calendar_template_schedule">Kartica Raspored</string>
+    <string name="calendar_template_schedule_sub">Redaka: %1$d, kakvi su sada</string>
     <string name="calendar_service_name">Naziv</string>
     <string name="calendar_service_start">Vrijeme početka</string>
     <string name="calendar_service_type">Vrsta</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d planirano bogoslužje · %2$s</string>
     <string name="calendar_header_sub_other">%1$d planiranih bogoslužja · %2$s</string>
     <string name="calendar_all_saved">Sve promjene spremljene</string>
+    <string name="calendar_next_sync_in">Sljedeća sinkronizacija za %1$s</string>
+    <string name="calendar_syncing">Sinkronizacija…</string>
     <string name="calendar_day_services_one">%1$d bogoslužje</string>
     <string name="calendar_day_services_other">%1$d bogoslužja</string>
     <string name="calendar_day_no_services">Nema bogoslužja</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Umetni</string>
     <string name="calendar_auto_load">Automatski učitaj bogoslužje</string>
     <string name="calendar_auto_load_sub">Stavlja tijek bogoslužja u karticu Raspored prije njegove prve stavke i briše ono što je ondje</string>
+    <string name="calendar_auto_load_off">Bogoslužja se ne učitavaju sama u raspored. Uključite „Automatski učitaj bogoslužje” da bi svako bilo ondje prije početka.</string>
+    <string name="calendar_auto_load_turn_on">Uključi</string>
     <string name="calendar_auto_load_lead">Koliko unaprijed</string>
     <string name="calendar_auto_load_lead_sub">Minuta prije prve stavke, od %1$d do %2$d</string>
     <string name="calendar_default_sermon">Zadano trajanje propovijedi</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Oznaka pokrenuta</string>
     <string name="calendar_cue_toast_close">Sakrij</string>
+    <string name="calendar_export_saved_title">PDF spremljen</string>
+    <string name="calendar_export_failed_title">Spremanje PDF-a nije uspjelo</string>
     <string name="calendar_preset_kind_all">Sve</string>
     <string name="calendar_preset_kind_slides">Prezentacije slika</string>
     <string name="calendar_preset_kind_presentations">Prezentacije</string>

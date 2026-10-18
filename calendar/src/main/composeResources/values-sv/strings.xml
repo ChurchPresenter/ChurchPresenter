@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Lägg till gudstjänst</string>
     <string name="calendar_edit_service">Redigera gudstjänst</string>
+    <string name="calendar_service_date">Datum</string>
+    <string name="calendar_template_schedule">Fliken Program</string>
+    <string name="calendar_template_schedule_sub">%1$d rader, som de ser ut nu</string>
     <string name="calendar_service_name">Namn</string>
     <string name="calendar_service_start">Starttid</string>
     <string name="calendar_service_type">Typ</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d gudstjänst planerad · %2$s</string>
     <string name="calendar_header_sub_other">%1$d gudstjänster planerade · %2$s</string>
     <string name="calendar_all_saved">Alla ändringar sparade</string>
+    <string name="calendar_next_sync_in">Nästa synkronisering om %1$s</string>
+    <string name="calendar_syncing">Synkroniserar…</string>
     <string name="calendar_day_services_one">%1$d gudstjänst</string>
     <string name="calendar_day_services_other">%1$d gudstjänster</string>
     <string name="calendar_day_no_services">Inga gudstjänster</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Infoga</string>
     <string name="calendar_auto_load">Läs in gudstjänsten automatiskt</string>
     <string name="calendar_auto_load_sub">Lägger körschemat i fliken Program före dess första punkt och tömmer det som står där</string>
+    <string name="calendar_auto_load_off">Gudstjänster läses inte in i programmet av sig själva. Slå på ”Läs in gudstjänsten automatiskt” så att varje gudstjänst finns där innan den börjar.</string>
+    <string name="calendar_auto_load_turn_on">Slå på</string>
     <string name="calendar_auto_load_lead">Hur långt i förväg</string>
     <string name="calendar_auto_load_lead_sub">Minuter före första punkten, från %1$d till %2$d</string>
     <string name="calendar_default_sermon">Standardlängd för predikan</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Markering utlöst</string>
     <string name="calendar_cue_toast_close">Dölj</string>
+    <string name="calendar_export_saved_title">PDF sparad</string>
+    <string name="calendar_export_failed_title">Det gick inte att spara PDF-filen</string>
     <string name="calendar_preset_kind_all">Alla</string>
     <string name="calendar_preset_kind_slides">Bildspel</string>
     <string name="calendar_preset_kind_presentations">Presentationer</string>

@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Xizmat qo‘shish</string>
     <string name="calendar_edit_service">Xizmatni tahrirlash</string>
+    <string name="calendar_service_date">Sana</string>
+    <string name="calendar_template_schedule">Jadval yorlig‘i</string>
+    <string name="calendar_template_schedule_sub">%1$d qator, hozirgi holicha</string>
     <string name="calendar_service_name">Nomi</string>
     <string name="calendar_service_start">Boshlanish vaqti</string>
     <string name="calendar_service_type">Turi</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d xizmat rejalashtirilgan · %2$s</string>
     <string name="calendar_header_sub_other">%1$d ta xizmat rejalashtirilgan · %2$s</string>
     <string name="calendar_all_saved">Barcha o‘zgarishlar saqlandi</string>
+    <string name="calendar_next_sync_in">Keyingi sinxronlash %1$s dan keyin</string>
+    <string name="calendar_syncing">Sinxronlanmoqda…</string>
     <string name="calendar_day_services_one">%1$d xizmat</string>
     <string name="calendar_day_services_other">%1$d ta xizmat</string>
     <string name="calendar_day_no_services">Xizmatlar yo‘q</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Kiritish</string>
     <string name="calendar_auto_load">Xizmatni avtomatik yuklash</string>
     <string name="calendar_auto_load_sub">Xizmat tartibini birinchi elementdan oldin jadval yorlig‘iga qo‘yadi va u yerdagi hamma narsani tozalaydi</string>
+    <string name="calendar_auto_load_off">Xizmatlar jadvalga o‘z-o‘zidan yuklanmaydi. Har biri boshlanishidan oldin u yerda bo‘lishi uchun “Xizmatni avtomatik yuklash”ni yoqing.</string>
+    <string name="calendar_auto_load_turn_on">Yoqish</string>
     <string name="calendar_auto_load_lead">Qancha vaqt oldin</string>
     <string name="calendar_auto_load_lead_sub">Birinchi elementgacha daqiqa, %1$d dan %2$d gacha</string>
     <string name="calendar_default_sermon">Standart va’z davomiyligi</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d daq</string>
     <string name="calendar_cue_fired_title">Belgi ishga tushdi</string>
     <string name="calendar_cue_toast_close">Yashirish</string>
+    <string name="calendar_export_saved_title">PDF saqlandi</string>
+    <string name="calendar_export_failed_title">PDF saqlanmadi</string>
     <string name="calendar_preset_kind_all">Hammasi</string>
     <string name="calendar_preset_kind_slides">Slaydshoular</string>
     <string name="calendar_preset_kind_presentations">Taqdimotlar</string>

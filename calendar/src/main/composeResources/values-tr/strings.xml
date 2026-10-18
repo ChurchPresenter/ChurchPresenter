@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Toplantı ekle</string>
     <string name="calendar_edit_service">Toplantıyı düzenle</string>
+    <string name="calendar_service_date">Tarih</string>
+    <string name="calendar_template_schedule">Program sekmesi</string>
+    <string name="calendar_template_schedule_sub">%1$d satır, şu anki hâliyle</string>
     <string name="calendar_service_name">Ad</string>
     <string name="calendar_service_start">Başlangıç saati</string>
     <string name="calendar_service_type">Tür</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d toplantı planlandı · %2$s</string>
     <string name="calendar_header_sub_other">%1$d toplantı planlandı · %2$s</string>
     <string name="calendar_all_saved">Tüm değişiklikler kaydedildi</string>
+    <string name="calendar_next_sync_in">Sonraki eşitleme %1$s sonra</string>
+    <string name="calendar_syncing">Eşitleniyor…</string>
     <string name="calendar_day_services_one">%1$d toplantı</string>
     <string name="calendar_day_services_other">%1$d toplantı</string>
     <string name="calendar_day_no_services">Toplantı yok</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Ekle</string>
     <string name="calendar_auto_load">Toplantıyı otomatik yükle</string>
     <string name="calendar_auto_load_sub">Akış planını ilk öğesinden önce Program sekmesine koyar ve oradakileri temizler</string>
+    <string name="calendar_auto_load_off">Toplantılar Programa kendiliğinden yüklenmez. Her biri başlamadan önce orada olsun diye “Toplantıyı otomatik yükle” seçeneğini açın.</string>
+    <string name="calendar_auto_load_turn_on">Aç</string>
     <string name="calendar_auto_load_lead">Ne kadar önce</string>
     <string name="calendar_auto_load_lead_sub">İlk öğeden önceki dakika, %1$d ile %2$d arası</string>
     <string name="calendar_default_sermon">Varsayılan vaaz süresi</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d dk</string>
     <string name="calendar_cue_fired_title">İşaret tetiklendi</string>
     <string name="calendar_cue_toast_close">Gizle</string>
+    <string name="calendar_export_saved_title">PDF kaydedildi</string>
+    <string name="calendar_export_failed_title">PDF kaydedilemedi</string>
     <string name="calendar_preset_kind_all">Tümü</string>
     <string name="calendar_preset_kind_slides">Slayt gösterileri</string>
     <string name="calendar_preset_kind_presentations">Sunumlar</string>

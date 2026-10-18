@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Қызмет қосу</string>
     <string name="calendar_edit_service">Қызметті өзгерту</string>
+    <string name="calendar_service_date">Күні</string>
+    <string name="calendar_template_schedule">«Бағдарлама» қойындысы</string>
+    <string name="calendar_template_schedule_sub">%1$d жол, қазіргі күйінде</string>
     <string name="calendar_service_name">Атауы</string>
     <string name="calendar_service_start">Басталу уақыты</string>
     <string name="calendar_service_type">Түрі</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d қызмет жоспарланған · %2$s</string>
     <string name="calendar_header_sub_other">%1$d қызмет жоспарланған · %2$s</string>
     <string name="calendar_all_saved">Барлық өзгеріс сақталды</string>
+    <string name="calendar_next_sync_in">Келесі синхрондау %1$s кейін</string>
+    <string name="calendar_syncing">Синхрондалуда…</string>
     <string name="calendar_day_services_one">%1$d қызмет</string>
     <string name="calendar_day_services_other">%1$d қызмет</string>
     <string name="calendar_day_no_services">Қызметтер жоқ</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Кірістіру</string>
     <string name="calendar_auto_load">Қызметті автоматты жүктеу</string>
     <string name="calendar_auto_load_sub">Қызмет ретін бірінші элементтің алдында кесте қойындысына қояды, ондағы барлық нәрсені тазалайды</string>
+    <string name="calendar_auto_load_off">Қызметтер бағдарламаға өздігінен жүктелмейді. Әрқайсысы басталар алдында сонда болуы үшін «Қызметті автоматты жүктеу» параметрін қосыңыз.</string>
+    <string name="calendar_auto_load_turn_on">Қосу</string>
     <string name="calendar_auto_load_lead">Қанша уақыт бұрын</string>
     <string name="calendar_auto_load_lead_sub">Бірінші элементке дейінгі минут, %1$d пен %2$d аралығында</string>
     <string name="calendar_default_sermon">Әдепкі уағыз ұзақтығы</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d мин</string>
     <string name="calendar_cue_fired_title">Белгі іске қосылды</string>
     <string name="calendar_cue_toast_close">Жасыру</string>
+    <string name="calendar_export_saved_title">PDF сақталды</string>
+    <string name="calendar_export_failed_title">PDF сақталмады</string>
     <string name="calendar_preset_kind_all">Барлығы</string>
     <string name="calendar_preset_kind_slides">Слайдшоулар</string>
     <string name="calendar_preset_kind_presentations">Презентациялар</string>

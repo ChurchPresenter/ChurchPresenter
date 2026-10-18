@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Ongeza ibada</string>
     <string name="calendar_edit_service">Hariri ibada</string>
+    <string name="calendar_service_date">Tarehe</string>
+    <string name="calendar_template_schedule">Kichupo cha Ratiba</string>
+    <string name="calendar_template_schedule_sub">Safu %1$d, jinsi zilivyo sasa</string>
     <string name="calendar_service_name">Jina</string>
     <string name="calendar_service_start">Saa ya kuanza</string>
     <string name="calendar_service_type">Aina</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">Ibada %1$d imepangwa · %2$s</string>
     <string name="calendar_header_sub_other">Ibada %1$d zimepangwa · %2$s</string>
     <string name="calendar_all_saved">Mabadiliko yote yamehifadhiwa</string>
+    <string name="calendar_next_sync_in">Usawazishaji unaofuata baada ya %1$s</string>
+    <string name="calendar_syncing">Inasawazisha…</string>
     <string name="calendar_day_services_one">Ibada %1$d</string>
     <string name="calendar_day_services_other">Ibada %1$d</string>
     <string name="calendar_day_no_services">Hakuna ibada</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Ingiza</string>
     <string name="calendar_auto_load">Pakia ibada kiotomatiki</string>
     <string name="calendar_auto_load_sub">Huweka mtiririko wa ibada kwenye kichupo cha Ratiba kabla ya kipengee chake cha kwanza, na kufuta kilichopo</string>
+    <string name="calendar_auto_load_off">Ibada hazipakiwi kwenye Ratiba zenyewe. Washa “Pakia ibada kiotomatiki” ili kila moja iwe pale kabla haijaanza.</string>
+    <string name="calendar_auto_load_turn_on">Washa</string>
     <string name="calendar_auto_load_lead">Muda kabla</string>
     <string name="calendar_auto_load_lead_sub">Dakika kabla ya kipengee cha kwanza, kutoka %1$d hadi %2$d</string>
     <string name="calendar_default_sermon">Muda wa chaguo-msingi wa mahubiri</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · dakika %3$d</string>
     <string name="calendar_cue_fired_title">Alama imeanzishwa</string>
     <string name="calendar_cue_toast_close">Ficha</string>
+    <string name="calendar_export_saved_title">PDF imehifadhiwa</string>
+    <string name="calendar_export_failed_title">Imeshindwa kuhifadhi PDF</string>
     <string name="calendar_preset_kind_all">Zote</string>
     <string name="calendar_preset_kind_slides">Maonyesho ya picha</string>
     <string name="calendar_preset_kind_presentations">Mawasilisho</string>

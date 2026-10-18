@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Добавить служение</string>
     <string name="calendar_edit_service">Изменить служение</string>
+    <string name="calendar_service_date">Дата</string>
+    <string name="calendar_template_schedule">Вкладка «Программа»</string>
+    <string name="calendar_template_schedule_sub">Строк: %1$d, в текущем виде</string>
     <string name="calendar_service_name">Название</string>
     <string name="calendar_service_start">Время начала</string>
     <string name="calendar_service_type">Тип</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d служение запланировано · %2$s</string>
     <string name="calendar_header_sub_other">%1$d служений запланировано · %2$s</string>
     <string name="calendar_all_saved">Все изменения сохранены</string>
+    <string name="calendar_next_sync_in">Следующая синхронизация через %1$s</string>
+    <string name="calendar_syncing">Синхронизация…</string>
     <string name="calendar_day_services_one">%1$d служение</string>
     <string name="calendar_day_services_other">%1$d служений</string>
     <string name="calendar_day_no_services">Нет служений</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Вставить</string>
     <string name="calendar_auto_load">Загружать служение автоматически</string>
     <string name="calendar_auto_load_sub">Помещает порядок служения во вкладку расписания перед первым элементом, очищая то, что там было</string>
+    <string name="calendar_auto_load_off">Служения не загружаются в программу сами. Включите «Загружать служение автоматически», чтобы каждое было там до начала.</string>
+    <string name="calendar_auto_load_turn_on">Включить</string>
     <string name="calendar_auto_load_lead">За сколько заранее</string>
     <string name="calendar_auto_load_lead_sub">Минут до первого элемента, от %1$d до %2$d</string>
     <string name="calendar_default_sermon">Длительность проповеди по умолчанию</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d мин</string>
     <string name="calendar_cue_fired_title">Метка сработала</string>
     <string name="calendar_cue_toast_close">Скрыть</string>
+    <string name="calendar_export_saved_title">PDF сохранён</string>
+    <string name="calendar_export_failed_title">Не удалось сохранить PDF</string>
     <string name="calendar_preset_kind_all">Все</string>
     <string name="calendar_preset_kind_slides">Слайд-шоу</string>
     <string name="calendar_preset_kind_presentations">Презентации</string>

@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">सभा जोड़ें</string>
     <string name="calendar_edit_service">सभा संपादित करें</string>
+    <string name="calendar_service_date">तारीख</string>
+    <string name="calendar_template_schedule">कार्यक्रम टैब</string>
+    <string name="calendar_template_schedule_sub">%1$d पंक्तियाँ, जैसी वे अभी हैं</string>
     <string name="calendar_service_name">नाम</string>
     <string name="calendar_service_start">आरंभ समय</string>
     <string name="calendar_service_type">प्रकार</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d सभा नियोजित · %2$s</string>
     <string name="calendar_header_sub_other">%1$d सभाएँ नियोजित · %2$s</string>
     <string name="calendar_all_saved">सभी परिवर्तन सहेजे गए</string>
+    <string name="calendar_next_sync_in">अगला सिंक %1$s में</string>
+    <string name="calendar_syncing">सिंक हो रहा है…</string>
     <string name="calendar_day_services_one">%1$d सभा</string>
     <string name="calendar_day_services_other">%1$d सभाएँ</string>
     <string name="calendar_day_no_services">कोई सभा नहीं</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">सम्मिलित करें</string>
     <string name="calendar_auto_load">सभा स्वतः लोड करें</string>
     <string name="calendar_auto_load_sub">सभा क्रम को उसके पहले आइटम से पहले कार्यक्रम टैब में रखता है, और वहाँ जो है उसे हटा देता है</string>
+    <string name="calendar_auto_load_off">सभाएँ अपने-आप कार्यक्रम में लोड नहीं होतीं। हर सभा शुरू होने से पहले वहाँ रहे, इसके लिए “सभा स्वतः लोड करें” चालू करें।</string>
+    <string name="calendar_auto_load_turn_on">चालू करें</string>
     <string name="calendar_auto_load_lead">कितनी देर पहले</string>
     <string name="calendar_auto_load_lead_sub">पहले आइटम से पहले के मिनट, %1$d से %2$d तक</string>
     <string name="calendar_default_sermon">डिफ़ॉल्ट प्रवचन अवधि</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d मिनट</string>
     <string name="calendar_cue_fired_title">चिह्न चला</string>
     <string name="calendar_cue_toast_close">छिपाएँ</string>
+    <string name="calendar_export_saved_title">PDF सहेजा गया</string>
+    <string name="calendar_export_failed_title">PDF सहेजा नहीं जा सका</string>
     <string name="calendar_preset_kind_all">सभी</string>
     <string name="calendar_preset_kind_slides">स्लाइड शो</string>
     <string name="calendar_preset_kind_presentations">प्रस्तुतियाँ</string>

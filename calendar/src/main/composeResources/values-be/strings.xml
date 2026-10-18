@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Дадаць служэнне</string>
     <string name="calendar_edit_service">Змяніць служэнне</string>
+    <string name="calendar_service_date">Дата</string>
+    <string name="calendar_template_schedule">Укладка «Праграма»</string>
+    <string name="calendar_template_schedule_sub">Радкоў: %1$d, як яны там зараз</string>
     <string name="calendar_service_name">Назва</string>
     <string name="calendar_service_start">Час пачатку</string>
     <string name="calendar_service_type">Тып</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d служэнне запланавана · %2$s</string>
     <string name="calendar_header_sub_other">%1$d служэнняў запланавана · %2$s</string>
     <string name="calendar_all_saved">Усе змены захаваны</string>
+    <string name="calendar_next_sync_in">Наступная сінхранізацыя праз %1$s</string>
+    <string name="calendar_syncing">Сінхранізацыя…</string>
     <string name="calendar_day_services_one">%1$d служэнне</string>
     <string name="calendar_day_services_other">%1$d служэнняў</string>
     <string name="calendar_day_no_services">Няма служэнняў</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Уставіць</string>
     <string name="calendar_auto_load">Загружаць служэнне аўтаматычна</string>
     <string name="calendar_auto_load_sub">Змяшчае парадак служэння ва ўкладку раскладу перад першым элементам, ачышчаючы тое, што там было</string>
+    <string name="calendar_auto_load_off">Служэнні не загружаюцца ў праграму самі. Уключыце «Загружаць служэнне аўтаматычна», каб кожнае было там да пачатку.</string>
+    <string name="calendar_auto_load_turn_on">Уключыць</string>
     <string name="calendar_auto_load_lead">За колькі загадзя</string>
     <string name="calendar_auto_load_lead_sub">Хвілін да першага элемента, ад %1$d да %2$d</string>
     <string name="calendar_default_sermon">Працягласць казані па змаўчанні</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d хв</string>
     <string name="calendar_cue_fired_title">Метка спрацавала</string>
     <string name="calendar_cue_toast_close">Схаваць</string>
+    <string name="calendar_export_saved_title">PDF захаваны</string>
+    <string name="calendar_export_failed_title">Не ўдалося захаваць PDF</string>
     <string name="calendar_preset_kind_all">Усе</string>
     <string name="calendar_preset_kind_slides">Слайд-шоу</string>
     <string name="calendar_preset_kind_presentations">Прэзентацыі</string>

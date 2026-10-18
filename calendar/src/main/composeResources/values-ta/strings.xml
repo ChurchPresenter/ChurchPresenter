@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">ஆராதனை சேர்</string>
     <string name="calendar_edit_service">ஆராதனையைத் திருத்து</string>
+    <string name="calendar_service_date">தேதி</string>
+    <string name="calendar_template_schedule">அட்டவணை தாவல்</string>
+    <string name="calendar_template_schedule_sub">%1$d வரிசைகள், இப்போது உள்ளபடியே</string>
     <string name="calendar_service_name">பெயர்</string>
     <string name="calendar_service_start">தொடங்கும் நேரம்</string>
     <string name="calendar_service_type">வகை</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d ஆராதனை திட்டமிடப்பட்டது · %2$s</string>
     <string name="calendar_header_sub_other">%1$d ஆராதனைகள் திட்டமிடப்பட்டன · %2$s</string>
     <string name="calendar_all_saved">அனைத்து மாற்றங்களும் சேமிக்கப்பட்டன</string>
+    <string name="calendar_next_sync_in">அடுத்த ஒத்திசைவு %1$s இல்</string>
+    <string name="calendar_syncing">ஒத்திசைக்கிறது…</string>
     <string name="calendar_day_services_one">%1$d ஆராதனை</string>
     <string name="calendar_day_services_other">%1$d ஆராதனைகள்</string>
     <string name="calendar_day_no_services">ஆராதனைகள் இல்லை</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">செருகு</string>
     <string name="calendar_auto_load">ஆராதனையைத் தானாக ஏற்று</string>
     <string name="calendar_auto_load_sub">முதல் உருப்படிக்கு முன்பு ஆராதனை வரிசையை அட்டவணைத் தாவலில் வைக்கும், அங்குள்ளதை அழிக்கும்</string>
+    <string name="calendar_auto_load_off">ஆராதனைகள் தானாக அட்டவணையில் ஏற்றப்படாது. ஒவ்வொன்றும் தொடங்கும் முன் அங்கு இருக்க “ஆராதனையைத் தானாக ஏற்று” என்பதை இயக்கவும்.</string>
+    <string name="calendar_auto_load_turn_on">இயக்கு</string>
     <string name="calendar_auto_load_lead">எவ்வளவு முன்பு</string>
     <string name="calendar_auto_load_lead_sub">முதல் உருப்படிக்கு முந்தைய நிமிடங்கள், %1$d முதல் %2$d வரை</string>
     <string name="calendar_default_sermon">இயல்புநிலைப் பிரசங்க நேரம்</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d நிமிடம்</string>
     <string name="calendar_cue_fired_title">குறி இயங்கியது</string>
     <string name="calendar_cue_toast_close">மறை</string>
+    <string name="calendar_export_saved_title">PDF சேமிக்கப்பட்டது</string>
+    <string name="calendar_export_failed_title">PDF-ஐச் சேமிக்க முடியவில்லை</string>
     <string name="calendar_preset_kind_all">அனைத்தும்</string>
     <string name="calendar_preset_kind_slides">படக்காட்சிகள்</string>
     <string name="calendar_preset_kind_presentations">விளக்கக்காட்சிகள்</string>

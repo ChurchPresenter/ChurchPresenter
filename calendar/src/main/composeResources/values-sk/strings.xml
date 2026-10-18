@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Pridať bohoslužbu</string>
     <string name="calendar_edit_service">Upraviť bohoslužbu</string>
+    <string name="calendar_service_date">Dátum</string>
+    <string name="calendar_template_schedule">Karta Program</string>
+    <string name="calendar_template_schedule_sub">Riadkov: %1$d, tak ako sú teraz</string>
     <string name="calendar_service_name">Názov</string>
     <string name="calendar_service_start">Čas začiatku</string>
     <string name="calendar_service_type">Typ</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d naplánovaná bohoslužba · %2$s</string>
     <string name="calendar_header_sub_other">%1$d naplánovaných bohoslužieb · %2$s</string>
     <string name="calendar_all_saved">Všetky zmeny uložené</string>
+    <string name="calendar_next_sync_in">Ďalšia synchronizácia o %1$s</string>
+    <string name="calendar_syncing">Synchronizácia…</string>
     <string name="calendar_day_services_one">%1$d bohoslužba</string>
     <string name="calendar_day_services_other">%1$d bohoslužieb</string>
     <string name="calendar_day_no_services">Žiadne bohoslužby</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Vložiť</string>
     <string name="calendar_auto_load">Načítavať bohoslužbu automaticky</string>
     <string name="calendar_auto_load_sub">Vloží priebeh bohoslužby na kartu programu pred jej prvou položkou a vyčistí, čo tam je</string>
+    <string name="calendar_auto_load_off">Bohoslužby sa do programu nenačítavajú samy. Zapnite „Načítavať bohoslužbu automaticky“, aby tam každá bola pred začiatkom.</string>
+    <string name="calendar_auto_load_turn_on">Zapnúť</string>
     <string name="calendar_auto_load_lead">S akým predstihom</string>
     <string name="calendar_auto_load_lead_sub">Minút pred prvou položkou, od %1$d do %2$d</string>
     <string name="calendar_default_sermon">Predvolená dĺžka kázne</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Značka spustená</string>
     <string name="calendar_cue_toast_close">Skryť</string>
+    <string name="calendar_export_saved_title">PDF uložené</string>
+    <string name="calendar_export_failed_title">PDF sa nepodarilo uložiť</string>
     <string name="calendar_preset_kind_all">Všetko</string>
     <string name="calendar_preset_kind_slides">Prezentácie obrázkov</string>
     <string name="calendar_preset_kind_presentations">Prezentácie</string>

@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Dienst toevoegen</string>
     <string name="calendar_edit_service">Dienst bewerken</string>
+    <string name="calendar_service_date">Datum</string>
+    <string name="calendar_template_schedule">Het tabblad Programma</string>
+    <string name="calendar_template_schedule_sub">%1$d rijen, zoals ze er nu staan</string>
     <string name="calendar_service_name">Naam</string>
     <string name="calendar_service_start">Begintijd</string>
     <string name="calendar_service_type">Type</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d dienst gepland · %2$s</string>
     <string name="calendar_header_sub_other">%1$d diensten gepland · %2$s</string>
     <string name="calendar_all_saved">Alle wijzigingen opgeslagen</string>
+    <string name="calendar_next_sync_in">Volgende synchronisatie over %1$s</string>
+    <string name="calendar_syncing">Synchroniseren…</string>
     <string name="calendar_day_services_one">%1$d dienst</string>
     <string name="calendar_day_services_other">%1$d diensten</string>
     <string name="calendar_day_no_services">Geen diensten</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Invoegen</string>
     <string name="calendar_auto_load">Dienst automatisch laden</string>
     <string name="calendar_auto_load_sub">Zet het draaiboek vóór het eerste onderdeel in het tabblad Programma en maakt leeg wat daar staat</string>
+    <string name="calendar_auto_load_off">Diensten worden niet vanzelf in het Programma geladen. Zet ‘Dienst automatisch laden’ aan zodat elke dienst er staat voordat hij begint.</string>
+    <string name="calendar_auto_load_turn_on">Aanzetten</string>
     <string name="calendar_auto_load_lead">Hoe lang van tevoren</string>
     <string name="calendar_auto_load_lead_sub">Minuten vóór het eerste onderdeel, van %1$d tot %2$d</string>
     <string name="calendar_default_sermon">Standaardduur van de preek</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Markering afgevuurd</string>
     <string name="calendar_cue_toast_close">Verbergen</string>
+    <string name="calendar_export_saved_title">PDF opgeslagen</string>
+    <string name="calendar_export_failed_title">Kan de PDF niet opslaan</string>
     <string name="calendar_preset_kind_all">Alles</string>
     <string name="calendar_preset_kind_slides">Diavoorstellingen</string>
     <string name="calendar_preset_kind_presentations">Presentaties</string>

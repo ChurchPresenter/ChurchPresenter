@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Añadir servicio</string>
     <string name="calendar_edit_service">Editar servicio</string>
+    <string name="calendar_service_date">Fecha</string>
+    <string name="calendar_template_schedule">La pestaña Programa</string>
+    <string name="calendar_template_schedule_sub">%1$d filas, tal como están ahora</string>
     <string name="calendar_service_name">Nombre</string>
     <string name="calendar_service_start">Hora de inicio</string>
     <string name="calendar_service_type">Tipo</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d servicio planificado · %2$s</string>
     <string name="calendar_header_sub_other">%1$d servicios planificados · %2$s</string>
     <string name="calendar_all_saved">Todos los cambios guardados</string>
+    <string name="calendar_next_sync_in">Próxima sincronización en %1$s</string>
+    <string name="calendar_syncing">Sincronizando…</string>
     <string name="calendar_day_services_one">%1$d servicio</string>
     <string name="calendar_day_services_other">%1$d servicios</string>
     <string name="calendar_day_no_services">Sin servicios</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Insertar</string>
     <string name="calendar_auto_load">Cargar el servicio automáticamente</string>
     <string name="calendar_auto_load_sub">Pone el orden del servicio en la pestaña de programa antes de su primer elemento, limpiando lo que haya</string>
+    <string name="calendar_auto_load_off">Los servicios no se cargan solos en el Programa. Activa «Cargar el servicio automáticamente» para que cada uno esté allí antes de empezar.</string>
+    <string name="calendar_auto_load_turn_on">Activar</string>
     <string name="calendar_auto_load_lead">Con cuánta antelación</string>
     <string name="calendar_auto_load_lead_sub">Minutos antes del primer elemento, de %1$d a %2$d</string>
     <string name="calendar_default_sermon">Duración del sermón por defecto</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Marca lanzada</string>
     <string name="calendar_cue_toast_close">Ocultar</string>
+    <string name="calendar_export_saved_title">PDF guardado</string>
+    <string name="calendar_export_failed_title">No se pudo guardar el PDF</string>
     <string name="calendar_preset_kind_all">Todos</string>
     <string name="calendar_preset_kind_slides">Pases de diapositivas</string>
     <string name="calendar_preset_kind_presentations">Presentaciones</string>

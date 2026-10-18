@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Adaugă serviciu</string>
     <string name="calendar_edit_service">Editează serviciul</string>
+    <string name="calendar_service_date">Data</string>
+    <string name="calendar_template_schedule">Fila Program</string>
+    <string name="calendar_template_schedule_sub">%1$d rânduri, așa cum sunt acum</string>
     <string name="calendar_service_name">Nume</string>
     <string name="calendar_service_start">Ora de început</string>
     <string name="calendar_service_type">Tip</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d serviciu planificat · %2$s</string>
     <string name="calendar_header_sub_other">%1$d servicii planificate · %2$s</string>
     <string name="calendar_all_saved">Toate modificările au fost salvate</string>
+    <string name="calendar_next_sync_in">Următoarea sincronizare în %1$s</string>
+    <string name="calendar_syncing">Se sincronizează…</string>
     <string name="calendar_day_services_one">%1$d serviciu</string>
     <string name="calendar_day_services_other">%1$d servicii</string>
     <string name="calendar_day_no_services">Niciun serviciu</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Inserează</string>
     <string name="calendar_auto_load">Încarcă serviciul automat</string>
     <string name="calendar_auto_load_sub">Pune desfășurarea în fila Program înainte de primul element, golind ce se află acolo</string>
+    <string name="calendar_auto_load_off">Serviciile nu se încarcă singure în Program. Activați „Încarcă serviciul automat” ca fiecare să fie acolo înainte de a începe.</string>
+    <string name="calendar_auto_load_turn_on">Activează</string>
     <string name="calendar_auto_load_lead">Cu cât timp înainte</string>
     <string name="calendar_auto_load_lead_sub">Minute înainte de primul element, de la %1$d la %2$d</string>
     <string name="calendar_default_sermon">Durata implicită a predicii</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Marcaj declanșat</string>
     <string name="calendar_cue_toast_close">Ascunde</string>
+    <string name="calendar_export_saved_title">PDF salvat</string>
+    <string name="calendar_export_failed_title">PDF-ul nu a putut fi salvat</string>
     <string name="calendar_preset_kind_all">Toate</string>
     <string name="calendar_preset_kind_slides">Prezentări de imagini</string>
     <string name="calendar_preset_kind_presentations">Prezentări</string>

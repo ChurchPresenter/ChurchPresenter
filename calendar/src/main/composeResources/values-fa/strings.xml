@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">افزودن جلسه</string>
     <string name="calendar_edit_service">ویرایش جلسه</string>
+    <string name="calendar_service_date">تاریخ</string>
+    <string name="calendar_template_schedule">زبانهٔ برنامه</string>
+    <string name="calendar_template_schedule_sub">%1$d ردیف، همان‌طور که اکنون هستند</string>
     <string name="calendar_service_name">نام</string>
     <string name="calendar_service_start">زمان شروع</string>
     <string name="calendar_service_type">نوع</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d جلسه برنامه‌ریزی شد · %2$s</string>
     <string name="calendar_header_sub_other">%1$d جلسه برنامه‌ریزی شد · %2$s</string>
     <string name="calendar_all_saved">همهٔ تغییرات ذخیره شد</string>
+    <string name="calendar_next_sync_in">همگام‌سازی بعدی تا %1$s دیگر</string>
+    <string name="calendar_syncing">در حال همگام‌سازی…</string>
     <string name="calendar_day_services_one">%1$d جلسه</string>
     <string name="calendar_day_services_other">%1$d جلسه</string>
     <string name="calendar_day_no_services">بدون جلسه</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">درج</string>
     <string name="calendar_auto_load">بارگذاری خودکار جلسه</string>
     <string name="calendar_auto_load_sub">ترتیب برنامه را پیش از نخستین موردش در زبانهٔ برنامه می‌گذارد و آنچه آنجاست پاک می‌کند</string>
+    <string name="calendar_auto_load_off">جلسات خودبه‌خود در برنامه بارگذاری نمی‌شوند. «بارگذاری خودکار جلسه» را روشن کنید تا هر جلسه پیش از شروع آنجا باشد.</string>
+    <string name="calendar_auto_load_turn_on">روشن کردن</string>
     <string name="calendar_auto_load_lead">چقدر زودتر</string>
     <string name="calendar_auto_load_lead_sub">دقیقه پیش از نخستین مورد، از %1$d تا %2$d</string>
     <string name="calendar_default_sermon">مدت پیش‌فرض موعظه</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d دقیقه</string>
     <string name="calendar_cue_fired_title">نشانه اجرا شد</string>
     <string name="calendar_cue_toast_close">پنهان کردن</string>
+    <string name="calendar_export_saved_title">PDF ذخیره شد</string>
+    <string name="calendar_export_failed_title">ذخیرهٔ PDF ممکن نشد</string>
     <string name="calendar_preset_kind_all">همه</string>
     <string name="calendar_preset_kind_slides">نمایش تصاویر</string>
     <string name="calendar_preset_kind_presentations">ارائه‌ها</string>

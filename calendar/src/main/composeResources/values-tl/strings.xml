@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Magdagdag ng serbisyo</string>
     <string name="calendar_edit_service">I-edit ang serbisyo</string>
+    <string name="calendar_service_date">Petsa</string>
+    <string name="calendar_template_schedule">Ang tab na Schedule</string>
+    <string name="calendar_template_schedule_sub">%1$d hanay, gaya ng nasa ngayon</string>
     <string name="calendar_service_name">Pangalan</string>
     <string name="calendar_service_start">Oras ng simula</string>
     <string name="calendar_service_type">Uri</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d serbisyong nakaplano · %2$s</string>
     <string name="calendar_header_sub_other">%1$d serbisyong nakaplano · %2$s</string>
     <string name="calendar_all_saved">Naka-save ang lahat ng pagbabago</string>
+    <string name="calendar_next_sync_in">Susunod na sync sa loob ng %1$s</string>
+    <string name="calendar_syncing">Nagsi-sync…</string>
     <string name="calendar_day_services_one">%1$d serbisyo</string>
     <string name="calendar_day_services_other">%1$d na serbisyo</string>
     <string name="calendar_day_no_services">Walang serbisyo</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Ipasok</string>
     <string name="calendar_auto_load">Awtomatikong i-load ang serbisyo</string>
     <string name="calendar_auto_load_sub">Inilalagay ang takbo ng programa sa tab na Iskedyul bago ang unang item nito, at nililinis ang naroon</string>
+    <string name="calendar_auto_load_off">Hindi kusang naglo-load ang mga serbisyo sa Schedule. I-on ang “Awtomatikong i-load ang serbisyo” para naroon na ang bawat isa bago ito magsimula.</string>
+    <string name="calendar_auto_load_turn_on">I-on</string>
     <string name="calendar_auto_load_lead">Gaano katagal bago</string>
     <string name="calendar_auto_load_lead_sub">Minuto bago ang unang item, mula %1$d hanggang %2$d</string>
     <string name="calendar_default_sermon">Default na tagal ng sermon</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Tumakbo ang marka</string>
     <string name="calendar_cue_toast_close">Itago</string>
+    <string name="calendar_export_saved_title">Na-save ang PDF</string>
+    <string name="calendar_export_failed_title">Hindi ma-save ang PDF</string>
     <string name="calendar_preset_kind_all">Lahat</string>
     <string name="calendar_preset_kind_slides">Mga slideshow</string>
     <string name="calendar_preset_kind_presentations">Mga presentasyon</string>

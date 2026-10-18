@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Pievienot dievkalpojumu</string>
     <string name="calendar_edit_service">Rediģēt dievkalpojumu</string>
+    <string name="calendar_service_date">Datums</string>
+    <string name="calendar_template_schedule">Cilne Programma</string>
+    <string name="calendar_template_schedule_sub">%1$d rindas, kādas tās ir tagad</string>
     <string name="calendar_service_name">Nosaukums</string>
     <string name="calendar_service_start">Sākuma laiks</string>
     <string name="calendar_service_type">Veids</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d ieplānots dievkalpojums · %2$s</string>
     <string name="calendar_header_sub_other">%1$d ieplānoti dievkalpojumi · %2$s</string>
     <string name="calendar_all_saved">Visas izmaiņas saglabātas</string>
+    <string name="calendar_next_sync_in">Nākamā sinhronizācija pēc %1$s</string>
+    <string name="calendar_syncing">Sinhronizē…</string>
     <string name="calendar_day_services_one">%1$d dievkalpojums</string>
     <string name="calendar_day_services_other">%1$d dievkalpojumi</string>
     <string name="calendar_day_no_services">Nav dievkalpojumu</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Ievietot</string>
     <string name="calendar_auto_load">Ielādēt dievkalpojumu automātiski</string>
     <string name="calendar_auto_load_sub">Ievieto norises kārtību Programmas cilnē pirms tās pirmā punkta, notīrot to, kas tur ir</string>
+    <string name="calendar_auto_load_off">Dievkalpojumi netiek ielādēti programmā paši. Ieslēdziet “Ielādēt dievkalpojumu automātiski”, lai katrs būtu tur pirms sākuma.</string>
+    <string name="calendar_auto_load_turn_on">Ieslēgt</string>
     <string name="calendar_auto_load_lead">Cik ilgi iepriekš</string>
     <string name="calendar_auto_load_lead_sub">Minūtes pirms pirmā punkta, no %1$d līdz %2$d</string>
     <string name="calendar_default_sermon">Sprediķa noklusējuma ilgums</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d min</string>
     <string name="calendar_cue_fired_title">Atzīme nostrādāja</string>
     <string name="calendar_cue_toast_close">Paslēpt</string>
+    <string name="calendar_export_saved_title">PDF saglabāts</string>
+    <string name="calendar_export_failed_title">Neizdevās saglabāt PDF</string>
     <string name="calendar_preset_kind_all">Visas</string>
     <string name="calendar_preset_kind_slides">Slaidrādes</string>
     <string name="calendar_preset_kind_presentations">Prezentācijas</string>

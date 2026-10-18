@@ -19,6 +19,9 @@
 
     <string name="calendar_add_service">Додати служіння</string>
     <string name="calendar_edit_service">Змінити служіння</string>
+    <string name="calendar_service_date">Дата</string>
+    <string name="calendar_template_schedule">Вкладка «Програма»</string>
+    <string name="calendar_template_schedule_sub">Рядків: %1$d, у поточному вигляді</string>
     <string name="calendar_service_name">Назва</string>
     <string name="calendar_service_start">Час початку</string>
     <string name="calendar_service_type">Тип</string>
@@ -61,6 +64,8 @@
     <string name="calendar_header_sub_one">%1$d служіння заплановано · %2$s</string>
     <string name="calendar_header_sub_other">%1$d служінь заплановано · %2$s</string>
     <string name="calendar_all_saved">Усі зміни збережено</string>
+    <string name="calendar_next_sync_in">Наступна синхронізація через %1$s</string>
+    <string name="calendar_syncing">Синхронізація…</string>
     <string name="calendar_day_services_one">%1$d служіння</string>
     <string name="calendar_day_services_other">%1$d служінь</string>
     <string name="calendar_day_no_services">Немає служінь</string>
@@ -155,6 +160,8 @@
     <string name="calendar_section_insert">Вставити</string>
     <string name="calendar_auto_load">Завантажувати служіння автоматично</string>
     <string name="calendar_auto_load_sub">Розміщує порядок служіння у вкладці розкладу перед першим елементом, очищаючи те, що там було</string>
+    <string name="calendar_auto_load_off">Служіння не завантажуються в програму самі. Увімкніть «Завантажувати служіння автоматично», щоб кожне було там до початку.</string>
+    <string name="calendar_auto_load_turn_on">Увімкнути</string>
     <string name="calendar_auto_load_lead">За скільки заздалегідь</string>
     <string name="calendar_auto_load_lead_sub">Хвилин до першого елемента, від %1$d до %2$d</string>
     <string name="calendar_default_sermon">Тривалість проповіді за умовчанням</string>
@@ -191,6 +198,8 @@
     <string name="calendar_run_meta">%1$s – %2$s · %3$d хв</string>
     <string name="calendar_cue_fired_title">Мітка спрацювала</string>
     <string name="calendar_cue_toast_close">Сховати</string>
+    <string name="calendar_export_saved_title">PDF збережено</string>
+    <string name="calendar_export_failed_title">Не вдалося зберегти PDF</string>
     <string name="calendar_preset_kind_all">Усі</string>
     <string name="calendar_preset_kind_slides">Слайд-шоу</string>
     <string name="calendar_preset_kind_presentations">Презентації</string>
