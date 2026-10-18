@@ -56,7 +56,12 @@ internal object PowerPointDeckSupport {
         PoiLimits.apply()
         return SlideShowFactory.create(file, null, true)
             .also { registerEmbeddedFonts(it) }
-            .also { show -> (show as? XMLSlideShow)?.let { stripUnsupportedHighlights(it) } }
+            .also { show ->
+                (show as? XMLSlideShow)?.let {
+                    stripUnsupportedHighlights(it)
+                    addMissingFillRects(it)
+                }
+            }
     }
 
     /**

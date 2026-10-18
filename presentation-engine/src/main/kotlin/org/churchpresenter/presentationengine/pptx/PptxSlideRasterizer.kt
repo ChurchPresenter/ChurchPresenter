@@ -191,6 +191,7 @@ internal object PptxSlideRasterizer {
         graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
         graphics.setRenderingHint(Drawable.FONT_HANDLER, SlideFontRegistry.drawFontManager)
+        graphics.setRenderingHint(Drawable.DRAW_FACTORY, SlideDrawFactory)
         // DrawSlide sets this before drawing; per-shape drawing needs it too (placeholder
         // visibility checks in DrawSimpleShape dereference the current slide).
         graphics.setRenderingHint(Drawable.CURRENT_SLIDE, slide)
