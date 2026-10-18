@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,11 @@ class PicturePresenterScaleTest {
                 PicturePresenter(imagePath = picture.absolutePath, contentScale = mode.contentScale)
             }
         }
+        // The picture decodes off the event thread, which idling does not wait for; until it lands
+        // the output is the black behind it, and a busy machine captures that instead.
+        waitUntil(timeoutMillis = DECODE_TIMEOUT_MS) {
+            onAllNodesWithContentDescription(PRESENTED_IMAGE).fetchSemanticsNodes().isNotEmpty()
+        }
         OutputScaleFixture.assertDrawnAs(mode, onNodeWithTag("output").captureToImage().toPixelMap())
     }
 
@@ -59,4 +65,9 @@ class PicturePresenterScaleTest {
 
     @Test
     fun `stretch covers the screen by squashing the picture`() = drawnAs(OutputScaleMode.STRETCH)
+
+    private companion object {
+        const val DECODE_TIMEOUT_MS = 5_000L
+        const val PRESENTED_IMAGE = "Presented Image"
+    }
 }
