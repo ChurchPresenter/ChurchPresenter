@@ -219,6 +219,17 @@ class PcoImportSelectionTest {
     }
 
     @Test
+    fun `a deck saved as a template or a slideshow comes in as a presentation`() {
+        val files = listOf(PlanAttachment("t", "choir.potx"), PlanAttachment("s", "carols.ppsx"))
+        val vm = viewModel(
+            listOf(row(item("i", PcoItemType.ITEM, title = "Choir"))),
+            files = mapOf("i" to files),
+            ticked = mapOf("i" to setOf("t", "s")),
+        )
+        assertEquals(listOf("presentation:Choir|7|potx", "presentation:Choir|7|ppsx"), import(vm))
+    }
+
+    @Test
     fun `an untitled item's files are named after the file and its folder`() {
         val files = listOf(
             PlanAttachment("p", "deck.pdf"),

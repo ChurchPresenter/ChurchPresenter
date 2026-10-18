@@ -20,7 +20,14 @@ import org.churchpresenter.settings.utils.Constants
 
 /** Image extensions — also used by the tab to count pictures inside a dropped folder. */
 internal val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
-private val PRESENTATION_EXTENSIONS = setOf("ppt", "pptx", "key", "pdf")
+
+/**
+ * What the presentation engine loads — its `PresentationLoader.SUPPORTED_EXTENSIONS`, repeated
+ * here because this module does not depend on the engine.
+ */
+private val PRESENTATION_EXTENSIONS = setOf(
+    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot", "key", "pdf",
+)
 
 internal enum class DroppedFileAction { PRESENTATION, MEDIA, PICTURE, LOWER_THIRD, NONE }
 

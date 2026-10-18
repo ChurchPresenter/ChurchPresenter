@@ -18,11 +18,12 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.settings.utils.Constants
 
 private const val MAX_UPLOAD_MB = 200
 private const val BYTES_PER_MB = 1024 * 1024
-private val UPLOADABLE_EXTENSIONS = setOf("pdf", "ppt", "pptx", "key")
+private val UPLOADABLE_EXTENSIONS = PresentationLoader.SUPPORTED_EXTENSIONS
 
 /*
  * Items sent from a phone to the schedule, and presentation files uploaded to the desktop.

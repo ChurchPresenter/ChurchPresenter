@@ -31,7 +31,13 @@ private val VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "webm")
 
 private val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac")
 
-private val PRESENTATION_EXTENSIONS = setOf("ppt", "pptx", "key", "pdf")
+/**
+ * What the presentation engine loads — its `PresentationLoader.SUPPORTED_EXTENSIONS`, repeated
+ * here because this module does not depend on the engine.
+ */
+internal val PRESENTATION_EXTENSIONS = setOf(
+    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot", "key", "pdf",
+)
 
 /** Mirrors [PlanningCenterImportViewModel.importAttachment]'s extension classification. */
 internal fun isSupportedAttachment(filename: String): Boolean {

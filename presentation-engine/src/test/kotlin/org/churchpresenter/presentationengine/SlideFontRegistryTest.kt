@@ -1,8 +1,10 @@
 package org.churchpresenter.presentationengine
 
 import org.junit.jupiter.api.Test
+import org.churchpresenter.presentationengine.fonts.PostScriptName
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import java.awt.Font
+import java.awt.GraphicsEnvironment
 import java.awt.image.BufferedImage
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -190,5 +192,44 @@ class SlideFontRegistryTest {
         } finally {
             graphics.dispose()
         }
+    }
+
+    @Test
+    fun `Carlito ships with the engine, so Calibri always has its metric twin`() {
+        assertTrue(SlideFontRegistry.isFamilyAvailable("Carlito"), "the bundled Carlito is registered on first use")
+        val calibri = SlideFontRegistry.resolveFamily("Calibri")
+        assertTrue(calibri == "Calibri" || calibri == "Carlito", "Calibri resolves to itself or its twin, got $calibri")
+    }
+
+    @Test
+    fun `an installed face is found from its words in any order`() {
+        // Every face on this machine whose name carries a width or weight a family cannot: asked
+        // for with its words reversed, as PowerPoint writes "Helvetica Neue Bold Condensed" for
+        // the face the system calls "HelveticaNeue-CondensedBold". Machines without such faces
+        // have nothing to check.
+        val faces = GraphicsEnvironment.getLocalGraphicsEnvironment().allFonts.map { it.fontName }
+            .filter { PostScriptName.namesFaceOnlyStyle(it) }
+            .distinctBy { PostScriptName.words(it).sorted() }
+        for (face in faces.take(20)) {
+            val reordered = PostScriptName.words(face).reversed().joinToString(" ")
+            assertEquals(face, SlideFontRegistry.resolveFace(reordered).family, "\"$reordered\" is $face")
+        }
+    }
+
+    @Test
+    fun `a width or weight word is told apart from bold and italic`() {
+        assertEquals(
+            listOf("helvetica", "neue", "condensed", "bold"),
+            PostScriptName.words("HelveticaNeue-CondensedBold"),
+        )
+        assertTrue(PostScriptName.namesFaceOnlyStyle("Helvetica Neue Bold Condensed"))
+        assertTrue(PostScriptName.namesFaceOnlyStyle("HelveticaNeue-Medium"))
+        assertFalse(PostScriptName.namesFaceOnlyStyle("Arial-BoldItalicMT"), "bold and italic a family can give")
+        assertFalse(PostScriptName.namesFaceOnlyStyle("Calibri"))
+    }
+
+    @Test
+    fun `a face word with no installed face falls back to the family`() {
+        assertEquals("Carlito", SlideFontRegistry.resolveFace("Carlito Condensed").family)
     }
 }

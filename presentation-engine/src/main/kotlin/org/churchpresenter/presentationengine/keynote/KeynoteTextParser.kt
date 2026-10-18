@@ -41,9 +41,9 @@ internal object KeynoteTextParser {
             // wholesale is what left five of six paragraphs at the 20pt-black defaults below.
             val charProps = KeynoteStyleResolver.resolveCharProps(index, charStyleId)
             val paraProps = paraStyle?.let { KeynoteStyleResolver.resolveCharProps(index, paraStyleId) }
-            val alignment = paraStyle?.message(F.PARAGRAPH_STYLE_PARA_PROPERTIES)
-                ?.varint(F.PARA_PROPS_ALIGNMENT)?.toInt()
-                ?: 0
+            // Inherited like the character properties: a slide's paragraph style often sets only
+            // what it changes, and the alignment comes from the layout's style above it.
+            val alignment = paraStyle?.let { KeynoteStyleResolver.resolveParagraphAlignment(index, paraStyleId) } ?: 0
             paragraphs.add(
                 KnParagraph(
                     text = cleanText,

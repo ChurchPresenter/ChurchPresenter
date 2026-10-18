@@ -67,6 +67,18 @@ object SlideFontRegistry {
         "impact" to listOf("Haettenschweiler", "Anton", "Open Sans")
     )
 
+    /**
+     * Fonts the engine carries itself (`resources/slide-fonts`, SIL Open Font License): Carlito,
+     * drawn to Calibri's metrics. Calibri is the body font of most decks and comes only with
+     * Office, so without it a Calibri slide is set in a wider face and its lines re-wrap and
+     * overflow; with it every line breaks where PowerPoint breaks it.
+     */
+    private val BUNDLED_FONTS = listOf(
+        "Carlito-Regular.ttf", "Carlito-Bold.ttf", "Carlito-Italic.ttf", "Carlito-BoldItalic.ttf",
+    )
+
+    private val bundledFontsRegistered = AtomicBoolean(false)
+
     /** The ultimate fallback family when nothing else matches (bundled with the app). */
     private const val DEFAULT_FAMILY = "Open Sans"
 
@@ -167,15 +179,20 @@ object SlideFontRegistry {
         // initialize, and an empty index would silently resolve every request to SansSerif.
         if (availableFamilies.isEmpty()) refreshAvailableFamilies()
         val (bold, italic) = PostScriptName.styleOf(requested)
-        for (candidate in PostScriptName.candidates(requested)) {
-            val key = candidate.lowercase()
-            availableFamilies[key]?.let { return ResolvedFace(it, bold, italic) }
-            substitutionTable[key]?.forEach { substitute ->
-                availableFamilies[substitute.lowercase()]?.let { return ResolvedFace(it, bold, italic) }
+        // An installed face first when the name carries a width or weight a family cannot (the
+        // face already has the weight and slant its name says; reporting them as well costs
+        // nothing, since asking a face for a style it has adds nothing to it). Then the name
+        // peeled back to a family, installed or substituted, then the default.
+        val face = if (PostScriptName.namesFaceOnlyStyle(requested)) InstalledFaces.find(requested) else null
+        val family = face
+            ?: PostScriptName.candidates(requested).firstNotNullOfOrNull { candidate ->
+                val key = candidate.lowercase()
+                availableFamilies[key]
+                    ?: substitutionTable[key]?.firstNotNullOfOrNull { availableFamilies[it.lowercase()] }
             }
-        }
-        val fallback = availableFamilies[DEFAULT_FAMILY.lowercase()] ?: Font.SANS_SERIF
-        return ResolvedFace(fallback, bold, italic)
+            ?: availableFamilies[DEFAULT_FAMILY.lowercase()]
+            ?: Font.SANS_SERIF
+        return ResolvedFace(family, bold, italic)
     }
 
     /**
@@ -198,7 +215,15 @@ object SlideFontRegistry {
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
+    private fun registerBundledFonts() {
+        if (!bundledFontsRegistered.compareAndSet(false, true)) return
+        for (name in BUNDLED_FONTS) {
+            SlideFontRegistry::class.java.getResourceAsStream("/slide-fonts/$name")?.let { registerFontStream(it) }
+        }
+    }
+
     private fun refreshAvailableFamilies() {
+        registerBundledFonts()
         try {
             GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.forEach {
                 availableFamilies.putIfAbsent(it.lowercase(), it)
