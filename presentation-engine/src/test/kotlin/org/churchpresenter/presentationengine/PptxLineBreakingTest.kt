@@ -17,6 +17,8 @@ import java.awt.Rectangle
 import java.awt.font.TextLayout
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
+import java.awt.font.TextAttribute
+import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import kotlin.math.ceil
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -228,5 +230,37 @@ class PptxLineBreakingTest {
             return pixels
         }
         assertFalse(numbered(on = true).contentEquals(numbered(on = false)))
+    }
+
+    @Test
+    fun `a Calibri run is set to Calibri's widths, not the JVM's default face`() {
+        // Calibri ships only with Office; the engine carries Carlito, drawn to its metrics. Either
+        // way the line below measures as Carlito does — before the substitute reached the drawn
+        // font, a missing Calibri was set in Dialog, wider, and the line wrapped.
+        val text = "Grace and peace to you from God our Father"
+        val graphics = graphics()
+        val width = try {
+            SlideFontRegistry.resolveFamily("Calibri") // registers the bundled fonts
+            val font = Font(
+                mapOf(
+                    TextAttribute.FAMILY to "Carlito",
+                    TextAttribute.SIZE to size.toFloat(),
+                    TextAttribute.KERNING to TextAttribute.KERNING_ON,
+                ),
+            )
+            TextLayout(text, font, graphics.fontRenderContext).visibleAdvance.toDouble()
+        } finally {
+            graphics.dispose()
+        }
+        withBox(width + 2, text, style = { it.fontFamily = "Calibri" }) { box ->
+            val measuring = graphics()
+            try {
+                measuring.setRenderingHint(Drawable.FONT_HANDLER, SlideFontRegistry.drawFontManager)
+                val drawable = DrawFactory.getInstance(measuring).getDrawable(box) as DrawTextShape
+                assertEquals(lineHeight, drawable.getTextHeight(measuring), 0.5, "one line at Calibri's widths")
+            } finally {
+                measuring.dispose()
+            }
+        }
     }
 }

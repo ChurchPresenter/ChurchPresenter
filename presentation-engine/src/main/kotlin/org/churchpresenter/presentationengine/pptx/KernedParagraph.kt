@@ -2,11 +2,13 @@
  * The line breaking below is a port of Apache POI 5.5.1's DrawTextParagraph.breakText,
  * getAttributedString, processGlyphs and nextPart, licensed under the Apache License, Version 2.0
  * (http://www.apache.org/licenses/LICENSE-2.0). Changed: each run's font has kerning turned on, and a
- * line's trailing spaces may hang past the wrapping width.
+ * line's trailing spaces may hang past the wrapping width, and each run's font is built from the
+ * substituted family rather than the deck's own.
  */
 package org.churchpresenter.presentationengine.pptx
 
 import org.apache.poi.common.usermodel.fonts.FontGroup
+import org.apache.poi.common.usermodel.fonts.FontInfo
 import org.apache.poi.sl.draw.DrawFactory
 import org.apache.poi.sl.draw.DrawFontManager
 import org.apache.poi.sl.draw.DrawPaint
@@ -22,7 +24,6 @@ import java.awt.font.TextAttribute
 import java.awt.font.TextLayout
 import java.text.AttributedCharacterIterator.Attribute
 import java.text.AttributedString
-import java.util.Locale
 
 /** A laid-out line and the index in the paragraph's text where it ends. */
 private class Line(val layout: TextLayout, val end: Int)
@@ -114,18 +115,22 @@ internal class KernedParagraph(paragraph: TextParagraph<*, *, *>) : DrawTextPara
             val begin = text.length
             text.append(runText)
             val att = runAttributes(graphics, paint, run)
-            att[TextAttribute.FAMILY] = fontInfo?.typeface ?: paragraph.defaultFontFamily
+            // The font Java draws is the FONT attribute, built here from the *substituted* family:
+            // POI built it from the deck's own name, which for a font this machine lacks is Java's
+            // Dialog — the substitute it then added as FAMILY is ignored beside a FONT.
+            val runFont = fontInfo ?: PlainFontInfo(paragraph.defaultFontFamily)
+            att[TextAttribute.FAMILY] = mappedFamily(graphics, fonts, runFont)
             att[TextAttribute.KERNING] = TextAttribute.KERNING_ON
             att[TextAttribute.FONT] = Font(att)
             att.forEach { (key, value) -> ranges += RangeAttribute(key, value, begin, text.length) }
-            ranges += fallbackFamilies(graphics, fonts, begin, run, runText)
+            ranges += partFonts(graphics, fonts, PlacedRun(run, runText, begin), att)
         }
         // A paragraph needs at least one character to be measured at all.
         if (text.isEmpty()) {
             text.append(" ")
             val att = mutableMapOf<Attribute, Any>(
                 TextAttribute.SIZE to paragraph.defaultFontSize.toFloat(),
-                TextAttribute.FAMILY to paragraph.defaultFontFamily,
+                TextAttribute.FAMILY to mappedFamily(graphics, fonts, PlainFontInfo(paragraph.defaultFontFamily)),
                 TextAttribute.KERNING to TextAttribute.KERNING_ON,
             )
             att[TextAttribute.FONT] = Font(att)
@@ -133,6 +138,9 @@ internal class KernedParagraph(paragraph: TextParagraph<*, *, *>) : DrawTextPara
         }
         return ranges
     }
+
+    private fun mappedFamily(graphics: Graphics2D, fonts: DrawFontManager, font: FontInfo): String =
+        fonts.getMappedFont(graphics, font)?.typeface ?: paragraph.defaultFontFamily
 
     private fun runAttributes(graphics: Graphics2D, paint: DrawPaint, run: TextRun): MutableMap<Attribute, Any> {
         val att = mutableMapOf<Attribute, Any>()
@@ -160,48 +168,49 @@ internal class KernedParagraph(paragraph: TextParagraph<*, *, *>) : DrawTextPara
     }
 
     /**
-     * POI's `processGlyphs`: per font group of the run (Latin, East Asian, symbol, …), names the
-     * mapped font for the characters it can show and the fallback font for those it cannot.
+     * POI's `processGlyphs`: per font group of the run (Latin, East Asian, symbol, …), the font for
+     * the characters its mapped font can show and the fallback font for those it cannot — each as
+     * the FONT of its own stretch, built on the run's [base] attributes, since a FONT is the only
+     * font attribute Java honours beside one.
      */
-    private fun fallbackFamilies(
+    private fun partFonts(
         graphics: Graphics2D,
         fonts: DrawFontManager,
-        begin: Int,
-        run: TextRun,
-        runText: String,
+        placed: PlacedRun,
+        base: Map<Attribute, Any>,
     ): List<RangeAttribute> {
+        val run = placed.run
         val ranges = mutableListOf<RangeAttribute>()
+        fun font(family: String?, from: Int, to: Int) {
+            val font = Font(base + (TextAttribute.FAMILY to (family ?: paragraph.defaultFontFamily)))
+            ranges += RangeAttribute(TextAttribute.FONT, font, placed.begin + from, placed.begin + to)
+        }
         var groupBegin = 0
-        for (group in FontGroup.getFontGroupRanges(runText)) {
+        for (group in FontGroup.getFontGroupRanges(placed.text)) {
             val runFont = run.getFontInfo(group.fontGroup) ?: run.getFontInfo(FontGroup.LATIN)
             val fallbackInfo = fonts.getFallbackFont(graphics, runFont)
             val mappedInfo = fonts.getMappedFont(graphics, runFont)
                 ?: fonts.getMappedFont(graphics, PlainFontInfo(paragraph.defaultFontFamily))
                 ?: fallbackInfo
             val mapped = fonts.createAWTFont(graphics, mappedInfo, FONT_PROBE_SIZE, run.isBold, run.isItalic)
-            val fallback = fonts.createAWTFont(graphics, fallbackInfo, FONT_PROBE_SIZE, run.isBold, run.isItalic)
             val groupEnd = groupBegin + group.length
             var partEnd = groupBegin
             while (partEnd < groupEnd) {
                 var partBegin = partEnd
-                partEnd = nextPart(mapped, runText, partBegin, groupEnd, displayed = true)
-                if (partBegin < partEnd) {
-                    ranges += family(mapped, begin + partBegin, begin + partEnd)
-                }
+                partEnd = nextPart(mapped, placed.text, partBegin, groupEnd, displayed = true)
+                if (partBegin < partEnd) font(mappedInfo.typeface, partBegin, partEnd)
                 partBegin = partEnd
-                partEnd = nextPart(mapped, runText, partBegin, groupEnd, displayed = false)
-                if (partBegin < partEnd) {
-                    ranges += family(fallback, begin + partBegin, begin + partEnd)
-                }
+                partEnd = nextPart(mapped, placed.text, partBegin, groupEnd, displayed = false)
+                if (partBegin < partEnd) font(fallbackInfo.typeface, partBegin, partEnd)
             }
             groupBegin = groupEnd
         }
         return ranges
     }
-
-    private fun family(font: Font, begin: Int, end: Int) =
-        RangeAttribute(TextAttribute.FAMILY, font.getFontName(Locale.ROOT), begin, end)
 }
+
+/** A run's text and where it starts in its paragraph's. */
+private class PlacedRun(val run: TextRun, val text: String, val begin: Int)
 
 /**
  * The next line, wrapped on its visible width: the spaces that end it may run past [width], by up
@@ -249,6 +258,6 @@ private fun nextPart(font: Font, text: String, begin: Int, end: Int, displayed: 
 }
 
 /** A font known only by its typeface — POI's `DrawFontInfo`, which is internal to its package. */
-private class PlainFontInfo(private val name: String) : org.apache.poi.common.usermodel.fonts.FontInfo {
+private class PlainFontInfo(private val name: String) : FontInfo {
     override fun getTypeface(): String = name
 }

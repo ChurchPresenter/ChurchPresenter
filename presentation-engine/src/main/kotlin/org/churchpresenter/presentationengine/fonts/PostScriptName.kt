@@ -59,6 +59,22 @@ internal object PostScriptName {
         return words.any { it in BOLD_WORDS } to words.any { it in ITALIC_WORDS }
     }
 
+    /**
+     * Words of a width or weight that a family name cannot carry: a family lookup drops them, so
+     * `Helvetica Neue Bold Condensed` would come back as the full-width Regular.
+     */
+    private val FACE_ONLY_WORDS = setOf(
+        "condensed", "narrow", "compressed", "expanded", "extended", "medium", "light", "thin",
+        "black", "heavy", "semibold", "demibold", "extralight", "ultralight", "book"
+    )
+
+    /** The lower-cased words of a font name, however it is written: `HelveticaNeue-CondensedBold`. */
+    fun words(name: String): List<String> =
+        splitCamelCase(name).split(' ', STYLE_SEPARATOR, '_').map { it.lowercase() }.filter { it.isNotEmpty() }
+
+    /** Whether [requested] names a width or weight only an installed face, not a family, can give. */
+    fun namesFaceOnlyStyle(requested: String): Boolean = words(requested).any { it in FACE_ONLY_WORDS }
+
     /** `HelveticaNeue` → `Helvetica Neue`; `TimesNewRoman` → `Times New Roman`. */
     private fun splitCamelCase(name: String): String =
         name.replace(CAMEL_BOUNDARY, " ").replace(ACRONYM_BOUNDARY, " ")
