@@ -386,10 +386,7 @@ object Strings {
     val bandAppTitle: String get() = bundle.getString("band_app_title")
     val bandSectionBand: String get() = bundle.getString("band_section_band")
     val bandSectionLayout: String get() = bundle.getString("band_section_layout")
-    val bandSectionAnimation: String get() = bundle.getString("band_section_animation")
-    val bandSectionPreviewText: String get() = bundle.getString("band_section_preview_text")
     val bandSectionSave: String get() = bundle.getString("band_section_save")
-    val bandStyle: String get() = bundle.getString("band_style")
     val bandEntrance: String get() = bundle.getString("band_entrance")
     val bandTextAnimation: String get() = bundle.getString("band_text_animation")
     val bandLayout: String get() = bundle.getString("band_layout")
@@ -401,14 +398,12 @@ object Strings {
     val bandImageNone: String get() = bundle.getString("band_image_none")
     val bandImageChoose: String get() = bundle.getString("band_image_choose")
     val bandImageClear: String get() = bundle.getString("band_image_clear")
-    val bandColorBorder: String get() = bundle.getString("band_color_border")
     val bandBorderThickness: String get() = bundle.getString("band_border_thickness")
     val bandBorderColor: String get() = bundle.getString("band_border_color")
     val bandGradientPosition: String get() = bundle.getString("band_gradient_position")
     val bandCornerRadius: String get() = bundle.getString("band_corner_radius")
     val bandInset: String get() = bundle.getString("band_inset")
     val bandPadding: String get() = bundle.getString("band_padding")
-    val bandLook: String get() = bundle.getString("band_look")
     val bandLookTooltip: String get() = bundle.getString("band_look_tooltip")
     val bandTabMotion: String get() = bundle.getString("band_tab_motion")
     val bandTabText: String get() = bundle.getString("band_tab_text")
@@ -429,7 +424,6 @@ object Strings {
     val bandLookAlpha: String get() = bundle.getString("band_look_alpha")
     val bandLookWash: String get() = bundle.getString("band_look_wash")
     val bandLookBlur: String get() = bundle.getString("band_look_blur")
-    val bandLookBlurHint: String get() = bundle.getString("band_look_blur_hint")
     val bandLookPosition: String get() = bundle.getString("band_look_position")
     val bandLookReset: String get() = bundle.getString("band_look_reset")
     val bandLookOffsetX: String get() = bundle.getString("band_look_offset_x")
@@ -443,7 +437,6 @@ object Strings {
     val bandTextAreaBottom: String get() = bundle.getString("band_text_area_bottom")
     val bandTimeBandIn: String get() = bundle.getString("band_time_band_in")
     val bandTimeTextIn: String get() = bundle.getString("band_time_text_in")
-    val bandTimeHold: String get() = bundle.getString("band_time_hold")
     val bandTimeTextOut: String get() = bundle.getString("band_time_text_out")
     val bandTimeBandOut: String get() = bundle.getString("band_time_band_out")
     val bandTickerSpeed: String get() = bundle.getString("band_ticker_speed")
@@ -455,8 +448,6 @@ object Strings {
     val bandStyleBold: String get() = bundle.getString("band_style_letter_bold")
     val bandStyleItalic: String get() = bundle.getString("band_style_letter_italic")
     val bandStyleShadow: String get() = bundle.getString("band_style_letter_shadow")
-    val bandPreviewTextColor: String get() = bundle.getString("band_preview_text_color")
-    val bandPreviewReferenceColor: String get() = bundle.getString("band_preview_reference_color")
     val bandFileName: String get() = bundle.getString("band_file_name")
     val bandSave: String get() = bundle.getString("band_save")
     val bandSaveHint: String get() = bundle.getString("band_save_hint")
@@ -503,9 +494,6 @@ object EditorStrings {
 
     fun exportDoneSteps(id: String, fileName: String, styleName: String): String =
         Strings.byKey("editor_export_done_steps").format(id, fileName, styleName)
-
-    fun savedStatus(name: String): String =
-        Strings.byKey("editor_saved_status").format(name)
 
     fun imageInfo(w: Int, h: Int, kb: Int): String =
         Strings.byKey("editor_image_info").format(w, h, kb)
