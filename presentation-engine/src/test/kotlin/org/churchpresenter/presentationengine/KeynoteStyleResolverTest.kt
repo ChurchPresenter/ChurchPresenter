@@ -3,7 +3,9 @@ package org.churchpresenter.presentationengine
 import org.churchpresenter.presentationengine.Fixtures.ProtoWriter
 import org.churchpresenter.presentationengine.keynote.IwaMessage
 import org.churchpresenter.presentationengine.keynote.KeynoteStyleResolver
+import org.churchpresenter.presentationengine.keynote.KeynoteTextBoxStyle
 import org.churchpresenter.presentationengine.keynote.KnFields as F
+import org.churchpresenter.presentationengine.keynote.KnPadding
 import org.churchpresenter.presentationengine.keynote.ObjectIndex
 import java.awt.Color
 import java.io.File
@@ -178,5 +180,66 @@ class KeynoteStyleResolverTest {
         assertEquals(true, props.bold)
         assertEquals(true, props.italic)
         assertEquals(Color.WHITE, props.color)
+    }
+
+    // ── Text boxes ────────────────────────────────────────────────────────────
+
+    private val textBoxStyleType = 2025
+
+    /**
+     * A text box style (TSWP), whose super is a shape style (TSD) whose own super is the TSS
+     * style holding the parent — the parent sits one level deeper than in other styles.
+     */
+    private fun textBoxStyle(parent: Long?, props: ByteArray?) = proto {
+        bytesField(F.STYLE_SUPER, proto {
+            bytesField(F.STYLE_SUPER, proto { if (parent != null) bytesField(F.TSS_STYLE_PARENT, reference(parent)) })
+        })
+        if (props != null) bytesField(F.TSWP_SHAPE_STYLE_PROPERTIES, props)
+    }
+
+    @Test
+    fun `a text box takes shrink, alignment and padding from the nearest style that sets each`() {
+        val padding = proto {
+            floatField(F.PADDING_LEFT, 4f)
+            floatField(F.PADDING_TOP, 5f)
+            floatField(F.PADDING_RIGHT, 6f)
+            floatField(F.PADDING_BOTTOM, 7f)
+        }
+        val parentProps = proto {
+            varintField(F.TSWP_SHAPE_PROPS_SHRINK, 0)
+            varintField(F.TSWP_SHAPE_PROPS_VALIGN, 1)
+            bytesField(F.TSWP_SHAPE_PROPS_PADDING, padding)
+        }
+        val childProps = proto { varintField(F.TSWP_SHAPE_PROPS_SHRINK, 1) }
+        val index = index(
+            Triple(1L, textBoxStyleType, textBoxStyle(parent = null, props = parentProps)),
+            Triple(2L, textBoxStyleType, textBoxStyle(parent = 1L, props = childProps)),
+        )
+
+        val layout = KeynoteTextBoxStyle.resolveTextBoxLayout(index, 2L)
+        assertEquals(true, layout.shrinkToFit, "the child's own setting wins over its parent's")
+        assertEquals(1, layout.verticalAlignment, "the parent supplies what the child leaves unset")
+        assertEquals(KnPadding(4.0, 5.0, 6.0, 7.0), layout.padding)
+    }
+
+    @Test
+    fun `a text box with no style is top aligned, unpadded and never shrinks`() {
+        val layout = KeynoteTextBoxStyle.resolveTextBoxLayout(empty, null)
+        assertEquals(false, layout.shrinkToFit)
+        assertEquals(0, layout.verticalAlignment)
+        assertEquals(KnPadding.NONE, layout.padding)
+    }
+
+    @Test
+    fun `a paragraph inherits its alignment from a parent paragraph style`() {
+        val centred = proto {
+            bytesField(F.PARAGRAPH_STYLE_PARA_PROPERTIES, proto { varintField(F.PARA_PROPS_ALIGNMENT, 2) })
+        }
+        val index = index(
+            Triple(1L, F.TYPE_TSWP_PARAGRAPH_STYLE, centred),
+            Triple(2L, F.TYPE_TSWP_PARAGRAPH_STYLE, style(parent = 1L, props = null)),
+        )
+        assertEquals(2, KeynoteStyleResolver.resolveParagraphAlignment(index, 2L))
+        assertNull(KeynoteStyleResolver.resolveParagraphAlignment(empty, null))
     }
 }

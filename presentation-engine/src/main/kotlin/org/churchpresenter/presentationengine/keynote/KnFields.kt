@@ -154,6 +154,17 @@ internal object KnFields {
     const val STROKE_COLOR = 1                  // TSP.Color
     const val STROKE_WIDTH = 2                  // float
 
+    // ── TSWP.ShapeStyleArchive (TSWPArchives.proto) — a text box's style ───────
+    // Its super is a TSD.ShapeStyleArchive, so its TSS parent sits one level deeper.
+    const val TSWP_SHAPE_STYLE_PROPERTIES = 11  // TSWP.ShapeStylePropertiesArchive
+    const val TSWP_SHAPE_PROPS_SHRINK = 1       // bool shrink_to_fit
+    const val TSWP_SHAPE_PROPS_VALIGN = 2       // 0 top, 1 middle, 2 bottom, 3 justify (as top)
+    const val TSWP_SHAPE_PROPS_PADDING = 6      // TSWP.PaddingArchive
+    const val PADDING_LEFT = 1                  // float
+    const val PADDING_TOP = 2                   // float
+    const val PADDING_RIGHT = 3                 // float
+    const val PADDING_BOTTOM = 4                // float
+
     // ── TSWP (TSWPArchives.proto) ─────────────────────────────────────────────
     const val SHAPE_INFO_SUPER = 1              // TSD.ShapeArchive
     const val SHAPE_INFO_OWNED_STORAGE = 4      // TSP.Reference → TSWP.StorageArchive

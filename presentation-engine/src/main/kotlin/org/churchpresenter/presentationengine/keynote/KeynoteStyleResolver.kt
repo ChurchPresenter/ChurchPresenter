@@ -88,6 +88,12 @@ internal object KeynoteStyleResolver {
      * the walk stops once a family, a size and a colour are known. Null when no style in the chain
      * carries character properties at all.
      */
+    /** The paragraph alignment from the nearest paragraph style in the chain that sets one. */
+    fun resolveParagraphAlignment(index: ObjectIndex, styleId: Long?): Int? =
+        styleChain(index, styleId).firstNotNullOfOrNull {
+            it.message(F.PARAGRAPH_STYLE_PARA_PROPERTIES)?.varint(F.PARA_PROPS_ALIGNMENT)?.toInt()
+        }
+
     fun resolveCharProps(index: ObjectIndex, styleId: Long?): CharProps? {
         var fontName: String? = null
         var fontSize: Double? = null

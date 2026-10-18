@@ -99,7 +99,12 @@ internal object KeynoteDrawableParser {
         val storage = storageId?.let { index.message(it) }
         val paragraphs = storage?.let { KeynoteTextParser.parseParagraphs(index, it) } ?: emptyList()
         return if (paragraphs.any { it.text.isNotBlank() }) {
-            KnDrawable.Text(shape.geometry, shape, paragraphs)
+            val layout = KeynoteTextBoxStyle.resolveTextBoxLayout(
+                index, shapeArchive.message(F.SHAPE_STYLE)?.varint(F.REFERENCE_IDENTIFIER),
+            )
+            KnDrawable.Text(
+                shape.geometry, shape, paragraphs, layout.shrinkToFit, layout.verticalAlignment, layout.padding,
+            )
         } else {
             shape
         }
