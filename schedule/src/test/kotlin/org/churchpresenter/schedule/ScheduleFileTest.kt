@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
+import java.nio.file.Path
 import java.nio.file.Files
 import java.time.LocalDate
 import kotlin.test.AfterTest
@@ -377,6 +378,33 @@ class ScheduleFileTest {
             suggested.captured.endsWith("-schedule.cps") && !suggested.captured.endsWith(".cps.cps"),
             "one extension, and the date in front of it: ${suggested.captured}",
         )
+    }
+
+    // ── Where the dialogs start ─────────────────────────────────────────────────
+
+    @Test
+    fun `Save As and Open start in the Schedules folder from settings`() = runBlocking {
+        val folder = File(home, "Services").apply { mkdirs() }
+        val savedFrom = slot<Path?>()
+        val openedFrom = slot<Path?>()
+        coEvery { chooser.save(captureNullable(savedFrom), any(), any(), any()) } returns null
+        coEvery { chooser.chooseSingle(captureNullable(openedFrom), any(), any(), any()) } returns null
+
+        val vm = ScheduleViewModel(scheduleFolder = { folder.path }).also { created.add(it) }
+        vm.saveScheduleAs()
+        vm.loadSchedule()
+
+        assertEquals(folder.toPath(), savedFrom.captured)
+        assertEquals(folder.toPath(), openedFrom.captured)
+    }
+
+    @Test
+    fun `with no Schedules folder, or one that has gone, the dialogs start where they always did`() {
+        assertEquals(null, vm().scheduleDialogStart(), "blank leaves the chooser its own start, the home folder")
+
+        val gone = File(home, "Moved Away").path
+        val vm = ScheduleViewModel(scheduleFolder = { gone }).also { created.add(it) }
+        assertEquals(null, vm.scheduleDialogStart())
     }
 
     @Test

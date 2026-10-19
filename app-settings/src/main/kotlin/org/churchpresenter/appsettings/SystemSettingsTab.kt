@@ -134,7 +134,8 @@ fun SystemSettingsTab(
                 pictureSettings = s.pictureSettings.copy(storageDirectory = dir),
                 streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir),
                 presentationStorageDirectory = dir,
-                mediaStorageDirectory = dir
+                mediaStorageDirectory = dir,
+                scheduleStorageDirectory = dir,
             )
         }
     }

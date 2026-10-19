@@ -1861,6 +1861,7 @@
     <string name="system_storage_status_read_only">Read only</string>
     <string name="system_storage_status_linked">Linked</string>
     <string name="calendar_storage">Calendar</string>
+    <string name="schedule_storage">Schedules</string>
     <string name="calendar_storage_status_default">App data folder</string>
     <string name="use_default_directory">Use Default</string>
     <string name="system_storage_status_file_count">%1$d files</string>

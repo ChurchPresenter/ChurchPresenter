@@ -166,6 +166,7 @@ class SystemSettingsTabScreenshotTest {
         val lowerThirds = dirWith("lower-thirds", "Welcome.json", "Speaker Name.json")
         val decks = dirWith("decks", "Sermon.pptx", "Notices.pdf")
         val media = dirWith("media", "Welcome Loop.mp4")
+        val schedules = dirWith("schedules", "2026-10-18-schedule.cps")
         return AppSettings().let { s ->
             s.copy(
                 bibleSettings = s.bibleSettings.copy(storageDirectory = bibles.absolutePath),
@@ -174,6 +175,7 @@ class SystemSettingsTabScreenshotTest {
                 streamingSettings = s.streamingSettings.copy(lowerThirdFolder = lowerThirds.absolutePath),
                 presentationStorageDirectory = decks.absolutePath,
                 mediaStorageDirectory = media.absolutePath,
+                scheduleStorageDirectory = schedules.absolutePath,
             )
         }
     }

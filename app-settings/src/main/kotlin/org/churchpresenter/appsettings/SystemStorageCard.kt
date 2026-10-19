@@ -45,8 +45,10 @@ import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.use_default_directory
 import org.churchpresenter.icons.generated.resources.ic_storage_calendar
+import org.churchpresenter.icons.generated.resources.ic_storage_schedule
 import org.churchpresenter.strings.generated.resources.calendar_storage_status_default
 import org.churchpresenter.strings.generated.resources.calendar_storage
+import org.churchpresenter.strings.generated.resources.schedule_storage
 import org.churchpresenter.strings.generated.resources.bible
 import org.churchpresenter.strings.generated.resources.browse_directory
 import org.churchpresenter.icons.generated.resources.ic_storage_bible
@@ -214,7 +216,7 @@ internal class StorageFolder(
 internal class StorageStatusLine(val text: String, val color: Color)
 
 /**
- * The seven folders, in the order the pane lists them. The calendar is last and the odd one out:
+ * The eight folders, in the order the pane lists them. The calendar is last and the odd one out:
  * blank means the app data folder, which is shown as the path in use rather than as "not set",
  * because it is set -- it is the default. *Set All* leaves it alone in both directions: it is
  * where the plan lives, not a content folder, and the reason to point it anywhere else is to share
@@ -251,6 +253,10 @@ private fun storageFolders(
         stringResource(Res.string.media), IconRes.drawable.ic_storage_media, MaterialTheme.semantic.contentMedia,
         settings.mediaStorageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(mediaStorageDirectory = dir) } },
+    StorageFolder(
+        stringResource(Res.string.schedule_storage), IconRes.drawable.ic_storage_schedule,
+        MaterialTheme.semantic.contentSchedule, settings.scheduleStorageDirectory,
+    ) { dir -> onSettingsChange { s -> s.copy(scheduleStorageDirectory = dir) } },
     StorageFolder(
         stringResource(Res.string.calendar_storage), IconRes.drawable.ic_storage_calendar,
         MaterialTheme.semantic.contentCalendar,
@@ -351,7 +357,7 @@ internal fun SystemStorageCard(
 
 private const val BIBLE_ROW = 0
 private const val SONGS_ROW = 1
-private const val CALENDAR_ROW = 6
+private const val CALENDAR_ROW = 7
 private const val ROW_LINE_ALPHA = 0.5f
 private const val ICON_TILE_ALPHA = 0.16f
 

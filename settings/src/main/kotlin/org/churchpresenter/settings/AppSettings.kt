@@ -50,6 +50,8 @@ data class AppSettings(
      * both at the same synced folder. Resolved by [calendarFolder].
      */
     val calendarStorageDirectory: String = "",
+    /** Where the schedule's Open and Save As dialogs start. Blank means the home folder. */
+    val scheduleStorageDirectory: String = "",
     /**
      * The song book the last new song was saved into, which the next new song starts in. Blank is
      * the top of the songs folder -- no song book.
