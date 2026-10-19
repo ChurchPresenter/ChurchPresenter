@@ -47,14 +47,32 @@ interface SongFormatConverter {
      */
     val acceptsExtensionlessFiles: Boolean get() = false
 
-    /** Converts one input, writing beside it when [outputDir] is null. */
-    fun convert(input: File, outputDir: File?): SongConversionResult
+    /**
+     * Converts one input, writing beside it when [outputDir] is null. [outputName] is what it is
+     * written out as — [outputNameFor] alone, or the batch's own pick from [outputNamesFor].
+     */
+    fun convert(input: File, outputDir: File?, outputName: String = outputNameFor(input)): SongConversionResult
 
     /** What the input holds, for the preview list. */
     fun describe(input: File): SongPreviewInfo
 
     /** What this input is written out as. */
     fun outputNameFor(input: File): String
+}
+
+/**
+ * What each of [inputs] is written out as, in order. Two that would write the same `.song` file into
+ * the same folder — two songs sharing a title, which a hymnal often has — get ` (2)`, ` (3)` … so
+ * the second does not overwrite the first. A folder a whole library expands into is left as it is.
+ */
+fun SongFormatConverter.outputNamesFor(inputs: List<File>, outputDir: File?): List<String> {
+    val takenInFolder = HashMap<String, MutableSet<String>>()
+    return inputs.map { input ->
+        val name = outputNameFor(input)
+        if (!name.endsWith(".song")) return@map name
+        val folder = outputDir ?: input.absoluteFile.parentFile
+        SongOutput.uniqueFile(folder, name, takenInFolder.getOrPut(folder.absolutePath) { mutableSetOf() }).name
+    }
 }
 
 object SongFormatConverters {
@@ -85,8 +103,8 @@ object SongBeamerFormat : SongFormatConverter {
     override val extensions = listOf("sng")
     override val needsOutputFolder = false
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
-        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputName)
         SngToSongConverter.convert(input, outFile)
         return SongConversionResult(listOf(outFile))
     }
@@ -105,8 +123,8 @@ object FreeWorshipFormat : SongFormatConverter {
     override val extensions = listOf("xml")
     override val needsOutputFolder = false
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
-        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputName)
         FreeWorshipConverter.convert(input, outFile)
         return SongConversionResult(listOf(outFile))
     }
@@ -130,8 +148,8 @@ object ProPresenterFormat : SongFormatConverter {
     override val extensions = listOf("pro", "pro4", "pro5", "pro6")
     override val needsOutputFolder = false
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
-        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputName)
         ProPresenterConverter.convert(input, outFile)
         return SongConversionResult(listOf(outFile))
     }
@@ -156,9 +174,9 @@ object EasyWorshipFormat : SongFormatConverter {
     override val extensions = listOf("db", "ews", "ewsx")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "EasyWorship libraries need an output folder" }
-        return EasyWorshipConverter.convert(input, File(outputDir, outputNameFor(input)))
+        return EasyWorshipConverter.convert(input, File(outputDir, outputName))
     }
 
     override fun describe(input: File): SongPreviewInfo =
@@ -174,9 +192,9 @@ object MediaShoutFormat : SongFormatConverter {
     override val extensions = listOf("sc7x", "sc7")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "MediaShout scripts need an output folder" }
-        return MediaShoutConverter.convert(input, File(outputDir, outputNameFor(input)))
+        return MediaShoutConverter.convert(input, File(outputDir, outputName))
     }
 
     override fun describe(input: File): SongPreviewInfo =
@@ -191,10 +209,10 @@ object OpenLpFormat : SongFormatConverter {
     override val extensions = listOf("xml", "sqlite", "db")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "OpenLP libraries need an output folder" }
         if (OpenLpDatabaseConverter.isDatabase(input)) return OpenLpDatabaseConverter.convert(input, outputDir)
-        val outFile = File(outputDir, outputNameFor(input))
+        val outFile = File(outputDir, outputName)
         FreeWorshipConverter.convert(input, outFile)
         return SongConversionResult(listOf(outFile))
     }
@@ -209,7 +227,7 @@ object OpenLpFormat : SongFormatConverter {
 
     override fun outputNameFor(input: File): String =
         if (OpenLpDatabaseConverter.isDatabase(input)) input.nameWithoutExtension
-        else input.nameWithoutExtension + ".song"
+        else FreeWorshipConverter.outputNameFor(input)
 }
 
 /** OpenSong song files — XML metadata around a plain-text lyrics body, one song per file. */
@@ -219,8 +237,8 @@ object OpenSongFormat : SongFormatConverter {
     override val needsOutputFolder = false
     override val acceptsExtensionlessFiles = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
-        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputName)
         OpenSongConverter.convert(input, outFile)
         return SongConversionResult(listOf(outFile))
     }
@@ -243,8 +261,8 @@ object FreeShowFormat : SongFormatConverter {
     override val extensions = listOf("show", "json")
     override val needsOutputFolder = false
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
-        val outFile = File(outputDir ?: input.parentFile, outputNameFor(input))
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
+        val outFile = File(outputDir ?: input.parentFile, outputName)
         FreeShowConverter.convert(input, outFile)
         return SongConversionResult(listOf(outFile))
     }
@@ -263,7 +281,7 @@ object EasySlidesFormat : SongFormatConverter {
     override val extensions = listOf("xml")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "EasySlides exports need an output folder" }
         return EasySlidesConverter.convert(input, outputDir)
     }
@@ -287,7 +305,7 @@ object QueleaFormat : SongFormatConverter {
     override val extensions = listOf("qsp", "xml")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "Quelea song packs need an output folder" }
         return QueleaConverter.convert(input, outputDir)
     }
@@ -311,7 +329,7 @@ object SoftProjectorFormat : SongFormatConverter {
     override val extensions = listOf("sps")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "SoftProjector song books need an output folder" }
         val result = SpsToSongConverter.convert(input, outputDir)
         val folder = File(result.songbookFolder)
@@ -333,7 +351,7 @@ object DocumentFormat : SongFormatConverter {
     override val extensions = listOf("pdf", "docx", "pptx", "ppt", "key")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "Documents need an output folder" }
         val extracted = DocumentTextExtractor.extract(input)
         if (!extracted.success) {
@@ -357,7 +375,7 @@ object VideoPsalmFormat : SongFormatConverter {
     override val extensions = listOf("json")
     override val needsOutputFolder = true
 
-    override fun convert(input: File, outputDir: File?): SongConversionResult {
+    override fun convert(input: File, outputDir: File?, outputName: String): SongConversionResult {
         requireNotNull(outputDir) { "VideoPsalm song books need an output folder" }
         return VideoPsalmConverter.convert(input, outputDir)
     }

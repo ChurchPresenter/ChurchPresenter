@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.converter.song.findFormatInputs
 import org.churchpresenter.converter.song.matchesFormat
+import org.churchpresenter.converter.song.outputNamesFor
 import org.churchpresenter.converter.song.SongFormatConverter
 import org.churchpresenter.converter.song.SongPreviewInfo
 import org.churchpresenter.converter.song.SpsToSongConverter
@@ -166,9 +167,9 @@ internal fun buildFormatPreview(
     files: List<File>,
     outputDir: File?
 ): List<PreviewItem> {
-    return files.map { file ->
+    return files.zip(format.outputNamesFor(files, outputDir)) { file, outputName ->
         val outDir = outputDir ?: file.parentFile
-        val outFile = File(outDir, format.outputNameFor(file))
+        val outFile = File(outDir, outputName)
         val details = try {
             describePreview(format.describe(file))
         } catch (e: Exception) {
