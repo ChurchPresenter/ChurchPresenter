@@ -57,6 +57,17 @@ class RemoteSongCatalogTest {
         )
 
     @Test
+    fun `a primary that sends labels gets its own headers back`() =
+        assertEquals(
+            listOf("[Chorus 1]", "chorus line", "{Refrain}", "refrain line", "[Bridge 1]"),
+            detail(
+                SongSectionDto("verse", listOf("chorus line"), label = "Chorus 1"),
+                SongSectionDto("chorus", listOf("refrain line"), label = "Refrain"),
+                SongSectionDto("verse", emptyList(), label = "Bridge 1"),
+            ).toRawLyrics(),
+        )
+
+    @Test
     fun `a song with no sections has no lyrics`() = assertEquals(emptyList(), detail().toRawLyrics())
 
     @Test

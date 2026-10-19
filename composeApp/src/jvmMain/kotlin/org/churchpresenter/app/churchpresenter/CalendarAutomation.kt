@@ -43,6 +43,7 @@ internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int, ru
                 shown,
                 currentScheduleActions,
                 presenterManager,
+                currentScheduleItems,
             )
             if (shown is ScheduleItem.MediaItem) {
                 mediaViewModel.looping.setLooping(plays != 1)

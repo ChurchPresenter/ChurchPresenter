@@ -23,6 +23,7 @@ internal suspend fun DefaultWebSocketServerSession.handleWsCommand(
     json: Json,
     scope: CoroutineScope,
 ) {
+    if (refusedByPermission(msg, server, wsClientId, json)) return
     val signal = signalCommands(server)[msg.type]
     when {
         signal != null -> {

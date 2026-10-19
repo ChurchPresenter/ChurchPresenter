@@ -52,7 +52,7 @@ internal fun Route.propRoutes(server: CompanionServer, json: Json, scope: Corout
         call.respondText(body, ContentType.Application.Json)
     }
     post("${Constants.ENDPOINT_PROPS}/{id}/{action}") {
-        if (!server.checkApiKey(call)) return@post
+        if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
         if (!call.requireDevMode(server)) return@post
         val prop = findProp(server.props, call.parameters["id"].orEmpty())
         val action = propAction(call.parameters["action"])

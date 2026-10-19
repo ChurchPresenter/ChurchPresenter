@@ -9,6 +9,7 @@ import org.churchpresenter.core.models.qa.toDto
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.utils.sectionLabelOf
 
 /*
  * The schedule, the pictures and backgrounds behind it, what is live, and the server's own access
@@ -125,6 +126,7 @@ fun CompanionServer.updateLiveState(content: LiveContent) = with(content) {
         songTitle = lyricSection?.title?.ifEmpty { null },
         songNumber = lyricSection?.songNumber,
         sectionType = lyricSection?.type?.ifEmpty { null },
+        sectionLabel = lyricSection?.header?.let(::sectionLabelOf)?.ifEmpty { null },
         lines = lyricSection?.lines,
         songSectionIndex = songSectionIndex,
         songLineIndex = songLineIndex,

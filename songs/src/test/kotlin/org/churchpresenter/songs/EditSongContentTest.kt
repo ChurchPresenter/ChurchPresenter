@@ -91,7 +91,8 @@ class EditSongContentTest {
         const val SAVE = "Save"
         const val SECONDARY_PANE = "Language 2"
         const val CANCEL = "Cancel"
-        const val ADD_NEW = "Add New..."
+        const val ADD_NEW = "New song book…"
+        const val NO_SONG_BOOK = "No song book"
 
         // Card captions go through CardLabel, which uppercases them — so these must be matched in
         // upper case. Asserting on "Tempo" finds nothing whether the field is present or not, which
@@ -430,6 +431,14 @@ class EditSongContentTest {
     }
 
     @Test
+    fun `two songs at the top of the songs folder can duplicate each other`() {
+        val existing = aSong(songbook = "", sourceFile = "/a.sps")
+        editor(song = aSong(songbook = "", sourceFile = "/b.sps"), existingSongs = listOf(existing)) { _ ->
+            onNodeWithText(Label.SAVE).assertIsNotEnabled()
+        }
+    }
+
+    @Test
     fun `a song does not count as a duplicate of itself`() {
         val self = aSong(sourceFile = "/a.sps")
         editor(song = self, existingSongs = listOf(self)) { _ ->
@@ -483,10 +492,12 @@ class EditSongContentTest {
         }
 
     @Test
-    fun `a new song with a title but no songbook still cannot be saved`() =
-        editor(song = blankSong(), isNewSong = true) { _ ->
+    fun `a new song with a title but no songbook can be saved, at the top of the songs folder`() =
+        editor(song = blankSong(), isNewSong = true) { saved ->
             type(Field.TITLE, "Something New")
-            onNodeWithText(Label.SAVE).assertIsNotEnabled()
+            onNodeWithText(Label.SAVE).assertIsEnabled()
+            save()
+            assertEquals("", saved.song?.songbook)
         }
 
     @Test
@@ -557,7 +568,6 @@ class EditSongContentTest {
     fun `the songbook is picked from those already in the library`() =
         editor(song = blankSong(), isNewSong = true, songbooks = listOf("Hymnal", "Chorus Book")) { saved ->
             type(Field.TITLE, "Something New")
-            onNodeWithText(Label.SAVE).assertIsNotEnabled()
 
             songbook().performClick()
             waitForIdle()
@@ -598,6 +608,36 @@ class EditSongContentTest {
             assertEquals(Field.COUNT, fieldCount(), "back to the picker")
             save()
             assertEquals("Hymnal", saved.song?.songbook)
+        }
+
+    @Test
+    fun `No song book takes a song out of its song book`() =
+        editor(songbooks = listOf("Hymnal", "Chorus Book")) { saved ->
+            songbook().performClick()
+            waitForIdle()
+            tap(Label.NO_SONG_BOOK)
+
+            songbook().assertTextContains(Label.NO_SONG_BOOK)
+            save()
+            assertEquals("", saved.song?.songbook, "no song book is the top of the songs folder")
+        }
+
+    @Test
+    fun `a new song with no song book says so`() =
+        editor(song = blankSong(), isNewSong = true) { _ ->
+            songbook().assertTextContains(Label.NO_SONG_BOOK)
+        }
+
+    @Test
+    fun `the library's name for its top-level songs is not offered as a song book`() =
+        editor(songbooks = listOf("/", "Hymnal")) { _ ->
+            songbook().performClick()
+            waitForIdle()
+
+            // The card shows "Hymnal" too; the menu adds it once more, and "/" not at all.
+            onAllNodesWithText("Hymnal").assertCountEquals(2)
+            onNodeWithText("/").assertDoesNotExist()
+            onNodeWithText(Label.NO_SONG_BOOK).assertExists()
         }
 
     // ── The footer and the chords switch ────────────────────────────────────────

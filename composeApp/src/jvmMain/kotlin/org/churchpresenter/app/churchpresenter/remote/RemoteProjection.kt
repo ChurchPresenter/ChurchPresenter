@@ -7,38 +7,46 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.server.ScheduleSongDto
 /**
  * Executes a project request — adds to schedule and sets presenter state.
  * Fixes the original bug where SongItem projection never selected the song in the Songs tab.
+ *
+ * An item that is already a row of [scheduleItems] — a remote projecting a row it read from the
+ * schedule, a calendar cue or show-control action firing one — is put up without being added
+ * again; selecting that row is the caller's business, since a preview must not mark it live.
  */
 internal fun executeProjectItem(
     item: ScheduleItem,
     scheduleActions: ScheduleActions,
     presenterManager: PresenterManager,
+    scheduleItems: List<ScheduleItem>,
 ) {
+    // A row already there is put up as it is: the default actions add nothing.
+    val schedule = if (isScheduledRow(item, scheduleItems)) ScheduleActions() else scheduleActions
     when (item) {
-        is ScheduleItem.SongItem -> projectSong(item, scheduleActions, presenterManager)
+        is ScheduleItem.SongItem -> projectSong(item, schedule, presenterManager)
 
-        is ScheduleItem.BibleVerseItem -> projectBibleVerse(item, scheduleActions, presenterManager)
+        is ScheduleItem.BibleVerseItem -> projectBibleVerse(item, schedule, presenterManager)
 
         is ScheduleItem.PictureItem -> {
             // Deliberately does NOT call setSelectedImagePath(item.folderPath) — that setter expects
             // a single image FILE path, not a folder, and a folder path can never render. The actual
             // image push happens via remoteSelectPictureFlow in main.kt (MainDesktop loads the folder
             // into PicturesViewModel, whose own reactive effect pushes the current image once loaded).
-            scheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+            schedule.addPicture(item.folderPath, item.folderName, item.imageCount)
             presenterManager.setPresentingMode(Presenting.PICTURES)
             presenterManager.setShowPresenterWindow(true)
         }
 
         is ScheduleItem.PresentationItem -> {
-            scheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+            schedule.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
             presenterManager.setPresentingMode(Presenting.PRESENTATION)
             presenterManager.setShowPresenterWindow(true)
         }
 
         is ScheduleItem.MediaItem -> {
-            scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType, item.subtitleUrl)
+            schedule.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType, item.subtitleUrl)
             presenterManager.setCurrentMedia(item.mediaUrl, item.mediaType)
             presenterManager.setPresentingMode(Presenting.MEDIA)
             presenterManager.setShowPresenterWindow(true)
@@ -64,7 +72,7 @@ internal fun executeProjectItem(
         is ScheduleItem.AnnouncementItem -> projectAnnouncement(item, presenterManager)
 
         is ScheduleItem.WebsiteItem -> {
-            scheduleActions.addWebsite(item.url, item.title)
+            schedule.addWebsite(item.url, item.title)
             presenterManager.setWebsiteUrl(item.url)
             presenterManager.setWebPageTitle(item.title)
             presenterManager.setPresentingMode(Presenting.WEBSITE)
@@ -73,6 +81,30 @@ internal fun executeProjectItem(
 
         else -> Unit
     }
+}
+
+/** The row of [scheduleItems] that [item] is, by id — not merely one with the same content. */
+internal fun scheduledRowFor(item: ScheduleItem, scheduleItems: List<ScheduleItem>): ScheduleItem? =
+    if (item.id.isBlank()) null else scheduleItems.firstOrNull { it.id == item.id }
+
+/** Whether [item] is one of [scheduleItems] itself. */
+internal fun isScheduledRow(item: ScheduleItem, scheduleItems: List<ScheduleItem>): Boolean =
+    scheduledRowFor(item, scheduleItems) != null
+
+/**
+ * The song row a remote's `select_song` names: the row with its id, or else the first song row of
+ * the same songbook with the same number — the same title, for a song with no number.
+ */
+internal fun scheduledSongFor(song: ScheduleSongDto, scheduleItems: List<ScheduleItem>): ScheduleItem.SongItem? {
+    val rows = scheduleItems.filterIsInstance<ScheduleItem.SongItem>()
+    return rows.firstOrNull { song.id.isNotBlank() && it.id == song.id }
+        ?: rows.firstOrNull { row ->
+            row.songbook == song.songbook && if (song.songNumber > 0) {
+                row.songNumber == song.songNumber
+            } else {
+                row.title.equals(song.title, ignoreCase = true)
+            }
+        }
 }
 
 /**

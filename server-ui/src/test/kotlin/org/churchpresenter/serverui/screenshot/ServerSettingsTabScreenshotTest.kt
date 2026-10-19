@@ -29,6 +29,7 @@ import org.churchpresenter.serverui.ServerLabel
 import org.churchpresenter.serverui.ServerSettingsTab
 import org.churchpresenter.serverui.withIsolatedHome
 import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.DevicePermission
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -192,6 +193,19 @@ class ServerSettingsTabScreenshotTest {
         scrollTo(ServerLabel.SECTION_CLIENTS)
         onAllNodesWithContentDescription(EDIT_NAME)[1].performClick()
         waitForIdle()
+    }
+
+    /** A device's permissions open under its row: two switched off, and the chips that say so. */
+    @Test
+    fun `a client's permissions open`() = shoot("client_permissions", seedClients = {
+        pairedDevices(this)
+        setPermission(PHONE, DevicePermission.GO_LIVE, false)
+        setPermission(PHONE, DevicePermission.SHOW_TOASTS, false)
+    }) {
+        scrollTo(ServerLabel.SECTION_CLIENTS)
+        onAllNodesWithContentDescription("Permissions")[1].performClick()
+        waitForIdle()
+        scrollTo("Show activity notifications")
     }
 
     // ── Lower third triggers ────────────────────────────────────────────────────────────────────

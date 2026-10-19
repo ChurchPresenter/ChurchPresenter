@@ -49,7 +49,7 @@ internal fun resolveMessage(request: MessageRequest, templates: List<MessageTemp
 /** POST /api/message: puts a message up -- see [MessageRequest]. */
 internal fun Route.messageRoutes(server: CompanionServer, json: Json, scope: CoroutineScope) {
     post(Constants.ENDPOINT_MESSAGE) {
-        if (!server.checkApiKey(call)) return@post
+        if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
         if (!call.requireDevMode(server)) return@post
         val request = try {
             json.decodeFromString(MessageRequest.serializer(), call.receiveText())

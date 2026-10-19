@@ -27,7 +27,7 @@ internal fun Route.macroRoutes(server: CompanionServer, json: Json, scope: Corou
         call.respondText(body, ContentType.Application.Json)
     }
     post("${Constants.ENDPOINT_MACRO}/{name}") {
-        if (!server.checkApiKey(call)) return@post
+        if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
         if (!call.requireDevMode(server)) return@post
         val macro = server.macros.macroNamed(call.parameters["name"].orEmpty())
         if (macro == null) {

@@ -68,7 +68,13 @@ data class SongCatalogRecordsResponse(val books: List<CatalogRecord>)
 @Serializable
 data class SongSectionDto(
     val type: String,           // "verse", "chorus", "other"
-    val lines: List<String>
+    val lines: List<String>,
+    /**
+     * The section's header as the song writes it, without its brackets -- `Chorus 1`, `Bridge`,
+     * `Verse 2` -- so a remote can show the song's own names; [type] only knows that `{}` is a
+     * chorus. Null for lines that come before the first header.
+     */
+    val label: String? = null,
 )
 
 /**
@@ -83,8 +89,8 @@ data class SongSectionDto(
  *   "composer": "",
  *   "section-total": 4,
  *   "sections": [
- *     { "type": "verse", "lines": ["Amazing grace, how sweet the sound", "…"] },
- *     { "type": "chorus", "lines": ["…"] }
+ *     { "type": "verse", "label": "Verse 1", "lines": ["Amazing grace, how sweet the sound", "…"] },
+ *     { "type": "chorus", "label": "Chorus", "lines": ["…"] }
  *   ]
  * }
  */
@@ -196,6 +202,8 @@ data class LiveStateDto(
     val songTitle: String? = null,
     val songNumber: Int? = null,
     val sectionType: String? = null,
+    // The live section's header without its brackets ("Chorus 1"), when it has one.
+    val sectionLabel: String? = null,
     val lines: List<String>? = null,
     // Current line/section position within the mirrored section — lets a follower's own
     // line-by-line display mode track the primary's navigation, not just section changes.
@@ -456,10 +464,13 @@ data class ServerInfoResponse(
     val port: Int
 )
 
+/** What the calling device may do, so a remote can hide what would be refused -- see [permits]. */
 @Serializable
 data class DevicePermissionsDto(
     val canPresent: Boolean = true,
     val canAddToSchedule: Boolean = true,
+    val canRemoveFromSchedule: Boolean = true,
+    val canGoLive: Boolean = true,
     val canUploadFiles: Boolean = true,
     val maxMediaUploadMb: Int = Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB,
 )

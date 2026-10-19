@@ -35,6 +35,8 @@ class ScheduleViewModel(
     val clock: () -> LocalTime = { LocalTime.now() },
     /** How often unsaved changes are written to the autosave; shortened only by a test. */
     private val autoSaveIntervalMs: Long = AUTOSAVE_INTERVAL_MS,
+    /** The folder Open and Save As start in -- the System settings' Schedules folder; blank for home. */
+    internal val scheduleFolder: () -> String = { "" },
 ) {
     internal val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
     val scheduleItems: List<ScheduleItem> get() = _scheduleItems

@@ -17,6 +17,7 @@ import org.churchpresenter.server.InstanceLinkLogSide
 import org.churchpresenter.server.InstanceLinkLogger
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.rawHeader
 /**
  * Applying what a *remote* instance sends to this one: the Instance Link follower path, and the
  * approved remote requests that arrive from a phone or a linked controller.
@@ -107,7 +108,8 @@ private suspend fun applyRemoteContent(
                     title = state.songTitle.orEmpty(),
                     songNumber = state.songNumber ?: 0,
                     type = state.sectionType ?: "",
-                    lines = state.lines ?: emptyList()
+                    lines = state.lines ?: emptyList(),
+                    header = state.sectionLabel?.let { rawHeader(state.sectionType.orEmpty(), it) },
                 )
             )
             InstanceLinkLogger.log(
