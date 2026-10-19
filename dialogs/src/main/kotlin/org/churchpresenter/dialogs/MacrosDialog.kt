@@ -42,12 +42,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.schedule.ActionListEditor
 import org.churchpresenter.settings.Macro
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.control_open
@@ -60,11 +58,12 @@ import org.churchpresenter.strings.generated.resources.macros_run
 import org.churchpresenter.strings.generated.resources.macros_save
 import org.churchpresenter.strings.generated.resources.macros_title
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /** Keeps the macros (`docs/SHOW_CONTROL.md`, Macros): named action lists, run from here, a key or the API. */
 @Composable
@@ -80,10 +79,10 @@ fun MacrosDialog(
     frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(LocalMainWindowState.current, MACROS_DIALOG_WIDTH, MACROS_DIALOG_HEIGHT),
-        width = MACROS_DIALOG_WIDTH,
-        height = MACROS_DIALOG_HEIGHT,
+    val dialogState = rememberCenteredDialogState(
+        LocalMainWindowState.current,
+        MACROS_DIALOG_WIDTH,
+        MACROS_DIALOG_HEIGHT,
     )
     frame(
         DialogFrameSpec(
@@ -92,7 +91,7 @@ fun MacrosDialog(
             title = stringResource(Res.string.macros_title),
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             MacrosDialogContent(macros, rows, onMacrosChange, onRun, onDismiss, onOpenControl)
         }
     }

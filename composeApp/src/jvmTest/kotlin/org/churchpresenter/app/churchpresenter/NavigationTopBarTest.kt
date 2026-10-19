@@ -18,6 +18,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import java.awt.event.KeyEvent
 
@@ -59,6 +60,9 @@ private fun navigationTopBar(
     onOpenMemoryMonitor: () -> Unit = {},
     onOpenStoryPrompt: () -> Unit = {},
     onOpenWickIntro: () -> Unit = {},
+    onZoomIn: () -> Unit = {},
+    onZoomOut: () -> Unit = {},
+    onActualSize: () -> Unit = {},
     block: JMenuBar.() -> Unit,
 ) = runComposeUiTest {
     val window = mockk<ComposeWindow>(relaxed = true)
@@ -108,6 +112,9 @@ private fun navigationTopBar(
                 onOpenMemoryMonitor = onOpenMemoryMonitor,
                 onOpenStoryPrompt = onOpenStoryPrompt,
                 onOpenWickIntro = onOpenWickIntro,
+                onZoomIn = onZoomIn,
+                onZoomOut = onZoomOut,
+                onActualSize = onActualSize,
             )
         }
     }
@@ -322,7 +329,7 @@ class NavigationTopBarTest {
             navigationTopBar(currentTheme = selectedTheme) {
                 val view = getMenu(4)
                 assertEquals("View", view.text)
-                assertEquals(presets.size + 2, view.itemCount)
+                assertEquals(presets.size + 2 + ZOOM_ITEMS, view.itemCount)
                 for (i in presets.indices) {
                     val item = view.getItem(i) as JRadioButtonMenuItem
                     assertEquals(i == selectedIndex, item.isSelected, "theme=$selectedTheme index=$i")
@@ -331,10 +338,29 @@ class NavigationTopBarTest {
         }
         navigationTopBar(currentTheme = ThemeMode.CUSTOM) {
             val view = getMenu(4)
-            assertEquals(presets.size + 3, view.itemCount)
+            assertEquals(presets.size + 3 + ZOOM_ITEMS, view.itemCount)
             presets.indices.forEach { i -> assertFalse((view.getItem(i) as JRadioButtonMenuItem).isSelected) }
             assertTrue((view.getItem(presets.size + 1) as JRadioButtonMenuItem).isSelected, "Custom is ticked")
         }
+    }
+
+    @Test
+    fun `view menu zooms in, out and back to actual size`() {
+        val fired = mutableListOf<String>()
+        navigationTopBar(
+            onZoomIn = { fired += "in" },
+            onZoomOut = { fired += "out" },
+            onActualSize = { fired += "actual" },
+        ) {
+            val view = getMenu(4)
+            val zoom = (view.itemCount - ZOOM_ITEMS + 1 until view.itemCount).map { view.getItem(it) }
+            assertEquals(listOf("Zoom In", "Zoom Out", "Actual Size"), zoom.map { it.text })
+            zoom.forEach { it.doClick(0) }
+            assertEquals(KeyEvent.VK_EQUALS, zoom[0].accelerator.keyCode, "Ctrl = zooms in")
+            assertEquals(KeyEvent.VK_MINUS, zoom[1].accelerator.keyCode, "Ctrl - zooms out")
+            assertNull(zoom[2].accelerator, "Ctrl 0 is the quick background's reset, so Actual Size has no key")
+        }
+        assertEquals(listOf("in", "out", "actual"), fired)
     }
 
     @Test
@@ -576,3 +602,6 @@ class NavigationTopBarTest {
         }
     }
 }
+
+/** The View menu's separator, Zoom In, Zoom Out and Actual Size, after Customize Theme. */
+private const val ZOOM_ITEMS = 4

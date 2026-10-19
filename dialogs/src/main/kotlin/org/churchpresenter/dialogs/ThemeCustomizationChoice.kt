@@ -13,7 +13,7 @@ import org.churchpresenter.theme.ThemeCustomization
 /**
  * What the Customize Theme dialog hands back on Apply, in the shape settings store it.
  *
- * [useCustomColors] says whether to switch to the Custom theme; font and size apply either way.
+ * [useCustomColors] says whether to switch to the Custom theme; font and sizes apply either way.
  */
 data class ThemeCustomizationChoice(
     val useCustomColors: Boolean,
@@ -22,6 +22,7 @@ data class ThemeCustomizationChoice(
     val colors: CustomThemeColors = CustomThemeColors(),
     val fontFamily: String,
     val fontScale: Float,
+    val uiScale: Float = 1f,
     val rowSpacing: ListRowSpacing = ListRowSpacing.NORMAL,
 )
 
@@ -39,6 +40,7 @@ fun ThemeCustomizationChoice.toCustomization() = ThemeCustomization(
     selection = colors.selection.toColorOrNull(),
     fontFamily = fontFamily.takeIf { it.isNotBlank() }?.let(Utils::systemFontFamilyOrDefault),
     fontScale = fontScale,
+    uiScale = uiScale,
     rowSpacing = rowSpacing.factor,
 )
 

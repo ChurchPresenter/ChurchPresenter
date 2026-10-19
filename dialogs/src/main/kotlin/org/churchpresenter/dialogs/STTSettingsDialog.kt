@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_engine_detect
 import org.churchpresenter.strings.generated.resources.bible_engine_host
@@ -38,13 +37,13 @@ import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.stt_help_dev_mode
 import org.churchpresenter.strings.generated.resources.stt_settings_dialog_title
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.sharedui.composables.StyledTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleEngineSettings
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -63,11 +62,7 @@ fun STTSettingsDialog(
     val maxDialogHeight = 900.dp
     val density = LocalDensity.current
     val scrollState = rememberScrollState()
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, dialogWidth, dialogHeight),
-        width = dialogWidth,
-        height = dialogHeight
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, dialogWidth, dialogHeight)
 
     // Grow the window (never shrink) when content overflows the current viewport, instead of
     // relying on a single guessed-at fixed height — the scroll stays as a fallback beyond the cap.
@@ -89,7 +84,7 @@ fun STTSettingsDialog(
             resizable = false,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             STTSettingsDialogContent(
                 appSettings = appSettings,
                 onSettingsChange = onSettingsChange,

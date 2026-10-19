@@ -47,10 +47,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.utils.dialogSizeWithin
 import org.churchpresenter.sharedui.utils.primaryScreenSizeDp
 import org.churchpresenter.core.models.scene.Scene
@@ -104,6 +102,7 @@ import androidx.compose.ui.text.font.FontWeight
 import org.churchpresenter.profiles.LocalSettingsDevMode
 import org.churchpresenter.profiles.LocalApplySettings
 import androidx.compose.runtime.collectAsState
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 // Values must equal each tab's own position in SettingsTabStrip's row: PrimaryScrollableTabRow's
 // selectedTabIndex/tabIndicatorOffset key off *position*, so a value that outruns its row slot
@@ -170,11 +169,7 @@ fun OptionsDialog(
     frame(
         DialogFrameSpec(
             onClose = onDismiss,
-            state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, size.width, size.height),
-            width = size.width,
-            height = size.height
-        ),
+            state = rememberCenteredDialogState(mainWindowState, size.width, size.height),
             title = stringResource(Res.string.options),
             resizable = true,
         ),

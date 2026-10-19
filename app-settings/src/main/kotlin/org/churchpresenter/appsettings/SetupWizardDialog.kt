@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
@@ -63,6 +61,7 @@ import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.uiScaledWindowSize
 
 /*
  * Getting Started — eight steps in a two-column window.
@@ -134,8 +133,7 @@ private fun SetupWizardWindow(onClose: () -> Unit, alwaysOnTop: Boolean, content
     // for 35 language chips does not fit the old box, and a window the user cannot resize is what
     // turned "too many chips" into "four languages you cannot reach".
     val windowState = rememberWindowState(
-        width = 1120.dp,
-        height = 760.dp,
+        size = uiScaledWindowSize(1120.dp, 760.dp),
         position = WindowPosition(Alignment.Center)
     )
 

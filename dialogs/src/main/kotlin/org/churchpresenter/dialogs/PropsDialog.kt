@@ -40,13 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PropCorner
 import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.PropKind
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.delete_saved_string
@@ -69,12 +67,13 @@ import org.churchpresenter.strings.generated.resources.props_save
 import org.churchpresenter.strings.generated.resources.props_size
 import org.churchpresenter.strings.generated.resources.props_title
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /**
  * Switches props on and off air, and keeps them (`docs/SHOW_CONTROL.md`, Props): a logo bug, a
@@ -94,11 +93,7 @@ fun PropsDialog(
     frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(LocalMainWindowState.current, PROPS_DIALOG_WIDTH, PROPS_DIALOG_HEIGHT),
-        width = PROPS_DIALOG_WIDTH,
-        height = PROPS_DIALOG_HEIGHT,
-    )
+    val dialogState = rememberCenteredDialogState(LocalMainWindowState.current, PROPS_DIALOG_WIDTH, PROPS_DIALOG_HEIGHT)
     frame(
         DialogFrameSpec(
             onClose = onDismiss,
@@ -106,7 +101,7 @@ fun PropsDialog(
             title = stringResource(Res.string.props_title),
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             PropsDialogContent(props, onPropsChange, onAir, onSwitch, onChoosePicture, onDismiss)
         }
     }

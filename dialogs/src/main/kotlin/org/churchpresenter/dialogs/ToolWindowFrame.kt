@@ -7,6 +7,7 @@ import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.sharedui.utils.uiScaledWindowSize
 
 /** The window a tool asks for: its title, its opening size, and what closing it does. */
 data class ToolWindowSpec(val title: String, val size: DpSize, val onClose: () -> Unit)
@@ -23,6 +24,6 @@ val appToolWindowFrame: ToolWindowFrame = { spec, content ->
         onCloseRequest = spec.onClose,
         title = spec.title,
         icon = painterResource(IconRes.drawable.ic_app_icon),
-        state = rememberWindowState(width = spec.size.width, height = spec.size.height),
+        state = rememberWindowState(size = uiScaledWindowSize(spec.size.width, spec.size.height)),
     ) { content() }
 }

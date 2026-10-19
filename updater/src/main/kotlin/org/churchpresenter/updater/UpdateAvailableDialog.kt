@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.update_dialog_check_interval
@@ -46,15 +45,15 @@ import org.churchpresenter.strings.generated.resources.update_interval_monthly
 import org.churchpresenter.strings.generated.resources.update_interval_never
 import org.churchpresenter.strings.generated.resources.update_interval_weekly
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.settings.utils.UpdateCheckInterval
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.io.OutputStream
 import java.io.InputStream
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /**
  * The temp-file suffix for a downloaded installer, inferred from the release asset's URL so the
@@ -163,17 +162,13 @@ fun UpdateAvailableDialog(
 
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, UPDATE_DIALOG_WIDTH, dialogHeight),
-            width = UPDATE_DIALOG_WIDTH,
-            height = dialogHeight
-        ),
+        state = rememberCenteredDialogState(mainWindowState, UPDATE_DIALOG_WIDTH, dialogHeight),
         title = stringResource(
             if (hasUpdate) Res.string.update_dialog_title else Res.string.update_dialog_up_to_date_title
         ),
         resizable = false
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             UpdateAvailableContent(
                 result = result,
                 isManualCheck = isManualCheck,

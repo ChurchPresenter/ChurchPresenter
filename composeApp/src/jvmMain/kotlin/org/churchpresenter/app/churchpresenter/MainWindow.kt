@@ -34,6 +34,7 @@ import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.app.churchpresenter.composables.CrashGuardBanner
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.ui.window.rememberWindowState
+import org.churchpresenter.theme.LocalThemeCustomization
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.app_name
@@ -72,7 +73,6 @@ import org.churchpresenter.settings.recordingUse
 import org.churchpresenter.settings.shown
 import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Dimension
 import java.awt.GraphicsEnvironment
 import java.util.Locale
 import androidx.compose.ui.window.FrameWindowScope
@@ -241,8 +241,11 @@ private fun AppRootState.MainWindow(
         icon = painterResource(IconRes.drawable.ic_app_icon),
         state = state
     ) {
+        val uiScale = LocalThemeCustomization.current.uiScale
+        LaunchedEffect(uiScale) {
+            window.minimumSize = scaledMainWindowMinimum(uiScale, screenMaxUiScale(window))
+        }
         LaunchedEffect(Unit) {
-            window.minimumSize = Dimension(MIN_MAIN_WINDOW_WIDTH, MIN_MAIN_WINDOW_HEIGHT)
             // The first frame the operator sees; the startup benchmark's end point (StartupProbe).
             withFrameNanos { }
             StartupProbe.firstFrame(exit = { exitProcess(0) })
@@ -364,6 +367,7 @@ private fun AppRootState.MainWindowContent(
         ServerBroadcastWiring()
 
         AppMenuBar()
+        frame.ThemedMenuBar()
         MainDesktopHost()
         // After MainDesktop, not before it: siblings in a Box draw in order and
         // MainDesktop's root is an opaque fillMaxSize surface, so a banner

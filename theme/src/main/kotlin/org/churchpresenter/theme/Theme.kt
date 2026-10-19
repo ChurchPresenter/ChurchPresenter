@@ -618,7 +618,7 @@ fun ChurchPresenterTheme(
                 hoverColor = colorScheme.onSurface.copy(alpha = 0.45f)
             )
         ) {
-            ProvideUiFontScale(customization.fontScale, content)
+            ProvideUiScale(customization.fontScale, customization.uiScale, content)
         }
     }
 }

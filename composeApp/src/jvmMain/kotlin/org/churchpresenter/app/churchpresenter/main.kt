@@ -363,7 +363,9 @@ private fun runApplication(
     application(exitProcessOnExit = true) {
         // Held above every window so each one -- the main window, Settings, every dialog -- is drawn
         // with the same accent, font and text size, and a change reaches all of them at once.
-        var themeCustomization by remember { mutableStateOf(themeCustomizationFrom(startupSettings)) }
+        var themeCustomization by remember {
+            mutableStateOf(themeCustomizationFrom(startupSettings, screenMaxUiScale(null)))
+        }
         CompositionLocalProvider(
             LocalThemeCustomization provides themeCustomization,
             LocalDevelopmentBuild provides !BuildConfig.IS_RELEASE,

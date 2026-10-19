@@ -49,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res as AppRes
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -74,13 +73,13 @@ import org.churchpresenter.strings.generated.resources.story_prompt_screenshot
 import org.churchpresenter.strings.generated.resources.story_prompt_share
 import org.churchpresenter.strings.generated.resources.story_prompt_window_title
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.isDarkScheme
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private val STORY_IMAGE_COLUMN_WIDTH = 250.dp
 private val STORY_BUTTON_HEIGHT = 42.dp
@@ -144,18 +143,12 @@ fun ShareYourStoryDialog(
     frame(
         DialogFrameSpec(
             onClose = onDismiss,
-            state = rememberDialogState(
-            position = centeredOnMainWindow(
-                mainWindowState, SHARE_STORY_DIALOG_WIDTH, SHARE_STORY_DIALOG_HEIGHT
-            ),
-            width = SHARE_STORY_DIALOG_WIDTH,
-            height = SHARE_STORY_DIALOG_HEIGHT,
-        ),
+            state = rememberCenteredDialogState(mainWindowState, SHARE_STORY_DIALOG_WIDTH, SHARE_STORY_DIALOG_HEIGHT),
             title = stringResource(Res.string.story_prompt_window_title),
             resizable = false,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             ShareYourStoryContent(onShare = onShare, onDismiss = onDismiss)
         }
     }

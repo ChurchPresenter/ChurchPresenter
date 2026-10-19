@@ -35,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.presentation_remote_control
@@ -56,13 +55,13 @@ import org.churchpresenter.strings.generated.resources.qa_qr_code_shows
 import org.churchpresenter.strings.generated.resources.qa_retry
 import org.churchpresenter.strings.generated.resources.qa_starting_tunnel
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.utils.generateQRCodeBitmap
 import org.churchpresenter.server.TunnelStatus
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 fun PresentationRemoteDialog(
@@ -87,11 +86,7 @@ fun PresentationRemoteDialog(
     val maxDialogHeight = 900.dp
     val density = LocalDensity.current
     val scrollState = rememberScrollState()
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, dialogWidth, dialogHeight),
-        width = dialogWidth,
-        height = dialogHeight
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, dialogWidth, dialogHeight)
     val copyText: (String) -> Unit = { text ->
         SystemClipboard.copy(text)
     }
@@ -116,7 +111,7 @@ fun PresentationRemoteDialog(
             resizable = false,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             PresentationRemoteDialogContent(
                 settings = settings,
                 onSettingsChange = onSettingsChange,

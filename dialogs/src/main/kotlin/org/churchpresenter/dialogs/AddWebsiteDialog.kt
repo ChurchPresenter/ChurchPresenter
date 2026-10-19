@@ -13,7 +13,7 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.SettingsTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,10 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.ok
@@ -39,6 +37,7 @@ import org.churchpresenter.strings.generated.resources.website_title_hint
 import org.churchpresenter.strings.generated.resources.website_title_label
 import org.churchpresenter.strings.generated.resources.website_url_label
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 fun AddWebsiteDialog(
@@ -48,11 +47,7 @@ fun AddWebsiteDialog(
     frame: DialogFrame = appDialogFrame,
 ) {
     val mainWindowState = LocalMainWindowState.current
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, ADD_WEBSITE_DIALOG_WIDTH, ADD_WEBSITE_DIALOG_HEIGHT),
-        width = ADD_WEBSITE_DIALOG_WIDTH,
-        height = ADD_WEBSITE_DIALOG_HEIGHT
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, ADD_WEBSITE_DIALOG_WIDTH, ADD_WEBSITE_DIALOG_HEIGHT)
 
     frame(
         DialogFrameSpec(
@@ -62,7 +57,7 @@ fun AddWebsiteDialog(
             resizable = false,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             AddWebsiteDialogContent(onDismiss = onDismiss, onConfirm = onConfirm)
         }
     }

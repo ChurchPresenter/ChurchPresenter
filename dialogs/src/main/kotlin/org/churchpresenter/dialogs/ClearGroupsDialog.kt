@@ -25,13 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import org.churchpresenter.liveoutput.knownLayers
 import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.clear_group_clear
 import org.churchpresenter.strings.generated.resources.clear_groups_add
@@ -50,12 +48,13 @@ import org.churchpresenter.strings.generated.resources.clear_layer_slide
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.delete_saved_string
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /** Keeps the clear groups (`docs/SHOW_CONTROL.md`, Clear groups): named sets of layers cleared together. */
 @Composable
@@ -69,11 +68,7 @@ fun ClearGroupsDialog(
     frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(LocalMainWindowState.current, CLEAR_DIALOG_WIDTH, CLEAR_DIALOG_HEIGHT),
-        width = CLEAR_DIALOG_WIDTH,
-        height = CLEAR_DIALOG_HEIGHT,
-    )
+    val dialogState = rememberCenteredDialogState(LocalMainWindowState.current, CLEAR_DIALOG_WIDTH, CLEAR_DIALOG_HEIGHT)
     val title = stringResource(Res.string.clear_groups_title)
     frame(
         DialogFrameSpec(
@@ -82,7 +77,7 @@ fun ClearGroupsDialog(
             title = title,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             ClearGroupsDialogContent(groups, onGroupsChange, onClearGroup, onDismiss)
         }
     }

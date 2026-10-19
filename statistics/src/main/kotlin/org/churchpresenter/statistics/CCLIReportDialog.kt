@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
@@ -37,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.obs_mode_bible
 import org.churchpresenter.strings.generated.resources.ccli_export_csv
@@ -68,12 +65,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
 import java.time.ZoneId
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /** The tab indices, so the filter row can tell which library it is narrowing. */
 private const val SONGS_TAB = 0
@@ -94,10 +91,7 @@ fun CCLIReportDialog(
 
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 940.dp, 700.dp),
-            width = 940.dp, height = 700.dp
-        ),
+        state = rememberCenteredDialogState(mainWindowState, 940.dp, 700.dp),
         title = stringResource(Res.string.ccli_report_title),
         resizable = true
     ) {

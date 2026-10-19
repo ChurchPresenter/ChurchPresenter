@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.HorizontalDivider
@@ -35,7 +34,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.contact_email_label
 import org.churchpresenter.strings.generated.resources.contact_error
@@ -53,8 +51,7 @@ import org.churchpresenter.strings.generated.resources.contact_us_title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.telemetry.ContactReporter
 import org.churchpresenter.telemetry.TelemetryIdentity
@@ -64,6 +61,7 @@ import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private const val SENT_CONFIRMATION_MS = 1500L
 
@@ -176,16 +174,12 @@ fun ContactUsDialog(
     frame(
         DialogFrameSpec(
             onClose = onDismiss,
-            state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 520.dp, 660.dp),
-            width = 520.dp,
-            height = 660.dp
-        ),
+            state = rememberCenteredDialogState(mainWindowState, 520.dp, 660.dp),
             title = stringResource(Res.string.contact_us_title),
             resizable = false,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             ContactUsDialogContent(
                 onDismiss = onDismiss,
                 types = types,

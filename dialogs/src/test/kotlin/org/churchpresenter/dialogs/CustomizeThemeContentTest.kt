@@ -24,6 +24,8 @@ import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.settings.ListRowSpacing
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.UI_SCALES
+import kotlin.math.roundToInt
 import org.churchpresenter.theme.customColorScheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -57,6 +59,7 @@ class CustomizeThemeContentTest {
 
     private fun content(
         start: ThemeCustomizationChoice = initial,
+        maxUiScale: Float = UI_SCALES.last(),
         block: ComposeUiTest.(Result) -> Unit,
     ) = runComposeUiTest {
         val result = Result()
@@ -69,6 +72,7 @@ class CustomizeThemeContentTest {
                         previewDensity = LocalDensity.current,
                         onApply = { result.applied += it },
                         onDismiss = { result.dismissed++ },
+                        maxUiScale = maxUiScale,
                     )
                 }
             }
@@ -130,6 +134,7 @@ class CustomizeThemeContentTest {
             colors = CustomThemeColors(warning = "#E0A020"),
             fontFamily = "Serif",
             fontScale = 1.3f,
+            uiScale = 1.5f,
             rowSpacing = ListRowSpacing.THINNER,
         ),
     ) { result ->
@@ -199,6 +204,22 @@ class CustomizeThemeContentTest {
             click("Apply")
             assertEquals(scale, result.applied.last().fontScale, label)
         }
+    }
+
+    @Test
+    fun `every interface size is offered and the chosen one is handed back`() = content { result ->
+        UI_SCALES.forEach { scale ->
+            click("${(scale * 100).roundToInt()}%")
+            click("Apply")
+            assertEquals(scale, result.applied.last().uiScale, "$scale")
+        }
+    }
+
+    @Test
+    fun `sizes past what the main window's screen can take are not offered`() = content(maxUiScale = 1.25f) { _ ->
+        onNodeWithText("125%").assertExists()
+        onNodeWithText("150%").assertDoesNotExist()
+        onNodeWithText("200%").assertDoesNotExist()
     }
 
     @Test

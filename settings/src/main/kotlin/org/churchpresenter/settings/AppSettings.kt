@@ -102,6 +102,8 @@ data class AppSettings(
     val uiFontFamily: String = "",
     /** The UI text size, as a multiplier of the platform's font scale. Output windows ignore it. */
     val uiFontScale: Float = 1f,
+    /** The interface size: everything in the app's own windows, not only text. Output windows ignore it. */
+    val uiScale: Float = 1f,
     /** How much room list rows leave around their text. Output windows ignore it. */
     val uiRowSpacing: ListRowSpacing = ListRowSpacing.NORMAL,
     val language: String = "en",

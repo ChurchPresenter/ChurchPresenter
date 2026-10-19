@@ -12,7 +12,7 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.SettingsTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,10 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_label
 import org.churchpresenter.strings.generated.resources.canvas_text_bg_color
@@ -45,6 +43,7 @@ import org.churchpresenter.sharedui.composables.RecentLabelColors
 import org.churchpresenter.sharedui.composables.matches
 import org.churchpresenter.sharedui.composables.themeLabelPresets
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 fun AddLabelDialog(
@@ -69,11 +68,7 @@ fun AddLabelDialog(
     // everything past the SV panel with no visible scrollbar to hint more was there; a first pass
     // at 560dp still cropped the recent-color swatches down to an unrecognizable sliver. 640dp
     // leaves ~50dp of slack over the measured worst case.
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, ADD_LABEL_DIALOG_WIDTH, ADD_LABEL_DIALOG_HEIGHT),
-        width = ADD_LABEL_DIALOG_WIDTH,
-        height = ADD_LABEL_DIALOG_HEIGHT
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, ADD_LABEL_DIALOG_WIDTH, ADD_LABEL_DIALOG_HEIGHT)
 
     frame(
         DialogFrameSpec(
@@ -83,7 +78,7 @@ fun AddLabelDialog(
             resizable = false,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             AddLabelDialogContent(
                 onDismiss = onDismiss,
                 onConfirm = onConfirm,
