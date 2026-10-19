@@ -27,6 +27,7 @@ import org.churchpresenter.app.churchpresenter.remote.emitRemoteTabSelection
 import org.churchpresenter.server.RemoteApproval
 import org.churchpresenter.server.remoteApproval
 import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
+import org.churchpresenter.app.churchpresenter.remote.scheduledRowFor
 import org.churchpresenter.app.churchpresenter.remote.qaActionType
 import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
 import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
@@ -227,17 +228,22 @@ internal fun MainWindowScope.RemoteProjectRequests() {
                 val item = pending.item
                 val project: () -> Unit = {
                     UsageEvents.record(UsageEvent.REMOTE_PUT_LIVE)
-                    if (item is ScheduleItem.AnnouncementItem) {
-                        appSettings = appSettings.withAnnouncement(item)
+                    // A row the phone read from the schedule goes live as that row, not as a copy.
+                    val row = scheduledRowFor(item, currentScheduleItems)
+                    val shown = row ?: item
+                    if (shown is ScheduleItem.AnnouncementItem) {
+                        appSettings = appSettings.withAnnouncement(shown)
                     }
+                    if (row != null) currentScheduleActions.selectItem(row.id)
                     executeProjectItem(
-                        item,
+                        shown,
                         currentScheduleActions,
                         presenterManager,
+                        currentScheduleItems,
                     )
                     coroutineScope.launch {
                         emitRemoteTabSelection(
-                            item, remoteSelectSongFlow,
+                            shown, remoteSelectSongFlow,
                             remoteSelectPictureFlow, remoteSelectPresentationFlow,
                             remoteSelectMediaFlow,
                         )

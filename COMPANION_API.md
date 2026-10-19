@@ -771,9 +771,12 @@ HTTP 403
 
 ### `POST /api/project`
 
-Requests to send an item **directly to projection** (bypasses the schedule, goes live immediately after approval).
+Requests to send an item **directly to projection** — it goes live as soon as it is approved.
 
-Accepts the same body as `/api/schedule/add`.
+Accepts the same body as `/api/schedule/add`. The item is added to the end of the schedule as it
+goes live, **unless its `id` is the id of a row already in the schedule** (as `GET /api/schedule`
+returns them): that row is selected and put live, and nothing is added. A remote showing the
+service order should send the row's own `id`, so projecting from it never duplicates the row.
 
 ```bash
 # Project a Bible verse immediately
@@ -785,6 +788,11 @@ curl -k -X POST https://192.168.1.10:8765/api/project \
 curl -k -X POST https://192.168.1.10:8765/api/project \
   -H "Content-Type: application/json" \
   -d '{"item":{"songNumber":85,"title":"How Great Thou Art","songbook":"Hymns"}}'
+
+# Put a song that is already in the schedule live, without adding it again
+curl -k -X POST https://192.168.1.10:8765/api/project \
+  -H "Content-Type: application/json" \
+  -d '{"item":{"id":"a1b2c3","songNumber":42,"title":"Great Is Thy Faithfulness","songbook":"Hymns"}}'
 ```
 
 **Success:**
@@ -1558,7 +1566,7 @@ Send a command with `ws.send(JSON.stringify({ type, payload }))`.
 
 | `type` | Payload | Action | Approval needed |
 |--------|---------|--------|----------------|
-| `select_song` | `{id, songNumber, title, songbook}` | Navigate schedule to a song | No |
+| `select_song` | `{id, songNumber, title, songbook}` | Navigate schedule to a song: selects the row with that `id` (or else the first song row with the same `songbook` and `songNumber` — `title` when `songNumber` is 0) and opens the song on the Songs tab, ready for Go Live. Nothing goes on screen and nothing is added; a song not in the schedule is opened on its own | No |
 | `select_song_section` | `{number, section}` | Jump to a section within current song | No |
 | `select_slide` | `{id, index}` | Jump to a slide in current presentation | No |
 | `select_bible_verse` | as `POST /api/bible/select` | Display a Bible verse immediately | No |
@@ -1976,6 +1984,8 @@ await fetch(`https://host:8765/api/presentations/${presItem.id}/select`, {
 | Show a picture | `POST /api/pictures/select` · WS `select_picture` | `POST /api/project` |
 | Navigate to a slide | `POST /api/presentations/{id}/select` · WS `select_slide` | — |
 | Navigate to a song section | `POST /api/songs/{number}/select` · WS `select_song_section` | — |
+| Open a song, ready for Go Live | WS `select_song` | — |
+| Put a schedule row live | — | `POST /api/project` with the row's `id` |
 | Add Bible verse to schedule | — | `POST /api/schedule/add` |
 | Add song to schedule | — | `POST /api/schedule/add` |
 | Clear projection | `POST /api/clear` · WS `clear` | — |

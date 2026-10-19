@@ -138,6 +138,10 @@ internal fun MainWindowScope.ServerCommandWiring() {
         }
 
         LaunchedEffect(Unit) {
+            companionServer.onSongSelected.collect { song -> readyRemoteSong(song) }
+        }
+
+        LaunchedEffect(Unit) {
             companionServer.onClear.collect {
                 mediaViewModel.pause()
                 presenterManager.clearFromOperator()
