@@ -20,14 +20,17 @@ internal fun SongCatalogResponse.toSongItems(): List<SongItem> = songBook.flatMa
 
 /**
  * Reconstructs the raw header+line format the local parser produces, from structured sections, so
- * `SongsViewModel` splits remotely-fetched songs unchanged. Original header text (e.g. "Verse 2")
- * isn't preserved by the API, only the section type.
+ * `SongsViewModel` splits remotely-fetched songs unchanged. The header is the song's own ("Verse 2")
+ * where the primary sends its label; a primary from before labels sends only the type, so the header
+ * is made from that.
  */
 internal fun SongDetailDto.toRawLyrics(): List<String> = sections.flatMap { section ->
-    val header = if (section.type == Constants.SECTION_TYPE_CHORUS) {
-        "{Chorus}"
-    } else {
-        "[${section.type.replaceFirstChar(Char::uppercase)}]"
-    }
-    listOf(header) + section.lines
+    listOf(rawHeader(section.type, section.label)) + section.lines
+}
+
+/** A section header as the song file writes it: `{…}` for a chorus, `[…]` for anything else. */
+internal fun rawHeader(type: String, label: String?): String {
+    val isChorus = type == Constants.SECTION_TYPE_CHORUS
+    val name = label ?: if (isChorus) "Chorus" else type.replaceFirstChar(Char::uppercase)
+    return if (isChorus) "{$name}" else "[$name]"
 }

@@ -5,6 +5,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
+import org.churchpresenter.sharedui.utils.sectionLabelOf
 
 /**
  * Builders that turn the desktop's own song/Bible/presentation models into the wire catalogues the
@@ -14,6 +15,7 @@ import org.churchpresenter.sharedui.utils.isHeaderLine
 internal fun buildSongDetail(song: SongItem): SongDetailDto {
     val sections = mutableListOf<SongSectionDto>()
     var currentType = Constants.SECTION_TYPE_VERSE
+    var currentLabel: String? = null
     var currentLines = mutableListOf<String>()
     for (line in song.lyrics) {
         val trimmed = line.trim()
@@ -21,16 +23,17 @@ internal fun buildSongDetail(song: SongItem): SongDetailDto {
         val isChorus = isChorusHeader(trimmed)
         if (isSectionHeader) {
             if (currentLines.isNotEmpty()) {
-                sections.add(SongSectionDto(type = currentType, lines = currentLines.toList()))
+                sections.add(SongSectionDto(type = currentType, lines = currentLines.toList(), label = currentLabel))
                 currentLines = mutableListOf()
             }
             currentType = if (isChorus) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
+            currentLabel = sectionLabelOf(trimmed).ifEmpty { null }
         } else if (trimmed.isNotEmpty()) {
             currentLines.add(line)
         }
     }
     if (currentLines.isNotEmpty()) {
-        sections.add(SongSectionDto(type = currentType, lines = currentLines.toList()))
+        sections.add(SongSectionDto(type = currentType, lines = currentLines.toList(), label = currentLabel))
     }
     return SongDetailDto(
         number       = song.number,

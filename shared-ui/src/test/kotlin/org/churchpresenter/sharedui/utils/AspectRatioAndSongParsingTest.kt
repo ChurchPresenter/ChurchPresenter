@@ -124,4 +124,11 @@ class SongHeaderParsingTest {
         // a list at all, so it can never be a regression.
         assertTrue(isVerseHeader("[Мост]"))
     }
+
+    @Test
+    fun `a section label is the header as written, without its brackets`() {
+        assertEquals("Chorus 1", sectionLabelOf("[Chorus 1]"))
+        assertEquals("Refrain", sectionLabelOf("  { Refrain }  "))
+        assertEquals("", sectionLabelOf("[]"))
+    }
 }
