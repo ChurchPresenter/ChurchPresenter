@@ -321,13 +321,13 @@
 
 ## Mobile & Remote Control
 - **Control from your phone** — a built-in server lets phones and tablets browse songs and scripture, build the schedule and go live — all over your local network.
-- **You stay in charge** — remote actions ask for approval on the desktop, with per-device allow/block lists and optional API-key protection.
+- **You stay in charge** — remote actions ask for approval on the desktop, with per-device allow/block lists, per-device permissions (control the screen, add to or remove from the schedule, go live, upload files, show notifications) and optional API-key protection.
 - **Real-time sync** — connected devices update instantly as the schedule and content change.
 
 **Source locations:**
 - `:server`'s `CompanionServer.kt` — Ktor REST + WebSocket server
 - `:server`'s `SslCertificateManager.kt`, `:server`'s `TunnelManager.kt`
-- `server-ui/…/RemoteClientManager.kt`
+- `server-ui/…/RemoteClientManager.kt`, `server-ui/…/ClientPermissions.kt`; `:server`'s `DevicePermissions.kt` — what each trusted device may do, enforced on every REST route and WebSocket command it gates
 - `data/settings/ServerSettings.kt`
 - `server-ui/…/ServerSettingsTab.kt`
 - `dialogs/RemoteActivityToast.kt`, `dialogs/RemoteEventDialog.kt`

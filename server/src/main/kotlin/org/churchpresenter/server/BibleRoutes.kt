@@ -235,7 +235,7 @@ private fun Route.bibleSelectRoutes(
     scope: CoroutineScope,
 ) {
                 post(Constants.ENDPOINT_BIBLE_SELECT) {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
                     val body = call.receiveText()
                     val req = try {
                         json.decodeFromString(SelectBibleVerseRequest.serializer(), body)

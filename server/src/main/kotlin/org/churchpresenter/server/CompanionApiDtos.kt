@@ -464,10 +464,13 @@ data class ServerInfoResponse(
     val port: Int
 )
 
+/** What the calling device may do, so a remote can hide what would be refused -- see [permits]. */
 @Serializable
 data class DevicePermissionsDto(
     val canPresent: Boolean = true,
     val canAddToSchedule: Boolean = true,
+    val canRemoveFromSchedule: Boolean = true,
+    val canGoLive: Boolean = true,
     val canUploadFiles: Boolean = true,
     val maxMediaUploadMb: Int = Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB,
 )

@@ -77,8 +77,10 @@ import androidx.compose.foundation.layout.size
 internal const val TOAST_AUTO_DISMISS_MS = 10_000L
 
 /**
- * Overlay shown at the bottom of the screen whenever a session-allowed or
- * permanently-allowed client performs an action that was auto-approved.
+ * Overlay shown at the bottom of the screen whenever a remote client does something without being
+ * asked about it: an instant action from any device that is not blocked, or a request from an
+ * allowed one that was approved on its own. A device the operator silenced (its Show activity
+ * notifications permission switched off) never reaches it.
  *
  * Shows for [TOAST_AUTO_DISMISS_MS] ms (10 s) then fades out automatically.
  * The operator can dismiss it immediately or block the client for the session.

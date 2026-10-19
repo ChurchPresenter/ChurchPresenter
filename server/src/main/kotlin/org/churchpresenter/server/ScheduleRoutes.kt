@@ -41,7 +41,7 @@ internal fun Route.scheduleRoutes(
                  * or {"ok":false,"reason":"blocked"} if the session is blocked.
                  */
                 post(Constants.ENDPOINT_SCHEDULE_ADD) {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.ADD_TO_SCHEDULE)) return@post
                     val body = call.receiveText()
                     val item = server.parseRemoteItem(body)
                     if (item == null) {
@@ -78,7 +78,7 @@ internal fun Route.scheduleRoutes(
                  * Bad body: HTTP 400  {"error":"…"}
                  */
                 post(Constants.ENDPOINT_SCHEDULE_ADD_BATCH) {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.ADD_TO_SCHEDULE)) return@post
                     val body = call.receiveText()
                     val items = try {
                         json.decodeFromString(RemoteItemsRequest.serializer(), body)
@@ -106,7 +106,7 @@ internal fun Route.scheduleRoutes(
                  * Same suspend-until-approved behaviour as /api/schedule/add.
                  */
                 post(Constants.ENDPOINT_PROJECT) {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.GO_LIVE)) return@post
                     val body = call.receiveText()
                     val item = server.parseRemoteItem(body)
                     if (item == null) {
@@ -143,7 +143,7 @@ private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineSco
                  * Response: {"ok":true}
                  */
                 post(Constants.ENDPOINT_CLEAR) {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     call.request.queryParameters["group"]?.let { group ->
                         if (call.requireDevMode(server)) call.respondClearGroup(server, scope, group)
@@ -174,7 +174,7 @@ private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineSco
                  * Response: {"ok":true}
                  */
                 post(Constants.ENDPOINT_TAKE) {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
                     if (!call.requireDevMode(server)) return@post
                     scope.launch { server.onTake.emit(Unit) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)

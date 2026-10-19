@@ -234,6 +234,13 @@ class CompanionServer(
     @Volatile
     var blockedClientIds: Set<String> = emptySet()
 
+    /**
+     * What each device on the Allowed list may do (mirrored from `RemoteClientManager`, like
+     * [blockedClientIds]). A device with no entry may do everything -- see [permits].
+     */
+    @Volatile
+    var devicePermissions: Map<String, DevicePermissions> = emptyMap()
+
     /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
     internal val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
 

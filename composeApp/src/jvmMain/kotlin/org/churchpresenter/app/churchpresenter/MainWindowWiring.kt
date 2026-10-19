@@ -269,7 +269,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         LaunchedEffect(Unit) {
             companionServer.onInstantAction.collect { action ->
                 val type = remoteActionType(action.actionType)
-                remoteActivityNotifications.add(
+                notifyRemoteActivity(
                     RemoteActivityNotification(
                         type = type,
                         title = remoteActivityTitle(type, clearDisplayTitle, action.title.text()),

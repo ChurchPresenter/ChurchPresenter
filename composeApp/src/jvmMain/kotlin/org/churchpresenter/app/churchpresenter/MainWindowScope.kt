@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.serverui.RemoteClientManager
+import org.churchpresenter.serverui.permissionsFor
+import org.churchpresenter.server.DevicePermission
 import org.churchpresenter.server.RemoteActivityNotification
 import org.churchpresenter.server.RemoteEvent
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -34,6 +36,13 @@ internal class MainWindowState(calendarSyncInitiallyOn: Boolean) {
     val sessionAllowedClients = mutableStateListOf<String>()
     val sessionBlockedClients = mutableStateListOf<String>()
     val remoteActivityNotifications = mutableStateListOf<RemoteActivityNotification>()
+
+    /** Shows [notification] as a toast, unless its device is one the operator has silenced. */
+    fun notifyRemoteActivity(notification: RemoteActivityNotification) {
+        if (remoteClientManager.permissionsFor(notification.clientId).allows(DevicePermission.SHOW_TOASTS)) {
+            remoteActivityNotifications.add(notification)
+        }
+    }
 
     // The QR a just-approved phone scans to get its calendar token and key.
     var calendarEnrollQr by mutableStateOf<CalendarInvite?>(null)
@@ -71,6 +80,7 @@ internal class MainWindowScope(
     val sessionAllowedClients get() = win.sessionAllowedClients
     val sessionBlockedClients get() = win.sessionBlockedClients
     val remoteActivityNotifications get() = win.remoteActivityNotifications
+    fun notifyRemoteActivity(notification: RemoteActivityNotification) = win.notifyRemoteActivity(notification)
     var calendarEnrollQr by win::calendarEnrollQr
     var calendarSyncWasOn by win::calendarSyncWasOn
 

@@ -1,5 +1,7 @@
 package org.churchpresenter.serverui
 
+import org.churchpresenter.server.DevicePermission
+import org.churchpresenter.server.DevicePermissions
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -306,5 +308,75 @@ class RemoteClientManagerTest {
         )
 
         assertTrue(RemoteClientManager().isAllowed("phone-1"), "an unknown field must not cost the whole list")
+    }
+
+    // ── What an allowed device may do ───────────────────────────────────────────
+
+    @Test
+    fun `an allowed device may do everything until something is switched off`() {
+        val clients = RemoteClientManager()
+        clients.allowPermanently("phone-1")
+
+        assertEquals(DevicePermissions.ALL, clients.permissionsFor("phone-1"))
+        assertTrue(clients.permissions.isEmpty(), "everything on is stored as nothing at all")
+    }
+
+    @Test
+    fun `a permission switched off is kept across a restart`() {
+        val clients = RemoteClientManager()
+        clients.allowPermanently("phone-1")
+
+        clients.setPermission("phone-1", DevicePermission.SHOW_TOASTS, false)
+
+        val after = restarted().permissionsFor("phone-1")
+        assertFalse(after.allows(DevicePermission.SHOW_TOASTS))
+        assertTrue(after.allows(DevicePermission.GO_LIVE))
+    }
+
+    @Test
+    fun `switching everything back on forgets the entry`() {
+        val clients = RemoteClientManager()
+        clients.allowPermanently("phone-1")
+        clients.setPermission("phone-1", DevicePermission.GO_LIVE, false)
+
+        clients.setPermission("phone-1", DevicePermission.GO_LIVE, true)
+
+        assertTrue(clients.permissions.isEmpty())
+    }
+
+    @Test
+    fun `only an allowed device has permissions to set`() {
+        val clients = RemoteClientManager()
+        clients.blockPermanently("tablet-2")
+
+        clients.setPermission("tablet-2", DevicePermission.GO_LIVE, false)
+        clients.setPermission("stranger", DevicePermission.GO_LIVE, false)
+
+        assertTrue(clients.permissions.isEmpty())
+    }
+
+    @Test
+    fun `removing or blocking a device drops its permissions`() {
+        val clients = RemoteClientManager()
+        listOf("phone-1", "phone-2").forEach {
+            clients.allowPermanently(it)
+            clients.setPermission(it, DevicePermission.UPLOAD_FILES, false)
+        }
+
+        clients.removeAllowed("phone-1")
+        clients.blockPermanently("phone-2")
+
+        assertTrue(clients.permissions.isEmpty(), "a device allowed again later starts with everything on")
+    }
+
+    @Test
+    fun `a list file from before permissions existed still loads`() {
+        clientsFile.parentFile.mkdirs()
+        clientsFile.writeText("""{"allowedClients":["phone-1"],"blockedClients":[],"clientLabels":{}}""")
+
+        val clients = RemoteClientManager()
+
+        assertTrue(clients.isAllowed("phone-1"))
+        assertEquals(DevicePermissions.ALL, clients.permissionsFor("phone-1"))
     }
 }

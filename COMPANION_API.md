@@ -40,6 +40,26 @@ while the desktop is not in dev mode (WebSocket commands are acked `ok:false`, r
 act (marked *approval* in the index). A device the operator has trusted is approved without a
 prompt, and a blocked device is refused without one.
 
+**Device permissions.** The operator can switch off, for each trusted device, what it may do —
+control the screen, add to the schedule, remove from it, go live, upload files — under Settings →
+Server → Remote Clients → *Permissions*. A request the device may not make is refused without a
+prompt: `403 {"ok":false,"reason":"not_permitted"}` over HTTP, a `command_ack` with
+`ok:false, reason:"not_permitted"` over the WebSocket. A blocked device gets
+`403 {"ok":false,"reason":"blocked"}` from those same routes. Every device starts with everything
+allowed, and a request with no `X-Device-Id` (a Bitfocus Companion trigger URL) is never refused
+for its permissions. Read `GET /api/status`'s `permissions` to hide what would be refused.
+
+| Permission | What it gates |
+|------------|---------------|
+| Control the screen | `POST /api/songs/{number}/select`, `/api/bible/select`, `/api/presentations/{id}/select`, `/api/pictures/select`, `/api/clear`, `/api/take`, `/api/lowerthirds/…`, `/api/atem/…`, `/api/message`, `/api/props/…`, `/api/macro/…`; every WebSocket command that changes the screen (`select_*`, `next_*`, `previous_*`, `media_*`, `clear`, `take`, `bible_hold`, `message`, `prop`, `macro`) |
+| Add to the schedule | `POST /api/schedule/add`, `/api/schedule/add-batch`; WS `add_to_schedule`, `add_batch_to_schedule` |
+| Remove from the schedule | WS `remove_from_schedule` |
+| Go live | `POST /api/project`; WS `project` |
+| Upload files | `POST /api/presentations/upload`, `/api/pictures/upload`, `/api/media/upload` |
+
+A sixth switch, *Show activity notifications*, refuses nothing: it decides whether what the device
+does shows a toast on the desktop.
+
 ```bash
 # Header
 curl -H "X-Api-Key: mysecretkey" http://192.168.1.10:8765/api/info
@@ -50,7 +70,10 @@ curl "http://192.168.1.10:8765/api/info?apiKey=mysecretkey"
 
 ### Device Identification (Optional)
 
-Pass `X-Device-Id` on action requests (`/api/schedule/add`, `/api/schedule/add-batch`, `/api/project`) to identify your device in the approval dialog shown on the desktop.
+Pass `X-Device-Id` on every request that acts — adding to the schedule, projecting, putting something
+on screen, uploading — to identify your device. The desktop names it in the approval dialog and the
+activity toasts, and it is what the operator allows, blocks and sets [permissions](#authentication)
+for. Keep it the same across launches.
 
 ```bash
 curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
@@ -220,8 +243,10 @@ curl -k https://192.168.1.10:8765/api/info
 Returns server capability and per-device permission information.  
 Called by the mobile companion immediately after launch to warn users about limited functionality.
 
-The server resolves `permissions` based on the `X-Device-Id` header.  
-If the header is absent or the device has no explicit entry, global defaults are used.
+The server resolves `permissions` from the `X-Device-Id` header: what the operator allowed that
+device (see *Device permissions* under [Authentication](#authentication)). A device with no
+permissions of its own, or a request with no header, gets everything allowed; a blocked device gets
+nothing.
 
 ```bash
 curl -H "X-Device-Id: MyiPhone" http://192.168.1.10:8765/api/status
@@ -236,6 +261,8 @@ curl -H "X-Device-Id: MyiPhone" http://192.168.1.10:8765/api/status
   "permissions": {
     "canPresent": true,
     "canAddToSchedule": true,
+    "canRemoveFromSchedule": true,
+    "canGoLive": true,
     "canUploadFiles": false,
     "maxMediaUploadMb": 700
   }
@@ -250,9 +277,11 @@ The response also carries the `X-Server-Version` header.
 | `endpoints` | `string[]` | List of API path segments this server exposes |
 | `bibles` | `string[]` | The loaded translation's name (empty array if none) |
 | `songbooks` | `string[]` | Song-book names loaded in the app (empty array if none) |
-| `permissions.canPresent` | `bool` | Whether this device may call `/api/project` and `/api/clear` (always `true` today) |
-| `permissions.canAddToSchedule` | `bool` | Whether this device may call `/api/schedule/add` (always `true` today) |
-| `permissions.canUploadFiles` | `bool` | Whether file upload is enabled — `/api/presentations/upload`, `/api/pictures/upload`, `/api/media/upload` |
+| `permissions.canPresent` | `bool` | Whether this device may control the screen — the `…/select` routes, `/api/clear` and the WebSocket screen commands |
+| `permissions.canAddToSchedule` | `bool` | Whether this device may call `/api/schedule/add` and `/api/schedule/add-batch` |
+| `permissions.canRemoveFromSchedule` | `bool` | Whether this device may send `remove_from_schedule` |
+| `permissions.canGoLive` | `bool` | Whether this device may call `/api/project` |
+| `permissions.canUploadFiles` | `bool` | Whether file upload is enabled *and* this device may upload — `/api/presentations/upload`, `/api/pictures/upload`, `/api/media/upload` |
 | `permissions.maxMediaUploadMb` | `int` | The largest file `POST /api/media/upload` accepts, in MB |
 
 > All `permissions` fields default to `true` when absent so that older server versions that omit the object do not incorrectly restrict devices.
@@ -1516,7 +1545,7 @@ All messages (both directions) share the same envelope:
 **Command acks.** A command sent with a `commandId` is answered with a `command_ack` event whose
 payload is `{"commandId":"…","ok":true,"reason":null}`. Without a `commandId` there is no ack.
 Reasons sent with `ok:false`: `unknown_command`, `invalid_payload`, `dev_mode_only`, `blocked`,
-`no_such_group`, `no_message`, `no_such_prop`, `no_such_macro`. Approval-gated commands ack at once
+`not_permitted`, `no_such_group`, `no_message`, `no_such_prop`, `no_such_macro`. Approval-gated commands ack at once
 with `ok:true` and reason `pending_approval`; the operator's decision then arrives as a bare
 `{"ok":true}` or `{"ok":false,"reason":"denied"}` text frame (not an envelope), and a granted change
 also as `schedule_updated`.
