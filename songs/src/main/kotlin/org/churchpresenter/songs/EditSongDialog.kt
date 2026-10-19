@@ -223,8 +223,8 @@ internal fun EditSongContent(
                 EditSongFooter(
                     stats = songStatsOf(buildPreviewSections(state.paneValue.text, showChords = false)),
                     typicalSeconds = typicalSeconds,
-                    saveEnabled = !isDuplicate &&
-                        (!isNewSong || (state.songbook.isNotBlank() && state.title.isNotBlank())),
+                    // A new song needs a title; with no song book it is kept at the top of the folder.
+                    saveEnabled = !isDuplicate && (!isNewSong || state.title.isNotBlank()),
                     onDismiss = onDismiss,
                     onSave = {
                         val updatedSong = state.toSongItem()

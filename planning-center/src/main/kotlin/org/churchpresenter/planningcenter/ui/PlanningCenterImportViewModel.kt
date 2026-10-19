@@ -19,6 +19,7 @@ import org.churchpresenter.planningcenter.PcoItemType
 import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.planningcenter.PlanningCenterLyricsFormatter
 import org.churchpresenter.settings.SettingsManager
+import org.churchpresenter.core.models.songs.SongFileName
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
@@ -426,8 +427,9 @@ internal fun matchLocalSong(pco: PlanningCenterClient.PlanItem, catalog: List<So
 
 /**
  * Writes a newly-confirmed song straight to the song storage directory, mirroring
- * `SongsViewModel.createSong`'s file-naming/write logic exactly (mkdirs songbook folder,
- * `"NNNN - Title.song"` filename, [SongFileParser.writeSongFile]) — deliberately not routed
+ * `SongsViewModel.createSong`'s file-naming/write logic exactly (mkdirs songbook folder, or the
+ * storage folder itself for no songbook, `"NNNN - Title.song"` filename with the title made safe
+ * for a file name, [SongFileParser.writeSongFile]) — deliberately not routed
  * through `SongsViewModel` (owned exclusively by the Songs tab per the ViewModel-ownership
  * rule). Returns the saved [SongItem] (with `sourceFile`/`songId` populated) so the caller can
  * immediately add it to the schedule, or null on failure.
@@ -435,15 +437,16 @@ internal fun matchLocalSong(pco: PlanningCenterClient.PlanItem, catalog: List<So
 internal fun createLocalSong(song: SongItem): SongItem? {
     return try {
         val storageDir = SettingsManager().loadSettings().songSettings.storageDirectory
-        if (storageDir.isBlank() || song.songbook.isBlank()) return null
+        if (storageDir.isBlank()) return null
 
-        val targetDir = File(storageDir, song.songbook)
+        val targetDir = if (song.songbook.isBlank()) File(storageDir) else File(storageDir, song.songbook)
         if (!targetDir.exists()) targetDir.mkdirs()
 
+        val title = SongFileName.sanitize(song.title).ifBlank { "Untitled" }
         val fileName = if (song.number.isNotBlank()) {
-            "${song.number.padStart(4, '0')} - ${song.title}.song"
+            "${song.number.padStart(4, '0')} - $title.song"
         } else {
-            "${song.title}.song"
+            "$title.song"
         }
         val filePath = File(targetDir, fileName).absolutePath
 

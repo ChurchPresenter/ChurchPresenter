@@ -172,9 +172,19 @@ class PlanningCenterSongPrefillTest {
     }
 
     @Test
-    fun `a song with no songbook is refused`() {
-        assertNull(
+    fun `a song with no songbook is kept at the top of the songs folder`() {
+        val created = assertNotNull(
             createLocalSong(SongItem(number = "1", title = "Orphan", songbook = "", lyrics = listOf("l"))),
         )
+        assertEquals(File(home, "songs/0001 - Orphan.song").absolutePath, created.sourceFile)
+    }
+
+    @Test
+    fun `a title a file name cannot hold is made safe on disk and kept in the song`() {
+        val created = assertNotNull(
+            createLocalSong(SongItem(number = "", title = "AC/DC: Live?", songbook = "Hymnal", lyrics = listOf("l"))),
+        )
+        assertTrue(created.sourceFile.endsWith("Hymnal${File.separator}AC DC Live.song"), created.sourceFile)
+        assertEquals("AC/DC: Live?", created.title)
     }
 }

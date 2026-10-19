@@ -208,9 +208,12 @@ internal class EditSongState(private val song: SongItem) {
         }
     }
 
-    /** Whether another song in [existingSongs] already has this number, title and song book. */
+    /**
+     * Whether another song in [existingSongs] already has this number, title and song book — a blank
+     * song book being the top of the songs folder, which is a place like any other.
+     */
     fun isDuplicateIn(existingSongs: List<SongItem>): Boolean =
-        if (title.isBlank() || songbook.isBlank()) false
+        if (title.isBlank()) false
         else existingSongs.any {
             it.number == number &&
                 it.title.equals(title, ignoreCase = true) &&

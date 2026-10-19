@@ -2,16 +2,20 @@ package org.churchpresenter.songs
 
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongFileName
 import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 
 private const val SONG_NUMBER_DIGITS = 4
+private const val UNTITLED_SONG = "Untitled"
 
+/** `0042 - Title.song`, with whatever in the title a file name cannot hold replaced. */
 internal fun SongsViewModel.buildSongFileName(number: String, title: String): String {
+    val safeTitle = SongFileName.sanitize(title).ifBlank { UNTITLED_SONG }
     return if (number.isNotBlank()) {
-        "${number.padStart(SONG_NUMBER_DIGITS, '0')} - $title.song"
+        "${number.padStart(SONG_NUMBER_DIGITS, '0')} - $safeTitle.song"
     } else {
-        "$title.song"
+        "$safeTitle.song"
     }
 }
 
@@ -42,8 +46,14 @@ internal fun SongsViewModel.moveSongFile(oldSong: SongItem, newSong: SongItem, s
     return newSong.copy(sourceFile = newFile.absolutePath)
 }
 
+/**
+ * Removes [dir] once its last song has gone — a song book folder, never the songs folder itself,
+ * which holds the songs with no song book.
+ */
 internal fun SongsViewModel.deleteIfEmpty(dir: File?) {
-    if (dir != null && dir.isDirectory && dir.listFiles()?.isEmpty() == true) dir.delete()
+    val songsFolder = appSettings.songSettings.storageDirectory
+    if (dir == null || (songsFolder.isNotEmpty() && dir.absoluteFile == File(songsFolder).absoluteFile)) return
+    if (dir.isDirectory && dir.listFiles()?.isEmpty() == true) dir.delete()
 }
 
 fun SongsViewModel.updateSong(
@@ -119,17 +129,13 @@ fun SongsViewModel.createSong(song: SongItem): Boolean {
     if (remoteModeActive) return false
     try {
         val storageDir = appSettings.songSettings.storageDirectory
-        if (storageDir.isEmpty() || song.songbook.isBlank()) return false
+        if (storageDir.isEmpty()) return false
 
-        val targetDir = File(storageDir, song.songbook)
+        // No song book is the top of the songs folder.
+        val targetDir = if (song.songbook.isBlank()) File(storageDir) else File(storageDir, song.songbook)
         if (!targetDir.exists()) targetDir.mkdirs()
 
-        val fileName = if (song.number.isNotBlank()) {
-            "${song.number.padStart(SONG_NUMBER_DIGITS, '0')} - ${song.title}.song"
-        } else {
-            "${song.title}.song"
-        }
-        val filePath = File(targetDir, fileName).absolutePath
+        val filePath = File(targetDir, buildSongFileName(song.number, song.title)).absolutePath
 
         val parser = SongFileParser()
         parser.writeSongFile(song.copy(sourceFile = filePath), filePath)
@@ -147,10 +153,7 @@ fun SongsViewModel.deleteSong(song: SongItem): Boolean {
         if (song.sourceFile.isNotEmpty()) {
             val file = File(song.sourceFile)
             if (file.exists()) file.delete()
-            val dir = file.parentFile
-            if (dir != null && dir.isDirectory && dir.listFiles()?.isEmpty() == true) {
-                dir.delete()
-            }
+            deleteIfEmpty(file.parentFile)
         }
         loadSongs()
         true

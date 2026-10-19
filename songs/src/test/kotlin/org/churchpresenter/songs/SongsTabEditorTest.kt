@@ -3,6 +3,7 @@
 package org.churchpresenter.songs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -11,6 +12,7 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageLabel
 import kotlin.test.Test
@@ -250,7 +252,8 @@ class SongsTabEditorTest {
             waitForIdle()
 
             assertTrue(vm.filteredSongItems.value.any { it.title == "Fresh Song" })
-            assertNull(reports.settingsAfterChange, "an untouched tuning stores nothing")
+            val after = assertNotNull(reports.settingsAfterChange)
+            assertTrue(after.songBpm.isEmpty() && after.songCapo.isEmpty(), "an untouched tuning stores nothing")
             assertFalse(assertNotNull(spy.new).isVisible)
         }
     }
@@ -271,15 +274,48 @@ class SongsTabEditorTest {
     }
 
     @Test
-    fun `a new song without a songbook is refused and the editor stays open`() {
+    fun `a new song without a songbook is saved at the top of the songs folder`() {
         val spy = EditorSpy()
         songsTab(songEditor = spy.slot) { vm, _ ->
             clickAction("New Song")
             runOnIdle { spy.new!!.onSave(SongItem(number = "52", title = "Homeless", songbook = " "), SongTuning()) }
             waitForIdle()
 
-            assertFalse(vm.filteredSongItems.value.any { it.title == "Homeless" })
-            assertTrue(assertNotNull(spy.new).isVisible)
+            assertTrue(vm.filteredSongItems.value.any { it.title == "Homeless" && it.songbook.isBlank() })
+            assertFalse(assertNotNull(spy.new).isVisible)
+        }
+    }
+
+    @Test
+    fun `a new song starts in the song book the last new song was saved into`() {
+        val spy = EditorSpy()
+        val override = mutableStateOf<AppSettings?>(null)
+        songsTab(songEditor = spy.slot, settingsOverride = override) { _, reports ->
+            clickAction("New Song")
+            assertEquals("", assertNotNull(spy.new).song?.songbook, "with nothing remembered, no song book")
+            val song = SongItem(number = "53", title = "Second", songbook = "Chorus Book", lyrics = listOf("x"))
+            runOnIdle { spy.new!!.onSave(song, SongTuning()) }
+            waitForIdle()
+
+            val after = assertNotNull(reports.settingsAfterChange)
+            assertEquals("Chorus Book", after.newSongSongbook)
+            override.value = after
+            clickAction("New Song")
+
+            assertEquals("Chorus Book", assertNotNull(spy.new).song?.songbook)
+        }
+    }
+
+    @Test
+    fun `a remembered song book that is gone starts the new song with none`() {
+        val spy = EditorSpy()
+        val override = mutableStateOf<AppSettings?>(null)
+        songsTab(songEditor = spy.slot, settingsOverride = override) { vm, _ ->
+            override.value = vm.appSettings.copy(newSongSongbook = "Retired Book")
+            waitForIdle()
+            clickAction("New Song")
+
+            assertEquals("", assertNotNull(spy.new).song?.songbook)
         }
     }
 

@@ -25,6 +25,8 @@
     <string name="bible_load_failed_report_hint">The details are in the crash report folder — attach the newest file when reporting this.</string>
     <string name="search_songs">Search songs...</string>
     <string name="song_book">Song Book</string>
+    <string name="song_book_none">No song book</string>
+    <string name="song_book_new">New song book…</string>
     <string name="all_song_books">All Song Books</string>
     <string name="entire_bible">Entire Bible</string>
     <string name="current_book">Current Book</string>

@@ -16,7 +16,7 @@ internal fun SongsViewModel.applyFilters() {
     // Uses prefix matching so selecting "Kids" also shows "Kids/AM" and "Kids/PM"
     if (selectedSongbookState.value.isNotEmpty() && songbooksState.value.contains(selectedSongbookState.value)) {
         val selected = selectedSongbookState.value
-        filtered = if (selected == "/") {
+        filtered = if (selected == ROOT_SONGBOOK) {
             filtered.filter { it.songbook.isBlank() }
         } else {
             filtered.filter { it.songbook == selected || it.songbook.startsWith("$selected/") }

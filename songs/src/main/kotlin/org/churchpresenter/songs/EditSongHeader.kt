@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
@@ -41,13 +42,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.add_new
 import org.churchpresenter.strings.generated.resources.author
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.ccli_number
 import org.churchpresenter.strings.generated.resources.composer
 import org.churchpresenter.strings.generated.resources.duplicate_song_error
 import org.churchpresenter.strings.generated.resources.song_book
+import org.churchpresenter.strings.generated.resources.song_book_new
+import org.churchpresenter.strings.generated.resources.song_book_none
 import org.churchpresenter.strings.generated.resources.song_capo
 import org.churchpresenter.strings.generated.resources.song_number
 import org.churchpresenter.strings.generated.resources.song_tempo
@@ -249,7 +251,9 @@ private fun RowScope.FieldCard(
 
 /**
  * The song book card: the one metadata field that picks from what already exists rather than
- * accepting free text, with an escape hatch for naming a new book.
+ * accepting free text, with an escape hatch for naming a new book. *No song book* is always offered
+ * first: the song is kept at the top of the songs folder, where imported songs already sit, so a
+ * library with no song book folders can still take a new song.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -314,12 +318,18 @@ private fun RowScope.SongbookCard(
             ) {
                 CardLabel(stringResource(Res.string.song_book))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val shown = songbook.ifBlank { stringResource(Res.string.song_book_none) }
                     Text(
-                        text = songbook,
+                        text = shown,
                         style = fieldValueStyle(),
+                        color = if (songbook.isBlank()) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            Color.Unspecified
+                        },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f).semantics { editableText = AnnotatedString(songbook) },
+                        modifier = Modifier.weight(1f).semantics { editableText = AnnotatedString(shown) },
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
@@ -330,7 +340,12 @@ private fun RowScope.SongbookCard(
                 }
             }
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                songbooks.forEach { book ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.song_book_none)) },
+                    onClick = { onSongbookChange(""); expanded = false },
+                )
+                // The library lists its top-level songs as "/"; here that is the entry above.
+                songbooks.filter { it.isNotBlank() && it != ROOT_SONGBOOK }.forEach { book ->
                     DropdownMenuItem(
                         text = { Text(book) },
                         onClick = { onSongbookChange(book); expanded = false },
@@ -338,7 +353,7 @@ private fun RowScope.SongbookCard(
                 }
                 HorizontalDivider()
                 DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.add_new)) },
+                    text = { Text(stringResource(Res.string.song_book_new)) },
                     onClick = { expanded = false; onSongbookChange(""); isAddingNew = true },
                 )
             }
