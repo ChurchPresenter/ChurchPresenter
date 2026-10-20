@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
@@ -29,14 +28,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.action_unknown
@@ -51,7 +48,7 @@ import org.churchpresenter.strings.generated.resources.tooltip_move_down
 import org.churchpresenter.strings.generated.resources.tooltip_move_up
 import org.churchpresenter.strings.generated.resources.tooltip_remove
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.jetbrains.compose.resources.DrawableResource
@@ -59,6 +56,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /**
  * Edits what a schedule row does when it goes live (`docs/SHOW_CONTROL.md`, Cue actions): a list of
@@ -72,14 +70,10 @@ internal fun RowActionsDialog(
     onSave: (List<Action>) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(LocalMainWindowState.current, ROW_ACTIONS_WIDTH, ROW_ACTIONS_HEIGHT),
-        width = ROW_ACTIONS_WIDTH,
-        height = ROW_ACTIONS_HEIGHT,
-    )
+    val dialogState = rememberCenteredDialogState(LocalMainWindowState.current, ROW_ACTIONS_WIDTH, ROW_ACTIONS_HEIGHT)
     val title = stringResource(Res.string.row_actions_title)
     DialogWindow(onCloseRequest = onDismiss, state = dialogState, title = title) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             RowActionsDialogContent(row, actions, rows, LocalActionChoices.current, onSave, onDismiss)
         }
     }

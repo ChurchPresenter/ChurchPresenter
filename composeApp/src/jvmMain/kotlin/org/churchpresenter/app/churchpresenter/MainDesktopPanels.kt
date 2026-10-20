@@ -248,11 +248,14 @@ internal fun Modifier.sidePanelWidth(widthPx: () -> Int): Modifier = layout { me
     }
 }
 
-/** A side panel's width in px, loaded from [widthDp] once per window mode — see [MainDesktopPanels]. */
+/**
+ * A side panel's width in px, loaded from [widthDp] once per window mode — see [MainDesktopPanels] —
+ * and again when the density changes, so the panel keeps its width in dp as the interface size does.
+ */
 @Composable
 private fun rememberPanelWidthPx(isMaximized: Boolean, widthDp: Int): MutableState<Float> {
     val density = LocalDensity.current
-    return remember(isMaximized) { mutableStateOf(with(density) { widthDp.dp.toPx() }) }
+    return remember(isMaximized, density) { mutableStateOf(with(density) { widthDp.dp.toPx() }) }
 }
 
 /** How far open a side panel is drawn, animated towards 0 when [collapsed] and 1 when not. */

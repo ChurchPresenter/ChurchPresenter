@@ -23,14 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.controlin.ControlSettings
 import org.churchpresenter.controlin.ControlStatus
 import org.churchpresenter.controlin.PortState
 import org.churchpresenter.controlin.Trigger
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.control_device_none
@@ -49,12 +47,13 @@ import org.churchpresenter.strings.generated.resources.control_tab_ports
 import org.churchpresenter.strings.generated.resources.control_tab_triggers
 import org.churchpresenter.strings.generated.resources.control_title
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /** What the MIDI & OSC dialog shows: how the ports stand, the devices there are, and the schedule's rows. */
 class ControlPanelData(
@@ -91,11 +90,7 @@ fun ControlDialog(
     frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(LocalMainWindowState.current, CONTROL_WIDTH, CONTROL_HEIGHT),
-        width = CONTROL_WIDTH,
-        height = CONTROL_HEIGHT,
-    )
+    val dialogState = rememberCenteredDialogState(LocalMainWindowState.current, CONTROL_WIDTH, CONTROL_HEIGHT)
     frame(
         DialogFrameSpec(
             onClose = {
@@ -106,7 +101,7 @@ fun ControlDialog(
             title = stringResource(Res.string.control_title),
         ),
     ) {
-        ProvideUiFontScale { ControlDialogContent(settings, data, actions, onDismiss) }
+        ProvideUiScale { ControlDialogContent(settings, data, actions, onDismiss) }
     }
 }
 

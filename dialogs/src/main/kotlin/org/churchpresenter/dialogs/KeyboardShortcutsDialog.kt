@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_warning
@@ -52,16 +51,16 @@ import org.churchpresenter.strings.generated.resources.shortcut_search_match_one
 import org.churchpresenter.strings.generated.resources.shortcut_search_results
 import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.ShortcutScope
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.sharedui.utils.label
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /** Test tag for the reset-everything button, which several tests need to locate. */
 internal const val SHORTCUT_RESET_ALL_TAG = "shortcut_reset_all"
@@ -121,16 +120,12 @@ fun KeyboardShortcutsDialog(
     frame(
         DialogFrameSpec(
             onClose = onDismiss,
-            state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, DIALOG_WIDTH, DIALOG_HEIGHT),
-            width = DIALOG_WIDTH,
-            height = DIALOG_HEIGHT
-        ),
+            state = rememberCenteredDialogState(mainWindowState, DIALOG_WIDTH, DIALOG_HEIGHT),
             title = stringResource(Res.string.menu_keyboard_shortcuts),
             resizable = true,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             // This window's own spotlight: Wick's shortcut answers ring the row they name.
             GuideSpotlightHost(Modifier.fillMaxSize()) {
                 KeyboardShortcutsDialogContent(

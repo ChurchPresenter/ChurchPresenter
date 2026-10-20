@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.calendar_enroll_qr_body
 import org.churchpresenter.strings.generated.resources.calendar_enroll_invite_failed
@@ -30,13 +29,13 @@ import org.churchpresenter.strings.generated.resources.calendar_enroll_qr_title
 import org.churchpresenter.strings.generated.resources.close
 import kotlinx.coroutines.delay
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.server.CalendarInvite
 import org.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /** The QR a phone scans to enroll -- or, when the relay could not be asked, what went wrong. */
 @Composable
@@ -45,11 +44,7 @@ fun CalendarEnrollQrDialog(invite: CalendarInvite, onDismiss: () -> Unit) {
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, DIALOG_WIDTH, DIALOG_HEIGHT),
-            width = DIALOG_WIDTH,
-            height = DIALOG_HEIGHT,
-        ),
+        state = rememberCenteredDialogState(mainWindowState, DIALOG_WIDTH, DIALOG_HEIGHT),
         title = stringResource(Res.string.calendar_enroll_qr_title),
         resizable = false,
     ) {

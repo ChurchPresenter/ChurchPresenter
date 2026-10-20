@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -97,6 +96,7 @@ import org.churchpresenter.sharedui.composables.StyledTextField
 import org.churchpresenter.sharedui.composables.TextStyleButtons
 import org.churchpresenter.sharedui.composables.VerticalAlignmentButtons
 import org.churchpresenter.sharedui.composables.opacityLabel
+import org.churchpresenter.sharedui.utils.uiScaledWindowSize
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 private const val MAX_TEXT_CURVE = 200f
@@ -307,13 +307,11 @@ private fun TextContentEditor(source: SceneSource.TextSource, onUpdate: (SceneSo
     if (showTextDialog) {
         DialogWindow(
             onCloseRequest = { showTextDialog = false },
-            state = rememberDialogState(
-                width = 600.dp, height = 450.dp
-            ),
+            state = rememberDialogState(size = uiScaledWindowSize(600.dp, 450.dp)),
             title = stringResource(Res.string.canvas_text_content),
             resizable = true
         ) {
-            ProvideUiFontScale {
+            ProvideUiScale {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

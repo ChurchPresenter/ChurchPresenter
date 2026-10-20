@@ -47,7 +47,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.profiles.generated.resources.Res as BundledRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
@@ -59,13 +58,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.media.data.StockMediaClient
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
 import java.io.File
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private const val THUMB_ASPECT_W = 4f
 private const val THUMB_ASPECT_H = 3f
@@ -166,11 +165,7 @@ fun LocalLibraryDialog(
     }
 
     val mainWindowState = LocalMainWindowState.current
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, 1100.dp, 800.dp),
-        width = 1100.dp,
-        height = 800.dp
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, 1100.dp, 800.dp)
 
     DialogWindow(
         onCloseRequest = onDismiss,
@@ -178,7 +173,7 @@ fun LocalLibraryDialog(
         title = stringResource(titleRes),
         resizable = true
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             LocalLibraryDialogContent(
                 mediaType = mediaType,
                 downloadedFiles = allFiles,

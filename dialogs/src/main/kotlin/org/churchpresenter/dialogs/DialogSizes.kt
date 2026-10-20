@@ -60,11 +60,11 @@ val SHARE_STORY_DIALOG_HEIGHT: Dp = 470.dp
 
 /**
  * `CustomizeThemeDialog` — two columns, controls beside the preview, so the six optional colours fit
- * without the window growing past a laptop screen. The content measures 617dp at the default text
- * size and 678dp at Extra large; the rest is the title bar and a little slack.
+ * without the window growing past a laptop screen. The content measures 744dp at Extra large text,
+ * with the Interface size row; the rest is a little slack.
  */
 internal val CUSTOMIZE_THEME_DIALOG_WIDTH: Dp = 940.dp
-internal val CUSTOMIZE_THEME_DIALOG_HEIGHT: Dp = 720.dp
+internal val CUSTOMIZE_THEME_DIALOG_HEIGHT: Dp = 760.dp
 
 internal val MESSAGE_DIALOG_WIDTH: Dp = 520.dp
 internal val MESSAGE_DIALOG_HEIGHT: Dp = 720.dp

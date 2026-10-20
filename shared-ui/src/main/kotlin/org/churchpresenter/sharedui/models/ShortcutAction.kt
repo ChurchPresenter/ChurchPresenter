@@ -66,6 +66,8 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_next
 import org.churchpresenter.strings.generated.resources.shortcut_description_next_song
 import org.churchpresenter.strings.generated.resources.shortcut_description_next_verse
 import org.churchpresenter.strings.generated.resources.shortcut_description_open_calendar_manager
+import org.churchpresenter.strings.generated.resources.shortcut_description_zoom_out
+import org.churchpresenter.strings.generated.resources.shortcut_description_zoom_in
 import org.churchpresenter.strings.generated.resources.shortcut_description_open_converter
 import org.churchpresenter.strings.generated.resources.shortcut_description_open_schedule
 import org.churchpresenter.strings.generated.resources.shortcut_description_open_song_library
@@ -185,6 +187,10 @@ enum class ShortcutAction(
         listOf(KeyChord.of(Key.K, ctrl = true, shift = true))),
     OPEN_CALENDAR_MANAGER(ShortcutScope.MENU, Res.string.shortcut_description_open_calendar_manager,
         listOf(KeyChord.of(Key.D, ctrl = true, shift = true))),
+    ZOOM_IN(ShortcutScope.MENU, Res.string.shortcut_description_zoom_in,
+        listOf(KeyChord.of(Key.Equals, ctrl = true))),
+    ZOOM_OUT(ShortcutScope.MENU, Res.string.shortcut_description_zoom_out,
+        listOf(KeyChord.of(Key.Minus, ctrl = true))),
     ADD_TO_SCHEDULE(ShortcutScope.MENU, Res.string.shortcut_description_add_to_schedule,
         listOf(KeyChord.of(Key.F2))),
     REMOVE_FROM_SCHEDULE(ShortcutScope.MENU, Res.string.shortcut_description_remove_from_schedule,

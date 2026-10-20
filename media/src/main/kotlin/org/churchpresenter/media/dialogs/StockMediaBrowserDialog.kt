@@ -59,7 +59,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.stock_photo_browse_photos_title
@@ -85,8 +84,7 @@ import org.churchpresenter.strings.generated.resources.stock_photo_show_key
 import org.churchpresenter.strings.generated.resources.stock_photo_source_pexels
 import org.churchpresenter.strings.generated.resources.stock_photo_source_pixabay
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.media.viewmodel.StockDownloadError
@@ -98,6 +96,7 @@ import org.jetbrains.skia.Image as SkiaImage
 import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private const val HALF_WIDTH = 0.5f
 private const val THUMB_ASPECT_W = 4f
@@ -146,11 +145,7 @@ fun StockMediaBrowserDialog(
     }
 
     val mainWindowState = LocalMainWindowState.current
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, 1100.dp, 800.dp),
-        width = 1100.dp,
-        height = 800.dp
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, 1100.dp, 800.dp)
 
     DialogWindow(
         onCloseRequest = onDismiss,
@@ -158,7 +153,7 @@ fun StockMediaBrowserDialog(
         title = stringResource(titleRes),
         resizable = true
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             StockMediaBrowserDialogContent(
                 titleRes = titleRes,
                 searchPlaceholderRes = searchPlaceholderRes,

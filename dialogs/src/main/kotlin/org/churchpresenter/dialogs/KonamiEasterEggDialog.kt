@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.konami_dialog_blessings
@@ -38,11 +37,11 @@ import org.churchpresenter.strings.generated.resources.konami_dialog_headline
 import org.churchpresenter.strings.generated.resources.konami_dialog_message
 import org.churchpresenter.strings.generated.resources.konami_dialog_title
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sin
 import kotlin.random.Random
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private const val WOBBLE_FREQUENCY = 20f
 private const val CONFETTI_HEIGHT_DIVISOR = 4
@@ -75,15 +74,11 @@ fun KonamiEasterEggDialog(
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, KONAMI_DIALOG_WIDTH, KONAMI_DIALOG_HEIGHT),
-            width = KONAMI_DIALOG_WIDTH,
-            height = KONAMI_DIALOG_HEIGHT
-        ),
+        state = rememberCenteredDialogState(mainWindowState, KONAMI_DIALOG_WIDTH, KONAMI_DIALOG_HEIGHT),
         title = stringResource(Res.string.konami_dialog_title),
         resizable = false
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background

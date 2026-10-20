@@ -56,10 +56,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.semantic
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.remote_api_calendar_enroll
@@ -97,6 +95,7 @@ import org.churchpresenter.strings.generated.resources.remote_client_label
 import org.churchpresenter.strings.generated.resources.remote_queue_waiting_many
 import org.churchpresenter.strings.generated.resources.remote_queue_waiting_one
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 fun resolveRemoteEventPresentation(
@@ -226,17 +225,13 @@ fun RemoteEventDialog(
     frame(
         DialogFrameSpec(
             onClose = onDeny,
-            state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, dialogWidth, presentation.dialogHeight),
-            width = dialogWidth,
-            height = presentation.dialogHeight
-        ),
+            state = rememberCenteredDialogState(mainWindowState, dialogWidth, presentation.dialogHeight),
             title = presentation.dialogTitle,
             resizable = false,
             alwaysOnTop = true,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             RemoteEventDialogContent(
                 event = event,
                 actionLabel = presentation.actionLabel,

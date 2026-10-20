@@ -22,7 +22,7 @@ import org.churchpresenter.sharedui.screenshot.PinnedFonts
  * The Customize Theme window, opened from View → Customize Theme…, in both themes.
  *
  * Shot through `CustomizeThemeContent` rather than the `DialogWindow` around it, which a headless
- * test cannot photograph, at the window's own 940x720 so what is reviewed is the size it opens at.
+ * test cannot photograph, at the window's own 940x760 so what is reviewed is the size it opens at.
  * The window itself is drawn in the theme in use — the stacked light and dark halves — while the
  * preview column on its right is drawn in the draft, which is the point of it.
  *

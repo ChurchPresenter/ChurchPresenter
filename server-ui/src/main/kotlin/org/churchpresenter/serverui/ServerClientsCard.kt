@@ -43,14 +43,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.server.DevicePermission
 import org.churchpresenter.server.DevicePermissions
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.allowed_clients_description
 import org.churchpresenter.strings.generated.resources.blocked_clients_description
@@ -77,6 +75,7 @@ import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 internal fun RemoteClientsCard(companionServer: CompanionServer, remoteClientManager: RemoteClientManager) {
@@ -319,11 +318,7 @@ internal fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: (
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 400.dp, 500.dp),
-            width = 400.dp,
-            height = 500.dp
-        ),
+        state = rememberCenteredDialogState(mainWindowState, 400.dp, 500.dp),
         title = stringResource(Res.string.connection_qr_title),
         resizable = false
     ) {

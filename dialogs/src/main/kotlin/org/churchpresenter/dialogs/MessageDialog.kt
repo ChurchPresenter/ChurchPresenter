@@ -2,7 +2,6 @@ package org.churchpresenter.dialogs
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -34,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.liveshow.Cue
@@ -42,7 +40,6 @@ import org.churchpresenter.settings.MessageTemplate
 import org.churchpresenter.settings.fillMessage
 import org.churchpresenter.settings.messageTokens
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.delete_saved_string
@@ -56,11 +53,12 @@ import org.churchpresenter.strings.generated.resources.message_text
 import org.churchpresenter.strings.generated.resources.message_text_hint
 import org.churchpresenter.strings.generated.resources.message_title
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 /**
  * Puts a message up (`docs/SHOW_CONTROL.md`, Messages): a saved one or one typed here, its
@@ -79,10 +77,10 @@ fun MessageDialog(
     frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(LocalMainWindowState.current, MESSAGE_DIALOG_WIDTH, MESSAGE_DIALOG_HEIGHT),
-        width = MESSAGE_DIALOG_WIDTH,
-        height = MESSAGE_DIALOG_HEIGHT,
+    val dialogState = rememberCenteredDialogState(
+        LocalMainWindowState.current,
+        MESSAGE_DIALOG_WIDTH,
+        MESSAGE_DIALOG_HEIGHT,
     )
     frame(
         DialogFrameSpec(
@@ -91,7 +89,7 @@ fun MessageDialog(
             title = stringResource(Res.string.message_title),
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             MessageDialogContent(templates, onTemplatesChange, onAir, onGoLive, onClear, onDismiss)
         }
     }

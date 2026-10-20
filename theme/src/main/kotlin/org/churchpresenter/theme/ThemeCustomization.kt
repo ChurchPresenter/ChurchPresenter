@@ -20,6 +20,12 @@ const val DEFAULT_ROW_SPACING = 0.6f
 val UI_FONT_SCALES = listOf(0.9f, 1f, 1.15f, 1.3f)
 
 /**
+ * The interface sizes Ctrl + and Ctrl − step through, as multipliers of the display's own scale.
+ * The largest a screen can take is capped further by [maxUiScale].
+ */
+val UI_SCALES = listOf(0.8f, 0.9f, 1f, 1.1f, 1.25f, 1.5f, 1.75f, 2f)
+
+/**
  * What the user has chosen on top of a theme: the accent, base and optional per-role colours
  * [ThemeMode.CUSTOM] is generated from, and the font family and text size every theme is drawn with.
  *
@@ -45,6 +51,8 @@ data class ThemeCustomization(
     val selection: Color? = null,
     val fontFamily: FontFamily? = null,
     val fontScale: Float = 1f,
+    /** The interface size: everything in the operator's windows, not only text. See [ProvideUiScale]. */
+    val uiScale: Float = 1f,
     /** The padding around list rows' text, as a multiplier of the amount each row is written with. */
     val rowSpacing: Float = DEFAULT_ROW_SPACING,
 )

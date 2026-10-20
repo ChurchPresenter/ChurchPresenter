@@ -51,14 +51,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 internal fun StepDots(step: Int) {
@@ -157,11 +156,7 @@ internal fun CalendarDialog(
     }
     val isDark = MaterialTheme.colorScheme.background.luminance() < DARK_LUMINANCE
     val mainWindowState = LocalMainWindowState.current
-    val state = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, width, INITIAL_HEIGHT),
-        width = width,
-        height = INITIAL_HEIGHT,
-    )
+    val state = rememberCenteredDialogState(mainWindowState, width, INITIAL_HEIGHT)
     DialogWindow(onCloseRequest = onDismiss, state = state, title = title, resizable = false) {
         val density = LocalDensity.current
         AppWindowRoot(theme = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT) {

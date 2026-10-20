@@ -48,9 +48,10 @@ import org.churchpresenter.strings.generated.resources.license_decline_button
 import org.churchpresenter.strings.generated.resources.license_prompt
 import org.churchpresenter.strings.generated.resources.license_title
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.uiScaledWindowSize
 
 /** The EULA text shown in [LicenseDialog], read from the bundled resource file. */
 internal suspend fun loadEulaText(): String = AppRes.readBytes("files/eula.txt").toString(Charsets.UTF_8)
@@ -88,8 +89,7 @@ fun LicenseDialog(
     if (!isVisible) return
 
     val windowState = rememberWindowState(
-        width = 760.dp,
-        height = 600.dp,
+        size = uiScaledWindowSize(760.dp, 600.dp),
         position = WindowPosition(Alignment.Center)
     )
 
@@ -105,7 +105,7 @@ fun LicenseDialog(
         onDecline
     ) {
         MacMenuBarActivationFix()
-        ProvideUiFontScale {
+        ProvideUiScale {
             LicenseDialogContent(licenseText = licenseText, onAccept = onAccept, onDecline = onDecline)
         }
     }

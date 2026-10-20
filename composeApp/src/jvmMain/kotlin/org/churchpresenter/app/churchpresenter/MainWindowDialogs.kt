@@ -122,12 +122,14 @@ internal fun MainWindowScope.SettingsDialogs() {
                     customThemeColors = choice.colors,
                     uiFontFamily = choice.fontFamily,
                     uiFontScale = choice.fontScale,
+                    uiScale = choice.uiScale,
                     uiRowSpacing = choice.rowSpacing,
                 )
                 settingsManager.saveSettings(appSettings)
-                onThemeCustomizationChange(themeCustomizationFrom(appSettings))
+                onThemeCustomizationChange(themeCustomizationFrom(appSettings, screenMaxUiScale(window)))
             },
-            onDismiss = { showCustomizeThemeDialog = false; dialogDismissSignal++ }
+            onDismiss = { showCustomizeThemeDialog = false; dialogDismissSignal++ },
+            maxUiScale = screenMaxUiScale(window),
         )
     }
 }

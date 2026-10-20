@@ -213,7 +213,7 @@ class DialogViewportTest {
     }
 
     @Test
-    fun `CustomizeTheme content fits its 940x720 window`() =
+    fun `CustomizeTheme content fits its 940x760 window`() =
         fits(CUSTOMIZE_THEME_DIALOG_WIDTH, CUSTOMIZE_THEME_DIALOG_HEIGHT) { customizeThemeContent() }
 
     @Test

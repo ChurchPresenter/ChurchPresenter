@@ -46,7 +46,7 @@ Corollaries:
 | `ThemeManager.kt` | `ThemeMode` (the fixed palettes plus `SYSTEM` and `CUSTOM`), `ThemeManager`, `LocalThemeManager`/`ProvideThemeManager`/`rememberThemeManager`, and `themeFromSettings(saved)` |
 | `ThemeCustomization.kt` | `ThemeCustomization` (accent, light/dark base, the optional background/text/secondary/selection/success/warning/error colours, UI font family, UI font scale, list-row spacing — the Margin), `LocalThemeCustomization`, `customColorScheme(custom)` — the HSL-generated palette behind `ThemeMode.CUSTOM` — `customSemanticColorsFor(custom)` `UI_FONT_SCALES` and `DEFAULT_ROW_SPACING` (Normal) |
 | `AppShape.kt` | `AppShape(...)` — the app's corner: a `RoundedCornerShape` at `CORNER_SCALE` of the radius written. Percent corners are not scaled, so a pill stays a pill. Plain circular corners on purpose — a squircle was tried and drew animated screens about four times slower (see the constant's KDoc) |
-| `UiFontScale.kt` | `ProvideUiFontScale` — the UI text size as a font scale on `LocalDensity`, applied once per window |
+| `UiScale.kt` | `ProvideUiScale` — the interface size and UI text size on `LocalDensity`, applied once per window; the Ctrl +/− steps and the screen's cap |
 | `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, staged…) derived per scheme — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
 | `AppThemeWrapper.kt` | The one-call wrapper (`ProvideThemeManager` + `ChurchPresenterTheme`) used by app entry points, previews and screenshot tests |
 
@@ -75,12 +75,13 @@ The generator's guarantees are what make an operator's five-minutes-before-servi
   a yellow or cyan accent is bright even at the fixed lightness.
 - Unpicked error and status colours, and the tooltip pair, come from the Light or Dark preset.
 
-`ChurchPresenterTheme` applies the customization's font family (through the typography) and its font
-scale — through `ProvideUiFontScale`, on `LocalDensity`, so hard-coded `sp` sizes scale too — to
+`ChurchPresenterTheme` applies the customization's font family (through the typography) and its
+interface size and font scale — through `ProvideUiScale`, on `LocalDensity`, so hard-coded `dp` and
+`sp` sizes scale too — to
 every theme. Each window starts from the display's density, so a dialog that opens its own window
-without going through the theme wraps its body in `ProvideUiFontScale`; a second call in the same
+without going through the theme wraps its body in `ProvideUiScale`; a second call in the same
 window is a no-op, so nesting never scales twice. **Output windows never call it**: the audience's
-screen does not follow the operator's text size.
+screen does not follow the operator's interface or text size.
 
 Adding a theme means: a `ColorScheme` in `Theme.kt`, an entry in `ThemeMode`, a branch in
 `colorSchemeFor`, and whatever `SemanticColorsTest`/`ThemeSurfaceRampTest` assert about ramps and

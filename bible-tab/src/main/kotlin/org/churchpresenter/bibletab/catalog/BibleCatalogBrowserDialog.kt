@@ -45,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_catalog_attribution
 import org.churchpresenter.strings.generated.resources.bible_catalog_done
@@ -62,15 +61,15 @@ import org.churchpresenter.strings.generated.resources.bible_catalog_title
 import org.churchpresenter.strings.generated.resources.bible_catalog_source_beblia
 import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.bibleformats.catalog.BebliaSource
 import org.churchpresenter.bibleformats.catalog.BibleModule
 import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.EBibleSource
 import org.churchpresenter.bibleformats.catalog.ZefaniaSource
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 fun BibleCatalogBrowserDialog(
@@ -94,11 +93,7 @@ fun BibleCatalogBrowserDialog(
     }
 
     val mainWindowState = LocalMainWindowState.current
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, 860.dp, 780.dp),
-        width = 860.dp,
-        height = 780.dp
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, 860.dp, 780.dp)
 
     DialogWindow(
         onCloseRequest = onDismiss,
@@ -106,7 +101,7 @@ fun BibleCatalogBrowserDialog(
         title = stringResource(Res.string.bible_catalog_title),
         resizable = true
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             // This window's own spotlight: Wick's "add a Bible translation" tour rings its list.
             LocalSpotlightHost.current(Modifier.fillMaxSize()) {
                 BibleCatalogBrowserDialogContent(

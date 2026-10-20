@@ -30,11 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.about_copyright
@@ -68,6 +66,7 @@ import kotlin.io.path.writeText
 import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private const val GRADIENT_DARKEN = 0.45f
 
@@ -88,11 +87,7 @@ fun AboutDialog(
     frame(
         DialogFrameSpec(
             onClose = onDismiss,
-            state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT),
-            width = ABOUT_DIALOG_WIDTH,
-            height = ABOUT_DIALOG_HEIGHT
-        ),
+            state = rememberCenteredDialogState(mainWindowState, ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT),
             title = stringResource(Res.string.about_title),
             resizable = false,
         ),

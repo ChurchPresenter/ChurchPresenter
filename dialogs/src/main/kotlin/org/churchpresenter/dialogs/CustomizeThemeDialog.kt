@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.apply
 import org.churchpresenter.strings.generated.resources.cancel
@@ -75,7 +74,6 @@ import org.churchpresenter.strings.generated.resources.customize_theme_warning
 import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.strings.generated.resources.preview
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.sharedui.composables.SettingsSection
@@ -87,6 +85,11 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.LocalThemeCustomization
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.UI_FONT_SCALES
+import org.churchpresenter.strings.generated.resources.customize_theme_interface_size
+import kotlin.math.roundToInt
+import kotlin.math.abs
+import org.churchpresenter.theme.uiScaleSteps
+import org.churchpresenter.theme.UI_SCALES
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedButton
@@ -97,6 +100,7 @@ import org.churchpresenter.theme.customColorScheme
 import org.churchpresenter.theme.customSemanticColorsFor
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private val PREVIEW_COLUMN_WIDTH = 320.dp
 private val SECTION_GAP = 8.dp
@@ -138,14 +142,16 @@ fun CustomizeThemeDialog(
     onDismiss: () -> Unit,
     /** The window it opens in -- see [DialogFrame]. */
     frame: DialogFrame = appDialogFrame,
+    /** The largest interface size the main window's screen can take; larger steps are not offered. */
+    maxUiScale: Float = UI_SCALES.last(),
 ) {
     if (!isVisible) return
 
     val mainWindowState = LocalMainWindowState.current
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, CUSTOMIZE_THEME_DIALOG_WIDTH, CUSTOMIZE_THEME_DIALOG_HEIGHT),
-        width = CUSTOMIZE_THEME_DIALOG_WIDTH,
-        height = CUSTOMIZE_THEME_DIALOG_HEIGHT,
+    val dialogState = rememberCenteredDialogState(
+        mainWindowState,
+        CUSTOMIZE_THEME_DIALOG_WIDTH,
+        CUSTOMIZE_THEME_DIALOG_HEIGHT,
     )
 
     frame(
@@ -163,6 +169,7 @@ fun CustomizeThemeDialog(
                 currentTheme = currentTheme,
                 initial = initial,
                 previewDensity = windowDensity,
+                maxUiScale = maxUiScale,
                 onApply = onApply,
                 onDismiss = onDismiss,
             )
@@ -177,6 +184,7 @@ internal fun CustomizeThemeContent(
     previewDensity: Density,
     onApply: (ThemeCustomizationChoice) -> Unit,
     onDismiss: () -> Unit,
+    maxUiScale: Float = UI_SCALES.last(),
 ) {
     var draft by remember { mutableStateOf(initial) }
     val defaultFontLabel = stringResource(Res.string.customize_theme_font_default)
@@ -194,11 +202,16 @@ internal fun CustomizeThemeContent(
                 ) {
                     ColorsSection(draft = draft, onChange = { draft = it })
                     TextSection(
+                        sizes = UiSizes(
+                            fontScale = draft.fontScale,
+                            uiScale = draft.uiScale,
+                            uiScales = uiScaleSteps(maxUiScale),
+                        ),
                         fontFamily = draft.fontFamily,
-                        fontScale = draft.fontScale,
                         defaultLabel = defaultFontLabel,
                         onFontChange = { draft = draft.copy(fontFamily = if (it == defaultFontLabel) "" else it) },
                         onScaleChange = { draft = draft.copy(fontScale = it) },
+                        onUiScaleChange = { draft = draft.copy(uiScale = it) },
                         rowSpacing = draft.rowSpacing,
                         onRowSpacingChange = { draft = draft.copy(rowSpacing = it) },
                     )
@@ -412,13 +425,20 @@ private fun OptionalColorCell(entry: OptionalColor, modifier: Modifier, onChange
     }
 }
 
+/** The two sizes the Text section sets, and the interface sizes the screen allows. */
+private class UiSizes(val fontScale: Float, val uiScale: Float, val uiScales: List<Float>)
+
+private const val PERCENT = 100
+private const val SCALE_MATCH = 0.001f
+
 @Composable
 private fun TextSection(
+    sizes: UiSizes,
     fontFamily: String,
-    fontScale: Float,
     defaultLabel: String,
     onFontChange: (String) -> Unit,
     onScaleChange: (Float) -> Unit,
+    onUiScaleChange: (Float) -> Unit,
     rowSpacing: ListRowSpacing,
     onRowSpacingChange: (ListRowSpacing) -> Unit,
 ) {
@@ -442,7 +462,7 @@ private fun TextSection(
                 SegmentTrack(modifier = Modifier.weight(1f).height(SEGMENT_TRACK_HEIGHT)) {
                     UI_FONT_SCALES.forEachIndexed { index, scale ->
                         SegmentTrackItem(
-                            selected = fontScale == scale,
+                            selected = sizes.fontScale == scale,
                             onClick = { onScaleChange(scale) },
                             modifier = Modifier.weight(1f).fillMaxHeight(),
                         ) {
@@ -451,6 +471,20 @@ private fun TextSection(
                                 color = LocalContentColor.current,
                                 maxLines = 1,
                             )
+                        }
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FieldLabel(stringResource(Res.string.customize_theme_interface_size))
+                SegmentTrack(modifier = Modifier.weight(1f).height(SEGMENT_TRACK_HEIGHT)) {
+                    sizes.uiScales.forEach { scale ->
+                        SegmentTrackItem(
+                            selected = abs(sizes.uiScale - scale) < SCALE_MATCH,
+                            onClick = { onUiScaleChange(scale) },
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        ) {
+                            Text("${(scale * PERCENT).roundToInt()}%", color = LocalContentColor.current, maxLines = 1)
                         }
                     }
                 }

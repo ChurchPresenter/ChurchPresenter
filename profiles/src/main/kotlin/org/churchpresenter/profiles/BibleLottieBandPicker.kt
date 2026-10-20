@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_lottie_gen_window_title
 import org.churchpresenter.strings.generated.resources.bible_font
@@ -29,7 +28,6 @@ import org.churchpresenter.strings.generated.resources.lower_third_animation_fil
 import org.churchpresenter.strings.generated.resources.lower_third_animation_generate
 import org.churchpresenter.strings.generated.resources.lower_third_animation_none
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.sharedui.filechooser.FileChooser
@@ -45,13 +43,14 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.presenter.invalidateBibleLottieTemplates
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.churchpresenter.theme.components.DropdownSelector
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.math.roundToInt
 import org.churchpresenter.sharedui.utils.previewOutputSize
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 private val PICKER_ROW_HEIGHT = 32.dp
 private val GENERATOR_WINDOW_WIDTH = 1240.dp
@@ -166,11 +165,7 @@ internal fun BibleLottieGeneratorWindow(
     onClose: () -> Unit,
 ) {
     val mainWindowState = LocalMainWindowState.current
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, GENERATOR_WINDOW_WIDTH, GENERATOR_WINDOW_HEIGHT),
-        width = GENERATOR_WINDOW_WIDTH,
-        height = GENERATOR_WINDOW_HEIGHT,
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, GENERATOR_WINDOW_WIDTH, GENERATOR_WINDOW_HEIGHT)
     val imageFilter = stringResource(Res.string.image_files_filter)
     val fonts = rememberSystemFonts()
     val fontLabel = stringResource(Res.string.bible_font)
@@ -180,7 +175,7 @@ internal fun BibleLottieGeneratorWindow(
         title = stringResource(Res.string.bible_lottie_gen_window_title),
         resizable = true,
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             BibleLottieGenApp(
                 outputDir = outputDir,
                 onFileSaved = onSaved,

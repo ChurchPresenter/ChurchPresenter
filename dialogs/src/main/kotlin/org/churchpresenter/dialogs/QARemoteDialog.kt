@@ -45,7 +45,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.qa_admin_panel
@@ -70,19 +69,19 @@ import org.churchpresenter.strings.generated.resources.qa_server_hint
 import org.churchpresenter.strings.generated.resources.qa_starting_tunnel
 import org.churchpresenter.strings.generated.resources.qa_submit_questions
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.sharedui.utils.generateQRCodeBitmap
 import org.churchpresenter.server.TunnelStatus
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.theme.ProvideUiScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import java.net.URLEncoder
+import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
 fun QARemoteDialog(
@@ -109,11 +108,7 @@ fun QARemoteDialog(
     val maxDialogHeight = 900.dp
     val density = LocalDensity.current
     val scrollState = rememberScrollState()
-    val dialogState = rememberDialogState(
-        position = centeredOnMainWindow(mainWindowState, dialogWidth, dialogHeight),
-        width = dialogWidth,
-        height = dialogHeight
-    )
+    val dialogState = rememberCenteredDialogState(mainWindowState, dialogWidth, dialogHeight)
 
     // Grow the window (never shrink) when content overflows the current viewport, instead of
     // relying on a single guessed-at fixed height — the scroll stays as a fallback beyond the cap.
@@ -135,7 +130,7 @@ fun QARemoteDialog(
             resizable = false,
         ),
     ) {
-        ProvideUiFontScale {
+        ProvideUiScale {
             // This window's own spotlight: Wick's Q&A tip rings Enable Public Access.
             GuideSpotlightHost(Modifier.fillMaxSize()) {
                 QARemoteContent(

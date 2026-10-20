@@ -8,6 +8,7 @@ import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.settings.ListRowSpacing
 import org.churchpresenter.theme.DEFAULT_ROW_SPACING
 import org.churchpresenter.theme.DefaultCustomAccent
+import org.churchpresenter.theme.UI_SCALES
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -126,5 +127,23 @@ class ThemeCustomizationSettingsTest {
         assertEquals(cpColorToHex(DefaultCustomAccent), customAccentHex(AppSettings()))
         assertEquals(cpColorToHex(DefaultCustomAccent), customAccentHex(AppSettings(customThemeAccent = "zz")))
         assertEquals("#AA3355", customAccentHex(AppSettings(customThemeAccent = "#AA3355")))
+    }
+
+    @Test
+    fun `the saved interface size is handed to the theme`() {
+        assertEquals(1f, themeCustomizationFrom(AppSettings()).uiScale, "nothing saved is the default size")
+        assertEquals(1.5f, themeCustomizationFrom(AppSettings(uiScale = 1.5f)).uiScale)
+    }
+
+    @Test
+    fun `an interface size outside the offered range is clamped into it`() {
+        assertEquals(UI_SCALES.last(), themeChoiceFrom(AppSettings(uiScale = 9f), useCustomColors = true).uiScale)
+        assertEquals(UI_SCALES.first(), themeChoiceFrom(AppSettings(uiScale = 0.1f), useCustomColors = true).uiScale)
+    }
+
+    @Test
+    fun `a size larger than the screen allows opens at the largest it does`() {
+        assertEquals(1.25f, themeCustomizationFrom(AppSettings(uiScale = 2f), maxUiScale = 1.25f).uiScale)
+        assertEquals(0.9f, themeCustomizationFrom(AppSettings(uiScale = 0.9f), maxUiScale = 1.25f).uiScale)
     }
 }
