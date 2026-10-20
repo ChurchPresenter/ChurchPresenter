@@ -119,7 +119,7 @@ internal fun ExportTab(
 @Composable
 private fun LogoRow(path: String, onChoose: () -> Unit, onRemove: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
-    val preview = remember(path) { path.takeIf { it.isNotBlank() }?.let { thumbnailOf(File(it)) } }
+    val preview = rememberThumbnail(path).value
     SettingCard {
         Box(
             Modifier

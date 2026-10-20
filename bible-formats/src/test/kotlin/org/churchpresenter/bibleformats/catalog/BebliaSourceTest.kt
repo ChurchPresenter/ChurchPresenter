@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import java.security.cert.CertificateException
 
 /**
  * Installing a translation from the Holy Bible XML archive.
@@ -68,6 +69,9 @@ class BebliaSourceTest {
         httpServingBytes(body.toByteArray(Charsets.UTF_8), status)
 
     private fun httpFailing() = HttpClient(MockEngine { throw java.io.IOException("no route to host") })
+
+    /** What ktor CIO's own TLS raises for a certificate an inspecting proxy re-signed: raw, not an SSLException. */
+    private fun httpUntrusted() = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
 
     /** Answers with a promised length and then delivers none of it — the shape the Sentry report had. */
     private fun httpNeverDelivering(body: ByteArray) = HttpClient(
@@ -236,6 +240,11 @@ class BebliaSourceTest {
     @Test
     fun `an unreachable host is reported as a network error`() {
         assertIs<BibleInstallOutcome.NetworkError>(install(httpFailing()))
+    }
+
+    @Test
+    fun `a download whose certificate is rejected is reported as a network error`() {
+        assertIs<BibleInstallOutcome.NetworkError>(install(httpUntrusted()))
     }
 
     @Test

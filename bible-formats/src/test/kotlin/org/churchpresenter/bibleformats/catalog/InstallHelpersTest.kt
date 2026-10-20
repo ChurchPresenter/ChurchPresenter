@@ -17,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import java.security.cert.CertificateException
 
 /**
  * The small decisions the install pipelines are built from: is this file a Bible module, what comes
@@ -344,6 +345,16 @@ class InstallHelpersTest {
         assertTrue(isEnvironment(java.net.SocketException("Connection reset")))
         assertTrue(isEnvironment(SocketTimeoutException("timed out")))
         assertTrue(isEnvironment(SSLException("bad certificate")))
+    }
+
+    @Test
+    fun `a certificate the JVM will not trust is the operator's network, wrapped or not`() {
+        // ktor CIO's own TLS raises it raw rather than as an SSLException: an HTTPS-inspecting
+        // proxy or antivirus re-signing the traffic, which is the church's network, not a defect.
+        val rejected = CertificateException("PKIX path building failed")
+
+        assertTrue(isEnvironment(rejected))
+        assertTrue(isEnvironment(IOException("request failed", rejected)), "ktor wraps, so the cause chain counts")
     }
 
     @Test

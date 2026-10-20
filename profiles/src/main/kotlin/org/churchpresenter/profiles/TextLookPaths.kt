@@ -1,7 +1,6 @@
 package org.churchpresenter.profiles
 
-import org.churchpresenter.settings.OutputProfile
-import org.churchpresenter.settings.settingPaths
+import kotlinx.serialization.json.JsonElement
 
 /** One row's worth of a [TextLook]: what a row of the Text group changes. */
 internal enum class TextLookField {
@@ -48,21 +47,24 @@ internal fun TextLook.perturbed(field: TextLookField): TextLook = when (field) {
 }
 
 /**
- * Where [write] stores each field of [look] on [profile], found by writing each one changed and
- * seeing which values move -- the Bible and song styles keep one look under a hundred different
- * names, and this is the one place that has to know none of them.
+ * Where each field of [look] is stored, found by writing each one changed and seeing which values
+ * move -- the Bible and song styles keep one look under a hundred different names, and this is the
+ * one place that has to know none of them.
+ *
+ * [pathsWith] is the profile section the look lives in with a look written into it, as paths
+ * (`SongSettings.profilePaths`): only that section is flattened per probe, never the whole profile,
+ * and none of the throwaway copies is kept in the profile path cache.
  *
  * An outline or a highlight is one control over a whole object, so its row owns the object rather
  * than the one field the probe happened to change.
  */
 internal fun probeTextLookPaths(
-    profile: OutputProfile,
     look: TextLook,
-    write: (OutputProfile, TextLook) -> OutputProfile,
+    pathsWith: (TextLook) -> Map<String, JsonElement>,
 ): TextLookPaths {
-    val before = write(profile, look).settingPaths()
+    val before = pathsWith(look)
     val byField = TextLookField.entries.associateWith { field ->
-        val after = write(profile, look.perturbed(field)).settingPaths()
+        val after = pathsWith(look.perturbed(field))
         val moved = after.keys.filter { before[it] != after[it] }
         if (field == TextLookField.OUTLINE || field == TextLookField.BACKDROP) {
             moved.map { it.substringBeforeLast('.') }.distinct()

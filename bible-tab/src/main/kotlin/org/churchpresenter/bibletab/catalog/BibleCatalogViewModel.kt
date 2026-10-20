@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +17,8 @@ import org.churchpresenter.bibleformats.catalog.BibleInstallOutcome
 import org.churchpresenter.bibleformats.catalog.BibleModule
 import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.InstallPhase
+import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEventStore
@@ -56,7 +59,34 @@ class BibleCatalogViewModel(
     private val usage: UsageEventStore = UsageEvents,
 ) {
 
-    private val viewModelScope = CoroutineScope(dispatcher + SupervisorJob())
+    /**
+     * The backstop for a failure a source let escape. Every fetch and install is meant to come back
+     * as an outcome, but one that did not — an untrusted certificate ktor CIO raised raw rather
+     * than as an `SSLException` (CHURCH-PRESENTER-DESKTOP-E3) — left this scope with no handler,
+     * reached the app's uncaught handler and ended the app from the download browser. Here it is
+     * reported as a warning instead, and whatever was in flight stops spinning with an error the
+     * dialog already knows how to say.
+     */
+    private val escapedFailure = CoroutineExceptionHandler { _, e ->
+        Log.error("BibleCatalog", "${source.sourceId} failed outside its outcome: $e")
+        CrashReporter.reportWarning(
+            "Bible catalogue failed outside its outcome",
+            throwable = e,
+            tags = mapOf("subsystem" to "bible_catalog", "source" to source.sourceId.name.lowercase()),
+        )
+        if (isLoading) {
+            isLoading = false
+            catalogError = BibleCatalogError.FAILURE
+        }
+        if (installingKey != null) {
+            installingKey = null
+            installPhase = null
+            installProgress = 0f
+            installError = BibleDownloadError.NETWORK_ERROR
+        }
+    }
+
+    private val viewModelScope = CoroutineScope(dispatcher + SupervisorJob() + escapedFailure)
 
     /**
      * One entry per language present in the catalogue, for the filter dropdown.

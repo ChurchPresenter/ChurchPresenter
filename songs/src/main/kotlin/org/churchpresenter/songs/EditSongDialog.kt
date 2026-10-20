@@ -170,7 +170,10 @@ internal fun EditSongContent(
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
-    val isDuplicate = remember(state.number, state.title, state.songbook) { state.isDuplicateIn(existingSongs) }
+    val duplicates = remember(existingSongs) { SongDuplicateIndex(existingSongs) }
+    val isDuplicate = remember(duplicates, state.number, state.title, state.songbook) {
+        state.isDuplicateIn(duplicates)
+    }
 
     AppWindowRoot(theme = theme) {
         Surface(

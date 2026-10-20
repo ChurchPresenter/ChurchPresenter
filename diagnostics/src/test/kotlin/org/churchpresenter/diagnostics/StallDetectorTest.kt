@@ -126,4 +126,48 @@ class StallDetectorTest {
 
         assertTrue(lines.isEmpty())
     }
+
+    @Test
+    fun `a stall is sampled again every interval while it lasts, and no more than the cap`() {
+        var taken = 0
+        val stalls = mutableListOf<Stall>()
+        val sampling = StallDetector(
+            budgetMs = { 100 },
+            stack = { taken++; listOf(StackTraceElement("Compose", "step$taken", null, -1)) },
+            report = { },
+            onStall = { stalls += it },
+        )
+        sampling.posted(0)
+        assertEquals(20, sampling.pollDelayMs, "a fifth of the budget while nothing is stuck")
+        sampling.poll(101)
+        sampling.poll(120)
+        assertEquals(1, taken, "not again before the interval")
+        sampling.poll(101 + StallDetector.SAMPLE_INTERVAL_MS)
+        assertEquals(2, taken)
+
+        sampling.answered(200)
+        val stall = stalls.single()
+        assertEquals(listOf("step1"), stall.frames.map { it.methodName }, "the stack from when the budget ran out")
+        assertEquals(listOf("step1", "step2"), stall.samples.map { it.single().methodName })
+
+        sampling.posted(1_000)
+        var now = 1_101L
+        repeat(StallDetector.MAX_SAMPLES + 10) {
+            sampling.poll(now)
+            now += StallDetector.SAMPLE_INTERVAL_MS
+        }
+        sampling.answered(now)
+        assertEquals(StallDetector.MAX_SAMPLES, stalls.last().samples.size, "a long stall keeps a bounded count")
+    }
+
+    @Test
+    fun `a stall being sampled is polled at least every sampling interval`() {
+        val slow = StallDetector(budgetMs = { 1_000 }, stack = { listOf(frame) }, report = { })
+        slow.posted(0)
+        assertEquals(200, slow.pollDelayMs)
+
+        slow.poll(1_001)
+
+        assertEquals(StallDetector.SAMPLE_INTERVAL_MS, slow.pollDelayMs)
+    }
 }

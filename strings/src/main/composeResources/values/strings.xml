@@ -359,6 +359,8 @@
     <string name="no_files_detected">No files detected</string>
     <string name="scanning_directory">Scanning folder…</string>
     <string name="detected_files_label">Detected:</string>
+    <string name="detected_files_more">%1$d more</string>
+    <string name="detected_files_less">Show less</string>
     <string name="position_on_screen">Position on screen:</string>
     <string name="position_showing_at">Showing at</string>
     <string name="top_left">Top Left</string>

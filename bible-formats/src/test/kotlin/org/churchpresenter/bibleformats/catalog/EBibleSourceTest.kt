@@ -21,6 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import java.security.cert.CertificateException
 
 /**
  * Listing eBible.org's catalogue and installing a translation from it.
@@ -79,6 +80,9 @@ class EBibleSourceTest {
     )
 
     private fun httpFailing() = HttpClient(MockEngine { throw java.io.IOException("no route to host") })
+
+    /** What ktor CIO's own TLS raises for a certificate an inspecting proxy re-signed: raw, not an SSLException. */
+    private fun httpUntrusted() = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
 
     private fun fetch(http: HttpClient, now: Long = 1_000L) = runBlocking {
         EBibleSource.fetchCatalog(url = url, http = http, cacheFile = cacheFile, nowMillis = now)
@@ -401,6 +405,24 @@ class EBibleSourceTest {
     }
 
     @Test
+    fun `a certificate the JVM will not trust is a network error, not a crash`() {
+        // Uncaught, it left the download browser's scope and the uncaught handler ended the app.
+        assertEquals(BibleCatalogOutcome.NetworkError, fetch(httpUntrusted()))
+    }
+
+    @Test
+    fun `a certificate the JVM will not trust falls back to the cached catalogue`() {
+        fetch(httpServing(csv("eng,engbsb,Berean,,public domain,True,True,2024-01-01")), now = 1_000L)
+        EBibleSource.clearMemoryCache()
+        val muchLater = 1_000L + 30L * 24 * 60 * 60 * 1000
+
+        val offline = assertIs<BibleCatalogOutcome.Success>(fetch(httpUntrusted(), now = muchLater))
+
+        assertTrue(offline.stale)
+        assertEquals(1, offline.modules.size)
+    }
+
+    @Test
     fun `a server error with no cache is a failure`() {
         assertEquals(
             BibleCatalogOutcome.Failure,
@@ -646,6 +668,12 @@ class EBibleSourceTest {
     @Test
     fun `an unreachable host is a network error`() {
         assertEquals(BibleInstallOutcome.NetworkError, install(httpFailing()))
+    }
+
+    @Test
+    fun `a download whose certificate is rejected is a network error`() {
+        assertEquals(BibleInstallOutcome.NetworkError, install(httpUntrusted()))
+        assertTrue(targetDir.listFiles()!!.isEmpty())
     }
 
     @Test

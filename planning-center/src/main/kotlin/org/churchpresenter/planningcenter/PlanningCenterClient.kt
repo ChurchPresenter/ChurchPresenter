@@ -29,6 +29,7 @@ import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.io.IOException
 import java.nio.channels.UnresolvedAddressException
+import java.security.GeneralSecurityException
 
 /**
  * OAuth2 + REST client for Planning Center Online's Services/People APIs. Each church registers
@@ -38,8 +39,11 @@ import java.nio.channels.UnresolvedAddressException
  * Planning Center.
  *
  * Every request function turns a failure into a value rather than throwing, and each catches the
- * three things that actually happen, in this order:
+ * four things that actually happen, in this order:
  *  - [IOException] — refused, reset or timed out. A retry is worth offering: `NetworkError`.
+ *  - [GeneralSecurityException] — a certificate the JVM will not trust, from an HTTPS-inspecting
+ *    proxy or antivirus. ktor CIO's own TLS raises it raw rather than as an `SSLException`, so the
+ *    clause above never sees it; uncaught, it ends the app. Also `NetworkError`.
  *  - [UnresolvedAddressException] — no DNS answer, which is what being offline looks like. It is
  *    an [IllegalArgumentException] subclass, so it MUST be caught before the clause below or an
  *    offline operator is told their plan is malformed.
@@ -97,7 +101,7 @@ object PlanningCenterClient {
     private val PCO_TAGS = mapOf("subsystem" to "planning_center")
 
     /**
-     * Reports [e] and hands back [outcome], so a catch clause stays one line and the three-clause
+     * Reports [e] and hands back [outcome], so a catch clause stays one line and the four-clause
      * shape above reads as the mapping it is rather than as thirty lines of reporting.
      */
     private fun <T> reported(message: String, e: Throwable, outcome: T): T {
@@ -203,6 +207,8 @@ object PlanningCenterClient {
             reported("Planning Center token request failed", e, TokenOutcome.NetworkError)
         } catch (e: UnresolvedAddressException) {
             reported("Planning Center token request failed", e, TokenOutcome.NetworkError)
+        } catch (e: GeneralSecurityException) {
+            reported("Planning Center token request failed", e, TokenOutcome.NetworkError)
         } catch (e: IllegalArgumentException) {
             reported("Planning Center token response could not be parsed", e, TokenOutcome.Failure)
         }
@@ -247,6 +253,8 @@ object PlanningCenterClient {
         } catch (e: IOException) {
             reported("Planning Center /people/v2/me failed", e, PersonOutcome.NetworkError)
         } catch (e: UnresolvedAddressException) {
+            reported("Planning Center /people/v2/me failed", e, PersonOutcome.NetworkError)
+        } catch (e: GeneralSecurityException) {
             reported("Planning Center /people/v2/me failed", e, PersonOutcome.NetworkError)
         } catch (e: IllegalArgumentException) {
             reported("Planning Center /people/v2/me response could not be parsed", e, PersonOutcome.Failure)
@@ -342,6 +350,8 @@ object PlanningCenterClient {
             reported("Planning Center service_types request failed", e, ServiceTypesOutcome.NetworkError)
         } catch (e: UnresolvedAddressException) {
             reported("Planning Center service_types request failed", e, ServiceTypesOutcome.NetworkError)
+        } catch (e: GeneralSecurityException) {
+            reported("Planning Center service_types request failed", e, ServiceTypesOutcome.NetworkError)
         } catch (e: IllegalArgumentException) {
             reported("Planning Center service_types response could not be parsed", e, ServiceTypesOutcome.Failure)
         }
@@ -386,6 +396,8 @@ object PlanningCenterClient {
         } catch (e: IOException) {
             reported("Planning Center plans request failed", e, PlansOutcome.NetworkError)
         } catch (e: UnresolvedAddressException) {
+            reported("Planning Center plans request failed", e, PlansOutcome.NetworkError)
+        } catch (e: GeneralSecurityException) {
             reported("Planning Center plans request failed", e, PlansOutcome.NetworkError)
         } catch (e: IllegalArgumentException) {
             reported("Planning Center plans response could not be parsed", e, PlansOutcome.Failure)
@@ -456,6 +468,8 @@ object PlanningCenterClient {
                 reported("Planning Center plan items request failed", e, PlanItemsOutcome.NetworkError)
             } catch (e: UnresolvedAddressException) {
                 reported("Planning Center plan items request failed", e, PlanItemsOutcome.NetworkError)
+            } catch (e: GeneralSecurityException) {
+                reported("Planning Center plan items request failed", e, PlanItemsOutcome.NetworkError)
             } catch (e: IllegalArgumentException) {
                 reported("Planning Center plan items response could not be parsed", e, PlanItemsOutcome.Failure)
             }
@@ -498,6 +512,8 @@ object PlanningCenterClient {
             } catch (e: IOException) {
                 reported("Planning Center arrangement request failed", e, ArrangementOutcome.NetworkError)
             } catch (e: UnresolvedAddressException) {
+                reported("Planning Center arrangement request failed", e, ArrangementOutcome.NetworkError)
+            } catch (e: GeneralSecurityException) {
                 reported("Planning Center arrangement request failed", e, ArrangementOutcome.NetworkError)
             } catch (e: IllegalArgumentException) {
                 reported("Planning Center arrangement response could not be parsed", e, ArrangementOutcome.Failure)
@@ -574,6 +590,8 @@ object PlanningCenterClient {
             reported("Planning Center item attachments request failed", e, AttachmentsOutcome.NetworkError)
         } catch (e: UnresolvedAddressException) {
             reported("Planning Center item attachments request failed", e, AttachmentsOutcome.NetworkError)
+        } catch (e: GeneralSecurityException) {
+            reported("Planning Center item attachments request failed", e, AttachmentsOutcome.NetworkError)
         } catch (e: IllegalArgumentException) {
             reported("Planning Center item attachments response could not be parsed", e, AttachmentsOutcome.Failure)
         }
@@ -615,6 +633,8 @@ object PlanningCenterClient {
             } catch (e: IOException) {
                 reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
             } catch (e: UnresolvedAddressException) {
+                reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
+            } catch (e: GeneralSecurityException) {
                 reported("Planning Center attachment open failed", e, AttachmentUrlOutcome.Failure)
             } catch (e: IllegalArgumentException) {
                 reported(
@@ -664,6 +684,8 @@ object PlanningCenterClient {
             FileDownloadOutcome.Success(destination)
         } catch (e: IOException) {
             downloadFailed(url, e)
+        } catch (e: GeneralSecurityException) {
+            downloadFailed(url, e)
         } catch (e: IllegalArgumentException) {
             // No JSON is parsed here, so this is not a malformed body: it is a URL ktor could not
             // use — an unparseable one, or a host with no DNS answer (UnresolvedAddressException is
@@ -681,6 +703,8 @@ object PlanningCenterClient {
             val response = http.get(url)
             if (response.status.value in 200..299) response.body() else null
         } catch (_: IOException) {
+            null
+        } catch (_: GeneralSecurityException) {
             null
         } catch (_: IllegalArgumentException) {
             // Unreachable, unresolvable or not a URL at all. A missing preview is not worth
