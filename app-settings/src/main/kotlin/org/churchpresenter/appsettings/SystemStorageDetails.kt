@@ -3,8 +3,9 @@ package org.churchpresenter.appsettings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,17 +32,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_song_samples
 import org.churchpresenter.strings.generated.resources.bible_catalog_button
+import org.churchpresenter.strings.generated.resources.browse_directory
 import org.churchpresenter.strings.generated.resources.bible_catalog_folder_not_writable
 import org.churchpresenter.strings.generated.resources.convert
 import org.churchpresenter.strings.generated.resources.detected_files_label
+import org.churchpresenter.strings.generated.resources.detected_files_less
+import org.churchpresenter.strings.generated.resources.detected_files_more
 import org.churchpresenter.strings.generated.resources.file_not_supported_short
 import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.icons.generated.resources.ic_download
@@ -116,31 +123,56 @@ internal fun rememberSongScan(fileManager: FileManager, directory: String): Song
     return scan
 }
 
-/** The indented strip under a folder's row, where that folder reports on its own contents. */
+/**
+ * The indented strip under a folder's row, where that folder reports on its own contents: what it
+ * holds under the path field, its [action] under the Browse button ([actionStart], measured from
+ * the row; until it is known the action simply follows the chips), and anything [below] both.
+ */
 @Composable
-private fun StorageDetail(content: @Composable () -> Unit) {
+private fun StorageDetail(
+    actionStart: Dp?,
+    action: @Composable () -> Unit = {},
+    below: @Composable () -> Unit = {},
+    contents: @Composable () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = STORAGE_DETAIL_INDENT, end = 16.dp, bottom = 11.dp),
-    ) { content() }
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(STORAGE_ROW_GAP)) {
+            val width = actionStart?.let {
+                (it + STORAGE_ROW_PADDING - STORAGE_DETAIL_INDENT - STORAGE_ROW_GAP).coerceAtLeast(0.dp)
+            }
+            Box(
+                modifier = (if (width != null) Modifier.width(width) else Modifier.weight(1f, fill = false))
+                    .heightIn(min = DETAIL_ACTION_HEIGHT),
+                contentAlignment = Alignment.CenterStart,
+            ) { contents() }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { action() }
+        }
+        below()
+    }
 }
 
-/** A file the folder holds, named as it is on disk. */
+/** A row's Browse button, which reports where it starts so the detail strip below can line up with it. */
 @Composable
-private fun DetectedChip(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        fontFamily = FontFamily.Monospace,
-        color = MaterialTheme.colorScheme.onSurface,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
+internal fun BrowseButton(onClick: () -> Unit, onPlaced: (Dp) -> Unit) {
+    val density = LocalDensity.current
+    RaisedButton(
+        onClick = onClick,
         modifier = Modifier
-            .clip(AppShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-            .padding(horizontal = 8.dp, vertical = 3.dp),
-    )
+            .height(CONTROL_HEIGHT)
+            .onPlaced { onPlaced(with(density) { it.positionInParent().x.toDp() }) },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
+        shape = AppShape(8.dp),
+        contentPadding = PaddingValues(horizontal = 14.dp),
+    ) {
+        Text(text = stringResource(Res.string.browse_directory), style = MaterialTheme.typography.labelMedium)
+    }
 }
 
 /** The way out of an empty folder — fetch a Bible, drop in the sample songs. */
@@ -158,7 +190,7 @@ private fun DetailAction(
         enabled = enabled,
         shape = AppShape(9.dp),
         contentPadding = PaddingValues(horizontal = 13.dp),
-        modifier = modifier.height(30.dp),
+        modifier = modifier.height(DETAIL_ACTION_HEIGHT),
     ) {
         Icon(painter = painterResource(icon), contentDescription = null, modifier = Modifier.size(13.dp))
         Text(
@@ -188,29 +220,24 @@ private fun DetectedLabel(empty: Boolean) {
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun BibleStorageDetail(
     directory: String,
     files: MutableState<List<String>?>,
+    actionStart: Dp?,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     if (directory.isEmpty()) return
     val found = files.value
-    StorageDetail {
-        if (found == null) {
-            ScanningRow(stringResource(Res.string.scanning_directory))
-            return@StorageDetail
-        }
-        var showCatalog by remember(directory) { mutableStateOf(false) }
-        var notWritable by remember(directory) { mutableStateOf(false) }
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            DetectedLabel(empty = found.isEmpty())
-            found.forEach { DetectedChip(it) }
+    if (found == null) {
+        StorageDetail(actionStart) { ScanningRow(stringResource(Res.string.scanning_directory)) }
+        return
+    }
+    var showCatalog by remember(directory) { mutableStateOf(false) }
+    var notWritable by remember(directory) { mutableStateOf(false) }
+    StorageDetail(
+        actionStart = actionStart,
+        action = {
             // Offered only once a real folder is in place: downloads are written the moment they
             // finish, so there must be no doubt about where they are going.
             if (java.io.File(directory).isDirectory) {
@@ -232,65 +259,96 @@ internal fun BibleStorageDetail(
                     color = MaterialTheme.colorScheme.error,
                 )
             }
-        }
-        if (showCatalog) {
-            BibleCatalogBrowserDialog(
-                storageDirectory = directory,
-                onDismiss = { showCatalog = false },
-                onBibleInstalled = { fileName ->
-                    onSettingsChange { s -> s.withInstalledBible(fileName) }
-                    files.value = found + fileName
-                },
-            )
-        }
+        },
+    ) {
+        CollapsibleChipRow(
+            chips = found,
+            resetKey = directory,
+            lead = { DetectedLabel(empty = found.isEmpty()) },
+        )
+    }
+    if (showCatalog) {
+        BibleCatalogBrowserDialog(
+            storageDirectory = directory,
+            onDismiss = { showCatalog = false },
+            onBibleInstalled = { fileName ->
+                onSettingsChange { s -> s.withInstalledBible(fileName) }
+                files.value = found + fileName
+            },
+        )
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun SongsStorageDetail(directory: String, scan: SongScan) {
+internal fun SongsStorageDetail(directory: String, scan: SongScan, actionStart: Dp?) {
     if (directory.isEmpty()) return
-    StorageDetail {
-        if (scan.scanning) {
-            ScanningRow(stringResource(Res.string.scanning_directory))
-            return@StorageDetail
-        }
-        val samplesScope = rememberCoroutineScope()
-        var copyingSamples by remember { mutableStateOf(false) }
-        val samplePrompts = songSamplePrompts()
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            DetectedLabel(empty = scan.folders.isEmpty() && scan.unsupported.isEmpty())
-            scan.folders.forEach { (name, count) ->
-                DetectedChip(stringResource(Res.string.song_folder_with_count, name, count))
-            }
-            DetailAction(
-                stringResource(Res.string.add_song_samples),
-                IconRes.drawable.ic_add,
-                enabled = !copyingSamples,
+    if (scan.scanning) {
+        StorageDetail(actionStart) { ScanningRow(stringResource(Res.string.scanning_directory)) }
+        return
+    }
+    val samplesScope = rememberCoroutineScope()
+    var copyingSamples by remember { mutableStateOf(false) }
+    val samplePrompts = songSamplePrompts()
+    val folderChips = scan.folders.map { (name, count) ->
+        stringResource(Res.string.song_folder_with_count, name, count)
+    }
+    StorageDetail(
+        actionStart = actionStart,
+        action = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (samplePrompts.confirmOverwrite(directory)) {
-                    copyingSamples = true
-                    samplesScope.launch {
-                        val count = withContext(Dispatchers.IO) { copySongSamples(directory) }
-                        copyingSamples = false
-                        afterDispatch { samplePrompts.reportCopied(count) }
+                DetailAction(
+                    stringResource(Res.string.add_song_samples),
+                    IconRes.drawable.ic_add,
+                    enabled = !copyingSamples,
+                ) {
+                    if (samplePrompts.confirmOverwrite(directory)) {
+                        copyingSamples = true
+                        samplesScope.launch {
+                            val count = withContext(Dispatchers.IO) { copySongSamples(directory) }
+                            copyingSamples = false
+                            afterDispatch { samplePrompts.reportCopied(count) }
+                        }
                     }
                 }
+                if (copyingSamples) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
             }
-            if (copyingSamples) {
-                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-            }
-        }
-        if (scan.unsupported.isNotEmpty()) {
-            Column(
-                modifier = Modifier.padding(top = 7.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-                scan.unsupported.forEach { UnsupportedSongFileRow(directory, it) }
+        },
+        below = { if (scan.unsupported.isNotEmpty()) UnsupportedSongFiles(directory, scan.unsupported) },
+    ) {
+        CollapsibleChipRow(
+            chips = folderChips,
+            resetKey = directory,
+            lead = { DetectedLabel(empty = scan.folders.isEmpty() && scan.unsupported.isEmpty()) },
+        )
+    }
+}
+
+/**
+ * The old `.sps` libraries in the songs folder, a row each: the first [UNSUPPORTED_SHOWN], then a
+ * toggle for the rest, so a folder of dozens does not push the other storage rows off the screen.
+ */
+@Composable
+private fun UnsupportedSongFiles(directory: String, files: List<String>) {
+    var expanded by remember(directory) { mutableStateOf(false) }
+    val shown = if (expanded) files else files.take(UNSUPPORTED_SHOWN)
+    Column(
+        modifier = Modifier.padding(top = 7.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        shown.forEach { UnsupportedSongFileRow(directory, it) }
+        if (files.size > UNSUPPORTED_SHOWN) {
+            if (expanded) {
+                MoreLessToggle(stringResource(Res.string.detected_files_less), expanded = true) { expanded = false }
+            } else {
+                MoreLessToggle(
+                    stringResource(Res.string.detected_files_more, files.size - UNSUPPORTED_SHOWN),
+                    expanded = false,
+                ) { expanded = true }
             }
         }
     }
@@ -365,3 +423,9 @@ private fun UnsupportedSongFileRow(directory: String, fileName: String) {
         }
     }
 }
+
+/** How many unsupported files show before the rest fold behind a toggle. */
+private const val UNSUPPORTED_SHOWN = 3
+
+/** The detail action's height, which is also the least height of the strip beside it. */
+private val DETAIL_ACTION_HEIGHT = 30.dp
