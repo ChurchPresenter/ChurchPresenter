@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Sīkāka informācija ir avāriju ziņojumu mapē — ziņojot par šo, pievienojiet jaunāko failu.</string>
     <string name="search_songs">Meklēt dziesmas...</string>
     <string name="song_book">Dziesmu grāmata</string>
+    <string name="song_book_none">Nav dziesmu grāmatas</string>
+    <string name="song_book_new">Jauna dziesmu grāmata…</string>
     <string name="all_song_books">Visas dziesmu grāmatas</string>
     <string name="entire_bible">Visa Bībele</string>
     <string name="current_book">Pašreizējā grāmata</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Atvērt dziesmu bibliotēkas pārvaldnieku</string>
     <string name="shortcut_description_open_converter">Atvērt dziesmu un Bībeles pārveidotāju</string>
     <string name="shortcut_description_open_calendar_manager">Atvērt kalendāra pārvaldnieku</string>
+    <string name="shortcut_description_zoom_in">Tuvināt: padarīt lietotnes logus lielākus</string>
+    <string name="shortcut_description_zoom_out">Tālināt: padarīt lietotnes logus mazākus</string>
     <string name="shortcut_description_f6_bible">Pārslēgties uz Bībeles cilni</string>
     <string name="shortcut_description_f7_songs">Pārslēgties uz dziesmu cilni</string>
     <string name="shortcut_description_f8_pictures">Pārslēgties uz attēlu cilni</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamilu</string>
     <string name="language_tagalog">Tagalu</string>
     <string name="language_swahili">Svahili</string>
+    <string name="language_tahitian">Taitiešu</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Vaicājumam "%1$s" nav rezultātu</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">Plūmju tēma</string>
     <string name="custom_theme">Pielāgots motīvs</string>
     <string name="menu_customize_theme">Pielāgot motīvu…</string>
+    <string name="menu_zoom_in">Tuvināt</string>
+    <string name="menu_zoom_out">Tālināt</string>
+    <string name="menu_actual_size">Faktiskais izmērs</string>
     <string name="customize_theme_title">Pielāgot motīvu</string>
     <string name="customize_theme_colors">Krāsas</string>
     <string name="customize_theme_use_custom_colors">Izmantot pielāgotas krāsas</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Parasta</string>
     <string name="customize_theme_margin_thin">Šaura</string>
     <string name="customize_theme_margin_thinner">Šaurāka</string>
+    <string name="customize_theme_interface_size">Saskarnes izmērs</string>
     <string name="customize_theme_text_size_hint">Maina tikai pašas lietotnes logus. Izvadu ekrāni netiek ietekmēti.</string>
     <string name="customize_theme_preview_heading">Svētdienas dievkalpojums</string>
     <string name="customize_theme_preview_body">Dziesmas, Raksti un slaidi, gatavi rādīšanai ekrānā.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">Nav izvēlēts OMT avots</string>
     <string name="song_typical_live">parasti %1$s ēterā</string>
     <string name="calendar_storage">Kalendārs</string>
+    <string name="schedule_storage">Programmas</string>
     <string name="calendar_storage_status_default">Lietotnes datu mape</string>
     <string name="use_default_directory">Izmantot noklusējumu</string>
     <string name="song_background_category_cameras">Kameras</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">Atļautie</string>
     <string name="remote_clients_tab_blocked">Bloķētie</string>
     <string name="remote_clients_unnamed">Nenosaukta ierīce</string>
+    <string name="remote_client_permissions">Atļaujas</string>
+    <string name="remote_client_permissions_note">Ko šī ierīce drīkst darīt. Viss izslēgtais tiek atteikts bez jautāšanas.</string>
+    <string name="remote_client_permissions_all">Viss atļauts</string>
+    <string name="remote_client_permissions_count">Atļauts %1$d no %2$d</string>
+    <string name="remote_client_no_toasts">Bez paziņojumiem</string>
+    <string name="device_permission_control_output">Vadīt ekrānu</string>
+    <string name="device_permission_control_output_desc">Rādīt dziesmas, pantus, slaidus un attēlus, pārslēgties starp tiem, atskaņot multividi un notīrīt ekrānu</string>
+    <string name="device_permission_add_to_schedule">Pievienot programmai</string>
+    <string name="device_permission_add_to_schedule_desc">Pievienot vienumus programmai</string>
+    <string name="device_permission_remove_from_schedule">Noņemt no programmas</string>
+    <string name="device_permission_remove_from_schedule_desc">Izņemt vienumus no programmas</string>
+    <string name="device_permission_go_live">Rādīt ekrānā</string>
+    <string name="device_permission_go_live_desc">Uzreiz parādīt vienumu ekrānā</string>
+    <string name="device_permission_upload_files">Augšupielādēt failus</string>
+    <string name="device_permission_upload_files_desc">Sūtīt prezentācijas, multividi un attēlus uz šo datoru</string>
+    <string name="device_permission_show_toasts">Rādīt darbību paziņojumus</string>
+    <string name="device_permission_show_toasts_desc">Rādīt paziņojumu šajā datorā, kad ierīce kaut ko dara</string>
     <string name="companion_lt_filter">Filtrēt apakšjoslas</string>
     <string name="companion_lt_no_match">Neviena apakšjosla neatbilst.</string>
     <string name="companion_lt_plus_key">+ key</string>

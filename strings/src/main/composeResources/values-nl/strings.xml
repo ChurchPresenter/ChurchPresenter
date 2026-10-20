@@ -10,6 +10,8 @@
     <string name="search">Zoeken</string>
     <string name="search_songs">Zoek liederen...</string>
     <string name="song_book">Liedboek</string>
+    <string name="song_book_none">Geen liedboek</string>
+    <string name="song_book_new">Nieuw liedboek…</string>
     <string name="all_song_books">Alle liedboeken</string>
     <string name="entire_bible">Hele Bijbel</string>
     <string name="current_book">Huidig boek</string>
@@ -116,6 +118,8 @@
     <string name="shortcut_description_open_song_library">Liedbibliotheekbeheer openen</string>
     <string name="shortcut_description_open_converter">Lied- en Bijbelconverter openen</string>
     <string name="shortcut_description_open_calendar_manager">Kalenderbeheer openen</string>
+    <string name="shortcut_description_zoom_in">Inzoomen: de vensters van de app zelf groter maken</string>
+    <string name="shortcut_description_zoom_out">Uitzoomen: de vensters van de app zelf kleiner maken</string>
     <string name="shortcut_description_f6_bible">Naar Bijbel-tabblad</string>
     <string name="shortcut_description_f7_songs">Naar Liederen-tabblad</string>
     <string name="shortcut_description_f8_pictures">Naar Afbeeldingen-tabblad</string>
@@ -1478,6 +1482,7 @@
     <string name="language_tamil">Tamil</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Swahili</string>
+    <string name="language_tahitian">Tahitiaans</string>
     <string name="tab_dictionary">Woordenboek</string>
     <string name="dictionary_search_hint">Zoek op nummer, woord of definitie…</string>
     <string name="dictionary_filter_all">Alles</string>
@@ -2226,6 +2231,9 @@
     <string name="plum_theme">Pruim-thema</string>
     <string name="custom_theme">Aangepast thema</string>
     <string name="menu_customize_theme">Thema aanpassen…</string>
+    <string name="menu_zoom_in">Inzoomen</string>
+    <string name="menu_zoom_out">Uitzoomen</string>
+    <string name="menu_actual_size">Werkelijke grootte</string>
     <string name="customize_theme_title">Thema aanpassen</string>
     <string name="customize_theme_colors">Kleuren</string>
     <string name="customize_theme_use_custom_colors">Aangepaste kleuren gebruiken</string>
@@ -2239,6 +2247,7 @@
     <string name="customize_theme_margin_normal">Normaal</string>
     <string name="customize_theme_margin_thin">Smal</string>
     <string name="customize_theme_margin_thinner">Smaller</string>
+    <string name="customize_theme_interface_size">Interfacegrootte</string>
     <string name="customize_theme_text_size_hint">Wijzigt alleen de eigen vensters van de app. Uitvoerschermen worden niet beïnvloed.</string>
     <string name="customize_theme_preview_heading">Zondagsdienst</string>
     <string name="customize_theme_preview_body">Liederen, Schrift en dia's, klaar om live te gaan.</string>
@@ -2494,6 +2503,7 @@
     <string name="canvas_placeholder_omt_default">Geen OMT-bron geselecteerd</string>
     <string name="song_typical_live">meestal %1$s live</string>
     <string name="calendar_storage">Kalender</string>
+    <string name="schedule_storage">Programma's</string>
     <string name="calendar_storage_status_default">App-gegevensmap</string>
     <string name="use_default_directory">Standaard gebruiken</string>
     <string name="song_background_category_cameras">Camera's</string>
@@ -2711,6 +2721,23 @@
     <string name="remote_clients_tab_allowed">Toegestaan</string>
     <string name="remote_clients_tab_blocked">Geblokkeerd</string>
     <string name="remote_clients_unnamed">Naamloos apparaat</string>
+    <string name="remote_client_permissions">Rechten</string>
+    <string name="remote_client_permissions_note">Wat dit apparaat mag doen. Alles wat is uitgeschakeld, wordt zonder te vragen geweigerd.</string>
+    <string name="remote_client_permissions_all">Alles toegestaan</string>
+    <string name="remote_client_permissions_count">%1$d van %2$d toegestaan</string>
+    <string name="remote_client_no_toasts">Geen meldingen</string>
+    <string name="device_permission_control_output">Het scherm bedienen</string>
+    <string name="device_permission_control_output_desc">Liederen, verzen, dia's en afbeeldingen tonen, erdoorheen bladeren, media afspelen en het scherm wissen</string>
+    <string name="device_permission_add_to_schedule">Toevoegen aan programma</string>
+    <string name="device_permission_add_to_schedule_desc">Items aan het programma toevoegen</string>
+    <string name="device_permission_remove_from_schedule">Verwijderen uit programma</string>
+    <string name="device_permission_remove_from_schedule_desc">Items uit het programma halen</string>
+    <string name="device_permission_go_live">Live gaan</string>
+    <string name="device_permission_go_live_desc">Een item direct op het scherm zetten</string>
+    <string name="device_permission_upload_files">Bestanden uploaden</string>
+    <string name="device_permission_upload_files_desc">Presentaties, media en afbeeldingen naar deze computer sturen</string>
+    <string name="device_permission_show_toasts">Activiteitsmeldingen tonen</string>
+    <string name="device_permission_show_toasts_desc">Een melding op deze computer tonen wanneer het apparaat iets doet</string>
     <string name="companion_lt_filter">Ondertitels filteren</string>
     <string name="companion_lt_no_match">Geen ondertitels gevonden.</string>
     <string name="companion_lt_plus_key">+ Key</string>

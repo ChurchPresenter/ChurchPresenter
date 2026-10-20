@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">विवरण क्रैश रिपोर्ट फ़ोल्डर में हैं — रिपोर्ट करते समय सबसे नई फ़ाइल संलग्न करें।</string>
     <string name="search_songs">गीत खोजें...</string>
     <string name="song_book">गीत पुस्तक</string>
+    <string name="song_book_none">कोई गीत पुस्तक नहीं</string>
+    <string name="song_book_new">नई गीत पुस्तक…</string>
     <string name="all_song_books">सभी गीत पुस्तकें</string>
     <string name="entire_bible">पूरी बाइबल</string>
     <string name="current_book">वर्तमान पुस्तक</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">गीत लाइब्रेरी प्रबंधक खोलें</string>
     <string name="shortcut_description_open_converter">गीत और बाइबल कन्वर्टर खोलें</string>
     <string name="shortcut_description_open_calendar_manager">कैलेंडर प्रबंधक खोलें</string>
+    <string name="shortcut_description_zoom_in">ज़ूम इन: ऐप की अपनी विंडो बड़ी करें</string>
+    <string name="shortcut_description_zoom_out">ज़ूम आउट: ऐप की अपनी विंडो छोटी करें</string>
     <string name="shortcut_description_f6_bible">बाइबल टैब पर जाएँ</string>
     <string name="shortcut_description_f7_songs">गीत टैब पर जाएँ</string>
     <string name="shortcut_description_f8_pictures">चित्र टैब पर जाएँ</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">तमिल</string>
     <string name="language_tagalog">तागालोग</string>
     <string name="language_swahili">स्वाहिली</string>
+    <string name="language_tahitian">ताहिती</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" के लिए कोई परिणाम नहीं मिला</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">आलूबुखारा थीम</string>
     <string name="custom_theme">कस्टम थीम</string>
     <string name="menu_customize_theme">थीम कस्टमाइज़ करें…</string>
+    <string name="menu_zoom_in">ज़ूम इन</string>
+    <string name="menu_zoom_out">ज़ूम आउट</string>
+    <string name="menu_actual_size">वास्तविक आकार</string>
     <string name="customize_theme_title">थीम कस्टमाइज़ करें</string>
     <string name="customize_theme_colors">रंग</string>
     <string name="customize_theme_use_custom_colors">कस्टम रंग उपयोग करें</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">सामान्य</string>
     <string name="customize_theme_margin_thin">पतला</string>
     <string name="customize_theme_margin_thinner">और पतला</string>
+    <string name="customize_theme_interface_size">इंटरफ़ेस का आकार</string>
     <string name="customize_theme_text_size_hint">केवल ऐप की अपनी विंडो बदलती हैं। आउटपुट स्क्रीन पर कोई असर नहीं होता।</string>
     <string name="customize_theme_preview_heading">रविवार की आराधना</string>
     <string name="customize_theme_preview_body">गीत, पवित्रशास्त्र और स्लाइड, लाइव करने के लिए तैयार।</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">कोई OMT स्रोत नहीं चुना गया</string>
     <string name="song_typical_live">आमतौर पर %1$s लाइव</string>
     <string name="calendar_storage">कैलेंडर</string>
+    <string name="schedule_storage">कार्यक्रम</string>
     <string name="calendar_storage_status_default">ऐप डेटा फ़ोल्डर</string>
     <string name="use_default_directory">डिफ़ॉल्ट उपयोग करें</string>
     <string name="song_background_category_cameras">कैमरे</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">अनुमति वाले</string>
     <string name="remote_clients_tab_blocked">अवरुद्ध</string>
     <string name="remote_clients_unnamed">बिना नाम का डिवाइस</string>
+    <string name="remote_client_permissions">अनुमतियाँ</string>
+    <string name="remote_client_permissions_note">यह डिवाइस क्या कर सकता है। जो कुछ भी बंद है, बिना पूछे अस्वीकार कर दिया जाता है।</string>
+    <string name="remote_client_permissions_all">सब अनुमत</string>
+    <string name="remote_client_permissions_count">%2$d में से %1$d अनुमत</string>
+    <string name="remote_client_no_toasts">कोई सूचना नहीं</string>
+    <string name="device_permission_control_output">स्क्रीन नियंत्रित करें</string>
+    <string name="device_permission_control_output_desc">गीत, पद, स्लाइड और चित्र दिखाएँ, उनमें आगे-पीछे जाएँ, मीडिया चलाएँ और स्क्रीन साफ़ करें</string>
+    <string name="device_permission_add_to_schedule">कार्यक्रम में जोड़ें</string>
+    <string name="device_permission_add_to_schedule_desc">कार्यक्रम में आइटम जोड़ें</string>
+    <string name="device_permission_remove_from_schedule">कार्यक्रम से हटाएँ</string>
+    <string name="device_permission_remove_from_schedule_desc">कार्यक्रम से आइटम निकालें</string>
+    <string name="device_permission_go_live">लाइव करें</string>
+    <string name="device_permission_go_live_desc">किसी आइटम को तुरंत स्क्रीन पर दिखाएँ</string>
+    <string name="device_permission_upload_files">फ़ाइलें अपलोड करें</string>
+    <string name="device_permission_upload_files_desc">प्रस्तुतियाँ, मीडिया और चित्र इस कंप्यूटर पर भेजें</string>
+    <string name="device_permission_show_toasts">गतिविधि सूचनाएँ दिखाएँ</string>
+    <string name="device_permission_show_toasts_desc">जब डिवाइस कुछ करे तो इस कंप्यूटर पर सूचना दिखाएँ</string>
     <string name="companion_lt_filter">लोअर थर्ड फ़िल्टर करें</string>
     <string name="companion_lt_no_match">कोई लोअर थर्ड मेल नहीं खाता।</string>
     <string name="companion_lt_plus_key">+ Key</string>

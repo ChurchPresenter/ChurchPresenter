@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">ລາຍລະອຽດຢູ່ໃນໂຟນເດີລາຍງານການລົ້ມ — ໃຫ້ແນບໄຟລ໌ໃໝ່ສຸດເມື່ອລາຍງານເລື່ອງນີ້.</string>
     <string name="search_songs">ຄົ້ນຫາເພງ...</string>
     <string name="song_book">ປຶ້ມເພງ</string>
+    <string name="song_book_none">ບໍ່ມີປຶ້ມເພງ</string>
+    <string name="song_book_new">ປຶ້ມເພງໃໝ່…</string>
     <string name="all_song_books">ປຶ້ມເພງທັງໝົດ</string>
     <string name="entire_bible">ພຣະຄຳພີທັງໝົດ</string>
     <string name="current_book">ພຣະທັມປັດຈຸບັນ</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">ເປີດຕົວຈັດການຄັງເພງ</string>
     <string name="shortcut_description_open_converter">ເປີດຕົວແປງເພງ ແລະ ພຣະຄຳພີ</string>
     <string name="shortcut_description_open_calendar_manager">ເປີດຕົວຈັດການປະຕິທິນ</string>
+    <string name="shortcut_description_zoom_in">ຂະຫຍາຍ: ເຮັດໃຫ້ໜ້າຕ່າງຂອງແອັບໃຫຍ່ຂຶ້ນ</string>
+    <string name="shortcut_description_zoom_out">ຫຍໍ້: ເຮັດໃຫ້ໜ້າຕ່າງຂອງແອັບນ້ອຍລົງ</string>
     <string name="shortcut_description_f6_bible">ໄປແທັບພຣະຄຳພີ</string>
     <string name="shortcut_description_f7_songs">ໄປແທັບເພງ</string>
     <string name="shortcut_description_f8_pictures">ໄປແທັບຮູບພາບ</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">ພາສາທະມິນ</string>
     <string name="language_tagalog">ຕາການລອກ</string>
     <string name="language_swahili">ສະວາຮີລີ</string>
+    <string name="language_tahitian">ພາສາຕາຮີຕີ</string>
 
     <!-- Search Results -->
     <string name="no_results_found">ບໍ່ພົບຜົນລັບສຳລັບ "%1$s"</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">ຮູບແບບໝາກພລຳ</string>
     <string name="custom_theme">ທີມກຳນົດເອງ</string>
     <string name="menu_customize_theme">ປັບແຕ່ງທີມ…</string>
+    <string name="menu_zoom_in">ຂະຫຍາຍ</string>
+    <string name="menu_zoom_out">ຫຍໍ້</string>
+    <string name="menu_actual_size">ຂະໜາດຈິງ</string>
     <string name="customize_theme_title">ປັບແຕ່ງທີມ</string>
     <string name="customize_theme_colors">ສີ</string>
     <string name="customize_theme_use_custom_colors">ໃຊ້ສີກຳນົດເອງ</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">ປົກກະຕິ</string>
     <string name="customize_theme_margin_thin">ບາງ</string>
     <string name="customize_theme_margin_thinner">ບາງກວ່າ</string>
+    <string name="customize_theme_interface_size">ຂະໜາດສ່ວນຕິດຕໍ່</string>
     <string name="customize_theme_text_size_hint">ປ່ຽນສະເພາະໜ້າຕ່າງຂອງແອັບເທົ່ານັ້ນ. ບໍ່ມີຜົນຕໍ່ຈໍຊ່ອງອອກ.</string>
     <string name="customize_theme_preview_heading">ນະມັດສະການວັນອາທິດ</string>
     <string name="customize_theme_preview_body">ເພງ, ພຣະຄຳພີ ແລະ ສະໄລ້ ພ້ອມຂຶ້ນຈໍ.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">ບໍ່ໄດ້ເລືອກແຫຼ່ງ OMT</string>
     <string name="song_typical_live">ປົກກະຕິສະແດງ %1$s</string>
     <string name="calendar_storage">ປະຕິທິນ</string>
+    <string name="schedule_storage">ລາຍການ</string>
     <string name="calendar_storage_status_default">ໂຟນເດີຂໍ້ມູນແອັບ</string>
     <string name="use_default_directory">ໃຊ້ຄ່າເລີ່ມຕົ້ນ</string>
     <string name="song_background_category_cameras">ກ້ອງ</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">ອະນຸຍາດ</string>
     <string name="remote_clients_tab_blocked">ບລັອກ</string>
     <string name="remote_clients_unnamed">ອຸປະກອນທີ່ບໍ່ມີຊື່</string>
+    <string name="remote_client_permissions">ສິດອະນຸຍາດ</string>
+    <string name="remote_client_permissions_note">ສິ່ງທີ່ອຸປະກອນນີ້ເຮັດໄດ້. ສິ່ງໃດທີ່ປິດໄວ້ຈະຖືກປະຕິເສດໂດຍບໍ່ຖາມ.</string>
+    <string name="remote_client_permissions_all">ອະນຸຍາດທັງໝົດ</string>
+    <string name="remote_client_permissions_count">ອະນຸຍາດ %1$d ຈາກ %2$d</string>
+    <string name="remote_client_no_toasts">ບໍ່ມີການແຈ້ງເຕືອນ</string>
+    <string name="device_permission_control_output">ຄວບຄຸມຈໍ</string>
+    <string name="device_permission_control_output_desc">ສະແດງເພງ, ຂໍ້ພຣະຄຳ, ສະໄລ້ ແລະ ຮູບພາບ, ເລື່ອນໄປມາ, ຫຼິ້ນສື່ ແລະ ລ້າງຈໍ</string>
+    <string name="device_permission_add_to_schedule">ເພີ່ມໃສ່ລາຍການ</string>
+    <string name="device_permission_add_to_schedule_desc">ເພີ່ມລາຍການຍ່ອຍໃສ່ລາຍການ</string>
+    <string name="device_permission_remove_from_schedule">ລຶບອອກຈາກລາຍການ</string>
+    <string name="device_permission_remove_from_schedule_desc">ເອົາລາຍການຍ່ອຍອອກຈາກລາຍການ</string>
+    <string name="device_permission_go_live">ຂຶ້ນຈໍ</string>
+    <string name="device_permission_go_live_desc">ສະແດງລາຍການຂຶ້ນຈໍທັນທີ</string>
+    <string name="device_permission_upload_files">ອັບໂຫຼດໄຟລ໌</string>
+    <string name="device_permission_upload_files_desc">ສົ່ງການນຳສະເໜີ, ສື່ ແລະ ຮູບພາບມາຍັງຄອມພິວເຕີນີ້</string>
+    <string name="device_permission_show_toasts">ສະແດງການແຈ້ງເຕືອນກິດຈະກຳ</string>
+    <string name="device_permission_show_toasts_desc">ສະແດງການແຈ້ງເຕືອນໃນຄອມພິວເຕີນີ້ເມື່ອອຸປະກອນເຮັດບາງຢ່າງ</string>
     <string name="companion_lt_filter">ກັ່ນຕອງແຖບລຸ່ມ</string>
     <string name="companion_lt_no_match">ບໍ່ມີແຖບລຸ່ມທີ່ກົງກັນ.</string>
     <string name="companion_lt_plus_key">+ key</string>

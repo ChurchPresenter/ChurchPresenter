@@ -10,6 +10,8 @@
     <string name="search">Szukaj</string>
     <string name="search_songs">Szukaj pieśni...</string>
     <string name="song_book">Śpiewnik</string>
+    <string name="song_book_none">Brak śpiewnika</string>
+    <string name="song_book_new">Nowy śpiewnik…</string>
     <string name="all_song_books">Wszystkie śpiewniki</string>
     <string name="entire_bible">Cała Biblia</string>
     <string name="current_book">Bieżąca księga</string>
@@ -293,6 +295,7 @@
     <string name="language_tamil">Tamilski</string>
     <string name="language_tagalog">Tagalski</string>
     <string name="language_swahili">Suahili</string>
+    <string name="language_tahitian">Tahitański</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Nie znaleziono wyników dla "%1$s"</string>
@@ -499,6 +502,8 @@
     <string name="shortcut_description_open_song_library">Otwórz menedżer biblioteki pieśni</string>
     <string name="shortcut_description_open_converter">Otwórz konwerter pieśni i Biblii</string>
     <string name="shortcut_description_open_calendar_manager">Otwórz menedżer kalendarza</string>
+    <string name="shortcut_description_zoom_in">Powiększ: powiększ okna samej aplikacji</string>
+    <string name="shortcut_description_zoom_out">Pomniejsz: pomniejsz okna samej aplikacji</string>
     <string name="shortcut_description_f6_bible">Zakładka Biblia</string>
     <string name="shortcut_description_f7_songs">Zakładka Pieśni</string>
     <string name="shortcut_description_f8_pictures">Zakładka Zdjęcia</string>
@@ -2198,6 +2203,9 @@
     <string name="plum_theme">Motyw Śliwka</string>
     <string name="custom_theme">Własny motyw</string>
     <string name="menu_customize_theme">Dostosuj motyw…</string>
+    <string name="menu_zoom_in">Powiększ</string>
+    <string name="menu_zoom_out">Pomniejsz</string>
+    <string name="menu_actual_size">Rzeczywisty rozmiar</string>
     <string name="customize_theme_title">Dostosuj motyw</string>
     <string name="customize_theme_colors">Kolory</string>
     <string name="customize_theme_use_custom_colors">Użyj własnych kolorów</string>
@@ -2211,6 +2219,7 @@
     <string name="customize_theme_margin_normal">Normalny</string>
     <string name="customize_theme_margin_thin">Wąski</string>
     <string name="customize_theme_margin_thinner">Węższy</string>
+    <string name="customize_theme_interface_size">Rozmiar interfejsu</string>
     <string name="customize_theme_text_size_hint">Zmienia tylko okna samej aplikacji. Ekrany wyjściowe nie są zmieniane.</string>
     <string name="customize_theme_preview_heading">Nabożeństwo niedzielne</string>
     <string name="customize_theme_preview_body">Pieśni, Pismo i slajdy, gotowe do nadania na żywo.</string>
@@ -2466,6 +2475,7 @@
     <string name="canvas_placeholder_omt_default">Nie wybrano źródła OMT</string>
     <string name="song_typical_live">zwykle %1$s na żywo</string>
     <string name="calendar_storage">Kalendarz</string>
+    <string name="schedule_storage">Programy</string>
     <string name="calendar_storage_status_default">Folder danych aplikacji</string>
     <string name="use_default_directory">Użyj domyślnego</string>
     <string name="song_background_category_cameras">Kamery</string>
@@ -2683,6 +2693,23 @@
     <string name="remote_clients_tab_allowed">Dozwoleni</string>
     <string name="remote_clients_tab_blocked">Zablokowani</string>
     <string name="remote_clients_unnamed">Urządzenie bez nazwy</string>
+    <string name="remote_client_permissions">Uprawnienia</string>
+    <string name="remote_client_permissions_note">Co to urządzenie może robić. Wszystko, co wyłączone, jest odrzucane bez pytania.</string>
+    <string name="remote_client_permissions_all">Wszystko dozwolone</string>
+    <string name="remote_client_permissions_count">Dozwolone: %1$d z %2$d</string>
+    <string name="remote_client_no_toasts">Bez powiadomień</string>
+    <string name="device_permission_control_output">Sterowanie ekranem</string>
+    <string name="device_permission_control_output_desc">Wyświetlanie pieśni, wersetów, slajdów i obrazów, przechodzenie między nimi, odtwarzanie mediów i czyszczenie ekranu</string>
+    <string name="device_permission_add_to_schedule">Dodawanie do programu</string>
+    <string name="device_permission_add_to_schedule_desc">Dodawanie elementów do programu</string>
+    <string name="device_permission_remove_from_schedule">Usuwanie z programu</string>
+    <string name="device_permission_remove_from_schedule_desc">Usuwanie elementów z programu</string>
+    <string name="device_permission_go_live">Na żywo</string>
+    <string name="device_permission_go_live_desc">Natychmiastowe wyświetlanie elementu na ekranie</string>
+    <string name="device_permission_upload_files">Przesyłanie plików</string>
+    <string name="device_permission_upload_files_desc">Wysyłanie prezentacji, mediów i obrazów na ten komputer</string>
+    <string name="device_permission_show_toasts">Powiadomienia o aktywności</string>
+    <string name="device_permission_show_toasts_desc">Pokazywanie powiadomienia na tym komputerze, gdy urządzenie coś robi</string>
     <string name="companion_lt_filter">Filtruj belki</string>
     <string name="companion_lt_no_match">Brak pasujących belek.</string>
     <string name="companion_lt_plus_key">+ Key</string>

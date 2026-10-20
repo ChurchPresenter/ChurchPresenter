@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">விவரங்கள் செயலிழப்பு அறிக்கை கோப்புறையில் உள்ளன — இதைத் தெரிவிக்கும்போது புதிய கோப்பை இணைக்கவும்.</string>
     <string name="search_songs">பாடல்களைத் தேடு...</string>
     <string name="song_book">பாடல் புத்தகம்</string>
+    <string name="song_book_none">பாடல் புத்தகம் இல்லை</string>
+    <string name="song_book_new">புதிய பாடல் புத்தகம்…</string>
     <string name="all_song_books">அனைத்துப் பாடல் புத்தகங்கள்</string>
     <string name="entire_bible">வேதாகமம் முழுவதும்</string>
     <string name="current_book">தற்போதைய புத்தகம்</string>
@@ -206,6 +208,8 @@
     <string name="shortcut_description_open_song_library">பாடல் நூலக மேலாளரைத் திற</string>
     <string name="shortcut_description_open_converter">பாடல் மற்றும் வேதாகம மாற்றியைத் திற</string>
     <string name="shortcut_description_open_calendar_manager">நாட்காட்டி மேலாளரைத் திற</string>
+    <string name="shortcut_description_zoom_in">பெரிதாக்கு: செயலியின் சொந்த சாளரங்களைப் பெரிதாக்கு</string>
+    <string name="shortcut_description_zoom_out">சிறிதாக்கு: செயலியின் சொந்த சாளரங்களைச் சிறிதாக்கு</string>
     <string name="shortcut_description_f6_bible">வேதாகமத் தாவலுக்கு மாறு</string>
     <string name="shortcut_description_f7_songs">பாடல்கள் தாவலுக்கு மாறு</string>
     <string name="shortcut_description_f8_pictures">படங்கள் தாவலுக்கு மாறு</string>
@@ -536,6 +540,7 @@
     <string name="language_tamil">தமிழ்</string>
     <string name="language_tagalog">தகலோக்</string>
     <string name="language_swahili">சுவாஹிலி</string>
+    <string name="language_tahitian">டஹிதியன்</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" க்கு முடிவுகள் எதுவும் இல்லை</string>
@@ -2248,6 +2253,9 @@
     <string name="plum_theme">பிளம் தீம்</string>
     <string name="custom_theme">தனிப்பயன் தீம்</string>
     <string name="menu_customize_theme">தீமைத் தனிப்பயனாக்கு…</string>
+    <string name="menu_zoom_in">பெரிதாக்கு</string>
+    <string name="menu_zoom_out">சிறிதாக்கு</string>
+    <string name="menu_actual_size">உண்மையான அளவு</string>
     <string name="customize_theme_title">தீமைத் தனிப்பயனாக்கு</string>
     <string name="customize_theme_colors">வண்ணங்கள்</string>
     <string name="customize_theme_use_custom_colors">தனிப்பயன் வண்ணங்களைப் பயன்படுத்து</string>
@@ -2261,6 +2269,7 @@
     <string name="customize_theme_margin_normal">இயல்பானது</string>
     <string name="customize_theme_margin_thin">மெல்லியது</string>
     <string name="customize_theme_margin_thinner">மேலும் மெல்லியது</string>
+    <string name="customize_theme_interface_size">இடைமுக அளவு</string>
     <string name="customize_theme_text_size_hint">பயன்பாட்டின் சொந்தச் சாளரங்களை மட்டுமே மாற்றும். வெளியீட்டுத் திரைகள் பாதிக்கப்படாது.</string>
     <string name="customize_theme_preview_heading">ஞாயிறு ஆராதனை</string>
     <string name="customize_theme_preview_body">பாடல்கள், வேதவசனங்கள், படவில்லைகள் — நேரலைக்குத் தயார்.</string>
@@ -2516,6 +2525,7 @@
     <string name="canvas_placeholder_omt_default">OMT மூலம் எதுவும் தேர்ந்தெடுக்கப்படவில்லை</string>
     <string name="song_typical_live">பொதுவாக %1$s நேரலையில்</string>
     <string name="calendar_storage">நாட்காட்டி</string>
+    <string name="schedule_storage">அட்டவணைகள்</string>
     <string name="calendar_storage_status_default">செயலி தரவுக் கோப்புறை</string>
     <string name="use_default_directory">இயல்புநிலையைப் பயன்படுத்து</string>
     <string name="song_background_category_cameras">கேமராக்கள்</string>
@@ -2734,6 +2744,23 @@
     <string name="remote_clients_tab_allowed">அனுமதிக்கப்பட்டவை</string>
     <string name="remote_clients_tab_blocked">தடுக்கப்பட்டவை</string>
     <string name="remote_clients_unnamed">பெயரில்லாத சாதனம்</string>
+    <string name="remote_client_permissions">அனுமதிகள்</string>
+    <string name="remote_client_permissions_note">இந்தச் சாதனம் செய்யக்கூடியவை. அணைக்கப்பட்ட எதுவும் கேட்காமலே மறுக்கப்படும்.</string>
+    <string name="remote_client_permissions_all">அனைத்தும் அனுமதிக்கப்பட்டது</string>
+    <string name="remote_client_permissions_count">%2$d இல் %1$d அனுமதிக்கப்பட்டது</string>
+    <string name="remote_client_no_toasts">அறிவிப்புகள் இல்லை</string>
+    <string name="device_permission_control_output">திரையைக் கட்டுப்படுத்து</string>
+    <string name="device_permission_control_output_desc">பாடல்கள், வசனங்கள், ஸ்லைடுகள், படங்களைக் காட்டி, அவற்றில் முன்னேறி, ஊடகத்தை இயக்கி, திரையை அழி</string>
+    <string name="device_permission_add_to_schedule">அட்டவணையில் சேர்</string>
+    <string name="device_permission_add_to_schedule_desc">அட்டவணையில் உருப்படிகளைச் சேர்</string>
+    <string name="device_permission_remove_from_schedule">அட்டவணையிலிருந்து நீக்கு</string>
+    <string name="device_permission_remove_from_schedule_desc">அட்டவணையிலிருந்து உருப்படிகளை எடு</string>
+    <string name="device_permission_go_live">நேரலைக்கு</string>
+    <string name="device_permission_go_live_desc">ஒரு உருப்படியை உடனே திரையில் காட்டு</string>
+    <string name="device_permission_upload_files">கோப்புகளைப் பதிவேற்று</string>
+    <string name="device_permission_upload_files_desc">விளக்கக்காட்சிகள், ஊடகம், படங்களை இந்தக் கணினிக்கு அனுப்பு</string>
+    <string name="device_permission_show_toasts">செயல்பாட்டு அறிவிப்புகளைக் காட்டு</string>
+    <string name="device_permission_show_toasts_desc">சாதனம் ஏதாவது செய்யும்போது இந்தக் கணினியில் அறிவிப்பைக் காட்டு</string>
     <string name="companion_lt_filter">கீழ்ப்பட்டைகளை வடிகட்டு</string>
     <string name="companion_lt_no_match">பொருந்தும் கீழ்ப்பட்டை இல்லை.</string>
     <string name="companion_lt_plus_key">+ விசை</string>

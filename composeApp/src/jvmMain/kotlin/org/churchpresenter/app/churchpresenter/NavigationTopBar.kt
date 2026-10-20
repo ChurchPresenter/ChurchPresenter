@@ -36,6 +36,7 @@ import org.churchpresenter.strings.generated.resources.language_spanish
 import org.churchpresenter.strings.generated.resources.language_swahili
 import org.churchpresenter.strings.generated.resources.language_swedish
 import org.churchpresenter.strings.generated.resources.language_tagalog
+import org.churchpresenter.strings.generated.resources.language_tahitian
 import org.churchpresenter.strings.generated.resources.language_tamil
 import org.churchpresenter.strings.generated.resources.language_thai
 import org.churchpresenter.strings.generated.resources.language_turkish
@@ -400,6 +401,7 @@ private val LANGUAGES = listOf(
     LanguageEntry("🇱🇰", Res.string.language_tamil, Language.TAMIL),
     LanguageEntry("🇵🇭", Res.string.language_tagalog, Language.TAGALOG),
     LanguageEntry("🇹🇿", Res.string.language_swahili, Language.SWAHILI),
+    LanguageEntry("🇵🇫", Res.string.language_tahitian, Language.TAHITIAN),
 )
 
 @Composable

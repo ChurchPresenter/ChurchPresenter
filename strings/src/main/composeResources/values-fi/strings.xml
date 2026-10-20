@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Tarkemmat tiedot ovat kaatumisraporttien kansiossa — liitä uusin tiedosto mukaan, kun ilmoitat tästä.</string>
     <string name="search_songs">Hae lauluja...</string>
     <string name="song_book">Laulukirja</string>
+    <string name="song_book_none">Ei laulukirjaa</string>
+    <string name="song_book_new">Uusi laulukirja…</string>
     <string name="all_song_books">Kaikki laulukirjat</string>
     <string name="entire_bible">Koko Raamattu</string>
     <string name="current_book">Nykyinen kirja</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Avaa laulukirjaston hallinta</string>
     <string name="shortcut_description_open_converter">Avaa laulu- ja Raamattumuunnin</string>
     <string name="shortcut_description_open_calendar_manager">Avaa kalenterin hallinta</string>
+    <string name="shortcut_description_zoom_in">Lähennä: suurenna sovelluksen omia ikkunoita</string>
+    <string name="shortcut_description_zoom_out">Loitonna: pienennä sovelluksen omia ikkunoita</string>
     <string name="shortcut_description_f6_bible">Siirry Raamattu-välilehteen</string>
     <string name="shortcut_description_f7_songs">Siirry Laulut-välilehteen</string>
     <string name="shortcut_description_f8_pictures">Siirry Kuvat-välilehteen</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamili</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Swahili</string>
+    <string name="language_tahitian">Tahiti</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Haulle "%1$s" ei löytynyt tuloksia</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">Luumu-teema</string>
     <string name="custom_theme">Mukautettu teema</string>
     <string name="menu_customize_theme">Mukauta teemaa…</string>
+    <string name="menu_zoom_in">Lähennä</string>
+    <string name="menu_zoom_out">Loitonna</string>
+    <string name="menu_actual_size">Todellinen koko</string>
     <string name="customize_theme_title">Mukauta teemaa</string>
     <string name="customize_theme_colors">Värit</string>
     <string name="customize_theme_use_custom_colors">Käytä mukautettuja värejä</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Normaali</string>
     <string name="customize_theme_margin_thin">Kapea</string>
     <string name="customize_theme_margin_thinner">Kapeampi</string>
+    <string name="customize_theme_interface_size">Käyttöliittymän koko</string>
     <string name="customize_theme_text_size_hint">Muuttaa vain sovelluksen omia ikkunoita. Lähtönäytöt eivät muutu.</string>
     <string name="customize_theme_preview_heading">Sunnuntain jumalanpalvelus</string>
     <string name="customize_theme_preview_body">Laulut, Raamattu ja diat valmiina livenä näytettäviksi.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">OMT-lähdettä ei ole valittu</string>
     <string name="song_typical_live">yleensä %1$s esillä</string>
     <string name="calendar_storage">Kalenteri</string>
+    <string name="schedule_storage">Ohjelmat</string>
     <string name="calendar_storage_status_default">Sovelluksen datakansio</string>
     <string name="use_default_directory">Käytä oletusta</string>
     <string name="song_background_category_cameras">Kamerat</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">Sallitut</string>
     <string name="remote_clients_tab_blocked">Estetyt</string>
     <string name="remote_clients_unnamed">Nimetön laite</string>
+    <string name="remote_client_permissions">Käyttöoikeudet</string>
+    <string name="remote_client_permissions_note">Mitä tämä laite saa tehdä. Kaikki pois päältä oleva torjutaan kysymättä.</string>
+    <string name="remote_client_permissions_all">Kaikki sallittu</string>
+    <string name="remote_client_permissions_count">%1$d/%2$d sallittu</string>
+    <string name="remote_client_no_toasts">Ei ilmoituksia</string>
+    <string name="device_permission_control_output">Ohjaa näyttöä</string>
+    <string name="device_permission_control_output_desc">Näytä lauluja, jakeita, dioja ja kuvia, siirry niiden välillä, toista mediaa ja tyhjennä näyttö</string>
+    <string name="device_permission_add_to_schedule">Lisää ohjelmaan</string>
+    <string name="device_permission_add_to_schedule_desc">Lisää kohteita ohjelmaan</string>
+    <string name="device_permission_remove_from_schedule">Poista ohjelmasta</string>
+    <string name="device_permission_remove_from_schedule_desc">Poista kohteita ohjelmasta</string>
+    <string name="device_permission_go_live">Näytä livenä</string>
+    <string name="device_permission_go_live_desc">Tuo kohde näytölle heti</string>
+    <string name="device_permission_upload_files">Lähetä tiedostoja</string>
+    <string name="device_permission_upload_files_desc">Lähetä esityksiä, mediaa ja kuvia tälle tietokoneelle</string>
+    <string name="device_permission_show_toasts">Näytä toimintailmoitukset</string>
+    <string name="device_permission_show_toasts_desc">Näytä ilmoitus tällä tietokoneella, kun laite tekee jotain</string>
     <string name="companion_lt_filter">Suodata alapalkkeja</string>
     <string name="companion_lt_no_match">Yksikään alapalkki ei vastaa hakua.</string>
     <string name="companion_lt_plus_key">+ key</string>

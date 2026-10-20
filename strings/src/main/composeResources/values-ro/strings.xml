@@ -10,6 +10,8 @@
     <string name="search">Caută</string>
     <string name="search_songs">Caută cântări...</string>
     <string name="song_book">Carte de Cântări</string>
+    <string name="song_book_none">Nicio carte de cântări</string>
+    <string name="song_book_new">Carte de cântări nouă…</string>
     <string name="all_song_books">Toate Cărțile de Cântări</string>
     <string name="entire_bible">Toată Biblia</string>
     <string name="current_book">Cartea Curentă</string>
@@ -137,6 +139,8 @@
     <string name="shortcut_description_open_song_library">Deschide managerul bibliotecii de cântări</string>
     <string name="shortcut_description_open_converter">Deschide convertorul de cântări și Biblii</string>
     <string name="shortcut_description_open_calendar_manager">Deschide managerul de calendar</string>
+    <string name="shortcut_description_zoom_in">Mărire: face mai mari ferestrele aplicației</string>
+    <string name="shortcut_description_zoom_out">Micșorare: face mai mici ferestrele aplicației</string>
     <string name="shortcut_description_f6_bible">Comută la Fila Biblie</string>
     <string name="shortcut_description_f7_songs">Comută la Fila Cântări</string>
     <string name="shortcut_description_f8_pictures">Comută la Fila Imagini</string>
@@ -1524,6 +1528,7 @@
     <string name="language_tamil">Tamilă</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Swahili</string>
+    <string name="language_tahitian">Tahitiană</string>
     <string name="tab_dictionary">Dicționar</string>
     <string name="dictionary_search_hint">Căutați după număr, cuvânt sau definiție…</string>
     <string name="dictionary_filter_all">Toate</string>
@@ -2228,6 +2233,9 @@
     <string name="plum_theme">Tema Prună</string>
     <string name="custom_theme">Temă personalizată</string>
     <string name="menu_customize_theme">Personalizează tema…</string>
+    <string name="menu_zoom_in">Mărire</string>
+    <string name="menu_zoom_out">Micșorare</string>
+    <string name="menu_actual_size">Dimensiune reală</string>
     <string name="customize_theme_title">Personalizează tema</string>
     <string name="customize_theme_colors">Culori</string>
     <string name="customize_theme_use_custom_colors">Folosește culori personalizate</string>
@@ -2241,6 +2249,7 @@
     <string name="customize_theme_margin_normal">Normală</string>
     <string name="customize_theme_margin_thin">Subțire</string>
     <string name="customize_theme_margin_thinner">Mai subțire</string>
+    <string name="customize_theme_interface_size">Dimensiunea interfeței</string>
     <string name="customize_theme_text_size_hint">Modifică doar ferestrele aplicației. Ecranele de ieșire nu sunt afectate.</string>
     <string name="customize_theme_preview_heading">Serviciul de duminică</string>
     <string name="customize_theme_preview_body">Cântări, Scriptură și slide-uri, gata de proiectat.</string>
@@ -2496,6 +2505,7 @@
     <string name="canvas_placeholder_omt_default">Nicio sursă OMT selectată</string>
     <string name="song_typical_live">de obicei %1$s în direct</string>
     <string name="calendar_storage">Calendar</string>
+    <string name="schedule_storage">Programe</string>
     <string name="calendar_storage_status_default">Dosarul de date al aplicației</string>
     <string name="use_default_directory">Folosește implicit</string>
     <string name="song_background_category_cameras">Camere</string>
@@ -2713,6 +2723,23 @@
     <string name="remote_clients_tab_allowed">Permiși</string>
     <string name="remote_clients_tab_blocked">Blocați</string>
     <string name="remote_clients_unnamed">Dispozitiv fără nume</string>
+    <string name="remote_client_permissions">Permisiuni</string>
+    <string name="remote_client_permissions_note">Ce poate face acest dispozitiv. Orice este dezactivat este refuzat fără întrebare.</string>
+    <string name="remote_client_permissions_all">Totul permis</string>
+    <string name="remote_client_permissions_count">%1$d din %2$d permise</string>
+    <string name="remote_client_no_toasts">Fără notificări</string>
+    <string name="device_permission_control_output">Controlează ecranul</string>
+    <string name="device_permission_control_output_desc">Afișează cântări, versete, diapozitive și imagini, navighează prin ele, redă media și golește ecranul</string>
+    <string name="device_permission_add_to_schedule">Adaugă la program</string>
+    <string name="device_permission_add_to_schedule_desc">Adaugă elemente în program</string>
+    <string name="device_permission_remove_from_schedule">Elimină din program</string>
+    <string name="device_permission_remove_from_schedule_desc">Scoate elemente din program</string>
+    <string name="device_permission_go_live">Proiectează</string>
+    <string name="device_permission_go_live_desc">Pune imediat un element pe ecran</string>
+    <string name="device_permission_upload_files">Încarcă fișiere</string>
+    <string name="device_permission_upload_files_desc">Trimite prezentări, media și imagini pe acest computer</string>
+    <string name="device_permission_show_toasts">Afișează notificări de activitate</string>
+    <string name="device_permission_show_toasts_desc">Afișează o notificare pe acest computer când dispozitivul face ceva</string>
     <string name="companion_lt_filter">Filtrează burtierele</string>
     <string name="companion_lt_no_match">Nicio burtieră nu se potrivește.</string>
     <string name="companion_lt_plus_key">+ Key</string>

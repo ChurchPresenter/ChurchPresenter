@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Tafsilotlar nosozlik hisobotlari jildida — bu haqda xabar berganda eng yangi faylni ilova qiling.</string>
     <string name="search_songs">Qoʻshiqlarni qidirish...</string>
     <string name="song_book">Qoʻshiq kitobi</string>
+    <string name="song_book_none">Qoʻshiq kitobisiz</string>
+    <string name="song_book_new">Yangi qoʻshiq kitobi…</string>
     <string name="all_song_books">Barcha qoʻshiq kitoblari</string>
     <string name="entire_bible">Butun Muqaddas Kitob</string>
     <string name="current_book">Joriy kitob</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Qoʻshiq kutubxonasi menejerini ochish</string>
     <string name="shortcut_description_open_converter">Qoʻshiq va Injil oʻgirgichini ochish</string>
     <string name="shortcut_description_open_calendar_manager">Taqvim menejerini ochish</string>
+    <string name="shortcut_description_zoom_in">Kattalashtirish: ilovaning oʻz oynalarini kattaroq qilish</string>
+    <string name="shortcut_description_zoom_out">Kichiklashtirish: ilovaning oʻz oynalarini kichikroq qilish</string>
     <string name="shortcut_description_f6_bible">Muqaddas Kitob boʻlimiga oʻtish</string>
     <string name="shortcut_description_f7_songs">Qoʻshiqlar boʻlimiga oʻtish</string>
     <string name="shortcut_description_f8_pictures">Rasmlar boʻlimiga oʻtish</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamil</string>
     <string name="language_tagalog">Tagalogcha</string>
     <string name="language_swahili">Suahilicha</string>
+    <string name="language_tahitian">Taiti tili</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" boʻyicha natija topilmadi</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">«Olxo'ri» mavzusi</string>
     <string name="custom_theme">Maxsus mavzu</string>
     <string name="menu_customize_theme">Mavzuni sozlash…</string>
+    <string name="menu_zoom_in">Kattalashtirish</string>
+    <string name="menu_zoom_out">Kichiklashtirish</string>
+    <string name="menu_actual_size">Haqiqiy oʻlcham</string>
     <string name="customize_theme_title">Mavzuni sozlash</string>
     <string name="customize_theme_colors">Ranglar</string>
     <string name="customize_theme_use_custom_colors">Maxsus ranglardan foydalanish</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Oddiy</string>
     <string name="customize_theme_margin_thin">Ingichka</string>
     <string name="customize_theme_margin_thinner">Juda ingichka</string>
+    <string name="customize_theme_interface_size">Interfeys oʻlchami</string>
     <string name="customize_theme_text_size_hint">Faqat ilovaning oʻz oynalarini oʻzgartiradi. Chiqish ekranlariga taʼsir qilmaydi.</string>
     <string name="customize_theme_preview_heading">Yakshanba ibodati</string>
     <string name="customize_theme_preview_body">Qoʻshiqlar, oyatlar va slaydlar ekranga chiqarishga tayyor.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">OMT manbasi tanlanmagan</string>
     <string name="song_typical_live">odatda %1$s efirda</string>
     <string name="calendar_storage">Taqvim</string>
+    <string name="schedule_storage">Jadvallar</string>
     <string name="calendar_storage_status_default">Ilova ma’lumotlar jildi</string>
     <string name="use_default_directory">Standartni ishlatish</string>
     <string name="song_background_category_cameras">Kameralar</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">Ruxsat berilgan</string>
     <string name="remote_clients_tab_blocked">Bloklangan</string>
     <string name="remote_clients_unnamed">Nomsiz qurilma</string>
+    <string name="remote_client_permissions">Ruxsatlar</string>
+    <string name="remote_client_permissions_note">Bu qurilma nima qila oladi. Oʻchirilgan har narsa soʻramasdan rad etiladi.</string>
+    <string name="remote_client_permissions_all">Hammasiga ruxsat</string>
+    <string name="remote_client_permissions_count">%2$d tadan %1$d tasiga ruxsat</string>
+    <string name="remote_client_no_toasts">Bildirishnomalar yoʻq</string>
+    <string name="device_permission_control_output">Ekranni boshqarish</string>
+    <string name="device_permission_control_output_desc">Qoʻshiqlar, oyatlar, slaydlar va rasmlarni chiqarish, ular boʻylab oʻtish, media ijro etish va ekranni tozalash</string>
+    <string name="device_permission_add_to_schedule">Jadvalga qoʻshish</string>
+    <string name="device_permission_add_to_schedule_desc">Jadvalga elementlar qoʻshish</string>
+    <string name="device_permission_remove_from_schedule">Jadvaldan olib tashlash</string>
+    <string name="device_permission_remove_from_schedule_desc">Jadvaldan elementlarni olib tashlash</string>
+    <string name="device_permission_go_live">Ekranga chiqarish</string>
+    <string name="device_permission_go_live_desc">Elementni darhol ekranga chiqarish</string>
+    <string name="device_permission_upload_files">Fayllarni yuklash</string>
+    <string name="device_permission_upload_files_desc">Taqdimotlar, media va rasmlarni bu kompyuterga yuborish</string>
+    <string name="device_permission_show_toasts">Faoliyat bildirishnomalarini koʻrsatish</string>
+    <string name="device_permission_show_toasts_desc">Qurilma biror narsa qilganda bu kompyuterda bildirishnoma koʻrsatish</string>
     <string name="companion_lt_filter">Quyi lavhalarni saralash</string>
     <string name="companion_lt_no_match">Mos quyi lavha yo‘q.</string>
     <string name="companion_lt_plus_key">+ key</string>

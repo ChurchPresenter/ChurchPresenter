@@ -10,6 +10,8 @@
     <string name="search">Pesquisar</string>
     <string name="search_songs">Pesquisar músicas...</string>
     <string name="song_book">Hinário</string>
+    <string name="song_book_none">Nenhum hinário</string>
+    <string name="song_book_new">Novo hinário…</string>
     <string name="all_song_books">Todos os Hinários</string>
     <string name="entire_bible">Bíblia Completa</string>
     <string name="current_book">Livro Atual</string>
@@ -116,6 +118,8 @@
     <string name="shortcut_description_open_song_library">Abrir o gerenciador da biblioteca de músicas</string>
     <string name="shortcut_description_open_converter">Abrir o Conversor de Músicas e Bíblias</string>
     <string name="shortcut_description_open_calendar_manager">Abrir o gerenciador de calendário</string>
+    <string name="shortcut_description_zoom_in">Ampliar: deixa as janelas do próprio aplicativo maiores</string>
+    <string name="shortcut_description_zoom_out">Reduzir: deixa as janelas do próprio aplicativo menores</string>
     <string name="shortcut_description_f6_bible">Ir para Aba Bíblia</string>
     <string name="shortcut_description_f7_songs">Ir para Aba Músicas</string>
     <string name="shortcut_description_f8_pictures">Ir para Aba Imagens</string>
@@ -1478,6 +1482,7 @@
     <string name="language_tamil">Tâmil</string>
     <string name="language_tagalog">Tagalo</string>
     <string name="language_swahili">Suaíli</string>
+    <string name="language_tahitian">Taitiano</string>
     <string name="tab_dictionary">Dicionário</string>
     <string name="dictionary_search_hint">Pesquisar por número, palavra ou definição…</string>
     <string name="dictionary_filter_all">Todos</string>
@@ -2227,6 +2232,9 @@
     <string name="plum_theme">Tema Ameixa</string>
     <string name="custom_theme">Tema personalizado</string>
     <string name="menu_customize_theme">Personalizar tema…</string>
+    <string name="menu_zoom_in">Ampliar</string>
+    <string name="menu_zoom_out">Reduzir</string>
+    <string name="menu_actual_size">Tamanho Real</string>
     <string name="customize_theme_title">Personalizar tema</string>
     <string name="customize_theme_colors">Cores</string>
     <string name="customize_theme_use_custom_colors">Usar cores personalizadas</string>
@@ -2240,6 +2248,7 @@
     <string name="customize_theme_margin_normal">Normal</string>
     <string name="customize_theme_margin_thin">Fina</string>
     <string name="customize_theme_margin_thinner">Mais fina</string>
+    <string name="customize_theme_interface_size">Tamanho da interface</string>
     <string name="customize_theme_text_size_hint">Altera apenas as janelas do próprio aplicativo. As telas de saída não são afetadas.</string>
     <string name="customize_theme_preview_heading">Culto de Domingo</string>
     <string name="customize_theme_preview_body">Músicas, Escrituras e slides, prontos para transmitir.</string>
@@ -2495,6 +2504,7 @@
     <string name="canvas_placeholder_omt_default">Nenhuma fonte OMT selecionada</string>
     <string name="song_typical_live">geralmente %1$s no ar</string>
     <string name="calendar_storage">Calendário</string>
+    <string name="schedule_storage">Roteiros</string>
     <string name="calendar_storage_status_default">Pasta de dados do app</string>
     <string name="use_default_directory">Usar padrão</string>
     <string name="song_background_category_cameras">Câmeras</string>
@@ -2712,6 +2722,23 @@
     <string name="remote_clients_tab_allowed">Permitidos</string>
     <string name="remote_clients_tab_blocked">Bloqueados</string>
     <string name="remote_clients_unnamed">Dispositivo sem nome</string>
+    <string name="remote_client_permissions">Permissões</string>
+    <string name="remote_client_permissions_note">O que este dispositivo pode fazer. Tudo o que estiver desativado é recusado sem perguntar.</string>
+    <string name="remote_client_permissions_all">Tudo permitido</string>
+    <string name="remote_client_permissions_count">%1$d de %2$d permitidos</string>
+    <string name="remote_client_no_toasts">Sem notificações</string>
+    <string name="device_permission_control_output">Controlar a tela</string>
+    <string name="device_permission_control_output_desc">Exibir músicas, versículos, slides e imagens, navegar entre eles, reproduzir mídia e limpar a tela</string>
+    <string name="device_permission_add_to_schedule">Adicionar ao roteiro</string>
+    <string name="device_permission_add_to_schedule_desc">Adicionar itens ao roteiro</string>
+    <string name="device_permission_remove_from_schedule">Remover do roteiro</string>
+    <string name="device_permission_remove_from_schedule_desc">Tirar itens do roteiro</string>
+    <string name="device_permission_go_live">Transmitir</string>
+    <string name="device_permission_go_live_desc">Colocar um item na tela imediatamente</string>
+    <string name="device_permission_upload_files">Enviar arquivos</string>
+    <string name="device_permission_upload_files_desc">Enviar apresentações, mídia e imagens para este computador</string>
+    <string name="device_permission_show_toasts">Mostrar notificações de atividade</string>
+    <string name="device_permission_show_toasts_desc">Mostrar uma notificação neste computador quando o dispositivo fizer algo</string>
     <string name="companion_lt_filter">Filtrar geradores de caracteres</string>
     <string name="companion_lt_no_match">Nenhum gerador de caracteres corresponde.</string>
     <string name="companion_lt_plus_key">+ Key</string>

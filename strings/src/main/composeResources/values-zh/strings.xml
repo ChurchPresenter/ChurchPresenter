@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">详细信息在崩溃报告文件夹中——反馈问题时请附上最新的文件。</string>
     <string name="search_songs">搜索歌曲…</string>
     <string name="song_book">歌本</string>
+    <string name="song_book_none">无歌本</string>
+    <string name="song_book_new">新建歌本…</string>
     <string name="all_song_books">所有歌本</string>
     <string name="entire_bible">整本圣经</string>
     <string name="current_book">当前书卷</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">打开歌曲库管理器</string>
     <string name="shortcut_description_open_converter">打开歌曲与圣经转换器</string>
     <string name="shortcut_description_open_calendar_manager">打开日历管理器</string>
+    <string name="shortcut_description_zoom_in">放大：让应用自身的窗口变大</string>
+    <string name="shortcut_description_zoom_out">缩小：让应用自身的窗口变小</string>
     <string name="shortcut_description_f6_bible">切换到圣经标签页</string>
     <string name="shortcut_description_f7_songs">切换到歌曲标签页</string>
     <string name="shortcut_description_f8_pictures">切换到图片标签页</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">泰米尔语</string>
     <string name="language_tagalog">塔加洛语</string>
     <string name="language_swahili">斯瓦希里语</string>
+    <string name="language_tahitian">塔希提语</string>
 
     <!-- Search Results -->
     <string name="no_results_found">未找到“%1$s”的结果</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">梅子主题</string>
     <string name="custom_theme">自定义主题</string>
     <string name="menu_customize_theme">自定义主题…</string>
+    <string name="menu_zoom_in">放大</string>
+    <string name="menu_zoom_out">缩小</string>
+    <string name="menu_actual_size">实际大小</string>
     <string name="customize_theme_title">自定义主题</string>
     <string name="customize_theme_colors">颜色</string>
     <string name="customize_theme_use_custom_colors">使用自定义颜色</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">正常</string>
     <string name="customize_theme_margin_thin">窄</string>
     <string name="customize_theme_margin_thinner">更窄</string>
+    <string name="customize_theme_interface_size">界面大小</string>
     <string name="customize_theme_text_size_hint">只改变应用自身的窗口，不影响输出屏幕。</string>
     <string name="customize_theme_preview_heading">主日礼拜</string>
     <string name="customize_theme_preview_body">歌曲、经文和幻灯片，随时可以上屏。</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">未选择 OMT 源</string>
     <string name="song_typical_live">通常上屏 %1$s</string>
     <string name="calendar_storage">日历</string>
+    <string name="schedule_storage">程序单</string>
     <string name="calendar_storage_status_default">应用数据文件夹</string>
     <string name="use_default_directory">使用默认</string>
     <string name="song_background_category_cameras">摄像头</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">已允许</string>
     <string name="remote_clients_tab_blocked">已阻止</string>
     <string name="remote_clients_unnamed">未命名设备</string>
+    <string name="remote_client_permissions">权限</string>
+    <string name="remote_client_permissions_note">此设备可以执行的操作。任何已关闭的操作都会被直接拒绝。</string>
+    <string name="remote_client_permissions_all">全部允许</string>
+    <string name="remote_client_permissions_count">已允许 %1$d / %2$d</string>
+    <string name="remote_client_no_toasts">无通知</string>
+    <string name="device_permission_control_output">控制屏幕</string>
+    <string name="device_permission_control_output_desc">上屏歌曲、经文、幻灯片和图片，逐项切换，播放媒体并清空屏幕</string>
+    <string name="device_permission_add_to_schedule">添加到程序单</string>
+    <string name="device_permission_add_to_schedule_desc">向程序单添加项目</string>
+    <string name="device_permission_remove_from_schedule">从程序单移除</string>
+    <string name="device_permission_remove_from_schedule_desc">从程序单中移除项目</string>
+    <string name="device_permission_go_live">上屏</string>
+    <string name="device_permission_go_live_desc">立即将项目显示在屏幕上</string>
+    <string name="device_permission_upload_files">上传文件</string>
+    <string name="device_permission_upload_files_desc">向这台电脑发送演示文稿、媒体和图片</string>
+    <string name="device_permission_show_toasts">显示活动通知</string>
+    <string name="device_permission_show_toasts_desc">设备执行操作时在这台电脑上显示通知</string>
     <string name="companion_lt_filter">筛选下三分之一</string>
     <string name="companion_lt_no_match">没有匹配的下三分之一。</string>
     <string name="companion_lt_plus_key">+ Key</string>

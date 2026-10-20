@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">詳細はクラッシュレポートのフォルダーにあります。報告の際は最新のファイルを添付してください。</string>
     <string name="search_songs">賛美歌を検索...</string>
     <string name="song_book">賛美歌集</string>
+    <string name="song_book_none">賛美歌集なし</string>
+    <string name="song_book_new">新しい賛美歌集…</string>
     <string name="all_song_books">すべての賛美歌集</string>
     <string name="entire_bible">聖書全体</string>
     <string name="current_book">現在の書</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">賛美歌ライブラリ管理を開く</string>
     <string name="shortcut_description_open_converter">賛美歌・聖書コンバーターを開く</string>
     <string name="shortcut_description_open_calendar_manager">カレンダーマネージャーを開く</string>
+    <string name="shortcut_description_zoom_in">拡大：アプリ自身のウィンドウを大きくする</string>
+    <string name="shortcut_description_zoom_out">縮小：アプリ自身のウィンドウを小さくする</string>
     <string name="shortcut_description_f6_bible">聖書タブに切り替え</string>
     <string name="shortcut_description_f7_songs">賛美歌タブに切り替え</string>
     <string name="shortcut_description_f8_pictures">画像タブに切り替え</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">タミル語</string>
     <string name="language_tagalog">タガログ語</string>
     <string name="language_swahili">スワヒリ語</string>
+    <string name="language_tahitian">タヒチ語</string>
 
     <!-- Search Results -->
     <string name="no_results_found">「%1$s」に一致する結果はありません</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">プラムテーマ</string>
     <string name="custom_theme">カスタムテーマ</string>
     <string name="menu_customize_theme">テーマをカスタマイズ…</string>
+    <string name="menu_zoom_in">拡大</string>
+    <string name="menu_zoom_out">縮小</string>
+    <string name="menu_actual_size">実際のサイズ</string>
     <string name="customize_theme_title">テーマのカスタマイズ</string>
     <string name="customize_theme_colors">色</string>
     <string name="customize_theme_use_custom_colors">カスタムカラーを使う</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">標準</string>
     <string name="customize_theme_margin_thin">狭い</string>
     <string name="customize_theme_margin_thinner">より狭い</string>
+    <string name="customize_theme_interface_size">インターフェースのサイズ</string>
     <string name="customize_theme_text_size_hint">アプリ自体のウィンドウだけが変わります。出力画面には影響しません。</string>
     <string name="customize_theme_preview_heading">主日礼拝</string>
     <string name="customize_theme_preview_body">賛美歌、聖書、スライドをすぐにライブ表示できます。</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">OMT ソースが選択されていません</string>
     <string name="song_typical_live">通常 %1$s 表示</string>
     <string name="calendar_storage">カレンダー</string>
+    <string name="schedule_storage">進行表</string>
     <string name="calendar_storage_status_default">アプリのデータフォルダー</string>
     <string name="use_default_directory">デフォルトを使用</string>
     <string name="song_background_category_cameras">カメラ</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">許可済み</string>
     <string name="remote_clients_tab_blocked">ブロック済み</string>
     <string name="remote_clients_unnamed">名前のないデバイス</string>
+    <string name="remote_client_permissions">権限</string>
+    <string name="remote_client_permissions_note">このデバイスに許可する操作です。オフにした操作は確認なしで拒否されます。</string>
+    <string name="remote_client_permissions_all">すべて許可</string>
+    <string name="remote_client_permissions_count">%2$d 件中 %1$d 件を許可</string>
+    <string name="remote_client_no_toasts">通知なし</string>
+    <string name="device_permission_control_output">画面の操作</string>
+    <string name="device_permission_control_output_desc">賛美歌、聖句、スライド、画像の表示と切り替え、メディアの再生、画面のクリア</string>
+    <string name="device_permission_add_to_schedule">進行表に追加</string>
+    <string name="device_permission_add_to_schedule_desc">進行表に項目を追加する</string>
+    <string name="device_permission_remove_from_schedule">進行表から削除</string>
+    <string name="device_permission_remove_from_schedule_desc">進行表から項目を取り除く</string>
+    <string name="device_permission_go_live">ライブ表示</string>
+    <string name="device_permission_go_live_desc">項目をすぐに画面に表示する</string>
+    <string name="device_permission_upload_files">ファイルのアップロード</string>
+    <string name="device_permission_upload_files_desc">プレゼンテーション、メディア、画像をこのコンピューターに送る</string>
+    <string name="device_permission_show_toasts">アクティビティ通知を表示</string>
+    <string name="device_permission_show_toasts_desc">デバイスが操作を行ったときにこのコンピューターに通知を表示する</string>
     <string name="companion_lt_filter">ローワーサードを絞り込む</string>
     <string name="companion_lt_no_match">一致するローワーサードはありません。</string>
     <string name="companion_lt_plus_key">+ Key</string>

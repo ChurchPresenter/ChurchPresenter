@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Detalji se nalaze u mapi s izvještajima o padu — priložite najnoviju datoteku kada ovo prijavljujete.</string>
     <string name="search_songs">Traži pjesme...</string>
     <string name="song_book">Pjesmarica</string>
+    <string name="song_book_none">Bez pjesmarice</string>
+    <string name="song_book_new">Nova pjesmarica…</string>
     <string name="all_song_books">Sve pjesmarice</string>
     <string name="entire_bible">Cijela Biblija</string>
     <string name="current_book">Trenutna knjiga</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Otvori upravitelj knjižnice pjesama</string>
     <string name="shortcut_description_open_converter">Otvori pretvarač pjesama i Biblije</string>
     <string name="shortcut_description_open_calendar_manager">Otvori upravitelj kalendara</string>
+    <string name="shortcut_description_zoom_in">Povećaj: povećaj prozore same aplikacije</string>
+    <string name="shortcut_description_zoom_out">Smanji: smanji prozore same aplikacije</string>
     <string name="shortcut_description_f6_bible">Prebaci na karticu Biblija</string>
     <string name="shortcut_description_f7_songs">Prebaci na karticu Pjesme</string>
     <string name="shortcut_description_f8_pictures">Prebaci na karticu Slike</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamilski</string>
     <string name="language_tagalog">Tagaloški</string>
     <string name="language_swahili">Svahili</string>
+    <string name="language_tahitian">Tahićanski</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Nema rezultata za "%1$s"</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">Tema Šljiva</string>
     <string name="custom_theme">Prilagođena tema</string>
     <string name="menu_customize_theme">Prilagodi temu…</string>
+    <string name="menu_zoom_in">Povećaj</string>
+    <string name="menu_zoom_out">Smanji</string>
+    <string name="menu_actual_size">Stvarna veličina</string>
     <string name="customize_theme_title">Prilagodi temu</string>
     <string name="customize_theme_colors">Boje</string>
     <string name="customize_theme_use_custom_colors">Koristi prilagođene boje</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Normalna</string>
     <string name="customize_theme_margin_thin">Uska</string>
     <string name="customize_theme_margin_thinner">Uža</string>
+    <string name="customize_theme_interface_size">Veličina sučelja</string>
     <string name="customize_theme_text_size_hint">Mijenja samo prozore aplikacije. Izlazni zasloni nisu zahvaćeni.</string>
     <string name="customize_theme_preview_heading">Nedjeljno bogoslužje</string>
     <string name="customize_theme_preview_body">Pjesme, Pismo i slajdovi, spremni za prikaz uživo.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">Nije odabran OMT izvor</string>
     <string name="song_typical_live">obično %1$s uživo</string>
     <string name="calendar_storage">Kalendar</string>
+    <string name="schedule_storage">Rasporedi</string>
     <string name="calendar_storage_status_default">Mapa podataka aplikacije</string>
     <string name="use_default_directory">Koristi zadano</string>
     <string name="song_background_category_cameras">Kamere</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">Dopušteni</string>
     <string name="remote_clients_tab_blocked">Blokirani</string>
     <string name="remote_clients_unnamed">Uređaj bez naziva</string>
+    <string name="remote_client_permissions">Dopuštenja</string>
+    <string name="remote_client_permissions_note">Što ovaj uređaj smije raditi. Sve isključeno odbija se bez pitanja.</string>
+    <string name="remote_client_permissions_all">Sve dopušteno</string>
+    <string name="remote_client_permissions_count">Dopušteno %1$d od %2$d</string>
+    <string name="remote_client_no_toasts">Nema obavijesti</string>
+    <string name="device_permission_control_output">Upravljati zaslonom</string>
+    <string name="device_permission_control_output_desc">Prikazivati pjesme, retke, slajdove i slike, prolaziti kroz njih, reproducirati medije i čistiti zaslon</string>
+    <string name="device_permission_add_to_schedule">Dodaj u raspored</string>
+    <string name="device_permission_add_to_schedule_desc">Dodavati stavke u raspored</string>
+    <string name="device_permission_remove_from_schedule">Ukloni iz rasporeda</string>
+    <string name="device_permission_remove_from_schedule_desc">Uklanjati stavke iz rasporeda</string>
+    <string name="device_permission_go_live">Prikaži uživo</string>
+    <string name="device_permission_go_live_desc">Odmah prikazati stavku na zaslonu</string>
+    <string name="device_permission_upload_files">Prenositi datoteke</string>
+    <string name="device_permission_upload_files_desc">Slati prezentacije, medije i slike na ovo računalo</string>
+    <string name="device_permission_show_toasts">Prikazivati obavijesti o aktivnosti</string>
+    <string name="device_permission_show_toasts_desc">Prikaži obavijest na ovom računalu kada uređaj nešto učini</string>
     <string name="companion_lt_filter">Filtriraj donje trake</string>
     <string name="companion_lt_no_match">Nijedna donja traka ne odgovara.</string>
     <string name="companion_lt_plus_key">+ key</string>

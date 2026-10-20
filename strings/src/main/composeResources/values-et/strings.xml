@@ -15,6 +15,8 @@
     <string name="bible_search_mode_tooltip">Puuduta vahetamiseks — Automaatne: hüppab viidete juurde, otsib kõike muud. Viide: ainult navigeerimine. Tekst: otsib alati salmi teksti.</string>
     <string name="search_songs">Otsi laule...</string>
     <string name="song_book">Laulik</string>
+    <string name="song_book_none">Laulik puudub</string>
+    <string name="song_book_new">Uus laulik…</string>
     <string name="all_song_books">Kõik laulikud</string>
     <string name="entire_bible">Kogu Piibel</string>
     <string name="current_book">Praegune raamat</string>
@@ -141,6 +143,8 @@
     <string name="shortcut_description_open_song_library">Ava laulukogu haldur</string>
     <string name="shortcut_description_open_converter">Ava laulude ja Piibli teisendaja</string>
     <string name="shortcut_description_open_calendar_manager">Ava kalendrihaldur</string>
+    <string name="shortcut_description_zoom_in">Suurenda: muuda rakenduse enda aknad suuremaks</string>
+    <string name="shortcut_description_zoom_out">Vähenda: muuda rakenduse enda aknad väiksemaks</string>
     <string name="shortcut_description_f6_bible">Lülitu Piibli vahekaardile</string>
     <string name="shortcut_description_f7_songs">Lülitu laulude vahekaardile</string>
     <string name="shortcut_description_f8_pictures">Lülitu piltide vahekaardile</string>
@@ -425,6 +429,7 @@
     <string name="language_tamil">Tamili</string>
     <string name="language_tagalog">Tagalogi</string>
     <string name="language_swahili">Suahiili</string>
+    <string name="language_tahitian">Tahiti</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Tulemusi ei leitud päringule "%1$s"</string>
@@ -2231,6 +2236,9 @@
     <string name="plum_theme">Ploomi teema</string>
     <string name="custom_theme">Kohandatud teema</string>
     <string name="menu_customize_theme">Kohanda teemat…</string>
+    <string name="menu_zoom_in">Suurenda</string>
+    <string name="menu_zoom_out">Vähenda</string>
+    <string name="menu_actual_size">Tegelik suurus</string>
     <string name="customize_theme_title">Kohanda teemat</string>
     <string name="customize_theme_colors">Värvid</string>
     <string name="customize_theme_use_custom_colors">Kasuta kohandatud värve</string>
@@ -2244,6 +2252,7 @@
     <string name="customize_theme_margin_normal">Tavaline</string>
     <string name="customize_theme_margin_thin">Kitsas</string>
     <string name="customize_theme_margin_thinner">Kitsam</string>
+    <string name="customize_theme_interface_size">Liidese suurus</string>
     <string name="customize_theme_text_size_hint">Muudab ainult rakenduse enda aknaid. Väljundekraane see ei mõjuta.</string>
     <string name="customize_theme_preview_heading">Pühapäevane jumalateenistus</string>
     <string name="customize_theme_preview_body">Laulud, pühakiri ja slaidid, valmis eetrisse minema.</string>
@@ -2499,6 +2508,7 @@
     <string name="canvas_placeholder_omt_default">OMT allikat pole valitud</string>
     <string name="song_typical_live">tavaliselt %1$s eetris</string>
     <string name="calendar_storage">Kalender</string>
+    <string name="schedule_storage">Kavad</string>
     <string name="calendar_storage_status_default">Rakenduse andmekaust</string>
     <string name="use_default_directory">Kasuta vaikimisi</string>
     <string name="song_background_category_cameras">Kaamerad</string>
@@ -2716,6 +2726,23 @@
     <string name="remote_clients_tab_allowed">Lubatud</string>
     <string name="remote_clients_tab_blocked">Blokeeritud</string>
     <string name="remote_clients_unnamed">Nimetu seade</string>
+    <string name="remote_client_permissions">Õigused</string>
+    <string name="remote_client_permissions_note">Mida see seade teha tohib. Kõik väljalülitatu lükatakse küsimata tagasi.</string>
+    <string name="remote_client_permissions_all">Kõik lubatud</string>
+    <string name="remote_client_permissions_count">Lubatud %1$d / %2$d</string>
+    <string name="remote_client_no_toasts">Teateid pole</string>
+    <string name="device_permission_control_output">Juhi ekraani</string>
+    <string name="device_permission_control_output_desc">Näita laule, salme, slaide ja pilte, liigu nende vahel, esita meediat ja tühjenda ekraan</string>
+    <string name="device_permission_add_to_schedule">Lisa kavasse</string>
+    <string name="device_permission_add_to_schedule_desc">Lisa üksusi kavasse</string>
+    <string name="device_permission_remove_from_schedule">Eemalda kavast</string>
+    <string name="device_permission_remove_from_schedule_desc">Võta üksusi kavast välja</string>
+    <string name="device_permission_go_live">Mine eetrisse</string>
+    <string name="device_permission_go_live_desc">Näita üksust kohe ekraanil</string>
+    <string name="device_permission_upload_files">Laadi faile üles</string>
+    <string name="device_permission_upload_files_desc">Saada esitlusi, meediat ja pilte sellesse arvutisse</string>
+    <string name="device_permission_show_toasts">Näita tegevusteateid</string>
+    <string name="device_permission_show_toasts_desc">Näita selles arvutis teadet, kui seade midagi teeb</string>
     <string name="companion_lt_filter">Filtreeri alumisi kolmandikke</string>
     <string name="companion_lt_no_match">Ükski alumine kolmandik ei sobi.</string>
     <string name="companion_lt_plus_key">+ Key</string>

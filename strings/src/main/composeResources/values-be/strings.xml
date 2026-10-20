@@ -10,6 +10,8 @@
     <string name="search">Пошук</string>
     <string name="search_songs">Шукаць песні...</string>
     <string name="song_book">Зборнік песень</string>
+    <string name="song_book_none">Без зборніка песень</string>
+    <string name="song_book_new">Новы зборнік песень…</string>
     <string name="all_song_books">Усе зборнікі</string>
     <string name="entire_bible">Уся Біблія</string>
     <string name="current_book">Бягучая кніга</string>
@@ -293,6 +295,7 @@
     <string name="language_tamil">Тамільская</string>
     <string name="language_tagalog">Тагальская</string>
     <string name="language_swahili">Суахілі</string>
+    <string name="language_tahitian">Таіцянская</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Вынікі не знойдзены для "%1$s"</string>
@@ -499,6 +502,8 @@
     <string name="shortcut_description_open_song_library">Адкрыць менеджар зборніка песень</string>
     <string name="shortcut_description_open_converter">Адкрыць канвертар песень і Бібліі</string>
     <string name="shortcut_description_open_calendar_manager">Адкрыць менеджар календара</string>
+    <string name="shortcut_description_zoom_in">Павялічыць: зрабіць вокны праграмы большымі</string>
+    <string name="shortcut_description_zoom_out">Паменшыць: зрабіць вокны праграмы меншымі</string>
     <string name="shortcut_description_f6_bible">Укладка Біблія</string>
     <string name="shortcut_description_f7_songs">Укладка Песні</string>
     <string name="shortcut_description_f8_pictures">Укладка Фота</string>
@@ -2198,6 +2203,9 @@
     <string name="plum_theme">Тэма «Сліва»</string>
     <string name="custom_theme">Уласная тэма</string>
     <string name="menu_customize_theme">Наладзіць тэму…</string>
+    <string name="menu_zoom_in">Павялічыць</string>
+    <string name="menu_zoom_out">Паменшыць</string>
+    <string name="menu_actual_size">Сапраўдны памер</string>
     <string name="customize_theme_title">Наладзіць тэму</string>
     <string name="customize_theme_colors">Колеры</string>
     <string name="customize_theme_use_custom_colors">Выкарыстоўваць уласныя колеры</string>
@@ -2211,6 +2219,7 @@
     <string name="customize_theme_margin_normal">Звычайны</string>
     <string name="customize_theme_margin_thin">Тонкі</string>
     <string name="customize_theme_margin_thinner">Танчэйшы</string>
+    <string name="customize_theme_interface_size">Памер інтэрфейсу</string>
     <string name="customize_theme_text_size_hint">Змяняе толькі вокны самой праграмы. Экраны вываду не змяняюцца.</string>
     <string name="customize_theme_preview_heading">Нядзельнае набажэнства</string>
     <string name="customize_theme_preview_body">Песні, Пісанне і слайды — гатовыя да эфіру.</string>
@@ -2466,6 +2475,7 @@
     <string name="canvas_placeholder_omt_default">Крыніца OMT не выбрана</string>
     <string name="song_typical_live">звычайна %1$s у эфіры</string>
     <string name="calendar_storage">Каляндар</string>
+    <string name="schedule_storage">Праграмы</string>
     <string name="calendar_storage_status_default">Папка даных праграмы</string>
     <string name="use_default_directory">Па змаўчанні</string>
     <string name="song_background_category_cameras">Камеры</string>
@@ -2683,6 +2693,23 @@
     <string name="remote_clients_tab_allowed">Дазволеныя</string>
     <string name="remote_clients_tab_blocked">Заблакаваныя</string>
     <string name="remote_clients_unnamed">Прылада без назвы</string>
+    <string name="remote_client_permissions">Дазволы</string>
+    <string name="remote_client_permissions_note">Што можа рабіць гэтая прылада. Усё выключанае адхіляецца без пытання.</string>
+    <string name="remote_client_permissions_all">Усё дазволена</string>
+    <string name="remote_client_permissions_count">Дазволена %1$d з %2$d</string>
+    <string name="remote_client_no_toasts">Без апавяшчэнняў</string>
+    <string name="device_permission_control_output">Кіраваць экранам</string>
+    <string name="device_permission_control_output_desc">Выводзіць песні, вершы, слайды і выявы, пераключаць іх, прайграваць медыя і ачышчаць экран</string>
+    <string name="device_permission_add_to_schedule">Дадаць у праграму</string>
+    <string name="device_permission_add_to_schedule_desc">Дадаваць элементы ў праграму</string>
+    <string name="device_permission_remove_from_schedule">Выдаліць з праграмы</string>
+    <string name="device_permission_remove_from_schedule_desc">Прыбіраць элементы з праграмы</string>
+    <string name="device_permission_go_live">У эфір</string>
+    <string name="device_permission_go_live_desc">Адразу выводзіць элемент на экран</string>
+    <string name="device_permission_upload_files">Запампоўваць файлы</string>
+    <string name="device_permission_upload_files_desc">Адпраўляць прэзентацыі, медыя і выявы на гэты камп’ютар</string>
+    <string name="device_permission_show_toasts">Паказваць апавяшчэнні пра дзеянні</string>
+    <string name="device_permission_show_toasts_desc">Паказваць апавяшчэнне на гэтым камп’ютары, калі прылада нешта робіць</string>
     <string name="companion_lt_filter">Фільтр цітраў</string>
     <string name="companion_lt_no_match">Няма адпаведных цітраў.</string>
     <string name="companion_lt_plus_key">+ Key</string>

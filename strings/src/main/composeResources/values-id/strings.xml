@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Rinciannya ada di folder laporan kerusakan — lampirkan file terbaru saat melaporkan hal ini.</string>
     <string name="search_songs">Cari lagu...</string>
     <string name="song_book">Buku Lagu</string>
+    <string name="song_book_none">Tanpa buku lagu</string>
+    <string name="song_book_new">Buku lagu baru…</string>
     <string name="all_song_books">Semua Buku Lagu</string>
     <string name="entire_bible">Seluruh Alkitab</string>
     <string name="current_book">Kitab Saat Ini</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Buka Pengelola Pustaka Lagu</string>
     <string name="shortcut_description_open_converter">Buka Konverter Lagu dan Alkitab</string>
     <string name="shortcut_description_open_calendar_manager">Buka Pengelola Kalender</string>
+    <string name="shortcut_description_zoom_in">Perbesar: buat jendela aplikasi ini lebih besar</string>
+    <string name="shortcut_description_zoom_out">Perkecil: buat jendela aplikasi ini lebih kecil</string>
     <string name="shortcut_description_f6_bible">Pindah ke tab Alkitab</string>
     <string name="shortcut_description_f7_songs">Pindah ke tab Lagu</string>
     <string name="shortcut_description_f8_pictures">Pindah ke tab Gambar</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamil</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Swahili</string>
+    <string name="language_tahitian">Tahiti</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Tidak ada hasil untuk "%1$s"</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">Tema Prem</string>
     <string name="custom_theme">Tema Kustom</string>
     <string name="menu_customize_theme">Sesuaikan Tema…</string>
+    <string name="menu_zoom_in">Perbesar</string>
+    <string name="menu_zoom_out">Perkecil</string>
+    <string name="menu_actual_size">Ukuran Sebenarnya</string>
     <string name="customize_theme_title">Sesuaikan Tema</string>
     <string name="customize_theme_colors">Warna</string>
     <string name="customize_theme_use_custom_colors">Gunakan warna kustom</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Normal</string>
     <string name="customize_theme_margin_thin">Tipis</string>
     <string name="customize_theme_margin_thinner">Lebih tipis</string>
+    <string name="customize_theme_interface_size">Ukuran antarmuka</string>
     <string name="customize_theme_text_size_hint">Hanya mengubah jendela aplikasi ini. Layar keluaran tidak terpengaruh.</string>
     <string name="customize_theme_preview_heading">Ibadah Minggu</string>
     <string name="customize_theme_preview_body">Lagu, ayat Alkitab, dan slide, siap ditayangkan.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">Belum ada sumber OMT yang dipilih</string>
     <string name="song_typical_live">biasanya tayang %1$s</string>
     <string name="calendar_storage">Kalender</string>
+    <string name="schedule_storage">Jadwal</string>
     <string name="calendar_storage_status_default">Folder data aplikasi</string>
     <string name="use_default_directory">Gunakan Bawaan</string>
     <string name="song_background_category_cameras">Kamera</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">Diizinkan</string>
     <string name="remote_clients_tab_blocked">Diblokir</string>
     <string name="remote_clients_unnamed">Perangkat tanpa nama</string>
+    <string name="remote_client_permissions">Izin</string>
+    <string name="remote_client_permissions_note">Apa yang boleh dilakukan perangkat ini. Apa pun yang dimatikan akan ditolak tanpa bertanya.</string>
+    <string name="remote_client_permissions_all">Semua diizinkan</string>
+    <string name="remote_client_permissions_count">%1$d dari %2$d diizinkan</string>
+    <string name="remote_client_no_toasts">Tanpa notifikasi</string>
+    <string name="device_permission_control_output">Kendalikan layar</string>
+    <string name="device_permission_control_output_desc">Tampilkan lagu, ayat, slide dan gambar, berpindah di antaranya, putar media dan kosongkan layar</string>
+    <string name="device_permission_add_to_schedule">Tambahkan ke jadwal</string>
+    <string name="device_permission_add_to_schedule_desc">Tambahkan item ke jadwal</string>
+    <string name="device_permission_remove_from_schedule">Hapus dari jadwal</string>
+    <string name="device_permission_remove_from_schedule_desc">Keluarkan item dari jadwal</string>
+    <string name="device_permission_go_live">Tayangkan</string>
+    <string name="device_permission_go_live_desc">Tampilkan item di layar seketika</string>
+    <string name="device_permission_upload_files">Unggah file</string>
+    <string name="device_permission_upload_files_desc">Kirim presentasi, media dan gambar ke komputer ini</string>
+    <string name="device_permission_show_toasts">Tampilkan notifikasi aktivitas</string>
+    <string name="device_permission_show_toasts_desc">Tampilkan notifikasi di komputer ini saat perangkat melakukan sesuatu</string>
     <string name="companion_lt_filter">Filter lower third</string>
     <string name="companion_lt_no_match">Tidak ada lower third yang cocok.</string>
     <string name="companion_lt_plus_key">+ key</string>

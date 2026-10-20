@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Ayrıntılar çökme raporu klasöründe — bunu bildirirken en yeni dosyayı ekleyin.</string>
     <string name="search_songs">Şarkı ara...</string>
     <string name="song_book">Şarkı Kitabı</string>
+    <string name="song_book_none">Şarkı kitabı yok</string>
+    <string name="song_book_new">Yeni şarkı kitabı…</string>
     <string name="all_song_books">Tüm Şarkı Kitapları</string>
     <string name="entire_bible">Tüm Kutsal Kitap</string>
     <string name="current_book">Geçerli Kitap</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Şarkı Kitaplığı Yöneticisini Aç</string>
     <string name="shortcut_description_open_converter">İlahi ve Kutsal Kitap Dönüştürücüyü Aç</string>
     <string name="shortcut_description_open_calendar_manager">Takvim Yöneticisini Aç</string>
+    <string name="shortcut_description_zoom_in">Yakınlaştır: uygulamanın kendi pencerelerini büyüt</string>
+    <string name="shortcut_description_zoom_out">Uzaklaştır: uygulamanın kendi pencerelerini küçült</string>
     <string name="shortcut_description_f6_bible">Kutsal Kitap Sekmesine Geç</string>
     <string name="shortcut_description_f7_songs">Şarkılar Sekmesine Geç</string>
     <string name="shortcut_description_f8_pictures">Resimler Sekmesine Geç</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamilce</string>
     <string name="language_tagalog">Tagalogca</string>
     <string name="language_swahili">Svahili</string>
+    <string name="language_tahitian">Tahitice</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" için sonuç bulunamadı</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">Erik Teması</string>
     <string name="custom_theme">Özel Tema</string>
     <string name="menu_customize_theme">Temayı Özelleştir…</string>
+    <string name="menu_zoom_in">Yakınlaştır</string>
+    <string name="menu_zoom_out">Uzaklaştır</string>
+    <string name="menu_actual_size">Gerçek boyut</string>
     <string name="customize_theme_title">Temayı Özelleştir</string>
     <string name="customize_theme_colors">Renkler</string>
     <string name="customize_theme_use_custom_colors">Özel renkler kullan</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Normal</string>
     <string name="customize_theme_margin_thin">İnce</string>
     <string name="customize_theme_margin_thinner">Daha ince</string>
+    <string name="customize_theme_interface_size">Arayüz boyutu</string>
     <string name="customize_theme_text_size_hint">Yalnızca uygulamanın kendi pencerelerini değiştirir. Çıkış ekranları etkilenmez.</string>
     <string name="customize_theme_preview_heading">Pazar Ayini</string>
     <string name="customize_theme_preview_body">Şarkılar, ayetler ve slaytlar yayına hazır.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">OMT kaynağı seçilmedi</string>
     <string name="song_typical_live">genellikle %1$s yayında</string>
     <string name="calendar_storage">Takvim</string>
+    <string name="schedule_storage">Programlar</string>
     <string name="calendar_storage_status_default">Uygulama veri klasörü</string>
     <string name="use_default_directory">Varsayılanı Kullan</string>
     <string name="song_background_category_cameras">Kameralar</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">İzin verilen</string>
     <string name="remote_clients_tab_blocked">Engellenen</string>
     <string name="remote_clients_unnamed">Adsız cihaz</string>
+    <string name="remote_client_permissions">İzinler</string>
+    <string name="remote_client_permissions_note">Bu cihazın neler yapabileceği. Kapalı olan her şey sorulmadan reddedilir.</string>
+    <string name="remote_client_permissions_all">Tümüne izin verildi</string>
+    <string name="remote_client_permissions_count">%2$d izinden %1$d tanesi verildi</string>
+    <string name="remote_client_no_toasts">Bildirim yok</string>
+    <string name="device_permission_control_output">Ekranı kontrol etme</string>
+    <string name="device_permission_control_output_desc">Şarkıları, ayetleri, slaytları ve resimleri gösterme, aralarında ilerleme, medya oynatma ve ekranı temizleme</string>
+    <string name="device_permission_add_to_schedule">Programa ekle</string>
+    <string name="device_permission_add_to_schedule_desc">Programa öğe ekleme</string>
+    <string name="device_permission_remove_from_schedule">Programdan kaldır</string>
+    <string name="device_permission_remove_from_schedule_desc">Programdan öğe çıkarma</string>
+    <string name="device_permission_go_live">Yayına Al</string>
+    <string name="device_permission_go_live_desc">Bir öğeyi hemen ekrana getirme</string>
+    <string name="device_permission_upload_files">Dosya yükleme</string>
+    <string name="device_permission_upload_files_desc">Bu bilgisayara sunum, medya ve resim gönderme</string>
+    <string name="device_permission_show_toasts">Etkinlik bildirimlerini göster</string>
+    <string name="device_permission_show_toasts_desc">Cihaz bir şey yaptığında bu bilgisayarda bildirim göster</string>
     <string name="companion_lt_filter">Alt bantları filtrele</string>
     <string name="companion_lt_no_match">Eşleşen alt bant yok.</string>
     <string name="companion_lt_plus_key">+ key</string>

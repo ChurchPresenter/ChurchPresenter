@@ -10,6 +10,8 @@
     <string name="search">Hledat</string>
     <string name="search_songs">Hledat písně...</string>
     <string name="song_book">Zpěvník</string>
+    <string name="song_book_none">Bez zpěvníku</string>
+    <string name="song_book_new">Nový zpěvník…</string>
     <string name="all_song_books">Všechny zpěvníky</string>
     <string name="entire_bible">Celá Bible</string>
     <string name="current_book">Aktuální kniha</string>
@@ -169,6 +171,7 @@
     <string name="language_tamil">Tamilština</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Svahilština</string>
+    <string name="language_tahitian">Tahitština</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Pro "%1$s" nebyly nalezeny žádné výsledky</string>
@@ -540,6 +543,8 @@
     <string name="shortcut_description_open_song_library">Otevřít správce knihovny písní</string>
     <string name="shortcut_description_open_converter">Otevřít převodník písní a Bible</string>
     <string name="shortcut_description_open_calendar_manager">Otevřít správce kalendáře</string>
+    <string name="shortcut_description_zoom_in">Přiblížit: zvětšit okna aplikace</string>
+    <string name="shortcut_description_zoom_out">Oddálit: zmenšit okna aplikace</string>
     <string name="shortcut_description_f6_bible">Záložka Bible</string>
     <string name="shortcut_description_f7_songs">Záložka Písně</string>
     <string name="shortcut_description_f8_pictures">Záložka Fotky</string>
@@ -2208,6 +2213,9 @@
     <string name="plum_theme">Motiv Švestka</string>
     <string name="custom_theme">Vlastní motiv</string>
     <string name="menu_customize_theme">Přizpůsobit motiv…</string>
+    <string name="menu_zoom_in">Přiblížit</string>
+    <string name="menu_zoom_out">Oddálit</string>
+    <string name="menu_actual_size">Skutečná velikost</string>
     <string name="customize_theme_title">Přizpůsobit motiv</string>
     <string name="customize_theme_colors">Barvy</string>
     <string name="customize_theme_use_custom_colors">Použít vlastní barvy</string>
@@ -2221,6 +2229,7 @@
     <string name="customize_theme_margin_normal">Normální</string>
     <string name="customize_theme_margin_thin">Tenký</string>
     <string name="customize_theme_margin_thinner">Tenčí</string>
+    <string name="customize_theme_interface_size">Velikost rozhraní</string>
     <string name="customize_theme_text_size_hint">Mění jen vlastní okna aplikace. Výstupní obrazovky nejsou ovlivněny.</string>
     <string name="customize_theme_preview_heading">Nedělní bohoslužba</string>
     <string name="customize_theme_preview_body">Písně, Písmo a snímky připravené k zobrazení.</string>
@@ -2476,6 +2485,7 @@
     <string name="canvas_placeholder_omt_default">Není vybrán žádný zdroj OMT</string>
     <string name="song_typical_live">obvykle %1$s živě</string>
     <string name="calendar_storage">Kalendář</string>
+    <string name="schedule_storage">Programy</string>
     <string name="calendar_storage_status_default">Datová složka aplikace</string>
     <string name="use_default_directory">Použít výchozí</string>
     <string name="song_background_category_cameras">Kamery</string>
@@ -2693,6 +2703,23 @@
     <string name="remote_clients_tab_allowed">Povolení</string>
     <string name="remote_clients_tab_blocked">Blokovaní</string>
     <string name="remote_clients_unnamed">Nepojmenované zařízení</string>
+    <string name="remote_client_permissions">Oprávnění</string>
+    <string name="remote_client_permissions_note">Co smí toto zařízení dělat. Cokoli vypnutého se bez ptaní odmítne.</string>
+    <string name="remote_client_permissions_all">Vše povoleno</string>
+    <string name="remote_client_permissions_count">Povoleno %1$d z %2$d</string>
+    <string name="remote_client_no_toasts">Žádná oznámení</string>
+    <string name="device_permission_control_output">Ovládat obrazovku</string>
+    <string name="device_permission_control_output_desc">Zobrazovat písně, verše, snímky a obrázky, procházet je, přehrávat média a vymazat obrazovku</string>
+    <string name="device_permission_add_to_schedule">Přidat do programu</string>
+    <string name="device_permission_add_to_schedule_desc">Přidávat položky do programu</string>
+    <string name="device_permission_remove_from_schedule">Odebrat z programu</string>
+    <string name="device_permission_remove_from_schedule_desc">Odebírat položky z programu</string>
+    <string name="device_permission_go_live">Zobrazit</string>
+    <string name="device_permission_go_live_desc">Okamžitě zobrazit položku na obrazovce</string>
+    <string name="device_permission_upload_files">Nahrávat soubory</string>
+    <string name="device_permission_upload_files_desc">Posílat prezentace, média a obrázky do tohoto počítače</string>
+    <string name="device_permission_show_toasts">Zobrazovat oznámení o činnosti</string>
+    <string name="device_permission_show_toasts_desc">Zobrazit oznámení na tomto počítači, když zařízení něco provede</string>
     <string name="companion_lt_filter">Filtrovat titulky</string>
     <string name="companion_lt_no_match">Žádné titulky neodpovídají.</string>
     <string name="companion_lt_plus_key">+ Key</string>

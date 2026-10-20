@@ -10,6 +10,8 @@
     <string name="search">Hľadať</string>
     <string name="search_songs">Hľadať piesne...</string>
     <string name="song_book">Spevník</string>
+    <string name="song_book_none">Bez spevníka</string>
+    <string name="song_book_new">Nový spevník…</string>
     <string name="all_song_books">Všetky spevníky</string>
     <string name="entire_bible">Celá Biblia</string>
     <string name="current_book">Aktuálna kniha</string>
@@ -116,6 +118,8 @@
     <string name="shortcut_description_open_song_library">Otvoriť správcu knižnice piesní</string>
     <string name="shortcut_description_open_converter">Otvoriť prevodník piesní a Biblie</string>
     <string name="shortcut_description_open_calendar_manager">Otvoriť správcu kalendára</string>
+    <string name="shortcut_description_zoom_in">Priblížiť: zväčšiť okná samotnej aplikácie</string>
+    <string name="shortcut_description_zoom_out">Oddialiť: zmenšiť okná samotnej aplikácie</string>
     <string name="shortcut_description_f6_bible">Prepnúť na záložku Biblia</string>
     <string name="shortcut_description_f7_songs">Prepnúť na záložku Piesne</string>
     <string name="shortcut_description_f8_pictures">Prepnúť na záložku Obrázky</string>
@@ -1478,6 +1482,7 @@
     <string name="language_tamil">Tamilčina</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Svahilčina</string>
+    <string name="language_tahitian">Tahitčina</string>
     <string name="tab_dictionary">Slovník</string>
     <string name="dictionary_search_hint">Hľadať podľa čísla, slova alebo definície…</string>
     <string name="dictionary_filter_all">Všetko</string>
@@ -2228,6 +2233,9 @@
     <string name="plum_theme">Motív Slivka</string>
     <string name="custom_theme">Vlastná téma</string>
     <string name="menu_customize_theme">Prispôsobiť tému…</string>
+    <string name="menu_zoom_in">Priblížiť</string>
+    <string name="menu_zoom_out">Oddialiť</string>
+    <string name="menu_actual_size">Skutočná veľkosť</string>
     <string name="customize_theme_title">Prispôsobiť tému</string>
     <string name="customize_theme_colors">Farby</string>
     <string name="customize_theme_use_custom_colors">Použiť vlastné farby</string>
@@ -2241,6 +2249,7 @@
     <string name="customize_theme_margin_normal">Normálny</string>
     <string name="customize_theme_margin_thin">Tenký</string>
     <string name="customize_theme_margin_thinner">Tenší</string>
+    <string name="customize_theme_interface_size">Veľkosť rozhrania</string>
     <string name="customize_theme_text_size_hint">Mení len vlastné okná aplikácie. Výstupné obrazovky to neovplyvní.</string>
     <string name="customize_theme_preview_heading">Nedeľná bohoslužba</string>
     <string name="customize_theme_preview_body">Piesne, Písmo a snímky pripravené na spustenie naživo.</string>
@@ -2496,6 +2505,7 @@
     <string name="canvas_placeholder_omt_default">Nie je vybraný žiadny zdroj OMT</string>
     <string name="song_typical_live">zvyčajne %1$s naživo</string>
     <string name="calendar_storage">Kalendár</string>
+    <string name="schedule_storage">Programy</string>
     <string name="calendar_storage_status_default">Dátový priečinok aplikácie</string>
     <string name="use_default_directory">Použiť predvolený</string>
     <string name="song_background_category_cameras">Kamery</string>
@@ -2713,6 +2723,23 @@
     <string name="remote_clients_tab_allowed">Povolení</string>
     <string name="remote_clients_tab_blocked">Blokovaní</string>
     <string name="remote_clients_unnamed">Nepomenované zariadenie</string>
+    <string name="remote_client_permissions">Povolenia</string>
+    <string name="remote_client_permissions_note">Čo smie toto zariadenie robiť. Všetko vypnuté sa bez pýtania odmietne.</string>
+    <string name="remote_client_permissions_all">Všetko povolené</string>
+    <string name="remote_client_permissions_count">Povolené %1$d z %2$d</string>
+    <string name="remote_client_no_toasts">Žiadne upozornenia</string>
+    <string name="device_permission_control_output">Ovládať obrazovku</string>
+    <string name="device_permission_control_output_desc">Zobrazovať piesne, verše, snímky a obrázky, prechádzať nimi, prehrávať médiá a vymazať obrazovku</string>
+    <string name="device_permission_add_to_schedule">Pridať do programu</string>
+    <string name="device_permission_add_to_schedule_desc">Pridávať položky do programu</string>
+    <string name="device_permission_remove_from_schedule">Odstrániť z programu</string>
+    <string name="device_permission_remove_from_schedule_desc">Vyberať položky z programu</string>
+    <string name="device_permission_go_live">Spustiť naživo</string>
+    <string name="device_permission_go_live_desc">Okamžite zobraziť položku na obrazovke</string>
+    <string name="device_permission_upload_files">Nahrávať súbory</string>
+    <string name="device_permission_upload_files_desc">Posielať prezentácie, médiá a obrázky do tohto počítača</string>
+    <string name="device_permission_show_toasts">Zobrazovať upozornenia na činnosť</string>
+    <string name="device_permission_show_toasts_desc">Zobraziť upozornenie na tomto počítači, keď zariadenie niečo urobí</string>
     <string name="companion_lt_filter">Filtrovať titulky</string>
     <string name="companion_lt_no_match">Žiadne titulky nezodpovedajú.</string>
     <string name="companion_lt_plus_key">+ Key</string>

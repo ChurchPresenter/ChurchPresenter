@@ -421,6 +421,7 @@ class NavigationTopBarTest {
             "Tamil" to Language.TAMIL,
             "Tagalog" to Language.TAGALOG,
             "Swahili" to Language.SWAHILI,
+            "Tahitian" to Language.TAHITIAN,
         )
         val invoked = mutableListOf<Language>()
         navigationTopBar(onLanguageChange = { invoked.add(it) }) {

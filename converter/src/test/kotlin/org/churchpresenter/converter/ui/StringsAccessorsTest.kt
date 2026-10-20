@@ -10,7 +10,7 @@ class StringsAccessorsTest {
     private val languages = listOf(
         "en", "ar", "be", "cs", "de", "es", "et", "fa", "fi", "fr", "hi", "hr", "id", "ja", "kk", "lo",
         "lv", "ms", "ne", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sv", "sw", "ta", "th", "tl",
-        "tr", "uk", "uz", "zh",
+        "tr", "ty", "uk", "uz", "zh",
     )
 
     private val systemLocale: Locale = Locale.getDefault()

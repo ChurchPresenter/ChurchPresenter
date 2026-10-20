@@ -634,6 +634,7 @@
     <string name="language_tamil">Tamil</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Swahili</string>
+    <string name="language_tahitian">Tahitian</string>
 
     <!-- Search Results -->
     <string name="no_results_found">No results found for "%1$s"</string>

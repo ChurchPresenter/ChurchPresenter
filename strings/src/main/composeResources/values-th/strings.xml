@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">รายละเอียดอยู่ในโฟลเดอร์รายงานข้อขัดข้อง — โปรดแนบไฟล์ล่าสุดเมื่อแจ้งเรื่องนี้</string>
     <string name="search_songs">ค้นหาเพลง...</string>
     <string name="song_book">หนังสือเพลง</string>
+    <string name="song_book_none">ไม่มีหนังสือเพลง</string>
+    <string name="song_book_new">หนังสือเพลงใหม่…</string>
     <string name="all_song_books">หนังสือเพลงทั้งหมด</string>
     <string name="entire_bible">พระคัมภีร์ทั้งเล่ม</string>
     <string name="current_book">หนังสือปัจจุบัน</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">เปิดตัวจัดการคลังเพลง</string>
     <string name="shortcut_description_open_converter">เปิดตัวแปลงเพลงและพระคัมภีร์</string>
     <string name="shortcut_description_open_calendar_manager">เปิดตัวจัดการปฏิทิน</string>
+    <string name="shortcut_description_zoom_in">ซูมเข้า: ทำให้หน้าต่างของแอปใหญ่ขึ้น</string>
+    <string name="shortcut_description_zoom_out">ซูมออก: ทำให้หน้าต่างของแอปเล็กลง</string>
     <string name="shortcut_description_f6_bible">ไปที่แท็บพระคัมภีร์</string>
     <string name="shortcut_description_f7_songs">ไปที่แท็บเพลง</string>
     <string name="shortcut_description_f8_pictures">ไปที่แท็บภาพ</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">ทมิฬ</string>
     <string name="language_tagalog">ตากาล็อก</string>
     <string name="language_swahili">สวาฮีลี</string>
+    <string name="language_tahitian">ภาษาตาฮิติ</string>
 
     <!-- Search Results -->
     <string name="no_results_found">ไม่พบผลลัพธ์สำหรับ "%1$s"</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">ธีมลูกพลัม</string>
     <string name="custom_theme">ธีมกำหนดเอง</string>
     <string name="menu_customize_theme">ปรับแต่งธีม…</string>
+    <string name="menu_zoom_in">ซูมเข้า</string>
+    <string name="menu_zoom_out">ซูมออก</string>
+    <string name="menu_actual_size">ขนาดจริง</string>
     <string name="customize_theme_title">ปรับแต่งธีม</string>
     <string name="customize_theme_colors">สี</string>
     <string name="customize_theme_use_custom_colors">ใช้สีกำหนดเอง</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">ปกติ</string>
     <string name="customize_theme_margin_thin">บาง</string>
     <string name="customize_theme_margin_thinner">บางกว่า</string>
+    <string name="customize_theme_interface_size">ขนาดอินเทอร์เฟซ</string>
     <string name="customize_theme_text_size_hint">เปลี่ยนเฉพาะหน้าต่างของแอปเท่านั้น จอเอาต์พุตไม่ได้รับผลกระทบ</string>
     <string name="customize_theme_preview_heading">นมัสการวันอาทิตย์</string>
     <string name="customize_theme_preview_body">เพลง พระคัมภีร์ และสไลด์ พร้อมขึ้นจอ</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">ยังไม่ได้เลือกแหล่งสัญญาณ OMT</string>
     <string name="song_typical_live">ปกติขึ้นจอ %1$s</string>
     <string name="calendar_storage">ปฏิทิน</string>
+    <string name="schedule_storage">รายการ</string>
     <string name="calendar_storage_status_default">โฟลเดอร์ข้อมูลแอป</string>
     <string name="use_default_directory">ใช้ค่าเริ่มต้น</string>
     <string name="song_background_category_cameras">กล้อง</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">อนุญาต</string>
     <string name="remote_clients_tab_blocked">บล็อก</string>
     <string name="remote_clients_unnamed">อุปกรณ์ไม่มีชื่อ</string>
+    <string name="remote_client_permissions">สิทธิ์</string>
+    <string name="remote_client_permissions_note">สิ่งที่อุปกรณ์นี้ทำได้ สิ่งใดที่ปิดไว้จะถูกปฏิเสธโดยไม่ถาม</string>
+    <string name="remote_client_permissions_all">อนุญาตทั้งหมด</string>
+    <string name="remote_client_permissions_count">อนุญาต %1$d จาก %2$d</string>
+    <string name="remote_client_no_toasts">ไม่มีการแจ้งเตือน</string>
+    <string name="device_permission_control_output">ควบคุมหน้าจอ</string>
+    <string name="device_permission_control_output_desc">แสดงเพลง ข้อพระคัมภีร์ สไลด์ และรูปภาพ เลื่อนไปทีละรายการ เล่นสื่อ และล้างหน้าจอ</string>
+    <string name="device_permission_add_to_schedule">เพิ่มลงในรายการ</string>
+    <string name="device_permission_add_to_schedule_desc">เพิ่มรายการลงในรายการ</string>
+    <string name="device_permission_remove_from_schedule">ลบออกจากรายการ</string>
+    <string name="device_permission_remove_from_schedule_desc">นำรายการออกจากรายการ</string>
+    <string name="device_permission_go_live">ขึ้นจอ</string>
+    <string name="device_permission_go_live_desc">แสดงรายการบนหน้าจอทันที</string>
+    <string name="device_permission_upload_files">อัปโหลดไฟล์</string>
+    <string name="device_permission_upload_files_desc">ส่งงานนำเสนอ สื่อ และรูปภาพมายังคอมพิวเตอร์เครื่องนี้</string>
+    <string name="device_permission_show_toasts">แสดงการแจ้งเตือนกิจกรรม</string>
+    <string name="device_permission_show_toasts_desc">แสดงการแจ้งเตือนบนคอมพิวเตอร์เครื่องนี้เมื่ออุปกรณ์ทำบางอย่าง</string>
     <string name="companion_lt_filter">กรองแถบล่าง</string>
     <string name="companion_lt_no_match">ไม่มีแถบล่างที่ตรงกัน</string>
     <string name="companion_lt_plus_key">+ key</string>

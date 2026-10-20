@@ -10,6 +10,8 @@
     <string name="search">Іздеу</string>
     <string name="search_songs">Әнұрандарды іздеу...</string>
     <string name="song_book">Әнұрандар жинағы</string>
+    <string name="song_book_none">Әнұрандар жинағы жоқ</string>
+    <string name="song_book_new">Жаңа әнұрандар жинағы…</string>
     <string name="all_song_books">Барлық жинақтар</string>
     <string name="entire_bible">Бүкіл Киелі Кітап</string>
     <string name="current_book">Ағымдағы кітап</string>
@@ -293,6 +295,7 @@
     <string name="language_tamil">Тамил</string>
     <string name="language_tagalog">Тагал</string>
     <string name="language_swahili">Суахили</string>
+    <string name="language_tahitian">Таити тілі</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" үшін нәтижелер табылмады</string>
@@ -499,6 +502,8 @@
     <string name="shortcut_description_open_song_library">Әндер жинағының менеджерін ашу</string>
     <string name="shortcut_description_open_converter">Әндер мен Киелі кітап түрлендіргішін ашу</string>
     <string name="shortcut_description_open_calendar_manager">Күнтізбе менеджерін ашу</string>
+    <string name="shortcut_description_zoom_in">Үлкейту: қолданбаның өз терезелерін үлкенірек ету</string>
+    <string name="shortcut_description_zoom_out">Кішірейту: қолданбаның өз терезелерін кішірек ету</string>
     <string name="shortcut_description_f6_bible">Киелі кітап қойындысы</string>
     <string name="shortcut_description_f7_songs">Әндер қойындысы</string>
     <string name="shortcut_description_f8_pictures">Суреттер қойындысы</string>
@@ -2199,6 +2204,9 @@
     <string name="plum_theme">«Қара өрік» тақырыбы</string>
     <string name="custom_theme">Өзгеше тақырып</string>
     <string name="menu_customize_theme">Тақырыпты баптау…</string>
+    <string name="menu_zoom_in">Үлкейту</string>
+    <string name="menu_zoom_out">Кішірейту</string>
+    <string name="menu_actual_size">Нақты өлшем</string>
     <string name="customize_theme_title">Тақырыпты баптау</string>
     <string name="customize_theme_colors">Түстер</string>
     <string name="customize_theme_use_custom_colors">Өзгеше түстерді қолдану</string>
@@ -2212,6 +2220,7 @@
     <string name="customize_theme_margin_normal">Қалыпты</string>
     <string name="customize_theme_margin_thin">Жіңішке</string>
     <string name="customize_theme_margin_thinner">Жіңішкерек</string>
+    <string name="customize_theme_interface_size">Интерфейс өлшемі</string>
     <string name="customize_theme_text_size_hint">Тек қолданбаның өз терезелерін өзгертеді. Шығыс экрандарына әсер етпейді.</string>
     <string name="customize_theme_preview_heading">Жексенбілік қызмет</string>
     <string name="customize_theme_preview_body">Әндер, Жазбалар және слайдтар эфирге дайын.</string>
@@ -2467,6 +2476,7 @@
     <string name="canvas_placeholder_omt_default">OMT көзі таңдалмаған</string>
     <string name="song_typical_live">әдетте %1$s эфирде</string>
     <string name="calendar_storage">Күнтізбе</string>
+    <string name="schedule_storage">Бағдарламалар</string>
     <string name="calendar_storage_status_default">Қолданба деректер қалтасы</string>
     <string name="use_default_directory">Әдепкіні қолдану</string>
     <string name="song_background_category_cameras">Камералар</string>
@@ -2684,6 +2694,23 @@
     <string name="remote_clients_tab_allowed">Рұқсат етілген</string>
     <string name="remote_clients_tab_blocked">Бұғатталған</string>
     <string name="remote_clients_unnamed">Атаусыз құрылғы</string>
+    <string name="remote_client_permissions">Рұқсаттар</string>
+    <string name="remote_client_permissions_note">Бұл құрылғы не істей алады. Өшірілгеннің бәрі сұраусыз қабылданбайды.</string>
+    <string name="remote_client_permissions_all">Барлығына рұқсат</string>
+    <string name="remote_client_permissions_count">%2$d ішінен %1$d рұқсат етілген</string>
+    <string name="remote_client_no_toasts">Хабарландырусыз</string>
+    <string name="device_permission_control_output">Экранды басқару</string>
+    <string name="device_permission_control_output_desc">Әндерді, тармақтарды, слайдтарды және суреттерді шығару, олар бойынша жылжу, медианы ойнату және экранды тазарту</string>
+    <string name="device_permission_add_to_schedule">Бағдарламаға қосу</string>
+    <string name="device_permission_add_to_schedule_desc">Бағдарламаға элементтер қосу</string>
+    <string name="device_permission_remove_from_schedule">Бағдарламадан өшіру</string>
+    <string name="device_permission_remove_from_schedule_desc">Бағдарламадан элементтерді алып тастау</string>
+    <string name="device_permission_go_live">Эфирге</string>
+    <string name="device_permission_go_live_desc">Элементті бірден экранға шығару</string>
+    <string name="device_permission_upload_files">Файлдарды жүктеу</string>
+    <string name="device_permission_upload_files_desc">Презентацияларды, медианы және суреттерді осы компьютерге жіберу</string>
+    <string name="device_permission_show_toasts">Әрекет хабарландыруларын көрсету</string>
+    <string name="device_permission_show_toasts_desc">Құрылғы бір нәрсе істегенде осы компьютерде хабарландыру көрсету</string>
     <string name="companion_lt_filter">Титрлерді сүзу</string>
     <string name="companion_lt_no_match">Сәйкес титр жоқ.</string>
     <string name="companion_lt_plus_key">+ Key</string>

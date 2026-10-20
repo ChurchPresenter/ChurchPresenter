@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Detaljene ligger i mappen for krasjrapporter – legg ved den nyeste filen når du melder dette.</string>
     <string name="search_songs">Søk i sanger...</string>
     <string name="song_book">Sangbok</string>
+    <string name="song_book_none">Ingen sangbok</string>
+    <string name="song_book_new">Ny sangbok…</string>
     <string name="all_song_books">Alle sangbøker</string>
     <string name="entire_bible">Hele Bibelen</string>
     <string name="current_book">Denne boken</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Åpne sangbibliotekbehandleren</string>
     <string name="shortcut_description_open_converter">Åpne sang- og bibelkonvertereren</string>
     <string name="shortcut_description_open_calendar_manager">Åpne kalenderbehandleren</string>
+    <string name="shortcut_description_zoom_in">Zoom inn: gjør appens egne vinduer større</string>
+    <string name="shortcut_description_zoom_out">Zoom ut: gjør appens egne vinduer mindre</string>
     <string name="shortcut_description_f6_bible">Bytt til Bibel-fanen</string>
     <string name="shortcut_description_f7_songs">Bytt til Sang-fanen</string>
     <string name="shortcut_description_f8_pictures">Bytt til Bilder-fanen</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamilsk</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Swahili</string>
+    <string name="language_tahitian">Tahitisk</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Ingen treff for «%1$s»</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">Plomme-tema</string>
     <string name="custom_theme">Egendefinert tema</string>
     <string name="menu_customize_theme">Tilpass tema…</string>
+    <string name="menu_zoom_in">Zoom inn</string>
+    <string name="menu_zoom_out">Zoom ut</string>
+    <string name="menu_actual_size">Faktisk størrelse</string>
     <string name="customize_theme_title">Tilpass tema</string>
     <string name="customize_theme_colors">Farger</string>
     <string name="customize_theme_use_custom_colors">Bruk egendefinerte farger</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Normal</string>
     <string name="customize_theme_margin_thin">Smal</string>
     <string name="customize_theme_margin_thinner">Smalere</string>
+    <string name="customize_theme_interface_size">Grensesnittstørrelse</string>
     <string name="customize_theme_text_size_hint">Endrer bare appens egne vinduer. Utgangsskjermer påvirkes ikke.</string>
     <string name="customize_theme_preview_heading">Søndagsgudstjeneste</string>
     <string name="customize_theme_preview_body">Sanger, skriftsteder og lysbilder, klare til å gå live.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">Ingen OMT-kilde valgt</string>
     <string name="song_typical_live">vanligvis %1$s live</string>
     <string name="calendar_storage">Kalender</string>
+    <string name="schedule_storage">Kjøreplaner</string>
     <string name="calendar_storage_status_default">Appens datamappe</string>
     <string name="use_default_directory">Bruk standard</string>
     <string name="song_background_category_cameras">Kameraer</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">Tillatte</string>
     <string name="remote_clients_tab_blocked">Blokkerte</string>
     <string name="remote_clients_unnamed">Enhet uten navn</string>
+    <string name="remote_client_permissions">Tillatelser</string>
+    <string name="remote_client_permissions_note">Hva denne enheten kan gjøre. Alt som er slått av, avvises uten å spørre.</string>
+    <string name="remote_client_permissions_all">Alt tillatt</string>
+    <string name="remote_client_permissions_count">%1$d av %2$d tillatt</string>
+    <string name="remote_client_no_toasts">Ingen varsler</string>
+    <string name="device_permission_control_output">Styre skjermen</string>
+    <string name="device_permission_control_output_desc">Vise sanger, vers, lysbilder og bilder, bla gjennom dem, spille av media og tømme skjermen</string>
+    <string name="device_permission_add_to_schedule">Legge til i kjøreplanen</string>
+    <string name="device_permission_add_to_schedule_desc">Legge til elementer i kjøreplanen</string>
+    <string name="device_permission_remove_from_schedule">Fjerne fra kjøreplanen</string>
+    <string name="device_permission_remove_from_schedule_desc">Ta elementer ut av kjøreplanen</string>
+    <string name="device_permission_go_live">Gå live</string>
+    <string name="device_permission_go_live_desc">Vise et element på skjermen med en gang</string>
+    <string name="device_permission_upload_files">Laste opp filer</string>
+    <string name="device_permission_upload_files_desc">Sende presentasjoner, media og bilder til denne datamaskinen</string>
+    <string name="device_permission_show_toasts">Vise aktivitetsvarsler</string>
+    <string name="device_permission_show_toasts_desc">Vise et varsel på denne datamaskinen når enheten gjør noe</string>
     <string name="companion_lt_filter">Filtrer undertekstbokser</string>
     <string name="companion_lt_no_match">Ingen undertekstbokser samsvarer.</string>
     <string name="companion_lt_plus_key">+ key</string>

@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">Nasa folder ng crash report ang mga detalye — ilagay ang pinakabagong file kapag ini-report ito.</string>
     <string name="search_songs">Maghanap ng awit...</string>
     <string name="song_book">Aklat ng Awit</string>
+    <string name="song_book_none">Walang aklat ng awit</string>
+    <string name="song_book_new">Bagong aklat ng awit…</string>
     <string name="all_song_books">Lahat ng Aklat ng Awit</string>
     <string name="entire_bible">Buong Biblia</string>
     <string name="current_book">Kasalukuyang Aklat</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">Buksan ang Tagapamahala ng Aklatan ng Awit</string>
     <string name="shortcut_description_open_converter">Buksan ang Converter ng Awit at Bibliya</string>
     <string name="shortcut_description_open_calendar_manager">Buksan ang Tagapamahala ng Kalendaryo</string>
+    <string name="shortcut_description_zoom_in">Mag-zoom in: palakihin ang sariling mga window ng app</string>
+    <string name="shortcut_description_zoom_out">Mag-zoom out: paliitin ang sariling mga window ng app</string>
     <string name="shortcut_description_f6_bible">Lumipat sa Tab ng Biblia</string>
     <string name="shortcut_description_f7_songs">Lumipat sa Tab ng mga Awit</string>
     <string name="shortcut_description_f8_pictures">Lumipat sa Tab ng mga Larawan</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">Tamil</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Swahili</string>
+    <string name="language_tahitian">Tahitian</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Walang resultang nahanap para sa "%1$s"</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">Temang Siruwelas</string>
     <string name="custom_theme">Custom na Tema</string>
     <string name="menu_customize_theme">I-customize ang Tema…</string>
+    <string name="menu_zoom_in">Mag-zoom in</string>
+    <string name="menu_zoom_out">Mag-zoom out</string>
+    <string name="menu_actual_size">Aktuwal na laki</string>
     <string name="customize_theme_title">I-customize ang Tema</string>
     <string name="customize_theme_colors">Mga Kulay</string>
     <string name="customize_theme_use_custom_colors">Gumamit ng custom na kulay</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">Normal</string>
     <string name="customize_theme_margin_thin">Manipis</string>
     <string name="customize_theme_margin_thinner">Mas manipis</string>
+    <string name="customize_theme_interface_size">Laki ng interface</string>
     <string name="customize_theme_text_size_hint">Mga window lang ng app ang binabago. Hindi apektado ang mga output screen.</string>
     <string name="customize_theme_preview_heading">Pagsamba sa Linggo</string>
     <string name="customize_theme_preview_body">Mga awit, kasulatan at slide, handang i-live.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">Walang napiling OMT source</string>
     <string name="song_typical_live">karaniwang %1$s na live</string>
     <string name="calendar_storage">Kalendaryo</string>
+    <string name="schedule_storage">Mga schedule</string>
     <string name="calendar_storage_status_default">Folder ng data ng app</string>
     <string name="use_default_directory">Gamitin ang Default</string>
     <string name="song_background_category_cameras">Mga Camera</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">Pinapayagan</string>
     <string name="remote_clients_tab_blocked">Hinaharangan</string>
     <string name="remote_clients_unnamed">Device na walang pangalan</string>
+    <string name="remote_client_permissions">Mga pahintulot</string>
+    <string name="remote_client_permissions_note">Ang maaaring gawin ng device na ito. Anumang naka-off ay tinatanggihan nang hindi nagtatanong.</string>
+    <string name="remote_client_permissions_all">Lahat ay pinapayagan</string>
+    <string name="remote_client_permissions_count">%1$d sa %2$d ang pinapayagan</string>
+    <string name="remote_client_no_toasts">Walang abiso</string>
+    <string name="device_permission_control_output">Kontrolin ang screen</string>
+    <string name="device_permission_control_output_desc">Ipakita ang mga awit, talata, slide at larawan, lumipat sa mga ito, mag-play ng media at linisin ang screen</string>
+    <string name="device_permission_add_to_schedule">Idagdag sa schedule</string>
+    <string name="device_permission_add_to_schedule_desc">Magdagdag ng mga item sa schedule</string>
+    <string name="device_permission_remove_from_schedule">Alisin sa schedule</string>
+    <string name="device_permission_remove_from_schedule_desc">Mag-alis ng mga item sa schedule</string>
+    <string name="device_permission_go_live">I-Live</string>
+    <string name="device_permission_go_live_desc">Ipakita agad sa screen ang isang item</string>
+    <string name="device_permission_upload_files">Mag-upload ng mga file</string>
+    <string name="device_permission_upload_files_desc">Magpadala ng mga presentation, media at larawan sa computer na ito</string>
+    <string name="device_permission_show_toasts">Ipakita ang mga abiso ng aktibidad</string>
+    <string name="device_permission_show_toasts_desc">Magpakita ng abiso sa computer na ito kapag may ginawa ang device</string>
     <string name="companion_lt_filter">I-filter ang mga lower third</string>
     <string name="companion_lt_no_match">Walang tumutugmang lower third.</string>
     <string name="companion_lt_plus_key">+ key</string>

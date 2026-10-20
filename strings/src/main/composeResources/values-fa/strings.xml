@@ -21,6 +21,8 @@
     <string name="bible_load_failed_report_hint">جزئیات در پوشه گزارش‌های خرابی است — هنگام گزارش این مشکل، تازه‌ترین فایل را پیوست کنید.</string>
     <string name="search_songs">جست‌وجوی سرودها...</string>
     <string name="song_book">کتاب سرود</string>
+    <string name="song_book_none">بدون کتاب سرود</string>
+    <string name="song_book_new">کتاب سرود جدید…</string>
     <string name="all_song_books">همه کتاب‌های سرود</string>
     <string name="entire_bible">تمام کتاب‌مقدس</string>
     <string name="current_book">کتاب کنونی</string>
@@ -201,6 +203,8 @@
     <string name="shortcut_description_open_song_library">باز کردن مدیر کتابخانهٔ سرودها</string>
     <string name="shortcut_description_open_converter">باز کردن مبدل سرود و کتاب‌مقدس</string>
     <string name="shortcut_description_open_calendar_manager">باز کردن مدیر تقویم</string>
+    <string name="shortcut_description_zoom_in">بزرگ‌نمایی: بزرگ‌تر کردن پنجره‌های خود برنامه</string>
+    <string name="shortcut_description_zoom_out">کوچک‌نمایی: کوچک‌تر کردن پنجره‌های خود برنامه</string>
     <string name="shortcut_description_f6_bible">رفتن به زبانه کتاب‌مقدس</string>
     <string name="shortcut_description_f7_songs">رفتن به زبانه سرودها</string>
     <string name="shortcut_description_f8_pictures">رفتن به زبانه تصاویر</string>
@@ -529,6 +533,7 @@
     <string name="language_tamil">تامیلی</string>
     <string name="language_tagalog">تاگالوگ</string>
     <string name="language_swahili">سواحیلی</string>
+    <string name="language_tahitian">تاهیتیایی</string>
 
     <!-- Search Results -->
     <string name="no_results_found">نتیجه‌ای برای «%1$s» یافت نشد</string>
@@ -2243,6 +2248,9 @@
     <string name="plum_theme">پوستهٔ آلو</string>
     <string name="custom_theme">پوسته سفارشی</string>
     <string name="menu_customize_theme">سفارشی‌سازی پوسته…</string>
+    <string name="menu_zoom_in">بزرگ‌نمایی</string>
+    <string name="menu_zoom_out">کوچک‌نمایی</string>
+    <string name="menu_actual_size">اندازهٔ واقعی</string>
     <string name="customize_theme_title">سفارشی‌سازی پوسته</string>
     <string name="customize_theme_colors">رنگ‌ها</string>
     <string name="customize_theme_use_custom_colors">استفاده از رنگ‌های سفارشی</string>
@@ -2256,6 +2264,7 @@
     <string name="customize_theme_margin_normal">معمولی</string>
     <string name="customize_theme_margin_thin">باریک</string>
     <string name="customize_theme_margin_thinner">باریک‌تر</string>
+    <string name="customize_theme_interface_size">اندازهٔ رابط</string>
     <string name="customize_theme_text_size_hint">فقط پنجره‌های خود برنامه را تغییر می‌دهد. صفحه‌های خروجی تغییری نمی‌کنند.</string>
     <string name="customize_theme_preview_heading">جلسه یکشنبه</string>
     <string name="customize_theme_preview_body">سرودها، کتاب‌مقدس و اسلایدها، آماده پخش زنده.</string>
@@ -2511,6 +2520,7 @@
     <string name="canvas_placeholder_omt_default">هیچ منبع OMT انتخاب نشده</string>
     <string name="song_typical_live">معمولاً %1$s روی صفحه</string>
     <string name="calendar_storage">تقویم</string>
+    <string name="schedule_storage">برنامه‌ها</string>
     <string name="calendar_storage_status_default">پوشهٔ دادهٔ برنامه</string>
     <string name="use_default_directory">استفاده از پیش‌فرض</string>
     <string name="song_background_category_cameras">دوربین‌ها</string>
@@ -2728,6 +2738,23 @@
     <string name="remote_clients_tab_allowed">مجاز</string>
     <string name="remote_clients_tab_blocked">مسدود</string>
     <string name="remote_clients_unnamed">دستگاه بی‌نام</string>
+    <string name="remote_client_permissions">مجوزها</string>
+    <string name="remote_client_permissions_note">کارهایی که این دستگاه مجاز است انجام دهد. هر چیز خاموش بدون پرسش رد می‌شود.</string>
+    <string name="remote_client_permissions_all">همه مجاز</string>
+    <string name="remote_client_permissions_count">%1$d از %2$d مجاز</string>
+    <string name="remote_client_no_toasts">بدون اعلان</string>
+    <string name="device_permission_control_output">کنترل صفحه</string>
+    <string name="device_permission_control_output_desc">نمایش سرودها، آیات، اسلایدها و تصاویر، جابه‌جایی میان آن‌ها، پخش رسانه و پاک کردن صفحه</string>
+    <string name="device_permission_add_to_schedule">افزودن به برنامه</string>
+    <string name="device_permission_add_to_schedule_desc">افزودن موارد به برنامه</string>
+    <string name="device_permission_remove_from_schedule">حذف از برنامه</string>
+    <string name="device_permission_remove_from_schedule_desc">بیرون آوردن موارد از برنامه</string>
+    <string name="device_permission_go_live">پخش زنده</string>
+    <string name="device_permission_go_live_desc">نمایش فوری یک مورد روی صفحه</string>
+    <string name="device_permission_upload_files">بارگذاری فایل‌ها</string>
+    <string name="device_permission_upload_files_desc">ارسال ارائه‌ها، رسانه و تصاویر به این رایانه</string>
+    <string name="device_permission_show_toasts">نمایش اعلان‌های فعالیت</string>
+    <string name="device_permission_show_toasts_desc">نمایش اعلان روی این رایانه وقتی دستگاه کاری انجام می‌دهد</string>
     <string name="companion_lt_filter">پالایش نوارهای پایینی</string>
     <string name="companion_lt_no_match">هیچ نوار پایینی مطابقت ندارد.</string>
     <string name="companion_lt_plus_key">+ key</string>
