@@ -3048,7 +3048,7 @@
     <string name="helper_close_bubble">ʻOpani i teie pōpō (e vai noa te lamepa)</string>
     <string name="helper_confirm_hide">Huna iā Wick?</string>
     <string name="helper_hide_where">E nehenehe ʻoe e faʻahoʻi mai iāna i te mau taime atoʻa mai roto mai i</string>
-    <string name="helper_hide_menu_path">Help → Show Helper</string>
+    <string name="helper_hide_menu_path">Tauturu → Faʻaʻite i te tauturu</string>
     <string name="helper_hide_confirm_button">Huna iā Wick</string>
     <string name="helper_send">Tono</string>
     <string name="helper_input_placeholder">Ani iā Wick ʻaore rā ʻa parau iāna i te mea e rave…</string>
@@ -3432,7 +3432,7 @@
     <string name="helper_intro_title_3">ʻAita vau e haʻafifi</string>
     <string name="helper_intro_point_live">E māmū vau i te taime e vai ra te tahi mea i te ora, nō reira ʻaita roa vau e fā mai i rōpū i te pureraʻa.</string>
     <string name="helper_intro_point_badge">E tiʻai te mau manaʻo ʻāpī ei tāpaʻo iti i niʻa i tāʻu pītōʻe e tae roa ʻoe e ʻīriti mai iaʻu.</string>
-    <string name="helper_intro_point_hide">E nehenehe ʻoe e huna iaʻu mai tāʻu ʻāfata mai ʻe e faʻahoʻi mai iaʻu mai te Help → Show Helper.</string>
+    <string name="helper_intro_point_hide">E nehenehe ʻoe e huna iaʻu mai tāʻu ʻāfata mai ʻe e faʻahoʻi mai iaʻu mai te Tauturu → Faʻaʻite i te tauturu.</string>
     <string name="helper_intro_pointer">Tei raro nei au i te mau taime atoʻa e titau ai ʻoe iaʻu.</string>
     <string name="helper_intro_replay">Haʻuti faʻahou i te haʻamataraʻa</string>
     <string name="helper_hint_song_lyrics">ʻA taui i te mau parau i ʻō nei. Nā te mau tāpaʻo i niʻa aʻe e tuʻu i te hōʻē iʻoa ʻirava ʻaore rā aniraʻa i te vāhi e vai ra tō ʻoe curseur. ʻA haʻapūʻe ia oti ʻoe.</string>
