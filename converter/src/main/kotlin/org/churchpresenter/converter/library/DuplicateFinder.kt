@@ -219,6 +219,7 @@ object DuplicateFinder {
     fun scanSongs(directory: File): List<SongInfo> {
         return directory.walkTopDown()
             .filter { it.isFile && it.extension.equals("song", ignoreCase = true) }
+            .sortedBy { it.path }
             .mapNotNull { file ->
                 try {
                     parseSong(file)
@@ -494,6 +495,7 @@ object DuplicateFinder {
         return directory.walkTopDown()
             .filter { it.isFile && it.extension.equals("song", ignoreCase = true) }
             .filter { hasHomoglyphs(it) }
+            .sortedBy { it.path }
             .toList()
     }
 
