@@ -368,6 +368,7 @@ private fun AppRootState.MainWindowContent(
 
         AppMenuBar()
         frame.ThemedMenuBar()
+        ThemedTitleBars()
         MainDesktopHost()
         // After MainDesktop, not before it: siblings in a Box draw in order and
         // MainDesktop's root is an opaque fillMaxSize surface, so a banner
