@@ -48,6 +48,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.withWindowGeometry
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
+import org.churchpresenter.app.churchpresenter.utils.warmStrings
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.appsettings.SetupWizardDialog
@@ -255,6 +256,8 @@ private fun AppRootState.MainWindow(
             // it cannot use, which makes every frame slow, so a stall report says which it got.
             CrashReporter.setTag("render.api.actual", window.renderApi.name)
             uiStallReporter.softwareRendering(window.renderApi.name.startsWith("SOFTWARE"))
+            // Each string's first stringResource reads the jar on this thread; read them all now, off it.
+            withContext(Dispatchers.IO) { warmStrings() }
         }
         MacMenuBarActivationFix()
         LanguageProvider(language = currentLanguage) {
