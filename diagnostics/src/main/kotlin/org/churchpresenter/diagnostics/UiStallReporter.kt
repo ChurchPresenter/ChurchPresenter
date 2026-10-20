@@ -15,6 +15,8 @@ import java.util.concurrent.Executors
  *   ordinary drawing, and a single sample of it lands on whatever happened to be running.
  * - **At most [MAX_EVENTS] events a run**, one per stall. The live-stall count is kept whatever
  *   was sent.
+ * - **A stall groups on its screen and the app frame most of its samples were in**
+ *   ([stallEvent]), so one slow screen is one issue.
  * - **Two causes group as one issue each** rather than one per page they surface on: the JVM
  *   loading code or Compose reading a string for the first time ([STALL_CAUSE_COLD_LOAD]), and any
  *   stall on a machine whose main window draws in software ([STALL_CAUSE_SOFTWARE]), where every
@@ -140,29 +142,6 @@ data class StallEvent(
     val fingerprint: List<String>,
 )
 
-/**
- * The event for [stall]. It groups on the first frame of the app's own code, so one cause is one
- * issue; a stall stuck wholly in the JDK or a library groups on its top frame instead. A stall on a
- * [software]-drawn window, or one stuck loading code or a string for the first time, groups with
- * the rest of its kind, and says which in `stall.cause`.
- */
-fun stallEvent(stall: Stall, live: Boolean, software: Boolean = false): StallEvent {
-    val appFrame = stall.frames.indexOfFirst { it.className.startsWith(APP_PACKAGE) }
-    val cause = stall.frames.getOrNull(appFrame) ?: stall.frames.firstOrNull()
-    val kind = when {
-        software -> STALL_CAUSE_SOFTWARE
-        isColdLoad(stall.frames, appFrame) -> STALL_CAUSE_COLD_LOAD
-        else -> null
-    }
-    val tags = mapOf("stall.live" to live.toString(), "stall.length" to lengthBucket(stall.lateMs))
-    return StallEvent(
-        frames = stall.frames,
-        tags = kind?.let { tags + ("stall.cause" to it) } ?: tags,
-        extras = mapOf("stall.ms" to stall.lateMs.toString(), "stall.budget.ms" to stall.budgetMs.toString()),
-        fingerprint = listOf("ui-stall", kind ?: cause?.let { "${it.className}.${it.methodName}" } ?: "no-frames"),
-    )
-}
-
 /** `stall.cause` for a stall on a main window that draws in software. */
 const val STALL_CAUSE_SOFTWARE = "software-renderer"
 
@@ -170,28 +149,14 @@ const val STALL_CAUSE_SOFTWARE = "software-renderer"
 const val STALL_CAUSE_COLD_LOAD = "cold-load"
 
 /**
- * Whether the thread was inside the class loader or Compose's resource reader, above the app's own
- * code ([appFrame], or the whole stack when there is none): a first use, paid once a run.
- */
-internal fun isColdLoad(frames: List<StackTraceElement>, appFrame: Int): Boolean {
-    val above = if (appFrame < 0) frames else frames.subList(0, appFrame)
-    return above.any { frame -> COLD_LOADERS.any { frame.className.startsWith(it) } }
-}
-
-private val COLD_LOADERS = listOf(
-    "java.lang.ClassLoader",
-    "jdk.internal.loader.",
-    "java.lang.invoke.InnerClassLambdaMetafactory",
-    "org.jetbrains.compose.resources.",
-)
-
-/**
  * Whether [stall]'s stack is the event thread already running the watchdog's own ping: the stall
  * ended between two polls and its stack was taken as the thread answered, so it says nothing about
  * where the thread was stuck. Counted like any stall, but not sent -- it would group on the
  * watchdog itself.
  */
-internal fun sampledAsItAnswered(stall: Stall): Boolean = stall.frames.any { frame ->
+internal fun sampledAsItAnswered(stall: Stall): Boolean = sampledAsItAnswered(stall.frames)
+
+internal fun sampledAsItAnswered(frames: List<StackTraceElement>): Boolean = frames.any { frame ->
     WATCHDOG_CLASSES.any { frame.className.startsWith(it) }
 }
 
@@ -217,5 +182,3 @@ class UiStall(frames: List<StackTraceElement>) : Throwable(STALL_CONTEXT, null, 
         stackTrace = frames.toTypedArray()
     }
 }
-
-private const val APP_PACKAGE = "org.churchpresenter."

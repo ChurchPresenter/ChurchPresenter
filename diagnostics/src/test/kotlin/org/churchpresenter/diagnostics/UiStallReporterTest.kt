@@ -201,7 +201,15 @@ class UiStallReporterTest {
 
         assertEquals(listOf("ui-stall", "org.churchpresenter.liveoutput.PresenterScreen.draw"), event.fingerprint)
         assertEquals(mapOf("stall.live" to "true", "stall.length" to "1-2s"), event.tags)
-        assertEquals(mapOf("stall.ms" to "1200", "stall.budget.ms" to "100"), event.extras)
+        assertEquals(
+            mapOf(
+                "stall.ms" to "1200",
+                "stall.budget.ms" to "100",
+                "stall.samples" to "1",
+                "stall.samples.top" to "1x org.churchpresenter.liveoutput.PresenterScreen.draw",
+            ),
+            event.extras,
+        )
         assertEquals(listOf(jdkFrame, appFrame), event.frames)
     }
 
@@ -228,5 +236,133 @@ class UiStallReporterTest {
 
         assertEquals(listOf(appFrame, jdkFrame), carried.stackTrace.toList())
         assertEquals(STALL_CONTEXT, carried.message)
+    }
+
+    private fun frame(className: String, method: String) = StackTraceElement(className, method, null, -1)
+
+    @Test
+    fun `a stall linking a lambda or a call site is a cold load`() {
+        val link = frame("java.lang.invoke.MethodHandleNatives", "linkCallSite")
+        val metafactory = frame("java.lang.invoke.LambdaMetafactory", "metafactory")
+
+        listOf(link, metafactory).forEach { loader ->
+            val event = stallEvent(Stall(600, 100, listOf(loader, appFrame)), live = false)
+            assertEquals(listOf("ui-stall", STALL_CAUSE_COLD_LOAD), event.fingerprint, loader.className)
+        }
+    }
+
+    @Test
+    fun `a string accessor created for the first time is a cold load, and a lazy elsewhere is not`() {
+        val lazy = frame("kotlin.SynchronizedLazyImpl", "getValue")
+        val accessor = frame("org.churchpresenter.strings.generated.resources.String5_mainKt", "getBible_tab")
+        val ownLazy = frame("org.churchpresenter.bible.Books", "getAll")
+
+        val resource = stallEvent(Stall(600, 100, listOf(jdkFrame, lazy, accessor, appFrame)), live = false)
+        val other = stallEvent(Stall(600, 100, listOf(jdkFrame, lazy, ownLazy, appFrame)), live = false)
+
+        assertEquals(listOf("ui-stall", STALL_CAUSE_COLD_LOAD), resource.fingerprint)
+        assertEquals(listOf("ui-stall", "org.churchpresenter.bible.Books.getAll"), other.fingerprint)
+    }
+
+    @Test
+    fun `a generated resource accessor is not the app's own code`() {
+        val accessor = frame("org.churchpresenter.strings.generated.resources.String5_mainKt", "getBible_tab")
+
+        val event = stallEvent(Stall(600, 100, listOf(jdkFrame, accessor, appFrame)), live = false)
+
+        assertEquals(listOf("ui-stall", "${appFrame.className}.${appFrame.methodName}"), event.fingerprint)
+    }
+
+    @Test
+    fun `a sampled stall groups on the app frame most samples were in, and shows that sample's stack`() {
+        val measure = frame("org.churchpresenter.songs.SongList", "measure")
+        val drawn = listOf(jdkFrame, appFrame)
+        val measured = listOf(measure, appFrame)
+        val outside = listOf(jdkFrame)
+        val stall = Stall(900, 100, frames = drawn, samples = listOf(drawn, measured, outside, measured, measured))
+
+        val event = stallEvent(stall, live = false)
+
+        assertEquals(listOf("ui-stall", "org.churchpresenter.songs.SongList.measure"), event.fingerprint)
+        assertEquals(measured, event.frames)
+        assertEquals("5", event.extras["stall.samples"])
+        assertEquals(
+            "3x org.churchpresenter.songs.SongList.measure; 1x ${appFrame.className}.draw; 1x -",
+            event.extras["stall.samples.top"],
+        )
+    }
+
+    @Test
+    fun `a sample taken as the thread answered is left out of the count`() {
+        val answering = listOf(frame(StallDetector::class.java.name, "answered"), appFrame)
+        val measure = listOf(frame("org.churchpresenter.songs.SongList", "measure"), appFrame)
+        val stall = Stall(900, 100, frames = measure, samples = listOf(measure, answering, answering))
+
+        val event = stallEvent(stall, live = false)
+
+        assertEquals(listOf("ui-stall", "org.churchpresenter.songs.SongList.measure"), event.fingerprint)
+        assertEquals("1", event.extras["stall.samples"])
+    }
+
+    @Test
+    fun `a stall is a cold load only when most of its samples are`() {
+        val classLoad = listOf(frame("java.lang.ClassLoader", "defineClass1"), appFrame)
+        val drawing = listOf(jdkFrame, appFrame)
+
+        val mostlyLoading = stallEvent(Stall(900, 100, classLoad, listOf(classLoad, classLoad, drawing)), false)
+        val mostlyDrawing = stallEvent(Stall(900, 100, classLoad, listOf(classLoad, drawing, drawing)), false)
+
+        assertEquals(STALL_CAUSE_COLD_LOAD, mostlyLoading.tags["stall.cause"])
+        assertEquals(listOf("ui-stall", "${appFrame.className}.draw"), mostlyDrawing.fingerprint)
+    }
+
+    @Test
+    fun `the screen a stall happened on is tagged and grouped on, ahead of the frame`() {
+        val stack = listOf(
+            frame("org.churchpresenter.songs.SongList", "measure"),
+            frame("org.churchpresenter.profiles.ProfileSongsPageKt", "ProfileSongsPage\$lambda\$3"),
+            frame("org.churchpresenter.profiles.ProfilesSettingsTabKt\$ProfilesSettingsTab\$1", "invoke"),
+            frame("org.churchpresenter.app.churchpresenter.dialogs.SettingsTabContentKt", "SettingsTabContent"),
+            frame("org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogKt", "OptionsDialog"),
+        )
+
+        val event = stallEvent(Stall(900, 100, stack), live = false)
+
+        assertEquals("ProfileSongsPage", event.tags["stall.screen"])
+        assertEquals(
+            listOf("ui-stall", "ProfileSongsPage", "org.churchpresenter.songs.SongList.measure"),
+            event.fingerprint,
+        )
+    }
+
+    @Test
+    fun `the screen is the outermost of the finest kind on the stack`() {
+        fun screen(vararg names: Pair<String, String>) = screenOf(names.map { (c, m) -> frame(c, m) })
+
+        assertEquals(
+            "SystemSettingsTab",
+            screen(
+                "org.churchpresenter.x.LabeledTabKt" to "LabeledTab",
+                "org.churchpresenter.x.SystemSettingsTabKt" to "SystemSettingsTab",
+                "org.churchpresenter.x.SettingsTabContentKt" to "SettingsTabContent",
+                "org.churchpresenter.x.OptionsDialogKt" to "OptionsDialog",
+            ),
+        )
+        assertEquals(
+            "SettingsTabContent",
+            screen(
+                "org.churchpresenter.x.SettingsTabContentKt" to "SettingsTabContent",
+                "org.churchpresenter.x.OptionsDialogKt\$OptionsDialog\$1" to "invoke",
+            ),
+        )
+        assertEquals("OptionsDialog", screen("org.churchpresenter.x.OptionsDialogKt\$OptionsDialog\$1" to "invoke"))
+        assertEquals(
+            null,
+            screen(
+                "androidx.compose.material3.TabKt" to "Tab",
+                "org.churchpresenter.x.ComposableSingletons\$BibleTabKt\$lambda-1\$1" to "invoke",
+                "org.churchpresenter.x.Tab" to "draw",
+            ),
+        )
     }
 }

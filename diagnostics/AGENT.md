@@ -27,7 +27,8 @@ owns — [CrashReporter] and [BuildIdentity].
 | `Log.kt` | `object Log` (`info`/`warn`/`error`) — the app's diagnostic lines: `[tag] message` on stderr, and a breadcrumb for warnings and errors. `Logger` takes its sink and trail as parameters for tests |
 | `UiWatchdog.kt` | `StallDetector` and `object UiWatchdog` — pings the AWT event thread and logs its stack when a ping goes unanswered past the budget; runs in every build |
 | `EventThreadIoMonitor.kt` | Watches the AWT event thread through JFR for file, socket and sleep calls, each place once: failed on by the soak test, logged by a debug build that asks (`DevFlags.watchEventThreadIo`) (root AGENT.md, "Live-safe output paths") |
-| `UiStallReporter.kt` | Which stalls become Sentry events (the live budget, the startup settle window, ten a run, grouped on the first app frame), and the live minutes and live stalls a run reports to telemetry (`docs/SHOW_CONTROL.md`, Output isolation) |
+| `UiStallReporter.kt` | Which stalls become Sentry events (the live budget, the startup settle window, ten a run), and the live minutes and live stalls a run reports to telemetry (`docs/SHOW_CONTROL.md`, Output isolation) |
+| `StallGrouping.kt` | `stallEvent` — what a stall's samples group on: its screen, the app frame most samples were in, or a cause of its own (cold load, software rendering) |
 
 47 files across `:composeApp` call it, which is why it is its own module rather than part of
 `:settings`: everything that can fail wants to report, and nothing should have to depend on the
@@ -62,8 +63,10 @@ did that afternoon. A stale Gradle build is the loud one: it produces `NoClassDe
 `NoSuchMethodError` on `:settings` classes, and `Base64` failures inside `decodeAsString` of the
 generated Compose resources. Those are one `./gradlew clean`, not ten bugs.
 
-**UI stalls are one issue per cause**, titled "UI thread stalled" and grouped on the first frame of
-the app's own code. Filter `stall.live:true` for the ones an audience saw; `stall.length` says how
+**UI stalls are one issue per cause**, titled "UI thread stalled". The watchdog samples the event
+thread every 50 ms while it is stuck; a stall groups on `stall.screen` (the screen on the stack —
+a `…Page`, else a `…Tab`/`…Screen`, else a `…Dialog`/`…Window`) and the first frame of the app's own
+code that most samples were in. `stall.samples.top` counts what the samples saw. Filter `stall.live:true` for the ones an audience saw; `stall.length` says how
 long, in ranges. Only stalls of 250 ms or more are sent. Two kinds group as one issue each and
 carry `stall.cause`: `software-renderer` (the main window fell back to drawing in software —
 `render.api.actual` says so) and `cold-load` (the JVM loading code, or Compose reading a string, for
