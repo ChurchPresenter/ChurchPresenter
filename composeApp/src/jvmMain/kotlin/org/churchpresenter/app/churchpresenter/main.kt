@@ -226,6 +226,8 @@ fun main(args: Array<String>) {
 
     // Before the first window: every window gets the app icon's pixel frames as it opens.
     AppWindowIcons.install()
+    // Before the first window: a Ctrl shortcut's typed character never reaches a text field.
+    installShortcutResidueFilter()
 
     // A dev build can stall its own UI on a schedule (-Dchurchpresenter.injectUiStall=<ms>,<everySec>)
     // to show what a stall costs the outputs -- see docs/SHOW_CONTROL.md, Output isolation.
