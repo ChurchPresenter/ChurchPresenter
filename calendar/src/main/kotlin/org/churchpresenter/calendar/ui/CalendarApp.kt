@@ -227,7 +227,10 @@ fun CalendarApp(
     val toast = firedCues.firstOrNull()?.takeUnless { it.key == dismissedToast }
     var exportOutcome by remember { mutableStateOf<ExportOutcome?>(null) }
 
-    CompositionLocalProvider(LocalUse24HourClock provides state.document.preferences.use24HourClock) {
+    CompositionLocalProvider(
+        LocalUse24HourClock provides state.document.preferences.use24HourClock,
+        LocalCalendarIo provides io,
+    ) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Box(Modifier.fillMaxSize()) {
                 CalendarBody(
