@@ -31,8 +31,8 @@ private fun Color.awt(): AwtColor = AwtColor(toArgb(), true)
  * Paints the title bars of the app's windows in the theme, from the main window. The title bar is
  * the platform's — light on a light desktop whatever the app's theme — and neither Compose nor
  * Swing reaches it, so each platform is asked in its own way: Windows 11 takes the caption and text
- * colours themselves (Windows 10 only dark or light), GNOME the dark or light variant of its own
- * frame, and macOS the dark or light appearance for the whole app.
+ * colours themselves (Windows 10 only dark or light), GNOME the dark variant of its frame on a dark
+ * theme, and macOS the dark or light appearance for the whole app.
  */
 @Composable
 internal fun ThemedTitleBars() {

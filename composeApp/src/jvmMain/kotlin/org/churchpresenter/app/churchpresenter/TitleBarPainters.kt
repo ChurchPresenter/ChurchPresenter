@@ -76,7 +76,10 @@ private interface User32Api : Library {
 
 // ── Linux ───────────────────────────────────────────────────────────────────────────────────────
 
-/** The `_GTK_THEME_VARIANT` GNOME's window manager draws a frame by. */
+/**
+ * The `_GTK_THEME_VARIANT` GNOME's window manager draws a frame by. A GTK theme has only a dark
+ * variant, so "light" is the desktop theme's own frame — dark grey on Ubuntu 20.04's Yaru.
+ */
 internal fun gtkThemeVariant(style: TitleBarStyle): String = if (style.dark) "dark" else "light"
 
 private fun paintGtkTitleBar(window: Window, style: TitleBarStyle) {
