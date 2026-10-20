@@ -314,7 +314,7 @@ class InstanceLinkMessageTest {
     }
 
     @Test
-    fun `a ping timeout is classified and rate-limited like a refused connection`() {
+    fun `a ping timeout is classified and kept quiet like a refused connection`() {
         val c = clientWith(Recorder())
 
         // ktor's own pinger raises this when the primary misses the keepalive window. That is what
@@ -328,14 +328,14 @@ class InstanceLinkMessageTest {
             ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1),
             "one dropped keepalive on a hall's wifi is not worth an issue",
         )
-        assertTrue(
+        assertFalse(
             ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 10),
-            "a link that keeps dropping still has to surface",
+            "a primary that has gone away is not a defect however long it stays gone",
         )
     }
 
     @Test
-    fun `a connect timeout is rate-limited like a refused connection`() {
+    fun `a connect timeout is kept quiet like a refused connection`() {
         val c = clientWith(Recorder())
 
         // One stored address produced 767 reports from three churches in seventeen days, every one
@@ -352,9 +352,9 @@ class InstanceLinkMessageTest {
             ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1),
             "a primary that is simply switched off is not a defect to file",
         )
-        assertTrue(
+        assertFalse(
             ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 10),
-            "a link that never comes up still has to surface",
+            "a primary that is switched off is not a defect however long it stays off",
         )
     }
 
@@ -391,27 +391,16 @@ class InstanceLinkMessageTest {
     }
 
     @Test
-    fun `the benign kinds stay quiet until a run of failures persists`() {
+    fun `a benign run is never reported, however long it lasts`() {
         val c = clientWith(Recorder())
 
-        // A follower routinely starts before its primary; the first refusals are that ordering.
-        for (kind in listOf("refused", "dns")) {
-            assertFalse(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
-            assertFalse(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 9), kind)
-            assertTrue(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 10), kind)
-        }
-    }
-
-    @Test
-    fun `a benign run is reported once, however long it lasts`() {
-        val c = clientWith(Recorder())
-
-        // CHURCH-PRESENTER-DESKTOP-68: one follower pointed at an address that never answered still
-        // filed a warning at 10, 20 … 100, 200 … 1000 timeouts. After the first, each said only that
-        // the link was still down.
+        // CHURCH-PRESENTER-DESKTOP-DM: reporting a benign run once, at its 10th failure, still filed
+        // on every launch, because the count starts again with the connect loop — a follower whose
+        // primary simply was not running reported "connection failed" each time the app started.
+        // The Log.warn breadcrumb and the Instance Link log keep every failure.
         for (kind in listOf("refused", "dns", "ping_timeout", "timeout")) {
             val reported = (1..5_000).filter { n -> ConnectFailures.shouldReportConnectFailure(kind, n) }
-            assertEquals(listOf(10), reported, kind)
+            assertEquals(emptyList(), reported, kind)
         }
     }
 

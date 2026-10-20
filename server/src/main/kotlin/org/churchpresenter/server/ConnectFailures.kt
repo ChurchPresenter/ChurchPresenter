@@ -24,7 +24,8 @@ private const val REPORT_INTERVAL_WIDEN_AT_1000 = 1000
  *
  * It is also why the first-failure report was worth so little here: `consecutiveFailures` lives in
  * `connectLoop`, so every restart of the link begins a fresh count, and a follower pointed at an
- * address that never answers reports its "first" failure again on each one.
+ * address that never answers reports its "first" failure again on each one. The same reset is why
+ * these kinds are now never reported at all (see [ConnectFailures.shouldReportConnectFailure]).
  */
 private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns", "ping_timeout", "timeout")
 
@@ -46,26 +47,22 @@ internal object ConnectFailures {
     /**
      * Whether a connect failure this far into a run of them is worth a warning.
      *
-     * A follower is configured once and then starts with the room, routinely before the primary
-     * does, so "refused" and "dns" on the first attempt are the ordinary startup order rather than
-     * a fault — and reporting them there made the follower's own boot sequence the single noisiest
-     * signal in the project. Those two therefore wait for the run to persist through
-     * [FAILURE_LOG_INTERVAL] attempts, by which point the backoff has carried it well past any
-     * plausible "primary is still coming up" window and the link genuinely is not working.
+     * The [BENIGN_CONNECT_FAILURES] kinds — refused, dns, timeout, ping_timeout — are **never**
+     * reported. Each says only that the primary is not there: not started yet, switched off, or
+     * gone from the network. They used to wait for a run of [FAILURE_LOG_INTERVAL] and then report
+     * once, but the count lives in `connectLoop` and starts again with every launch and every
+     * restart of the link, so a follower whose primary simply was not running filed the same
+     * warning on every launch (CHURCH-PRESENTER-DESKTOP-DM). The caller's `Log.warn` still leaves
+     * each failure as a breadcrumb, so a session that reports something else carries the history,
+     * and `InstanceLinkLogger` still records every attempt.
      *
-     * Once it has persisted, a benign run is reported **once**: the first warning says the link is
-     * not coming up, and every later one from the same run says only that it still is not —
-     * CHURCH-PRESENTER-DESKTOP-68 kept one follower pointed at an address that never answered
-     * filing a warning at 10, 20 … 100, 200 … 1000 consecutive timeouts, about nineteen per
-     * thousand, each telling Sentry nothing the first had not.
-     *
-     * The kinds that suggest a regression rather than an ordering — a certificate, or something
+     * The kinds that suggest a regression rather than an absent peer — a certificate, or something
      * unrecognised — report on the first failure and then on the widening cadence of
      * [reportIntervalFor], because those are worth seeing even if they never recur and worth
      * seeing again while they do.
      */
     internal fun shouldReportConnectFailure(kind: String, consecutiveFailures: Int): Boolean {
-        if (kind in BENIGN_CONNECT_FAILURES) return consecutiveFailures == FAILURE_LOG_INTERVAL
+        if (kind in BENIGN_CONNECT_FAILURES) return false
         return consecutiveFailures == 1 || consecutiveFailures % reportIntervalFor(consecutiveFailures) == 0
     }
 
