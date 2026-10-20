@@ -1,5 +1,13 @@
+@file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
 import java.awt.Color
 import java.awt.Font
 import java.awt.event.InputEvent
@@ -7,6 +15,7 @@ import java.awt.event.KeyEvent
 import java.awt.image.BufferedImage
 import javax.swing.JCheckBoxMenuItem
 import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JMenu
 import javax.swing.JMenuBar
 import javax.swing.JMenuItem
@@ -15,8 +24,15 @@ import javax.swing.JRadioButtonMenuItem
 import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 import javax.swing.border.MatteBorder
+import javax.swing.plaf.MenuBarUI
+import javax.swing.plaf.PopupMenuUI
+import javax.swing.plaf.basic.BasicCheckBoxMenuItemUI
 import javax.swing.plaf.basic.BasicMenuBarUI
+import javax.swing.plaf.basic.BasicMenuItemUI
+import javax.swing.plaf.basic.BasicMenuUI
 import javax.swing.plaf.basic.BasicPopupMenuSeparatorUI
+import javax.swing.plaf.basic.BasicPopupMenuUI
+import javax.swing.plaf.basic.BasicSeparatorUI
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -178,5 +194,107 @@ class MenuBarStyleTest {
             assertNull(keys.get(shown), "a typed = does not press it a second time")
             assertSame(letter, newItem.accelerator, "a letter key is left as it is")
         }
+    }
+
+    @Test
+    fun `a menu whose look and feel was replaced is styled again on the next pass`() {
+        val menus = bar()
+        styleMenuBar(menus.bar, style)
+        val separator = menus.view.popupMenu.components.filterIsInstance<JPopupMenu.Separator>().single()
+        menus.bar.setUI(object : MenuBarUI() {})
+        menus.view.setUI(BasicMenuUI())
+        menus.view.popupMenu.setUI(object : PopupMenuUI() {})
+        menus.item.setUI(BasicMenuItemUI())
+        menus.check.setUI(BasicCheckBoxMenuItemUI())
+        menus.submenu.setUI(BasicMenuUI())
+        separator.setUI(BasicSeparatorUI())
+
+        styleMenuBar(menus.bar, style)
+
+        assertIs<BasicMenuBarUI>(menus.bar.ui)
+        assertIs<BasicPopupMenuUI>(menus.view.popupMenu.ui)
+        assertIs<BasicPopupMenuSeparatorUI>(separator.ui)
+        for (entry in listOf(menus.view, menus.item, menus.check, menus.submenu)) {
+            assertTrue(entry.ui.javaClass.simpleName.startsWith("Themed"), entry.text)
+        }
+    }
+
+    @Test
+    fun `a submenu's arrow is drawn in the text colour`() {
+        val menus = bar()
+        styleMenuBar(menus.bar, style)
+        menus.submenu.text = ""
+        assertTrue(menus.submenu.render().has(style.foreground))
+    }
+
+    @Test
+    fun `a typed-character accelerator, or one with no binding, is left as it is`() {
+        val menus = bar()
+        val typed = KeyStroke.getKeyStroke('x')
+        menus.item.accelerator = typed
+        styleMenuBar(menus.bar, style)
+        assertSame(typed, menus.item.accelerator)
+
+        // With no look and feel there is no binding to move, and the label still reads right.
+        val unbound = JMenuItem("Loose").apply {
+            accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_DOWN_MASK)
+            setUI(null)
+        }
+        showKeySymbol(unbound)
+        assertEquals('-', unbound.accelerator.keyChar)
+    }
+
+    @Test
+    fun `the menus' font grows with the interface, from a plain one where the look and feel has none`() {
+        val base = Font(Font.SERIF, Font.PLAIN, 14)
+        assertEquals(21f, menuFont(1.5f, base).size2D)
+        val fallback = menuFont(2f, lookAndFeelFont = null)
+        assertEquals(Font.DIALOG, fallback.name)
+        assertEquals(24f, fallback.size2D)
+    }
+
+    @Test
+    fun `the theme in effect is the menu bar's style`() = runComposeUiTest {
+        var styled: MenuBarStyle? = null
+        var mode by mutableStateOf(ThemeMode.DARK)
+        setContent { ChurchPresenterTheme(mode) { styled = themedMenuBarStyle() } }
+        waitForIdle()
+        val dark = assertNotNull(styled)
+        mode = ThemeMode.LIGHT
+        waitForIdle()
+        val light = assertNotNull(styled)
+
+        assertTrue(dark.background.red < light.background.red, "the dark theme's bar is the darker")
+        assertTrue(dark.foreground.red > light.foreground.red, "and its text the lighter")
+    }
+
+    @Test
+    fun `what is not a menu or an item is passed over`() {
+        val menus = bar()
+        val glue = JLabel("not a menu")
+        val note = JLabel("not an item")
+        menus.bar.add(glue)
+        menus.view.popupMenu.add(note)
+        val noteForeground = note.foreground
+
+        styleMenuBar(menus.bar, style)
+
+        assertEquals(style.popupBackground, menus.item.background, "the menus around them are styled")
+        assertEquals(noteForeground, note.foreground)
+    }
+
+    @Test
+    fun `an accelerator changed after its symbol was shown is followed`() {
+        val menus = bar()
+        menus.item.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.CTRL_DOWN_MASK)
+        styleMenuBar(menus.bar, style)
+        val minus = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_DOWN_MASK)
+        menus.item.accelerator = minus
+
+        styleMenuBar(menus.bar, style)
+
+        assertEquals('-', menus.item.accelerator.keyChar)
+        val keys = assertNotNull(SwingUtilities.getUIInputMap(menus.item, JComponent.WHEN_IN_FOCUSED_WINDOW))
+        assertNotNull(keys.get(minus), "the new key is the one bound")
     }
 }

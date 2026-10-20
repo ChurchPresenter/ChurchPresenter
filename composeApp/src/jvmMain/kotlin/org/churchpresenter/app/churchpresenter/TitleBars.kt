@@ -35,10 +35,12 @@ private fun Color.awt(): AwtColor = AwtColor(toArgb(), true)
  * theme, and macOS the dark or light appearance for the whole app.
  */
 @Composable
-internal fun ThemedTitleBars() {
+internal fun ThemedTitleBars(
+    onStyle: (TitleBarStyle) -> Unit = { SwingUtilities.invokeLater { AppTitleBars.update(it) } },
+) {
     val colors = MaterialTheme.colorScheme
     val style = titleBarStyle(colors.surface, colors.onSurface)
-    SideEffect { SwingUtilities.invokeLater { AppTitleBars.update(style) } }
+    SideEffect { onStyle(style) }
 }
 
 /**
@@ -65,34 +67,47 @@ internal class TitleBars<W>(
     }
 }
 
-/** The app's [TitleBars], on the platforms that have a painter, watching for every window made. */
+/** The app's [TitleBars], made on first use. */
 private object AppTitleBars {
-    private val titleBars: TitleBars<Window>? by lazy {
-        val paint = titleBarPainter(System.getProperty("os.name").orEmpty()) ?: return@lazy null
-        TitleBars(
-            openWindows = { Window.getWindows().filter { it.isDisplayable && it.hasTitleBar() } },
-            paint = { window, style ->
-                runCatching { paint(window, style) }.onFailure { Log.warn(TAG, "Title bar not painted: $it") }
-            },
-        ).also { bars ->
-            // Displayable is when the window's native one exists, before it is first shown: painted
-            // then, a window never flashes the platform's own colours.
-            Toolkit.getDefaultToolkit().addAWTEventListener(
-                { event -> madeTitledWindow(event)?.let(bars::opened) },
-                AWTEvent.HIERARCHY_EVENT_MASK,
-            )
-        }
-    }
+    private val titleBars: TitleBars<Window>? by lazy { appTitleBars(System.getProperty("os.name").orEmpty()) }
 
     fun update(style: TitleBarStyle) {
         titleBars?.update(style)
     }
 }
 
+/**
+ * The title bars of every window on the platform [osName] names, or null where there is no painter;
+ * [watch] is handed them to paint each window as it is made.
+ */
+internal fun appTitleBars(osName: String, watch: (TitleBars<Window>) -> Unit = ::watchNewWindows): TitleBars<Window>? {
+    val paint = titleBarPainter(osName) ?: return null
+    return TitleBars(
+        openWindows = { Window.getWindows().filter { it.isDisplayable && it.hasTitleBar() } },
+        paint = loggingFailures(paint),
+    ).also(watch)
+}
+
+/** [paint], with a failure logged rather than thrown: a title bar left as it was is no reason to stop. */
+internal fun <W> loggingFailures(paint: (W, TitleBarStyle) -> Unit): (W, TitleBarStyle) -> Unit = { window, style ->
+    runCatching { paint(window, style) }.onFailure { Log.warn(TAG, "Title bar not painted: $it") }
+}
+
+/**
+ * Paints each window as it is made. Displayable is when the window's native one exists, before it
+ * is first shown: painted then, a window never flashes the platform's own colours.
+ */
+private fun watchNewWindows(bars: TitleBars<Window>) {
+    Toolkit.getDefaultToolkit().addAWTEventListener(
+        { event -> madeTitledWindow(event)?.let(bars::opened) },
+        AWTEvent.HIERARCHY_EVENT_MASK,
+    )
+}
+
 private const val TAG = "TitleBars"
 
 /** The window [event] says was just made displayable, when it is one with a title bar. */
-private fun madeTitledWindow(event: AWTEvent): Window? {
+internal fun madeTitledWindow(event: AWTEvent): Window? {
     val hierarchy = event as? HierarchyEvent ?: return null
     if (hierarchy.changeFlags and HierarchyEvent.DISPLAYABILITY_CHANGED.toLong() == 0L) return null
     return (hierarchy.changed as? Window)?.takeIf { it.isDisplayable && it.hasTitleBar() }

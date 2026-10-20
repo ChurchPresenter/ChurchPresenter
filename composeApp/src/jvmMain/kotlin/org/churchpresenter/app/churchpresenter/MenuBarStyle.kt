@@ -12,7 +12,6 @@ import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.RenderingHints
-import java.awt.event.KeyEvent
 import javax.swing.BorderFactory
 import javax.swing.Icon
 import javax.swing.JCheckBoxMenuItem
@@ -22,7 +21,6 @@ import javax.swing.JMenuBar
 import javax.swing.JMenuItem
 import javax.swing.JPopupMenu
 import javax.swing.JRadioButtonMenuItem
-import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.plaf.basic.BasicCheckBoxMenuItemUI
@@ -52,25 +50,6 @@ private const val DEFAULT_MENU_FONT_SIZE = 12
 /** Marks a menu bar already painted with a style, so an unchanged style is not installed again. */
 private const val STYLE_PROPERTY = "churchpresenter.menuBarStyle"
 
-/** The key an item's accelerator stands for, once [showKeySymbol] has swapped it for a symbol. */
-private const val KEY_PROPERTY = "churchpresenter.acceleratorKey"
-
-/** The keys Swing names in words ("Ctrl+Equals"), and the symbol each is shown as instead. */
-private val KEY_SYMBOLS = mapOf(
-    KeyEvent.VK_EQUALS to '=',
-    KeyEvent.VK_MINUS to '-',
-    KeyEvent.VK_PLUS to '+',
-    KeyEvent.VK_COMMA to ',',
-    KeyEvent.VK_PERIOD to '.',
-    KeyEvent.VK_SLASH to '/',
-    KeyEvent.VK_BACK_SLASH to '\\',
-    KeyEvent.VK_SEMICOLON to ';',
-    KeyEvent.VK_QUOTE to '\'',
-    KeyEvent.VK_BACK_QUOTE to '`',
-    KeyEvent.VK_OPEN_BRACKET to '[',
-    KeyEvent.VK_CLOSE_BRACKET to ']',
-)
-
 /**
  * Paints the main window's menu bar in the theme on Windows and Linux, at the interface size.
  *
@@ -86,9 +65,17 @@ private val KEY_SYMBOLS = mapOf(
 @Composable
 internal fun FrameWindowScope.ThemedMenuBar() {
     if (isMacOs) return
+    val style = themedMenuBarStyle()
+    SideEffect {
+        SwingUtilities.invokeLater { window.jMenuBar?.let { styleMenuBar(it, style) } }
+    }
+}
+
+/** The theme in effect, as the menu bar's colours, and the menus' font at the interface size. */
+@Composable
+internal fun themedMenuBarStyle(): MenuBarStyle {
     val colors = MaterialTheme.colorScheme
-    val uiScale = LocalThemeCustomization.current.uiScale
-    val style = MenuBarStyle(
+    return MenuBarStyle(
         background = colors.surface.awt(),
         foreground = colors.onSurface.awt(),
         disabled = colors.onSurfaceVariant.awt(),
@@ -96,11 +83,8 @@ internal fun FrameWindowScope.ThemedMenuBar() {
         selectionForeground = colors.onSecondaryContainer.awt(),
         popupBackground = colors.surfaceContainer.awt(),
         outline = colors.outlineVariant.awt(),
-        font = menuFont(uiScale),
+        font = menuFont(LocalThemeCustomization.current.uiScale),
     )
-    SideEffect {
-        SwingUtilities.invokeLater { window.jMenuBar?.let { styleMenuBar(it, style) } }
-    }
 }
 
 private val isMacOs: Boolean = System.getProperty("os.name").orEmpty().lowercase().contains("mac")
@@ -108,8 +92,8 @@ private val isMacOs: Boolean = System.getProperty("os.name").orEmpty().lowercase
 private fun Color.awt(): AwtColor = AwtColor(toArgb(), true)
 
 /** The look and feel's menu font, grown by [uiScale]. */
-private fun menuFont(uiScale: Float): Font {
-    val base = UIManager.getFont("Menu.font") ?: Font(Font.DIALOG, Font.PLAIN, DEFAULT_MENU_FONT_SIZE)
+internal fun menuFont(uiScale: Float, lookAndFeelFont: Font? = UIManager.getFont("Menu.font")): Font {
+    val base = lookAndFeelFont ?: Font(Font.DIALOG, Font.PLAIN, DEFAULT_MENU_FONT_SIZE)
     return base.deriveFont(base.size2D * uiScale)
 }
 
@@ -169,34 +153,6 @@ private fun styleEntry(child: Component, style: MenuBarStyle, restyle: Boolean) 
         }
     }
     if (child is JMenuItem && child !is JMenu) showKeySymbol(child)
-}
-
-/**
- * Shows [item]'s accelerator as the symbol on the key — "Ctrl+=" — where Swing would spell the key's
- * name out, as "Ctrl+Equals". The label is Swing's own, built from the accelerator, so the item is
- * given a typed-character accelerator that reads right, and the key it stands for stays bound in
- * its place; the typed one is unbound, as that character can also arrive as a typed key.
- * Idempotent, and run again after the item's look and feel is replaced, which binds its accelerator
- * afresh.
- */
-internal fun showKeySymbol(item: JMenuItem) {
-    val shown = item.accelerator ?: return
-    val saved = item.getClientProperty(KEY_PROPERTY) as? KeyStroke
-    val key = saved?.takeIf { shown == symbolStroke(it) } ?: shown
-    val symbolStroke = symbolStroke(key) ?: return
-    item.putClientProperty(KEY_PROPERTY, key)
-    item.accelerator = symbolStroke
-    val keys = SwingUtilities.getUIInputMap(item, JComponent.WHEN_IN_FOCUSED_WINDOW) ?: return
-    val action = keys.get(symbolStroke) ?: keys.get(key) ?: return
-    keys.remove(symbolStroke)
-    keys.put(key, action)
-}
-
-/** The typed-character stroke that labels [key] with its symbol, or null for a key Swing names well. */
-private fun symbolStroke(key: KeyStroke): KeyStroke? {
-    if (key.keyEventType != KeyEvent.KEY_PRESSED) return null
-    val symbol = KEY_SYMBOLS[key.keyCode] ?: return null
-    return KeyStroke.getKeyStroke(symbol, key.modifiers)
 }
 
 private fun JComponent.paint(background: AwtColor, foreground: AwtColor, font: Font) {

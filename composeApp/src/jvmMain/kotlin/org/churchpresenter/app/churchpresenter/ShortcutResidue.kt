@@ -13,7 +13,7 @@ import java.awt.event.KeyEvent
 internal fun isShortcutResidue(event: KeyEvent): Boolean =
     event.id == KeyEvent.KEY_TYPED &&
         event.isControlDown && !event.isAltDown && !event.isAltGraphDown && !event.isMetaDown &&
-        event.keyChar != KeyEvent.CHAR_UNDEFINED && !event.keyChar.isISOControl()
+        !event.keyChar.isISOControl()
 
 /**
  * Drops [isShortcutResidue]'s characters before any window sees them, on Windows and Linux. macOS

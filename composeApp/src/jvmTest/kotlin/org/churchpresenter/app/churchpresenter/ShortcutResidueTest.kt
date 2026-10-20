@@ -28,6 +28,7 @@ class ShortcutResidueTest {
         assertFalse(isShortcutResidue(typed('@', InputEvent.CTRL_DOWN_MASK or InputEvent.ALT_DOWN_MASK)), "AltGr")
         assertFalse(isShortcutResidue(typed('€', InputEvent.CTRL_DOWN_MASK or InputEvent.ALT_GRAPH_DOWN_MASK)))
         assertFalse(isShortcutResidue(typed('\u0001', InputEvent.CTRL_DOWN_MASK)), "Ctrl+A's control character")
+        assertFalse(isShortcutResidue(typed('=', InputEvent.CTRL_DOWN_MASK or InputEvent.META_DOWN_MASK)), "Ctrl+Meta")
     }
 
     @Test
