@@ -43,7 +43,6 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.defaultBaseline
 import org.churchpresenter.settings.defaultChanges
 import org.churchpresenter.settings.changesFrom
-import org.churchpresenter.settings.pathWithin
 import org.churchpresenter.settings.plainText
 import org.churchpresenter.settings.valueAt
 import org.churchpresenter.settings.withDefaultAt
@@ -193,7 +192,9 @@ private fun DifferencesCard(
     onValueChange: (String, JsonElement) -> Unit,
 ) {
     var expanded by remember(link.profile.id) { mutableStateOf(false) }
-    val changes = link.profile.overrides.sorted()
+    // Worked out once per profile and masters, not on every frame: each line reads its master's
+    // value by path, and the card recomposes with every edit made on the page beside it.
+    val changes = remember(link.profile, link.sectionMasters, master) { link.changeLines(master) }
     // Named for the master while there is one; a profile following several says so rather than
     // naming one of them for changes made against another.
     val title = if (link.sectionMasters.values.all { it.id == master.id }) {
@@ -211,11 +212,17 @@ private fun DifferencesCard(
             )
         }
         val shown = if (expanded) changes else changes.take(SHOWN_CHANGES)
-        shown.forEach { path ->
-            val from = link.masterFor(listOf(path)) ?: master
-            ChangeRow(path, link.profile, from.displayName(), from.valueAt(path), onOpenPage, onValueChange) {
-                link.onRevert(listOf(path))
-            }
+        shown.forEach { line ->
+            ChangeRow(
+                path = line.path,
+                profile = link.profile,
+                sourceName = line.sourceName,
+                sourceValue = line.sourceValue,
+                onOpenPage = onOpenPage,
+                onValueChange = onValueChange,
+                page = line.page,
+                onRevert = { link.onRevert(listOf(line.path)) },
+            )
         }
         if (!expanded && changes.size > SHOWN_CHANGES) {
             LinkText(stringResource(Res.string.profile_show_more, changes.size - SHOWN_CHANGES), { expanded = true })
@@ -246,13 +253,14 @@ private fun ChangeRow(
     onValueChange: (String, JsonElement) -> Unit,
     /** What the row is called -- the setting's own name, unless it stands for several. */
     label: String = settingPathLabel(path),
+    /** The page [path] is edited on, which its name opens; null for one no page shows. */
+    page: ProfilePage? = pageForPath(path),
     onRevert: () -> Unit,
 ) {
     val on = stringResource(Res.string.profile_value_on)
     val off = stringResource(Res.string.profile_value_off)
     Column(Modifier.fillMaxWidth().testTag(changeRowTag(path)), verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val page = pageForPath(path)
             Text(
                 text = label,
                 fontSize = 12.sp,
@@ -305,11 +313,6 @@ private fun InlineValue(
         }
     }
 }
-
-/** The page a setting is edited on, or null for one no page shows. */
-internal fun pageForPath(path: String): ProfilePage? =
-    (listOf(ProfilePage.Content) + CustomizePane.entries.map { ProfilePage.Appearance(it) })
-        .firstOrNull { page -> page.pathPrefixes().any { pathWithin(path, it) } }
 
 /**
  * A setting's name read off its path: `bibleSettings.translations[kjv.spb].textFontSize` is
