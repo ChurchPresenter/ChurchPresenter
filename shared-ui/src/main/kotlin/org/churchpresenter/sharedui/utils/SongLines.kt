@@ -9,6 +9,9 @@ import java.util.Locale
  */
 fun isHeaderLine(line: String): Boolean = ChordTransposer.isSectionHeader(line)
 
+/** A header's name as written, without its brackets: `[Chorus 1]` → `Chorus 1`, `{Refrain}` → `Refrain`. */
+fun sectionLabelOf(header: String): String = header.trim().trim('[', ']', '{', '}').trim()
+
 /** {} = chorus, [] = verse/other */
 fun isChorusHeader(line: String): Boolean {
     val t = line.trim()
@@ -49,7 +52,7 @@ private val NON_VERSE_SECTION_NAMES = setOf(
  * this replaced and so never a regression.
  */
 fun isVerseHeader(header: String?): Boolean {
-    val label = header?.trim()?.trim('[', ']', '{', '}')?.trim().orEmpty()
+    val label = header?.let(::sectionLabelOf).orEmpty()
     if (label.isEmpty()) return true
     val name = label.trimEnd { it.isDigit() || it.isWhitespace() }
         .lowercase(Locale.US)

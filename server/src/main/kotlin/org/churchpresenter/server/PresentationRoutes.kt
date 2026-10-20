@@ -141,7 +141,7 @@ private fun Route.presentationSlideRoutes(
                  * Response: {"ok":true}
                  */
                 post("${Constants.ENDPOINT_PRESENTATIONS}/{id}/select") {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
                     val id = call.parameters["id"] ?: run {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
@@ -186,7 +186,7 @@ private fun Route.presentationUploadRoutes(
     scope: CoroutineScope,
 ) {
                 post("${Constants.ENDPOINT_PRESENTATIONS}/upload") {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.UPLOAD_FILES)) return@post
                     if (!server._fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
@@ -213,7 +213,7 @@ private fun Route.mediaUploadRoutes(
                  * Response: { "ok": true, "path": "<abs path>", "name": "<title>", "mediaType": "local|audio" }
                  */
                 post(Constants.ENDPOINT_MEDIA_UPLOAD) {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.UPLOAD_FILES)) return@post
                     if (!server._fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post

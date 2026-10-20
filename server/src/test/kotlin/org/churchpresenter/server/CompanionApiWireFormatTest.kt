@@ -1,5 +1,6 @@
 package org.churchpresenter.server
 
+import org.churchpresenter.core.models.songs.SongItem
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -67,7 +68,7 @@ class CompanionApiWireFormatTest {
             composer = "",
             sectionTotal = 2,
             sections = listOf(
-                SongSectionDto(type = "verse", lines = listOf("Amazing grace, how sweet the sound")),
+                SongSectionDto(type = "verse", lines = listOf("Amazing grace, how sweet the sound"), label = "Verse 1"),
                 SongSectionDto(type = "chorus", lines = listOf("Praise God")),
             ),
         )
@@ -76,6 +77,35 @@ class CompanionApiWireFormatTest {
 
         assertEquals(detail, decoded)
         assertTrue("section-total" in keysOf(SongDetailDto.serializer(), detail))
+    }
+
+    @Test
+    fun `a section from a server that sends no label still decodes`() {
+        val section = json.decodeFromString(SongSectionDto.serializer(), """{"type":"verse","lines":["a"]}""")
+
+        assertEquals(SongSectionDto(type = "verse", lines = listOf("a"), label = null), section)
+    }
+
+    @Test
+    fun `a song detail names each section the way the song does`() {
+        val song = SongItem(
+            number = "7",
+            title = "Labels",
+            songbook = "Hymns",
+            lyrics = listOf(
+                "before any header",
+                "[Verse 1]", "verse line",
+                "[Chorus 1]", "chorus line",
+                "{Refrain}", "refrain line",
+                "[Bridge 1]", "bridge line",
+            ),
+        )
+
+        val sections = buildSongDetail(song).sections
+
+        assertEquals(listOf(null, "Verse 1", "Chorus 1", "Refrain", "Bridge 1"), sections.map { it.label })
+        assertEquals(listOf("verse", "verse", "verse", "chorus", "verse"), sections.map { it.type })
+        assertEquals(listOf("chorus line"), sections[2].lines)
     }
 
     @Test

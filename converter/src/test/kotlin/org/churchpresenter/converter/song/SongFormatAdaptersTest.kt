@@ -76,6 +76,45 @@ class SongFormatAdaptersTest {
         assertTrue(written.readText().contains("Amazing grace how sweet the sound"))
     }
 
+    @Test
+    fun `an OpenLyrics song is named by its title, not by a file name mangled on the way in`() {
+        // "Ô Dieu" whose UTF-8 bytes were read back as code page 437, as unzipping can leave it.
+        val input = openLyrics("freeworship/\u251C\u00F6 Dieu.xml", title = "\u00D4 Dieu")
+
+        assertEquals("\u00D4 Dieu.song", FreeWorshipFormat.outputNameFor(input))
+        assertEquals("\u00D4 Dieu.song", FreeWorshipFormat.convert(input, out("fw-title")).outputFiles.single().name)
+    }
+
+    @Test
+    fun `an OpenLyrics song with no title keeps the name of its file`() {
+        val input = openLyrics("freeworship/untitled-song ().xml", title = "")
+
+        assertEquals("untitled-song.song", FreeWorshipFormat.outputNameFor(input))
+    }
+
+    @Test
+    fun `two songs sharing a title in one batch are both written`() {
+        val first = openLyrics("fw-batch/a.xml", title = "Amazing Grace")
+        val second = openLyrics("fw-batch/b.xml", title = "Amazing Grace")
+        val folder = out("fw-batch-out")
+
+        val names = FreeWorshipFormat.outputNamesFor(listOf(first, second), folder)
+        assertEquals(listOf("Amazing Grace.song", "Amazing Grace (2).song"), names)
+
+        listOf(first, second).zip(names).forEach { (input, name) -> FreeWorshipFormat.convert(input, folder, name) }
+        assertEquals(setOf("Amazing Grace.song", "Amazing Grace (2).song"), folder.list()!!.toSet())
+    }
+
+    @Test
+    fun `batch names leave a library's own folder alone and keep separate folders apart`() {
+        val database = openLpDatabase("batch-songs.sqlite")
+        assertEquals(listOf("batch-songs"), OpenLpFormat.outputNamesFor(listOf(database), out("batch-db")))
+
+        val here = openLyrics("fw-here/a.xml", title = "Same")
+        val there = openLyrics("fw-there/a.xml", title = "Same")
+        assertEquals(listOf("Same.song", "Same.song"), FreeWorshipFormat.outputNamesFor(listOf(here, there), null))
+    }
+
     // ── OpenLP, which is two formats under one name ───────────────────────────
 
     private fun openLpDatabase(name: String): File {
@@ -109,8 +148,11 @@ class SongFormatAdaptersTest {
     fun `OpenLP reads an OpenLyrics export as a single song instead`() {
         val input = openLyrics("openlp/export.xml", title = "Be Thou My Vision")
         assertEquals("Be Thou My Vision", OpenLpFormat.describe(input).title)
-        assertEquals("export.song", OpenLpFormat.outputNameFor(input))
-        assertEquals("export.song", OpenLpFormat.convert(input, out("openlp-xml")).outputFiles.single().name)
+        assertEquals("Be Thou My Vision.song", OpenLpFormat.outputNameFor(input))
+        assertEquals(
+            "Be Thou My Vision.song",
+            OpenLpFormat.convert(input, out("openlp-xml")).outputFiles.single().name,
+        )
     }
 
     @Test

@@ -92,9 +92,17 @@ object FreeWorshipConverter {
         outputFile.writeText(buildSongContent(parse(inputFile)), Charsets.UTF_8)
     }
 
-    /** Free Worship names files "TITLE ().xml" when the songbook entry is blank. */
-    fun outputNameFor(inputFile: File): String =
-        trailingEmptyParens.replace(inputFile.nameWithoutExtension, "").trim() + ".song"
+    /**
+     * The song's own title, so the file is named the way the song is: an export's file name can
+     * arrive mangled (an archive unzipped under the wrong code page turns `Ô` into `├ö`) while the
+     * title inside it is right. Falls back to the file name — minus the " ()" Free Worship appends
+     * when the songbook entry is blank — when the file has no title or cannot be read.
+     */
+    fun outputNameFor(inputFile: File): String {
+        val title = runCatching { parse(inputFile).title }.getOrDefault("")
+        val fileName = trailingEmptyParens.replace(inputFile.nameWithoutExtension, "").trim()
+        return SongOutput.fileName(title, fallback = fileName)
+    }
 
     internal fun buildSongContent(song: FreeWorshipSong): String {
         val sb = StringBuilder()

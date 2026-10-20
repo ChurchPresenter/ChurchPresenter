@@ -34,17 +34,20 @@ internal fun SongsViewModel.fetchRemoteDetailIfNeeded(index: Int) {
     }
 }
 
+/** How the song book list names the songs at the top of the songs folder, which have no song book. */
+internal const val ROOT_SONGBOOK = "/"
+
 internal fun SongsViewModel.applySongList(songItems: List<SongItem>, songsObj: Songs? = null) {
     val songs = songsObj ?: Songs().also { it.addSongs(songItems) }
     songsDataState.value = songs
 
     // Collect songbooks including parent paths (e.g. "Kids/AM" also adds "Kids")
-    // Use "/" for songs in the root directory
+    // Use [ROOT_SONGBOOK] for songs in the root directory
     val allPaths = mutableSetOf<String>()
     for (item in songItems) {
         val sb = item.songbook
         if (sb.isBlank()) {
-            allPaths.add("/")
+            allPaths.add(ROOT_SONGBOOK)
             continue
         }
         allPaths.add(sb)

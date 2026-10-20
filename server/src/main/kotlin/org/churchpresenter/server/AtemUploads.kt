@@ -29,7 +29,7 @@ internal suspend fun handleAtemStillUpload(
     server: CompanionServer,
     scope: CoroutineScope,
 ) {
-                if (!server.checkApiKey(call)) return
+                if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return
                 val name = call.parameters["name"].orEmpty()
                 val file = namedLowerThirdOrRespond(call, server, name) ?: return
                 val atem = configuredAtemOrRespond(call, server) ?: return

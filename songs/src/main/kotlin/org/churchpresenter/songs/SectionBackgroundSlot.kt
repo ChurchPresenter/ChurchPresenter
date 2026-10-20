@@ -1,6 +1,7 @@
 package org.churchpresenter.songs
 
 import org.churchpresenter.sharedui.utils.isHeaderLine
+import org.churchpresenter.sharedui.utils.sectionLabelOf
 import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
@@ -62,7 +63,7 @@ internal fun sectionBackgroundSlots(lines: List<String>): List<SectionBackground
             isHeaderLine(line) -> {
                 flush()
                 headerIndex = index
-                label = line.trim().trim('[', ']', '{', '}').trim()
+                label = sectionLabelOf(line)
             }
             directive != null -> fields[directive.first] = directive.second
             line.isNotBlank() -> hasBody = true

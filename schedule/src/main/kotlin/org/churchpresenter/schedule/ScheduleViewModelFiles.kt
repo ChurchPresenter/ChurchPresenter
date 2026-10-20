@@ -6,8 +6,11 @@ import java.io.File
 import java.io.IOException
 import java.time.LocalDate
 import javax.swing.filechooser.FileNameExtensionFilter
+import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlinx.coroutines.CancellationException
@@ -44,13 +47,20 @@ suspend fun ScheduleViewModel.saveSchedule(
 internal fun ScheduleViewModel.suggestedScheduleFileName(today: LocalDate = LocalDate.now()): String =
     "$today-schedule.${Constants.EXTENSION_CPS}"
 
+/**
+ * Where Open and Save As start: the Schedules folder from System settings while it is there, or
+ * null for the chooser's own start, the home folder.
+ */
+internal fun ScheduleViewModel.scheduleDialogStart(): Path? =
+    scheduleFolder().takeIf { it.isNotBlank() }?.let(::Path)?.takeIf { it.isDirectory() }
+
 /** Always opens a save-file dialog and serializes the schedule to a .cps file. */
 suspend fun ScheduleViewModel.saveScheduleAs(
     dialogTitle: String = "Save Schedule As",
     fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
 ) {
     val file = FileChooser.platformInstance.save(
-        location = null,
+        location = scheduleDialogStart(),
         suggestedName = suggestedScheduleFileName(),
         filters = listOf(FileNameExtensionFilter(fileFilterDescription, Constants.EXTENSION_CPS)),
         title = dialogTitle
@@ -70,7 +80,7 @@ suspend fun ScheduleViewModel.loadSchedule(
 ) {
     if (_isFollowingRemote.value) return
     val file = FileChooser.platformInstance.chooseSingle(
-        path = null,
+        path = scheduleDialogStart(),
         filters = listOf(FileNameExtensionFilter(fileFilterDescription, Constants.EXTENSION_CPS)),
         title = dialogTitle,
         selectDirectory = false

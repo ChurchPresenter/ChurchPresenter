@@ -162,13 +162,44 @@ class SongsViewModelEditDeleteTest {
     }
 
     @Test
-    fun `a new song needs a songbook, and is refused while following a remote primary`() {
+    fun `a new song is refused while following a remote primary`() {
         val vm = viewModel()
-        assertFalse(vm.createSong(SongItem(number = "1", title = "Homeless", songbook = " ")))
-
         vm.setInstanceLinkSource(active = true, catalog = null, fetchLyrics = null)
         assertFalse(vm.createSong(SongItem(number = "1", title = "Mirrored", songbook = "Fresh")))
         assertFalse(File(dir, "Fresh").exists())
+    }
+
+    @Test
+    fun `a new song with no songbook is kept at the top of the songs folder`() {
+        val vm = viewModel()
+
+        assertTrue(vm.createSong(SongItem(number = "9", title = "Loose", songbook = " ", lyrics = listOf("l"))))
+
+        assertTrue(File(dir, "0009 - Loose.song").exists())
+        assertTrue(vm.filteredSongItems.value.any { it.title == "Loose" && it.songbook.isBlank() })
+    }
+
+    @Test
+    fun `a title a file name cannot hold is made safe on disk and kept in the song`() {
+        val vm = viewModel()
+
+        val song = SongItem(number = "", title = "AC/DC: Live?", songbook = "Hymnal", lyrics = listOf("l"))
+
+        assertTrue(vm.createSong(song))
+
+        assertTrue(File(dir, "Hymnal/AC DC Live.song").exists())
+        assertTrue(vm.filteredSongItems.value.any { it.title == "AC/DC: Live?" })
+    }
+
+    @Test
+    fun `taking a song out of its songbook moves it to the top of the folder`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Alone Song")
+
+        assertTrue(vm.updateSong(song, song.copy(songbook = "")))
+
+        assertTrue(File(dir, "0003 - Alone Song.song").exists())
+        assertFalse(File(dir, "Solo").exists(), "the songbook it left, now empty, is tidied away")
     }
 
     // ── deleteSong ───────────────────────────────────────────────────────────────
@@ -243,5 +274,30 @@ class SongsViewModelEditDeleteTest {
         vm.setInstanceLinkSource(active = true, catalog = null, fetchLyrics = null)
 
         assertFalse(vm.deleteSong(SongItem(number = "0009", title = "Ghost", songbook = "X")))
+    }
+
+    @Test
+    fun `deleting the last song at the top of the folder keeps the songs folder`() {
+        val songs = Files.createTempDirectory("cp-songs-root-only").toFile()
+        try {
+            val file = File(songs, "0001 - Only.song")
+            SongFileParser().writeSongFile(
+                SongItem(number = "0001", title = "Only", lyrics = listOf("[Verse 1]", "l")),
+                file.absolutePath,
+            )
+            val vm = SongsViewModel(
+                AppSettings(songSettings = SongSettings(storageDirectory = songs.absolutePath)),
+                dispatcher = Dispatchers.Unconfined,
+                ioDispatcher = Dispatchers.Unconfined,
+                enableFolderWatcher = false,
+            ).also { created.add(it) }
+
+            assertTrue(vm.deleteSong(vm.songTitled("Only")))
+
+            assertFalse(file.exists())
+            assertTrue(songs.isDirectory, "the songs folder itself must never be deleted")
+        } finally {
+            songs.deleteRecursively()
+        }
     }
 }

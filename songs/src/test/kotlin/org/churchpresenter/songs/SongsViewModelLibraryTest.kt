@@ -337,10 +337,7 @@ class SongsViewModelLibraryTest {
     }
 
     @Test
-    fun `creating without a songbook or storage directory is refused`() {
-        val vm = viewModel()
-        assertFalse(vm.createSong(SongItem(number = "1", title = "No Book", songbook = "", lyrics = listOf("l"))))
-
+    fun `creating without a storage directory is refused`() {
         val unconfigured = SongsViewModel(
             AppSettings(),
             dispatcher = Dispatchers.Unconfined,

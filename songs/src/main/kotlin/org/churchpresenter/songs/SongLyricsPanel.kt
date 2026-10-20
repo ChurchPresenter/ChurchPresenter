@@ -59,6 +59,7 @@ import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.labelOrUnbound
+import org.churchpresenter.sharedui.utils.sectionLabelOf
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.ui.platform.LocalDensity
@@ -601,7 +602,7 @@ private fun LyricSectionEntry(
         // preview uses, so a verse is recognised the same way in both.
         section.header?.let { header ->
             SectionLabelRow(
-                label = header.trim().trim('[', ']', '{', '}').trim(),
+                label = sectionLabelOf(header),
                 modifier = Modifier.padding(vertical = 4.dp),
                 slideIndex = section.slideIndex,
                 slideCount = section.slideCount,

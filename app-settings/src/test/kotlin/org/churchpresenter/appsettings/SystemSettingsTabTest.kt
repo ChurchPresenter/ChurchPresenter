@@ -377,12 +377,12 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodesWithText("No directory selected").assertCountEquals(6)
+        onAllNodesWithText("No directory selected").assertCountEquals(7)
         onAllNodesWithText("Browse...")[index].performScrollTo().performClick()
         waitUntil { onAllNodesWithText(picked).fetchSemanticsNodes().isNotEmpty() }
 
         onAllNodesWithText(picked).assertCountEquals(1)
-        onAllNodesWithText("No directory selected").assertCountEquals(5)
+        onAllNodesWithText("No directory selected").assertCountEquals(6)
         return current
     }
 
@@ -394,6 +394,7 @@ class SystemSettingsTabTest {
         settings.streamingSettings.lowerThirdFolder,
         settings.presentationStorageDirectory,
         settings.mediaStorageDirectory,
+        settings.scheduleStorageDirectory,
     )
 
     /** Asserts the browsed path landed in picker [index]'s own setting and nowhere else. */
@@ -441,6 +442,12 @@ class SystemSettingsTabTest {
     }
 
     @Test
+    fun `browsing the schedules picker stores and displays the chosen folder`() = runComposeUiTest {
+        val picked = tempDir().path
+        assertOnlyPickerChanged(6, picked, browsePicker(6, picked))
+    }
+
+    @Test
     fun `cancelling the folder picker changes nothing`() = runComposeUiTest {
         givenFolderChooserReturns(null)
         var current by mutableStateOf(AppSettings())
@@ -458,7 +465,7 @@ class SystemSettingsTabTest {
         waitForIdle()
 
         assertEquals(0, changes, "a cancelled picker must not report a settings change")
-        onAllNodesWithText("No directory selected").assertCountEquals(6)
+        onAllNodesWithText("No directory selected").assertCountEquals(7)
     }
 
     // ── Set All ───────────────────────────────────────────────────────────────
@@ -482,13 +489,13 @@ class SystemSettingsTabTest {
         waitForIdle()
 
         val result = assertNotNull(applied, "Set All must report a settings change")
-        assertEquals(List(6) { dir.path }, storagePaths(result), "every storage directory follows")
+        assertEquals(List(7) { dir.path }, storagePaths(result), "every storage directory follows")
     }
 
     @Test
     fun `every picker's Set All applies its own directory, not another picker's`() = runComposeUiTest {
         // One distinct folder per picker, in the order the pickers are declared.
-        val dirs = List(6) { tempDir() }
+        val dirs = List(7) { tempDir() }
         var applied: AppSettings? = null
         val initial = AppSettings(
             bibleSettings = AppSettings().bibleSettings.copy(storageDirectory = dirs[0].path),
@@ -497,6 +504,7 @@ class SystemSettingsTabTest {
             streamingSettings = AppSettings().streamingSettings.copy(lowerThirdFolder = dirs[3].path),
             presentationStorageDirectory = dirs[4].path,
             mediaStorageDirectory = dirs[5].path,
+            scheduleStorageDirectory = dirs[6].path,
         )
         setContent {
             MaterialTheme {
@@ -513,7 +521,7 @@ class SystemSettingsTabTest {
             waitForIdle()
 
             val result = assertNotNull(applied, "picker $index's Set All must report a settings change")
-            assertEquals(List(6) { dir.path }, storagePaths(result), "picker $index spreads its own path")
+            assertEquals(List(7) { dir.path }, storagePaths(result), "picker $index spreads its own path")
         }
     }
 
@@ -525,8 +533,8 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodesWithText("No directory selected").assertCountEquals(6)
-        repeat(6) { i -> onAllNodesWithText("Set All")[i].assertIsNotEnabled() }
+        onAllNodesWithText("No directory selected").assertCountEquals(7)
+        repeat(7) { i -> onAllNodesWithText("Set All")[i].assertIsNotEnabled() }
     }
 
     // ── What the tab displays ─────────────────────────────────────────────────
@@ -547,20 +555,21 @@ class SystemSettingsTabTest {
             "Lower Third",
             "Presentation",
             "Media",
+            "Schedules",
             "Calendar",
             "General",
             "Manage settings",
         ).forEach { title ->
             onAllNodesWithText(title).onFirst().assertExists("the $title heading must render")
         }
-        onAllNodesWithText("Browse...").assertCountEquals(7)
-        onAllNodesWithText("Set All").assertCountEquals(6)
+        onAllNodesWithText("Browse...").assertCountEquals(8)
+        onAllNodesWithText("Set All").assertCountEquals(7)
         onAllNodesWithText("Use Default").assertCountEquals(1)
     }
 
     @Test
     fun `each picker displays the directory it is configured with`() = runComposeUiTest {
-        val dirs = List(6) { tempDir() }
+        val dirs = List(7) { tempDir() }
         setContent {
             MaterialTheme {
                 SystemSettingsTab(
@@ -571,6 +580,7 @@ class SystemSettingsTabTest {
                         streamingSettings = AppSettings().streamingSettings.copy(lowerThirdFolder = dirs[3].path),
                         presentationStorageDirectory = dirs[4].path,
                         mediaStorageDirectory = dirs[5].path,
+                        scheduleStorageDirectory = dirs[6].path,
                     ),
                 )
             }
@@ -1274,9 +1284,9 @@ class SystemSettingsTabTest {
     fun `an unset folder says so under its name`() = runComposeUiTest {
         setContent { MaterialTheme { SystemSettingsTab() } }
 
-        waitUntil { onAllNodesWithText("Not set").fetchSemanticsNodes().size == 6 }
+        waitUntil { onAllNodesWithText("Not set").fetchSemanticsNodes().size == 7 }
         // The calendar's folder is checked off the UI thread, so the count is 0 until that lands --
-        // wait for the number itself, as the two counting tests above do, rather than for the six
+        // wait for the number itself, as the two counting tests above do, rather than for the seven
         // rows that are "Not set" the instant they compose.
         waitUntil { onAllNodesWithText("1 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("1 linked").onFirst()

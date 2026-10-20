@@ -5,6 +5,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.server.ScheduleSongDto
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -16,7 +17,8 @@ import kotlin.test.assertTrue
  * A phone or a linked controller asks for an item, the operator approves it, and this is what
  * happens next: the item joins the schedule **and** goes on the output. Both halves matter — adding
  * without projecting leaves the operator wondering why nothing changed, and projecting without
- * adding loses the item from the service order.
+ * adding loses the item from the service order. A row that is already in the service order is the
+ * exception: it goes up as it is, because adding it again duplicates the row.
  *
  * Every content type has to set the *right* presenting mode. Sending a song and getting the Bible
  * renderer would put a blank or stale screen in front of the congregation, which is the failure this
@@ -27,11 +29,70 @@ import kotlin.test.assertTrue
  */
 class ExecuteProjectItemTest {
 
-    private fun project(item: ScheduleItem): Pair<ScheduleActionsRecorder, PresenterManager> {
+    private fun project(
+        item: ScheduleItem,
+        scheduleItems: List<ScheduleItem> = emptyList(),
+    ): Pair<ScheduleActionsRecorder, PresenterManager> {
         val recorder = ScheduleActionsRecorder()
         val presenter = PresenterManager()
-        executeProjectItem(item, recorder.actions(), presenter)
+        executeProjectItem(item, recorder.actions(), presenter, scheduleItems)
         return recorder to presenter
+    }
+
+    // ── A row already in the schedule ───────────────────────────────────────────
+
+    private val scheduledSong = ScheduleItem.SongItem(
+        id = "row-1", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal", songId = "Hymnal::42",
+    )
+
+    @Test
+    fun `a row already in the schedule is put up without a second copy being added`() {
+        val (recorder, presenter) = project(scheduledSong, scheduleItems = listOf(scheduledSong))
+
+        assertEquals(emptyList(), recorder.added, "projecting a scheduled row must not duplicate it")
+        assertTrue(presenter.showPresenterWindow.value, "it still goes up")
+    }
+
+    @Test
+    fun `a verse already in the schedule still reaches the bible renderer`() {
+        val verse = ScheduleItem.BibleVerseItem(
+            id = "row-2", bookName = "John", chapter = 3, verseNumber = 16, verseText = "v",
+        )
+
+        val (recorder, presenter) = project(verse, scheduleItems = listOf(verse))
+
+        assertEquals(emptyList(), recorder.added)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
+    }
+
+    @Test
+    fun `an item whose id is not a row is added as before`() {
+        val (recorder, _) = project(scheduledSong.copy(id = "elsewhere"), scheduleItems = listOf(scheduledSong))
+
+        assertEquals(listOf("song:42:Amazing Grace:Hymnal:Hymnal::42"), recorder.added)
+    }
+
+    @Test
+    fun `a row is found by its id alone, and never by a blank one`() {
+        val rows = listOf(scheduledSong, scheduledSong.copy(id = ""))
+
+        assertEquals(scheduledSong, scheduledRowFor(scheduledSong.copy(title = "Edited on the phone"), rows))
+        assertEquals(null, scheduledRowFor(scheduledSong.copy(id = ""), rows))
+        assertFalse(isScheduledRow(scheduledSong.copy(id = "row-9"), rows))
+    }
+
+    @Test
+    fun `select_song finds its row by id, then by number and songbook, then by title`() {
+        val numbered = scheduledSong
+        val other = scheduledSong.copy(id = "row-3", songbook = "Choruses")
+        val unnumbered = ScheduleItem.SongItem(id = "row-4", songNumber = 0, title = "Ô Dieu", songbook = "")
+        val rows = listOf(ScheduleItem.LabelItem(id = "l", text = "Welcome", textColor = "", backgroundColor = ""),
+            numbered, other, unnumbered)
+
+        assertEquals(other, scheduledSongFor(ScheduleSongDto("row-3", 0, "", ""), rows))
+        assertEquals(other, scheduledSongFor(ScheduleSongDto("", 42, "Amazing Grace", "Choruses"), rows))
+        assertEquals(unnumbered, scheduledSongFor(ScheduleSongDto("", 0, "ô dieu", ""), rows))
+        assertEquals(null, scheduledSongFor(ScheduleSongDto("", 7, "Amazing Grace", "Hymnal"), rows))
     }
 
     // ── Each content type reaches its own renderer ──────────────────────────────
@@ -144,6 +205,7 @@ class ExecuteProjectItemTest {
             ScheduleItem.BibleVerseItem(id = "0", bookName = "John", chapter = 3, verseNumber = 16, verseText = "v"),
             recorder.actions(),
             presenter,
+            emptyList(),
         )
         val modeBefore = presenter.slideContent.value
         val addedBefore = recorder.added.size
@@ -152,6 +214,7 @@ class ExecuteProjectItemTest {
             ScheduleItem.LabelItem(id = "1", text = "Welcome", textColor = "#FFF", backgroundColor = "#000"),
             recorder.actions(),
             presenter,
+            emptyList(),
         )
 
         // A label is a divider in the service order, not content. Falling through the `when` has to
@@ -239,6 +302,7 @@ class ExecuteProjectItemTest {
                 ),
                 ScheduleActionsRecorder().actions(),
                 presenter,
+                emptyList(),
             )
 
             assertEquals(3_723, presenter.timerRemainingSeconds.value, "1h 2m 3s is 3723 seconds")
@@ -260,6 +324,7 @@ class ExecuteProjectItemTest {
                 ),
                 ScheduleActionsRecorder().actions(),
                 presenter,
+                emptyList(),
             )
 
             assertEquals(0, presenter.timerRemainingSeconds.value, "a count-up starts at nothing elapsed")
@@ -286,6 +351,7 @@ class ExecuteProjectItemTest {
                     ),
                     ScheduleActionsRecorder().actions(),
                     presenter,
+                    emptyList(),
                 )
 
                 assertFalse(presenter.timerRunning.value, "$mode is a display, not a countdown")

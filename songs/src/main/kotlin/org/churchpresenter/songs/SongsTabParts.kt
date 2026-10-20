@@ -398,13 +398,16 @@ internal fun SongsTabController.SongEditorDialogs() {
         )
     )
 
-    // New Song Dialog
-    val newSongTemplate = remember {
+    // New Song Dialog -- in the song book the last new song went into, while that book is still
+    // there; otherwise at the top of the songs folder.
+    val lastSongbook = appSettings.newSongSongbook
+    val songbooks = viewModel.songbooks.value
+    val newSongTemplate = remember(dialogs.creatingNew) {
         val templateLyrics = listOf("[Verse 1]", "", "", "[Chorus]", "", "", "[Verse 2]", "", "", "[Verse 3]", "", "")
         SongItem(
             number = "",
             title = "",
-            songbook = "",
+            songbook = lastSongbook.takeIf { it in songbooks }.orEmpty(),
             lyrics = templateLyrics,
             secondaryLyrics = templateLyrics
         )
@@ -425,8 +428,9 @@ internal fun SongsTabController.SongEditorDialogs() {
             onSave = { newSong, tuning ->
                 val success = viewModel.createSong(newSong)
                 if (success) {
-                    if (tuning != SongTuning()) {
-                        onSettingsChange { s -> s.withTuning(newSong.songId, tuning) }
+                    onSettingsChange { s ->
+                        val remembered = s.copy(newSongSongbook = newSong.songbook)
+                        if (tuning != SongTuning()) remembered.withTuning(newSong.songId, tuning) else remembered
                     }
                     dialogs.closeNew()
                 }

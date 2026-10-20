@@ -55,6 +55,7 @@ import org.churchpresenter.converter.song.DocumentTextExtractor
 import org.churchpresenter.converter.song.findFormatInputs
 import org.churchpresenter.converter.song.inputSize
 import org.churchpresenter.converter.song.MarkdownToSongConverter
+import org.churchpresenter.converter.song.outputNamesFor
 import org.churchpresenter.converter.song.ParsedSong
 import org.churchpresenter.converter.song.DocumentFormat
 import org.churchpresenter.converter.song.SoftProjectorFormat
@@ -239,10 +240,11 @@ private fun BatchFilePanel(
         completed = 0
         scope.launch {
             val messages = mutableListOf<String>()
-            for (file in files) {
+            val outputNames = withContext(Dispatchers.IO) { format.outputNamesFor(files, outputDir) }
+            for ((file, outputName) in files.zip(outputNames)) {
                 messages += withContext(Dispatchers.IO) {
                     try {
-                        val result = format.convert(file, outputDir)
+                        val result = format.convert(file, outputDir, outputName)
                         result.outputFiles.map { "OK: ${file.name} -> ${it.name}" } +
                             result.errors.map { "ERROR: ${file.name} - $it" }
                     } catch (e: Exception) {

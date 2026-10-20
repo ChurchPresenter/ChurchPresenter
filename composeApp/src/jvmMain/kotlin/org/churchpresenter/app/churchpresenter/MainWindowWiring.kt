@@ -138,6 +138,10 @@ internal fun MainWindowScope.ServerCommandWiring() {
         }
 
         LaunchedEffect(Unit) {
+            companionServer.onSongSelected.collect { song -> readyRemoteSong(song) }
+        }
+
+        LaunchedEffect(Unit) {
             companionServer.onClear.collect {
                 mediaViewModel.pause()
                 presenterManager.clearFromOperator()
@@ -265,7 +269,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         LaunchedEffect(Unit) {
             companionServer.onInstantAction.collect { action ->
                 val type = remoteActionType(action.actionType)
-                remoteActivityNotifications.add(
+                notifyRemoteActivity(
                     RemoteActivityNotification(
                         type = type,
                         title = remoteActivityTitle(type, clearDisplayTitle, action.title.text()),

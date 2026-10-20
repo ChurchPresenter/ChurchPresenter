@@ -3,6 +3,7 @@ package org.churchpresenter.songs
 import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
 import org.churchpresenter.sharedui.utils.isSlideBreak
+import org.churchpresenter.sharedui.utils.sectionLabelOf
 import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTranslation
@@ -118,7 +119,7 @@ private fun lyricsMatch(index: Int, label: String, sections: List<SearchableSect
 /** The chip a section's header earns, and the name to write on it. */
 private fun kindOf(header: String?): Pair<SongMatchKind, String?> {
     if (header == null) return SongMatchKind.LYRICS to null
-    val name = header.trim().trim('[', ']', '{', '}').trim()
+    val name = sectionLabelOf(header)
     val kind = when {
         isChorusHeader(header) -> SongMatchKind.CHORUS
         else -> when (SongSectionWords.groupOf(name)) {

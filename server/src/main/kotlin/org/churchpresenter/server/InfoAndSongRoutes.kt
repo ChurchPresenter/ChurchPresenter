@@ -48,18 +48,14 @@ private fun Route.infoRoutes(
                         "songs", "bible", "schedule", "presentations", "pictures", "status"
                     )
                     call.response.headers.append(Constants.HEADER_SERVER_VERSION, server.appVersion)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID].orEmpty()
                     call.respond(
                         StatusResponse(
                             appVersion  = server.appVersion,
                             endpoints   = exposedEndpoints,
                             bibles      = bibleNames,
                             songbooks   = songbookNames,
-                            permissions = DevicePermissionsDto(
-                                canPresent       = true,
-                                canAddToSchedule = true,
-                                canUploadFiles   = server._fileUploadEnabled.value,
-                                maxMediaUploadMb = server._maxMediaUploadMb.value,
-                            ),
+                            permissions = server.permissionsDtoFor(clientId),
                         )
                     )
                 }
@@ -154,7 +150,7 @@ private fun Route.songSelectRoutes(
     scope: CoroutineScope,
 ) {
                 post("${Constants.ENDPOINT_SONGS}/{number}/select") {
-                    if (!server.checkApiKey(call)) return@post
+                    if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
                     val number = call.parameters["number"] ?: run {
                         call.respond(HttpStatusCode.BadRequest, """{"error":"missing number"}""")
                         return@post

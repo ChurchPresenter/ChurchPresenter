@@ -6,13 +6,17 @@ import androidx.compose.runtime.setValue
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.churchpresenter.server.DevicePermission
+import org.churchpresenter.server.DevicePermissions
 import java.io.File
 
 @Serializable
 data class RemoteClientLists(
     val allowedClients: Set<String> = emptySet(),
     val blockedClients: Set<String> = emptySet(),
-    val clientLabels: Map<String, String> = emptyMap()
+    val clientLabels: Map<String, String> = emptyMap(),
+    /** What each allowed device may do; a device with no entry may do everything. */
+    val permissions: Map<String, DevicePermissions> = emptyMap(),
 )
 
 /**
@@ -30,15 +34,13 @@ class RemoteClientManager {
     val allowedClients: Set<String> get() = _lists.allowedClients
     val blockedClients: Set<String> get() = _lists.blockedClients
     val clientLabels: Map<String, String> get() = _lists.clientLabels
+    val permissions: Map<String, DevicePermissions> get() = _lists.permissions
 
     fun isAllowed(clientId: String): Boolean =
         clientId.isNotBlank() && clientId in _lists.allowedClients
 
     fun isBlocked(clientId: String): Boolean =
         clientId.isNotBlank() && clientId in _lists.blockedClients
-
-    /** Returns true if the client is in either the permanent allow or permanent block list. */
-    fun isKnown(clientId: String): Boolean = isAllowed(clientId) || isBlocked(clientId)
 
     /** Adds to permanent allow list and removes from block list if present. */
     fun allowPermanently(clientId: String) {
@@ -50,18 +52,36 @@ class RemoteClientManager {
         file.save(_lists)
     }
 
-    /** Adds to permanent block list and removes from allow list if present. */
+    /** Adds to permanent block list and removes from allow list -- and its permissions -- if present. */
     fun blockPermanently(clientId: String) {
         if (clientId.isBlank()) return
         _lists = _lists.copy(
             blockedClients = _lists.blockedClients + clientId,
-            allowedClients = _lists.allowedClients - clientId
+            allowedClients = _lists.allowedClients - clientId,
+            permissions = _lists.permissions - clientId,
         )
         file.save(_lists)
     }
 
     fun removeAllowed(clientId: String) {
-        _lists = _lists.copy(allowedClients = _lists.allowedClients - clientId)
+        _lists = _lists.copy(
+            allowedClients = _lists.allowedClients - clientId,
+            permissions = _lists.permissions - clientId,
+        )
+        file.save(_lists)
+    }
+
+    /** Switches one of an allowed device's permissions on or off. */
+    fun setPermission(clientId: String, permission: DevicePermission, allowed: Boolean) {
+        if (!isAllowed(clientId)) return
+        val updated = permissionsFor(clientId).with(permission, allowed)
+        _lists = _lists.copy(
+            permissions = if (updated == DevicePermissions.ALL) {
+                _lists.permissions - clientId
+            } else {
+                _lists.permissions + (clientId to updated)
+            },
+        )
         file.save(_lists)
     }
 
@@ -86,6 +106,13 @@ class RemoteClientManager {
 
     fun reload() { _lists = file.load() }
 }
+
+/** Returns true if the client is in either the permanent allow or permanent block list. */
+fun RemoteClientManager.isKnown(clientId: String): Boolean = isAllowed(clientId) || isBlocked(clientId)
+
+/** What [clientId] may do: everything, unless the operator has switched something off. */
+fun RemoteClientManager.permissionsFor(clientId: String): DevicePermissions =
+    permissions[clientId] ?: DevicePermissions.ALL
 
 /** Where the lists are kept between runs: `~/.churchpresenter/remote_clients.json`. */
 private class RemoteClientsFile {

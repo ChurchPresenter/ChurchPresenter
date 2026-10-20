@@ -27,6 +27,7 @@ import org.churchpresenter.app.churchpresenter.remote.emitRemoteTabSelection
 import org.churchpresenter.server.RemoteApproval
 import org.churchpresenter.server.remoteApproval
 import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
+import org.churchpresenter.app.churchpresenter.remote.scheduledRowFor
 import org.churchpresenter.app.churchpresenter.remote.qaActionType
 import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
 import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
@@ -43,6 +44,9 @@ internal fun MainWindowScope.RemoteAddRequests() {
         LaunchedEffect(remoteClientManager.blockedClients, sessionBlockedClients.toList()) {
             companionServer.blockedClientIds =
                 remoteClientManager.blockedClients + sessionBlockedClients
+        }
+        LaunchedEffect(remoteClientManager.permissions) {
+            companionServer.devicePermissions = remoteClientManager.permissions
         }
 
         LaunchedEffect(Unit) {
@@ -73,7 +77,7 @@ internal fun MainWindowScope.RemoteAddRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         add()
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event, add, { pending.decision.complete(false) },
@@ -163,7 +167,7 @@ internal fun MainWindowScope.RemoteRemoveRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         remove()
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event, remove, { pending.decision.complete(false) },
@@ -201,7 +205,7 @@ internal fun MainWindowScope.RemoteRemoveRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         addAll()
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event, addAll, { pending.decision.complete(false) },
@@ -227,17 +231,22 @@ internal fun MainWindowScope.RemoteProjectRequests() {
                 val item = pending.item
                 val project: () -> Unit = {
                     UsageEvents.record(UsageEvent.REMOTE_PUT_LIVE)
-                    if (item is ScheduleItem.AnnouncementItem) {
-                        appSettings = appSettings.withAnnouncement(item)
+                    // A row the phone read from the schedule goes live as that row, not as a copy.
+                    val row = scheduledRowFor(item, currentScheduleItems)
+                    val shown = row ?: item
+                    if (shown is ScheduleItem.AnnouncementItem) {
+                        appSettings = appSettings.withAnnouncement(shown)
                     }
+                    if (row != null) currentScheduleActions.selectItem(row.id)
                     executeProjectItem(
-                        item,
+                        shown,
                         currentScheduleActions,
                         presenterManager,
+                        currentScheduleItems,
                     )
                     coroutineScope.launch {
                         emitRemoteTabSelection(
-                            item, remoteSelectSongFlow,
+                            shown, remoteSelectSongFlow,
                             remoteSelectPictureFlow, remoteSelectPresentationFlow,
                             remoteSelectMediaFlow,
                         )
@@ -256,7 +265,7 @@ internal fun MainWindowScope.RemoteProjectRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         project()
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event, project, { pending.decision.complete(false) },
@@ -289,7 +298,7 @@ internal fun MainWindowScope.QaAndPresentationConnectRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         pending.decision.complete(true)
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event,
@@ -318,7 +327,7 @@ internal fun MainWindowScope.QaAndPresentationConnectRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         pending.decision.complete(true)
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event,
@@ -353,7 +362,7 @@ internal fun MainWindowScope.AdminAndMusicianConnectRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         pending.decision.complete(true)
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event,
@@ -382,7 +391,7 @@ internal fun MainWindowScope.AdminAndMusicianConnectRequests() {
                     RemoteApproval.Reject -> pending.decision.complete(false)
                     is RemoteApproval.Approve -> {
                         pending.decision.complete(true)
-                        remoteActivityNotifications.add(outcome.notification)
+                        notifyRemoteActivity(outcome.notification)
                     }
                     is RemoteApproval.Ask -> remoteEventQueue.add(Triple(
                         outcome.event,

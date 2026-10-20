@@ -47,6 +47,7 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
                 item,
                 currentScheduleActions,
                 presenterManager.previewBus.forNewItem(cuedModeOf(item)),
+                currentScheduleItems,
             )
         },
         media = mediaOutlet(mediaViewModel::play, mediaViewModel::pause, mediaViewModel::stop),
