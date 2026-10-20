@@ -11,8 +11,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.core.models.songs.LyricSection
 
-private const val SECTION_INDICATOR_SPACER_PX = 4
-
 /**
  * The floor the two searches in this file settle on, in settings units at the 1920×1080 reference
  * resolution. Named rather than repeated at the five places that had it inline.
@@ -80,6 +78,10 @@ fun calculateAutoFitFontSize(
  * [includeEndIndicator] reserves the end-of-song marker's row under **every** section: the presenter
  * keeps that row on every slide, drawn invisibly until the last, so the lyrics never move when it
  * appears.
+ *
+ * The answer is the plain binary search's -- every line measured at every size it probes -- found
+ * from one measure per line and a few near the edge, and shared with every other output and preview
+ * that asks the same: see `SectionFitSearch`.
  */
 fun calculateAutoFitForAllSections(
     textMeasurer: TextMeasurer,
@@ -96,26 +98,13 @@ fun calculateAutoFitForAllSections(
     if (allLines.all { it.isBlank() }) return MIN_AUTO_FIT_FONT_SIZE
 
     val effectiveHeight = (availableHeight - reservedHeight).coerceAtLeast(1)
-    val referenceDensity = Density(1f)
-    // Use unconstrained width to measure natural line width (no wrapping)
-    val unconstrainedConstraints = Constraints()
-
-    var low = MIN_AUTO_FIT_FONT_SIZE
-    var high = 300
-    while (high - low > 1) {
-        val mid = (low + high) / 2
-        val style = baseStyle.copy(fontSize = mid.sp)
-        val fits = sections.all { section ->
-            sectionFits(
-                textMeasurer, section, style, unconstrainedConstraints, referenceDensity,
-                availableWidth, effectiveHeight,
-                withEndIndicator = includeEndIndicator,
-                styleText = styleText,
-            )
-        }
-        if (fits) low = mid else high = mid
-    }
-    return (low - 1).coerceAtLeast(MIN_AUTO_FIT_FONT_SIZE)
+    // One song in one style in one box is fitted once, by whichever output or preview asks first.
+    val table = SectionFitLines.of(sections, includeEndIndicator, styleText)
+    val probe = table.probe(textMeasurer, baseStyle)
+    val key = SectionFitCache.Key(table, baseStyle, availableWidth, effectiveHeight, probe)
+    SectionFitCache.get(key)?.let { return it }
+    return SectionFitSearch(textMeasurer, table, baseStyle, availableWidth, effectiveHeight).result()
+        .also { SectionFitCache.put(key, it) }
 }
 
 /**
@@ -193,40 +182,4 @@ fun calculateChordChartFontSize(
         if (fits(mid)) low = mid else high = mid - 1
     }
     return low.coerceAtLeast(MIN_AUTO_FIT_FONT_SIZE)
-}
-
-/** True when every line of [section] fits on one row and the section fits the height. */
-@Suppress("LongParameterList")
-private fun sectionFits(
-    textMeasurer: TextMeasurer,
-    section: LyricSection,
-    style: TextStyle,
-    constraints: Constraints,
-    density: Density,
-    availableWidth: Int,
-    effectiveHeight: Int,
-    withEndIndicator: Boolean,
-    styleText: (String) -> AnnotatedString,
-): Boolean {
-    // Every language's lines, so the size that is settled on fits the longest line of whichever
-    // language has it -- not just of the first two. `allLanguageLines` puts the primary first and
-    // then each translation in order; the empty ones are dropped on the next line.
-    val lineSets = section.allLanguageLines()
-    return lineSets.filter { it.isNotEmpty() }.all { lines ->
-        val measured = lines.map {
-            textMeasurer.measure(
-                text = styleText(it), style = style, constraints = constraints, density = density,
-            ).size
-        }
-        // Reserve space for end-of-song indicator on the last section: spacer + indicator height
-        val indicatorHeight = if (withEndIndicator) {
-            SECTION_INDICATOR_SPACER_PX + textMeasurer.measure(
-                text = "* * *", style = style, constraints = constraints, density = density
-            ).size.height
-        } else {
-            0
-        }
-        val sectionHeight = measured.sumOf { it.height } + indicatorHeight
-        measured.none { it.width > availableWidth } && sectionHeight <= effectiveHeight
-    }
 }
