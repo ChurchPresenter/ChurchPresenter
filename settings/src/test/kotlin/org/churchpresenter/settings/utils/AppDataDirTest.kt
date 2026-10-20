@@ -103,4 +103,32 @@ class AppDataDirTest {
         assertEquals(File(home, ".churchpresenter"), resolved)
         assertTrue(!resolved.exists())
     }
+
+    @Test
+    fun `a run's resolution is answered again without resolving`() {
+        val home = dir("home").path
+        val resolved = AppDataDir.resolveForRun(home) { File(scratch, "resolved") }
+
+        val shown = AppDataDir.resolvedThisRun(homeDir = home) { error("resolved a second time") }
+
+        assertEquals(resolved, shown)
+    }
+
+    @Test
+    fun `another home is resolved afresh`() {
+        AppDataDir.resolveForRun(dir("home").path) { File(scratch, "first") }
+        val other = File(scratch, "other")
+
+        assertEquals(other, AppDataDir.resolvedThisRun(homeDir = dir("elsewhere").path) { other })
+    }
+
+    @Test
+    fun `resolving for a run creates the folder as resolve does`() {
+        val home = dir("home")
+
+        val resolved = AppDataDir.resolveForRun(home.path)
+
+        assertEquals(File(home, ".churchpresenter").canonicalFile, resolved.canonicalFile)
+        assertTrue(resolved.isDirectory)
+    }
 }

@@ -82,7 +82,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.calendarFolder
+import org.churchpresenter.settings.calendarFolderShown
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -266,7 +266,7 @@ private fun storageFolders(
         LocalDefaultCalendarFolder.current.let { pinned ->
             remember(settings.calendarStorageDirectory, pinned) {
                 pinned?.takeIf { settings.calendarStorageDirectory.isBlank() }
-                    ?: settings.calendarFolder().absolutePath
+                    ?: settings.calendarFolderShown().absolutePath
             }
         },
         isDefault = settings.calendarStorageDirectory.isBlank(),

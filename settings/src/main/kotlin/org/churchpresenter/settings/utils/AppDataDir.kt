@@ -19,8 +19,11 @@ import java.io.File
  * settings and its Bibles together and finds them again on the next launch — the resolution is
  * deterministic, not remembered anywhere.
  *
- * Nothing is cached: the result is recomputed per call so that a test swapping `user.home` is
- * honoured, rather than latching onto whichever directory the first caller happened to see.
+ * [resolve] caches nothing: the result is recomputed per call so that a test swapping `user.home`
+ * is honoured, rather than latching onto whichever directory the first caller happened to see. A
+ * screen that only *shows* the folder reads [resolvedThisRun] instead, which answers from the last
+ * resolution for the same home without touching the disk again — startup resolves it before the
+ * first window opens, so composing never has to.
  *
  * `WebsitePresenter` resolves its own root by the same principle for a different reason (it
  * prefers `%ProgramData%` for the JCEF cache), and `CrashReporter` deliberately latches its
@@ -33,6 +36,34 @@ object AppDataDir {
 
     /** The name used under a platform application-data folder, where a dotfile would be odd. */
     private const val APP_FOLDER = "ChurchPresenter"
+
+    /** What the last [resolve] for the process's own `user.home` came to, and for which home. */
+    private class Resolution(val homeDir: String?, val folder: File)
+
+    @Volatile
+    private var lastResolution: Resolution? = null
+
+    /** The folder to persist into for this process's `user.home`, created if it did not exist. */
+    fun resolve(): File = resolveForRun(System.getProperty("user.home"))
+
+    /** Resolves for [homeDir] through [resolveNow] and remembers the answer for [resolvedThisRun]. */
+    internal fun resolveForRun(
+        homeDir: String?,
+        resolveNow: (String?) -> File = { resolve(homeDir = it) },
+    ): File = resolveNow(homeDir).also { lastResolution = Resolution(homeDir, it) }
+
+    /**
+     * The folder [resolve] last came to for [homeDir], or a fresh resolution when it has not run
+     * for that home yet.
+     *
+     * For a screen that prints the folder: it reads the disk at most once per run, where [resolve]
+     * creates and probes the candidates on every call — work that does not belong on the thread a
+     * window composes on.
+     */
+    fun resolvedThisRun(
+        homeDir: String? = System.getProperty("user.home"),
+        resolveNow: () -> File = { resolve() },
+    ): File = lastResolution?.takeIf { it.homeDir == homeDir }?.folder ?: resolveNow()
 
     /**
      * The folder to persist into, created if it did not exist.
