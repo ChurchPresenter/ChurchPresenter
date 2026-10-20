@@ -536,6 +536,7 @@
     <string name="language_tamil">தமிழ்</string>
     <string name="language_tagalog">தகலோக்</string>
     <string name="language_swahili">சுவாஹிலி</string>
+    <string name="language_tahitian">டஹிதியன்</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" க்கு முடிவுகள் எதுவும் இல்லை</string>

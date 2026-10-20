@@ -169,6 +169,7 @@
     <string name="language_tamil">Tamilština</string>
     <string name="language_tagalog">Tagalog</string>
     <string name="language_swahili">Svahilština</string>
+    <string name="language_tahitian">Tahitština</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Pro "%1$s" nebyly nalezeny žádné výsledky</string>

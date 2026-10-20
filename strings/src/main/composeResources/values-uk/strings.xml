@@ -293,6 +293,7 @@
     <string name="language_tamil">Тамільська</string>
     <string name="language_tagalog">Тагальська</string>
     <string name="language_swahili">Суахілі</string>
+    <string name="language_tahitian">Таїтянська</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Результати не знайдені для "%1$s"</string>

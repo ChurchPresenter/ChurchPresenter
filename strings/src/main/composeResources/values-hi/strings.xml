@@ -529,6 +529,7 @@
     <string name="language_tamil">तमिल</string>
     <string name="language_tagalog">तागालोग</string>
     <string name="language_swahili">स्वाहिली</string>
+    <string name="language_tahitian">ताहिती</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" के लिए कोई परिणाम नहीं मिला</string>

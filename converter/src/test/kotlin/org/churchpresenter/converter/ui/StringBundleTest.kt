@@ -25,7 +25,7 @@ class StringBundleTest {
     private val locales = listOf(
         "ar", "be", "cs", "de", "es", "et", "fa", "fi", "fr", "hi", "hr", "id", "ja", "kk", "lo",
         "lv", "ms", "ne", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sv", "sw", "ta", "th", "tl",
-        "tr", "uk", "uz", "zh",
+        "tr", "ty", "uk", "uz", "zh",
     )
 
     private fun load(name: String): Properties {

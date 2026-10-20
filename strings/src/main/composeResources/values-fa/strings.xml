@@ -529,6 +529,7 @@
     <string name="language_tamil">تامیلی</string>
     <string name="language_tagalog">تاگالوگ</string>
     <string name="language_swahili">سواحیلی</string>
+    <string name="language_tahitian">تاهیتیایی</string>
 
     <!-- Search Results -->
     <string name="no_results_found">نتیجه‌ای برای «%1$s» یافت نشد</string>

@@ -45,5 +45,6 @@ enum class Language(val code: String, val nativeName: String, val rightToLeft: B
     MALAY("ms", "Bahasa Melayu"),
     TAMIL("ta", "தமிழ்"),
     TAGALOG("tl", "Tagalog"),
-    SWAHILI("sw", "Kiswahili")
+    SWAHILI("sw", "Kiswahili"),
+    TAHITIAN("ty", "Reo Tahiti")
 }

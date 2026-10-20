@@ -293,6 +293,7 @@
     <string name="language_tamil">Tamilski</string>
     <string name="language_tagalog">Tagalski</string>
     <string name="language_swahili">Suahili</string>
+    <string name="language_tahitian">Tahitański</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Nie znaleziono wyników dla "%1$s"</string>

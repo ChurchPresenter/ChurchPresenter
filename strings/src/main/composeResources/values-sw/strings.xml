@@ -529,6 +529,7 @@
     <string name="language_tamil">Kitamil</string>
     <string name="language_tagalog">Kitagalogi</string>
     <string name="language_swahili">Kiswahili</string>
+    <string name="language_tahitian">Kitahiti</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Hakuna matokeo ya "%1$s"</string>

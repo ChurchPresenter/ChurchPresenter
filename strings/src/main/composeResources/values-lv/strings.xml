@@ -529,6 +529,7 @@
     <string name="language_tamil">Tamilu</string>
     <string name="language_tagalog">Tagalu</string>
     <string name="language_swahili">Svahili</string>
+    <string name="language_tahitian">Taitiešu</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Vaicājumam "%1$s" nav rezultātu</string>

@@ -321,6 +321,7 @@
     <string name="language_tamil">Тамильский</string>
     <string name="language_tagalog">Тагальский</string>
     <string name="language_swahili">Суахили</string>
+    <string name="language_tahitian">Таитянский</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Результаты не найдены для "%1$s"</string>

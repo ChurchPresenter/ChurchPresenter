@@ -425,6 +425,7 @@
     <string name="language_tamil">Tamili</string>
     <string name="language_tagalog">Tagalogi</string>
     <string name="language_swahili">Suahiili</string>
+    <string name="language_tahitian">Tahiti</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Tulemusi ei leitud päringule "%1$s"</string>
