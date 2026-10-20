@@ -13,6 +13,7 @@ import java.awt.Window
 import java.awt.event.ActionEvent
 import java.awt.event.HierarchyEvent
 import javax.swing.JPanel
+import javax.swing.SwingUtilities
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -127,6 +128,16 @@ class TitleBarsTest {
         mode = ThemeMode.LIGHT
         waitForIdle()
         assertFalse(handed.last().dark)
+    }
+
+    @Test
+    fun `the app's own title bars take the theme without a window to paint`() = runComposeUiTest {
+        // Headless there are no windows, so whichever platform runs this, nothing native is called.
+        setContent { ChurchPresenterTheme(ThemeMode.DARK) { ThemedTitleBars() } }
+        waitForIdle()
+        SwingUtilities.invokeAndWait {}
+        assertTrue(Window.getWindows().isEmpty())
+        assertEquals(true, AppTitleBars.style?.dark, "the dark theme reached the app's title bars")
     }
 
     @Test

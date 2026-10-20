@@ -297,4 +297,23 @@ class MenuBarStyleTest {
         val keys = assertNotNull(SwingUtilities.getUIInputMap(menus.item, JComponent.WHEN_IN_FOCUSED_WINDOW))
         assertNotNull(keys.get(minus), "the new key is the one bound")
     }
+
+    @Test
+    fun `the main window's bar is styled in the theme after each composition, and left alone on macOS`() =
+        runComposeUiTest {
+            val windows = bar()
+            val mac = bar()
+            setContent {
+                ChurchPresenterTheme(ThemeMode.DARK) {
+                    ThemedMenuBar(menuBar = { windows.bar }, macOs = false)
+                    ThemedMenuBar(menuBar = { mac.bar }, macOs = true)
+                }
+            }
+            waitForIdle()
+            SwingUtilities.invokeAndWait {}
+
+            assertIs<BasicMenuBarUI>(windows.bar.ui)
+            assertTrue(windows.item.ui.javaClass.simpleName.startsWith("Themed"))
+            assertNull(mac.bar.getClientProperty("churchpresenter.menuBarStyle"), "macOS keeps its own menus")
+        }
 }

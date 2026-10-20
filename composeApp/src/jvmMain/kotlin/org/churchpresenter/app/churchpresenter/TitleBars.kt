@@ -68,8 +68,11 @@ internal class TitleBars<W>(
 }
 
 /** The app's [TitleBars], made on first use. */
-private object AppTitleBars {
+internal object AppTitleBars {
     private val titleBars: TitleBars<Window>? by lazy { appTitleBars(System.getProperty("os.name").orEmpty()) }
+
+    /** The style the app's title bars are in; null before the first, or on a platform with no painter. */
+    val style: TitleBarStyle? get() = titleBars?.style
 
     fun update(style: TitleBarStyle) {
         titleBars?.update(style)

@@ -64,10 +64,16 @@ private const val STYLE_PROPERTY = "churchpresenter.menuBarStyle"
  */
 @Composable
 internal fun FrameWindowScope.ThemedMenuBar() {
-    if (isMacOs) return
+    ThemedMenuBar(menuBar = { window.jMenuBar })
+}
+
+/** [ThemedMenuBar] for the bar [menuBar] finds; nothing on [macOs]. */
+@Composable
+internal fun ThemedMenuBar(menuBar: () -> JMenuBar?, macOs: Boolean = isMacOs) {
+    if (macOs) return
     val style = themedMenuBarStyle()
     SideEffect {
-        SwingUtilities.invokeLater { window.jMenuBar?.let { styleMenuBar(it, style) } }
+        SwingUtilities.invokeLater { menuBar()?.let { styleMenuBar(it, style) } }
     }
 }
 
