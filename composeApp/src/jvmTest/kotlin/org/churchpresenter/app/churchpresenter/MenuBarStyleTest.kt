@@ -2,20 +2,27 @@ package org.churchpresenter.app.churchpresenter
 
 import java.awt.Color
 import java.awt.Font
+import java.awt.event.InputEvent
+import java.awt.event.KeyEvent
 import java.awt.image.BufferedImage
 import javax.swing.JCheckBoxMenuItem
+import javax.swing.JComponent
 import javax.swing.JMenu
 import javax.swing.JMenuBar
 import javax.swing.JMenuItem
 import javax.swing.JPopupMenu
 import javax.swing.JRadioButtonMenuItem
+import javax.swing.KeyStroke
+import javax.swing.SwingUtilities
 import javax.swing.border.MatteBorder
 import javax.swing.plaf.basic.BasicMenuBarUI
 import javax.swing.plaf.basic.BasicPopupMenuSeparatorUI
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNotSame
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -149,5 +156,27 @@ class MenuBarStyleTest {
         styleMenuBar(menus.bar, style)
         assertEquals(style.popupBackground, custom.background)
         assertEquals(style.font, custom.font)
+    }
+
+    @Test
+    fun `a key Swing names in words is shown as its symbol, and stays bound`() {
+        val menus = bar()
+        val key = KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.CTRL_DOWN_MASK)
+        val letter = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK)
+        val newItem = JMenuItem("New").apply { accelerator = letter }
+        menus.item.accelerator = key
+        menus.view.add(newItem)
+
+        for (pass in listOf(style, style, style.copy(foreground = Color.BLACK))) {
+            styleMenuBar(menus.bar, pass)
+            val shown = menus.item.accelerator
+            assertEquals('=', shown.keyChar, "labelled with the symbol")
+            assertEquals(KeyEvent.VK_UNDEFINED, shown.keyCode)
+            assertEquals(InputEvent.CTRL_DOWN_MASK, shown.modifiers and InputEvent.CTRL_DOWN_MASK)
+            val keys = assertNotNull(SwingUtilities.getUIInputMap(menus.item, JComponent.WHEN_IN_FOCUSED_WINDOW))
+            assertNotNull(keys.get(key), "Ctrl and the = key still press it")
+            assertNull(keys.get(shown), "a typed = does not press it a second time")
+            assertSame(letter, newItem.accelerator, "a letter key is left as it is")
+        }
     }
 }

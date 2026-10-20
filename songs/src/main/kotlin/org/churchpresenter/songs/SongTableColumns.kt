@@ -68,7 +68,7 @@ internal fun rememberSongTableColumns(
     settings.songSettings.colWidthSongbook, settings.songSettings.colWidthTune,
     settings.songSettings.colWidthPlayCount, settings.songSettings.colWidthAuthor,
     settings.songSettings.colWidthComposer,
-    settings.songColOrder, settings.songHiddenCols, availableColumns,
+    settings.songColOrder, settings.songHiddenCols, availableColumns, density,
 ) {
     SongTableColumns(
         density = density,

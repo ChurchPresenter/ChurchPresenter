@@ -149,10 +149,10 @@ internal fun rememberCanvasTabState(
     isMaximized: Boolean,
     density: Density,
 ): CanvasTabState {
-    val leftPanelPx = remember(currentLayout.canvasLeftPanelWidthDp, isMaximized) {
+    val leftPanelPx = remember(currentLayout.canvasLeftPanelWidthDp, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.canvasLeftPanelWidthDp.dp.toPx() })
     }
-    val rightPanelPx = remember(currentLayout.canvasRightPanelWidthDp, isMaximized) {
+    val rightPanelPx = remember(currentLayout.canvasRightPanelWidthDp, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.canvasRightPanelWidthDp.dp.toPx() })
     }
     val renamingSceneId = remember { mutableStateOf<String?>(null) }

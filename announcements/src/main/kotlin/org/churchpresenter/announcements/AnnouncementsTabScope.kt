@@ -402,12 +402,12 @@ internal fun rememberAnnouncementsPanelState(
     isMaximized: Boolean,
     density: Density,
 ): AnnouncementsPanelState {
-    val leftPanelPx = remember(currentLayout.announcementsLeftPanelWidthDp, isMaximized) {
+    val leftPanelPx = remember(currentLayout.announcementsLeftPanelWidthDp, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.announcementsLeftPanelWidthDp.dp.toPx() })
     }
     // The text box's dragged height; 0 until the divider under the text card is first dragged, and
     // until then the box keeps its natural height of up to three lines.
-    val textHeightPx = remember(currentLayout.announcementsTextHeightDp, isMaximized) {
+    val textHeightPx = remember(currentLayout.announcementsTextHeightDp, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.announcementsTextHeightDp.dp.toPx() })
     }
     val naturalTextHeightPx = remember { mutableStateOf(0) }

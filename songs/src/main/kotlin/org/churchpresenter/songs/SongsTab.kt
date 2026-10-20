@@ -111,10 +111,10 @@ fun SongsTab(
         availableColumns = availableSongColumns(songbooks.size, hasAddToSchedule = onAddToSchedule != null),
     )
     // Favorites panel height in px
-    controller.favPanelHeight = remember(appSettings.songFavoritesPanelHeightDp) {
+    controller.favPanelHeight = remember(appSettings.songFavoritesPanelHeightDp, density) {
         mutableStateOf(with(density) { appSettings.songFavoritesPanelHeightDp.dp.toPx() })
     }
-    controller.lyricsPanel = remember(currentLayout.lyricsPanelWidthDp, isMaximized) {
+    controller.lyricsPanel = remember(currentLayout.lyricsPanelWidthDp, isMaximized, density) {
         val saved = currentLayout.lyricsPanelWidthDp
         mutableStateOf(if (saved > 0) with(density) { saved.dp.toPx() } else 0f)
     }

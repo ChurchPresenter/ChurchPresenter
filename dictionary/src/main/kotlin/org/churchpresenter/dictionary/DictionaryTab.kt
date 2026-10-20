@@ -46,7 +46,7 @@ fun DictionaryTab(
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
     val initialWidth = appSettings?.windowedLayout?.dictionaryListWidthDp ?: 320
-    var listWidthPx by remember(initialWidth) {
+    var listWidthPx by remember(initialWidth, density) {
         mutableStateOf(with(density) { initialWidth.dp.toPx() })
     }
 

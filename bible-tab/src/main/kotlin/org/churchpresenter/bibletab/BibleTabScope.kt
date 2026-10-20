@@ -403,18 +403,18 @@ internal fun rememberBibleColumnWidths(
     val isMaximized = windowState?.placement != WindowPlacement.Floating
     val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
 
-    val colWBook = remember(currentLayout.bibleColWidthBook, isMaximized) {
+    val colWBook = remember(currentLayout.bibleColWidthBook, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.bibleColWidthBook.dp.toPx() })
     }
-    val colWChapter = remember(currentLayout.bibleColWidthChapter, isMaximized) {
+    val colWChapter = remember(currentLayout.bibleColWidthChapter, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.bibleColWidthChapter.dp.toPx() })
     }
 
-    val colWSplit = remember(currentLayout.splitLivePanelWidth, isMaximized) {
+    val colWSplit = remember(currentLayout.splitLivePanelWidth, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.splitLivePanelWidth.dp.toPx() })
     }
 
-    val colWCrossRef = remember(currentLayout.bibleColWidthCrossRef, isMaximized) {
+    val colWCrossRef = remember(currentLayout.bibleColWidthCrossRef, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.bibleColWidthCrossRef.dp.toPx() })
     }
     return remember(colWBook, colWChapter, colWSplit, colWCrossRef, density, isMaximized, onSettingsChangeState) {

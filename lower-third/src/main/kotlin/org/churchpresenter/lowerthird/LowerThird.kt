@@ -162,7 +162,7 @@ fun LowerThirdTab(
     val isMaximized = windowState?.placement != WindowPlacement.Floating
     val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
 
-    val listWidthPxState = remember(currentLayout.lowerThirdListWidthDp, isMaximized) {
+    val listWidthPxState = remember(currentLayout.lowerThirdListWidthDp, isMaximized, density) {
         mutableStateOf(with(density) { currentLayout.lowerThirdListWidthDp.dp.toPx() })
     }
 

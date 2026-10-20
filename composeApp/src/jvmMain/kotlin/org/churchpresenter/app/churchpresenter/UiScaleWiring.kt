@@ -10,7 +10,7 @@ import java.awt.Window
 
 /**
  * The room the main window's layout needs with the schedule and preview panels open, in dp. The side
- * panels keep their own widths as the interface grows, so below this the middle tab is what gives
+ * panels keep their widths in dp as the interface grows, so below this the middle tab is what gives
  * way: at 1067dp wide the Bible tab's verse column is a few letters across.
  */
 private const val UI_SCALE_LAYOUT_WIDTH = 1280f
