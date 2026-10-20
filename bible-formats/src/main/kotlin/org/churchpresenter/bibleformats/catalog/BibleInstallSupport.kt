@@ -26,10 +26,12 @@ import java.net.SocketTimeoutException
 import java.nio.channels.UnresolvedAddressException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.security.GeneralSecurityException
 import java.security.MessageDigest
 import java.util.UUID
 import java.util.zip.ZipFile
 import javax.net.ssl.SSLException
+import javax.net.ssl.SSLHandshakeException
 import kotlin.random.Random
 import io.sentry.SentryLevel
 import org.churchpresenter.diagnostics.CrashReporter
@@ -144,6 +146,11 @@ object BibleInstallSupport {
      * including it is that a genuinely truncated *archive* also stops being reported, which is
      * accepted — a half-downloaded archive is the same failed download, and the outcome still
      * reaches the install dialog either way.
+     *
+     * [GeneralSecurityException] is the certificate the JVM will not trust — an HTTPS-inspecting
+     * proxy or antivirus re-signing the archive's traffic. ktor CIO's own TLS raises it raw (a
+     * `CertificateException`) rather than as an [SSLException], but it is the same fact about the
+     * church's network.
      */
     internal fun Throwable.isOperatorEnvironment(depth: Int = 0): Boolean =
         this is CancellationException ||
@@ -155,6 +162,7 @@ object BibleInstallSupport {
             isContentLengthMismatch() ||
             this is InsufficientDiskSpaceException ||
             this is SSLException ||
+            this is GeneralSecurityException ||
             this is EOFException ||
             (depth < MAX_CAUSE_DEPTH && cause?.isOperatorEnvironment(depth + 1) == true)
 
@@ -386,8 +394,14 @@ object BibleInstallSupport {
      * nothing here was cancelled, so cancellation is believed only while this coroutine is itself
      * cancelled; anything else is a network failure and resumes like one.
      *
+     * A certificate the JVM will not trust is not retried either — the proxy that re-signed the
+     * first attempt will re-sign every other. ktor CIO raises it as a bare
+     * [GeneralSecurityException]; it is rethrown as an [SSLHandshakeException], so the caller's
+     * [IOException] arm treats it as the network failure it is.
+     *
      * @param retryFloorMs the first backoff delay; 0 in tests, so they wait for nothing.
      * @throws DownloadStalledException every attempt timed out mid-body.
+     * @throws SSLHandshakeException the server's certificate was rejected.
      */
     suspend fun downloadTo(
         url: String,
@@ -432,6 +446,11 @@ object BibleInstallSupport {
                 IOException("The connection closed mid-download", e)
             } catch (e: IOException) {
                 e
+            } catch (e: GeneralSecurityException) {
+                // ktor CIO's own TLS raises an untrusted certificate raw rather than as an
+                // SSLException, so no caller's IOException arm saw it and it ended the app. The
+                // proxy that re-signed this attempt re-signs every other, so it is not retried.
+                throw SSLHandshakeException("The server's certificate was not trusted").apply { initCause(e) }
             }
             lastFailure = failure
             stalledAttempts = if (state.written > resumeFrom) 0 else stalledAttempts + 1

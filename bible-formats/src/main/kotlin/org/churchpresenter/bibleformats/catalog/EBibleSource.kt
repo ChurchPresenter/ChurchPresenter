@@ -17,15 +17,17 @@ import java.io.File
 import java.io.IOException
 import org.xml.sax.SAXException
 import java.nio.channels.UnresolvedAddressException
+import java.security.GeneralSecurityException
 
 /**
  * The outcome for a catalogue fetch that did not complete: the list as it was last seen, or a
  * failure.
  *
- * One function rather than a body per catch arm — the three of them (network, DNS, a body that
- * stopped short) differ only in the exception they name, and writing the mapping once is what keeps
- * `fetchCatalog` readable as the sequence it is. Top-level rather than a member because the object
- * is already at detekt's function ceiling, and this is a mapping rather than part of its interface.
+ * One function rather than a body per catch arm — the four of them (network, DNS, an untrusted
+ * certificate, a body that stopped short) differ only in the exception they name, and writing the
+ * mapping once is what keeps `fetchCatalog` readable as the sequence it is. Top-level rather than
+ * a member because the object is already at detekt's function ceiling, and this is a mapping
+ * rather than part of its interface.
  */
 private fun catalogFetchFailed(e: Throwable, cached: List<BibleModule>?): BibleCatalogOutcome =
     BibleInstallSupport.reported(
@@ -150,6 +152,11 @@ object EBibleSource : BibleSource {
             currentCoroutineContext().ensureActive()
             catalogFetchFailed(e, cached)
         } catch (e: UnresolvedAddressException) {
+            currentCoroutineContext().ensureActive()
+            catalogFetchFailed(e, cached)
+        } catch (e: GeneralSecurityException) {
+            // ktor CIO's own TLS raises a certificate it will not trust raw, not as an
+            // SSLException; uncaught it took the whole app down from the download browser.
             currentCoroutineContext().ensureActive()
             catalogFetchFailed(e, cached)
         } catch (e: IllegalStateException) {

@@ -19,6 +19,7 @@ import java.io.File
 import java.net.URLEncoder
 import java.io.IOException
 import java.nio.channels.UnresolvedAddressException
+import java.security.GeneralSecurityException
 
 private val HTTP_OK_RANGE = 200..299
 private const val REGEX_GROUP_IDENTIFIER = 3
@@ -197,6 +198,9 @@ object ZefaniaRepositoryIndex {
             indexFetchFailed(e, cached)
         } catch (e: UnresolvedAddressException) {
             indexFetchFailed(e, cached)
+        } catch (e: GeneralSecurityException) {
+            // See EBibleSource: ktor CIO raises an untrusted certificate raw, not as an SSLException.
+            indexFetchFailed(e, cached)
         } catch (e: IllegalStateException) {
             // See EBibleSource: a buffered body that stops early is ktor's Content-Length check,
             // not an IOException, and nothing above catches it.
@@ -208,7 +212,7 @@ object ZefaniaRepositoryIndex {
     /**
      * The outcome for a fetch that did not complete: the index as it was last seen, or a failure.
      *
-     * One function rather than a body per catch arm — the three of them differ only in the
+     * One function rather than a body per catch arm — the four of them differ only in the
      * exception they name. The eBible source has the same shape, for the same reason.
      */
     private fun indexFetchFailed(e: Throwable, cached: Index?): IndexOutcome =

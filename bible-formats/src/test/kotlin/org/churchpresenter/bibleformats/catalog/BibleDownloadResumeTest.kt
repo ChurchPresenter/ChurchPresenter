@@ -23,6 +23,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import java.security.cert.CertificateException
+import javax.net.ssl.SSLHandshakeException
+import kotlin.test.assertIs
 
 /**
  * [BibleInstallSupport.downloadTo]'s behaviour when the body stops arriving part-way.
@@ -236,6 +239,23 @@ class BibleDownloadResumeTest {
             "an unreachable host is not a slow connection and must not be described as one",
         )
         assertEquals(3, attempts)
+    }
+
+    @Test
+    fun `a rejected certificate is not retried and reaches the caller as an ssl failure`() {
+        // ktor CIO raises it raw rather than as an SSLException, so no caller's IOException arm saw
+        // it. The proxy that re-signed the first attempt re-signs every other, so retrying only
+        // delays the answer.
+        var attempts = 0
+        val engine = MockEngine {
+            attempts++
+            throw CertificateException("PKIX path building failed")
+        }
+
+        val failure = assertFailsWith<SSLHandshakeException> { download(engine) }
+
+        assertIs<CertificateException>(failure.cause)
+        assertEquals(1, attempts)
     }
 
     @Test

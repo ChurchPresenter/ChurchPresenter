@@ -1,5 +1,7 @@
 package org.churchpresenter.planningcenter
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.engine.embeddedServer
@@ -13,6 +15,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.nio.file.Files
+import java.security.cert.CertificateException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -324,6 +327,20 @@ class PlanningCenterDownloadTest {
         assertEquals(PlanningCenterClient.FileDownloadOutcome.NetworkError, outcome)
     }
 
+    @Test
+    fun `a download whose certificate is rejected is a network problem rather than a crash`() {
+        // ktor CIO's own TLS raises an untrusted certificate raw, not as an SSLException.
+        val untrusted = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
+        val target = File(dir, "plan.pdf")
+
+        val outcome = runBlocking {
+            PlanningCenterClient.downloadFile("https://example.invalid/plan.pdf", target, untrusted)
+        }
+
+        assertEquals(PlanningCenterClient.FileDownloadOutcome.NetworkError, outcome)
+        assertFalse(target.exists())
+    }
+
     // ── Thumbnails ──────────────────────────────────────────────────────────────
 
     @Test
@@ -345,6 +362,13 @@ class PlanningCenterDownloadTest {
     fun `a thumbnail from a host that is not there comes back as nothing`() {
         // Port 1 again, and for the same reason: a recycled ephemeral port gets answered, not refused.
         assertNull(runBlocking { PlanningCenterClient.fetchThumbnailBytes("http://127.0.0.1:1/thumb.png") })
+    }
+
+    @Test
+    fun `a thumbnail whose certificate is rejected comes back as nothing`() {
+        val untrusted = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
+
+        assertNull(runBlocking { PlanningCenterClient.fetchThumbnailBytes("https://example.invalid/t.png", untrusted) })
     }
 
     @Test

@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import java.security.cert.CertificateException
 
 /**
  * Reading the Holy Bible XML archive's `catalog.json`.
@@ -274,6 +275,28 @@ class BebliaCatalogIndexTest {
         val success = assertIs<BebliaCatalogIndex.IndexOutcome.Success>(outcome)
         assertTrue(success.stale, "an offline hall still sees the list it saw last time")
         assertEquals("EnglishKJBible.xml", success.index.modules.single().file)
+    }
+
+    @Test
+    fun `a certificate the JVM will not trust falls back to the cached copy`() = runBlocking {
+        BebliaCatalogIndex.fetch("https://x.invalid/c.json", httpServing(manifest(entry())), cacheFile, 0)
+        BebliaCatalogIndex.clearMemoryCache()
+        val week = 7L * 24 * 60 * 60 * 1000
+        val untrusted = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
+
+        val outcome = BebliaCatalogIndex.fetch("https://x.invalid/c.json", untrusted, cacheFile, week + 1)
+
+        assertTrue(assertIs<BebliaCatalogIndex.IndexOutcome.Success>(outcome).stale)
+    }
+
+    @Test
+    fun `a certificate the JVM will not trust with nothing cached is a network error`() {
+        // ktor CIO's own TLS raises it raw, not as an SSLException; uncaught it ended the app.
+        val untrusted = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
+
+        val outcome = runBlocking { BebliaCatalogIndex.fetch("https://x.invalid/c.json", untrusted, cacheFile, 0) }
+
+        assertIs<BebliaCatalogIndex.IndexOutcome.NetworkError>(outcome)
     }
 
     @Test

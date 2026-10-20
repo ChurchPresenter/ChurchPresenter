@@ -69,13 +69,16 @@ Schedule. `PlanningCenterSettings` is in `:settings`, where every persisted sett
 - **Anything `:composeApp` calls has to be public here.** `internal` no longer reaches the app —
   which is why the `@Serializable` DTOs' construction test moved with the code, as
   `PlanningCenterDtoConstructionTest`.
-- **Every request function returns an outcome; none of them throws.** Each catches exactly three
+- **Every request function returns an outcome; none of them throws.** Each catches exactly four
   things, and the order matters:
   1. `IOException` — refused, reset, timed out. A retry is worth offering: `NetworkError`.
-  2. `UnresolvedAddressException` — no DNS answer, which is what being offline looks like. It is an
+  2. `GeneralSecurityException` — a certificate the JVM will not trust (an HTTPS-inspecting proxy
+     or antivirus). ktor CIO's own TLS raises it raw, not as an `SSLException`, so the clause above
+     never sees it, and uncaught it ends the app. Also `NetworkError`.
+  3. `UnresolvedAddressException` — no DNS answer, which is what being offline looks like. It is an
      `IllegalArgumentException` subclass, so it **must** be caught before the next clause or an
      offline operator is told their plan is malformed.
-  3. `IllegalArgumentException` — the body was not what the API documents. `SerializationException`
+  4. `IllegalArgumentException` — the body was not what the API documents. `SerializationException`
      (not JSON at all) and the `jsonObject`/`jsonPrimitive` accessors (JSON of the wrong shape) both
      land here, and both mean `Failure`: retrying returns the same page.
 
@@ -96,7 +99,7 @@ Schedule. `PlanningCenterSettings` is in `:settings`, where every persisted sett
   One `@Suppress` at the declaration, with its reason: `TooManyFunctions` on `PlanningCenterClient`,
   which is 14 request functions, one per PCO endpoint this integration uses. Its eight
   `TooGenericExceptionCaught` entries were **not** carried over from `:composeApp`'s baseline — the
-  catches were narrowed to the three clauses above instead, which is what the rule was asking for.
+  catches were narrowed to the four clauses above instead, which is what the rule was asking for.
 - **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no**
   `coverageFloors`, **no** `coverageExcludes`. It currently runs 87.0% complexity / 89.3% branches,
   the tightest counters, so a new untested branch is what will break it first.

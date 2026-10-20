@@ -19,6 +19,24 @@ import java.io.File
 import java.net.URLEncoder
 import java.io.IOException
 import java.nio.channels.UnresolvedAddressException
+import java.security.GeneralSecurityException
+
+/**
+ * The outcome for a manifest fetch that did not complete: the manifest as it was last seen, or a
+ * failure. One function rather than a body per catch arm — they differ only in the exception they
+ * name. Top-level, as in `EBibleSource`, because the object is at detekt's function ceiling.
+ */
+private fun catalogFetchFailed(
+    e: Throwable,
+    cached: BebliaCatalogIndex.Index?,
+): BebliaCatalogIndex.IndexOutcome =
+    BibleInstallSupport.reported(
+        "Holy Bible XML catalogue fetch failed",
+        e,
+        mapOf("subsystem" to "beblia_catalog"),
+        cached?.let { BebliaCatalogIndex.IndexOutcome.Success(it, stale = true) }
+            ?: BebliaCatalogIndex.IndexOutcome.NetworkError,
+    )
 
 /**
  * Lists the Bible modules available in the Holy Bible XML archive.
@@ -183,29 +201,17 @@ object BebliaCatalogIndex {
             // An offline hall still sees the list it saw last time; the failure then surfaces on the
             // install, which is far more useful than an empty dialog.
         } catch (e: IOException) {
-            BibleInstallSupport.reported(
-                "Holy Bible XML catalogue fetch failed",
-                e,
-                mapOf("subsystem" to "beblia_catalog"),
-                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
-            )
+            catalogFetchFailed(e, cached)
         } catch (e: UnresolvedAddressException) {
-            BibleInstallSupport.reported(
-                "Holy Bible XML catalogue fetch failed",
-                e,
-                mapOf("subsystem" to "beblia_catalog"),
-                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
-            )
+            catalogFetchFailed(e, cached)
+        } catch (e: GeneralSecurityException) {
+            // See EBibleSource: ktor CIO raises an untrusted certificate raw, not as an SSLException.
+            catalogFetchFailed(e, cached)
         } catch (e: IllegalStateException) {
             // See EBibleSource: a buffered body that stops early is ktor's Content-Length check,
             // not an IOException, and nothing above catches it.
             if (!with(BibleInstallSupport) { e.isContentLengthMismatch() }) throw e
-            BibleInstallSupport.reported(
-                "Holy Bible XML catalogue fetch failed",
-                e,
-                mapOf("subsystem" to "beblia_catalog"),
-                cached?.let { IndexOutcome.Success(it, stale = true) } ?: IndexOutcome.NetworkError,
-            )
+            catalogFetchFailed(e, cached)
         }
     }
 
