@@ -51,6 +51,7 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.allStyle
 import org.churchpresenter.settings.boxAt
+import org.churchpresenter.settings.profilePaths
 import org.churchpresenter.settings.clearOwnStyle
 import org.churchpresenter.settings.updateAllLayer
 import org.churchpresenter.settings.updateOwnStyle
@@ -204,11 +205,8 @@ internal class BibleEdit(
     fun lookPaths(): TextLookPaths {
         val link = LocalProfileLink.current ?: return TextLookPaths.NONE
         if (!link.isLinked && !picked) return TextLookPaths.NONE
-        val base = link.profile.copy(bibleSettings = bs)
         return remember(link.profile.id, index, styleElement, target, stack.map { it.fileName }) {
-            probeTextLookPaths(base, style.toLook()) { p, look ->
-                p.copy(bibleSettings = styled(p.bibleSettings, style.withLook(look)))
-            }
+            probeTextLookPaths(style.toLook()) { look -> styled(bs, style.withLook(look)).profilePaths() }
         }
     }
 }

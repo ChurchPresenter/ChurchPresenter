@@ -14,7 +14,7 @@ import java.util.Collections
  * `LinkedProfiles.kt` for what the paths are for.
  */
 
-private val linkJson = Json {
+internal val linkJson = Json {
     encodeDefaults = true
     ignoreUnknownKeys = true
 }
@@ -59,7 +59,7 @@ fun OutputProfile.settingPaths(): Map<String, JsonElement> = RecentSettingPaths.
 }
 
 /** One of the profile's own fields: a settings object is flattened without its document-owned keys. */
-private fun flattenTopLevel(key: String, value: JsonElement, out: MutableMap<String, JsonElement>) {
+internal fun flattenTopLevel(key: String, value: JsonElement, out: MutableMap<String, JsonElement>) {
     val ignored = DOCUMENT_KEYS[key].orEmpty()
     if (value is JsonObject) {
         value.forEach { (inner, v) -> if (inner !in ignored) flatten(v, "$key.$inner", out) }

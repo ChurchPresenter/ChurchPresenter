@@ -56,6 +56,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.DEFAULT_STACKED_LANGUAGE_GAP
 import org.churchpresenter.settings.LANGUAGE_GAP_RANGE
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.profilePaths
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -563,11 +564,10 @@ private fun songLookPaths(
     language: SongStyleLanguage,
 ): TextLookPaths {
     val link = LocalProfileLink.current?.takeIf { it.isLinked } ?: return TextLookPaths.NONE
-    val base = link.profile.copy(songSettings = song)
     return remember(link.profile.id, element, target, language) {
         val style = song.elementStyle(element, target, language)
-        probeTextLookPaths(base, style.toLook(element)) { p, look ->
-            p.copy(songSettings = p.songSettings.withElementStyle(element, target, language, style.withLook(look)))
+        probeTextLookPaths(style.toLook(element)) { look ->
+            song.withElementStyle(element, target, language, style.withLook(look)).profilePaths()
         }
     }
 }
