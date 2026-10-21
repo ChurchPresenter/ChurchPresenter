@@ -1,17 +1,15 @@
 package org.churchpresenter.presenter
 
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonPrimitive
 import io.github.alexzhirkevich.compottie.internal.helpers.text.TextJustify
 import kotlin.math.roundToInt
 
@@ -25,8 +23,9 @@ import kotlin.math.roundToInt
  * band lays its own text out — it wraps every line before the player sees it, measuring each
  * character in the layer's own font — so the cut follows the same arithmetic the words were set by.
  *
- * The cut is where the words sit when still, so a template whose text slides, scales or types in
- * shows the second voice's colour once the text has arrived, and drops it as the text leaves.
+ * The cut moves with the words. It is worked out each frame from what the player draws that
+ * frame: the typed part of a typewriter's text, a ticker's scroll, and the text layer's own
+ * transform as the file keyframes it (see LayerMotion.kt).
  */
 
 /** What [secondVoiceRects] needs of a laid-out slot: its text, the wrapped lines and where they sit. */
@@ -82,28 +81,34 @@ internal fun secondVoiceRects(layout: BandVoiceLayout, advance: (Char) -> Float)
     return rects
 }
 
-/**
- * Whether the voice pass shows at [frame]: always on a template whose text stands still, else only
- * while it is held — from the end of `text_in` to the start of `text_out`.
- */
-internal fun voicePassShows(template: BibleLottieTemplate, layers: Set<String>, frame: Float): Boolean {
-    val still = template.meta.textMotion == BandTextMotion.NONE && layers.none { it in template.movingTextLayers }
-    if (still) return true
-    val textIn = template.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
-    val textOut = template.segment(BibleLottieTemplate.SEGMENT_TEXT_OUT)
-    return frame >= textIn.endFrame && frame <= textOut.startFrame
+/** A slot's second voice: where its words sit and each character's advance, to cut to at any frame. */
+internal data class BandVoice(val layout: BandVoiceLayout, val advances: Map<Char, Float>) {
+    /** The rectangles for [shown] — the part of the slot's text the player draws this frame. */
+    fun rectsFor(shown: String): List<Rect> =
+        secondVoiceRects(layout.copy(lines = shown.split('\n'))) { c -> advances[c] ?: 0f }
 }
 
 /**
- * Draws the voice pass cut to [rects], given in the template's pixels, where an image of the
+ * Each of [rects] as the four corners it lands on: moved by [shift] — a ticker's scroll — and then
+ * through the layer's [matrix], when there is one.
+ */
+internal fun voiceShapes(rects: List<Rect>, shift: Offset, matrix: Matrix?): List<List<Offset>> =
+    rects.map { r ->
+        val moved = r.translate(shift)
+        listOf(moved.topLeft, moved.topRight, moved.bottomRight, moved.bottomLeft)
+            .map { corner -> matrix?.map(corner) ?: corner }
+    }
+
+/**
+ * Draws the voice pass cut to [shapes], given in the template's pixels, where an image of the
  * template is drawn with [contentScale] at the bottom centre of this scope — as the band draws it.
  */
 internal fun ContentDrawScope.drawCutToVoices(
     template: BibleLottieTemplate,
-    rects: List<Rect>,
+    shapes: List<List<Offset>>,
     contentScale: ContentScale,
 ) {
-    if (rects.isEmpty()) return
+    if (shapes.isEmpty()) return
     val source = Size(template.width, template.height)
     val scale = contentScale.computeScaleFactor(source, size)
     val scaled = IntSize((source.width * scale.scaleX).roundToInt(), (source.height * scale.scaleY).roundToInt())
@@ -112,37 +117,13 @@ internal fun ContentDrawScope.drawCutToVoices(
         IntSize(size.width.roundToInt(), size.height.roundToInt()),
         layoutDirection,
     )
+    fun place(p: Offset) = Offset(origin.x + p.x * scale.scaleX, origin.y + p.y * scale.scaleY)
     val cut = Path()
-    rects.forEach { r ->
-        cut.addRect(
-            Rect(
-                origin.x + r.left * scale.scaleX,
-                origin.y + r.top * scale.scaleY,
-                origin.x + r.right * scale.scaleX,
-                origin.y + r.bottom * scale.scaleY,
-            ),
-        )
+    shapes.filter { it.isNotEmpty() }.forEach { corners ->
+        val first = place(corners.first())
+        cut.moveTo(first.x, first.y)
+        corners.drop(1).map(::place).forEach { cut.lineTo(it.x, it.y) }
+        cut.close()
     }
     clipPath(cut) { this@drawCutToVoices.drawContent() }
 }
-
-/** The text layers whose transform is keyframed — see [BibleLottieTemplate.movingTextLayers]. */
-internal fun readMovingTextLayers(layers: List<JsonObject>): Set<String> =
-    layers.filter { it["ty"]?.jsonPrimitive?.intOrNull == TEXT_LAYER_TYPE }.mapNotNull { layer ->
-        val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-        val transform = layer["ks"] as? JsonObject ?: return@mapNotNull null
-        name.takeIf { MOVING_PROPERTIES.any { key -> transform.isKeyframed(key) } }
-    }.toSet()
-
-/** Whether [key] of a transform is animated — directly, or through split x/y position. */
-private fun JsonObject.isKeyframed(key: String): Boolean {
-    val property = this[key] as? JsonObject ?: return false
-    if (property["a"]?.jsonPrimitive?.intOrNull == 1) return true
-    return listOf("x", "y").any { axis -> (property[axis] as? JsonObject)?.get("a")?.jsonPrimitive?.intOrNull == 1 }
-}
-
-/** A Lottie layer's `ty` for text. */
-private const val TEXT_LAYER_TYPE = 5
-
-/** The transform keys that move a layer: anchor, position, scale, rotation. */
-private val MOVING_PROPERTIES = listOf("a", "p", "s", "r")

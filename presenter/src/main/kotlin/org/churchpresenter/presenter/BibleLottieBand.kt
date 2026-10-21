@@ -19,7 +19,6 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -80,8 +79,8 @@ private data class SlotRender(
     val shadow: Boolean,
     val shadowColor: Color,
     val shadowOffset: Offset,
-    /** Where the second voice's words sit, in template pixels — none when the slot has none. */
-    val voiceRects: List<Rect> = emptyList(),
+    /** Where the second voice's words sit — null when the slot has none to colour. */
+    val voice: BandVoice? = null,
     val voiceColor: Color = color,
 )
 
@@ -261,8 +260,15 @@ private fun BandLayer(
             }
             val ascent = template.textAscents[name] ?: 0f
             val geometry = SlotGeometry(box, pxPerPoint, singleLine, template.meta.textMotion, ascent)
-            val render = remember(effectiveStyle, text, geometry, measurer) {
-                layoutSlot(BandSlotText(text, effectiveStyle, slots[name]?.voiceRanges.orEmpty()), geometry, measurer)
+            // A ticker puts the reference ahead of the text, so the voice's places move along by it.
+            val lead = text.length - slots[name]?.text.orEmpty().length
+            val voiceRanges = if (lead < 0) {
+                emptyList()
+            } else {
+                slots[name]?.voiceRanges.orEmpty().map { (it.first + lead)..(it.last + lead) }
+            }
+            val render = remember(effectiveStyle, text, geometry, measurer, voiceRanges) {
+                layoutSlot(BandSlotText(text, effectiveStyle, voiceRanges), geometry, measurer)
             }
             rememberUpdatedState(render)
         }
@@ -316,7 +322,7 @@ private fun BandLayer(
             modifier = Modifier.fillMaxSize(),
         )
         // Composed only for a page that has a second voice to colour — see BandSecondVoice.kt.
-        if (renders.values.any { it.value.voiceRects.isNotEmpty() }) {
+        if (renders.values.any { it.value.voice != null }) {
             VoicePass(template, composition, renders, progress, tickerState, groupsText, contentScale, colorFilter)
         }
     }
@@ -360,12 +366,18 @@ private fun VoicePass(
         contentScale = contentScale,
         alignment = Alignment.BottomCenter,
         colorFilter = colorFilter,
-        modifier = Modifier.fillMaxSize().drawWithContent {
-            val frame = progress() * template.totalFrames
-            if (voicePassShows(template, renders.keys, frame)) {
-                drawCutToVoices(template, renders.values.flatMap { it.value.voiceRects }, contentScale)
-            }
-        },
+        modifier = Modifier.fillMaxSize()
+            .drawWithContent {
+                val frame = progress() * template.totalFrames
+                val shapes = renders.flatMap { (name, state) ->
+                    val r = state.value
+                    val voice = r.voice ?: return@flatMap emptyList()
+                    val shift = if (r.ticker) tickerPosition(template, r, tickerState.value) - r.position else Offset.Zero
+                    val matrix = template.textMotions[name]?.matrixAt(frame)
+                    voiceShapes(voice.rectsFor(revealedText(template, r.text, frame)), shift, matrix)
+                }
+                drawCutToVoices(template, shapes, contentScale)
+            },
     )
 }
 
@@ -423,10 +435,19 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
     val top = box.y + ((box.h - blockHeight) / 2f).coerceAtLeast(0f)
     val shadowScale = style.shadowSizePercent / PERCENT
     val shadowPx = SHADOW_OFFSET_PX * pxPerPoint * shadowScale
-    val voiced = !isTicker && slot.voiceRanges.isNotEmpty() && style.secondVoiceColor != style.color
-    val voiceRects = if (!voiced) emptyList() else secondVoiceRects(
-        BandVoiceLayout(text, slot.voiceRanges, fitted.lines, style.justify, box, top, lineHeight),
-    ) { c -> (charWidth(c) + trackingPx) * fitted.fontSize / baseSize }
+    val voiced = slot.voiceRanges.isNotEmpty() && style.secondVoiceColor != style.color
+    val voice = if (!voiced) null else BandVoice(
+        BandVoiceLayout(
+            text = text,
+            voiceRanges = slot.voiceRanges,
+            lines = if (isTicker) listOf(text) else fitted.lines,
+            justify = if (isTicker) TextJustify.Left else style.justify,
+            box = box,
+            top = top,
+            lineHeight = lineHeight,
+        ),
+        text.toSet().associateWith { c -> (charWidth(c) + trackingPx) * fitted.fontSize / baseSize },
+    )
     return SlotRender(
         text = if (isTicker) text else fitted.lines.joinToString("\n"),
         fontSize = fitted.fontSize,
@@ -442,7 +463,7 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
         shadow = style.shadow,
         shadowColor = style.shadowColor.copy(alpha = style.shadowOpacityPercent / PERCENT),
         shadowOffset = Offset(shadowPx, shadowPx),
-        voiceRects = voiceRects,
+        voice = voice,
         voiceColor = style.secondVoiceColor,
     )
 }

@@ -218,6 +218,7 @@ internal fun MainWindowScope.ToolWindows() {
                 theme = theme,
                 songStorageDirectory = appSettings.songSettings.storageDirectory,
                 typicalSongSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
+                appSettings = appSettings,
                 // What it writes lands in the songs folder, which SongsViewModel
                 // already watches -- so the list behind this window reloads on
                 // its own rather than on close.

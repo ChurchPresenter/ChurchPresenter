@@ -81,11 +81,10 @@ class BibleLottieTemplate(
      */
     val textAscents: Map<String, Float> = emptyMap(),
     /**
-     * The text layers whose own position, anchor, scale or rotation is keyframed — a slide in or
-     * out. The band's second-voice colour is cut to where the words sit when still, so on these it
-     * waits for the text to stop.
+     * The text layers whose own transform is keyframed — a slide, a scale or a turn — and how it
+     * moves; see [readTextMotions]. The band's second-voice colour follows the words through it.
      */
-    val movingTextLayers: Set<String> = emptySet(),
+    val textMotions: Map<String, LayerMotion> = emptyMap(),
 ) {
 
     val frameRate: Float get() = size.frameRate
@@ -255,7 +254,7 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
             slots = readSlots(meta, layers),
             layerNames = layers.mapNotNull { it["nm"]?.jsonPrimitive?.contentOrNull }.toSet(),
             textAscents = readTextAscents(obj["fonts"] as? JsonObject, layers),
-            movingTextLayers = readMovingTextLayers(layers),
+            textMotions = readTextMotions(layers),
             meta = BandTemplateMeta(
                 textMotion = readTextMotion(meta),
                 tickerPxPerSecond = meta?.get("tickerPxPerSecond")?.jsonPrimitive?.floatOrNull ?: DEFAULT_TICKER_SPEED,

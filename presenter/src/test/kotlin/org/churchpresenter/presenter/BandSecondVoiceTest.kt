@@ -3,20 +3,13 @@ package org.churchpresenter.presenter
 import androidx.compose.ui.geometry.Rect
 import io.github.alexzhirkevich.compottie.internal.helpers.text.TextJustify
 import org.churchpresenter.core.models.songs.SongTextOverrides
-import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
-import org.churchpresenter.lottiegen.band.SlotLayout
-import org.churchpresenter.lottiegen.band.TextAnimation
 import org.churchpresenter.settings.SongSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 /**
- * Where the second voice's colour goes on a Lottie band, when it shows, and a song's own look
- * over the profile's.
+ * Where the second voice's colour goes on a Lottie band, and a song's own look over the profile's.
  */
 class BandSecondVoiceTest {
 
@@ -84,61 +77,6 @@ class BandSecondVoiceTest {
         )
 
         assertEquals(listOf(Rect(100f, 80f, 130f, 110f)), rects, "the third row, all of it")
-    }
-
-    // ── When the pass shows ─────────────────────────────────────────────────────
-
-    private fun template(animation: TextAnimation) = assertNotNull(
-        parseBibleLottieTemplate(
-            LottieBandTestSupport.templateJson(
-                BibleLottieGenConfig(
-                    canvasW = 960, canvasH = 180, layout = SlotLayout.SINGLE,
-                    bgInSeconds = 0.5f, textInSeconds = 0.5f, holdSeconds = 1f,
-                    textOutSeconds = 0.5f, bgOutSeconds = 0.5f,
-                    textAnimation = animation,
-                ),
-            ),
-        ),
-    )
-
-    private val text = setOf("Text1")
-
-    @Test
-    fun `text that only fades stands still, so the pass always shows`() {
-        val fade = template(TextAnimation.FADE)
-
-        assertTrue(fade.movingTextLayers.isEmpty())
-        assertTrue(voicePassShows(fade, text, 0f))
-        assertTrue(voicePassShows(fade, text, fade.totalFrames))
-    }
-
-    @Test
-    fun `text that slides shows the pass only while it is held`() {
-        val slide = template(TextAnimation.SLIDE_UP)
-        val textIn = slide.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
-        val textOut = slide.segment(BibleLottieTemplate.SEGMENT_TEXT_OUT)
-
-        assertTrue("Text1" in slide.movingTextLayers)
-        assertFalse(voicePassShows(slide, text, textIn.startFrame), "still sliding in")
-        assertTrue(voicePassShows(slide, text, textIn.endFrame))
-        assertTrue(voicePassShows(slide, text, textOut.startFrame))
-        assertFalse(voicePassShows(slide, text, textOut.endFrame), "sliding out")
-    }
-
-    @Test
-    fun `text the player types in waits for the typing to finish`() {
-        val typed = template(TextAnimation.TYPEWRITER)
-
-        assertFalse(voicePassShows(typed, text, typed.segment(BibleLottieTemplate.SEGMENT_TEXT_IN).startFrame))
-        assertTrue(voicePassShows(typed, text, typed.segment(BibleLottieTemplate.SEGMENT_HOLD).startFrame))
-    }
-
-    @Test
-    fun `a layer the pass does not draw does not hold it back`() {
-        val slide = template(TextAnimation.SLIDE_UP)
-
-        assertEquals(BandTextMotion.NONE, slide.meta.textMotion, "the file moves the text, not the player")
-        assertTrue(voicePassShows(slide, setOf("NotMoving"), 0f))
     }
 
     // ── A song's own look over the profile's ────────────────────────────────────
