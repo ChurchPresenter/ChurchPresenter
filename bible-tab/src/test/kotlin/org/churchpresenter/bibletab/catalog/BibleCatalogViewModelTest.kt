@@ -12,6 +12,7 @@ import org.churchpresenter.bibleformats.catalog.InstallPhase
 import org.churchpresenter.bibleformats.catalog.InstallProgress
 import java.io.File
 import java.nio.file.Files
+import java.security.cert.CertificateException
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.SwingUtilities
 import kotlin.test.AfterTest
@@ -75,8 +76,12 @@ class BibleCatalogViewModelTest {
         var parkedInstall: CompletableDeferred<BibleInstallOutcome>? = null
         var emitProgress: InstallProgress? = null
 
+        /** When set, the call throws this instead of answering — a failure a source let escape. */
+        var escaping: Throwable? = null
+
         override suspend fun catalog(nowMillis: Long): BibleCatalogOutcome {
             catalogCalls.incrementAndGet()
+            escaping?.let { throw it }
             return parkedCatalog?.await() ?: catalogOutcome
         }
 
@@ -87,6 +92,7 @@ class BibleCatalogViewModelTest {
         ): BibleInstallOutcome {
             installCalls.incrementAndGet()
             emitProgress?.let(onProgress)
+            escaping?.let { throw it }
             return parkedInstall?.await() ?: installOutcome
         }
     }
@@ -334,6 +340,19 @@ class BibleCatalogViewModelTest {
     }
 
     @Test
+    fun `a catalogue failure the source let escape stops the spinner instead of ending the app`() {
+        // CHURCH-PRESENTER-DESKTOP-E3: ktor CIO raised an untrusted certificate raw, past every
+        // catch, and the view model's scope had no handler — so the app's uncaught handler ended it.
+        val model = vm(FakeSource().apply { escaping = CertificateException("PKIX path building failed") })
+
+        model.load()
+        settle()
+
+        assertEquals(BibleCatalogError.FAILURE, model.catalogError)
+        assertFalse(model.isLoading)
+    }
+
+    @Test
     fun `retrying after a failure clears the stale error`() {
         val source = FakeSource(catalogOutcome = BibleCatalogOutcome.NetworkError)
         val model = vm(source)
@@ -509,6 +528,20 @@ class BibleCatalogViewModelTest {
             assertFalse(model.isInstalled(module("ENG_ACV")), "for $outcome")
             assertNull(model.installingKey)
         }
+    }
+
+    @Test
+    fun `an install failure the source let escape is shown as an error, not a crash`() {
+        val model = vm(FakeSource().apply { escaping = CertificateException("PKIX path building failed") })
+        var installed: String? = null
+
+        model.install(module("ENG_ACV")) { installed = it }
+        settle()
+
+        assertEquals(BibleDownloadError.NETWORK_ERROR, model.installError)
+        assertNull(model.installingKey, "the row must stop showing progress")
+        assertNull(model.installPhase)
+        assertNull(installed)
     }
 
     @Test

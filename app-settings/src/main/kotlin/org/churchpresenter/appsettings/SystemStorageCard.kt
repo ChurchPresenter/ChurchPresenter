@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -50,7 +51,6 @@ import org.churchpresenter.strings.generated.resources.calendar_storage_status_d
 import org.churchpresenter.strings.generated.resources.calendar_storage
 import org.churchpresenter.strings.generated.resources.schedule_storage
 import org.churchpresenter.strings.generated.resources.bible
-import org.churchpresenter.strings.generated.resources.browse_directory
 import org.churchpresenter.icons.generated.resources.ic_storage_bible
 import org.churchpresenter.icons.generated.resources.ic_storage_lower_third
 import org.churchpresenter.icons.generated.resources.ic_storage_media
@@ -82,7 +82,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.calendarFolder
+import org.churchpresenter.settings.calendarFolderShown
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -266,7 +266,7 @@ private fun storageFolders(
         LocalDefaultCalendarFolder.current.let { pinned ->
             remember(settings.calendarStorageDirectory, pinned) {
                 pinned?.takeIf { settings.calendarStorageDirectory.isBlank() }
-                    ?: settings.calendarFolder().absolutePath
+                    ?: settings.calendarFolderShown().absolutePath
             }
         },
         isDefault = settings.calendarStorageDirectory.isBlank(),
@@ -337,16 +337,18 @@ internal fun SystemStorageCard(
                 }
                 else -> null
             }
+            var browseStart by remember { mutableStateOf<Dp?>(null) }
             StorageRow(
                 folder = folder,
                 status = statuses[index],
                 statusLine = statusLineFor(statuses[index], healthy),
                 onSetAll = onSetAll,
                 fileManager = fileManager,
+                onBrowsePlaced = { browseStart = it },
             )
             when (index) {
-                BIBLE_ROW -> BibleStorageDetail(folder.path, bibleFiles, onSettingsChange)
-                SONGS_ROW -> SongsStorageDetail(folder.path, songScan)
+                BIBLE_ROW -> BibleStorageDetail(folder.path, bibleFiles, browseStart, onSettingsChange)
+                SONGS_ROW -> SongsStorageDetail(folder.path, songScan, browseStart)
             }
             if (index < folders.lastIndex) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = ROW_LINE_ALPHA))
@@ -364,7 +366,13 @@ private const val ICON_TILE_ALPHA = 0.16f
 /** The name block's width, which the detail rows under a folder line up against. */
 private val NAME_COLUMN_WIDTH = 152.dp
 internal val STORAGE_DETAIL_INDENT = 180.dp
-private val CONTROL_HEIGHT = 34.dp
+
+/** The gap between a storage row's controls, which the detail strip under it keeps too. */
+internal val STORAGE_ROW_GAP = 12.dp
+
+/** A storage row's side padding; Browse's measured start is inside it. */
+internal val STORAGE_ROW_PADDING = 16.dp
+internal val CONTROL_HEIGHT = 34.dp
 
 /** What a row says about itself: [healthy] wins when the folder is fine and has something to add. */
 @Composable
@@ -395,11 +403,12 @@ private fun StorageRow(
     statusLine: StorageStatusLine,
     onSetAll: (String) -> Unit,
     fileManager: FileManager,
+    onBrowsePlaced: (Dp) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 11.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = STORAGE_ROW_PADDING, vertical = 11.dp),
+        horizontalArrangement = Arrangement.spacedBy(STORAGE_ROW_GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
@@ -440,22 +449,14 @@ private fun StorageRow(
             }
         }
         StoragePathField(folder.path, status, modifier = Modifier.weight(1f))
-        RaisedButton(
+        BrowseButton(
             onClick = {
                 scope.launch {
                     fileManager.chooseDirectory(currentDirectory = folder.path)?.let(folder.onPathChange)
                 }
             },
-            modifier = Modifier.height(CONTROL_HEIGHT),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-            shape = AppShape(8.dp),
-            contentPadding = PaddingValues(horizontal = 14.dp),
-        ) {
-            Text(text = stringResource(Res.string.browse_directory), style = MaterialTheme.typography.labelMedium)
-        }
+            onPlaced = onBrowsePlaced,
+        )
         val useDefault = folder.onUseDefault
         if (useDefault != null) {
             RaisedButton(

@@ -11,6 +11,7 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
+import java.security.cert.CertificateException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -83,6 +84,16 @@ class StockMediaClientTest {
     private fun failToConnect() {
         http = HttpClient(
             MockEngine { throw java.io.IOException("no route to host") },
+        )
+    }
+
+    /**
+     * Fails every request the way an HTTPS-inspecting proxy does: a certificate the JVM will not
+     * trust, which ktor CIO's own TLS raises raw rather than as an `SSLException`.
+     */
+    private fun failCertificate() {
+        http = HttpClient(
+            MockEngine { throw CertificateException("PKIX path building failed") },
         )
     }
 
@@ -395,6 +406,13 @@ class StockMediaClientTest {
     }
 
     @Test
+    fun `a certificate the JVM will not trust is a network error, not a crash`() {
+        failCertificate()
+
+        assertEquals(StockMediaClient.SearchOutcome.NetworkError, search(pexels, photo))
+    }
+
+    @Test
     fun `a reply that is not the expected shape fails rather than crashing the dialog`() {
         respondWith("""{"photos":"this should have been a list"}""")
 
@@ -471,6 +489,16 @@ class StockMediaClientTest {
     @Test
     fun `a download that never connects is told apart from one that was refused`() {
         failToConnect()
+
+        assertEquals(
+            StockMediaClient.DownloadOutcome.NetworkError,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) },
+        )
+    }
+
+    @Test
+    fun `a download whose certificate is rejected is a network error, not a crash`() {
+        failCertificate()
 
         assertEquals(
             StockMediaClient.DownloadOutcome.NetworkError,

@@ -20,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import java.security.cert.CertificateException
 
 /**
  * Installing a translation from the Zefania archive — the counterpart to [EBibleSourceTest].
@@ -88,6 +89,9 @@ class ZefaniaSourceTest {
     )
 
     private fun httpFailing() = HttpClient(MockEngine { throw java.io.IOException("no route to host") })
+
+    /** What ktor CIO's own TLS raises for a certificate an inspecting proxy re-signed: raw, not an SSLException. */
+    private fun httpUntrusted() = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
 
     /**
      * A server that stops part-way through the first answer and serves the tail when asked for it —
@@ -314,6 +318,11 @@ class ZefaniaSourceTest {
     @Test
     fun `an unreachable host is a network error`() {
         assertEquals(BibleInstallOutcome.NetworkError, install(httpFailing()))
+    }
+
+    @Test
+    fun `a download whose certificate is rejected is a network error`() {
+        assertEquals(BibleInstallOutcome.NetworkError, install(httpUntrusted()))
     }
 
     @Test

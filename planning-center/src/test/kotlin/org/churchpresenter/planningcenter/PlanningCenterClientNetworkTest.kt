@@ -12,6 +12,7 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import java.net.URLEncoder
 import java.nio.channels.UnresolvedAddressException
+import java.security.cert.CertificateException
 import java.util.Base64
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -64,6 +65,17 @@ class PlanningCenterClientNetworkTest {
     private fun failToResolve() {
         http = HttpClient(
             MockEngine { throw UnresolvedAddressException() },
+        )
+    }
+
+    /**
+     * A certificate the JVM will not trust — an HTTPS-inspecting proxy or antivirus. ktor CIO's own
+     * TLS raises it raw rather than as an `SSLException`, so it is neither an [java.io.IOException]
+     * nor an [IllegalArgumentException]; uncaught, it ended the app.
+     */
+    private fun failCertificate() {
+        http = HttpClient(
+            MockEngine { throw CertificateException("PKIX path building failed") },
         )
     }
 
@@ -984,6 +996,50 @@ class PlanningCenterClientNetworkTest {
             runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
         )
         failToResolve()
+        assertEquals(
+            PlanningCenterClient.AttachmentUrlOutcome.Failure,
+            runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },
+        )
+    }
+
+    @Test
+    fun `a certificate the JVM will not trust is a network error on every endpoint`() {
+        failCertificate()
+        assertEquals(
+            PlanningCenterClient.TokenOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("id", "secret", "code", VERIFIER, http) },
+        )
+        failCertificate()
+        assertEquals(
+            PlanningCenterClient.PersonOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getCurrentPerson("tok", http = http) },
+        )
+        failCertificate()
+        assertEquals(
+            PlanningCenterClient.ServiceTypesOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.listServiceTypes("tok", http = http) },
+        )
+        failCertificate()
+        assertEquals(
+            PlanningCenterClient.PlansOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.listUpcomingPlans("tok", "svc-1", http = http) },
+        )
+        failCertificate()
+        assertEquals(
+            PlanningCenterClient.PlanItemsOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getPlanItems("tok", "svc-1", "plan-1", http = http) },
+        )
+        failCertificate()
+        assertEquals(
+            PlanningCenterClient.ArrangementOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getArrangementDetail("tok", "song-1", "arr-1", http = http) },
+        )
+        failCertificate()
+        assertEquals(
+            PlanningCenterClient.AttachmentsOutcome.NetworkError,
+            runBlocking { PlanningCenterClient.getItemAttachments("tok", "svc-1", "plan-1", "item-1", http = http) },
+        )
+        failCertificate()
         assertEquals(
             PlanningCenterClient.AttachmentUrlOutcome.Failure,
             runBlocking { PlanningCenterClient.resolveAttachmentDownloadUrl("tok", "att-1", http = http) },

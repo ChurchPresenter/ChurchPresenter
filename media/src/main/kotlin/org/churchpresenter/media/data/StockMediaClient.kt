@@ -17,6 +17,7 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.File
 import java.io.IOException
+import java.security.GeneralSecurityException
 
 /**
  * Search and download free stock photos/videos from Pexels and Pixabay for use as
@@ -201,6 +202,10 @@ object StockMediaClient {
         } catch (e: IOException) {
             // Ktor's connect and request timeouts are IOExceptions too.
             searchFailed(source, mediaType, e)
+        } catch (e: GeneralSecurityException) {
+            // A certificate the JVM will not trust — an HTTPS-inspecting proxy or antivirus. ktor
+            // CIO's own TLS raises it raw rather than as an SSLException; uncaught, it ends the app.
+            searchFailed(source, mediaType, e)
         } catch (e: IllegalArgumentException) {
             // A reply that is not the JSON this source sends.
             searchFailed(source, mediaType, e)
@@ -324,13 +329,20 @@ object StockMediaClient {
             destFile.writeBytes(bytes)
             DownloadOutcome.Success(destFile)
         } catch (e: IOException) {
-            CrashReporter.reportWarning(
-                "Stock media download failed (${item.source.name.lowercase()})",
-                throwable = e,
-                tags = mapOf("subsystem" to "stock_media", "source" to item.source.name.lowercase())
-            )
-            DownloadOutcome.NetworkError
+            downloadFailed(item, e)
+        } catch (e: GeneralSecurityException) {
+            // See search: ktor CIO raises an untrusted certificate raw, not as an SSLException.
+            downloadFailed(item, e)
         }
+    }
+
+    private fun downloadFailed(item: StockMediaItem, e: Exception): DownloadOutcome {
+        CrashReporter.reportWarning(
+            "Stock media download failed (${item.source.name.lowercase()})",
+            throwable = e,
+            tags = mapOf("subsystem" to "stock_media", "source" to item.source.name.lowercase())
+        )
+        return DownloadOutcome.NetworkError
     }
 
     private fun searchFailed(source: StockSource, mediaType: StockMediaType, e: Exception): SearchOutcome {

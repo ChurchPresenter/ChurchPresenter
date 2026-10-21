@@ -10,6 +10,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
+import org.churchpresenter.appsettings.CHIPS_TOGGLE_TAG
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -94,6 +96,23 @@ class SystemSettingsTabScreenshotTest {
     @Test
     fun `as it opens, with folders already set`() = shoot("top_filled", settings = filledSettings())
 
+    /** A big library: the detected files fold to one line, and the old song files to three rows. */
+    @Test
+    fun `with many Bibles, songbooks and old song files`() = shoot("top_many_files", settings = manyFilesSettings()) {
+        waitUntil(timeoutMillis = WAIT_MS) { onAllNodesWithTag(CHIPS_TOGGLE_TAG).fetchSemanticsNodes().size == 3 }
+    }
+
+    /** The same library with every folded list opened. */
+    @Test
+    fun `with many files, every list opened`() = shoot("top_many_files_open", settings = manyFilesSettings()) {
+        waitUntil(timeoutMillis = WAIT_MS) { onAllNodesWithTag(CHIPS_TOGGLE_TAG).fetchSemanticsNodes().size == 3 }
+        // Last first, so opening one list does not move the toggles still to press.
+        for (i in 2 downTo 0) {
+            onAllNodesWithTag(CHIPS_TOGGLE_TAG)[i].performClick()
+            waitForIdle()
+        }
+    }
+
     /** Wick started from Help → Show Helper: its card joins the switches, as it does outside dev mode. */
     @Test
     fun `with Wick started from the Help menu`() =
@@ -176,6 +195,34 @@ class SystemSettingsTabScreenshotTest {
                 presentationStorageDirectory = decks.absolutePath,
                 mediaStorageDirectory = media.absolutePath,
                 scheduleStorageDirectory = schedules.absolutePath,
+            )
+        }
+    }
+
+    private fun manyFilesSettings(): AppSettings {
+        val bibles = dirWith(
+            "many-bibles",
+            *listOf(
+                "ara", "asv", "bbe", "bg1940", "csb", "cuv", "darby", "esv", "geneva1599", "kjv", "kor-krv",
+                "lsg", "lut1912", "nasb", "niv", "nkjv", "nvi", "rst", "rv1960", "ukr-ogienko", "web", "ylt",
+            ).map { "$it.spb" }.toTypedArray(),
+        )
+        val songs = dirWith(
+            "many-songs",
+            "001 Amazing Grace.sps", "002 It Is Well.sps", "003 How Great Thou Art.sps",
+            "004 Be Thou My Vision.sps", "005 Rock of Ages.sps",
+        )
+        listOf(
+            "Baptism", "Choir", "Christmas", "Communion", "Easter", "Hymns of Faith", "Kids Church",
+            "Russian Hymnal", "Spanish Coros", "Ukrainian Hymnal", "Worship Together", "Youth Camp",
+        ).forEachIndexed { i, name ->
+            val book = File(songs, name).apply { mkdirs() }
+            repeat(i + 2) { File(book, "$it.song").writeText("fixture") }
+        }
+        return AppSettings().let { s ->
+            s.copy(
+                bibleSettings = s.bibleSettings.copy(storageDirectory = bibles.absolutePath),
+                songSettings = s.songSettings.copy(storageDirectory = songs.absolutePath),
             )
         }
     }

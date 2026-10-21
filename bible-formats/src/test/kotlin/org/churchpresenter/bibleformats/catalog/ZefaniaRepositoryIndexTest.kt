@@ -17,6 +17,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import java.security.cert.CertificateException
 
 /**
  * Listing the Bible modules available in the Zefania archive.
@@ -109,6 +110,9 @@ class ZefaniaRepositoryIndexTest {
     private fun httpFailing() = HttpClient(
         MockEngine { throw java.io.IOException("no route to host") },
     )
+
+    /** What ktor CIO's own TLS raises for a certificate an inspecting proxy re-signed: raw, not an SSLException. */
+    private fun httpUntrusted() = HttpClient(MockEngine { throw CertificateException("PKIX path building failed") })
 
     private fun fetch(http: HttpClient, now: Long = 1_000L) = runBlocking {
         ZefaniaRepositoryIndex.fetch(url = url, http = http, cacheFile = cacheFile, nowMillis = now)
@@ -396,6 +400,22 @@ class ZefaniaRepositoryIndexTest {
     @Test
     fun `an unreachable host with no cache is a network error`() {
         assertEquals(ZefaniaRepositoryIndex.IndexOutcome.NetworkError, fetch(httpFailing()))
+    }
+
+    @Test
+    fun `a certificate the JVM will not trust is a network error, not a crash`() {
+        assertEquals(ZefaniaRepositoryIndex.IndexOutcome.NetworkError, fetch(httpUntrusted()))
+    }
+
+    @Test
+    fun `a certificate the JVM will not trust falls back to the cached listing`() {
+        fetch(httpServing(realisticTree), now = 1_000L)
+        ZefaniaRepositoryIndex.clearMemoryCache()
+        val muchLater = 1_000L + 30L * 24 * 60 * 60 * 1000
+
+        val offline = assertIs<ZefaniaRepositoryIndex.IndexOutcome.Success>(fetch(httpUntrusted(), now = muchLater))
+
+        assertTrue(offline.stale)
     }
 
     @Test

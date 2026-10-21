@@ -3,6 +3,7 @@ package org.churchpresenter.sharedui.utils
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
+import java.util.concurrent.ConcurrentHashMap
 
 private const val SRGB_LINEAR_THRESHOLD = 0.03928
 private const val SRGB_LINEAR_DIVISOR = 12.92
@@ -20,14 +21,25 @@ object Utils {
     /** The installed font families — see [SystemFonts], which enumerates them once per process. */
     fun getAvailableSystemFonts(): List<String> = SystemFonts.families()
 
+    /** One family per name, so every output's styles compare equal -- see [systemFontFamilyOrDefault]. */
+    private val systemFontFamilies = ConcurrentHashMap<String, FontFamily>()
+
+    /**
+     * The installed family named [fontName], or the default face when there is none.
+     *
+     * The same object for the same name, every time: a system family built twice is two unequal
+     * families, and a style that holds one would never match a style that holds the other -- which
+     * is how the song fit's cache tells one output's question from another's.
+     */
     @OptIn(ExperimentalTextApi::class)
-    fun systemFontFamilyOrDefault(fontName: String): FontFamily {
-        return try {
-            FontFamily(fontName)
-        } catch (_: Exception) {
-            FontFamily.Default
+    fun systemFontFamilyOrDefault(fontName: String): FontFamily =
+        systemFontFamilies.getOrPut(fontName) {
+            try {
+                FontFamily(fontName)
+            } catch (_: Exception) {
+                FontFamily.Default
+            }
         }
-    }
 
     /**
      * WCAG 2 relative luminance of [color], in the 0..1 range contrast-ratio math uses.
