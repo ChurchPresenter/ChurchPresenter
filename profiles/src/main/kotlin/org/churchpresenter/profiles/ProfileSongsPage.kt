@@ -50,6 +50,8 @@ import org.churchpresenter.strings.generated.resources.profile_title_slide_sub
 import org.churchpresenter.strings.generated.resources.profile_title_slide_valign
 import org.churchpresenter.strings.generated.resources.profile_word_wrap
 import org.churchpresenter.strings.generated.resources.top
+import org.churchpresenter.strings.generated.resources.profile_second_voice_color
+import org.churchpresenter.strings.generated.resources.profile_second_voice_color_sub
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -270,9 +272,26 @@ private fun SongTextGroup(
                         )
                     }
                 },
-                extraBasic = { SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong) },
+                extraBasic = {
+                    SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong)
+                    if (styleElement == SongStyleElement.LYRICS) SecondVoiceColorRow(song, updateSong)
+                },
             )
         } }
+    }
+}
+
+/** The colour a song's second voice — its `2>` lines and words — is drawn in on this profile. */
+@Composable
+private fun SecondVoiceColorRow(song: SongSettings, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
+    SettingsRow(
+        Res.string.profile_second_voice_color,
+        sub = stringResource(Res.string.profile_second_voice_color_sub),
+        paths = SONG_SECOND_VOICE_PATHS,
+    ) {
+        RowColor(song.layoutExtras.secondVoiceColor, { v ->
+            updateSong { it.copy(layoutExtras = it.layoutExtras.copy(secondVoiceColor = v)) }
+        })
     }
 }
 
@@ -539,6 +558,9 @@ private val SONG_FIT_LANGUAGES_PATHS = listOf("songSettings.layoutExtras.fitLang
 private val SONG_LAYOUT_PATHS =
     listOf("songSettings.bilingualLayout", "songSettings.layoutExtras.languageGap") + SONG_FIT_LANGUAGES_PATHS
 private val SONG_GAP_PATHS = listOf("songSettings.layoutExtras.languageGap")
+
+/** Where the second voice's colour is stored. */
+private val SONG_SECOND_VOICE_PATHS = listOf("songSettings.layoutExtras.secondVoiceColor")
 private const val LANGUAGE_GAP_STEP = 4
 
 /** Test handle for the Gap between languages field. */

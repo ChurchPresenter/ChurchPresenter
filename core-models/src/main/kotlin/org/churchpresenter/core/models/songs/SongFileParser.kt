@@ -170,7 +170,8 @@ class SongFileParser {
 
     /** The `key: value` lines of a .song header, lowercased keys, unknown keys kept out. */
     private fun parseHeaderFields(headerBody: List<String>): Map<String, String> {
-        val known = setOf("author", "composer", "tune", "ccli") + BACKGROUND_PREFIXES.flatMap(::songBackgroundKeys)
+        val known = setOf("author", "composer", "tune", "ccli") + SONG_TEXT_OVERRIDE_KEYS +
+            BACKGROUND_PREFIXES.flatMap(::songBackgroundKeys)
         return headerBody.mapNotNull { raw ->
             val line = raw.trim()
             val colonIndex = line.indexOf(':')
@@ -191,6 +192,7 @@ class SongFileParser {
             var ccli = ""
             var background = SongBackground()
             var lowerThirdBackground = SongBackground()
+            var textOverrides = SongTextOverrides()
             val headerStart = lines.indexOfFirst { it.trim() == "---" }
             val headerClose = if (headerStart < 0) -1 else
                 lines.subList(headerStart + 1, lines.size).indexOfFirst { it.trim() == "---" }
@@ -206,6 +208,7 @@ class SongFileParser {
                 ccli = header["ccli"].orEmpty()
                 background = songBackgroundFrom(header, SONG_BACKGROUND_PREFIX)
                 lowerThirdBackground = songBackgroundFrom(header, SONG_LOWER_THIRD_BACKGROUND_PREFIX)
+                textOverrides = songTextOverridesFrom(header)
             }
 
             // Parse body after header
@@ -238,7 +241,8 @@ class SongFileParser {
                 sourceFile = filePath,
                 ccliNumber = ccli,
                 background = background,
-                lowerThirdBackground = lowerThirdBackground
+                lowerThirdBackground = lowerThirdBackground,
+                textOverrides = textOverrides,
             ).withTranslations(extraTranslations)
         } catch (_: Exception) {
             return null
@@ -256,7 +260,7 @@ class SongFileParser {
         // Write header if any metadata exists
         val credits = listOf(song.author, song.composer, song.tune, song.ccliNumber)
         val hasBackground = song.background.isCustom || song.lowerThirdBackground.isCustom
-        if (credits.any { it.isNotEmpty() } || hasBackground) {
+        if (credits.any { it.isNotEmpty() } || hasBackground || song.textOverrides.isCustom) {
             sb.appendLine("---")
             if (song.author.isNotEmpty()) sb.appendLine("author: ${song.author}")
             if (song.composer.isNotEmpty()) sb.appendLine("composer: ${song.composer}")
@@ -264,6 +268,7 @@ class SongFileParser {
             if (song.ccliNumber.isNotEmpty()) sb.appendLine("ccli: ${song.ccliNumber}")
             appendBackground(sb, SONG_BACKGROUND_PREFIX, song.background)
             appendBackground(sb, SONG_LOWER_THIRD_BACKGROUND_PREFIX, song.lowerThirdBackground)
+            songTextOverrideFields(song.textOverrides).forEach { (key, value) -> sb.appendLine("$key: $value") }
             sb.appendLine("---")
             sb.appendLine()
         }

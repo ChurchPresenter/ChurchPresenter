@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.utils.FallbackOutputSize
 import org.churchpresenter.sharedui.utils.OutputSize
+import org.churchpresenter.presenter.ScaledOutputBox
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.stageMonitorScreenIndices
 
@@ -112,36 +113,7 @@ internal fun stageMonitorPreviewOutputSize(settings: AppSettings): PreviewOutput
  */
 @Composable
 internal fun ScaledPresenterBox(output: PreviewOutputSize, content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag(SETTINGS_PREVIEW_SCALED_TAG)
-            .layout { measurable, constraints ->
-                val scale = minOf(
-                    constraints.maxWidth.toFloat() / output.width,
-                    constraints.maxHeight.toFloat() / output.height,
-                )
-                val placeable = measurable.measure(
-                    constraints.copy(
-                        minWidth = output.width,
-                        maxWidth = output.width,
-                        minHeight = output.height,
-                        maxHeight = output.height,
-                    ),
-                )
-                layout((output.width * scale).toInt(), (output.height * scale).toInt()) {
-                    placeable.placeWithLayer(0, 0) {
-                        this.scaleX = scale
-                        this.scaleY = scale
-                        transformOrigin = TransformOrigin(0f, 0f)
-                    }
-                }
-            },
-    ) {
-        CompositionLocalProvider(LocalDensity provides Density(1f)) {
-            content()
-        }
-    }
+    ScaledOutputBox(output, Modifier.testTag(SETTINGS_PREVIEW_SCALED_TAG), content)
 }
 
 /** The four insets a presenter pads by, in the output's own reference pixels. */

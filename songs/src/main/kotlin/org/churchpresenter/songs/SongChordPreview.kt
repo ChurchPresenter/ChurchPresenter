@@ -64,6 +64,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.Icon
 import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
+import org.churchpresenter.songchords.SecondVoice
 
 /**
  * A section of the song as the preview draws it: a label, and its lines already split into runs.
@@ -132,10 +133,11 @@ fun buildPreviewSections(
             label = line.trim().let { it.substring(1, it.length - 1) }.trim()
         } else if (ChordTransposer.isSlideBreak(line)) {
             if (body.isNotEmpty()) flush()
-        } else if (ChordTransposer.isBackgroundDirective(line)) {
+        } else if (ChordTransposer.isBackgroundDirective(line) || SecondVoice.isVoiceDirective(line)) {
             // Configuration, not words — the panel above shows what it says.
         } else if (line.isNotBlank()) {
-            body.add(line)
+            // The chart is for players, who play both voices: the markup comes off.
+            body.add(SecondVoice.plain(line))
         }
     }
     flush()

@@ -16,6 +16,8 @@ import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.songchords.ChordTransposer
+import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.core.models.songs.SongTextOverrides
 
 private const val BPM_MAX_DIGITS = 3
 private const val CAPO_MAX_DIGITS = 2
@@ -41,11 +43,12 @@ internal data class TranslationDraft(
      */
     fun toTranslation(): SongTranslation {
         val lines = lyrics.text.split("\n")
-        // Structure alone -- headers, slide breaks, background directives -- is not a translation.
+        // Structure alone -- headers, slide breaks, directives -- is not a translation.
         // A lyric line that opens on a chord (`[G]Blagodat`) is words, not a header.
         val blank = lines.all {
             it.isBlank() || ChordTransposer.isSectionHeader(it) ||
-                ChordTransposer.isSlideBreak(it) || ChordTransposer.isBackgroundDirective(it)
+                ChordTransposer.isSlideBreak(it) || ChordTransposer.isBackgroundDirective(it) ||
+                SecondVoice.isVoiceDirective(it)
         }
         return SongTranslation(
             label = label.trim(),
@@ -104,6 +107,9 @@ internal class EditSongState(private val song: SongItem) {
     var lowerThirdBackground by mutableStateOf(song.lowerThirdBackground)
         private set
     var backgroundPanelOpen by mutableStateOf(false)
+
+    /** This song's own font, size and colours — see [SongTextOverrides]. */
+    var textOverrides by mutableStateOf(song.textOverrides)
 
     // 0 is the song's own background; 1.. are its sections, in the order they are written. Held as
     // an index rather than a name because two sections may share one, and clamped on every read
@@ -187,6 +193,7 @@ internal class EditSongState(private val song: SongItem) {
         if (isNewSong && !titleManuallyEdited) {
             title = value.text.lines()
                 .firstOrNull { it.isNotBlank() && !it.trim().startsWith("[") }
+                ?.let(SecondVoice::plain)
                 ?.trim()
                 ?: ""
         }
@@ -234,6 +241,7 @@ internal class EditSongState(private val song: SongItem) {
         ccliNumber = ccli,
         background = background,
         lowerThirdBackground = lowerThirdBackground,
+        textOverrides = textOverrides,
     ).withTranslations(translations.map { it.toTranslation() })
 }
 

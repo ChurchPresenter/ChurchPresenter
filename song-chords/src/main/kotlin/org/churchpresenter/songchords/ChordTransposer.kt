@@ -149,7 +149,7 @@ object ChordTransposer {
         // A slide break is bracketed and is not a chord, so it would otherwise parse as a section
         // named "---" -- which is what it did, and what put a `---` badge on half a chorus. A
         // background directive is bracketed for the same reason and is no more a section than it is.
-        if (!bracketed || isSlideBreak(t) || isBackgroundDirective(t)) return false
+        if (!bracketed || isSlideBreak(t) || isBackgroundDirective(t) || SecondVoice.isVoiceDirective(t)) return false
         val inner = t.substring(1, t.length - 1)
         if (inner.any { it in "[]{}" }) return false
         return !isChord(inner)

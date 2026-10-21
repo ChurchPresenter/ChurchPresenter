@@ -17,7 +17,8 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.sharedui.utils.spacingEm
-import org.churchpresenter.sharedui.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.voicedDisplayText
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.TextBox
@@ -237,7 +238,7 @@ internal fun SongBoxLayer(
                     fitInBox(
                         measurer = measurer,
                         fitText = BoxFitText(
-                            text = styledDisplayText(lines.joinToString("\n"), profile.transform, letterEm, wordEm),
+                            text = voicedDisplayText(lines, profile.transform, letterEm, wordEm, null),
                             style = fitStyle,
                             configuredSize = profile.fontSize,
                             softWrap = settings.wordWrap,
@@ -254,7 +255,14 @@ internal fun SongBoxLayer(
                 key = item.key,
             ) {
                 OutlinedText(
-                    text = styledDisplayText(item.lines.joinToString("\n"), profile.transform, letterEm, wordEm),
+                    text = voicedDisplayText(
+                        item.lines, profile.transform, letterEm, wordEm,
+                        secondVoiceColor = if (isKey || item.element != SongStyleElement.LYRICS) {
+                            null
+                        } else {
+                            parseHexColor(settings.layoutExtras.secondVoiceColor)
+                        },
+                    ),
                     outline = outlineOf(profile.outline),
                     scaleFactor = scaleFactor,
                     color = styling.color,

@@ -1,5 +1,6 @@
 package org.churchpresenter.presenter
 
+import org.churchpresenter.songchords.SecondVoice
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 
@@ -61,10 +62,8 @@ internal fun slideFitSections(
         else -> SlideFit(
             listOf(
                 section.copy(
-                    lines = listOfNotNull(section.lines.getOrNull(line)),
-                    translations = section.translations.map {
-                        it.copy(lines = listOfNotNull(it.lines.getOrNull(line)))
-                    },
+                    lines = pageAt(section.lines, line),
+                    translations = section.translations.map { it.copy(lines = pageAt(it.lines, line)) },
                 ),
             ),
         )
@@ -83,3 +82,7 @@ internal fun LyricSection.withoutLanguages(languages: Set<Int>): LyricSection = 
     lines = if (0 in languages) emptyList() else lines,
     translations = translations.mapIndexed { i, t -> if (i + 1 in languages) SectionTranslation() else t },
 )
+
+/** The lines line mode shows at [line] of [lines] — see [SecondVoice.lineGroups] — or none past the end. */
+private fun pageAt(lines: List<String>, line: Int): List<String> =
+    if (line in lines.indices) lines.slice(SecondVoice.lineGroupAt(lines, line)) else emptyList()

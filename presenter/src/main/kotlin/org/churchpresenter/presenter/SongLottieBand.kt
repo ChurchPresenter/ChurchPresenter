@@ -7,17 +7,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
-import org.churchpresenter.sharedui.utils.applyTextTransform
+import org.churchpresenter.sharedui.utils.voicedLine
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.songchords.SecondVoice
 
 /** The lyrics' lower-third typography as a band slot draws it. */
 internal fun SongSettings.lyricsSlotStyle(isKey: Boolean) = BandSlotStyle(
     font = BandFontKey(lyricsLowerThirdFontType, lyricsLowerThirdBold, lyricsLowerThirdItalic),
     fontSizePt = lyricsLowerThirdFontSize,
     color = if (isKey) Color.White else parseHexColor(lyricsLowerThirdColor),
+    secondVoiceColor = if (isKey) Color.White else parseHexColor(layoutExtras.secondVoiceColor),
     letterSpacingPt = lyricsLowerThirdLetterSpacing,
     transform = lyricsLowerThirdTransform,
     justify = justifyOf(lyricsLowerThirdHorizontalAlignment),
@@ -49,8 +51,21 @@ internal fun SongSettings.titleSlotStyle(isKey: Boolean) = BandSlotStyle(
  * language(s), follow the lower-third song settings the classic band reads; look-ahead and chords
  * have no slot and are left out.
  */
-/** [text] in this style, cased the way the style says. */
-private fun BandSlotStyle.slot(text: String): BandSlotText = BandSlotText(applyTextTransform(text, transform), this)
+/**
+ * [text] in this style, cased the way the style says, its voice markup taken out and remembered as
+ * the ranges the second voice's colour goes on.
+ */
+private fun BandSlotStyle.slot(text: String): BandSlotText {
+    val plain = StringBuilder()
+    val voiceRanges = mutableListOf<IntRange>()
+    text.split('\n').forEachIndexed { i, line ->
+        if (i > 0) plain.append('\n')
+        val voiced = voicedLine(line, transform)
+        voiced.secondVoiceRanges.forEach { voiceRanges += (it.first + plain.length)..(it.last + plain.length) }
+        plain.append(voiced.text)
+    }
+    return BandSlotText(plain.toString(), this, voiceRanges)
+}
 
 /** The page the band is on: the section, its place in the song, and the line within it. */
 internal data class SongBandPage(
@@ -110,7 +125,8 @@ internal fun songBandSlots(
     val lineMode = settings.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
     fun pick(lines: List<String>): List<String> = when {
         lines.isEmpty() -> lines
-        lineMode -> listOf(lines[lineIndex.coerceIn(0, lines.lastIndex)])
+        // A line and the voice-2 line answering it are one page — see [SecondVoice.lineGroups].
+        lineMode -> lines.slice(SecondVoice.lineGroupAt(lines, lineIndex.coerceIn(0, lines.lastIndex)))
         else -> lines
     }
     val allLines = section.allLanguageLines()

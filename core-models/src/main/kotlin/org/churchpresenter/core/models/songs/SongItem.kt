@@ -27,7 +27,9 @@ data class SongItem(
     /** This song's own full-screen background, or an inheriting one when it has none. */
     val background: SongBackground = SongBackground(),
     /** This song's own lower-third background, or an inheriting one when it has none. */
-    val lowerThirdBackground: SongBackground = SongBackground()
+    val lowerThirdBackground: SongBackground = SongBackground(),
+    /** This song's own font, size and colours over the profile's — none by default. */
+    val textOverrides: SongTextOverrides = SongTextOverrides(),
 ) {
     /** Stable unique ID across songbooks: "songbook::number" or "songbook::title" when no number */
     val songId: String get() = if (number.isNotBlank()) "$songbook::$number" else "$songbook::$title"

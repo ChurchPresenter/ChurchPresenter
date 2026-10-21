@@ -44,6 +44,11 @@ import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.sharedui.composables.PaneTab
+import org.churchpresenter.sharedui.composables.PaneTabRow
+import org.churchpresenter.strings.generated.resources.song_pane_output
+import org.churchpresenter.strings.generated.resources.song_chords
 
 /** The Background button's slot: the app draws `:profiles`' `SongBackgroundButton` in it. */
 typealias SongBackgroundButtonSlot = @Composable (SongBackgroundButtonState) -> Unit
@@ -78,6 +83,11 @@ fun EditSongDialog(
     languageNames: List<String> = emptyList(),
     /** Stores renamed [languageNames] on Save. Null leaves the names out of the editor. */
     onLanguageNamesChange: ((List<String>) -> Unit)? = null,
+    /**
+     * The settings the outputs draw by, for the Output tab's previews of the slide being edited.
+     * Null leaves the tab out, and the right-hand pane is the chord preview alone.
+     */
+    appSettings: AppSettings? = null,
     onDismiss: () -> Unit,
     onSave: (SongItem, SongTuning) -> Unit,
     /**
@@ -112,6 +122,7 @@ fun EditSongDialog(
                 onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
                 languageNames = languageNames,
                 onLanguageNamesChange = onLanguageNamesChange,
+                appSettings = appSettings,
                 onDismiss = onDismiss,
                 onSave = onSave
             )
@@ -160,6 +171,8 @@ internal fun EditSongContent(
     /** What each language is called install-wide -- see [EditSongDialog]. */
     languageNames: List<String> = emptyList(),
     onLanguageNamesChange: ((List<String>) -> Unit)? = null,
+    /** What the outputs draw by -- see [EditSongDialog]. */
+    appSettings: AppSettings? = null,
     onDismiss: () -> Unit,
     onSave: (SongItem, SongTuning) -> Unit
 ) {
@@ -210,7 +223,7 @@ internal fun EditSongContent(
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                     VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    EditSongChordPreview(state, showChords)
+                    EditSongRightPane(state, showChords, appSettings)
                 }
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -232,9 +245,38 @@ internal fun EditSongContent(
     }
 }
 
+/** The two views of the open pane on the right: as the outputs show it, and as the band reads it. */
+private enum class RightPane { OUTPUT, CHORDS }
+
+/**
+ * The right-hand pane: the Output and Chords tabs, or the chord preview alone where the editor was
+ * opened without the settings the outputs draw by.
+ */
+@Composable
+private fun EditSongRightPane(state: EditSongState, showChords: Boolean, appSettings: AppSettings?) {
+    val paneModifier = Modifier.width(RIGHT_PANE_WIDTH).fillMaxHeight()
+    if (appSettings == null) {
+        EditSongChordPreview(state, showChords, paneModifier)
+        return
+    }
+    var pane by remember { mutableStateOf(RightPane.OUTPUT) }
+    Column(paneModifier) {
+        PaneTabRow(Modifier.padding(start = 14.dp, top = 9.dp)) {
+            PaneTab(stringResource(Res.string.song_pane_output), pane == RightPane.OUTPUT) { pane = RightPane.OUTPUT }
+            PaneTab(stringResource(Res.string.song_chords), pane == RightPane.CHORDS) { pane = RightPane.CHORDS }
+        }
+        when (pane) {
+            RightPane.OUTPUT -> EditSongOutputPane(state, appSettings, Modifier.weight(1f).fillMaxWidth())
+            RightPane.CHORDS -> EditSongChordPreview(state, showChords, Modifier.weight(1f).fillMaxWidth())
+        }
+    }
+}
+
+private val RIGHT_PANE_WIDTH = 452.dp
+
 /** The open pane as the band reads it, with the key, transposition and chord palette. */
 @Composable
-private fun EditSongChordPreview(state: EditSongState, showChords: Boolean) {
+private fun EditSongChordPreview(state: EditSongState, showChords: Boolean, modifier: Modifier) {
     SongChordPreview(
         text = state.paneValue.text,
         showChords = showChords,
@@ -248,7 +290,7 @@ private fun EditSongChordPreview(state: EditSongState, showChords: Boolean) {
         onInsertChord = { chord ->
             state.setPaneValue(insertSnippet(state.paneValue, "[$chord]", ownLine = false))
         },
-        modifier = Modifier.width(452.dp).fillMaxHeight(),
+        modifier = modifier,
     )
 }
 

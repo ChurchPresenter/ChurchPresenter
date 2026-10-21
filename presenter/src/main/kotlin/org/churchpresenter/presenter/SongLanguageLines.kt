@@ -18,6 +18,7 @@ import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.SongTextStyle
 import org.churchpresenter.settings.translationSettings
+import org.churchpresenter.songchords.SecondVoice
 
 /**
  * What one language contributes to one slide: the words now, and the words next.
@@ -52,15 +53,16 @@ internal data class SongSlideModes(
 )
 
 /**
- * The slice of [lines] this slide shows: the one line at [SongSlideModes.lineIndex] in line mode,
- * all of them otherwise.
+ * The slice of [lines] this slide shows: the line at [SongSlideModes.lineIndex] in line mode — with
+ * the voice-2 line answering it, when one does (see [SecondVoice.lineGroups]) — all of them
+ * otherwise.
  *
  * A language with no lines slices to none, which is what makes a song translated into two of its
  * four configured languages draw two blocks rather than two blocks and two empty columns.
  */
 internal fun slideLinesFor(lines: List<String>, modes: SongSlideModes): List<String> =
     if (modes.isLineMode && modes.lineIndex >= 0 && modes.lineIndex < lines.size) {
-        listOf(lines[modes.lineIndex])
+        lines.slice(SecondVoice.lineGroupAt(lines, modes.lineIndex))
     } else {
         lines
     }
@@ -86,11 +88,12 @@ internal fun lookAheadLinesFor(
     // In line mode the look-ahead is literally "the line after this one", so a next line inside this
     // section wins over the start of the following one; it only crosses a section boundary once
     // there is nothing left here.
-    val nextLineHere = bothLineMode && lineIndex >= 0 && lineIndex + 1 < lines.size
+    val after = if (lineIndex in lines.indices) SecondVoice.lineGroupAt(lines, lineIndex).last + 1 else lineIndex + 1
+    val nextLineHere = bothLineMode && lineIndex >= 0 && after < lines.size
     return when {
-        nextLineHere -> listOf(lines[lineIndex + 1])
+        nextLineHere -> lines.slice(SecondVoice.lineGroupAt(lines, after))
         nextLines.isEmpty() -> emptyList()
-        modes.laIsLineMode -> listOf(nextLines.first())
+        modes.laIsLineMode -> nextLines.slice(SecondVoice.lineGroupAt(nextLines, 0))
         else -> nextLines
     }
 }
