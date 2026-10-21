@@ -39,11 +39,15 @@ internal data class Keyframe(
 internal class KeyedTrack(private val keys: List<Keyframe>) : Track {
     override fun at(frame: Float): List<Float> {
         val next = keys.indexOfFirst { it.time > frame }
-        if (next == 0) return keys.first().value
-        if (next < 0) return keys.last().value
-        val from = keys[next - 1]
-        val to = keys[next]
-        if (from.hold) return from.value
+        return when {
+            next == 0 -> keys.first().value
+            next < 0 -> keys.last().value
+            keys[next - 1].hold -> keys[next - 1].value
+            else -> between(keys[next - 1], keys[next], frame)
+        }
+    }
+
+    private fun between(from: Keyframe, to: Keyframe, frame: Float): List<Float> {
         val linear = (frame - from.time) / (to.time - from.time)
         val eased = cubicBezier(linear, from.outX, from.outY, from.inX, from.inY)
         return from.value.indices.map { i ->
@@ -60,9 +64,10 @@ internal class KeyedTrack(private val keys: List<Keyframe>) : Track {
 internal fun cubicBezier(progress: Float, x1: Float, y1: Float, x2: Float, y2: Float): Float {
     if (progress <= 0f) return 0f
     if (progress >= 1f) return 1f
+    // The cubic's 3·(1−t)²·t·a + 3·(1−t)·t²·b + t³, written as one sum of powers of t.
     fun curve(t: Float, a: Float, b: Float): Float {
         val u = 1f - t
-        return 3f * u * u * t * a + 3f * u * t * t * b + t * t * t
+        return BEZIER_WEIGHT * u * t * (u * a + t * b) + t * t * t
     }
     var low = 0f
     var high = 1f
@@ -104,14 +109,14 @@ internal fun readTextMotions(layers: List<JsonObject>): Map<String, LayerMotion>
         val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
         val ks = layer["ks"] as? JsonObject ?: return@mapNotNull null
         val rotationKey = if (ks.containsKey("r")) "r" else "rz"
-        val properties = listOf("a", "p", "s", rotationKey).map { ks[it] as? JsonObject }
-        if (properties.none { it?.isAnimated() == true }) return@mapNotNull null
-        val (anchor, position, scale, rotation) = properties.map { it?.let(::readTrack) }
+        fun property(key: String) = ks[key] as? JsonObject
+        if (listOf("a", "p", "s", rotationKey).none { property(it)?.isAnimated() == true }) return@mapNotNull null
+        fun track(key: String) = property(key)?.let(::readTrack)
         name to LayerMotion(
-            anchor = anchor ?: Track { listOf(0f, 0f) },
-            position = position ?: Track { listOf(0f, 0f) },
-            scale = scale ?: Track { listOf(PERCENT, PERCENT) },
-            rotation = rotation ?: Track { listOf(0f) },
+            anchor = track("a") ?: Track { listOf(0f, 0f) },
+            position = track("p") ?: Track { listOf(0f, 0f) },
+            scale = track("s") ?: Track { listOf(PERCENT, PERCENT) },
+            rotation = track(rotationKey) ?: Track { listOf(0f) },
             startTime = layer["st"]?.jsonPrimitive?.floatOrNull ?: 0f,
         )
     }.toMap()
@@ -165,6 +170,9 @@ private fun handle(key: JsonObject, side: String, axis: String): Float? =
 
 /** A Lottie layer's `ty` for text. */
 private const val TEXT_LAYER_TYPE = 5
+
+/** A cubic bezier's weight on each of its two handles. */
+private const val BEZIER_WEIGHT = 3f
 
 /** Halvings that solve a bezier for x — 20 put it within a millionth of a frame's fraction. */
 private const val BEZIER_STEPS = 20

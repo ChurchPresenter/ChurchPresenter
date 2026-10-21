@@ -372,7 +372,8 @@ private fun VoicePass(
                 val shapes = renders.flatMap { (name, state) ->
                     val r = state.value
                     val voice = r.voice ?: return@flatMap emptyList()
-                    val shift = if (r.ticker) tickerPosition(template, r, tickerState.value) - r.position else Offset.Zero
+                    val shift =
+                        if (r.ticker) tickerPosition(template, r, tickerState.value) - r.position else Offset.Zero
                     val matrix = template.textMotions[name]?.matrixAt(frame)
                     voiceShapes(voice.rectsFor(revealedText(template, r.text, frame)), shift, matrix)
                 }
