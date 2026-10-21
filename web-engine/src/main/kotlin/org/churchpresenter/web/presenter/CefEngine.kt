@@ -48,6 +48,9 @@ internal class CefEngine(
     var missingLibrary: String? = null
         private set
 
+    /** Whether the installed engine renders windowless; set with [clientSource]. */
+    @Volatile internal var offscreen = false
+
     /** Makes a client from the installed engine, or null while there is none to make one from. */
     @Volatile internal var clientSource: (() -> CefClient)? = null
 

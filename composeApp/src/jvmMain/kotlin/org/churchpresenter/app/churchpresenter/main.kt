@@ -187,6 +187,18 @@ private fun runAsOutputGuard(args: Array<String>): Boolean {
     return true
 }
 
+/**
+ * With the website rendered off screen, the AWT event thread is also Chromium's browser thread, and
+ * on Linux skiko waits for the screen's refresh inside each buffer swap on that thread, so a playing
+ * video misses refreshes on every window. Skiko latches this on its first SkiaLayer; a value already
+ * set (`-Dskiko.vsync.enabled=true`) wins.
+ */
+private fun turnOffLinuxVsync() {
+    if (System.getProperty("os.name", "").startsWith("Linux") && System.getProperty("skiko.vsync.enabled") == null) {
+        System.setProperty("skiko.vsync.enabled", "false")
+    }
+}
+
 private fun setLatchedSystemProperties() {
     // Skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
@@ -238,6 +250,8 @@ fun main(args: Array<String>) {
     }
 
     val startupSettings = SettingsManager().loadSettings()
+    val offscreenWeb = startupSettings.projectionSettings.offscreenWebEnabled
+    if (offscreenWeb) turnOffLinuxVsync()
     CrashReporter.initialize(
         startupSettings.analyticsReportingEnabled,
         // BuildConfig is generated into :composeApp, so :diagnostics is told what this build is
@@ -314,8 +328,9 @@ fun main(args: Array<String>) {
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")
     }
 
-    CefManager.init()
+    CefManager.init(offscreen = offscreenWeb)
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())
+    CrashReporter.setTag("web.render", if (CefManager.offscreen) "offscreen" else "windowed")
     if (CefManager.macOsUnsupported) CrashReporter.setTag("jcef.macos_unsupported", "true")
     if (CefManager.windowsUnsupported) CrashReporter.setTag("jcef.windows_unsupported", "true")
 

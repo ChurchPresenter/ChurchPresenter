@@ -16,6 +16,11 @@ import androidx.compose.ui.graphics.Color
 import org.churchpresenter.sharedui.composables.LocalOutputCursorHidden
 import org.churchpresenter.sharedui.composables.outputCursorScript
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.web.offscreen.OffscreenPage
+import org.churchpresenter.web.offscreen.OffscreenWebControl
+import org.churchpresenter.web.offscreen.OwnOffscreenPage
+import org.churchpresenter.web.offscreen.OffscreenWebView
+import org.churchpresenter.web.offscreen.SentMessagePump
 import androidx.compose.ui.graphics.ImageBitmap
 import me.friwi.jcefmaven.CefAppBuilder
 import me.friwi.jcefmaven.MavenCefAppHandlerAdapter
@@ -30,6 +35,7 @@ import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
 import java.io.File
+import kotlin.system.exitProcess
 import javax.swing.Timer
 import kotlinx.coroutines.delay
 import java.lang.invoke.MethodHandles
@@ -144,15 +150,19 @@ internal object JcefInstall {
      *
      * The throw is the point: it is what tells [installIntoFirstUsableRoot] this root did not work.
      */
-    fun buildCefApp(root: File): CefApp =
-        CefAppBuilder().also { configure(it, root, readDmiTexts()) }.build()
+    fun buildCefApp(root: File, offscreen: Boolean = false): CefApp =
+        CefAppBuilder().also { configure(it, root, readDmiTexts(), offscreen) }.build()
 
     /**
      * Points [builder] at [root] — the engine under `jcef`, its cache under `webview-cache` — and
      * falls back to software rendering when [dmiTexts] name a virtual machine, whose GPU drivers
      * Chromium cannot rely on.
+     *
+     * With [offscreen] the engine renders windowless, for [OffscreenPage]: a video starts with sound
+     * without a click, as on an output nobody touches, and smooth scrolling is off, since it restarts
+     * its animation on every small step and loses about half of a touchpad's movement.
      */
-    internal fun configure(builder: CefAppBuilder, root: File, dmiTexts: List<String>) {
+    internal fun configure(builder: CefAppBuilder, root: File, dmiTexts: List<String>, offscreen: Boolean = false) {
         val installDir = File(root, "jcef")
         installDir.mkdirs()
         val cacheDir = File(root, "webview-cache")
@@ -160,9 +170,13 @@ internal object JcefInstall {
 
         builder.setInstallDir(installDir)
         builder.setProgressHandler(ConsoleProgressHandler())
-        builder.setAppHandler(object : MavenCefAppHandlerAdapter() {})
-        builder.cefSettings.windowless_rendering_enabled = false
+        builder.setAppHandler(QuitThroughApp)
+        builder.cefSettings.windowless_rendering_enabled = offscreen
         builder.cefSettings.cache_path = cacheDir.absolutePath
+        if (offscreen) {
+            builder.addJcefArgs("--autoplay-policy=no-user-gesture-required")
+            builder.addJcefArgs("--disable-smooth-scrolling")
+        }
         if (isVirtualizedEnvironment(dmiTexts)) {
             builder.addJcefArgs("--disable-gpu")
             builder.addJcefArgs("--disable-gpu-compositing")
@@ -402,18 +416,36 @@ object CefManager {
         }.apply { isDaemon = true; name = "jcef-legacy-cleanup" }.start()
     }
 
-    fun init() = engine.init(isUnsupportedMacOS(), isUnsupportedWindowsForJcef()) {
+    /**
+     * Whether the engine started windowless, for [OffscreenPage]: what [init] was asked for, once the
+     * engine is up. Chromium takes this once, at start-up, so it holds for the whole run.
+     */
+    val offscreen: Boolean get() = engine.offscreen
+
+    /** Starts the engine; with [offscreen], windowless, so the live page renders through [OffscreenPage]. */
+    fun init(offscreen: Boolean = false) = engine.init(isUnsupportedMacOS(), isUnsupportedWindowsForJcef()) {
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
         // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
         patchJcefModuleAccess()
         JcefInstall.install { root ->
-            val app = JcefInstall.buildRepairing(root, JcefInstall::buildCefApp)
+            val app = JcefShutdownHook.withoutJcefmavenHook {
+                JcefInstall.buildRepairing(root) { JcefInstall.buildCefApp(it, offscreen) }
+            }
             engine.clientSource = app::createClient
+            engine.offscreen = offscreen
+            if (offscreen) SentMessagePump.start()
         }
     }
 
     /** A client for a new browser, or null when the web engine cannot provide one; see [CefEngine.createClient]. */
     fun createClient(): CefClient? = engine.createClient()
+
+    /**
+     * What Cmd+Q does once the engine is up: the app's own quit, set by its main window. JCEF takes
+     * macOS's terminate request for itself and would otherwise tear Chromium down on the AWT event
+     * thread, which crashes on the way out; see [QuitThroughApp]. Null quits the process at once.
+     */
+    @Volatile var onQuitRequested: (() -> Unit)? = null
 
     fun dispose() {
         // Intentionally no-op — calling CefApp.dispose() during shutdown
@@ -442,6 +474,18 @@ object CefManager {
             }
         } catch (_: Exception) {
         }
+    }
+}
+
+/**
+ * The engine's app handler: Cmd+Q, which JCEF intercepts on macOS, goes to [CefManager.onQuitRequested]
+ * rather than to JCEF's own `dispose()`, which closes a native window off the main thread and stops
+ * the process with SIGTRAP. Returning true tells JCEF the quit is handled.
+ */
+internal object QuitThroughApp : MavenCefAppHandlerAdapter() {
+    override fun onBeforeTerminate(): Boolean {
+        CefManager.onQuitRequested?.invoke() ?: exitProcess(0)
+        return true
     }
 }
 
@@ -523,6 +567,10 @@ internal fun applyMobileUserAgent(mobileModeEnabled: Boolean, request: CefReques
  * [onTitleChanged] — called whenever the page title changes.
  * [onSnapshot]  — called periodically with an [ImageBitmap] screen capture.
  * [navController] — optional controller for back/forward navigation.
+ *
+ * With [offscreen] (the engine started windowless) the page is an [OffscreenPage] of its own instead,
+ * drawn and controlled by [OffscreenWebControl]: on macOS a windowed browser in a windowless engine
+ * crashes Chromium as it is shown. [onSnapshot] is then never called.
  */
 @Composable
 fun EmbeddedWebView(
@@ -532,9 +580,14 @@ fun EmbeddedWebView(
     onTitleChanged: ((String) -> Unit)? = null,
     onSnapshot: ((ImageBitmap) -> Unit)? = null,
     navController: WebNavController? = null,
-    onBrowserCreated: ((CefBrowser) -> Unit)? = null
+    onBrowserCreated: ((CefBrowser) -> Unit)? = null,
+    offscreen: Boolean = CefManager.offscreen,
 ) {
     if (url.isBlank() || !CefManager.initialized) return
+    if (offscreen) {
+        OwnOffscreenPage(url, modifier, onUrlChanged, onTitleChanged, navController, onBrowserCreated)
+        return
+    }
     EmbeddedBrowser(
         url = url,
         modifier = modifier,
@@ -646,7 +699,11 @@ internal fun EmbeddedBrowser(
     }
 }
 
-/** Full-screen presenter variant that captures snapshots for the live preview. */
+/**
+ * The website on one output window. With [offscreenPage] it draws that page's frames, which every
+ * output shares, and tells the page its size; without, it is a windowed browser of its own that
+ * captures snapshots for the live preview.
+ */
 @Composable
 fun WebsitePresenter(
     url: String,
@@ -656,7 +713,8 @@ fun WebsitePresenter(
     onUrlChanged: ((String) -> Unit)? = null,
     onTitleChanged: ((String) -> Unit)? = null,
     audioDeviceId: String = "",
-    outputRole: String = Constants.OUTPUT_ROLE_NORMAL
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    offscreenPage: OffscreenPage? = null,
 ) {
     // Key mode: solid white frame (mixer sees "fully visible")
     if (outputRole == Constants.OUTPUT_ROLE_KEY) {
@@ -675,9 +733,15 @@ fun WebsitePresenter(
         }
     }
 
+    if (offscreenPage != null) {
+        OffscreenWebView(offscreenPage, modifier.fillMaxSize().background(Color.Black), drivesSize = true)
+        return
+    }
+    // The windowed browser here is the fallback for a page that failed to start off screen.
     EmbeddedWebView(
         url = url,
         modifier = modifier.fillMaxSize(),
+        offscreen = false,
         onSnapshot = onSnapshot,
         onBrowserCreated = onBrowserCreated,
         onUrlChanged = onUrlChanged,

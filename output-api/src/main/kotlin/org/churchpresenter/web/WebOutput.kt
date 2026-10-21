@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.ImageBitmap
 import org.cef.browser.CefBrowser
 import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.web.offscreen.OffscreenPage
 
 /**
  * What the Web tab needs from the live output: the page on screen, its title, the live browser
@@ -24,6 +25,9 @@ interface WebOutput {
 
     /** The last frame captured from [liveBrowser], for the preview's mirror. */
     val webSnapshot: State<ImageBitmap?>
+
+    /** The live page every output draws when the engine renders off screen; the tab draws and controls it. */
+    val offscreenPage: State<OffscreenPage?>
 
     fun setPresentingMode(mode: Presenting)
     fun setWebsiteUrl(url: String)

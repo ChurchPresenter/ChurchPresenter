@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
+import org.churchpresenter.web.offscreen.OffscreenWebView
 import org.churchpresenter.web.presenter.WebsitePresenter
 
 // What the media, graphics and web cues draw on one output -- see [CueContent]. Where the three
@@ -113,6 +115,10 @@ internal fun LowerThirdCue(surface: OutputSurface) {
 @Composable
 internal fun WebCue(surface: OutputSurface) {
     val presenterManager = surface.presenterManager
+    if (surface.kind != OutputSurfaceKind.PREVIEW && presenterManager.offscreenWebAvailable.value) {
+        OffscreenWebCue(surface)
+        return
+    }
     when {
         surface.kind == OutputSurfaceKind.PREVIEW -> Unit
         surface.kind == OutputSurfaceKind.OFFSCREEN || LocalInMergedTile.current ->
@@ -132,6 +138,34 @@ internal fun WebCue(surface: OutputSurface) {
             onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
             onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
             audioDeviceId = surface.appSettings.projectionSettings.audioOutputDeviceId,
+        )
+    }
+}
+
+/**
+ * The web cue drawn from the one off-screen page every output shares: an output window draws it at
+ * its own size and tells the page that size, while an off-screen output or a merged tile draws the
+ * same frames at whatever size it is. The page opens with the first surface that shows it.
+ */
+@Composable
+private fun OffscreenWebCue(surface: OutputSurface) {
+    val presenterManager = surface.presenterManager
+    DisposableEffect(presenterManager) {
+        presenterManager.useOffscreenPage()
+        onDispose { presenterManager.releaseOffscreenPage() }
+    }
+    val page = presenterManager.offscreenPage.value ?: return
+    val url = presenterManager.websiteUrl.value
+    LaunchedEffect(page, url) { page.load(url) }
+    val modifier = Modifier.fillMaxSize().testTag(WEB_OFFSCREEN_TAG)
+    if (surface.kind == OutputSurfaceKind.OFFSCREEN || LocalInMergedTile.current) {
+        OffscreenWebView(page, modifier)
+    } else {
+        WebsitePresenter(
+            url = url,
+            modifier = modifier,
+            audioDeviceId = surface.appSettings.projectionSettings.audioOutputDeviceId,
+            offscreenPage = page,
         )
     }
 }

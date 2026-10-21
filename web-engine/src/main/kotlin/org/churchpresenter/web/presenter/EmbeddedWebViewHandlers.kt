@@ -18,7 +18,7 @@ import java.awt.Rectangle
 import java.awt.image.BufferedImage
 
 /** Reports the main frame's address and the page's title as they change; see [handleAddressChange]. */
-internal class PageDisplayHandler(
+internal open class PageDisplayHandler(
     private val onUrlChanged: ((String) -> Unit)?,
     private val onTitleChanged: ((String) -> Unit)?,
 ) : CefDisplayHandlerAdapter() {

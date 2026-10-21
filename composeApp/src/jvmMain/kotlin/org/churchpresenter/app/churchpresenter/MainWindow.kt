@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.DisposableEffect
+import org.churchpresenter.web.presenter.CefManager
 import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.snapshotFlow
 import org.churchpresenter.server.clearPresentationState
@@ -222,22 +225,29 @@ private fun AppRootState.MainWindow(
     tunnelUrl: String?,
     onThemeCustomizationChange: (ThemeCustomization) -> Unit,
 ) {
+    val closeApp = {
+        appSettings = appSettings.withWindowGeometry(
+            placement = windowPlacementToSettings(state.placement),
+            isFloating = state.placement == WindowPlacement.Floating,
+            width = state.size.width.value.toInt(),
+            height = state.size.height.value.toInt(),
+            x = state.position.x.value.toInt(),
+            y = state.position.y.value.toInt(),
+        )
+        settingsManager.saveSettings(appSettings)
+        if (qaManager.sessionActive) qaManager.toggleSession()
+        companionServer.clearPresentationState()
+        companionServer.tunnelManager.shutdown()
+        exitApplication()
+    }
+    // Cmd+Q reaches the web engine before the window; it quits the same way the window's close does.
+    val latestCloseApp = rememberUpdatedState(closeApp)
+    DisposableEffect(Unit) {
+        CefManager.onQuitRequested = { latestCloseApp.value() }
+        onDispose { CefManager.onQuitRequested = null }
+    }
     Window(
-        onCloseRequest = {
-            appSettings = appSettings.withWindowGeometry(
-                placement = windowPlacementToSettings(state.placement),
-                isFloating = state.placement == WindowPlacement.Floating,
-                width = state.size.width.value.toInt(),
-                height = state.size.height.value.toInt(),
-                x = state.position.x.value.toInt(),
-                y = state.position.y.value.toInt(),
-            )
-            settingsManager.saveSettings(appSettings)
-            if (qaManager.sessionActive) qaManager.toggleSession()
-            companionServer.clearPresentationState()
-            companionServer.tunnelManager.shutdown()
-            exitApplication()
-        },
+        onCloseRequest = closeApp,
         title = stringResource(Res.string.app_name),
         icon = painterResource(IconRes.drawable.ic_app_icon),
         state = state

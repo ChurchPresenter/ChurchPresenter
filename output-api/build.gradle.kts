@@ -22,6 +22,8 @@ dependencies {
     api(projects.coreModels)
     api(projects.presentationEngine)
     api(libs.jcefmaven)
+    // The live off-screen page crosses WebOutput for the tab to draw and control.
+    api(projects.webEngine)
 
     testImplementation(kotlin("test"))
     // pdfDeck(): a Deck without parsing one, for the deck port's default arguments.

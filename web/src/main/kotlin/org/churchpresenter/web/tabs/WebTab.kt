@@ -96,6 +96,11 @@ fun WebTab(
     /** Whether a screen beyond the operator's own is attached; overridable for the same reason. */
     hasSecondaryDisplay: Boolean = rememberScreenDevices().size > 1,
     /**
+     * Whether the outputs are dev windows on the operator's own screen (a dev build with no second
+     * display): they count as a display and as assigned for Go Live.
+     */
+    devOutputWindows: Boolean = false,
+    /**
      * Width over height of the output the preview stands in for. The app reads it from the preview
      * output the operator picked, so the embedded browser lays the page out at the shape it goes
      * out at.
@@ -121,11 +126,15 @@ fun WebTab(
     val isLive = output?.isLive(Presenting.WEBSITE) == true
 
     val navController = rememberWebNavController()
+    val canShowOutput = hasSecondaryDisplay || devOutputWindows
+    val webCapable = remember(appSettings.projectionSettings, devOutputWindows) {
+        hasWebCapableOutput(appSettings.projectionSettings, devOutputWindows)
+    }
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
         output, appSettings, onSettingsChange, onAddToSchedule, onUpdateScheduleTitle, state, isLive,
-        navController, previewAspectRatio, outputPicker, hasSecondaryDisplay
+        navController, previewAspectRatio, outputPicker, canShowOutput, webCapable
     ) {
         WebTabScope(
             output = output,
@@ -138,14 +147,14 @@ fun WebTab(
             navController = navController,
             previewAspectRatio = previewAspectRatio,
             outputPicker = outputPicker,
-            hasSecondaryDisplay = hasSecondaryDisplay,
+            hasSecondaryDisplay = canShowOutput,
+            hasWebCapableOutput = webCapable,
         )
     }
     tab.WebTabEffects(selectedWebsiteItem, selectedWebsiteItemVersion)
 
     // Go Live on a key, under the button's condition, and not for the page already on screen.
-    val webCapable = remember(appSettings.projectionSettings) { hasWebCapableOutput(appSettings.projectionSettings) }
-    val canGoLive = tab.urlInput.isNotBlank() && hasSecondaryDisplay && webCapable &&
+    val canGoLive = tab.urlInput.isNotBlank() && canShowOutput && webCapable &&
         !(isLive && tab.liveUrl == tab.currentUrlNormalised)
     Column(modifier = modifier.fillMaxSize().goLiveKeyTarget(enabled = canGoLive) { tab.goLive() }) {
         tab.WebToolbarCard()

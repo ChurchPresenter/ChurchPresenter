@@ -93,6 +93,26 @@ class WebToolbarTest {
     }
 
     @Test
+    fun `dev output windows count as an assigned display, but a DeckLink output still does not`() {
+        assertTrue(hasWebCapableOutput(projection(onDisplay(-2)), devOutputWindows = true))
+        assertFalse(hasWebCapableOutput(projection(onDisplay(-2))))
+        val deckLink = projection(onDisplay(-2, type = Constants.TARGET_TYPE_DECKLINK))
+        assertFalse(hasWebCapableOutput(deckLink, devOutputWindows = true))
+    }
+
+    @Test
+    fun `with dev output windows and no second screen, Go Live puts the address on them`() = webTab(
+        settings = { it.copy(projectionSettings = projection(onDisplay(-2))) },
+        devOutputWindows = true,
+    ) { presenter, _ ->
+        onNodeWithText(WebLabel.URL_PLACEHOLDER_DEFAULT).performTextReplacement("example.com")
+        webButton(WebLabel.GO_LIVE).assertIsEnabled().performClick()
+        waitForIdle()
+
+        assertEquals(Presenting.WEBSITE, presenter.onAir.value)
+    }
+
+    @Test
     fun `a second screen alone is not enough with no output that shows websites`() = webTab(
         hasSecondaryDisplay = true,
     ) { _, _ ->
