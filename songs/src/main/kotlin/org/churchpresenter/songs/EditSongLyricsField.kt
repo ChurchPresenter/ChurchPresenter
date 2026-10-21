@@ -120,7 +120,9 @@ private fun AnnotatedString.Builder.appendVoiceHighlighted(line: String, chordIn
     if (trimmed.startsWith(SecondVoice.MARK) && !trimmed.startsWith(SecondVoice.MARK + "(")) {
         append(line.take(lead))
         withStyle(mark) { append(SecondVoice.MARK) }
-        withStyle(SpanStyle(color = voiceInk)) { appendChordHighlighted(line.drop(lead + SecondVoice.MARK.length), chordInk) }
+        withStyle(SpanStyle(color = voiceInk)) {
+            appendChordHighlighted(line.drop(lead + SecondVoice.MARK.length), chordInk)
+        }
         return
     }
     var cursor = 0

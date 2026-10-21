@@ -8,6 +8,10 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import io.github.alexzhirkevich.compottie.internal.helpers.text.TextJustify
 import kotlin.math.roundToInt
 
@@ -26,7 +30,7 @@ import kotlin.math.roundToInt
  */
 
 /** What [secondVoiceRects] needs of a laid-out slot: its text, the wrapped lines and where they sit. */
-internal data class VoiceLayout(
+internal data class BandVoiceLayout(
     /** The slot's text as written, line breaks and all — what [voiceRanges] index into. */
     val text: String,
     val voiceRanges: List<IntRange>,
@@ -44,7 +48,7 @@ internal data class VoiceLayout(
  * run of them on each line. [advance] is a character's width at the fitted size, tracking included,
  * which is the measure the lines were wrapped by.
  */
-internal fun secondVoiceRects(layout: VoiceLayout, advance: (Char) -> Float): List<Rect> {
+internal fun secondVoiceRects(layout: BandVoiceLayout, advance: (Char) -> Float): List<Rect> {
     val rects = mutableListOf<Rect>()
     var cursor = 0
     layout.lines.forEachIndexed { row, line ->
@@ -94,7 +98,11 @@ internal fun voicePassShows(template: BibleLottieTemplate, layers: Set<String>, 
  * Draws the voice pass cut to [rects], given in the template's pixels, where an image of the
  * template is drawn with [contentScale] at the bottom centre of this scope — as the band draws it.
  */
-internal fun ContentDrawScope.drawCutToVoices(template: BibleLottieTemplate, rects: List<Rect>, contentScale: ContentScale) {
+internal fun ContentDrawScope.drawCutToVoices(
+    template: BibleLottieTemplate,
+    rects: List<Rect>,
+    contentScale: ContentScale,
+) {
     if (rects.isEmpty()) return
     val source = Size(template.width, template.height)
     val scale = contentScale.computeScaleFactor(source, size)
@@ -117,3 +125,24 @@ internal fun ContentDrawScope.drawCutToVoices(template: BibleLottieTemplate, rec
     }
     clipPath(cut) { this@drawCutToVoices.drawContent() }
 }
+
+/** The text layers whose transform is keyframed — see [BibleLottieTemplate.movingTextLayers]. */
+internal fun readMovingTextLayers(layers: List<JsonObject>): Set<String> =
+    layers.filter { it["ty"]?.jsonPrimitive?.intOrNull == TEXT_LAYER_TYPE }.mapNotNull { layer ->
+        val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+        val transform = layer["ks"] as? JsonObject ?: return@mapNotNull null
+        name.takeIf { MOVING_PROPERTIES.any { key -> transform.isKeyframed(key) } }
+    }.toSet()
+
+/** Whether [key] of a transform is animated — directly, or through split x/y position. */
+private fun JsonObject.isKeyframed(key: String): Boolean {
+    val property = this[key] as? JsonObject ?: return false
+    if (property["a"]?.jsonPrimitive?.intOrNull == 1) return true
+    return listOf("x", "y").any { axis -> (property[axis] as? JsonObject)?.get("a")?.jsonPrimitive?.intOrNull == 1 }
+}
+
+/** A Lottie layer's `ty` for text. */
+private const val TEXT_LAYER_TYPE = 5
+
+/** The transform keys that move a layer: anchor, position, scale, rotation. */
+private val MOVING_PROPERTIES = listOf("a", "p", "s", "r")

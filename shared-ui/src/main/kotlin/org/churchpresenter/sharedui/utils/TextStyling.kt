@@ -135,7 +135,8 @@ fun voicedDisplayText(
     secondVoiceColor: Color?,
 ): AnnotatedString {
     if (!SecondVoice.hasMarkup(raw)) return styledDisplayText(raw, transform, letterSpacingEm, wordSpacingEm)
-    val voiced = voicedLine(raw, NO_TRANSFORM)
+    // The markup comes off uncased; styledDisplayText cases the line.
+    val voiced = voicedLine(raw, Constants.TEXT_TRANSFORM_NONE)
     val styled = styledDisplayText(voiced.text, transform, letterSpacingEm, wordSpacingEm)
     if (secondVoiceColor == null || styled.length != voiced.text.length) return styled
     return buildAnnotatedString {
@@ -143,9 +144,6 @@ fun voicedDisplayText(
         voiced.secondVoiceRanges.forEach { addStyle(SpanStyle(color = secondVoiceColor), it.first, it.last + 1) }
     }
 }
-
-/** No case change — the markup comes off before [styledDisplayText] cases the line. */
-private const val NO_TRANSFORM = ""
 
 /** [voicedDisplayText] for several lines drawn as one block, each line's markup read on its own. */
 fun voicedDisplayText(

@@ -144,7 +144,8 @@ internal fun LyricLines(
     onLineDoubleClick: ((Int) -> Unit)? = null,
 ) {
     // A line and the voice-2 line answering it go live together, so both light up.
-    val activeLines = if (activeLineIndex in lines.indices) SecondVoice.lineGroupAt(lines, activeLineIndex) else IntRange.EMPTY
+    val activeLines =
+        if (activeLineIndex in lines.indices) SecondVoice.lineGroupAt(lines, activeLineIndex) else IntRange.EMPTY
     val secondVoiceInk = MaterialTheme.colorScheme.tertiary
     lines.forEachIndexed { lineIndex, line ->
         val isActiveLine = lineIndex in activeLines

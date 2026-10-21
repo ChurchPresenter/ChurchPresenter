@@ -14,7 +14,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
@@ -292,27 +291,6 @@ private fun readSegments(markers: JsonArray?, totalFrames: Float): Map<String, L
     )
     return order.mapIndexed { i, name -> name to LottieSegment(fifth * i, fifth) }.toMap()
 }
-
-/** The text layers whose transform is keyframed — see [BibleLottieTemplate.movingTextLayers]. */
-private fun readMovingTextLayers(layers: List<JsonObject>): Set<String> =
-    layers.filter { it["ty"]?.jsonPrimitive?.intOrNull == TEXT_LAYER_TYPE }.mapNotNull { layer ->
-        val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-        val transform = layer["ks"] as? JsonObject ?: return@mapNotNull null
-        name.takeIf { MOVING_PROPERTIES.any { key -> transform.isKeyframed(key) } }
-    }.toSet()
-
-/** Whether [key] of a transform is animated — directly, or through split x/y position. */
-private fun JsonObject.isKeyframed(key: String): Boolean {
-    val property = this[key] as? JsonObject ?: return false
-    if (property["a"]?.jsonPrimitive?.intOrNull == 1) return true
-    return listOf("x", "y").any { axis -> (property[axis] as? JsonObject)?.get("a")?.jsonPrimitive?.intOrNull == 1 }
-}
-
-/** A Lottie layer's `ty` for text. */
-private const val TEXT_LAYER_TYPE = 5
-
-/** The transform keys that move a layer: anchor, position, scale, rotation. */
-private val MOVING_PROPERTIES = listOf("a", "p", "s", "r")
 
 private fun readAlign(meta: JsonObject?, key: String): BandTextAlign? =
     when (meta?.get(key)?.jsonPrimitive?.contentOrNull) {

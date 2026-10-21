@@ -122,7 +122,8 @@ fun SongsViewModel.navigatePreviousLine(): Boolean {
         if (sections[prevIdx].lines.isNotEmpty()) {
             selectedSectionIndexState.value = prevIdx
             val prevLines = sections[prevIdx].lines
-            selectedLineIndexState.value = SecondVoice.lineGroupAt(prevLines, prevLines.lastIndex).first.coerceAtLeast(0)
+            selectedLineIndexState.value =
+                SecondVoice.lineGroupAt(prevLines, prevLines.lastIndex).first.coerceAtLeast(0)
             return true
         }
         prevIdx--

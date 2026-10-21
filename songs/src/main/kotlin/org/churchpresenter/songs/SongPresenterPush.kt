@@ -54,7 +54,9 @@ internal fun resolveEditedSongPush(
     return EditedSongPush(
         sectionIndex,
         lineIndex,
-        section.copy(bpm = tuning.bpm, capo = tuning.capo).withBackgroundsOf(editedSong).withTextOverridesOf(editedSong),
+        section.copy(bpm = tuning.bpm, capo = tuning.capo)
+            .withBackgroundsOf(editedSong)
+            .withTextOverridesOf(editedSong),
     )
 }
 

@@ -425,7 +425,7 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
     val shadowPx = SHADOW_OFFSET_PX * pxPerPoint * shadowScale
     val voiced = !isTicker && slot.voiceRanges.isNotEmpty() && style.secondVoiceColor != style.color
     val voiceRects = if (!voiced) emptyList() else secondVoiceRects(
-        VoiceLayout(text, slot.voiceRanges, fitted.lines, style.justify, box, top, lineHeight),
+        BandVoiceLayout(text, slot.voiceRanges, fitted.lines, style.justify, box, top, lineHeight),
     ) { c -> (charWidth(c) + trackingPx) * fitted.fontSize / baseSize }
     return SlotRender(
         text = if (isTicker) text else fitted.lines.joinToString("\n"),

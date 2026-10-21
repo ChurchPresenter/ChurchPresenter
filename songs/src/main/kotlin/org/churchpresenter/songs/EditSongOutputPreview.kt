@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -97,7 +96,8 @@ internal fun caretSlideOf(text: String, caret: Int, title: String): CaretSlide? 
     val lineEnd = text.indexOf('\n', caret.coerceIn(0, text.length)).let { if (it < 0) text.length else it }
     val upToCaret = lyricSlidesOf(text.take(lineEnd).split("\n"), title, "").filter { it.lines.isNotEmpty() }
     val index = (upToCaret.size - 1).coerceIn(0, slides.lastIndex)
-    val line = ((upToCaret.lastOrNull()?.lines?.size ?: 1) - 1).coerceIn(0, (slides[index].lines.size - 1).coerceAtLeast(0))
+    val linesAbove = (upToCaret.lastOrNull()?.lines?.size ?: 1) - 1
+    val line = linesAbove.coerceIn(0, (slides[index].lines.size - 1).coerceAtLeast(0))
     return CaretSlide(slides, index, line)
 }
 
@@ -148,11 +148,13 @@ internal fun EditSongOutputPane(state: EditSongState, appSettings: AppSettings, 
             val shown = slide.slides.map { it.copy(textOverrides = state.textOverrides) }
             profiles.first?.let { profile ->
                 PreviewCaption(stringResource(Res.string.song_output_full_screen), profile.name)
-                OutputPreview(appSettings.resolvedFor(profile).withSongDisplayMode(mode), output, shown, slide, lowerThird = false)
+                val settings = appSettings.resolvedFor(profile).withSongDisplayMode(mode)
+                OutputPreview(settings, output, shown, slide, lowerThird = false)
             }
             profiles.second?.let { profile ->
                 PreviewCaption(stringResource(Res.string.song_output_lower_third), profile.name)
-                OutputPreview(appSettings.resolvedFor(profile).withSongDisplayMode(mode), output, shown, slide, lowerThird = true)
+                val settings = appSettings.resolvedFor(profile).withSongDisplayMode(mode)
+                OutputPreview(settings, output, shown, slide, lowerThird = true)
             }
         }
         SongLookCard(state, appSettings, profiles.first ?: profiles.second)
@@ -183,8 +185,9 @@ private fun OutputPreview(
     lowerThird: Boolean,
 ) {
     val region = settings.songSettings.layoutExtras.contentRegion
-    val lineMode = (if (lowerThird) settings.songSettings.lowerThirdDisplayMode else settings.songSettings.fullscreenDisplayMode) ==
-        Constants.SONG_DISPLAY_MODE_LINE
+    val song = settings.songSettings
+    val lineMode =
+        (if (lowerThird) song.lowerThirdDisplayMode else song.fullscreenDisplayMode) == Constants.SONG_DISPLAY_MODE_LINE
     val shownFraction = if (lowerThird) {
         (settings.songSettings.lowerThirdHeightPercent / PERCENT + BAND_CROP_MARGIN).coerceAtMost(1f)
     } else {

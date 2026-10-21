@@ -87,7 +87,12 @@ internal fun SongLookCard(state: EditSongState, appSettings: AppSettings, profil
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        LookRow(Res.string.song_look_font, custom = own.font.isNotBlank(), onReset = { edit { it.copy(font = "") } }, key = "font") {
+        LookRow(
+            Res.string.song_look_font,
+            custom = own.font.isNotBlank(),
+            onReset = { edit { it.copy(font = "") } },
+            key = "font",
+        ) {
             FontSettingsDropdown(
                 value = own.font.ifBlank { if (lowerThird) song.lyricsLowerThirdFontType else song.lyricsFontType },
                 fonts = rememberSystemFonts(),
@@ -104,7 +109,12 @@ internal fun SongLookCard(state: EditSongState, appSettings: AppSettings, profil
         ) {
             SizeStepper(own.sizePercent) { v -> edit { it.copy(sizePercent = v) } }
         }
-        LookRow(Res.string.song_look_color, custom = own.color.isNotBlank(), onReset = { edit { it.copy(color = "") } }, key = "color") {
+        LookRow(
+            Res.string.song_look_color,
+            custom = own.color.isNotBlank(),
+            onReset = { edit { it.copy(color = "") } },
+            key = "color",
+        ) {
             ColorPickerField(
                 color = own.color.ifBlank { if (lowerThird) song.lyricsLowerThirdColor else song.lyricsColor },
                 onColorChange = { v -> edit { it.copy(color = v) } },

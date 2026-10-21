@@ -67,13 +67,13 @@ object SecondVoice {
         while (cursor < line.length) {
             val open = line.indexOf(SPAN_OPEN, cursor)
             if (open < 0) break
-            add(out, line.substring(cursor, open), MAIN)
+            addRun(out, line.substring(cursor, open), MAIN)
             val start = open + SPAN_OPEN.length
             val close = closingBracket(line, start)
-            add(out, line.substring(start, close), SECOND)
+            addRun(out, line.substring(start, close), SECOND)
             cursor = (close + 1).coerceAtMost(line.length)
         }
-        add(out, line.substring(cursor), MAIN)
+        addRun(out, line.substring(cursor), MAIN)
         return out.ifEmpty { listOf(VoiceRun("", MAIN)) }
     }
 
@@ -116,26 +116,27 @@ object SecondVoice {
     /** The group [index] falls in — see [lineGroups] — or [index] alone when it is out of range. */
     fun lineGroupAt(lines: List<String>, index: Int): IntRange =
         lineGroups(lines).firstOrNull { index in it } ?: index..index
+}
 
-    private fun add(out: MutableList<VoiceRun>, text: String, voice: Int) {
-        if (text.isEmpty()) return
-        val last = out.lastOrNull()
-        if (last != null && last.voice == voice) {
-            out[out.lastIndex] = VoiceRun(last.text + text, voice)
-        } else {
-            out.add(VoiceRun(text, voice))
+/** Appends [text] to [out] in [voice], merged into the last run when that is the same voice. */
+private fun addRun(out: MutableList<VoiceRun>, text: String, voice: Int) {
+    if (text.isEmpty()) return
+    val last = out.lastOrNull()
+    if (last != null && last.voice == voice) {
+        out[out.lastIndex] = VoiceRun(last.text + text, voice)
+    } else {
+        out.add(VoiceRun(text, voice))
+    }
+}
+
+/** Where the bracket opened just before [start] closes, counting the ones nested inside it. */
+private fun closingBracket(line: String, start: Int): Int {
+    var depth = 1
+    for (i in start until line.length) {
+        when (line[i]) {
+            '(' -> depth++
+            ')' -> if (--depth == 0) return i
         }
     }
-
-    /** Where the bracket opened just before [start] closes, counting the ones nested inside it. */
-    private fun closingBracket(line: String, start: Int): Int {
-        var depth = 1
-        for (i in start until line.length) {
-            when (line[i]) {
-                '(' -> depth++
-                ')' -> if (--depth == 0) return i
-            }
-        }
-        return line.length
-    }
+    return line.length
 }

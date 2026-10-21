@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import org.churchpresenter.calendar.model.formatDuration
@@ -262,8 +263,16 @@ private fun EditSongRightPane(state: EditSongState, showChords: Boolean, appSett
     var pane by remember { mutableStateOf(RightPane.OUTPUT) }
     Column(paneModifier) {
         PaneTabRow(Modifier.padding(start = 14.dp, top = 9.dp)) {
-            PaneTab(stringResource(Res.string.song_pane_output), pane == RightPane.OUTPUT) { pane = RightPane.OUTPUT }
-            PaneTab(stringResource(Res.string.song_chords), pane == RightPane.CHORDS) { pane = RightPane.CHORDS }
+            PaneTab(
+                stringResource(Res.string.song_pane_output),
+                pane == RightPane.OUTPUT,
+                Modifier.testTag(RIGHT_PANE_OUTPUT_TAG),
+            ) { pane = RightPane.OUTPUT }
+            PaneTab(
+                stringResource(Res.string.song_chords),
+                pane == RightPane.CHORDS,
+                Modifier.testTag(RIGHT_PANE_CHORDS_TAG),
+            ) { pane = RightPane.CHORDS }
         }
         when (pane) {
             RightPane.OUTPUT -> EditSongOutputPane(state, appSettings, Modifier.weight(1f).fillMaxWidth())
@@ -273,6 +282,10 @@ private fun EditSongRightPane(state: EditSongState, showChords: Boolean, appSett
 }
 
 private val RIGHT_PANE_WIDTH = 452.dp
+
+/** Test handles for the right pane's two tabs. */
+internal const val RIGHT_PANE_OUTPUT_TAG = "song_editor_pane_output"
+internal const val RIGHT_PANE_CHORDS_TAG = "song_editor_pane_chords"
 
 /** The open pane as the band reads it, with the key, transposition and chord palette. */
 @Composable
