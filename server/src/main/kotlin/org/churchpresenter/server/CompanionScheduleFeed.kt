@@ -112,6 +112,9 @@ private fun CompanionServer.registerScheduleItemResources(item: ScheduleItem) {
  * instead — [LiveContent.mode] == "PRESENTATION" here is informational only.
  */
 fun CompanionServer.updateLiveState(content: LiveContent) = with(content) {
+    // A drawing stops being live the moment the slide shows anything else -- decided before the
+    // repeat check below, so it holds even for a state that changed nothing else.
+    drawings.slideChanged(liveSlide ?: mode)
     val (pictureFolderId, pictureIndex) = pictures.locate(pictureImagePath)
     val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
     val dto = LiveStateDto(

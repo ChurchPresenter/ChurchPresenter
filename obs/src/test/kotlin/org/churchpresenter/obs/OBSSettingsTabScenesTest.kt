@@ -61,13 +61,14 @@ class OBSSettingsTabScenesTest {
      * test, which is the point: the new row then needs its own coverage like every other mode.
      *
      * Messages and props have no row either, by design: props sit over whatever is on air and never
-     * change the scene, and a message takes the default scene like any unmapped mode.
+     * change the scene, and a message takes the default scene like any unmapped mode. A drawing sent
+     * from a phone or tablet takes the default scene the same way, for now: it has no row of its own.
      */
     @Test
-    fun `every presenting mode except the dictionary, messages and props can be mapped`() {
+    fun `every presenting mode except the dictionary, drawings, messages and props can be mapped`() {
         val mapped = obsSceneModes.map { it.first }.toSet()
         assertEquals(
-            setOf(Presenting.DICTIONARY, Presenting.MESSAGE, Presenting.PROPS),
+            setOf(Presenting.DICTIONARY, Presenting.DRAWING, Presenting.MESSAGE, Presenting.PROPS),
             Presenting.entries.toSet() - mapped,
             "only these may be missing a scene row; a newly unmapped mode is a regression",
         )

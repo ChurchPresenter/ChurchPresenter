@@ -356,6 +356,30 @@ class CompanionServer(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /**
+     * Remote drawings — pages drawn on a phone or tablet's canvas: the requests waiting for the
+     * operator, the latest page of each, and whose is live. See [DrawingDesk] and `DrawingRoutes.kt`.
+     */
+    val drawings = DrawingDesk()
+
+    /** Emitted when a device asks to put its drawing live (POST /api/drawing/frame?takeOver=true). */
+    val onDrawingRequest = MutableSharedFlow<PendingDrawingRequest>(
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /**
+     * The latest page of the drawing that is live. Held, not queued: pages arrive after every
+     * stroke, and only the newest is worth drawing — an output that is busy skips straight to it.
+     */
+    val drawingFrames = MutableStateFlow<DrawingFrame?>(null)
+
+    /** Emitted with a device's id when it ends the drawing that is live (POST /api/drawing/end). */
+    val onDrawingEnd = MutableSharedFlow<String>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /** Emitted when a phone on the LAN asks to plan the calendar through the relay. */
     val onCalendarEnroll = MutableSharedFlow<PendingCalendarEnroll>(
         extraBufferCapacity = 8,
@@ -676,6 +700,7 @@ class CompanionServer(
                 )
                 browserSourceTransposeRoutes(this@CompanionServer)
                 qaRoutes(this@CompanionServer, json, scope)
+                drawingRoutes(this@CompanionServer, scope)
             }
     }
 

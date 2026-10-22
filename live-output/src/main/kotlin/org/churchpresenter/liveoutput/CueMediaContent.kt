@@ -3,6 +3,7 @@ package org.churchpresenter.liveoutput
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.presenter.LocalInMergedTile
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -12,6 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
@@ -41,6 +44,37 @@ internal fun PictureCue(surface: OutputSurface) {
         contentScale = surface.appSettings.pictureSettings.scaleMode.contentScale,
     )
 }
+
+/**
+ * A page drawn on a remote device, fitted to the output and framed by its own paper colour. Reads
+ * state only: the picture was decoded off the event thread before it reached [LiveDrawing].
+ */
+@Composable
+internal fun DrawingCue(surface: OutputSurface) {
+    val presenterManager = surface.presenterManager
+    DrawingPage(
+        frame = presenterManager.drawingFrame.value,
+        paper = presenterManager.drawingPaper.value,
+    )
+}
+
+/** [frame] fitted inside the output on [paper]; just the paper while no page has arrived. */
+@Composable
+internal fun DrawingPage(frame: ImageBitmap?, paper: Color) {
+    Box(Modifier.fillMaxSize().background(paper).testTag(DRAWING_TAG)) {
+        if (frame != null) {
+            Image(
+                bitmap = frame,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+}
+
+/** Names the drawing's surface for a test. */
+internal const val DRAWING_TAG = "output:drawing"
 
 @Composable
 internal fun PresentationCue(surface: OutputSurface) {

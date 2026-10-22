@@ -24,7 +24,7 @@ import org.churchpresenter.web.WebOutput
  * What every output is showing, and the one channel between the operator's tabs and the outputs.
  *
  * Its parts are classes of their own, one per kind of content -- [OutputLocks], [LiveBible],
- * [LiveSongs], [LivePictures], [LiveSlides], [PresentationPlayback], [LiveLowerThird],
+ * [LiveSongs], [LivePictures], [LiveDrawing], [LiveSlides], [PresentationPlayback], [LiveLowerThird],
  * [LiveAnnouncements], [LiveWeb] and [LiveScreens] -- and this class answers for all of them by
  * delegation, so a caller still reads and writes everything through one manager. What stays here is
  * what cuts across them: the live mode, clearing the display, the presenter window, the settings
@@ -37,6 +37,7 @@ class PresenterManager private constructor(
     internal val bible: LiveBibleState = LiveBibleState(context),
     internal val songs: LiveSongsState = LiveSongsState(context),
     internal val pictures: LivePicturesState = LivePicturesState(context),
+    internal val drawing: LiveDrawingState = LiveDrawingState(context),
     internal val slides: LiveSlidesState = LiveSlidesState(context),
     internal val playback: PresentationPlaybackState = PresentationPlaybackState(context),
     internal val lowerThird: LiveLowerThirdState = LiveLowerThirdState(context),
@@ -48,6 +49,7 @@ class PresenterManager private constructor(
     LiveBible by bible,
     LiveSongs by songs,
     LivePictures by pictures,
+    LiveDrawing by drawing,
     LiveSlides by slides,
     PresentationPlayback by playback,
     LiveLowerThird by lowerThird,
@@ -196,6 +198,8 @@ class PresenterManager private constructor(
             setBibleTransitionAlpha(1f)
             setSongTransitionAlpha(1f)
         }
+        // A drawing off the screen is gone: the next one starts from its own first page.
+        if (mode != Presenting.DRAWING) drawing.clearDrawing()
         if (mode != Presenting.PRESENTATION) {
             // Leaving presentation mode releases the animated player and its layer bitmaps.
             clearPresentationPlayback()
