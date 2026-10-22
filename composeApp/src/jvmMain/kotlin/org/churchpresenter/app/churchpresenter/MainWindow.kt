@@ -48,6 +48,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.withWindowGeometry
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
+import org.churchpresenter.app.churchpresenter.utils.startClassWarmUp
 import org.churchpresenter.app.churchpresenter.utils.warmStrings
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
@@ -259,6 +260,9 @@ private fun AppRootState.MainWindow(
             uiStallReporter.renderApi(window.renderApi.name)
             // Each string's first stringResource reads the jar on this thread; read them all now, off it.
             withContext(Dispatchers.IO) { warmStrings() }
+            // Then the classes behind the settings pages, profiles, outputs and server, loaded off
+            // it at the lowest priority so their first opening does not read the jar.
+            startClassWarmUp()
         }
         MacMenuBarActivationFix()
         LanguageProvider(language = currentLanguage) {
