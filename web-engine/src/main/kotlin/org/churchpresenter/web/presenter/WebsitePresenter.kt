@@ -417,6 +417,9 @@ object CefManager {
     /** A client for a new browser, or null when the web engine cannot provide one; see [CefEngine.createClient]. */
     fun createClient(): CefClient? = engine.createClient()
 
+    /** Starts the native engine on a thread of its own, ahead of the first browser; see [CefEngine.startEarly]. */
+    fun startEarly() = engine.startEarly()
+
     fun dispose() {
         // Intentionally no-op — calling CefApp.dispose() during shutdown
         // triggers a native crash in libjcef Context::Shutdown().
