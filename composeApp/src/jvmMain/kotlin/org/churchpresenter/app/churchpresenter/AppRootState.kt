@@ -204,6 +204,9 @@ internal class AppRootState(
 
     // Set once the startup update check has run, so nothing waiting on it opens before its result.
     var startupChecksDone by mutableStateOf(false)
+
+    // Set when this start already showed a dialog, or the one before did, so Wick's intro waits for a quiet one.
+    var wickIntroDeferred by mutableStateOf(false)
     var showConverterWindow by mutableStateOf(false)
 
     // Which tab it opens on. The Help menu wants the converter as a whole; the setup wizard's

@@ -29,6 +29,14 @@ internal fun pendingUpdateFor(
         else -> null
     }
 
+/**
+ * Whether the launch runs its update check. The first check ever always opens a dialog, so it waits for
+ * a start the pacing leaves free ([promptAllowed]) — not the one the setup wizard took. A later check
+ * only opens one for a real update, and runs whenever it is due.
+ */
+internal fun shouldRunStartupUpdateCheck(isDue: Boolean, isFirstEverCheck: Boolean, promptAllowed: Boolean): Boolean =
+    isDue && (!isFirstEverCheck || promptAllowed)
+
 /** Whether the story prompt shows: when it is due, and not on top of an update waiting to be shown. */
 internal fun shouldShowStoryPrompt(isDue: Boolean, updatePending: Boolean): Boolean = isDue && !updatePending
 

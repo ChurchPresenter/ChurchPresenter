@@ -50,6 +50,18 @@ class MainWindowLogicTest {
     }
 
     @Test
+    fun `the first update check waits for a start the pacing leaves free`() {
+        assertTrue(shouldRunStartupUpdateCheck(isDue = true, isFirstEverCheck = true, promptAllowed = true))
+        assertFalse(shouldRunStartupUpdateCheck(isDue = true, isFirstEverCheck = true, promptAllowed = false))
+    }
+
+    @Test
+    fun `a later update check runs whenever it is due`() {
+        assertTrue(shouldRunStartupUpdateCheck(isDue = true, isFirstEverCheck = false, promptAllowed = false))
+        assertFalse(shouldRunStartupUpdateCheck(isDue = false, isFirstEverCheck = false, promptAllowed = true))
+    }
+
+    @Test
     fun `the story prompt waits for a pending update`() {
         assertTrue(shouldShowStoryPrompt(isDue = true, updatePending = false))
         assertFalse(shouldShowStoryPrompt(isDue = true, updatePending = true))

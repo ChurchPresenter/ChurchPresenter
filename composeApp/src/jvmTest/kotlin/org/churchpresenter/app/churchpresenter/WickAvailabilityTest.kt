@@ -125,6 +125,7 @@ class WickAvailabilityTest {
             { root.showSetupWizard = true } to { root.showSetupWizard = false },
             { root.startupChecksDone = false } to { root.startupChecksDone = true },
             { root.showStoryPrompt = true } to { root.showStoryPrompt = false },
+            { root.wickIntroDeferred = true } to { root.wickIntroDeferred = false },
             { root.appSettings = root.appSettings.copy(helper = HelperSettings(enabled = false)) } to
                 { root.appSettings = root.appSettings.copy(helper = HelperSettings()) },
             { root.appSettings = root.appSettings.copy(helper = HelperSettings(introSeen = true)) } to
@@ -141,5 +142,13 @@ class WickAvailabilityTest {
         root.pendingUpdateResult = null
         root.presenterManager.setPresentingMode(Presenting.LYRICS)
         assertFalse(root.wickIntroShowing, "never over a live service")
+    }
+
+    @Test
+    fun `asking for the intro again plays it on a start the pacing keeps quiet`() {
+        root.wickIntroDeferred = true
+        root.helperState.replayIntro = true
+
+        assertTrue(root.wickIntroShowing)
     }
 }
