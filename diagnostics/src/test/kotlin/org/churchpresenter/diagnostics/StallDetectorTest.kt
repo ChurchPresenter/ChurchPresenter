@@ -116,7 +116,27 @@ class StallDetectorTest {
         assertTrue(stalls.isEmpty(), "not until the thread answers")
 
         watched.answered(420)
-        assertEquals(listOf(Stall(lateMs = 320, budgetMs = 100, frames = listOf(frame))), stalls)
+        assertEquals(listOf(Stall(lateMs = 320, budgetMs = 100, frames = listOf(frame), firstSampleMs = 150)), stalls)
+    }
+
+    @Test
+    fun `a stall says how late its first sample was, and the next stall starts its own count`() {
+        val stalls = mutableListOf<Stall>()
+        val watched = StallDetector(
+            budgetMs = { 100 },
+            stack = { listOf(frame) },
+            report = { },
+            onStall = { stalls += it },
+        )
+        watched.posted(0)
+        watched.poll(900)
+        watched.poll(950)
+        watched.answered(960)
+        watched.posted(1_000)
+        watched.poll(1_120)
+        watched.answered(1_200)
+
+        assertEquals(listOf(900L, 120L), stalls.map { it.firstSampleMs }, "the first sample's, not a later one's")
     }
 
     @Test

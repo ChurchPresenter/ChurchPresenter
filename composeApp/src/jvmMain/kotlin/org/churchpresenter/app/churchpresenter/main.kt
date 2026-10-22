@@ -264,7 +264,8 @@ fun main(args: Array<String>) {
     // report never carried. "default" means the platform's own choice, which is not the same fact
     // as any named API — a report from a machine on Direct3D-by-default and one pinned to it are
     // different evidence. Set here rather than with the availability tags below: a render fault
-    // can arrive before those run.
+    // can arrive before those run. This is the API asked for; what the main window actually draws
+    // with is render.api.actual, set once it has drawn (MainWindow).
     CrashReporter.setTag("render.api", System.getProperty("skiko.renderApi") ?: "default")
     // Which renderer ran is only half the fact: whether a GPU driver fault is an NVIDIA, AMD or
     // Intel problem is the axis such a group has to be split by, and no report carried it at all.

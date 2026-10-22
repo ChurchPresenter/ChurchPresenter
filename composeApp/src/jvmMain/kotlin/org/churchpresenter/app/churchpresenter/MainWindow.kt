@@ -252,10 +252,11 @@ private fun AppRootState.MainWindow(
             StartupProbe.firstFrame(exit = { exitProcess(0) })
             // UI stalls count from shortly after this: a first launch stalls while it loads.
             uiStallReporter.firstFrame()
-            // render.api is what was asked for; skiko falls back to drawing in software on a GPU
-            // it cannot use, which makes every frame slow, so a stall report says which it got.
+            // render.api is what was asked for; skiko may draw with another API, or fall back to
+            // drawing in software on a GPU it cannot use, so every report says which it got and a
+            // stall groups on it.
             CrashReporter.setTag("render.api.actual", window.renderApi.name)
-            uiStallReporter.softwareRendering(window.renderApi.name.startsWith("SOFTWARE"))
+            uiStallReporter.renderApi(window.renderApi.name)
             // Each string's first stringResource reads the jar on this thread; read them all now, off it.
             withContext(Dispatchers.IO) { warmStrings() }
         }
