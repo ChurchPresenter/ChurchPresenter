@@ -2805,6 +2805,15 @@
     <string name="preview_layout_split_down">Split down</string>
     <string name="preview_layout_remove">Remove</string>
     <string name="preview_layout_rename">Rename layout</string>
+    <string name="profile_sets">Profile sets</string>
+    <string name="profile_sets_show_button">Show profile sets button</string>
+    <string name="profile_sets_none">Save which profile every output uses now, then put them all back with one click.</string>
+    <string name="profile_sets_save">Save current as a set</string>
+    <string name="profile_sets_default_name">Set %1$d</string>
+    <string name="profile_sets_rename">Rename set</string>
+    <string name="profile_sets_delete">Delete set</string>
+    <string name="profile_sets_outputs">%1$d outputs</string>
+    <string name="profile_sets_current">In use now</string>
     <string name="preview_section_display">Display</string>
     <string name="preview_section_layout">Layout</string>
     <string name="profile_group_boxes">Text boxes</string>

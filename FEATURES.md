@@ -271,6 +271,7 @@
 - **Typography that fits** — auto-fit text to the screen, with control over fonts, size, alignment, shadows and margins.
 - **Live preview** — always see exactly what's on screen, and lock any output to a chosen tab.
 - **Design the preview panel** — arrange the live previews the way the booth wants them: start a layout from a template, split areas across or down, drag the dividers, choose what each area shows and where it sits, keep several named layouts and switch between them, and let a layout fill the panel.
+- **Profile sets** — save which profile every output uses (screens, Browser Source, NDI, OMT) under a name, and put them all back with one click from a button in the preview header; the layout menu's "Show profile sets button" switch turns the button on, offered with two outputs and two profiles or more.
 
 **Source locations:**
 - `live-output/…/PresenterScreen.kt` — output window
@@ -308,6 +309,7 @@
 - `profiles/…/MarginRoom.kt`, `presenter/…/ContentRegionModifier.kt`, `profiles/…/ContentBackgroundOwn.kt` — how far margins go, a region that moves only the text, and a content background that remembers its own
 - `data/settings/PreviewLayouts.kt`, `data/settings/PreviewLayoutSettings.kt` — preview layouts: the area tree and the layouts kept on the projection settings
 - `live-output/…/preview/PreviewLayoutView.kt`, `live-output/…/preview/PreviewLayoutTemplate.kt`, `live-output/…/preview/PreviewGroupsPopover.kt` — the panel drawn and edited as its layout says, the templates, and the gear's layout list
+- `settings/…/ProfileSet.kt`, `live-output/…/preview/ProfileSetsPopover.kt` — profile sets: saving, applying and the switch's rule, and the header button's menu
 
 ## Stage Monitor
 - **Confidence display for the platform** — give worship leaders and speakers their own screen showing the current slide, next slide, a clock, the countdown timer, section labels and presenter notes — in vertical, horizontal or four-quadrant layouts.

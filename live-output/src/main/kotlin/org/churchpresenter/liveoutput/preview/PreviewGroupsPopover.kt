@@ -49,9 +49,11 @@ import org.churchpresenter.strings.generated.resources.preview_section_display
 import org.churchpresenter.strings.generated.resources.preview_section_layout
 import org.churchpresenter.strings.generated.resources.preview_settings_show_labels
 import org.churchpresenter.strings.generated.resources.preview_settings_show_modes
+import org.churchpresenter.strings.generated.resources.profile_sets_show_button
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.activeLayout
 import org.churchpresenter.settings.newPreviewLayout
+import org.churchpresenter.settings.offersProfileSets
 import org.churchpresenter.settings.updateLayout
 import org.churchpresenter.theme.components.KeyButton
 import org.jetbrains.compose.resources.painterResource
@@ -61,6 +63,7 @@ import org.churchpresenter.sharedui.composables.TooltipIconButton
 /** Test handles for the switches, which carry no text of their own. */
 internal const val TAG_SHOW_LABELS = "preview_show_labels"
 internal const val TAG_SHOW_MODES = "preview_show_modes"
+internal const val TAG_SHOW_PROFILE_SETS = "preview_show_profile_sets"
 internal const val TAG_FILLS_PANEL = "preview_fills_panel"
 internal const val TAG_LIST_UNPLACED = "preview_list_unplaced"
 internal const val TAG_EDIT_LAYOUT = "preview_edit_layout"
@@ -74,7 +77,8 @@ private val POPOVER_WIDTH = 300.dp
  * The editor for how the preview panel is arranged, opened from the gear beside the clear button:
  * whether outputs carry their names and modes, and the panel's named layouts -- which one is drawn,
  * new ones from a template, renaming and deleting them, and Edit layout, which turns the live panel
- * itself into the layout's editor through [onEditLayout].
+ * itself into the layout's editor through [onEditLayout]. With outputs and profiles enough to switch,
+ * whether the header shows the profile sets button ([ProfileSetsPopover]).
  *
  * Works on a [ProjectionSettings] value and hands the changed one back through [onChange] -- it
  * keeps no state of its own beyond what the caller keeps.
@@ -107,6 +111,14 @@ fun PreviewGroupsPopover(
                 tag = TAG_SHOW_MODES,
                 onChange = { onChange(proj.copy(showOutputModes = it)) },
             )
+            if (proj.offersProfileSets()) {
+                SwitchRow(
+                    label = stringResource(Res.string.profile_sets_show_button),
+                    checked = proj.showProfileSetsButton,
+                    tag = TAG_SHOW_PROFILE_SETS,
+                    onChange = { onChange(proj.copy(showProfileSetsButton = it)) },
+                )
+            }
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                 color = MaterialTheme.colorScheme.outlineVariant,

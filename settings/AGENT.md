@@ -131,6 +131,10 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
   `activePreviewLayout`, `previewLayoutFillsPanel`, `listUnplacedOutputs`), not on a profile: they
   arrange the operator's own panel, not an output. The tree operations are in `PreviewLayouts.kt`
   and never mutate -- each returns the new root.
+- **Profile sets are one per install** too (`profileSets`, `showProfileSetsButton`, `ProfileSet.kt`):
+  each maps an output's key (`Constants.previewOutputKey`) to the profile it uses. Applying one passes
+  over an output or a profile that is gone; the button shows only while switched on and
+  `offersProfileSets()` (two outputs and two profiles or more).
 - **Version 19** moves the four per-translation Bible offsets onto boxes (`migrateBibleOffsetsToBoxes`),
   and **version 20** turns preview groups into one layout (`migratePreviewGroupsToLayout`), leaving
   outputs no group held out of the panel as they were.

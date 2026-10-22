@@ -36,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.outlined.DisplaySettings
+import androidx.compose.material.icons.outlined.SwitchAccount
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -58,10 +59,12 @@ import org.churchpresenter.strings.generated.resources.preview_take
 import org.churchpresenter.strings.generated.resources.tooltip_clear_display
 import org.churchpresenter.strings.generated.resources.tooltip_message
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
+import org.churchpresenter.strings.generated.resources.profile_sets
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
 import org.churchpresenter.liveoutput.preview.LivePreviewPanel
 import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
+import org.churchpresenter.liveoutput.preview.ProfileSetsPopover
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
@@ -77,6 +80,7 @@ import org.churchpresenter.stt.STTManager
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.showsProfileSetsButton
 import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.activeLayout
 import org.jetbrains.compose.resources.painterResource
@@ -346,6 +350,11 @@ private fun SidebarButtons(
         PreviewSettingsButton(appSettings.projectionSettings, onEditPreviewLayout) { updated ->
             onSettingsChange { s -> s.copy(projectionSettings = updated) }
         }
+        if (appSettings.projectionSettings.showsProfileSetsButton()) {
+            ProfileSetsButton(appSettings.projectionSettings) { updated ->
+                onSettingsChange { s -> s.copy(projectionSettings = updated) }
+            }
+        }
     }
     if (showControl.devMode) {
         DevModeBox {
@@ -503,6 +512,27 @@ private fun PreviewSettingsButton(
         )
     }
 }
+
+/** Beside the layout button, while the layout menu's switch for it is on: opens the saved profile sets. */
+@Composable
+private fun ProfileSetsButton(proj: ProjectionSettings, onChange: (ProjectionSettings) -> Unit) {
+    Box {
+        var open by remember { mutableStateOf(false) }
+        ToolbarKey(
+            painter = rememberVectorPainter(Icons.Outlined.SwitchAccount),
+            text = stringResource(Res.string.profile_sets),
+            onClick = { open = true },
+            style = ToolbarKeyStyle.PANEL_TOGGLE,
+            open = open,
+            buttonSize = 40.dp,
+            modifier = Modifier.testTag(PROFILE_SETS_BUTTON_TAG),
+        )
+        ProfileSetsPopover(expanded = open, onDismiss = { open = false }, proj = proj, onChange = onChange)
+    }
+}
+
+/** Test handle for the profile sets button. */
+internal const val PROFILE_SETS_BUTTON_TAG = "preview_profile_sets"
 
 /**
  * Preview mode's Take, while preview mode is on: what is cued on Preview goes on air. It can be

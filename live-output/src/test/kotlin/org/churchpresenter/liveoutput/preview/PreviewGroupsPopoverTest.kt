@@ -18,6 +18,7 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.PreviewLayout
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.SPLIT_ACROSS
@@ -71,6 +72,18 @@ class PreviewGroupsPopoverTest {
         previewLayouts = ids.map { PreviewLayout(id = it) },
         activePreviewLayout = ids.first(),
     )
+
+    @Test
+    fun `the profile sets switch shows the header's button, offered with two outputs and two profiles`() {
+        val offered = base().copy(outputProfiles = listOf(OutputProfile(id = "a"), OutputProfile(id = "b")))
+        edit(offered) { now ->
+            assertFalse(now().showProfileSetsButton)
+            onNodeWithTag(TAG_SHOW_PROFILE_SETS).performClick()
+            waitForIdle()
+            assertTrue(now().showProfileSetsButton)
+        }
+        edit(base()) { onNodeWithTag(TAG_SHOW_PROFILE_SETS).assertDoesNotExist() }
+    }
 
     @Test
     fun `the labels switch turns output labels off and on`() = edit(base()) { now ->
