@@ -20,6 +20,7 @@ private const val ASCII_MAX = 128
  * @param cleanupLegacy reclaims the old install footprint once a relocated install works.
  * @param reportFailure reports an install that ran and failed for a reason that is ours.
  * @param reportWarning files a recovered failure, with its tags.
+ * @param setTag leaves a tag on whatever else this session reports.
  */
 internal class CefEngine(
     private val cleanupLegacy: (File) -> Unit = CefManager::cleanupLegacyJcef,
@@ -27,6 +28,7 @@ internal class CefEngine(
     private val reportWarning: (String, Throwable, Map<String, String>) -> Unit = { message, t, tags ->
         CrashReporter.reportWarning(message, throwable = t, tags = tags)
     },
+    private val setTag: (String, String) -> Unit = CrashReporter::setTag,
 ) {
     /** Whether a usable engine exists right now; Compose state, since it can drop mid-session. */
     var initialized by mutableStateOf(false)
@@ -74,7 +76,7 @@ internal class CefEngine(
             is JcefInstall.Outcome.Installed -> {
                 initialized = true
                 installRoot = outcome.root
-                runCatching { CrashReporter.setTag("jcef.install_root", outcome.root.name) }
+                runCatching { setTag("jcef.install_root", outcome.root.name) }
                 // Now that the relocated install works, reclaim the orphaned old footprint.
                 cleanupLegacy(outcome.root)
             }
@@ -83,7 +85,7 @@ internal class CefEngine(
                 Log.warn("JCEF", "Not installing: ${outcome.reason}")
                 // No event: web features simply stay unavailable, which jcef.available already
                 // says. The tag rides along on anything else this session reports.
-                runCatching { CrashReporter.setTag("jcef.blocked", outcome.reason) }
+                runCatching { setTag("jcef.blocked", outcome.reason) }
             }
             is JcefInstall.Outcome.Failed -> {
                 engineUnavailable()
@@ -112,8 +114,8 @@ internal class CefEngine(
         // Best-effort telemetry: distinguish the accented-path theory from the
         // VC++-runtime theory at a glance in Sentry. Never let telemetry throw.
         runCatching {
-            CrashReporter.setTag("jcef.path_ascii", installDir.path.all { it.code < ASCII_MAX }.toString())
-            CrashReporter.setTag("jcef.install_root", outcome.root.name)
+            setTag("jcef.path_ascii", installDir.path.all { it.code < ASCII_MAX }.toString())
+            setTag("jcef.install_root", outcome.root.name)
             CrashReporter.setContext("jcef", mapOf(
                 "installDir" to installDir.path,
                 "os" to (System.getProperty("os.name") ?: ""),
@@ -127,7 +129,14 @@ internal class CefEngine(
         if (policy != null) {
             blockedByPolicy = true
             Log.warn("JCEF", "Blocked by this machine's software policy: ${outcome.cause.message}")
-            runCatching { CrashReporter.setTag("jcef.blocked", policy) }
+            runCatching { setTag("jcef.blocked", policy) }
+            return
+        }
+        // A file of the install held open by another process while it was being extracted: the
+        // check before the download clears what it can, and this is what was locked after it.
+        if (lockedInInstall(outcome.cause, installDir)) {
+            Log.warn("JCEF", "A file of the browser engine's install is in use: ${outcome.cause.message}")
+            runCatching { setTag("jcef.blocked", "install_in_use") }
             return
         }
         // So is a library the distribution did not install: the operator can add it, a report cannot.
@@ -135,7 +144,7 @@ internal class CefEngine(
         if (library != null) {
             missingLibrary = library
             Log.warn("JCEF", "This system is missing $library, which the browser engine needs")
-            runCatching { CrashReporter.setTag("jcef.blocked", "missing_library") }
+            runCatching { setTag("jcef.blocked", "missing_library") }
             return
         }
         reportFailure(outcome.cause)
@@ -158,7 +167,7 @@ internal class CefEngine(
         } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
             // JCEF's native side fails with Errors (UnsatisfiedLinkError and the like), not Exceptions.
             engineUnavailable()
-            runCatching { CrashReporter.setTag("jcef.blocked", "client_creation_failed") }
+            runCatching { setTag("jcef.blocked", "client_creation_failed") }
             reportWarning(
                 "JCEF client creation failed; web features disabled for this session",
                 t,

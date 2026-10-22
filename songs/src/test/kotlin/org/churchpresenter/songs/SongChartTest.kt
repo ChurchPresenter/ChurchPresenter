@@ -2,6 +2,7 @@ package org.churchpresenter.songs
 
 import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.composables.sectionKindOf
+import org.churchpresenter.songchords.ChordTransposer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -116,5 +117,54 @@ class SongChartTest {
         val sections = buildPreviewSections("[Verse 1]\none\n[Chorus]\ntwo")
 
         assertEquals(listOf(SongSectionKind.VERSE, SongSectionKind.CHORUS), sections.map { it.kind })
+    }
+
+    // ── The chords the palette highlights ───────────────────────────────────────
+
+    private fun usedMatchesText(text: String) {
+        val fromSections = chordsUsedIn(buildPreviewSections(text))
+        assertEquals(ChordTransposer.chordsIn(text).toSet(), fromSections, "chords used in:\n$text")
+    }
+
+    @Test
+    fun `the chords read off the sections are the chords in the text`() {
+        usedMatchesText("[Verse 1]\n[G]Amazing [C]grace how [G]sweet\n[Chorus]\n[D]How [Em]sweet [C/G]the sound")
+        usedMatchesText("[G]no header [Am7]at all\nand a [Dsus4]second line")
+        usedMatchesText("")
+        usedMatchesText("[Verse 1]\nwords and no chords\n\n[Bridge]\nstill none")
+    }
+
+    @Test
+    fun `headers, breaks and background directives add no chords`() {
+        usedMatchesText(
+            "[Intro]\n[Cm] [Bb] [Ab] [G]\n{Chorus}\n[background: gradient]\n[F]one\n[---]\n[Bb]two\n[Am]",
+        )
+    }
+
+    @Test
+    fun `odd spellings are taken as written`() {
+        // Spaces inside the brackets, a repeated chord, chords packed at a line's end, a word in
+        // brackets that is not a chord, and Windows line endings.
+        usedMatchesText("[ G ]one [G]two [G]\r\nwords[Ab][Gsus][G]\r\n[not a chord] [F#m]")
+    }
+
+    @Test
+    fun `chords off leaves nothing to highlight`() {
+        assertEquals(emptySet(), chordsUsedIn(buildPreviewSections("[G]one [C]two", showChords = false)))
+    }
+
+    @Test
+    fun `a bracket left open does not swallow the next line's chord`() {
+        // chordsIn reads the text as one run, so "[b\n[G]" hides the G from it; the preview draws
+        // that G over its line, and that is the one the palette should light up.
+        assertEquals(setOf("G"), chordsUsedIn(buildPreviewSections("a [b\n[G]c")))
+    }
+
+    @Test
+    fun `the preview content carries its sections and their chords`() {
+        val content = previewContentOf("[Verse 1]\n[G]one [C]two", flats = false, showChords = true)
+
+        assertEquals(listOf("Verse 1"), content.sections.map { it.label })
+        assertEquals(setOf("G", "C"), content.used)
     }
 }

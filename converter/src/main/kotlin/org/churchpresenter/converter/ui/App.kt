@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -29,12 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.converter.song.findFormatInputs
+import org.churchpresenter.converter.song.inputSize
 import org.churchpresenter.converter.song.matchesFormat
 import org.churchpresenter.converter.song.outputNamesFor
 import org.churchpresenter.converter.song.SongFormatConverter
 import org.churchpresenter.converter.song.SongPreviewInfo
 import org.churchpresenter.converter.song.SpsToSongConverter
 import org.churchpresenter.bibleformats.XmlToSpbConverter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
 import javax.swing.JFileChooser
@@ -311,6 +315,26 @@ internal fun pickSourceFiles(source: SongSource, format: SongFormatConverter): L
 
 /** How many of the chosen files the "source files" card lists before it stops. */
 internal const val FILE_LIST_LIMIT = 200
+
+/**
+ * The rows the "source files" card lists for [files], each with its size.
+ *
+ * Reads the disk — a Keynote package is walked to sum its contents — so it runs off the event
+ * thread; [rememberSelectedEntries] is the composable side.
+ */
+internal fun selectedEntries(files: List<File>): List<SelectedEntry> =
+    files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) }
+
+/**
+ * [selectedEntries] for the files just chosen, worked out on [Dispatchers.IO].
+ *
+ * Until the sizes are in, each row shows its name alone — the names need no disk access.
+ */
+@Composable
+internal fun rememberSelectedEntries(files: List<File>): List<SelectedEntry> =
+    produceState(files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, "") }, files) {
+        value = withContext(Dispatchers.IO) { selectedEntries(files) }
+    }.value
 
 internal fun formatFileSize(bytes: Long): String = when {
     bytes >= 1024 * 1024 -> String.format(Locale.ROOT, "%.1f MB", bytes / (1024.0 * 1024.0))

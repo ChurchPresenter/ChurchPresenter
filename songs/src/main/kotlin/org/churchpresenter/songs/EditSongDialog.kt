@@ -233,7 +233,7 @@ internal fun EditSongContent(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 EditSongFooter(
-                    stats = songStatsOf(buildPreviewSections(state.paneValue.text, showChords = false)),
+                    stats = rememberSongStats(state.paneValue.text),
                     typicalSeconds = typicalSeconds,
                     // A new song needs a title; with no song book it is kept at the top of the folder.
                     saveEnabled = !isDuplicate && (!isNewSong || state.title.isNotBlank()),
@@ -248,6 +248,11 @@ internal fun EditSongContent(
         }
     }
 }
+
+/** The footer's counts for [text], worked out off the event thread as the song is typed. */
+@Composable
+private fun rememberSongStats(text: String): SongStats =
+    rememberBuiltOffEventThread(text, null, null) { songStatsOf(buildPreviewSections(text, showChords = false)) }
 
 /** The two views of the open pane on the right: as the outputs show it, and as the band reads it. */
 private enum class RightPane { OUTPUT, CHORDS }

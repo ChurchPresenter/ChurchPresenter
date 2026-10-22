@@ -80,6 +80,7 @@ import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.server.LiveStateDto
+import org.churchpresenter.server.normalizePrimaryHost
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.LabeledRadioButton
@@ -282,9 +283,16 @@ private class InstanceLinkForm(private val settings: InstanceLinkSettings) {
         followedLayers = LinkLayers.ALL.filter { it in chosen }
     }
 
+    /**
+     * The port to connect on: the Port field, or the one pasted into the Host field with the host
+     * (`192.168.0.112:8765`) when the Port field is empty.
+     */
+    fun port(): Int? = portText.toIntOrNull() ?: normalizePrimaryHost(host).port
+
+    /** The Host field reduced to the host alone — see [normalizePrimaryHost]. */
     fun edited(): InstanceLinkSettings = settings.copy(
-        primaryHost = host.trim(),
-        primaryPort = portText.toIntOrNull() ?: settings.primaryPort,
+        primaryHost = normalizePrimaryHost(host).host,
+        primaryPort = port() ?: settings.primaryPort,
         apiKey = apiKey.trim(),
         autoConnect = autoConnect,
         reconnectDelayMs = parseReconnectDelayMs(reconnectDelayText, settings.reconnectDelayMs),
@@ -523,11 +531,11 @@ Row(
     RaisedButton(
         shape = AppShape(6.dp),
         onClick = {
-            if (form.portText.toIntOrNull() == null) return@RaisedButton
+            if (form.port() == null) return@RaisedButton
             onConnect(form.edited())
             onDismiss()
         },
-        enabled = form.host.isNotBlank() && form.portText.toIntOrNull() != null,
+        enabled = form.host.isNotBlank() && form.port() != null,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary
         )

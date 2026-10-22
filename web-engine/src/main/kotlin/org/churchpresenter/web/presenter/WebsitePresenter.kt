@@ -207,6 +207,8 @@ internal object JcefInstall {
             clearIncompleteInstall(installDir, ::installIsComplete)
                 ?: installBlocker(directoryIsWritable(installDir), installDir.usableSpace)
         },
+        // A file locked in one root's install (lockedInInstall) is not a reason to stop: the next
+        // root extracts into a directory of its own, which nothing holds open.
         stopRetrying = { policyBlock(it.message) != null || missingSystemLibrary(it) != null },
         attempt = attempt,
     )
