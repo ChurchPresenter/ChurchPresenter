@@ -118,13 +118,19 @@ class InstanceLinkClient(
     // points, so cancellation alone isn't enough) — same guard CompanionSatelliteClient uses.
     @Volatile private var generation = 0L
 
-    /** Starts (or restarts) the link to the primary instance's CompanionServer. */
+    /**
+     * Starts (or restarts) the link to the primary instance's CompanionServer.
+     *
+     * [host] goes through [normalizePrimaryHost] first, so a host saved as `host:port` or a whole
+     * URL before the dialog cleaned its field still connects; [port] stays the port.
+     */
     fun connect(host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long) {
         disconnect()
-        fetches.target(host, port, apiKey)
+        val primaryHost = normalizePrimaryHost(host).host
+        fetches.target(primaryHost, port, apiKey)
         val myGeneration = ++generation
         connectJob = scope.launch {
-            connectLoop(PrimaryAddress(host, port, apiKey, deviceId), reconnectDelayMs, myGeneration)
+            connectLoop(PrimaryAddress(primaryHost, port, apiKey, deviceId), reconnectDelayMs, myGeneration)
         }
     }
 
@@ -142,7 +148,8 @@ class InstanceLinkClient(
         var consecutiveFailures = 0
         fun connectFailed(e: Exception) {
             consecutiveFailures++
-            Log.warn("InstanceLink", "connect to ws://$host:$port${Constants.ENDPOINT_WS} failed — ${e.message}")
+            val reason = ConnectFailures.connectFailureReason(e)
+            Log.warn("InstanceLink", "connect to ws://$host:$port${Constants.ENDPOINT_WS} failed — $reason")
             val failureKind = ConnectFailures.classifyConnectFailure(e)
             if (ConnectFailures.shouldReportConnectFailure(failureKind, consecutiveFailures)) {
                 CrashReporter.reportWarning(
@@ -150,14 +157,15 @@ class InstanceLinkClient(
                     tags = mapOf(
                         "subsystem" to "instance_link",
                         "consecutive_failures" to consecutiveFailures.toString(),
-                        "failure_kind" to failureKind
+                        "failure_kind" to failureKind,
+                        "exception" to e.javaClass.name,
                     ),
-                    extras = mapOf("reason" to ConnectFailures.redactedConnectFailure(e.message))
+                    extras = mapOf("reason" to ConnectFailures.describeConnectFailure(e))
                 )
             }
             InstanceLinkLogger.log(
                 InstanceLinkLogSide.FOLLOWER, "connect_result",
-                mapOf("success" to false, "host" to host, "port" to port, "reason" to e.message)
+                mapOf("success" to false, "host" to host, "port" to port, "reason" to reason)
             )
         }
         // Exponential reconnect backoff (1s doubling to MAX_RECONNECT_DELAY_MS, ±20% jitter so
@@ -213,7 +221,8 @@ class InstanceLinkClient(
                 // Ktor's WebSocketException, for a refused upgrade.
                 connectFailed(e)
             } catch (e: IllegalArgumentException) {
-                // A frame from the primary that is not JSON.
+                // ktor CIO's UnresolvedAddressException, for an address that does not resolve. A
+                // frame that is not JSON never gets here: handleMessage drops it.
                 connectFailed(e)
             } catch (e: ClosedReceiveChannelException) {
                 connectFailed(e)
