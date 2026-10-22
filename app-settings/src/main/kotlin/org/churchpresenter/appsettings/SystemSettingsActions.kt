@@ -115,10 +115,7 @@ internal object SwingSettingsActionUi : SettingsActionUi {
      * close cleanly instead of hitting a ping timeout when the JVM exits. The stop runs off the
      * event thread, which it would hold for over a second, and the relaunch follows it.
      */
-    override fun restart(companionServer: CompanionServer?) {
-        if (companionServer == null) relaunch()
-        else companionServer.requestStop().invokeOnCompletion { relaunch() }
-    }
+    override fun restart(companionServer: CompanionServer?) = stopThenRelaunch(companionServer, ::relaunch)
 
     private fun relaunch() {
         val javaBin = System.getProperty("java.home") + "/bin/java"
@@ -129,6 +126,12 @@ internal object SwingSettingsActionUi : SettingsActionUi {
         } catch (_: Exception) {}
         Runtime.getRuntime().exit(0)
     }
+}
+
+/** Runs [relaunch] once [companionServer] has stopped, off the caller's thread, or at once with no server. */
+internal fun stopThenRelaunch(companionServer: CompanionServer?, relaunch: () -> Unit) {
+    if (companionServer == null) relaunch()
+    else companionServer.requestStop().invokeOnCompletion { relaunch() }
 }
 
 /**
