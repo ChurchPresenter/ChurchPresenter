@@ -1,10 +1,8 @@
 package org.churchpresenter.settings
 
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 
 /*
  * What a profile changes from the defaults: compared, path by path, with the profile a new one would
@@ -87,23 +85,24 @@ fun OutputProfile.withDefaultAt(path: String): OutputProfile {
 /** The value at [steps] under [this], or null where there is none. */
 private fun JsonObject.valueAlong(steps: List<PathStep>): JsonElement? {
     var current: JsonElement? = this
-    steps.forEach { step ->
-        val child = (current as? JsonObject)?.get(step.key)
-        current = if (step.entry == null) child else (child as? JsonArray)?.firstOrNull { it.entryName() == step.entry }
-    }
+    steps.forEach { step -> current = (current as? JsonObject)?.along(step) }
     return current
 }
 
-/** [this] with the key at the end of [steps] taken out, or null where [steps] do not lead to one. */
+/**
+ * [this] with the key at the end of [steps] taken out -- or, where the last step names an object's
+ * member, that member -- or null where [steps] do not lead to one.
+ */
 private fun JsonObject.withoutAlong(steps: List<PathStep>): JsonObject? {
     val step = steps.first()
-    val child = this[step.key]
-    return when {
-        step.entry != null || child == null -> null
-        steps.size == 1 -> JsonObject(this - step.key)
-        else -> (child as? JsonObject)?.withoutAlong(steps.drop(1))?.let { JsonObject(this + (step.key to it)) }
+    val child = this[step.key] ?: return null
+    val member = step.entry
+    val pruned = when {
+        member == null && steps.size == 1 -> return JsonObject(this - step.key)
+        member == null -> (child as? JsonObject)?.withoutAlong(steps.drop(1))
+        child !is JsonObject || member !in child -> null
+        steps.size == 1 -> JsonObject(child - member)
+        else -> (child[member] as? JsonObject)?.withoutAlong(steps.drop(1))?.let { JsonObject(child + (member to it)) }
     }
+    return pruned?.let { JsonObject(this + (step.key to it)) }
 }
-
-private fun JsonElement.entryName(): String? =
-    ((this as? JsonObject)?.get("fileName") as? JsonPrimitive)?.takeIf { it.isString }?.content
