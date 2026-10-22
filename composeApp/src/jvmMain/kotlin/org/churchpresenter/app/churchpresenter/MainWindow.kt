@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter
 
-import kotlinx.coroutines.flow.first
-import androidx.compose.runtime.snapshotFlow
 import org.churchpresenter.server.clearPresentationState
 import org.churchpresenter.server.preloadData
 import org.churchpresenter.server.updateApiKey
@@ -41,7 +39,6 @@ import org.churchpresenter.strings.generated.resources.app_name
 import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
@@ -66,13 +63,8 @@ import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
-import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.settings.isDue
-import org.churchpresenter.settings.recordingUse
-import org.churchpresenter.settings.shown
-import org.churchpresenter.settings.stampingInstall
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import java.util.Locale
@@ -91,6 +83,7 @@ import androidx.compose.foundation.layout.BoxScope
 @Composable
 internal fun AppRootState.StartupEffect() {
     LaunchedEffect(Unit) {
+        beginStartupPrompts()
         // The window comes first. Nothing below is needed to draw it: the server and its preloaded
         // data serve phones, and the JavaFX toolkit drives nothing the window shows.
         appReady = true
@@ -123,31 +116,7 @@ internal fun AppRootState.StartupEffect() {
                 )
             }
         }
-        val isFirstEverUpdateCheck = isFirstEverUpdateCheck(appSettings.lastUpdateCheckTimestamp)
-        if (appSettings.updateCheckInterval.isDueSince(appSettings.lastUpdateCheckTimestamp)) {
-            val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
-            appSettings = appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
-            settingsManager.saveSettings(appSettings)
-            val skipped = appSettings.skippedUpdateVersion
-            pendingUpdateFor(isFirstEverUpdateCheck, result, skipped)?.let { (pending, manual) ->
-                pendingUpdateResult = pending
-                pendingUpdateCheckWasManual = manual
-            }
-        }
-        startupChecksDone = true
-
-        val now = System.currentTimeMillis()
-        val storyPrompt = appSettings.storyPrompt.stampingInstall(now).recordingUse(now)
-        appSettings = appSettings.copy(storyPrompt = storyPrompt)
-        settingsManager.saveSettings(appSettings)
-        if (shouldShowStoryPrompt(storyPrompt.isDue(now), updatePending = pendingUpdateResult != null)) {
-            delay(STORY_PROMPT_DELAY_MS)
-            // Never on top of Wick's intro: it waits until that is finished or skipped.
-            snapshotFlow { wickIntroShowing }.first { !it }
-            appSettings = appSettings.copy(storyPrompt = storyPrompt.shown(System.currentTimeMillis()))
-            settingsManager.saveSettings(appSettings)
-            showStoryPrompt = true
-        }
+        openStartupPrompts()
     }
 }
 
