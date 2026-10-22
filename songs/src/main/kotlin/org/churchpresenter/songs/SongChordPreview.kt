@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.preview
@@ -153,6 +156,46 @@ fun buildPreviewSections(
     return out.mapIndexed { index, section -> section.copy(slideCount = counts[index]) }
 }
 
+/**
+ * Every chord the preview draws in [sections], in the order written.
+ *
+ * The same set `ChordTransposer.chordsIn` finds in the text, read off the runs already split
+ * rather than a second pass over the whole song: headers, slide breaks and background directives
+ * hold no chord, and a chord is taken exactly as written in both. Read line by line, so a bracket
+ * left open at the end of one line does not swallow a chord on the next. Empty when the sections
+ * were built with chords off.
+ */
+internal fun chordsUsedIn(sections: List<PreviewSection>): Set<String> =
+    sections.flatMapTo(LinkedHashSet()) { section ->
+        section.lines.flatMap { line -> line.mapNotNull { run -> run.chord.ifEmpty { null } } }
+    }
+
+/** What the preview draws: its sections, and the chords they use for the palette to highlight. */
+internal data class PreviewContent(val sections: List<PreviewSection>, val used: Set<String>)
+
+internal fun previewContentOf(text: String, flats: Boolean, showChords: Boolean): PreviewContent {
+    val sections = buildPreviewSections(text, 0, flats, showChords)
+    return PreviewContent(sections, chordsUsedIn(sections))
+}
+
+/**
+ * [build] worked out on [Dispatchers.Default] whenever [key1]–[key3] change, keeping the previous
+ * result on screen while the next one is built — a whole-song parse on every keystroke would
+ * otherwise run on the event thread.
+ *
+ * The first composition builds synchronously, once: a pane opening blank and filling a frame
+ * later would flash, and that single build is not per keystroke.
+ */
+@Composable
+internal fun <T> rememberBuiltOffEventThread(key1: Any?, key2: Any?, key3: Any?, build: () -> T): T {
+    val firstKeys = remember { listOf(key1, key2, key3) }
+    val first = remember { build() }
+    return produceState(first, key1, key2, key3) {
+        if (value === first && listOf(key1, key2, key3) == firstKeys) return@produceState
+        value = withContext(Dispatchers.Default) { build() }
+    }.value
+}
+
 /** Counts what the footer reports. Words are counted after chords come off, not before. */
 fun songStatsOf(sections: List<PreviewSection>): SongStats {
     val lines = sections.sumOf { it.lines.size }
@@ -192,8 +235,9 @@ fun SongChordPreview(
     modifier: Modifier = Modifier,
 ) {
     val flats = ChordTransposer.prefersFlats(songKey)
-    val sections = remember(text, showChords) { buildPreviewSections(text, 0, flats, showChords) }
-    val used = remember(text) { ChordTransposer.chordsIn(text).toSet() }
+    val content = rememberBuiltOffEventThread(text, flats, showChords) { previewContentOf(text, flats, showChords) }
+    val sections = content.sections
+    val used = content.used
     val palette = remember(songKey) { ChordTransposer.diatonicChords(songKey) }
 
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)) {
