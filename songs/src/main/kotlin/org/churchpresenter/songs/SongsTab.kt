@@ -26,6 +26,8 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.sharedui.utils.voicedDisplayText
 
 /** The toolbar button that adds the *selected* song, as opposed to any other "Add to Schedule". */
 internal const val SONGS_ADD_SELECTED_TAG = "songs_addSelectedToSchedule"
@@ -141,10 +143,14 @@ internal fun LyricLines(
     onLineClick: ((Int) -> Unit)? = null,
     onLineDoubleClick: ((Int) -> Unit)? = null,
 ) {
+    // A line and the voice-2 line answering it go live together, so both light up.
+    val activeLines =
+        if (activeLineIndex in lines.indices) SecondVoice.lineGroupAt(lines, activeLineIndex) else IntRange.EMPTY
+    val secondVoiceInk = MaterialTheme.colorScheme.tertiary
     lines.forEachIndexed { lineIndex, line ->
-        val isActiveLine = activeLineIndex >= 0 && lineIndex == activeLineIndex
+        val isActiveLine = lineIndex in activeLines
         Text(
-            text = line,
+            text = voicedDisplayText(line, "", 0f, 0f, secondVoiceInk.takeUnless { isActiveLine }),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (isActiveLine) FontWeight.Bold else FontWeight.Normal,
             color = if (isActiveLine) MaterialTheme.colorScheme.primary else textColor,

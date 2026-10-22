@@ -68,6 +68,8 @@ internal class InstanceLinkHttpFetches(
             val response = httpClient.get("http://$host:$port${Constants.ENDPOINT_SONGS}/$number") {
                 if (apiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, apiKey)
                 if (songbook.isNotEmpty()) parameter(Constants.QUERY_PARAM_SONGBOOK, songbook)
+                // The follower draws the second voice itself, so it takes the lines as written.
+                parameter(Constants.QUERY_PARAM_MARKUP, true)
             }
             if (!response.status.isSuccess()) {
                 logFetch("song_detail", success = false, status = response.status.value, reason = "http_status")

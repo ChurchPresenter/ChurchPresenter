@@ -113,10 +113,15 @@ fun SongPresenter(
     drawsBackground: Boolean = true,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
-    val ss = appSettings.songSettings
+    // The song's own font, size and colours, over the profile's — see [withTextOverrides].
+    val songAppSettings = remember(appSettings, lyricSection.textOverrides) {
+        val own = appSettings.songSettings.withTextOverrides(lyricSection.textOverrides)
+        if (own === appSettings.songSettings) appSettings else appSettings.copy(songSettings = own)
+    }
+    val ss = songAppSettings.songSettings
     val look = SongLook(
         lyricSection = lyricSection,
-        appSettings = appSettings,
+        appSettings = songAppSettings,
         isLowerThird = isLowerThird,
         isLowerThirdVertical = isLowerThirdVertical,
         outputRole = outputRole,

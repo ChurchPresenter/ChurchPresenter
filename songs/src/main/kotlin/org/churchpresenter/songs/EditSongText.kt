@@ -13,6 +13,7 @@ import org.churchpresenter.strings.generated.resources.song_pane_translation
 import org.churchpresenter.strings.generated.resources.song_title
 import org.churchpresenter.strings.generated.resources.song_translation_title
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.songchords.SecondVoice
 
 private val SECTION_MARKER_LINE = Regex("""^[\[{][^\]}]*[\]}]$""")
 private val CHORD_MARKER = Regex("""\[[^\]]*]""")
@@ -69,6 +70,44 @@ internal fun insertSnippet(value: TextFieldValue, snippet: String, ownLine: Bool
 }
 
 /**
+ * [value] with the second voice marked where the operator points:
+ * - words selected on one line are wrapped as `2>(…)`;
+ * - a selection across lines, or no selection at all, marks each line it touches with `2>`, or —
+ *   when every one of them is marked already — takes the mark off again.
+ *
+ * The selection follows the text it was on.
+ */
+internal fun toggleSecondVoice(value: TextFieldValue): TextFieldValue {
+    val text = value.text
+    val start = value.selection.min
+    val end = value.selection.max
+    val firstLine = text.lastIndexOf('\n', start - 1) + 1
+    val selected = text.substring(start, end)
+    if (selected.isNotBlank() && '\n' !in selected) {
+        val wrapped = "${SecondVoice.MARK}($selected)"
+        val opening = SecondVoice.MARK.length + 1
+        return TextFieldValue(
+            text.take(start) + wrapped + text.drop(end),
+            TextRange(start + opening, end + opening),
+        )
+    }
+    val lastLineEnd = text.indexOf('\n', if (end > start) end - 1 else end).let { if (it < 0) text.length else it }
+    val lines = text.substring(firstLine, lastLineEnd).split('\n')
+    val marked = lines.filter { it.isNotBlank() }.all { it.trimStart().startsWith(SecondVoice.MARK) }
+    val rewritten = lines.map { line ->
+        when {
+            line.isBlank() -> line
+            marked -> line.trimStart().removePrefix(SecondVoice.MARK).trimStart()
+            else -> SecondVoice.MARK + line
+        }
+    }.joinToString("\n")
+    val grown = rewritten.length - (lastLineEnd - firstLine)
+    val newText = text.take(firstLine) + rewritten + text.drop(lastLineEnd)
+    val caret = if (marked) (end + grown).coerceAtLeast(firstLine) else end + grown
+    return TextFieldValue(newText, TextRange(if (end > start) firstLine else caret, caret))
+}
+
+/**
  * [value] with every chord moved by [steps] semitones. The cursor keeps its place in the words:
  * a chord before it can change length (`C` → `C#`), so the new offset is the length of the text
  * before it once that part is transposed too.
@@ -93,6 +132,7 @@ internal fun firstLyricLine(lyrics: String): String =
         .map { it.trim() }
         .firstOrNull { it.isNotBlank() && !SECTION_MARKER_LINE.matches(it) }
         ?.replace(CHORD_MARKER, "")
+        ?.let(SecondVoice::plain)
         ?.trim()
         .orEmpty()
 

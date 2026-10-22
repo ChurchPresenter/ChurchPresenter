@@ -108,6 +108,27 @@ class CompanionApiWireFormatTest {
         assertEquals(listOf("chorus line"), sections[2].lines)
     }
 
+    private val voiced = SongItem(
+        number = "8",
+        title = "Voices",
+        songbook = "Hymns",
+        lyrics = listOf("[Verse 1]", "Was blind, but 2>(now I see)", "", "[voice: 2]", "2>That saved", "[voice: 1]"),
+    )
+
+    @Test
+    fun `a song detail gives a phone the words without the second-voice markup`() {
+        val lines = buildSongDetail(voiced).sections.single().lines
+
+        assertEquals(listOf("Was blind, but now I see", "That saved"), lines)
+    }
+
+    @Test
+    fun `a song detail with markup kept gives every written line as it is`() {
+        val lines = buildSongDetail(voiced, keepMarkup = true).sections.single().lines
+
+        assertEquals(listOf("Was blind, but 2>(now I see)", "[voice: 2]", "2>That saved", "[voice: 1]"), lines)
+    }
+
     @Test
     fun `a fully populated schedule item survives the round trip`() {
         val item = ScheduleItemDto(

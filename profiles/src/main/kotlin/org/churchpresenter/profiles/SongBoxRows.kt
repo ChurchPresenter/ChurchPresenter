@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.profile_box
 import org.churchpresenter.strings.generated.resources.profile_box_pick_language
+import org.churchpresenter.strings.generated.resources.profile_second_voice_color
+import org.churchpresenter.strings.generated.resources.profile_second_voice_color_sub
 import org.churchpresenter.presenter.boxedPerLanguage
 import org.churchpresenter.presenter.songBoxKey
 import org.churchpresenter.presenter.titleSlideBoxKey
@@ -196,3 +198,19 @@ internal fun SongSettings.offersPosition(element: SongStyleElement, lowerThird: 
     val placed = element.hasPosition || storedPosition(element, lowerThird) != null
     return placed && !elsewhere && !cornered
 }
+
+/** The colour a song's second voice -- its `2>` lines and words -- is drawn in on this profile. */
+@Composable
+internal fun SecondVoiceColorRow(song: SongSettings, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
+    SettingsRow(
+        Res.string.profile_second_voice_color,
+        sub = stringResource(Res.string.profile_second_voice_color_sub),
+        paths = SONG_SECOND_VOICE_PATHS,
+    ) {
+        RowColor(song.layoutExtras.secondVoiceColor, { v ->
+            updateSong { it.copy(layoutExtras = it.layoutExtras.copy(secondVoiceColor = v)) }
+        })
+    }
+}
+
+private val SONG_SECOND_VOICE_PATHS = listOf("songSettings.layoutExtras.secondVoiceColor")

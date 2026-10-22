@@ -5,8 +5,9 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.withBackgroundsOf
+import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
+import org.churchpresenter.sharedui.utils.presentableSongLines
 
 /**
  * How a song reaches the presenter — the title and credit lines the panel shows and the section/line
@@ -46,31 +47,33 @@ internal fun resolveEditedSongPush(
         title = editedSong.title,
         translations = editedSong.presentableTranslations(),
         songNumber = editedSong.number.toIntOrNull() ?: 0,
-        lines = editedSong.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+        lines = presentableSongLines(editedSong.lyrics),
         type = Constants.SECTION_TYPE_SONG,
     )
     val lineIndex = liveLineIndex.coerceIn(0, (section.lines.size - 1).coerceAtLeast(0))
     return EditedSongPush(
         sectionIndex,
         lineIndex,
-        section.copy(bpm = tuning.bpm, capo = tuning.capo).withBackgroundsOf(editedSong),
+        section.copy(bpm = tuning.bpm, capo = tuning.capo)
+            .withBackgroundsOf(editedSong)
+            .withTextOverridesOf(editedSong),
     )
 }
 
 /**
- * Every language beside the primary as slide translations, background directives stripped.
+ * Every language beside the primary as slide translations, directives stripped.
  *
  * For the slides built straight from a song rather than by splitting it into sections — the
  * whole-song slide and the live-edit fallback. A directive is configuration written among the
  * lyrics, and putting one on screen is never right.
  *
- * Here rather than beside [LyricSection] in `:core-models` because [songBackgroundDirectiveOf] is
+ * Here rather than beside [LyricSection] in `:core-models` because [presentableSongLines] is
  * a `:shared-ui` rule, and that module may not depend on this one.
  */
 internal fun SongItem.presentableTranslations(): List<SectionTranslation> =
     extraTranslations().map { translation ->
         SectionTranslation(
             title = translation.title,
-            lines = translation.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+            lines = presentableSongLines(translation.lyrics),
         )
     }

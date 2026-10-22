@@ -50,8 +50,9 @@ internal fun rememberLyricsHighlight(): VisualTransformation {
     val chorus = SectionInk.of(SongSectionKind.CHORUS)
     val chord = MaterialTheme.colorScheme.primary
     val divider = MaterialTheme.colorScheme.onSurfaceVariant
-    return remember(verse, chorus, chord, divider) {
-        LyricsHighlighter(LyricsInks(verse = verse, chorus = chorus, chord = chord, divider = divider))
+    val voice = MaterialTheme.colorScheme.tertiary
+    return remember(verse, chorus, chord, divider, voice) {
+        LyricsHighlighter(LyricsInks(verse = verse, chorus = chorus, chord = chord, divider = divider, voice = voice))
     }
 }
 

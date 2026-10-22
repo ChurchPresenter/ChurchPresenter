@@ -73,6 +73,8 @@ data class LyricSection(
     val background: SongBackground = SongBackground(),
     /** The same for the lower-third band. */
     val lowerThirdBackground: SongBackground = SongBackground(),
+    /** The song's own font, size and colours, carried here for the same reason [background] is. */
+    val textOverrides: SongTextOverrides = SongTextOverrides(),
 ) {
     /**
      * The second language's title and lines.
@@ -103,6 +105,9 @@ fun LyricSection.withBackgroundsOf(song: SongItem): LyricSection = copy(
     background = if (background.isCustom) background else song.background,
     lowerThirdBackground = if (lowerThirdBackground.isCustom) lowerThirdBackground else song.lowerThirdBackground,
 )
+
+/** [section] with [song]'s own font, size and colours, so the presenter can draw them. */
+fun LyricSection.withTextOverridesOf(song: SongItem): LyricSection = copy(textOverrides = song.textOverrides)
 
 /**
  * This section with language [index]'s lines replaced and its title left alone, the list grown to

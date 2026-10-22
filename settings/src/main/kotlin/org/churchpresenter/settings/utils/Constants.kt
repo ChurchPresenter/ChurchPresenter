@@ -407,6 +407,7 @@ object Constants {
     const val CLIENT_ROLE_INSTANCE_LINK = "instance_link"
     const val QUERY_PARAM_API_KEY   = "apiKey"
     const val QUERY_PARAM_SONGBOOK  = "songbook"
+    const val QUERY_PARAM_MARKUP    = "markup"
     const val QUERY_PARAM_BOOK      = "book"
     const val QUERY_PARAM_CHAPTER   = "chapter"
 

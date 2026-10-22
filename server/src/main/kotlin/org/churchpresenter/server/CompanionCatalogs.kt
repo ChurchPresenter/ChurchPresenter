@@ -5,6 +5,8 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
+import org.churchpresenter.sharedui.utils.isLyricDirective
+import org.churchpresenter.sharedui.utils.plainLyricLine
 import org.churchpresenter.sharedui.utils.sectionLabelOf
 
 /**
@@ -12,7 +14,12 @@ import org.churchpresenter.sharedui.utils.sectionLabelOf
  * companion API serves. Pure functions of their arguments — they were members of `CompanionServer`
  * only because that is where the callers happened to live.
  */
-internal fun buildSongDetail(song: SongItem): SongDetailDto {
+/**
+ * One song's sections. A phone or a browser gets the words as they are sung — the second voice's
+ * markup and the directives taken out; an Instance Link follower asks for [keepMarkup], since it
+ * rebuilds the song from these lines and draws the second voice itself.
+ */
+internal fun buildSongDetail(song: SongItem, keepMarkup: Boolean = false): SongDetailDto {
     val sections = mutableListOf<SongSectionDto>()
     var currentType = Constants.SECTION_TYPE_VERSE
     var currentLabel: String? = null
@@ -28,8 +35,10 @@ internal fun buildSongDetail(song: SongItem): SongDetailDto {
             }
             currentType = if (isChorus) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
             currentLabel = sectionLabelOf(trimmed).ifEmpty { null }
-        } else if (trimmed.isNotEmpty()) {
-            currentLines.add(line)
+        } else if (keepMarkup) {
+            if (trimmed.isNotEmpty()) currentLines.add(line)
+        } else if (!isLyricDirective(trimmed)) {
+            plainLyricLine(line).takeIf { it.isNotBlank() }?.let(currentLines::add)
         }
     }
     if (currentLines.isNotEmpty()) {

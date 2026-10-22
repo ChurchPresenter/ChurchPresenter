@@ -7,6 +7,8 @@ import org.churchpresenter.songchords.SongSectionWords
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import org.churchpresenter.sharedui.utils.isLyricDirective
+import org.churchpresenter.sharedui.utils.plainLyricLine
 
 private const val SPS_FIELD_SEPARATOR = "#\$#"
 private const val SPS_MIN_FIELDS = 6
@@ -210,6 +212,8 @@ private fun spsLyricsText(lyrics: List<String>): String {
         // A section marker is any bracketed line — [Куплет], {Припев}, [Zwrotka 1], and equally
         // a name this app has no word for. Matching on a word list here instead would write
         // every unrecognised header back out as a lyric line, brackets and all.
+        // A directive configures the lines around it; SPS has no way to say it, so it is left out.
+        if (isLyricDirective(trimmedLine)) continue
         if (isHeaderLine(trimmedLine)) {
             result.appendSection(currentSection)
             currentSection = StringBuilder()
@@ -219,7 +223,7 @@ private fun spsLyricsText(lyrics: List<String>): String {
             )
         } else if (trimmedLine.isNotEmpty()) {
             if (currentSection.isNotEmpty()) currentSection.append("@%")
-            currentSection.append(trimmedLine)
+            currentSection.append(plainLyricLine(trimmedLine))
         }
     }
 

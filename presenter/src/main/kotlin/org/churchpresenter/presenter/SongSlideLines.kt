@@ -17,8 +17,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.sharedui.utils.spacingEm
-import org.churchpresenter.sharedui.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.voicedDisplayText
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.songchords.SecondVoice
 
 /* A song slide's lyric and next-section lines, drawn per language. */
 
@@ -51,11 +52,12 @@ internal fun SongSlide.LyricLine(lineIdx: Int, line: String, laStart: Int, langu
         fontFamily = styling.fontFamily,
         fontSize = styling.fontSize,
         softWrap = appSettings.songSettings.wordWrap,
-        text = styledDisplayText(
+        text = voicedDisplayText(
             line,
             lineProfile.transform,
             spacingEm(lineProfile.letterSpacing, lineProfile.fontSize),
             spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
+            secondVoiceColor = if (isLookAheadLine) null else secondVoiceColor,
         ),
         color = styling.color,
         style = styling.textStyle,
@@ -113,7 +115,7 @@ internal fun SongSlide.NextSectionPlaceholder(block: SongLanguageBlock, gapAfter
                     fontFamily = placeholderStyling.fontFamily,
                     fontSize = placeholderStyling.fontSize,
                     softWrap = appSettings.songSettings.wordWrap,
-                    text = line,
+                    text = SecondVoice.plain(line),
                     color = placeholderStyling.color,
                     style = placeholderStyling.textStyle,
                 )

@@ -5,6 +5,7 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.withBackgroundsOf
+import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -32,7 +33,7 @@ fun titleSlideSection(
         ccli = song.ccliNumber,
         bpm = tuning.bpm,
         capo = tuning.capo,
-    ).withBackgroundsOf(song)
+    ).withBackgroundsOf(song).withTextOverridesOf(song)
     return section.copy(lines = titleSlideLines(section, settings).map { it.plainText })
 }
 

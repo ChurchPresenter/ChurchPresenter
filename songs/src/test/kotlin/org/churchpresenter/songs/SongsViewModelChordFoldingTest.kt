@@ -39,7 +39,7 @@ class SongsViewModelChordFoldingTest {
     private fun chordsOnly(header: String, vararg chords: String) =
         LyricSection(header = header, type = "verse", lines = emptyList(), chordLines = chords.toList())
 
-    private fun fold(vararg sections: LyricSection) = model.foldChordOnlySections(sections.toList())
+    private fun fold(vararg sections: LyricSection) = foldChordOnlySections(sections.toList())
 
     @Test
     fun `an intro is folded onto the section that follows it`() {
@@ -108,7 +108,7 @@ class SongsViewModelChordFoldingTest {
     fun `a song that is nothing but chords is left as it was written`() {
         val onlyChords = listOf(chordsOnly("[Intro]", "[G] [C]"))
 
-        assertEquals(onlyChords, model.foldChordOnlySections(onlyChords))
+        assertEquals(onlyChords, foldChordOnlySections(onlyChords))
     }
 
     @Test
@@ -146,11 +146,11 @@ class SongsViewModelChordFoldingTest {
             words("[Verse 2]", "Twas grace"),
         )
 
-        assertEquals(sections, model.foldChordOnlySections(sections))
+        assertEquals(sections, foldChordOnlySections(sections))
     }
 
     @Test
     fun `an empty song folds to nothing`() {
-        assertEquals(emptyList<LyricSection>(), model.foldChordOnlySections(emptyList()))
+        assertEquals(emptyList<LyricSection>(), foldChordOnlySections(emptyList()))
     }
 }

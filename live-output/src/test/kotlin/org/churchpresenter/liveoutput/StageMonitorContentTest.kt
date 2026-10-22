@@ -168,6 +168,20 @@ class StageMonitorContentTest {
         }
     }
 
+    @Test
+    fun `the singers see the words without the second-voice markup`() {
+        assertEquals(
+            "Amazing grace\nThat saved\nWas blind, but now I see",
+            stageCurrentText(
+                Presenting.LYRICS,
+                section("Amazing grace", "2>That saved", "Was blind, but 2>(now I see)"),
+                emptyList(),
+            ),
+        )
+        val sections = listOf(section("one"), section("2>That saved"))
+        assertEquals("That saved", stageNextText(Presenting.LYRICS, sections, 0, emptyList()))
+    }
+
     // ── stageNextText ─────────────────────────────────────────────────────────────────────────
 
     @Test
