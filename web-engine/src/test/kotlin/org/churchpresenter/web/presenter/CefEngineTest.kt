@@ -3,6 +3,9 @@ package org.churchpresenter.web.presenter
 import io.mockk.mockk
 import org.cef.CefClient
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.nio.file.AccessDeniedException
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -26,12 +29,14 @@ class CefEngineTest {
     private val cleanedUp = mutableListOf<File>()
     private val failures = mutableListOf<Throwable>()
     private val warnings = mutableListOf<Pair<Throwable, Map<String, String>>>()
+    private val tags = mutableMapOf<String, String>()
     private var installs = 0
 
     private val engine = CefEngine(
         cleanupLegacy = { cleanedUp += it },
         reportFailure = { failures += it },
         reportWarning = { _, t, tags -> warnings += t to tags },
+        setTag = { key, value -> tags[key] = value },
     )
 
     @AfterTest
@@ -123,6 +128,38 @@ class CefEngineTest {
         assertEquals("libnspr4.so", engine.missingLibrary)
         assertFalse(engine.initialized)
         assertEquals(emptyList(), failures)
+    }
+
+    @Test
+    fun `a file of the install held open during extraction is tagged as in use instead of reported`() {
+        // CHURCH-PRESENTER-DESKTOP-BN, on a Spanish Windows: the reason is localised, the path is not.
+        val cause = FileNotFoundException("${root.absolutePath}\\jcef\\chrome_elf.dll (Acceso denegado)")
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, cause))
+
+        assertEquals("install_in_use", tags["jcef.blocked"])
+        assertFalse(engine.initialized)
+        assertEquals(emptyList(), failures)
+    }
+
+    @Test
+    fun `a denied file under the install is in use however it is wrapped`() {
+        val denied = AccessDeniedException(File(root, "jcef/libcef.dll").absolutePath)
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, IOException("extraction failed", denied)))
+
+        assertEquals("install_in_use", tags["jcef.blocked"])
+        assertEquals(emptyList(), failures)
+    }
+
+    @Test
+    fun `a file that will not open outside the install is still reported`() {
+        val elsewhere = FileNotFoundException("${File(root, "webview-cache").absolutePath}\\Cookies (Acceso denegado)")
+        val sibling = FileNotFoundException("${root.absolutePath}\\jcef-old\\chrome_elf.dll (Access is denied)")
+
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, elsewhere))
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, sibling))
+
+        assertEquals(listOf<Throwable>(elsewhere, sibling), failures)
+        assertNull(tags["jcef.blocked"])
     }
 
     @Test

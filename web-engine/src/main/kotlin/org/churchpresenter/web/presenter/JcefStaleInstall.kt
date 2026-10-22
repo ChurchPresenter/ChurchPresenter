@@ -2,6 +2,8 @@ package org.churchpresenter.web.presenter
 
 import me.friwi.jcefmaven.impl.step.check.CefInstallationChecker
 import java.io.File
+import java.io.FileNotFoundException
+import java.nio.file.AccessDeniedException
 
 /**
  * Clears an install of [installDir] that jcefmaven would discard, or says why it cannot.
@@ -34,3 +36,33 @@ internal fun clearIncompleteInstall(
  */
 internal fun installIsComplete(installDir: File): Boolean =
     runCatching { CefInstallationChecker.checkInstallation(installDir) }.getOrDefault(true)
+
+/**
+ * Whether [cause], or anything it wraps, is a file under [installDir] the install could not open --
+ * held by another process after [clearIncompleteInstall] had looked, as a Chromium helper still
+ * running from a session that did not exit holds `chrome_elf.dll`. Like the check before it, that
+ * is the machine and not a defect.
+ *
+ * Decided by exception type and by the path alone. A [FileNotFoundException]'s message is
+ * "<path> (<reason>)", the reason in the OS's own language, so only its path is compared; an
+ * [AccessDeniedException] names its file outright.
+ */
+internal fun lockedInInstall(cause: Throwable, installDir: File): Boolean {
+    val prefix = normalized(installDir.absolutePath).trimEnd('/') + "/"
+    return generateSequence(cause) { it.cause.takeIf { next -> next !== it } }
+        .take(MAX_CAUSES)
+        .mapNotNull { t ->
+            when (t) {
+                is AccessDeniedException -> t.file
+                is FileNotFoundException -> t.message
+                else -> null
+            }
+        }
+        .any { normalized(it).startsWith(prefix, ignoreCase = true) }
+}
+
+/** [path] with Windows' separators as `/`, so one prefix comparison works on either. */
+private fun normalized(path: String): String = path.replace('\\', '/')
+
+/** How deep a cause chain is followed; far past any real wrapping, short of a cycle. */
+private const val MAX_CAUSES = 8
