@@ -7,16 +7,17 @@ import org.churchpresenter.settings.isWickAvailable
 
 /**
  * Whether "Meet Wick" is on screen: asked for again, or due the first time — after the licence, the
- * setup wizard and the startup update check, and never beside the update window, the story prompt
- * or a live service, so only one of them is ever up at once.
+ * setup wizard and the startup update check, never beside the update window, the story prompt
+ * or a live service, so only one of them is ever up at once, and not on a start the pacing keeps
+ * quiet ([wickIntroDeferred]).
  */
 internal val AppRootState.wickIntroShowing: Boolean
     get() {
         if (helperState.replayIntro) return true
         val helper = appSettings.helper
         return wickAvailable && !helper.introSeen && helper.enabled && appReady && eulaAccepted &&
-            !showSetupWizard && startupChecksDone && pendingUpdateResult == null && !showStoryPrompt &&
-            presenterManager.liveContent.value.isEmpty()
+            !showSetupWizard && startupChecksDone && !wickIntroDeferred && pendingUpdateResult == null &&
+            !showStoryPrompt && presenterManager.liveContent.value.isEmpty()
     }
 
 /**
