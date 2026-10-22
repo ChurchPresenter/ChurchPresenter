@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -78,7 +78,8 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
         right = stageWidth - (m.right * scale).dp,
         bottom = stageHeight - (m.bottom * scale).dp,
     )
-    // Where the overlay sits in the window: the presenter reports its blocks in window pixels.
+    // Where the overlay sits in its root: the presenter reports its blocks in root pixels, since
+    // window pixels cost a native call to AWT on every layout pass.
     var origin by remember { mutableStateOf(Offset.Zero) }
     val density = LocalDensity.current.density
     val reported = LocalPresentedBlocks.current.orEmpty()
@@ -102,7 +103,7 @@ internal fun PreviewAdjustOverlay(model: AdjustModel, stageWidth: Dp, output: Ou
     Box(
         Modifier
             .size(stageWidth, stageHeight)
-            .onGloballyPositioned { origin = it.boundsInWindow().topLeft }
+            .onGloballyPositioned { origin = it.boundsInRoot().topLeft }
             .testTag(ADJUST_OVERLAY_TAG),
     ) {
         if (model.boxesOnly) {
