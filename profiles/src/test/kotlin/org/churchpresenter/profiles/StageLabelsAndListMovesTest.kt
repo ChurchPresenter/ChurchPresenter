@@ -3,11 +3,14 @@
 package org.churchpresenter.profiles
 
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.MetronomePosition
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.StageMonitorContentType
 import org.churchpresenter.settings.StageMonitorLayout
 import org.churchpresenter.settings.StageMonitorZone
+import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -77,7 +80,45 @@ class StageLabelsAndListMovesTest {
     @Test
     fun `a setting's path reads as words, with the translation it belongs to`() {
         assertEquals("Text font size · KJV", settingPathLabel("bibleSettings.translations[kjv.spb].textFontSize"))
+        assertEquals(
+            "Text font size · BIBLE [KJV]",
+            settingPathLabel("bibleSettings.translations[Bible [KJV\\].spb].textFontSize"),
+        )
         assertEquals("Margin top", settingPathLabel("songSettings.marginTop"))
         assertEquals("Bold", settingPathLabel("bold"))
+    }
+
+    @Test
+    fun `a Bible box's path reads as its item and its translation`() {
+        assertEquals(
+            "Y percent · Reference · KJV",
+            settingPathLabel("bibleSettings.textBoxes[REFERENCE#kjv.spb].yPercent"),
+        )
+        assertEquals(
+            "X percent · Text · KJV · LT",
+            settingPathLabel("bibleSettings.textBoxes[TEXT#kjv.spb@LT].xPercent"),
+        )
+    }
+
+    @Test
+    fun `one row for a change alike on every translation, never for boxes`() {
+        val box = TextBox(enabled = true, yPercent = 40f)
+        val profile = OutputProfile(
+            bibleSettings = BibleSettings(
+                translations = listOf("kjv.spb", "rst.spb").map {
+                    BibleTranslationSettings(fileName = it, textFontSize = 50)
+                },
+                textBoxes = mapOf("REFERENCE#kjv.spb" to box, "REFERENCE#rst.spb" to box),
+            ),
+        )
+        val sizes = listOf(
+            "bibleSettings.translations[kjv.spb].textFontSize",
+            "bibleSettings.translations[rst.spb].textFontSize",
+        )
+        val boxes = listOf(
+            "bibleSettings.textBoxes[REFERENCE#kjv.spb].yPercent",
+            "bibleSettings.textBoxes[REFERENCE#rst.spb].yPercent",
+        )
+        assertEquals(listOf(sizes) + boxes.map(::listOf), groupedAcrossTranslations(sizes + boxes, profile))
     }
 }

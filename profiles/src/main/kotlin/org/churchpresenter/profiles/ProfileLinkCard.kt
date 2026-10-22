@@ -148,7 +148,7 @@ private fun DefaultsCard(
                     onValueChange = { _, value ->
                         onProfileChange(paths.fold(profile) { p, at -> p.withValueAt(at, value) })
                     },
-                    label = "${settingPathLabel(path.replace(ENTRY, ""))} · $all",
+                    label = "${settingPathLabel(path.replace(TRANSLATION_ENTRY, "translations"))} · $all",
                     onRevert = { onProfileChange(paths.fold(profile) { p, at -> p.withDefaultAt(at) }) },
                 )
             }
@@ -165,10 +165,10 @@ private fun DefaultsCard(
  */
 internal fun groupedAcrossTranslations(changes: List<String>, profile: OutputProfile): List<List<String>> {
     val translations = profile.bibleSettings.translations.size
-    val byShape = changes.groupBy { it.replace(ENTRY, "[*]") }
+    val byShape = changes.groupBy { it.replace(TRANSLATION_ENTRY, ANY_TRANSLATION) }
     val emitted = mutableSetOf<String>()
     return changes.mapNotNull { path ->
-        val shape = path.replace(ENTRY, "[*]")
+        val shape = path.replace(TRANSLATION_ENTRY, ANY_TRANSLATION)
         val group = byShape.getValue(shape)
         val alike = shape != path && translations > 1 && group.size == translations &&
             group.map { profile.valueAt(it) }.distinct().size == 1
@@ -179,6 +179,10 @@ internal fun groupedAcrossTranslations(changes: List<String>, profile: OutputPro
         }
     }
 }
+
+/** One translation's entry in a path -- not a Bible box, which names its translation in its key. */
+private val TRANSLATION_ENTRY = Regex("""translations\[(?:\\.|[^]\\])*]""")
+private const val ANY_TRANSLATION = "translations[*]"
 
 /** Test handle for the card listing what a profile changes from the defaults. */
 internal const val DEFAULTS_CARD_TAG = "profile_defaults_card"
@@ -313,21 +317,6 @@ private fun InlineValue(
         }
     }
 }
-
-/**
- * A setting's name read off its path: `bibleSettings.translations[kjv.spb].textFontSize` is
- * "Text font size · KJV". Named after the stored field, so it reads the way the settings file does
- * rather than the way a row labels it -- the card lists changes on every page, not only this one's.
- */
-internal fun settingPathLabel(path: String): String {
-    val entry = ENTRY.find(path)?.groupValues?.get(1)?.substringBeforeLast('.')?.uppercase()
-    val leaf = path.replace(ENTRY, "").substringAfterLast('.')
-    val words = leaf.replace(CAMEL_HUMP, " $1").lowercase().replaceFirstChar { it.uppercase() }
-    return if (entry != null) "$words · $entry" else words
-}
-
-private val ENTRY = Regex("\\[([^]]*)]")
-private val CAMEL_HUMP = Regex("(?<=[a-z0-9])([A-Z])")
 
 /** Test handle for one change in the card. */
 internal fun changeRowTag(path: String): String = "profile_change_$path"

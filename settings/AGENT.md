@@ -147,6 +147,11 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
 - **Version 23** turns a profile's fifteen flat `show*` switches into its `look`, grouped by layer
   (`OutputLook.kt`, `migrateShowSwitchesIntoLooks`), and renames a follower's overrides of them by
   `LEGACY_LOOK_PATHS`. Edit a look through `withLook`/`withBackground`/`withMedia`/`withSlide`.
+- **Version 24** renames the paths a follower's overrides were written with where a key holds a dot
+  -- a Bible box's `REFERENCE#kjv.spb` -- and takes out the empty boxes they made
+  (`migrateDottedSettingPaths`). Such a key is named in brackets, as a translation is
+  (`bibleSettings.textBoxes[REFERENCE#kjv.spb].yPercent`), and a `]` or `\` in a bracketed name is
+  escaped with a backslash. Never build a path by hand from a key: read it from `settingPaths()`.
 - **The main window follows a profile** for everything that is not one per install
   (`operatorProfile`: the first profile an output uses, else the first profile). Read
   `operatorSongSettings()`/`operatorBibleSettings()` for verse splitting, the title slide, chorus

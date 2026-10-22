@@ -4,7 +4,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import java.util.Collections
@@ -41,9 +40,6 @@ private val DOCUMENT_KEYS = mapOf(
     "qaSettings" to QA_GLOBAL_KEYS,
 )
 
-/** The key a list's entries are told apart by, so each can be followed or given its own look. */
-private const val ENTRY_KEY = "fileName"
-
 /** The path of the display mode, which a linked profile always takes from its master. */
 const val DISPLAY_MODE_PATH = "displayMode"
 
@@ -59,83 +55,69 @@ fun OutputProfile.settingPaths(): Map<String, JsonElement> = RecentSettingPaths.
 }
 
 /** One of the profile's own fields: a settings object is flattened without its document-owned keys. */
-internal fun flattenTopLevel(key: String, value: JsonElement, out: MutableMap<String, JsonElement>) {
+internal fun flattenTopLevel(key: String, value: JsonElement, out: MutableMap<String, JsonElement>) =
+    walkTopLevel(key, value) { path, _, leaf -> out[path] = leaf }
+
+/**
+ * Each value under the profile field [key], handed to [visit] with its path and the path builds
+ * before version 24 wrote for it: every key after a dot, no name escaped.
+ */
+private fun walkTopLevel(key: String, value: JsonElement, visit: (String, String, JsonElement) -> Unit) {
     val ignored = DOCUMENT_KEYS[key].orEmpty()
     if (value is JsonObject) {
-        value.forEach { (inner, v) -> if (inner !in ignored) flatten(v, "$key.$inner", out) }
+        value.forEach { (inner, v) -> if (inner !in ignored) walk(v, member(key, inner), "$key.$inner", visit) }
     } else {
-        flatten(value, key, out)
+        walk(value, key, key, visit)
     }
 }
 
-private fun flatten(element: JsonElement, path: String, out: MutableMap<String, JsonElement>) {
+private fun walk(element: JsonElement, path: String, legacy: String, visit: (String, String, JsonElement) -> Unit) {
     when {
         element is JsonObject && element.isNotEmpty() ->
-            element.forEach { (key, value) -> flatten(value, "$path.$key", out) }
+            element.forEach { (key, value) -> walk(value, member(path, key), "$legacy.$key", visit) }
         element is JsonArray && element.isNotEmpty() && element.all { it.entryName() != null } ->
-            element.forEach { flatten(it, "$path[${it.entryName()}]", out) }
-        else -> out[path] = element
+            element.forEach {
+                val name = it.entryName().orEmpty()
+                walk(it, named(path, name), "$legacy[$name]", visit)
+            }
+        else -> visit(path, legacy, element)
     }
 }
 
-private fun JsonElement.entryName(): String? =
-    (this as? JsonObject)?.get(ENTRY_KEY)?.let { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
+/**
+ * The path of an object's member [key] under [path]: after a dot, or -- a key a dot or a bracket
+ * would cut short, like a Bible box's `REFERENCE#kjv.spb` -- named in brackets.
+ */
+private fun member(path: String, key: String): String =
+    if (key.none { it in PATH_SYNTAX }) "$path.$key" else named(path, key)
 
-/** One step of a path: a key, and -- for a list of named entries -- which entry. */
-internal data class PathStep(val key: String, val entry: String?)
+/**
+ * [path] with [name] in brackets: a list's entry, or an object's member that needs them. A bracket
+ * or a backslash in the name is escaped with a backslash, so a file name may hold one.
+ */
+private fun named(path: String, name: String): String =
+    "$path[${name.replace("\\", "\\\\").replace("]", "\\]")}]"
 
-internal fun parsePath(path: String): List<PathStep> {
-    val steps = mutableListOf<PathStep>()
-    var i = 0
-    val key = StringBuilder()
-    while (i <= path.length) {
-        val c = path.getOrNull(i)
-        when (c) {
-            null, '.' -> {
-                if (key.isNotEmpty()) steps += PathStep(key.toString(), null)
-                key.clear()
-            }
-            '[' -> {
-                val close = path.indexOf(']', i)
-                steps += PathStep(key.toString(), path.substring(i + 1, close))
-                key.clear()
-                i = close
-                if (path.getOrNull(i + 1) == '.') i++
-            }
-            else -> key.append(c)
+/** The characters a key cannot hold after a dot. */
+private val PATH_SYNTAX = charArrayOf('.', '[', ']')
+
+/**
+ * Each of [profile]'s paths as builds before version 24 wrote it, mapped to how it is written now,
+ * where the two differ: a key with a dot in it, or a name with a bracket or a backslash.
+ */
+internal fun legacyPathRenames(profile: JsonObject): Map<String, String> {
+    val renames = LinkedHashMap<String, String>()
+    profile.forEach { (key, value) ->
+        if (key !in IDENTITY_KEYS) {
+            walkTopLevel(key, value) { path, legacy, _ -> if (legacy != path) renames[legacy] = path }
         }
-        i++
     }
-    return steps
+    return renames
 }
 
-/** [root] with the value at [path] replaced by [value], or null when [root] has nowhere to put it. */
-internal fun setAt(root: JsonObject, path: List<PathStep>, value: JsonElement): JsonObject? {
-    val step = path.first()
-    val rest = path.drop(1)
-    val current = root[step.key]
-    val replaced = when {
-        step.entry != null -> (current as? JsonArray)?.let { setEntry(it, step.entry, rest, value) }
-        rest.isEmpty() -> value
-        current != null && current !is JsonObject -> null
-        // A key the object does not have yet -- an entry of a map the master left empty -- is added.
-        else -> setAt(current ?: JsonObject(emptyMap()), rest, value)
-    }
-    return replaced?.let { JsonObject(root + (step.key to it)) }
+/** Every path of a serialized profile, identity keys left out. */
+internal fun JsonObject.paths(): Set<String> {
+    val out = LinkedHashMap<String, JsonElement>()
+    forEach { (key, value) -> if (key !in IDENTITY_KEYS) flattenTopLevel(key, value, out) }
+    return out.keys
 }
-
-/** [list] with the entry named [name] given [value] at [rest], or null when it has no such entry. */
-private fun setEntry(list: JsonArray, name: String, rest: List<PathStep>, value: JsonElement): JsonArray? {
-    val index = list.indexOfFirst { it.entryName() == name }
-    val entry = list.getOrNull(index)
-    val newEntry = when {
-        entry == null -> null
-        rest.isEmpty() -> value
-        else -> (entry as? JsonObject)?.let { setAt(it, rest, value) }
-    }
-    return newEntry?.let { replacement -> JsonArray(list.toMutableList().also { it[index] = replacement }) }
-}
-
-/** Whether [path] is [prefix] itself or lies under it. */
-fun pathWithin(path: String, prefix: String): Boolean =
-    path == prefix || path.startsWith("$prefix.") || path.startsWith("$prefix[")
