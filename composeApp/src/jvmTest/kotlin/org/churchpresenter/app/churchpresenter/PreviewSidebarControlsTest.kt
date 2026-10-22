@@ -19,6 +19,9 @@ import org.churchpresenter.dialogs.clearGroupItemTag
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.ProfileSet
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.PreviewLayout
@@ -146,6 +149,29 @@ class PreviewSidebarControlsTest {
             onNodeWithTag("preview_layout_done").performClick()
             waitForIdle()
             onNodeWithTag("preview_layout_done").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `the profile sets button shows only while switched on, and applies a set`() {
+        val start = AppSettings().let {
+            it.copy(
+                projectionSettings = it.projectionSettings.copy(
+                    outputProfiles = listOf(OutputProfile(id = "a"), OutputProfile(id = "b")),
+                    screenAssignments = List(2) { ScreenAssignment(activeProfileId = "a") },
+                    profileSets = listOf(ProfileSet("set1", "Youth", mapOf("screen:0" to "b", "screen:1" to "b"))),
+                ),
+            )
+        }
+        sidebar(start) { onNodeWithTag(PROFILE_SETS_BUTTON_TAG).assertDoesNotExist() }
+        val on = start.copy(projectionSettings = start.projectionSettings.copy(showProfileSetsButton = true))
+        sidebar(on) { seen ->
+            onNodeWithTag(PROFILE_SETS_BUTTON_TAG).performClick()
+            waitForIdle()
+            onNodeWithText("Youth").performClick()
+            waitForIdle()
+            val used = seen.applied(on).projectionSettings.screenAssignments.map { it.activeProfileId }
+            assertEquals(listOf("b", "b"), used)
         }
     }
 
