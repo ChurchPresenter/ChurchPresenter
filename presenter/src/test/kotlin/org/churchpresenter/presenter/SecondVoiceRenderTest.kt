@@ -161,7 +161,7 @@ class SecondVoiceRenderTest {
             )
         }
 
-        waitFor("the voice pass draws its words") { it.count(::isRed) }
+        waitFor("the voice pass draws its words") { it.count(::isReddish) }
         assertTrue(pixels().count(::isWhite) > 0, "the main voice's words stay white")
     }
 
@@ -178,7 +178,7 @@ class SecondVoiceRenderTest {
         }
 
         waitFor("the key band draws") { it.count(::isWhite) }
-        assertEquals(0, pixels().count(::isRed))
+        assertEquals(0, pixels().count(::isReddish))
     }
 
     private companion object {
@@ -187,6 +187,10 @@ class SecondVoiceRenderTest {
 }
 
 private fun isRed(c: Color) = c.red > 0.7f && c.green < 0.3f && c.blue < 0.3f
+
+// A band's lines are small, and Linux smooths their edges in grey, so no pixel of a red word is
+// pure red there: red well ahead of green and blue is what marks one.
+private fun isReddish(c: Color) = c.red > 0.6f && c.red - c.green > 0.3f && c.red - c.blue > 0.3f
 private fun isGreen(c: Color) = c.green > 0.7f && c.red < 0.3f && c.blue < 0.3f
 private fun isBlue(c: Color) = c.blue > 0.7f && c.red < 0.3f && c.green < 0.3f
 private fun isWhite(c: Color) = c.red > 0.9f && c.green > 0.9f && c.blue > 0.9f
