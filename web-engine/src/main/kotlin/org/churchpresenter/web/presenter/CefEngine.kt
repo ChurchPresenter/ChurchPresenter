@@ -7,6 +7,7 @@ import org.cef.CefClient
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val ASCII_MAX = 128
 
@@ -150,6 +151,20 @@ internal class CefEngine(
         reportFailure(outcome.cause)
     }
 
+    private val startedEarly = AtomicBoolean(false)
+
+    /**
+     * Brings the native engine up ahead of the first browser: one client, made and disposed through
+     * [offThread]. JCEF runs its native start-up on the event thread whichever thread asks, and it
+     * held that thread a quarter of a second at the first page load (CHURCH-PRESENTER-DESKTOP-DR);
+     * this cannot move it off, only to the moment the Web tab opens, before a page is typed. Once per
+     * session, and never without an engine.
+     */
+    fun startEarly(offThread: (() -> Unit) -> Unit = ::onDaemonThread) {
+        if (clientSource == null || !startedEarly.compareAndSet(false, true)) return
+        offThread { createClient()?.dispose() }
+    }
+
     /**
      * A client for a new browser, or null when the engine cannot provide one.
      *
@@ -176,4 +191,9 @@ internal class CefEngine(
             null
         }
     }
+}
+
+/** Runs [work] on a daemon thread of its own, so the engine's start never holds the app open. */
+private fun onDaemonThread(work: () -> Unit) {
+    Thread(work, "jcef-start").apply { isDaemon = true }.start()
 }

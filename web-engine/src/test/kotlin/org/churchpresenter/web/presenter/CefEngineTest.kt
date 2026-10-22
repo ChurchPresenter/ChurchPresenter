@@ -1,12 +1,15 @@
 package org.churchpresenter.web.presenter
 
 import io.mockk.mockk
+import io.mockk.verify
 import org.cef.CefClient
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.AccessDeniedException
 import java.nio.file.Files
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -226,5 +229,49 @@ class CefEngineTest {
         assertEquals(before + 1, logs.size, "the install failure, and only it, was written")
         assertTrue(logs.any { "chrome_elf.dll" in it.readText() })
         assertNull(defaults.clientSource, "the failed source is dropped")
+    }
+
+    // ── Starting early ──────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `with no engine nothing is started early`() {
+        val work = mutableListOf<() -> Unit>()
+        engine.startEarly { work += it }
+        assertEquals(0, work.size)
+    }
+
+    @Test
+    fun `an engine starts early once, off the caller's thread, with a client it disposes`() {
+        val client = mockk<CefClient>(relaxed = true)
+        var made = 0
+        engine.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
+        engine.clientSource = { made++; client }
+        val work = mutableListOf<() -> Unit>()
+
+        engine.startEarly { work += it }
+        engine.startEarly { work += it }
+        assertEquals(0, made, "nothing is made on the caller's thread")
+        assertEquals(1, work.size, "a second request starts nothing")
+
+        work.single()()
+        assertEquals(1, made)
+        verify(exactly = 1) { client.dispose() }
+    }
+
+    @Test
+    fun `on its own default the early start runs on a daemon thread`() {
+        val made = CountDownLatch(1)
+        var thread: Thread? = null
+        engine.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
+        engine.clientSource = {
+            thread = Thread.currentThread()
+            made.countDown()
+            mockk(relaxed = true)
+        }
+
+        engine.startEarly()
+        assertTrue(made.await(10, TimeUnit.SECONDS))
+        assertTrue(thread?.isDaemon == true)
+        assertFalse(thread === Thread.currentThread())
     }
 }

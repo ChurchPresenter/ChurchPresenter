@@ -75,6 +75,7 @@ internal fun webTab(
     cefInitialized: Boolean = true,
     cefMacOsUnsupported: Boolean = false,
     cefBlockedByPolicy: Boolean = false,
+    startEngine: () -> Unit = {},
     hasSecondaryDisplay: Boolean = false,
     includeAddToSchedule: Boolean = true,
     /**
@@ -109,6 +110,7 @@ internal fun webTab(
                         cefInitialized = cefInitialized,
                         cefMacOsUnsupported = cefMacOsUnsupported,
                         cefBlockedByPolicy = cefBlockedByPolicy,
+                        startEngine = startEngine,
                         hasSecondaryDisplay = hasSecondaryDisplay,
                     )
                 }

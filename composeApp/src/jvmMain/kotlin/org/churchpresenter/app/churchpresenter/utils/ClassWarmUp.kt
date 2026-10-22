@@ -89,6 +89,10 @@ internal val WARM_CLASSES = listOf(
     "org.churchpresenter.serverui.ServerClientsCardKt",
     "org.churchpresenter.serverui.CompanionTriggersCardKt",
     "org.churchpresenter.serverui.CalendarSyncCardKt",
+    // The song editor's Output pane: its preview, the song's own look and the font picker in it.
+    "org.churchpresenter.songs.EditSongOutputPreviewKt",
+    "org.churchpresenter.songs.EditSongLookKt",
+    "org.churchpresenter.sharedui.composables.FontSettingsDropdownKt",
     // The plugins the companion server installs as it starts.
     "io.ktor.server.plugins.cors.routing.CORSKt",
     "io.ktor.server.plugins.cors.CORSConfig",

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -83,6 +84,18 @@ internal fun binarySearchFitScale(
     }
     return lo
 }
+
+/**
+ * The full-screen and lower-third grid fit: [binarySearchFitScale] over [fits], searched again only
+ * when one of [keys] -- everything the measurement reads -- changes. Each search measures every
+ * translation about a dozen times; run on every recomposition it held the event thread for over a
+ * second on a slow machine (CHURCH-PRESENTER-DESKTOP-F0).
+ */
+@Composable
+internal fun rememberFitScale(vararg keys: Any?, fits: (scale: Float) -> Boolean): Float =
+    remember(*keys) { binarySearchFitScale(iterations = FIT_SEARCH_ITERATIONS, fits = fits) }
+
+private const val FIT_SEARCH_ITERATIONS = 10
 
 /**
  * The line under (or over) a verse: "KJV John 3:16".
