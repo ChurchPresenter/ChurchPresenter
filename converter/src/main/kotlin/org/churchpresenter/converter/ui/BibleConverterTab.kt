@@ -106,7 +106,17 @@ fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
             when (state) {
                 ConvertState.SELECT -> {
                     KeyButton(shape = ButtonShape, onClick = {
-                        previewItems = buildBiblePreview(inputFiles, outputDir); state = ConvertState.PREVIEW
+                        val chosen = inputFiles
+                        val destination = outputDir
+                        state = ConvertState.CONVERTING
+                        scope.launch {
+                            // Every file is parsed as XML, so the preview is built off the event thread.
+                            val items = withContext(Dispatchers.IO) { buildBiblePreview(chosen, destination) }
+                            if (inputFiles == chosen && state == ConvertState.CONVERTING) {
+                                previewItems = items
+                                state = ConvertState.PREVIEW
+                            }
+                        }
                     }, enabled = inputFiles.isNotEmpty()) {
                         Icon(Icons.Default.Preview, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp)); Text(Strings.preview)
                     }
