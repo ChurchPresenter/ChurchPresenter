@@ -101,6 +101,17 @@ class AppTest {
     }
 
     @Test
+    fun `the chosen files are listed with their sizes, up to the card's limit`() = withTempDir("app-entries") { dir ->
+        val files = (0..FILE_LIST_LIMIT).map { File(dir, "f$it.sng").apply { writeText("x".repeat(it)) } }
+
+        val entries = selectedEntries(files)
+
+        assertEquals(FILE_LIST_LIMIT, entries.size)
+        assertEquals(SelectedEntry("f0.sng", formatFileSize(0)), entries.first())
+        assertEquals(SelectedEntry("f42.sng", formatFileSize(42)), entries[42])
+    }
+
+    @Test
     fun `a song book preview lists its songs, and an unreadable one carries the error`() = withTempDir("app-sps") { dir ->
         val book = File(dir, "book.sps").apply { writeText("##SoftProjector\n##Psalms\n7#\$#Psalm#\$#x#\$##\$##\$##\$#line\n") }
         File(dir, "Psalms").mkdirs()

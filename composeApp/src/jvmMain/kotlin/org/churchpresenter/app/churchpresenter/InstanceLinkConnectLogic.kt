@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.normalizePrimaryHost
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -60,7 +61,10 @@ internal fun isControllerConnected(status: InstanceLinkStatus, role: InstanceLin
 internal fun isInstanceLinkFollowerClient(clientId: String, followers: Set<String>): Boolean =
     clientId.isNotBlank() && clientId in followers
 
-/** The URL a follower streams a mirrored media item from, carrying the key when one is set. */
+/**
+ * The URL a follower streams a mirrored media item from, carrying the key when one is set. [host]
+ * is normalized as the link's own connect normalizes it, so a saved `host:port` streams from the host.
+ */
 internal fun instanceLinkMediaStreamUrl(
     host: String,
     port: Int,
@@ -68,7 +72,8 @@ internal fun instanceLinkMediaStreamUrl(
     itemId: String,
 ): String {
     val keyParam = if (apiKey.isNotEmpty()) "?${Constants.QUERY_PARAM_API_KEY}=$apiKey" else ""
-    return "http://$host:$port${Constants.ENDPOINT_MEDIA_STREAM}/$itemId$keyParam"
+    val primaryHost = normalizePrimaryHost(host).host
+    return "http://$primaryHost:$port${Constants.ENDPOINT_MEDIA_STREAM}/$itemId$keyParam"
 }
 
 /** Whether the link is anything other than fully down, connecting included. */

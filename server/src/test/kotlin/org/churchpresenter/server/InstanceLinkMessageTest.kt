@@ -1,11 +1,13 @@
 package org.churchpresenter.server
 
 import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.plugins.websocket.WebSocketException
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.nio.channels.UnresolvedAddressException
 import javax.net.ssl.SSLException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -296,10 +298,57 @@ class InstanceLinkMessageTest {
         val c = clientWith(Recorder())
 
         assertEquals("No route to host", ConnectFailures.redactedConnectFailure("No route to host"))
+    }
+
+    @Test
+    fun `a failure with no message is described by its class`() {
+        // ktor CIO's UnresolvedAddressException carries no message. It used to arrive as "none",
+        // which said nothing about which failure it was (CHURCH-PRESENTER-DESKTOP-DM).
         assertEquals(
-            "none", ConnectFailures.redactedConnectFailure(null),
-            "a null message used to arrive as the literal title \"connection failed — null\"",
+            "UnresolvedAddressException",
+            ConnectFailures.describeConnectFailure(UnresolvedAddressException()),
         )
+        assertEquals(
+            "failed [url=ws://<peer>:8765/ws]",
+            ConnectFailures.describeConnectFailure(IOException("failed [url=ws://10.0.0.5:8765/ws]")),
+            "a message, when there is one, is still redacted",
+        )
+    }
+
+    @Test
+    fun `an address that does not resolve is a setup mistake and is not reported`() {
+        // CHURCH-PRESENTER-DESKTOP-DM: a Host field holding "host:port" or a whole URL made the
+        // client ask for ws://192.168.0.112:8765:8765/ws, which ktor cannot resolve.
+        val kind = ConnectFailures.classifyConnectFailure(UnresolvedAddressException())
+
+        assertEquals("bad_address", kind)
+        assertFalse(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1))
+        assertFalse(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 10))
+    }
+
+    @Test
+    fun `a port where something else answers is not a primary and is not reported`() {
+        val kind = ConnectFailures.classifyConnectFailure(
+            WebSocketException("Handshake exception, expected status code 101 but was 404"),
+        )
+
+        assertEquals("not_primary", kind)
+        assertEquals(
+            "not_primary",
+            ConnectFailures.classifyConnectFailure(
+                WebSocketException("Handshake exception, expected status code 101 but was 200"),
+            ),
+            "any status but 101 means the upgrade was refused",
+        )
+        assertFalse(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1))
+    }
+
+    @Test
+    fun `a websocket failure that is not a refused upgrade is still reported`() {
+        val kind = ConnectFailures.classifyConnectFailure(WebSocketException("something else"))
+
+        assertEquals("other", kind)
+        assertTrue(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1))
     }
 
     @Test
@@ -398,7 +447,7 @@ class InstanceLinkMessageTest {
         // on every launch, because the count starts again with the connect loop — a follower whose
         // primary simply was not running reported "connection failed" each time the app started.
         // The Log.warn breadcrumb and the Instance Link log keep every failure.
-        for (kind in listOf("refused", "dns", "ping_timeout", "timeout")) {
+        for (kind in listOf("refused", "dns", "ping_timeout", "timeout", "bad_address", "not_primary")) {
             val reported = (1..5_000).filter { n -> ConnectFailures.shouldReportConnectFailure(kind, n) }
             assertEquals(emptyList(), reported, kind)
         }

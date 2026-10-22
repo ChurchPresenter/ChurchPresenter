@@ -40,10 +40,11 @@ class BibleConverterTabTest {
             assertTrue(isShowing(Strings.fileCount(1)))
 
             click(Strings.preview)
-            assertTrue(isShowing(Strings.previewLabel))
+            awaitShowing(Strings.previewLabel)
             assertTrue(isShowing("\"Test Bible\" | 1 book(s) | 2 verses", substring = true))
             click(Strings.back)
             click(Strings.preview)
+            awaitShowing(Strings.previewLabel)
 
             click(Strings.convertNFiles(1))
             awaitShowing(Strings.doneConverted(1, 0))
@@ -75,7 +76,7 @@ class BibleConverterTabTest {
                 assertTrue(isShowing(out.absolutePath))
 
                 click(Strings.preview)
-                assertTrue(isShowing("Parse error", substring = true))
+                awaitShowing("Parse error", substring = true)
                 click(Strings.back)
 
                 click(Strings.convert)

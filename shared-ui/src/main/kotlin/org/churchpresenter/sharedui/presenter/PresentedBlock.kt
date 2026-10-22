@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 
 /**
@@ -18,15 +18,21 @@ data class PresentedBlock(val kind: Kind, val key: String) {
 }
 
 /**
- * Where each [PresentedBlock] was drawn, in window pixels -- provided only by the Profiles preview,
+ * Where each [PresentedBlock] was drawn, in root pixels -- provided only by the Profiles preview,
  * whose Adjust handles select and move blocks. Null everywhere else, so an output window records
  * nothing: this is layout reporting and never changes what is drawn.
  */
 val LocalPresentedBlocks = staticCompositionLocalOf<MutableMap<PresentedBlock, Rect>?> { null }
 
-/** [this] reporting where it was drawn as [block], while a preview is listening. */
+/**
+ * [this] reporting where it was drawn as [block], while a preview is listening.
+ *
+ * In root coordinates, not window ones: `boundsInWindow` on every layout pass asks AWT where the
+ * window is on screen, a native call that stalls the event thread on Windows. The overlay reading
+ * these sits in the same root, so its offsets come out the same.
+ */
 @Composable
 fun Modifier.reportsBlock(block: PresentedBlock): Modifier {
     val blocks = LocalPresentedBlocks.current ?: return this
-    return onGloballyPositioned { blocks[block] = it.boundsInWindow() }
+    return onGloballyPositioned { blocks[block] = it.boundsInRoot() }
 }

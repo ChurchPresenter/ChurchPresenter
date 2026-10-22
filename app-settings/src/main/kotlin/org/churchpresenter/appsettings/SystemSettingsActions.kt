@@ -3,6 +3,7 @@ package org.churchpresenter.appsettings
 import kotlinx.serialization.json.Json
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.requestStop
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.settings.SettingsManager
@@ -111,10 +112,12 @@ internal object SwingSettingsActionUi : SettingsActionUi {
      * Relaunches the app so the settings just written are the ones it comes back with.
      *
      * The server is stopped first so in-flight WebSocket sessions (a connected companion app, say)
-     * close cleanly instead of hitting a ping timeout when the JVM exits.
+     * close cleanly instead of hitting a ping timeout when the JVM exits. The stop runs off the
+     * event thread, which it would hold for over a second, and the relaunch follows it.
      */
-    override fun restart(companionServer: CompanionServer?) {
-        try { companionServer?.stop() } catch (_: Exception) {}
+    override fun restart(companionServer: CompanionServer?) = stopThenRelaunch(companionServer, ::relaunch)
+
+    private fun relaunch() {
         val javaBin = System.getProperty("java.home") + "/bin/java"
         val command = ProcessHandle.current().info().command().orElse(javaBin)
         val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
@@ -123,6 +126,12 @@ internal object SwingSettingsActionUi : SettingsActionUi {
         } catch (_: Exception) {}
         Runtime.getRuntime().exit(0)
     }
+}
+
+/** Runs [relaunch] once [companionServer] has stopped, off the caller's thread, or at once with no server. */
+internal fun stopThenRelaunch(companionServer: CompanionServer?, relaunch: () -> Unit) {
+    if (companionServer == null) relaunch()
+    else companionServer.requestStop().invokeOnCompletion { relaunch() }
 }
 
 /**

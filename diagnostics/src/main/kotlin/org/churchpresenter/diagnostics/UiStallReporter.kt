@@ -17,10 +17,13 @@ import java.util.concurrent.Executors
  *   was sent.
  * - **A stall groups on its screen and the app frame most of its samples were in**
  *   ([stallEvent]), so one slow screen is one issue.
- * - **Two causes group as one issue each** rather than one per page they surface on: the JVM
- *   loading code or Compose reading a string for the first time ([STALL_CAUSE_COLD_LOAD]), and any
+ * - **Some causes group as one issue each** rather than one per page they surface on: the JVM
+ *   loading code or Compose reading a string for the first time ([STALL_CAUSE_COLD_LOAD]), any
  *   stall on a machine whose main window draws in software ([STALL_CAUSE_SOFTWARE]), where every
- *   frame is slow.
+ *   frame is slow, the whole process paused ([STALL_CAUSE_PAUSED]), and a stack with no app frame
+ *   ([STALL_CAUSE_NO_APP_FRAME]), per OS and render API.
+ * - **A stall whose every sample found the thread idle is counted but not sent**: the thread had
+ *   already moved on, so there is nothing to group it on.
  *
  * [send] is handed each event on the thread that answered the ping -- the event thread -- so the
  * app's sender passes it to a thread of its own ([sendToSentry]).
@@ -34,7 +37,7 @@ class UiStallReporter(
 
     @Volatile private var countsFrom = Long.MAX_VALUE
 
-    @Volatile private var software = false
+    @Volatile private var renderApi = RENDER_API_UNKNOWN
 
     private var liveSince = NONE
     private var liveMs = 0L
@@ -49,9 +52,12 @@ class UiStallReporter(
         if (countsFrom == Long.MAX_VALUE) countsFrom = clock() + SETTLE_MS
     }
 
-    /** Whether the main window ended up drawing in software, told once it has drawn. */
-    fun softwareRendering(isSoftware: Boolean) {
-        software = isSoftware
+    /**
+     * The render API the main window actually draws with (skiko's `renderApi`, which names a
+     * software renderer when it fell back to one), told once it has drawn.
+     */
+    fun renderApi(name: String) {
+        renderApi = name
     }
 
     /** Whether any output is showing content, told on every change. */
@@ -75,8 +81,9 @@ class UiStallReporter(
         val wasLive = liveSince != NONE && liveSince <= startedAt
         if (wasLive && stall.lateMs > GATE_MS) liveStalls++
         if (stall.lateMs < SEND_MIN_MS || sent >= MAX_EVENTS || sampledAsItAnswered(stall)) return
+        val event = stallEvent(stall, wasLive, renderApi) ?: return
         sent++
-        send(stallEvent(stall, wasLive, software))
+        send(event)
     }
 
     /** Minutes an output has been live this run, an interval still open included. */
@@ -147,6 +154,15 @@ const val STALL_CAUSE_SOFTWARE = "software-renderer"
 
 /** `stall.cause` for a stall loading code from the jar, or a string through Compose, the first time. */
 const val STALL_CAUSE_COLD_LOAD = "cold-load"
+
+/** `stall.cause` for a stall whose first sample came long after the budget: the whole process was paused. */
+const val STALL_CAUSE_PAUSED = "process-paused"
+
+/** `stall.cause` for a stall none of whose samples reached the app's own code. */
+const val STALL_CAUSE_NO_APP_FRAME = "no-app-frame"
+
+/** The render API a stall reports before the main window has said which one it draws with. */
+const val RENDER_API_UNKNOWN = "unknown"
 
 /**
  * Whether [stall]'s stack is the event thread already running the watchdog's own ping: the stall
