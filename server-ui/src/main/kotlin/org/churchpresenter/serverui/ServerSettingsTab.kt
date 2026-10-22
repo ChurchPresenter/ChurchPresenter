@@ -43,6 +43,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.requestRestart
+import org.churchpresenter.server.requestStart
+import org.churchpresenter.server.requestStop
 import org.churchpresenter.server.updateApiKey
 import org.churchpresenter.server.updateFileUploadEnabled
 import org.churchpresenter.server.updateMaxMediaUploadMb
@@ -218,11 +221,13 @@ private fun ServerCard(
     }
     val onEnable: (Boolean) -> Unit = { enable ->
         val port = serverPortOrNull(portText) ?: Constants.SERVER_DEFAULT_PORT
+        // Off the event thread: a stop waits on Netty for over a second. The switch and the status
+        // pill follow isRunning when the request has run.
         if (enable) {
-            companionServer.start(port, hostText.trim())
+            companionServer.requestStart(port, hostText.trim())
             onSettingsChange { s -> s.copy(serverSettings = s.serverSettings.copy(enabled = true, port = port)) }
         } else {
-            companionServer.stop()
+            companionServer.requestStop()
             onSettingsChange { s -> s.copy(serverSettings = s.serverSettings.copy(enabled = false)) }
         }
     }
@@ -268,8 +273,7 @@ private fun ServerCard(
                     },
                     onRestart = {
                         val port = serverPortOrNull(portText) ?: Constants.SERVER_DEFAULT_PORT
-                        companionServer.stop()
-                        companionServer.start(port, hostText.trim())
+                        companionServer.requestRestart(port, hostText.trim())
                     },
                 )
                 ServerHostField(

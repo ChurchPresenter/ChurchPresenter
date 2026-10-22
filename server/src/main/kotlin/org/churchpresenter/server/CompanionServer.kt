@@ -28,6 +28,7 @@ import java.io.IOException
 import java.net.ServerSocket
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -92,8 +93,20 @@ class CompanionServer(
      * every teardown.
      */
     private val shutdownGraceMs: Long = SHUTDOWN_GRACE_MS,
+    /**
+     * Where [requestStart], [requestStop] and [requestRestart] run, one at a time and in the order
+     * asked (`Dispatchers.IO` limited to one thread). A test passes a dispatcher it can drain, to
+     * wait for what a click asked for.
+     */
+    lifecycleDispatcher: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1),
 ) {
     internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * The scope the lifecycle requests (`CompanionServerLifecycle.kt`) run in. Not [scope]: [stop]
+     * cancels that scope's children, and would cancel the very request that called it.
+     */
+    internal val lifecycleScope = CoroutineScope(SupervisorJob() + lifecycleDispatcher)
 
     /** One thread's worth of [Dispatchers.Default]: [publishSongs] and [publishBible] run on it in turn. */
     internal val publishing = Dispatchers.Default.limitedParallelism(1)
@@ -670,6 +683,10 @@ class CompanionServer(
     internal fun registeredRoutes(): List<RoutingNode> =
         server?.application?.pluginOrNull(RoutingRoot)?.getAllRoutes().orEmpty()
 
+    /**
+     * Stops the server and blocks until it has: for the caller that must not go on before it has
+     * (a test's teardown, a start-up already off the event thread). The UI uses [requestStop].
+     */
     fun stop() {
         tunnelManager.stop()
         server?.stop(shutdownGraceMs, maxOf(shutdownGraceMs, SHUTDOWN_TIMEOUT_MS))
