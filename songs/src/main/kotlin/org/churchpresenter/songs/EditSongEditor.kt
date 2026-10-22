@@ -64,6 +64,8 @@ import org.churchpresenter.strings.generated.resources.song_pane_lyrics
 import org.churchpresenter.strings.generated.resources.song_syntax
 import org.churchpresenter.strings.generated.resources.song_syntax_chord_hint
 import org.churchpresenter.strings.generated.resources.song_translation_label
+import org.churchpresenter.strings.generated.resources.song_insert_second_voice
+import org.churchpresenter.strings.generated.resources.song_insert_second_voice_hint
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.churchpresenter.theme.elevationPalette
@@ -205,6 +207,11 @@ private fun SectionMarkerChips(state: EditSongState) {
         // and a break is the opposite of one.
         InsertChip(stringResource(Res.string.song_insert_slide_break)) {
             state.setPaneValue(insertSnippet(state.paneValue, ChordTransposer.SLIDE_BREAK, ownLine = true))
+        }
+        HoverLabel(stringResource(Res.string.song_insert_second_voice_hint)) {
+            InsertChip(stringResource(Res.string.song_insert_second_voice)) {
+                state.setPaneValue(toggleSecondVoice(state.paneValue))
+            }
         }
     }
 }
@@ -355,6 +362,8 @@ private fun SyntaxLegend(modifier: Modifier = Modifier) {
         LegendChip("[Verse 1]", SectionInk.of(SongSectionKind.VERSE))
         LegendChip("{Chorus}", SectionInk.of(SongSectionKind.CHORUS))
         LegendChip("[G]lyric", MaterialTheme.colorScheme.primary)
+        LegendChip("2>line", MaterialTheme.colorScheme.tertiary)
+        LegendChip("2>(words)", MaterialTheme.colorScheme.tertiary)
         Text(
             text = stringResource(Res.string.song_syntax_chord_hint),
             style = MaterialTheme.typography.bodySmall,

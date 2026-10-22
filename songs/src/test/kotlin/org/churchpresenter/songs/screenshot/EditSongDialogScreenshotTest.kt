@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.onNodeWithTag
@@ -17,7 +18,14 @@ import org.churchpresenter.profiles.SONG_BACKGROUND_BUTTON_TAG
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongTextOverrides
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songs.EditSongContent
+import org.churchpresenter.songs.SONG_LOOK_RESET_TAG
 import org.churchpresenter.songs.testBackgroundButton
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -51,6 +59,8 @@ class EditSongDialogScreenshotTest {
         /** The install's language names, and the Language name field that edits them; null hides it. */
         languageNames: List<String>? = null,
         rootIndex: Int = 0,
+        /** What the outputs draw by: given, the right pane opens on the Output tab, as it does from the Songs tab. */
+        appSettings: AppSettings? = null,
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
@@ -71,6 +81,7 @@ class EditSongDialogScreenshotTest {
                                 onChordsVisibleChange = {},
                                 languageNames = languageNames.orEmpty(),
                                 onLanguageNamesChange = if (languageNames != null) ({}) else null,
+                                appSettings = appSettings,
                                 onDismiss = {},
                                 onSave = { _, _ -> },
                             )
@@ -192,6 +203,34 @@ class EditSongDialogScreenshotTest {
         waitForIdle()
     }
 
+    // ── The second voice and the Output tab ─────────────────────────────────────────────────────
+
+    /** `2>` lines, `2>(…)` words and a `[voice: 2]` block, tinted in the lyrics box. */
+    @Test
+    fun `a song with a second voice`() = shoot("second_voice", song = secondVoice())
+
+    /** The Output tab a verse at a time: the slide under the cursor on full screen and on the band. */
+    @Test
+    fun `the output a verse at a time`() = shoot("output_verse", song = secondVoice(), appSettings = OUTPUTS)
+
+    /** A line at a time: the line under the cursor and the voice-2 line answering it, together. */
+    @Test
+    fun `the output a line at a time`() = shoot("output_line", song = secondVoice(), appSettings = OUTPUTS) {
+        onNodeWithText("1 Line").performClick()
+        waitForIdle()
+    }
+
+    /** A song with its own font, size and colours: the previews draw them, each row offers its reset. */
+    @Test
+    fun `the output of a song with its own look`() = shoot(
+        "output_own_look",
+        song = secondVoice().copy(textOverrides = SongTextOverrides("Georgia", 120, "#A8D8FF", "#FF8A65")),
+        appSettings = OUTPUTS,
+    ) {
+        onNodeWithTag(SONG_LOOK_RESET_TAG + "voice2").performScrollTo()
+        waitForIdle()
+    }
+
     // ── Menus ───────────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -274,6 +313,21 @@ class EditSongDialogScreenshotTest {
         ),
     )
 
+    private fun secondVoice() = amazingGrace().copy(
+        lyrics = listOf(
+            "[Verse 1]",
+            "Amazing grace how sweet the sound",
+            "2>That saved a wretch like me",
+            "I once was lost but now am found",
+            "Was blind but 2>(now I see)",
+            "",
+            "{Chorus}",
+            "Praise the Lord, praise the Lord",
+            "[voice: 2]",
+            "Let the earth hear His voice",
+        ),
+    )
+
     private fun sparse() = amazingGrace().copy(tune = "", author = "", composer = "", ccliNumber = "")
 
     private fun blankSong() =
@@ -288,6 +342,21 @@ class EditSongDialogScreenshotTest {
         val BAND = SongBackground(type = SongBackgroundType.COLOR, color = "#2a1130", dim = 65)
 
         const val SECONDARY_PANE = "Language 2"
+
+        /** A full-screen output and a lower-third one, so the Output tab shows both previews. */
+        val OUTPUTS = AppSettings(
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(
+                    OutputProfile(id = "main", name = "Main"),
+                    OutputProfile(
+                        id = "band",
+                        name = "Stream",
+                        displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                    ),
+                ),
+                screenAssignments = listOf(ScreenAssignment(activeProfileId = "main")),
+            ),
+        )
         const val ADD_NEW = "New song book…"
     }
 }

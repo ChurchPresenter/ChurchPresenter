@@ -4,12 +4,13 @@ import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
 import org.churchpresenter.sharedui.utils.isSlideBreak
 import org.churchpresenter.sharedui.utils.sectionLabelOf
-import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTranslation
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.songchords.SongSectionWordGroup
 import org.churchpresenter.songchords.SongSectionWords
+import org.churchpresenter.sharedui.utils.isLyricDirective
+import org.churchpresenter.sharedui.utils.plainLyricLine
 
 private val WHITESPACE = Regex("\\s+")
 private const val SNIPPET_BEFORE = 12
@@ -54,8 +55,8 @@ internal fun searchableSections(lyrics: List<String>): List<SearchableSection> {
     for (line in lyrics) {
         when {
             isHeaderLine(line) -> { flush(); header = line.trim() }
-            isSlideBreak(line) || songBackgroundDirectiveOf(line) != null -> Unit
-            else -> lines += ChordTransposer.stripChords(line)
+            isSlideBreak(line) || isLyricDirective(line) -> Unit
+            else -> lines += plainLyricLine(ChordTransposer.stripChords(line))
         }
     }
     flush()

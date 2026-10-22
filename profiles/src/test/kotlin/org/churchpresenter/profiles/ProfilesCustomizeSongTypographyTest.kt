@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import org.churchpresenter.settings.DEFAULT_SECOND_VOICE_COLOR
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
@@ -77,6 +78,28 @@ class ProfilesCustomizeSongTypographyTest {
                 onAllNodesWithText("Chord Color").fetchSemanticsNodes().isEmpty(),
                 "only the lyrics carry a chord colour",
             )
+        }
+    }
+
+    // ── The second voice ────────────────────────────────────────────────────────────────────────
+
+    /** The colour a song's `2>` lines and words are drawn in, which only the lyrics carry. */
+    @Test
+    fun `the lyrics carry a second voice colour, and it writes`() {
+        profilesTab(output()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            recolor(DEFAULT_SECOND_VOICE_COLOR, "#FF8A65")
+
+            assertEquals("#FF8A65", get().song().layoutExtras.secondVoiceColor)
+        }
+    }
+
+    @Test
+    fun `no other element is offered a second voice colour`() {
+        profilesTab(output()) { _ ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE)
+
+            assertTrue(onAllNodesWithText("Second voice color").fetchSemanticsNodes().isEmpty())
         }
     }
 

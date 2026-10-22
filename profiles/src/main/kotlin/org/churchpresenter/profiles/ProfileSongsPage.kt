@@ -271,7 +271,10 @@ private fun SongTextGroup(
                         )
                     }
                 },
-                extraBasic = { SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong) },
+                extraBasic = {
+                    SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong)
+                    if (styleElement == SongStyleElement.LYRICS) SecondVoiceColorRow(song, updateSong)
+                },
             )
         } }
     }
@@ -540,6 +543,8 @@ private val SONG_FIT_LANGUAGES_PATHS = listOf("songSettings.layoutExtras.fitLang
 private val SONG_LAYOUT_PATHS =
     listOf("songSettings.bilingualLayout", "songSettings.layoutExtras.languageGap") + SONG_FIT_LANGUAGES_PATHS
 private val SONG_GAP_PATHS = listOf("songSettings.layoutExtras.languageGap")
+
+/** Where the second voice's colour is stored. */
 private const val LANGUAGE_GAP_STEP = 4
 
 /** Test handle for the Gap between languages field. */

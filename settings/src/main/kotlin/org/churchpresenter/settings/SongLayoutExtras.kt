@@ -100,7 +100,15 @@ data class SongLayoutExtras(
     val textBoxes: Map<String, TextBox> = emptyMap(),
     /** How the song page's boxes behave -- see [TextBoxOptions]. */
     val textBoxOptions: TextBoxOptions = TextBoxOptions(),
+    /**
+     * The colour a song's second voice is drawn in -- the lines and words written `2>` and `2>(…)`,
+     * the part only some of the congregation sings. A song's own `voice2:` wins over it.
+     */
+    val secondVoiceColor: String = DEFAULT_SECOND_VOICE_COLOR,
 )
+
+/** The second voice's colour until a profile picks its own: a warm yellow that reads on dark and light. */
+const val DEFAULT_SECOND_VOICE_COLOR = "#FFD43B"
 
 /** The space between stacked languages while [SongLayoutExtras.languageGap] is not set. */
 const val DEFAULT_STACKED_LANGUAGE_GAP = 12

@@ -94,9 +94,10 @@ private fun Route.songRoutes(
                 }
 
                 /**
-                 * GET /api/songs/{number}[?songbook=Name]
+                 * GET /api/songs/{number}[?songbook=Name][&markup=true]
                  * Returns full song details including all lyric sections.
                  * Use ?songbook= to disambiguate when the same number exists in multiple songbooks.
+                 * The lines are plain words unless markup=true keeps the second voice's markup.
                  */
                 get("${Constants.ENDPOINT_SONGS}/{identifier}") {
                     if (!server.checkApiKey(call)) return@get
@@ -129,7 +130,8 @@ private fun Route.songRoutes(
                         return@get
                     }
                     server.logRest("/api/songs/{identifier}", HttpStatusCode.OK.value)
-                    call.respond(buildSongDetail(song))
+                    val keepMarkup = call.request.queryParameters[Constants.QUERY_PARAM_MARKUP].toBoolean()
+                    call.respond(buildSongDetail(song, keepMarkup))
                 }
 
                 /**

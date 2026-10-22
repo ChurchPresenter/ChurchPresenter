@@ -149,6 +149,13 @@ class CompanionServerLiveStateFieldsTest {
     }
 
     @Test
+    fun `a remote sees a section's words without the second-voice markup`() {
+        val state = goLive(mode = "LYRICS", section = LyricSection(lines = listOf("2>That saved", "but 2>(now I see)")))
+
+        assertEquals(listOf("That saved", "but now I see"), state.lines)
+    }
+
+    @Test
     fun `a scheduled local video is reported by its schedule item id`() {
         val path = File(dir, "clip.mp4").apply { writeBytes(ByteArray(4)) }.absolutePath
         server.updateSchedule(

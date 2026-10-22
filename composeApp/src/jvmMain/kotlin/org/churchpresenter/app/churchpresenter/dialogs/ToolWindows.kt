@@ -11,6 +11,7 @@ import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.songs.EditSongDialog
 import androidx.compose.ui.awt.SwingDialog
 import androidx.compose.runtime.Composable
@@ -108,6 +109,8 @@ fun SongLibraryWindow(
     songStorageDirectory: String,
     /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
     typicalSongSeconds: (SongItem) -> Int? = { null },
+    /** The settings the outputs draw by, for the song editor's Output tab -- null leaves it out. */
+    appSettings: AppSettings? = null,
     onClose: () -> Unit,
     /** The window it opens in -- see [ToolWindowFrame]. */
     frame: ToolWindowFrame = appToolWindowFrame,
@@ -133,6 +136,7 @@ fun SongLibraryWindow(
                         existingSongs = editing.allSongs,
                         theme = theme,
                         typicalSeconds = typicalSongSeconds(editing.song),
+                        appSettings = appSettings,
                         onDismiss = editing.onDismiss,
                         onSave = { edited, _ -> editing.onSave(edited) },
                     )
@@ -161,6 +165,8 @@ fun CalendarWindow(
     host: CalendarHost,
     /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
     typicalSongSeconds: (SongItem) -> Int? = { null },
+    /** The settings the outputs draw by, for the song editor's Output tab -- null leaves it out. */
+    appSettings: AppSettings? = null,
     /**
      * Dialogs the app opens on the calendar's behalf -- the phone-invite QR. Composed inside this
      * window so it owns them: one composed in the main window's scope is owned by the main window,
@@ -257,6 +263,7 @@ fun CalendarWindow(
                         existingSongs = editing.allSongs,
                         theme = theme,
                         typicalSeconds = typicalSongSeconds(editing.song),
+                        appSettings = appSettings,
                         onDismiss = editing.onDismiss,
                         onSave = { edited, _ ->
                             editing.onSave(edited)
