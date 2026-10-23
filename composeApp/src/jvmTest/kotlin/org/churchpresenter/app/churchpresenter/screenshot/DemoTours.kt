@@ -113,7 +113,7 @@ class DemoTours {
             find(hasText("John 3:16", substring = true)) { it.left > dp(380f) && it.top > dp(820f) },
         )
         say("that-s-the-bible-tab")
-        outro("Songs")
+        outro()
     }
 
     @Test
@@ -234,7 +234,7 @@ class DemoTours {
         say("write-a-new-song")
         note("Write a new song", "Or import one", find(hasContentDescription("New Song")))
         say("that-s-the-songs-tab")
-        outro("Pictures")
+        outro()
     }
 }
 
@@ -326,7 +326,7 @@ class PicturesDemoTour {
         val row = reveal { findAll(hasText("Gallery (12 images)")) { it.right < dp(380f) }.last() }
         note("Added to your schedule", "Run the whole service from this list", row)
         say("outro")
-        outro("Presentation")
+        outro()
     }
 }
 

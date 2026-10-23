@@ -369,10 +369,10 @@ internal class DemoTour(
         scene.caption = null
     }
 
-    /** 06 Outro: the next tab's title, held for end-screen cards. */
-    fun outro(next: String) {
+    /** 06 Outro: the tab's own title again, held for YouTube's end-screen cards. */
+    fun outro() {
         val talk = narrate("That's the $tab tab", "")
-        repeat(frames(maxOf(4.0, talk + 2.0))) { age -> write(stage.outro(next, age)) }
+        repeat(frames(maxOf(4.0, talk + 2.0))) { age -> write(stage.outro(tab, age)) }
     }
 
     /**

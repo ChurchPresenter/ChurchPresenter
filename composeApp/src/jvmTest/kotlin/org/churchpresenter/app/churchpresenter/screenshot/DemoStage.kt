@@ -163,19 +163,16 @@ internal class DemoStage(private val appW: Float, private val appH: Float) {
         tabChips(g, tab, 160f, OUT_H - 110f - 50f)
     }
 
-    fun outro(next: String, age: Int): BufferedImage = card { g ->
+    fun outro(tab: String, age: Int): BufferedImage = card { g ->
         glow(g, 960f, 540f, 360f, 0.18f)
         val t = ease(min(1f, age / 18f))
         g.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, t)
         val rise = (1 - t) * 24f
-        g.font = DemoFonts.sans(600, 30f, 0.16f)
-        g.color = FAINT
-        centered(g, "NEXT UP", 960f, 400f + rise)
-        val w = titleWidth(g, next, 150f)
-        title(g, next, 150f, 960f - w / 2, 560f + rise)
+        val w = titleWidth(g, tab, 150f)
+        title(g, tab, 150f, 960f - w / 2, 530f + rise)
         g.font = DemoFonts.sans(400, 34f)
         g.color = MUTED
-        centered(g, "churchpresenter.org", 960f, 650f + rise)
+        centered(g, "churchpresenter.org", 960f, 630f + rise)
     }
 
     // ── The app, its window and the projector ─────────────────────────────
