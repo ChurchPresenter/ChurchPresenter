@@ -1,0 +1,32 @@
+# What the narrator says in the songs tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+the-songs-tab = Welcome to ChurchPresenter. In this tour, we'll explore the Songs tab, where you can find any song in your library, show its verses, and lead worship right from the keyboard.
+open-tab = Let's open the Songs tab. Your entire song library is listed here.
+search-by-title = To find a song, just start typing its title. The list narrows down with every letter.
+or-by-a-line-of-the-lyrics = Can't remember the title? Type a line from the lyrics instead. Each match even tells you which verse it was found in.
+clear-the-search = Clear the search to bring back the whole library.
+pick-a-song-book = If your library has several song books, you can show just one of them. Open the Song Book list.
+gospel-songs = We'll pick Gospel Songs, and now only those songs are listed.
+back-to-every-book = To see everything again, open the list once more.
+all-song-books = And choose All Song Books.
+choose-how-the-search-matches = The Filter list controls how your search matches. You can choose Contains, Starts With, or Exact Match.
+starts-with = Starts With is handy when you know how a title begins.
+sort-the-list = You can sort the list by clicking any column heading. Click it again to reverse the order.
+click-a-song = Now let's choose a song. Click Amazing Grace, and its verses appear on the right.
+click-a-verse = Click the first verse. It shows up in the preview, ready to go.
+sends-the-verse-to-the-projector = Then click Go Live to send it to the projector.
+verse-1-of-amazing-grace = The first verse of Amazing Grace is now on the big screen.
+next-verse = During worship, you don't need the mouse at all. Press the down arrow to move to the next verse, and the up arrow to go back.
+verse-2 = Verse two is live, straight from the keyboard.
+double-click-a-verse = You can also double-click any verse to put it live in a single move.
+verse-3-live = And now verse three is on the screen.
+star-a-song = Songs you use often can be starred. Your favorites stay pinned in their own panel, so they're always close at hand.
+right-click-a-song-for-more = Right-click any song for more options. You can go live, add it to the schedule, mark it as a favorite, edit it, or delete it.
+add-to-schedule = Let's add It Is Well With My Soul to the schedule.
+added-to-your-schedule = There it is, at the end of your service on the left.
+back-to-live = Notice the red Back to Live bar. It appears whenever you browse away from the song that's on screen. Click it to jump straight back.
+choose-the-columns = You can also choose which columns the list shows, such as the song number, the author, or how often a song has been played.
+edit-a-song = To change a song, click Edit. You can update its lyrics, add chords and transpose them, include translations, and give it its own look.
+write-a-new-song = And to add something new, click the plus button to write a new song, or import one.
+that-s-the-songs-tab = And that's the Songs tab. Search, pick a verse, go live, and lead the rest of the song from your keyboard.
