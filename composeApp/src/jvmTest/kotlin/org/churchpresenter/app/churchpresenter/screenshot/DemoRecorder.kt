@@ -39,6 +39,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
@@ -59,6 +60,7 @@ import org.churchpresenter.app.churchpresenter.MainDesktopPublishers
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.WebAccessState
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.PresenterOutputContent
@@ -96,6 +98,10 @@ private const val PROJ_W = 880f
 private const val PROJ_H = 495f
 private const val CANVAS_W = APP_W + GAP + PROJ_W + GAP
 
+/** Flip to record the app in light mode instead. */
+private const val DARK_MODE = true
+private val THEME = if (DARK_MODE) ThemeMode.DARK else ThemeMode.LIGHT
+
 private const val FPS = 30
 private const val TAB_AREA_LEFT = 380f
 private val DENSITY = System.getenv("CP_DEMO_DENSITY")?.toFloatOrNull() ?: 1.25f
@@ -118,6 +124,8 @@ internal fun recordTour(
     val out = File(root!!, name).apply { deleteRecursively(); mkdirs() }
     TestSingletons.latchSkikoHostOs()
     TestSingletons.latchToTestHome()
+    // A previous tour's schedule autosave would open every recording on "Restore unsaved schedule?".
+    File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp").delete()
     val appSettings = settings(library())
     runSkikoComposeUiTest(size = Size(CANVAS_W, APP_H) * DENSITY, density = Density(DENSITY)) {
         var actions = ScheduleActions()
@@ -127,7 +135,7 @@ internal fun recordTour(
         val changeSettings = { change: (AppSettings) -> AppSettings -> current = change(current) }
         setContent {
             PinnedFonts {
-                ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) {
+                ChurchPresenterTheme(themeMode = THEME) {
                     CompositionLocalProvider(LocalMediaViewModel provides media) {
                         Row(Modifier.fillMaxSize().background(STAGE)) {
                             Box(Modifier.size(APP_W.dp, APP_H.dp)) {
@@ -138,7 +146,7 @@ internal fun recordTour(
                                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
                                     qaManager = QAManager(),
                                     sttManager = STTManager(),
-                                    theme = ThemeMode.LIGHT,
+                                    theme = THEME,
                                     live = liveCallbacks(presenter),
                                     publish = MainDesktopPublishers(onScheduleActionsReady = { actions = it }),
                                     web = WebAccessState(serverUrl = "http://192.168.1.42:8080"),
@@ -151,7 +159,7 @@ internal fun recordTour(
             }
         }
         waitForIdle()
-        serviceSchedule(actions)
+        demoSchedule(actions)
         waitForIdle()
         startTab?.let {
             onNodeWithText(it).performScrollTo().performClick()
@@ -159,6 +167,18 @@ internal fun recordTour(
         }
         DemoTour(this, presenter, out, changeSettings).script()
     }
+}
+
+/** A short service — half a panel — so what a tour adds to it stands out. */
+private fun demoSchedule(actions: ScheduleActions) {
+    actions.addMedia(File(LIBRARY, "Media/Welcome Loop.mp4").absolutePath, "Welcome Loop", "video", "")
+    actions.addSong(320, "Come Thou Fount Of Every Blessing", "Hymnal", "song-320")
+    actions.addSong(12, "Amazing Grace", "Hymnal", "song-12")
+    actions.addPresentation(File(LIBRARY, "Decks/Sermon.pdf").absolutePath, "Sermon", 6, "pdf")
+    actions.addPicture(File(LIBRARY, "Gallery").absolutePath, "Gallery", 12)
+    actions.addAnnouncement(
+        ScheduleItem.AnnouncementItem(id = "ann-1", text = "Fellowship lunch in the hall after the service"),
+    )
 }
 
 private fun liveCallbacks(presenter: PresenterManager) = LiveOutputCallbacks(
@@ -237,6 +257,13 @@ internal class DemoTour(
     }
 
     fun dp(value: Float) = value * d
+
+    /** [text] inside the open menu or dropdown — a compose root of its own, listed after the window. */
+    fun menuItem(text: String): Target {
+        val nodes = ui.onAllNodes(hasText(text))
+        val hit = nodes.fetchSemanticsNodes().withIndex().last()
+        return Target(nodes[hit.index], hit.value.boundsInWindow)
+    }
 
     /** Every match, top to bottom. */
     fun findAll(matcher: SemanticsMatcher, where: (Rect) -> Boolean = { true }): List<Target> {
@@ -351,9 +378,23 @@ internal class DemoTour(
         ripple(tip)
         if (double) ripple(tip)
         action()
+        // The drawn pointer is the one the viewer follows; the real one leaves, so no tooltip lingers.
+        runCatching { ui.onAllNodes(isRoot())[0].performMouseInput { exit() } }
         ui.waitForIdle()
         crossfadeTo(grab(), 0.3, tip)
         hold(0.35, tip)
+    }
+
+    /** Clicks the [label] tab, and again off camera until it really is the open one. */
+    fun openTab(label: String, sub: String) {
+        val target = tab(label)
+        step("Open the $label tab", sub, target) {
+            repeat(5) {
+                if (hasNode(hasText(label) and isSelected()) { it.top < 60f * d }) return@step
+                target.node.performClick()
+                ui.waitForIdle()
+            }
+        }
     }
 
     /** A right-click on [target]: opens its menu. */
@@ -375,7 +416,9 @@ internal class DemoTour(
         val n = ++stepNumber
         val tip = { g: Graphics2D ->
             callout(g, area.bounds, n, heading, sub)
-            keycap(g, Rect(area.bounds.center.x - 250f * d, area.bounds.top + 20f * d, area.bounds.center.x, area.bounds.top + 20f * d), label)
+            val x = area.bounds.center.x
+            val y = area.bounds.top + 20f * d
+            keycap(g, Rect(x - 250f * d, y, x, y), label)
         }
         shot = grab()
         hold(1.6, tip)

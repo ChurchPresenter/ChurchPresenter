@@ -359,7 +359,7 @@ private fun tabLabel(tab: Tabs) = when (tab) {
     Tabs.COMPANION_SURFACE -> "Companion"
 }
 
-internal fun serviceSchedule(actions: ScheduleActions) {
+private fun serviceSchedule(actions: ScheduleActions) {
     actions.addMedia(File(LIBRARY, "Media/Welcome Loop.mp4").absolutePath, "Welcome Loop", "video", "")
     actions.addSong(320, "Come Thou Fount Of Every Blessing", "Hymnal", "song-320")
     actions.addSong(12, "Amazing Grace", "Hymnal", "song-12")

@@ -23,7 +23,7 @@ class DemoTours {
         },
     ) {
         title("The Bible tab", "Browse, search, schedule and go live")
-        step("Open the Bible tab", "Every translation you have installed lives here", tab("Bible"))
+        openTab("Bible", "Every translation you have installed lives here")
         // The tab opens with the search box focused; leaving it collapses a banner and moves the lists.
         quietClick(find(hasText("Genesis")) { it.left > dp(380f) })
 
@@ -90,26 +90,48 @@ class DemoTours {
     @Test
     fun songs() = recordTour("songs") {
         title("The Songs tab", "Find a song, show it, run it from the keyboard")
-        step("Open the Songs tab", "Your whole song library", tab("Songs"))
+        openTab("Songs", "Your whole song library")
 
         val search = searchField()
         type("Search by title", "The list narrows as you type", search, "grace")
         type("…or by a line of the lyrics", "Each match says where it was found", search, "wretch like me")
         step("Clear the search", "Back to the whole library", find(hasContentDescription("Clear search")))
 
-        step("Pick a song book", "Hymnals, collections, your own", find(hasText("All Song Books")) { it.left > dp(380f) })
-        step("Gospel Songs", "Only that book's songs", find(hasText("Gospel Songs")) { it.top < dp(400f) })
-        step("Back to every book", "", find(hasText("Gospel Songs")) { it.left > dp(580f) && it.top < dp(120f) })
-        step("All Song Books", "", find(hasText("All Song Books")) { it.top > dp(100f) })
-        step("Choose how the search matches", "Contains, Starts With or Exact Match", find(hasText("Contains")) { it.left > dp(380f) })
-        step("Starts With", "Titles that begin with what you type", find(hasText("Starts With")))
-        step("Sort the list", "Click any column heading — again to reverse", find(hasText("Title")) { it.left > dp(380f) })
+        step(
+            "Pick a song book",
+            "Hymnals, collections, your own",
+            find(hasText("All Song Books")) { it.left > dp(380f) },
+        )
+        step("Gospel Songs", "Only that book's songs", menuItem("Gospel Songs"))
+        step(
+            "Back to every book",
+            "Open the list again",
+            find(hasText("Gospel Songs")) { it.left > dp(580f) && it.top < dp(120f) },
+        )
+        step("All Song Books", "The whole library again", menuItem("All Song Books"))
+        step(
+            "Choose how the search matches",
+            "Contains, Starts With or Exact Match",
+            find(hasText("Contains")) { it.left > dp(380f) },
+        )
+        step("Starts With", "Titles that begin with what you type", menuItem("Starts With"))
+        step(
+            "Sort the list",
+            "Click any column heading — again to reverse",
+            find(hasText("Title")) { it.left > dp(380f) },
+        )
 
         step("Click a song", "Its verses appear on the right", text("Amazing Grace"))
         step("Click a verse", "Ready in the preview", text("Amazing grace! how sweet the sound"))
         goLive(sub = "Sends the verse to the projector")
         showLive(sub = "Verse 1 of Amazing Grace")
-        press("Next verse", "↓ and ↑ move through the verses while live", text("'Twas grace that taught"), Key.DirectionDown, "↓") {
+        press(
+            "Next verse",
+            "↓ and ↑ move through the verses while live",
+            text("'Twas grace that taught"),
+            Key.DirectionDown,
+            "↓",
+        ) {
             settle()
         }
         showLive("Verse 2", "Straight from the keyboard")
@@ -124,15 +146,28 @@ class DemoTours {
         val star = find(hasContentDescription("Add to favorites")) { it.left > dp(380f) && it.top > dp(170f) }
         step("Star a song", "Favorites stay pinned above the list", star)
         pause(1.2)
-        rightClick("Right-click a song for more", "Go Live, Add to Schedule, Favorites, Edit, Delete", text("It Is Well With My Soul"))
-        step("Add to Schedule", "Queue it for the service", find(hasText("Add to Schedule")))
+        rightClick(
+            "Right-click a song for more",
+            "Go Live, Add to Schedule, Favorites, Edit, Delete",
+            text("It Is Well With My Soul"),
+        )
+        step("Add to Schedule", "Queue it for the service", menuItem("Add to Schedule"))
         val row = reveal { find(hasText("It Is Well", substring = true)) { it.right < dp(380f) } }
         note("Added to your schedule", "Run the whole service from this list", row)
+        note("Back to Live", "Browsing away from the live song? One click returns to it", text("Back to Live"))
 
-        step("Choose the columns", "Number, Title, Song Book, Author, play count…", find(hasContentDescription("Filter columns")))
+        step(
+            "Choose the columns",
+            "Number, Title, Song Book, Author, play count…",
+            find(hasContentDescription("Filter columns")),
+        )
         pause(1.5)
         quietClick(text("Amazing Grace"))
-        note("Edit a song", "Lyrics, chords and transpose, translations, its own look", find(hasContentDescription("Edit Song")))
+        note(
+            "Edit a song",
+            "Lyrics, chords and transpose, translations, its own look",
+            find(hasContentDescription("Edit Song")),
+        )
         note("Write a new song", "Or import one", find(hasContentDescription("New Song")))
         title("That's the Songs tab", "Search · Pick · Go Live · Arrow keys", 2.4)
     }
