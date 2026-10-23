@@ -40,6 +40,16 @@ private val LIVE_RED = Color(0xDC, 0x26, 0x26)
 private val FULL_DST = Rect(240f, 96f, 1680f, 996f)
 private val OPERATOR_DST = Rect(56f, 182f, 1208f, 902f)
 
+/** Where an open dialog of [w]×[h] pixels sits on the frame: right of center, under a 36px title bar. */
+internal fun panelContent(w: Float, h: Float): Rect {
+    val k = min(824f / h, 860f / w)
+    val width = w * k
+    val height = h * k
+    val left = OUT_W - 110f - width
+    val top = 146f + (824f - height) / 2
+    return Rect(left, top, left + width, top + height)
+}
+
 /** The projector panel of the "Demo with projector" scene. */
 private val SCREEN = Rect(1324f, 346f, 1864f, 650f)
 
@@ -92,7 +102,15 @@ internal data class Camera(val src: Rect, val dst: Rect, val chrome: Float, val 
 }
 
 /** A highlighted control: its outline, the dim around it, and its tooltip. */
-internal class Focus(val rect: Rect, val step: Int?, val title: String, val body: String, val compact: Boolean)
+internal class Focus(
+    val rect: Rect,
+    val step: Int?,
+    val title: String,
+    val body: String,
+    val compact: Boolean,
+    /** [rect] is already in frame pixels (a control in an open dialog), not the app's. */
+    val onFrame: Boolean = false,
+)
 
 /** Everything a frame shows, mutated by the tour as it plays and drawn by [DemoStage]. */
 internal class Scene(var app: BufferedImage, var projector: BufferedImage, var camera: Camera) {
@@ -113,6 +131,9 @@ internal class Scene(var app: BufferedImage, var projector: BufferedImage, var c
     var liveAge = 1_000
     var arrow = 0f
     var header: Pair<String, String> = "" to ""
+    var panel: BufferedImage? = null
+    var panelShown = 0f
+    var panelTitle = ""
     var step = 0
     var steps = 0
 }
@@ -127,6 +148,7 @@ internal class DemoStage(private val appW: Float, private val appH: Float) {
         val g = img.createGraphics()
         g.drawImage(baseLayer(s), 0, 0, null)
         g.quality()
+        if (s.panelShown > 0f) s.panel?.let { panelWindow(g, it, s.panelTitle, s.panelShown) }
         s.focus?.let { focus(g, s, it) }
         s.keycap?.let { keycap(g, s, it) }
         s.cursor?.let { cursor(g, s, s.camera.map(it.x, it.y)) }
@@ -310,6 +332,36 @@ internal class DemoStage(private val appW: Float, private val appH: Float) {
         }
     }
 
+    /** An open dialog: the app dimmed behind it, the window sliding in from the right as it fades up. */
+    private fun panelWindow(g: Graphics2D, panel: BufferedImage, title: String, shown: Float) {
+        g.color = Color(0, 0, 0, (140 * shown).toInt())
+        g.fillRect(0, 0, OUT_W, OUT_H)
+        g.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, shown)
+        val dx = (1 - shown) * 60f
+        val p = panelContent(panel.width.toFloat(), panel.height.toFloat())
+        val c = Rect(p.left + dx, p.top, p.right + dx, p.bottom)
+        val frame = Rect(c.left, c.top - 36f, c.right, c.bottom)
+        softShadow(g, frame, Shadow(30f, 10f, 16f, 22, 6))
+        val shape = RoundRectangle2D.Float(frame.left, frame.top, frame.width, frame.height, 16f, 16f)
+        val old = g.clip
+        g.clip(shape)
+        g.color = TITLEBAR
+        g.fill(Rectangle2D.Float(frame.left, frame.top, frame.width, 36f))
+        listOf(Color(0xFF, 0x5F, 0x57), Color(0xFE, 0xBC, 0x2E), Color(0x28, 0xC8, 0x40)).forEachIndexed { i, col ->
+            g.color = col
+            g.fill(Ellipse2D.Float(frame.left + 16f + i * 21f, frame.top + 12f, 12f, 12f))
+        }
+        g.font = DemoFonts.sans(500, 16f)
+        g.color = MUTED
+        centered(g, title, frame.center.x, frame.top + 24f)
+        drawScaled(g, panel, c)
+        g.clip = old
+        g.color = Color(255, 255, 255, 36)
+        g.stroke = BasicStroke(1f)
+        g.draw(shape)
+        g.composite = AlphaComposite.SrcOver
+    }
+
     // ── Outline, dim, tooltip ─────────────────────────────────────────────
 
     private fun focus(g: Graphics2D, s: Scene, f: Focus) {
@@ -317,7 +369,7 @@ internal class DemoStage(private val appW: Float, private val appH: Float) {
         val draw = ease(min(1f, age / 9f))
         val compact = f.compact
         val pad = if (compact) 4f else 6f
-        val r = s.camera.map(f.rect)
+        val r = if (f.onFrame) f.rect else s.camera.map(f.rect)
         val grow = 1f + 0.06f * (1 - draw)
         val cx = r.center.x
         val cy = r.center.y

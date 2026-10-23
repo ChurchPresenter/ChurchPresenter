@@ -80,6 +80,10 @@ private const val PROJ_W = 880f
 private const val PROJ_H = 495f
 private const val CANVAS_W = APP_W + GAP + PROJ_W + GAP
 
+// A dialog a tour opens (see [recordTour]'s panel), rendered beside the projector at its own size.
+private const val PANEL_W = 600f
+private const val PANEL_H = 720f
+
 /** Flip to record the app in light mode instead. */
 private const val DARK_MODE = true
 private val THEME = if (DARK_MODE) ThemeMode.DARK else ThemeMode.LIGHT
@@ -112,6 +116,7 @@ internal fun recordTour(
     steps: Int,
     startTab: String? = null,
     settings: (AppSettings) -> AppSettings = { it },
+    panel: (@Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit) -> Unit)? = null,
     script: DemoTour.() -> Unit,
 ) {
     val root = System.getenv("CP_DEMO_OUT")?.let(::File)
@@ -122,11 +127,13 @@ internal fun recordTour(
     // A previous tour's schedule autosave would open every recording on "Restore unsaved schedule?".
     File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp").delete()
     val appSettings = settings(library())
-    runSkikoComposeUiTest(size = Size(CANVAS_W, APP_H) * DENSITY, density = Density(DENSITY)) {
+    val width = if (panel == null) CANVAS_W else CANVAS_W + PANEL_W
+    runSkikoComposeUiTest(size = Size(width, APP_H) * DENSITY, density = Density(DENSITY)) {
         var actions = ScheduleActions()
         val presenter = PresenterManager()
         val media = MediaViewModel()
         var current by mutableStateOf(appSettings)
+        var frozen by mutableStateOf(false)
         val changeSettings = { change: (AppSettings) -> AppSettings -> current = change(current) }
         setContent {
             PinnedFonts {
@@ -144,10 +151,24 @@ internal fun recordTour(
                                     theme = THEME,
                                     live = liveCallbacks(presenter),
                                     publish = MainDesktopPublishers(onScheduleActionsReady = { actions = it }),
-                                    web = WebAccessState(serverUrl = "http://192.168.1.42:8080"),
+                                    web = WebAccessState(
+                                        serverUrl = "http://192.168.1.42:8080",
+                                        // What AppWiring does: Blank Output freezes the slide output.
+                                        presentationFrozen = frozen,
+                                        onFreezeToggle = {
+                                            frozen = !frozen
+                                            presenter.setSlideFrozen(frozen)
+                                        },
+                                    ),
                                 )
                             }
                             Projector(presenter, current, media)
+                            panel?.let {
+                                Box(
+                                    Modifier.padding(start = GAP.dp, top = ((APP_H - PANEL_H) / 2).dp)
+                                        .size(PANEL_W.dp, PANEL_H.dp),
+                                ) { it(current, changeSettings) }
+                            }
                         }
                     }
                 }
@@ -162,7 +183,8 @@ internal fun recordTour(
         }
         val narrator = DemoNarrator(root)
         try {
-            DemoTour(TourSetup(name, tab, liveLabel, steps), this, presenter, out, changeSettings, narrator).script()
+            val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null)
+            DemoTour(setup, this, presenter, out, changeSettings, narrator).script()
         } catch (_: LengthReached) {
             // CP_DEMO_SECONDS cut the tour short; what was recorded is the preview.
         }
@@ -231,7 +253,13 @@ private fun Projector(presenter: PresenterManager, appSettings: AppSettings, med
 internal class Target(val node: SemanticsNodeInteraction, val bounds: Rect)
 
 /** What names a tour: its file names, the tab it shows, the projector scene's label, its step count. */
-internal class TourSetup(val name: String, val tab: String, val liveLabel: String, val steps: Int)
+internal class TourSetup(
+    val name: String,
+    val tab: String,
+    val liveLabel: String,
+    val steps: Int,
+    val hasPanel: Boolean = false,
+)
 
 internal class DemoTour(
     setup: TourSetup,
@@ -243,14 +271,20 @@ internal class DemoTour(
 ) {
     private val name = setup.name
     private val tab = setup.tab
+    private val hasPanel = setup.hasPanel
     private val d = DENSITY
     private val appW = APP_W * d
     private val appH = APP_H * d
     private val stage = DemoStage(appW, appH)
     private var frame = 0
     private var stepNumber = 0
-    private val scene: Scene = capture().let { (app, projector) ->
+
+    /** The open panel's own size in dp — each dialog is drawn top-left in the panel area at its size. */
+    private var panelSize = Size(PANEL_W, PANEL_H)
+
+    private val scene: Scene = capture().let { (app, projector, panel) ->
         Scene(app, projector, Camera.full(appW, appH)).apply {
+            this.panel = panel
             header = setup.tab to setup.liveLabel
             steps = setup.steps
             cursor = Pt(appW * 0.55f, appH * 0.6f)
@@ -573,6 +607,77 @@ internal class DemoTour(
         padTo(start, talk)
     }
 
+    // ── A dialog, as a floating window ────────────────────────────────────
+
+    /** A control inside the tour's panel (the dialog rendered beside the projector). */
+    fun panelItem(matcher: SemanticsMatcher): Target {
+        val nodes = ui.onAllNodes(matcher)
+        val hit = nodes.fetchSemanticsNodes().withIndex()
+            .first { it.value.boundsInWindow.left >= CANVAS_W * d }
+        return Target(nodes[hit.index], hit.value.boundsInWindow)
+    }
+
+    /** Opens the panel as a window titled [title], [width]×[height] dp, sliding in over the dimmed app. */
+    fun openPanel(title: String, width: Float, height: Float) {
+        panelSize = Size(width, height)
+        scene.focus = null
+        scene.panelTitle = title
+        refresh(0.1)
+        savedCursor = scene.cursor
+        scene.cursor = null
+        val n = frames(0.45)
+        for (i in 1..n) {
+            scene.panelShown = ease(i / n.toFloat())
+            emit()
+        }
+    }
+
+    fun closePanel() {
+        scene.focus = null
+        val n = frames(0.35)
+        for (i in n - 1 downTo 0) {
+            scene.panelShown = ease(i / n.toFloat())
+            emit()
+        }
+        scene.cursor = savedCursor
+        // A click inside the dialog took the keyboard from the tab; the banner it raises is not the lesson.
+        if (hasNode(hasText("Keyboard focus lost", substring = true))) {
+            quietClick(find(hasText("Keyboard focus lost", substring = true)))
+        }
+    }
+
+    /** A tooltip on a control in the open panel; with [click], the control is pressed too. */
+    fun panelNote(heading: String, sub: String, target: Target, click: Boolean = false, numbered: Boolean = false) {
+        val n = if (numbered) ++stepNumber else null
+        scene.step = stepNumber
+        val start = frame
+        val talk = narrate(heading, sub)
+        scene.focus = Focus(panelToFrame(target.bounds), n, heading, sub, compact = false, onFrame = true)
+        scene.focusAge = 0
+        hold(1.2)
+        if (click) {
+            target.node.performClick()
+            ui.waitForIdle()
+            refresh(0.3)
+        }
+        hold(0.4)
+        padTo(start, talk)
+    }
+
+    private var savedCursor: Pt? = null
+
+    private fun panelToFrame(r: Rect): Rect {
+        val content = panelContent(panelSize.width * d, panelSize.height * d)
+        val k = content.width / (panelSize.width * d)
+        val top = (APP_H - PANEL_H) / 2 * d
+        return Rect(
+            content.left + (r.left - CANVAS_W * d) * k,
+            content.top + (r.top - top) * k,
+            content.left + (r.right - CANVAS_W * d) * k,
+            content.top + (r.bottom - top) * k,
+        )
+    }
+
     fun pause(seconds: Double) {
         refresh(0.2)
         hold(seconds)
@@ -668,7 +773,8 @@ internal class DemoTour(
     /** Takes a fresh capture and crossfades to it; a [live] change also draws the arrow and pulses LIVE. */
     private fun refresh(seconds: Double, live: Boolean = false) {
         if (live) awaitProjectorChange()
-        val (app, projector) = capture()
+        val (app, projector, panel) = capture()
+        scene.panel = panel
         scene.appBefore = scene.app
         scene.app = app
         scene.projectorBefore = scene.projector
@@ -742,7 +848,7 @@ internal class DemoTour(
     }
 
     /** The app's window and the projector's picture, cut from one capture of both (and any open popup). */
-    private fun capture(): Pair<BufferedImage, BufferedImage> {
+    private fun capture(): Triple<BufferedImage, BufferedImage, BufferedImage?> {
         // Hold-live is a deliberate operator choice; a stray modifier key in the harness must not leave it on.
         if (presenter.bibleHold.value) {
             presenter.setBibleHold(false)
@@ -763,7 +869,11 @@ internal class DemoTour(
         val projector = img.getSubimage(
             ((APP_W + GAP) * d).toInt(), ((APP_H - PROJ_H) / 2 * d).toInt(), (PROJ_W * d).toInt(), (PROJ_H * d).toInt(),
         )
-        return app to projector
+        val panel = if (!hasPanel) null else img.getSubimage(
+            (CANVAS_W * d).toInt(), ((APP_H - PANEL_H) / 2 * d).toInt(), (panelSize.width * d).toInt(),
+            (panelSize.height * d).toInt(),
+        )
+        return Triple(app, projector, panel)
     }
 
     /** The tab-select tooltip is titled with the tab's own name, as in the storyboard. */
