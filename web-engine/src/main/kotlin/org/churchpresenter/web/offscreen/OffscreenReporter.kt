@@ -123,7 +123,7 @@ internal class OffscreenReporter(
         const val MAX_SESSIONS = 3
         private const val NONE = -1L
         private const val MS_PER_SECOND = 1000.0
-        private val SESSIONS_SENT = AtomicInteger()
+        internal val SESSIONS_SENT = AtomicInteger()
     }
 }
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.skiaCanvas
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import org.jetbrains.skia.FilterMipmap
 import org.jetbrains.skia.FilterMode
 import org.jetbrains.skia.Image
@@ -59,13 +60,15 @@ fun OffscreenWebView(
  * [page] as the operator controls it: [OffscreenWebView]'s small picture, with the mouse, wheel and
  * touchpad sent to the page at the matching point, the pointer shaped as the page asks, and the keys
  * sent to the page while this has focus. A press here gives it focus; focus anywhere else takes the
- * keys back. With [drivesSize] the page renders at this box's size, as for a page of its own.
+ * keys back. With [drivesSize] the page renders at this box's size and the screen's scale, as for a
+ * page of its own.
  */
 @Composable
 fun OffscreenWebControl(page: OffscreenPage, modifier: Modifier = Modifier, drivesSize: Boolean = false) {
     val surface = remember { Any() }
     DisposableEffect(page, surface) { onDispose { page.releaseSize(surface) } }
-    val sized = if (drivesSize) modifier.onSizeChanged { page.requestSize(surface, it) } else modifier
+    val density = LocalDensity.current.density
+    val sized = if (drivesSize) modifier.onSizeChanged { page.requestSize(surface, it, density) } else modifier
     val focus = remember { FocusRequester() }
     val focused = remember { AtomicBoolean(false) }
     val window = remember { AtomicReference<Window?>(null) }

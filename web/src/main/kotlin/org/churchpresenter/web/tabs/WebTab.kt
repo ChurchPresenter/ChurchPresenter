@@ -306,15 +306,24 @@ internal fun findMethod(obj: Any, name: String, vararg paramTypes: Class<*>): ja
     return null
 }
 
-/** Prepend https:// if the user forgot the scheme. */
+/**
+ * Prepend https:// if the user forgot the scheme. An address with a scheme of its own (`file://`, any
+ * `scheme://`, or `data:`, `about:`, `view-source:`) is left as typed; a bare `host:port` is not a scheme.
+ */
 internal fun normaliseUrl(raw: String): String {
     val trimmed = raw.trim()
     return when {
-        trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
+        HAS_SCHEME.containsMatchIn(trimmed) -> trimmed
+        OPAQUE_SCHEMES.any { trimmed.startsWith(it, ignoreCase = true) } -> trimmed
         trimmed.isNotBlank() -> "https://$trimmed"
         else -> trimmed
     }
 }
+
+private val HAS_SCHEME = Regex("^[a-zA-Z][a-zA-Z0-9+.-]*://")
+
+/** Schemes written without `//`. */
+private val OPAQUE_SCHEMES = listOf("data:", "about:", "view-source:")
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type-to-page JS helpers.

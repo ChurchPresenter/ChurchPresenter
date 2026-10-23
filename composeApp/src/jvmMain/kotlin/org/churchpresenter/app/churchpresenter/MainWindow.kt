@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.DisposableEffect
+import org.churchpresenter.web.offscreen.OffscreenPage
 import org.churchpresenter.web.presenter.CefManager
 import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.snapshotFlow
@@ -238,6 +239,7 @@ private fun AppRootState.MainWindow(
         if (qaManager.sessionActive) qaManager.toggleSession()
         companionServer.clearPresentationState()
         companionServer.tunnelManager.shutdown()
+        OffscreenPage.reportOpenSessions()
         exitApplication()
     }
     // Cmd+Q reaches the web engine before the window; it quits the same way the window's close does.

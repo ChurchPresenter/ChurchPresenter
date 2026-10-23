@@ -13,6 +13,7 @@ import org.cef.handler.CefDisplayHandler
 import org.cef.handler.CefLifeSpanHandler
 import org.cef.handler.CefRequestHandler
 import java.awt.Rectangle
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -79,6 +80,20 @@ class OffscreenPageTest {
     }
 
     @Test
+    fun `a page of its own takes its screen's scale, and a change of scale alone resizes it`() {
+        val page = assertNotNull(open())
+        val preview = Any()
+        page.requestSize(preview, IntSize(1500, 900), density = 1.5f)
+        page.applySize()
+        assertEquals(1000 to 600, page.browser.viewWidth to page.browser.viewHeight)
+        assertEquals(1.5, page.browser.scale)
+
+        page.requestSize(preview, IntSize(1500, 900), density = 1f)
+        page.applySize()
+        assertEquals(1.0, page.browser.scale)
+    }
+
+    @Test
     fun `a size of nothing is not a request`() {
         val page = assertNotNull(open())
         page.requestSize(Any(), IntSize(0, 0))
@@ -122,6 +137,26 @@ class OffscreenPageTest {
         assertNull(page.frames.value)
         verify(exactly = 1) { client.dispose() }
         assertTrue(sent.none { it is OffscreenReport.Session }, "a session this short sends no summary")
+    }
+
+    @Test
+    fun `a page still open at a quit sends its session summary, and closing it later sends no second`() {
+        var now = 0L
+        val page = assertNotNull(
+            OffscreenPage.openWith(
+                client, "https://example.org/", {}, {},
+                OffscreenPage.Options(
+                    "Mac OS X", reports = true, mobileMode = { false }, start = {}, send = { sent += it },
+                    clock = { now }, sessionsSent = AtomicInteger(),
+                ),
+            )?.also { opened += it },
+        )
+        now = 60_000
+
+        OffscreenPage.reportOpenSessions()
+        page.close()
+
+        assertEquals(1, sent.count { it is OffscreenReport.Session })
     }
 
     @Test

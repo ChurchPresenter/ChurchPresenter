@@ -16,6 +16,7 @@ import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.web.presenter.MobileUserAgentHandler
 import org.churchpresenter.web.presenter.PageDisplayHandler
 import org.churchpresenter.web.presenter.PopupsInPlace
+import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.Timer
 import kotlin.math.roundToInt
 
@@ -37,7 +38,8 @@ class OffscreenPage internal constructor(
 ) {
     /**
      * How a page runs: on [os], reporting to Sentry or not, and when it asks for mobile pages.
-     * [start] creates the native browser, and [send] is where reports go: both are seams for tests.
+     * [start] creates the native browser, [send] is where reports go, and [clock] and [sessionsSent]
+     * time a session and count the run's summaries: all seams for tests.
      */
     internal class Options(
         val os: String,
@@ -45,15 +47,20 @@ class OffscreenPage internal constructor(
         val mobileMode: () -> Boolean,
         val start: (CefBrowserHeadless) -> Unit = ::startBrowser,
         val send: (OffscreenReport) -> Unit = if (reports) ::sendToSentry else ::sendFailuresOnly,
+        val clock: () -> Long = System::currentTimeMillis,
+        val sessionsSent: AtomicInteger = OffscreenReporter.SESSIONS_SENT,
     )
 
     private val os = options.os
     internal val stats = OffscreenStats()
     private val rgba = os.startsWith("Linux")
     private var pixels = IntSize(LAYOUT_WIDTH, DEFAULT_HEIGHT)
+    private var density = 1.0
     private val reporter = OffscreenReporter(
         tags = ::tags,
+        clock = options.clock,
         send = options.send,
+        sessionsSent = options.sessionsSent,
     )
     private val store = OffscreenFrames(
         dipWidth = { headless.viewWidth },
@@ -70,10 +77,11 @@ class OffscreenPage internal constructor(
         val settings = CefBrowserSettings().apply { windowless_frame_rate = FRAME_RATE }
         CefBrowserHeadless(client, url, settings, view.width, view.height, scale, store)
     }
-    private val requested = LinkedHashMap<Any, IntSize>()
+    private val requested = LinkedHashMap<Any, Pair<IntSize, Double>>()
     private val resizeTimer = Timer(RESIZE_SETTLE_MS) { applySize() }.apply { isRepeats = false }
     private val tickTimer = Timer(TICK_MS) { reporter.tick(stats.drain(), stats.copyP95Ms()) }
     private var closed = false
+    private var reported = false
 
     /** The page's browser: what the Web tab steers (address, history, zoom, scripts). */
     val browser: CefBrowserHeadless get() = headless
@@ -87,6 +95,7 @@ class OffscreenPage internal constructor(
     init {
         options.start(headless)
         tickTimer.start()
+        openPages += this
         CrashReporter.breadcrumb("Off-screen web page opened", category = "web")
     }
 
@@ -95,10 +104,14 @@ class OffscreenPage internal constructor(
         if (url.isNotBlank() && url != headless.url) headless.loadURL(url)
     }
 
-    /** An output window [surface] is [size] pixels; the page renders at the largest of them. */
-    fun requestSize(surface: Any, size: IntSize) {
+    /**
+     * An output window [surface] is [size] pixels; the page renders at the largest of them. An output
+     * lays the page out [LAYOUT_WIDTH] DIPs wide whatever the screen's scale; a page of its own (the
+     * Web tab's preview) passes its screen's [density], so it reads at the same size as the app.
+     */
+    fun requestSize(surface: Any, size: IntSize, density: Float = 1f) {
         if (closed || size.width <= 0 || size.height <= 0) return
-        requested[surface] = size
+        requested[surface] = size to density.toDouble()
         resizeTimer.restart()
     }
 
@@ -110,10 +123,12 @@ class OffscreenPage internal constructor(
     /** Renders at the largest requested size; run by the resize timer once requests have settled. */
     internal fun applySize() {
         if (closed) return
-        val largest = requested.values.maxByOrNull { it.width.toLong() * it.height } ?: return
-        if (largest == pixels) return
+        val (largest, largestDensity) = requested.values.maxByOrNull { (size, _) -> size.width.toLong() * size.height }
+            ?: return
+        if (largest == pixels && largestDensity == density) return
         pixels = largest
-        val (view, scale) = layoutFor(largest)
+        density = largestDensity
+        val (view, scale) = layoutFor(largest, largestDensity)
         headless.resize(view.width, view.height, scale)
         CrashReporter.breadcrumb("Off-screen web page resized to ${largest.width}x${largest.height}", category = "web")
     }
@@ -124,13 +139,21 @@ class OffscreenPage internal constructor(
         closed = true
         resizeTimer.stop()
         tickTimer.stop()
-        reporter.tick(stats.drain(), stats.copyP95Ms())
-        reporter.finish(stats.copyP95Ms())
+        finishReports()
+        openPages -= this
         runCatching { headless.close(true) }
         runCatching { client.dispose() }
         val free = store.close()
         Timer(FREE_AFTER_MS) { free() }.apply { isRepeats = false }.start()
         CrashReporter.breadcrumb("Off-screen web page closed", category = "web")
+    }
+
+    /** Sends what the page's last second and its session came to, once. */
+    private fun finishReports() {
+        if (reported) return
+        reported = true
+        reporter.tick(stats.drain(), stats.copyP95Ms())
+        reporter.finish(stats.copyP95Ms())
     }
 
     private fun tags(): Map<String, String> = mapOf(
@@ -148,6 +171,15 @@ class OffscreenPage internal constructor(
         private const val RESIZE_SETTLE_MS = 250
         private const val TICK_MS = 1000
         private const val FREE_AFTER_MS = 1000
+
+        /** The pages open now, so a quit can still report them; touched on the event thread only. */
+        private val openPages = LinkedHashSet<OffscreenPage>()
+
+        /**
+         * Sends the session summary of every page still open, as the app quits: a page live at the
+         * quit is never closed, so its session would otherwise go unreported. The pages stay open.
+         */
+        fun reportOpenSessions() = openPages.toList().forEach(OffscreenPage::finishReports)
 
         /**
          * Opens [url] off screen, or returns null when the engine did not start windowless or the
@@ -189,9 +221,9 @@ class OffscreenPage internal constructor(
                 .getOrNull()
         }
 
-        /** The page's size in DIPs, and the device scale, for an output of [pixels]. */
-        internal fun layoutFor(pixels: IntSize): Pair<IntSize, Double> {
-            val scale = maxOf(1.0, pixels.width.toDouble() / LAYOUT_WIDTH)
+        /** The page's size in DIPs, and the device scale, for an output of [pixels] on a screen of [density]. */
+        internal fun layoutFor(pixels: IntSize, density: Double = 1.0): Pair<IntSize, Double> {
+            val scale = maxOf(1.0, density, pixels.width.toDouble() / LAYOUT_WIDTH)
             return IntSize((pixels.width / scale).roundToInt(), (pixels.height / scale).roundToInt()) to scale
         }
     }

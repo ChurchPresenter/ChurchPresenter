@@ -38,6 +38,8 @@ public class CefBrowserHeadless extends CefBrowser_N implements CefRenderHandler
     private volatile int viewWidth;
     private volatile int viewHeight;
     private volatile double scale;
+    /** Set while a {@link #setFocus} call is in Chromium; only CEF's UI thread calls it. */
+    private boolean settingFocus;
 
     public CefBrowserHeadless(CefClient client, String url, CefBrowserSettings settings,
                               int viewWidth, int viewHeight, double scale, HeadlessSink sink) {
@@ -90,6 +92,22 @@ public class CefBrowserHeadless extends CefBrowser_N implements CefRenderHandler
         viewHeight = height;
         this.scale = scale;
         wasResized(width, height);
+    }
+
+    /**
+     * Focuses or blurs the page, once. JCEF's {@code CefClient.onGotFocus} answers Chromium's focus
+     * callback with {@code setFocus(true)}, and a windowless Chromium answers that with the callback
+     * again on the same thread, so without this guard the two recurse until the stack runs out.
+     */
+    @Override
+    public void setFocus(boolean enable) {
+        if (settingFocus) return;
+        settingFocus = true;
+        try {
+            super.setFocus(enable);
+        } finally {
+            settingFocus = false;
+        }
     }
 
     public void mouse(MouseEvent event) { sendMouseEvent(event); }

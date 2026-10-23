@@ -58,7 +58,7 @@ class PageKeysTest {
     fun `on macOS a non-ASCII character goes as an edit, not a key`() {
         keys("Mac OS X").dispatchKeyEvent(key(KeyEvent.KEY_TYPED, 0, 'є'))
         assertTrue(target.keys.isEmpty())
-        assertEquals(listOf(insertTextScript('є')), target.scripts)
+        assertEquals(listOf(insertTextScript("є")), target.scripts)
     }
 
     @Test
@@ -73,6 +73,36 @@ class PageKeysTest {
         keys("Linux").dispatchKeyEvent(key(KeyEvent.KEY_PRESSED, KeyEvent.VK_X, 'x', KeyEvent.CTRL_DOWN_MASK))
         assertTrue(target.keys.isEmpty())
         assertEquals(listOf(LinuxClipboard.readScript(LinuxClipboard.Action.CUT)), target.scripts)
+    }
+
+    @Test
+    fun `on Linux a paste of the app's own copy is typed by script, not sent as a key`() {
+        LinuxClipboard.claim("it's \"here\"") { _, _ -> }
+        try {
+            keys("Linux").dispatchKeyEvent(key(KeyEvent.KEY_PRESSED, KeyEvent.VK_V, 'v', KeyEvent.CTRL_DOWN_MASK))
+            assertTrue(target.keys.isEmpty())
+            assertEquals(listOf(insertTextScript("it's \"here\"")), target.scripts)
+        } finally {
+            LinuxClipboard.release()
+        }
+    }
+
+    @Test
+    fun `on Linux a paste of another program's text goes to the page as a key`() {
+        LinuxClipboard.claim("mine") { _, _ -> }
+        LinuxClipboard.release()
+        keys("Linux").dispatchKeyEvent(key(KeyEvent.KEY_PRESSED, KeyEvent.VK_V, 'v', KeyEvent.CTRL_DOWN_MASK))
+        assertEquals(1, target.keys.size)
+        assertTrue(target.scripts.isEmpty())
+    }
+
+    @Test
+    fun `Alt+F4 is left to the window`() {
+        val altF4 = key(KeyEvent.KEY_PRESSED, KeyEvent.VK_F4, KeyEvent.CHAR_UNDEFINED, KeyEvent.ALT_DOWN_MASK)
+        assertFalse(keys("Windows 11").dispatchKeyEvent(altF4))
+        val f4 = key(KeyEvent.KEY_PRESSED, KeyEvent.VK_F4, KeyEvent.CHAR_UNDEFINED)
+        assertTrue(keys("Windows 11").dispatchKeyEvent(f4))
+        assertEquals(1, target.keys.size)
     }
 
     @Test

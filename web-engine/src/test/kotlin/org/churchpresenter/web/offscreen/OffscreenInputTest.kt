@@ -90,11 +90,12 @@ class OffscreenInputTest {
         assertEquals('ї', macTypedText(key(KeyEvent.KEY_TYPED, 0, 'ї'), "Mac OS X"))
         assertNull(macTypedText(key(KeyEvent.KEY_TYPED, 0, 'a'), "Mac OS X"))
         assertNull(macTypedText(key(KeyEvent.KEY_TYPED, 0, 'ї'), "Windows 11"))
-        assertEquals("document.execCommand('insertText', false, '\\u0457')", insertTextScript('ї'))
+        assertEquals("document.execCommand('insertText', false, '\\u0457')", insertTextScript("ї"))
+        assertEquals("document.execCommand('insertText', false, '\\u0061\\u0027\\u000a')", insertTextScript("a'\n"))
     }
 
     @Test
-    fun `Linux copy and cut are Ctrl+C, Ctrl+Insert and Ctrl+X, not with Alt or Meta`() {
+    fun `Linux copy, cut and paste are Ctrl+C or Ctrl+Insert, Ctrl+X, and Ctrl+V or Shift+Insert`() {
         fun pressed(code: Int, char: Char, mods: Int = KeyEvent.CTRL_DOWN_MASK) =
             LinuxClipboard.actionOf(key(KeyEvent.KEY_PRESSED, code, char, mods))
         assertEquals(LinuxClipboard.Action.COPY, pressed(KeyEvent.VK_C, 'c'))
@@ -102,7 +103,13 @@ class OffscreenInputTest {
         assertEquals(LinuxClipboard.Action.CUT, pressed(KeyEvent.VK_X, 'x'))
         assertNull(pressed(KeyEvent.VK_C, 'c', KeyEvent.CTRL_DOWN_MASK or KeyEvent.ALT_DOWN_MASK))
         assertNull(LinuxClipboard.actionOf(key(KeyEvent.KEY_RELEASED, KeyEvent.VK_C, 'c', KeyEvent.CTRL_DOWN_MASK)))
-        assertNull(LinuxClipboard.actionOf(key(KeyEvent.KEY_PRESSED, KeyEvent.VK_V, 'v', KeyEvent.CTRL_DOWN_MASK)))
+        assertEquals(LinuxClipboard.Action.PASTE, pressed(KeyEvent.VK_V, 'v'))
+        assertEquals(
+            LinuxClipboard.Action.PASTE,
+            pressed(KeyEvent.VK_INSERT, KeyEvent.CHAR_UNDEFINED, KeyEvent.SHIFT_DOWN_MASK),
+        )
+        assertNull(pressed(KeyEvent.VK_V, 'V', KeyEvent.CTRL_DOWN_MASK or KeyEvent.SHIFT_DOWN_MASK))
+        assertNull(pressed(KeyEvent.VK_A, 'a'))
     }
 
     @Test
@@ -162,5 +169,13 @@ class OffscreenInputTest {
         assertEquals(androidx.compose.ui.unit.IntSize(1920, 1080) to 2.0, fourK to fourKScale)
         val (window, windowScale) = OffscreenPage.layoutFor(androidx.compose.ui.unit.IntSize(960, 512))
         assertEquals(androidx.compose.ui.unit.IntSize(960, 512) to 1.0, window to windowScale)
+    }
+
+    @Test
+    fun `a page of its own on a scaled screen is laid out at the screen's scale`() {
+        val (view, scale) = OffscreenPage.layoutFor(androidx.compose.ui.unit.IntSize(1594, 897), density = 1.5)
+        assertEquals(androidx.compose.ui.unit.IntSize(1063, 598) to 1.5, view to scale)
+        val (wide, wideScale) = OffscreenPage.layoutFor(androidx.compose.ui.unit.IntSize(3840, 2160), density = 1.5)
+        assertEquals(androidx.compose.ui.unit.IntSize(1920, 1080) to 2.0, wide to wideScale)
     }
 }
