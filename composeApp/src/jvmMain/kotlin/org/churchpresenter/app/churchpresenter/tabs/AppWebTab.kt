@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.isDevWindowedFallback
+import org.churchpresenter.sharedui.utils.DevFlags
+import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.profiles.PreviewOutputPicker
@@ -50,6 +54,10 @@ fun AppWebTab(
         cefBlockedByPolicy = cefBlockedByPolicy,
         cefMissingLibrary = cefMissingLibrary,
         previewAspectRatio = previewOutput.size.aspectRatio,
+        // The dev windows PresenterWindows opens when there is no second display are outputs too.
+        devOutputWindows = isDevWindowedFallback(
+            BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, rememberScreenDevices().size - 1,
+        ),
         outputPicker = { pickerModifier ->
             PreviewOutputPicker(
                 settings = appSettings,

@@ -2,6 +2,8 @@
 
 package org.churchpresenter.web.tabs
 
+import org.churchpresenter.web.offscreen.paintStub
+import org.churchpresenter.web.offscreen.stubOffscreenPage
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
@@ -80,6 +82,21 @@ class WebTabMirrorPreviewTest {
 
         onNodeWithText(expectedHint).assertExists()
         onNode(spinner).assertExists()
+    }
+
+    @Test
+    fun `an off-screen page is drawn and controlled in place of any snapshot`() = webTab { presenter, _ ->
+        val page = stubOffscreenPage()
+        try {
+            paintStub(page, 800, 450)
+            presenter.offscreenPage.value = page
+            goLive { presenter.setPresentingMode(Presenting.WEBSITE) }
+
+            onNode(spinner).assertDoesNotExist()
+            onNodeWithText(expectedHint).assertDoesNotExist()
+        } finally {
+            page.close()
+        }
     }
 
     @Test

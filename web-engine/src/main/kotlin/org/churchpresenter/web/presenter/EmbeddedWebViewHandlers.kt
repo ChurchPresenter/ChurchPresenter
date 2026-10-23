@@ -7,6 +7,7 @@ import org.cef.browser.CefFrame
 import org.cef.handler.CefDisplayHandlerAdapter
 import org.cef.handler.CefLifeSpanHandlerAdapter
 import org.cef.handler.CefLoadHandlerAdapter
+import org.cef.handler.CefRequestHandler
 import org.cef.handler.CefRequestHandlerAdapter
 import org.cef.handler.CefResourceRequestHandler
 import org.cef.handler.CefResourceRequestHandlerAdapter
@@ -18,7 +19,7 @@ import java.awt.Rectangle
 import java.awt.image.BufferedImage
 
 /** Reports the main frame's address and the page's title as they change; see [handleAddressChange]. */
-internal class PageDisplayHandler(
+internal open class PageDisplayHandler(
     private val onUrlChanged: ((String) -> Unit)?,
     private val onTitleChanged: ((String) -> Unit)?,
 ) : CefDisplayHandlerAdapter() {
@@ -44,8 +45,22 @@ internal object PopupsInPlace : CefLifeSpanHandlerAdapter() {
     }
 }
 
-/** Tags every request with the mobile User-Agent while [mobileMode] says so; see [applyMobileUserAgent]. */
-internal class MobileUserAgentHandler(private val mobileMode: () -> Boolean) : CefRequestHandlerAdapter() {
+/**
+ * Tags every request with the mobile User-Agent while [mobileMode] says so; see [applyMobileUserAgent].
+ * [onRendererEnded] hears that the page's renderer process ended (crashed, killed or out of memory),
+ * with its status, error code and message. A client takes only one request handler, so both are here.
+ */
+internal class MobileUserAgentHandler(
+    private val mobileMode: () -> Boolean,
+    private val onRendererEnded: (CefRequestHandler.TerminationStatus, Int, String) -> Unit = { _, _, _ -> },
+) : CefRequestHandlerAdapter() {
+    override fun onRenderProcessTerminated(
+        browser: CefBrowser?,
+        status: CefRequestHandler.TerminationStatus,
+        errorCode: Int,
+        errorString: String?,
+    ) = onRendererEnded(status, errorCode, errorString.orEmpty())
+
     private val resources = object : CefResourceRequestHandlerAdapter() {
         override fun onBeforeResourceLoad(browser: CefBrowser?, frame: CefFrame?, request: CefRequest?): Boolean {
             applyMobileUserAgent(mobileMode(), request)

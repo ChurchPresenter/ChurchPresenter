@@ -101,7 +101,11 @@ class SystemSettingsTabTest {
      */
     private fun analytics(enabled: Boolean) = AppSettings(
         analyticsReportingEnabled = enabled,
-        projectionSettings = ProjectionSettings(hideCursorOnOutputs = false, overlayEndClearsDisplay = false),
+        projectionSettings = ProjectionSettings(
+            hideCursorOnOutputs = false,
+            overlayEndClearsDisplay = false,
+            offscreenWebEnabled = false,
+        ),
         keyboardShortcutSettings = KeyboardShortcutSettings(focusSearchOnTabOpen = false),
     )
 
@@ -284,9 +288,10 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Analytics is the sixth switch declared, after launch-at-login, start-hidden, hide-cursor,
-        // overlay-end-clears and focus-search-on-open. Preview mode is not here: it is in the sidebar's dev box.
-        onAllNodes(isToggleable())[5].performScrollTo().performClick()
+        // Analytics is the seventh switch declared, after launch-at-login, start-hidden, hide-cursor,
+        // smooth web output, overlay-end-clears and focus-search-on-open. Preview mode is not here:
+        // it is in the sidebar's dev box.
+        onAllNodes(isToggleable())[6].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -350,7 +355,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(6)
+        onAllNodes(isToggleable()).assertCountEquals(7)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.

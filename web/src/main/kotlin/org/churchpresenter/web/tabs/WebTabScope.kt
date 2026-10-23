@@ -55,6 +55,8 @@ internal class WebTabScope(
     val outputPicker: @Composable (Modifier) -> Unit,
     /** Whether a screen beyond the operator's own is attached, as Go Live needs. */
     val hasSecondaryDisplay: Boolean = false,
+    /** Whether an output shows websites, as Go Live also needs; see [hasWebCapableOutput]. */
+    val hasWebCapableOutput: Boolean = hasWebCapableOutput(appSettings.projectionSettings),
 ) {
     var urlInput: String
         get() = state.urlInput

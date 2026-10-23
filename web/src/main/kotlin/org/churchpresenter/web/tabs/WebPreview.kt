@@ -39,6 +39,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.web_preview_hint
 import org.churchpresenter.strings.generated.resources.web_snapshot_screen_recording_hint
 import org.churchpresenter.strings.generated.resources.web_snapshot_waiting
+import org.churchpresenter.web.offscreen.OffscreenWebControl
 import org.churchpresenter.web.presenter.EmbeddedWebView
 import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.delay
@@ -112,12 +113,18 @@ internal fun WebTabScope.WebPreviewCard(modifier: Modifier) {
     }
 }
 
-/** Mirror mode: the presenter's screenshot, with input forwarded to the live browser. */
+/**
+ * Mirror mode: the live page the outputs draw, controlled from here with the mouse, the wheel and the
+ * keys, or with the windowed browser the presenter's screenshot, with input forwarded to it.
+ */
 @Composable
 private fun WebTabScope.WebMirrorPreview() {
+    val page = output?.offscreenPage?.value
     val webSnapshot = output?.webSnapshot?.value
     val liveBrowser = output?.liveBrowser?.value
-    if (webSnapshot != null) {
+    if (page != null) {
+        OffscreenWebControl(page, Modifier.fillMaxSize())
+    } else if (webSnapshot != null) {
         WebSnapshotImage(webSnapshot, liveBrowser)
     } else {
         WebSnapshotWaiting()

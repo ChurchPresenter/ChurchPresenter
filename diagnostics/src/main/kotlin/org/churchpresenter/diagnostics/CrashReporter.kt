@@ -305,6 +305,25 @@ object CrashReporter {
         } catch (_: Exception) {}
     }
 
+    /**
+     * Sends an INFO event to Sentry: a measurement worth seeing in the field rather than a fault, such
+     * as how a feature performed over a session. The same rules as [reportWarning] apply: [context] is
+     * a constant title, the varying values go in [tags] and [extras], and nothing is sent when the
+     * user has turned reporting off.
+     */
+    fun reportInfo(context: String, tags: Map<String, String> = emptyMap(), extras: Map<String, String> = emptyMap()) {
+        try {
+            if (!Sentry.isEnabled()) return
+            val event = SentryEvent().apply {
+                level = SentryLevel.INFO
+                message = Message().apply { message = context }
+                tags.forEach { (k, v) -> setTag(k, v) }
+                extras.forEach { (k, v) -> setExtra(k, v) }
+            }
+            Sentry.captureEvent(event)
+        } catch (_: Exception) {}
+    }
+
     /** Re-enable video backgrounds (user override from the warning banner). */
     fun reEnableVideoBackgrounds() {
         videoBackgroundsDisabled = false

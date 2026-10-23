@@ -261,3 +261,4 @@ private fun OffscreenStageMonitor(
 
 /** The website snapshot an offscreen output draws, for a test to find. */
 internal const val WEB_SNAPSHOT_TAG = "offscreen-web-snapshot"
+internal const val WEB_OFFSCREEN_TAG = "offscreen-web-page"

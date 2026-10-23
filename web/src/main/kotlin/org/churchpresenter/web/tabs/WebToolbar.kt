@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -108,10 +107,6 @@ private fun WebTabScope.WebToolbar() {
     val navButtonsWidth = 440.dp   // 4 icon buttons + zoom controls + desktop toggle
     val actionButtonsWidth = 320.dp // bookmark + Add to Schedule + Go Live
     val minUrlWidth = 200.dp
-
-    val hasWebCapableOutput = remember(appSettings.projectionSettings) {
-        hasWebCapableOutput(appSettings.projectionSettings)
-    }
 
     // Shared composables for URL bar and action buttons
     val urlBar: @Composable RowScope.() -> Unit = {
@@ -415,10 +410,11 @@ private fun WebTabScope.WebTypeToPage() {
 
 /**
  * Whether a website can go live anywhere: on at least one regular (not DeckLink) output, assigned to
- * a display, whose profile shows websites.
+ * a display, whose profile shows websites. With [devOutputWindows] the outputs are windows on the
+ * operator's own screen, so no display assignment is needed.
  */
-internal fun hasWebCapableOutput(proj: ProjectionSettings): Boolean =
+internal fun hasWebCapableOutput(proj: ProjectionSettings, devOutputWindows: Boolean = false): Boolean =
     proj.screenAssignments.any {
-        it.targetType != Constants.TARGET_TYPE_DECKLINK && it.targetDisplay >= 0 &&
+        it.targetType != Constants.TARGET_TYPE_DECKLINK && (devOutputWindows || it.targetDisplay >= 0) &&
             proj.profileFor(it)?.look?.slide?.web == true
     }
