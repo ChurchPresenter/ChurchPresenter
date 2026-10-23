@@ -2,8 +2,10 @@ package org.churchpresenter.songs
 
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.withBackgroundsOf
+import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
+import org.churchpresenter.sharedui.utils.presentableSongLines
+import org.churchpresenter.songchords.SecondVoice
 
 fun SongsViewModel.setLineIndex(index: Int) {
     selectedLineIndexState.value = index
@@ -19,10 +21,10 @@ fun SongsViewModel.getSelectedSong(): LyricSection? {
         songNumber = song.number.toIntOrNull() ?: 0,
         // The whole-song slide is the lyrics verbatim, headers and all — but a directive is
         // configuration rather than words, and putting one on screen is never right.
-        lines = song.lyrics.filterNot { songBackgroundDirectiveOf(it) != null },
+        lines = presentableSongLines(song.lyrics),
         translations = song.presentableTranslations(),
         type = Constants.SECTION_TYPE_SONG
-    ).withBackgroundsOf(song)
+    ).withBackgroundsOf(song).withTextOverridesOf(song)
 }
 
 fun SongsViewModel.getSelectedLyricSection(): LyricSection? {
@@ -84,9 +86,10 @@ fun SongsViewModel.navigateNextSection(): Boolean {
 fun SongsViewModel.navigateNextLine(): Boolean {
     val section = getSelectedLyricSection() ?: return false
     val displayLines = section.lines
-    val currentLine = selectedLineIndexState.value
-    if (currentLine < displayLines.size - 1) {
-        selectedLineIndexState.value = currentLine + 1
+    // A line and the voice-2 line answering it show together, so one press steps over both.
+    val shown = SecondVoice.lineGroupAt(displayLines, selectedLineIndexState.value)
+    if (shown.last < displayLines.size - 1) {
+        selectedLineIndexState.value = shown.last + 1
         return true
     }
     // Move to next section with content lines (skip empty sections)
@@ -104,9 +107,10 @@ fun SongsViewModel.navigateNextLine(): Boolean {
 }
 
 fun SongsViewModel.navigatePreviousLine(): Boolean {
-    val currentLine = selectedLineIndexState.value
-    if (currentLine > 0) {
-        selectedLineIndexState.value = currentLine - 1
+    val lines = getSelectedLyricSection()?.lines.orEmpty()
+    val shownStart = SecondVoice.lineGroupAt(lines, selectedLineIndexState.value).first
+    if (shownStart > 0) {
+        selectedLineIndexState.value = SecondVoice.lineGroupAt(lines, shownStart - 1).first
         return true
     }
     // Move to previous section with content lines (skip empty sections)
@@ -117,7 +121,9 @@ fun SongsViewModel.navigatePreviousLine(): Boolean {
     while (prevIdx >= 0) {
         if (sections[prevIdx].lines.isNotEmpty()) {
             selectedSectionIndexState.value = prevIdx
-            selectedLineIndexState.value = (sections[prevIdx].lines.size - 1).coerceAtLeast(0)
+            val prevLines = sections[prevIdx].lines
+            selectedLineIndexState.value =
+                SecondVoice.lineGroupAt(prevLines, prevLines.lastIndex).first.coerceAtLeast(0)
             return true
         }
         prevIdx--

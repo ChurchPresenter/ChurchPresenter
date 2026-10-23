@@ -775,6 +775,14 @@ class MainLogicTest {
         )
     }
 
+    @Test
+    fun `a host saved with its scheme and port still streams from the host`() {
+        assertEquals(
+            "http://192.168.1.10:8080/api/media/stream/item-7",
+            instanceLinkMediaStreamUrl("http://192.168.1.10:8080", 8080, apiKey = "", itemId = "item-7"),
+        )
+    }
+
     // ── Going live ──────────────────────────────────────────────────────────────
 
     @Test

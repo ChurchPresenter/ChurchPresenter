@@ -12,7 +12,8 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.sharedui.utils.calculateAutoFitForAllSections
 import org.churchpresenter.sharedui.utils.spacingEm
-import org.churchpresenter.sharedui.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.voicedDisplayText
+import org.churchpresenter.songchords.SecondVoice
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.sideBySideLanguageGap
@@ -127,25 +128,21 @@ private fun SongLook.sectionsForFit(): Pair<Boolean, List<LyricSection>> {
     // In line mode, only 2 lines are shown (1 main + 1 lookahead), so create
     // 2-line sections pairing each line with the next.
     val sectionsForFit = if (lookAheadEnabled && fitIsLineMode) {
-        // Line mode: pair each line with the next line across all sections
-        val allLines = allLyricSections.flatMap { it.lines }
-        // Every language's lines end to end, in the same order, so line `i` of one is
-        // line `i` of the others. Built per language rather than for the secondary
-        // alone -- the fit has to measure the longest line of whichever language has
-        // it, not of the first two.
-        val allLanguageLines = List(availableLanguages) { language ->
-            allLyricSections.flatMap { it.allLanguageLines().getOrElse(language) { emptyList() } }
+        // Line mode: each line's page — the line, with the voice-2 line answering it — paired
+        // with the page after it, across all sections, one entry per line.
+        val pages = lineModePages(allLyricSections.map { it.lines })
+        // Every language's pages in the same order, so entry `i` of one is entry `i` of the
+        // others. Built per language rather than for the secondary alone -- the fit has to
+        // measure the longest line of whichever language has it, not of the first two.
+        val languagePages = List(availableLanguages) { language ->
+            lineModePages(allLyricSections.map { it.allLanguageLines().getOrElse(language) { emptyList() } })
         }
-        allLines.indices.map { i ->
-            val nextLine = allLines.getOrElse(i + 1) { allLines[i] }
+        pages.indices.map { i ->
             LyricSection(
-                lines = listOf(allLines[i], nextLine),
-                translations = allLanguageLines.drop(1).map { languageLines ->
-                    if (languageLines.isEmpty()) SectionTranslation()
-                    else {
-                        val line = languageLines.getOrElse(i) { "" }
-                        SectionTranslation(lines = listOf(line, languageLines.getOrElse(i + 1) { line }))
-                    }
+                lines = pages[i],
+                translations = languagePages.drop(1).map { pagesOfLanguage ->
+                    if (pagesOfLanguage.isEmpty()) SectionTranslation()
+                    else SectionTranslation(lines = pagesOfLanguage.getOrElse(i) { pagesOfLanguage.last() })
                 },
             )
         }
@@ -317,7 +314,7 @@ private fun SongLook.fitSections(
         // Measure what `LyricLine` draws, not the stored line: an uppercase transform
         // and the word spacing below are both applied at render, and a fit that did not
         // include them chose a size whose lines then ran off the side of the output.
-        styleText = { styledDisplayText(it, lyricsStyleProfile.transform, fitLetterEm, fitWordEm) },
+        styleText = { voicedDisplayText(it, lyricsStyleProfile.transform, fitLetterEm, fitWordEm, null) },
     )
     // Each language on its own: its own lines, in its own font, in the same room.
     val perLanguage = if (ss.layoutExtras.fitLanguagesSeparately && drawnLanguages > 1) {
@@ -339,11 +336,35 @@ private fun SongLook.fitSections(
                 availableHeight = refHeight,
                 reservedHeight = reserved,
                 includeEndIndicator = ss.showEndOfSongIndicator,
-                styleText = { styledDisplayText(it, look.transform, letterEm, wordEm) },
+                styleText = { voicedDisplayText(it, look.transform, letterEm, wordEm, null) },
             )
         }
     } else {
         emptyMap()
     }
     return SongFit(shared, perLanguage)
+}
+
+/**
+ * Line mode with a look-ahead, as the fit measures it: one entry per line of [sectionLines] taken
+ * end to end, each holding what shows with that line — its page, which is the line and the voice-2
+ * line answering it (see [SecondVoice.lineGroups]) — and the page after it. The last page is paired
+ * with itself.
+ */
+internal fun lineModePages(sectionLines: List<List<String>>): List<List<String>> {
+    val pages = mutableListOf<List<String>>()
+    sectionLines.forEachIndexed { sectionIndex, lines ->
+        lines.indices.forEach { lineIndex ->
+            val shown = SecondVoice.lineGroupAt(lines, lineIndex)
+            val after = shown.last + 1
+            val next = when {
+                after < lines.size -> lines.slice(SecondVoice.lineGroupAt(lines, after))
+                else -> sectionLines.drop(sectionIndex + 1).firstOrNull { it.isNotEmpty() }
+                    ?.let { it.slice(SecondVoice.lineGroupAt(it, 0)) }
+                    ?: lines.slice(shown)
+            }
+            pages += lines.slice(shown) + next
+        }
+    }
+    return pages
 }

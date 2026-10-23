@@ -62,6 +62,7 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -228,6 +229,11 @@ class ProfilesTabScreenshotTest {
 
     @Test
     fun `a follower's General page`() = shoot("linked_general", settings = linkedLibrary()) {
+        onNodeWithTag(profileRowTag("youth")).performClick()
+    }
+
+    @Test
+    fun `a follower's own boxes, one row each`() = shoot("linked_boxes", settings = linkedBoxesLibrary()) {
         onNodeWithTag(profileRowTag("youth")).performClick()
     }
 
@@ -433,6 +439,36 @@ class ProfilesTabScreenshotTest {
         val easter = OutputProfile(id = "easter", name = "Easter", parentId = "main")
         val proj = base.projectionSettings
         val profiles = proj.outputProfiles + youth + easter
+        return base.copy(projectionSettings = proj.copy(outputProfiles = profiles).withLinksResolved())
+    }
+
+    /**
+     * [linkedLibrary], with Youth night's KJV reference and text boxes moved from Sanctuary's, and its
+     * lower third's reference box too: a box is named in brackets, and each is a row of its own.
+     */
+    private fun linkedBoxesLibrary(): AppSettings {
+        val base = linkedLibrary()
+        val box = TextBox(enabled = true, xPercent = 10f, yPercent = 2f)
+        val keys = listOf("REFERENCE#kjv.spb", "TEXT#kjv.spb", "REFERENCE#kjv.spb@LT")
+        val moved = mapOf(
+            keys[0] to box.copy(yPercent = 40f),
+            keys[1] to box.copy(yPercent = 55f),
+            keys[2] to box.copy(xPercent = 30f),
+        )
+        val proj = base.projectionSettings
+        val profiles = proj.outputProfiles.map { p ->
+            when (p.id) {
+                "youth" -> p.copy(
+                    bibleSettings = p.bibleSettings.copy(textBoxes = moved),
+                    overrides = p.overrides + listOf(
+                        "bibleSettings.textBoxes[REFERENCE#kjv.spb].yPercent",
+                        "bibleSettings.textBoxes[TEXT#kjv.spb].yPercent",
+                        "bibleSettings.textBoxes[REFERENCE#kjv.spb@LT].xPercent",
+                    ),
+                )
+                else -> p.copy(bibleSettings = p.bibleSettings.copy(textBoxes = keys.associateWith { box }))
+            }
+        }
         return base.copy(projectionSettings = proj.copy(outputProfiles = profiles).withLinksResolved())
     }
 

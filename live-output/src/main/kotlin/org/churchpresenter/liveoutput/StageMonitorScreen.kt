@@ -58,6 +58,7 @@ import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import java.time.LocalTime
 import org.churchpresenter.settings.layoutSizes
+import org.churchpresenter.songchords.SecondVoice
 
 private const val CLOCK_TICK_MS = 1000L
 
@@ -71,7 +72,7 @@ internal fun stageCurrentText(
     currentLyricSection: LyricSection,
     displayedVerses: List<SelectedVerse>,
 ): String = when (slideContent) {
-    Presenting.LYRICS -> currentLyricSection.lines.joinToString("\n")
+    Presenting.LYRICS -> currentLyricSection.lines.joinToString("\n", transform = SecondVoice::plain)
     Presenting.BIBLE -> displayedVerses.firstOrNull()?.asZoneText().orEmpty()
     else -> ""
 }
@@ -87,7 +88,8 @@ internal fun stageNextText(
     nextVerses: List<SelectedVerse>,
 ): String = when (slideContent) {
     Presenting.LYRICS ->
-        allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.lines?.joinToString("\n").orEmpty()
+        allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.lines
+            ?.joinToString("\n", transform = SecondVoice::plain).orEmpty()
     Presenting.BIBLE -> nextVerses.firstOrNull()?.asZoneText().orEmpty()
     else -> ""
 }

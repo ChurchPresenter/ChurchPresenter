@@ -2,6 +2,7 @@ package org.churchpresenter.songlibrary
 
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.songchords.ChordTransposer
+import org.churchpresenter.songchords.SecondVoice
 
 /** One section of one language as written: its header line, and every line under it, chords and breaks included. */
 data class RawSection(val header: String?, val body: List<String>)
@@ -73,8 +74,8 @@ object TranslationComparison {
                     if (count > 0) slides.add(count)
                     count = 0
                 }
-                ChordTransposer.isBackgroundDirective(line) -> Unit
-                ChordTransposer.stripChords(line).isNotBlank() -> count++
+                ChordTransposer.isBackgroundDirective(line) || SecondVoice.isVoiceDirective(line) -> Unit
+                SecondVoice.plain(ChordTransposer.stripChords(line)).isNotBlank() -> count++
             }
         }
         if (count > 0) slides.add(count)

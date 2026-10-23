@@ -4,6 +4,9 @@ import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import org.churchpresenter.dialogs.showAlreadyRunningDialog
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
+import org.churchpresenter.app.churchpresenter.utils.toleratingDisposedOwnerRace
 import androidx.compose.runtime.CompositionLocalProvider
 import org.churchpresenter.profiles.LocalDevelopmentBuild
 import androidx.compose.runtime.getValue
@@ -278,7 +281,8 @@ fun main(args: Array<String>) {
     // report never carried. "default" means the platform's own choice, which is not the same fact
     // as any named API — a report from a machine on Direct3D-by-default and one pinned to it are
     // different evidence. Set here rather than with the availability tags below: a render fault
-    // can arrive before those run.
+    // can arrive before those run. This is the API asked for; what the main window actually draws
+    // with is render.api.actual, set once it has drawn (MainWindow).
     CrashReporter.setTag("render.api", System.getProperty("skiko.renderApi") ?: "default")
     // Which renderer ran is only half the fact: whether a GPU driver fault is an NVIDIA, AMD or
     // Intel problem is the axis such a group has to be split by, and no report carried it at all.
@@ -367,6 +371,7 @@ fun main(args: Array<String>) {
 }
 
 /** Opens the windows, once [main] has done everything that comes before them. */
+@OptIn(ExperimentalComposeUiApi::class)
 private fun runApplication(
     startupSettings: AppSettings,
     coroutineExceptionHandler: CoroutineExceptionHandler,
@@ -383,9 +388,15 @@ private fun runApplication(
         var themeCustomization by remember {
             mutableStateOf(themeCustomizationFrom(startupSettings, screenMaxUiScale(null)))
         }
+        // Every window drops Compose's disposed-owner race (a drag delivered to a layout disposed
+        // under it) and hands anything else to the usual handler, which reports it.
+        val windowExceptions = LocalWindowExceptionHandlerFactory.current
         CompositionLocalProvider(
             LocalThemeCustomization provides themeCustomization,
             LocalDevelopmentBuild provides !BuildConfig.IS_RELEASE,
+            LocalWindowExceptionHandlerFactory provides remember(windowExceptions) {
+                toleratingDisposedOwnerRace(windowExceptions)
+            },
         ) {
             ChurchPresenterApp(coroutineExceptionHandler, settingsManager, relaunchedByGuard) {
                 themeCustomization = it

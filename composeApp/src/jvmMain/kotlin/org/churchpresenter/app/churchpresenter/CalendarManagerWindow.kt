@@ -51,6 +51,7 @@ internal fun MainWindowScope.CalendarManagerWindow() {
                 appDataDirectory = calendarFolder,
                 songStorageDirectory = appSettings.songSettings.storageDirectory,
                 typicalSongSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
+                appSettings = appSettings,
                 host = CalendarHost(
                     // The switch in the calendar's own settings; the same flag the
                     // Server tab's card shows, so the two never disagree.

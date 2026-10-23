@@ -3,6 +3,7 @@ package org.churchpresenter.converter.library
 import org.churchpresenter.core.models.songs.decodeUtf8OrCyrillic
 import java.io.File
 import java.nio.charset.Charset
+import org.churchpresenter.songchords.SecondVoice
 
 data class SongInfo(
     val file: File,
@@ -352,10 +353,13 @@ object DuplicateFinder {
                 trimmed.equals("[Primary]", ignoreCase = true) -> foundPrimary = true
                 trimmed.startsWith("title:", ignoreCase = true) && title.isEmpty() ->
                     title = trimmed.substringAfter(":").trim()
+                // Which voice sings what is not what makes two songs the same.
+                SecondVoice.isVoiceDirective(trimmed) -> Unit
                 trimmed.startsWith("[") && trimmed.endsWith("]") -> openSection(trimmed)
                 // A chord line, which is not sung.
                 trimmed.startsWith("{") && trimmed.endsWith("}") -> Unit
-                foundPrimary && trimmed.isNotEmpty() && !isStructuralMarker(trimmed) -> addLyric(trimmed)
+                foundPrimary && trimmed.isNotEmpty() && !isStructuralMarker(trimmed) ->
+                    addLyric(SecondVoice.plain(trimmed))
             }
         }
 

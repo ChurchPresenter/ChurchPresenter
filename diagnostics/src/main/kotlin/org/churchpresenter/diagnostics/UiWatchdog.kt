@@ -32,6 +32,7 @@ class StallDetector(
     private var frames: List<StackTraceElement>? = null
     private val samples = mutableListOf<List<StackTraceElement>>()
     private var sampledAt = NONE
+    private var firstSampleMs = 0L
 
     /** Whether a ping is out and not yet answered. */
     val isWaiting: Boolean get() = synchronized(this) { postedAt != NONE }
@@ -64,7 +65,15 @@ class StallDetector(
         if (stuckAt != null) report("UI thread answered after ${late}ms (budget ${budget}ms)")
         onAnswered(late)
         if (stuckAt != null) {
-            onStall(Stall(lateMs = late, budgetMs = budget, frames = stuckAt, samples = samples.toList()))
+            onStall(
+                Stall(
+                    lateMs = late,
+                    budgetMs = budget,
+                    frames = stuckAt,
+                    samples = samples.toList(),
+                    firstSampleMs = firstSampleMs,
+                ),
+            )
         }
         postedAt = NONE
         frames = null
@@ -84,6 +93,7 @@ class StallDetector(
         }
         val stuckAt = sample(now)
         frames = stuckAt
+        firstSampleMs = now - postedAt
         val text = stuckAt.take(ThreadDump.STACK_DEPTH).joinToString("\n") { "        at $it" }
         report("UI thread has not answered for ${now - postedAt}ms (budget ${budget}ms); it is at:\n$text")
     }
@@ -101,20 +111,24 @@ class StallDetector(
         const val MAX_SAMPLES = 40
 
         private const val NONE = -1L
-        private const val TICKS_PER_BUDGET = 5
+
+        /** How many polls the watchdog makes in one budget while no stall is being sampled. */
+        internal const val TICKS_PER_BUDGET = 5
     }
 }
 
 /**
  * One stall, once it is over: how long the event thread was out, against which budget, where it was
  * stuck when the budget ran out ([frames]), and every stack taken while it stayed stuck ([samples],
- * [frames] first).
+ * [frames] first). [firstSampleMs] is how long after the ping went out [frames] was taken: a poll
+ * or so past the budget when the watchdog ran on time, far more when the whole process was paused.
  */
 data class Stall(
     val lateMs: Long,
     val budgetMs: Long,
     val frames: List<StackTraceElement>,
     val samples: List<List<StackTraceElement>> = listOf(frames),
+    val firstSampleMs: Long = budgetMs,
 )
 
 /**

@@ -19,7 +19,8 @@ What is on air, and everything that puts it on a screen or a wire:
   `NdiVideoRenderer`/`NdiManager`, `OmtVideoRenderer`/`OmtManager`, `DeckLinkComposeOutput`, over
   `OffscreenOutputContent`; and `PresentationPlayer`, `LottieFrameStream`, `AppNetworkInputs`;
 - the live preview panel (`preview/`): `LivePreviewPanel` and its tiles, entries, header and media
-  controls, the preview layouts (`PreviewLayoutView`, `PreviewLayoutTemplate`, `PreviewGroupsPopover`)
+  controls, the preview layouts (`PreviewLayoutView`, `PreviewLayoutTemplate`, `PreviewGroupsPopover`), the
+  profile sets menu (`ProfileSetsPopover`)
   and the stage monitor tile's `TransposeOverlay`. The app's `PreviewSidebar` hosts it and passes
   `isRelease`;
 - the Projection settings pages (`settings/`): `ProjectionSettingsTab` and its screen, Browser Source,

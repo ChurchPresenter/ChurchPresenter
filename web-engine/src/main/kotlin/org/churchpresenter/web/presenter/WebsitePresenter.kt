@@ -221,6 +221,8 @@ internal object JcefInstall {
             clearIncompleteInstall(installDir, ::installIsComplete)
                 ?: installBlocker(directoryIsWritable(installDir), installDir.usableSpace)
         },
+        // A file locked in one root's install (lockedInInstall) is not a reason to stop: the next
+        // root extracts into a directory of its own, which nothing holds open.
         stopRetrying = { policyBlock(it.message) != null || missingSystemLibrary(it) != null },
         attempt = attempt,
     )
@@ -446,6 +448,9 @@ object CefManager {
      * thread, which crashes on the way out; see [QuitThroughApp]. Null quits the process at once.
      */
     @Volatile var onQuitRequested: (() -> Unit)? = null
+
+    /** Starts the native engine on a thread of its own, ahead of the first browser; see [CefEngine.startEarly]. */
+    fun startEarly() = engine.startEarly()
 
     fun dispose() {
         // Intentionally no-op — calling CefApp.dispose() during shutdown

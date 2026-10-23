@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -93,6 +94,8 @@ fun WebTab(
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
     cefMissingLibrary: String? = CefManager.missingLibrary,
+    /** Brings the engine up as the tab first opens, so the first page load does not; see [CefManager.startEarly]. */
+    startEngine: () -> Unit = CefManager::startEarly,
     /** Whether a screen beyond the operator's own is attached; overridable for the same reason. */
     hasSecondaryDisplay: Boolean = rememberScreenDevices().size > 1,
     /**
@@ -116,6 +119,7 @@ fun WebTab(
         WebEngineUnavailable(modifier, cefMacOsUnsupported, cefBlockedByPolicy, missingLibrary = cefMissingLibrary)
         return
     }
+    LaunchedEffect(Unit) { startEngine() }
 
     // Restore URL / title from PresenterManager so state survives tab switches
     val savedUrl = output?.websiteUrl?.value ?: ""

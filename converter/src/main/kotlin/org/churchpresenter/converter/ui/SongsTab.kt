@@ -53,7 +53,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.converter.song.DocumentTextExtractor
 import org.churchpresenter.converter.song.findFormatInputs
-import org.churchpresenter.converter.song.inputSize
 import org.churchpresenter.converter.song.MarkdownToSongConverter
 import org.churchpresenter.converter.song.outputNamesFor
 import org.churchpresenter.converter.song.ParsedSong
@@ -222,10 +221,11 @@ private fun BatchFilePanel(
     var log by remember { mutableStateOf<List<String>>(emptyList()) }
     var state by remember { mutableStateOf(ConvertState.SELECT) }
     var completed by remember { mutableStateOf(0) }
+    var previewing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun clearResults() {
-        previewItems = emptyList(); log = emptyList(); state = ConvertState.SELECT; completed = 0
+        previewItems = emptyList(); log = emptyList(); state = ConvertState.SELECT; completed = 0; previewing = false
     }
 
     fun choose(picked: List<File>, label: String) {
@@ -233,6 +233,22 @@ private fun BatchFilePanel(
         files = picked
         summary = label
         clearResults()
+    }
+
+    fun runPreview() {
+        val chosen = files
+        val destination = outputDir
+        state = ConvertState.CONVERTING
+        previewing = true
+        scope.launch {
+            // describe() reads every file, so the preview is built off the event thread.
+            val items = withContext(Dispatchers.IO) { buildFormatPreview(format, chosen, destination) }
+            previewing = false
+            if (files == chosen && state == ConvertState.CONVERTING) {
+                previewItems = items
+                state = ConvertState.PREVIEW
+            }
+        }
     }
 
     fun runConvert() {
@@ -293,7 +309,7 @@ private fun BatchFilePanel(
                 } else {
                     SelectedFilesCard(
                         summary = summary,
-                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
+                        entries = rememberSelectedEntries(files),
                         onChange = {
                             val picked = pickers.sourceFiles(source, format)
                             choose(picked, Strings.filesSelected(picked.size))
@@ -325,7 +341,7 @@ private fun BatchFilePanel(
                 canConvert = files.isNotEmpty() && (outputDir != null || !format.needsOutputFolder),
                 convertLabel = if (state == ConvertState.PREVIEW) Strings.convertNFiles(files.size) else Strings.convert,
                 doneLabel = if (state == ConvertState.DONE) Strings.nConverted(log.count { it.startsWith("OK") }) else null,
-                onPreview = { previewItems = buildFormatPreview(format, files, outputDir); state = ConvertState.PREVIEW },
+                onPreview = { runPreview() },
                 onConvert = { runConvert() },
                 onStartOver = { files = emptyList(); summary = ""; clearResults() }
             )
@@ -335,7 +351,7 @@ private fun BatchFilePanel(
             item {
                 ConversionProgressRow(
                     Strings.convertingFiles(files.size),
-                    if (files.isEmpty()) null else completed.toFloat() / files.size
+                    if (files.isEmpty() || previewing) null else completed.toFloat() / files.size
                 )
             }
         }
@@ -378,10 +394,26 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
     var log by remember { mutableStateOf<List<String>>(emptyList()) }
     var state by remember { mutableStateOf(ConvertState.SELECT) }
     var completed by remember { mutableStateOf(0) }
+    var previewing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun clearResults() {
-        previews = emptyList(); log = emptyList(); state = ConvertState.SELECT; completed = 0
+        previews = emptyList(); log = emptyList(); state = ConvertState.SELECT; completed = 0; previewing = false
+    }
+
+    fun runPreview(destination: File) {
+        val chosen = files
+        state = ConvertState.CONVERTING
+        previewing = true
+        scope.launch {
+            // Parsing a song book reads the whole file, so the preview is built off the event thread.
+            val built = withContext(Dispatchers.IO) { chosen.map { buildSpsPreview(it, destination) } }
+            previewing = false
+            if (files == chosen && state == ConvertState.CONVERTING) {
+                previews = built
+                state = ConvertState.PREVIEW
+            }
+        }
     }
 
     fun choose(picked: List<File>, describedAs: String) {
@@ -441,7 +473,7 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
                 } else {
                     SelectedFilesCard(
                         summary = summary,
-                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
+                        entries = rememberSelectedEntries(files),
                         onChange = {
                             val picked = pickers.sourceFiles(spsSource, SoftProjectorFormat)
                             choose(picked, Strings.filesSelected(picked.size))
@@ -474,10 +506,7 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
                     Strings.convertNSongs(previews.sumOf { it.songCount })
                 } else Strings.convert,
                 doneLabel = if (state == ConvertState.DONE && log.none { it.startsWith("ERROR") }) Strings.doneLabel else null,
-                onPreview = {
-                    previews = files.map { buildSpsPreview(it, outputDir!!) }
-                    state = ConvertState.PREVIEW
-                },
+                onPreview = { outputDir?.let { runPreview(it) } },
                 onConvert = { runConvert() },
                 onStartOver = { files = emptyList(); summary = ""; clearResults() }
             )
@@ -487,7 +516,7 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
             item {
                 ConversionProgressRow(
                     Strings.convertingFiles(files.size),
-                    if (files.isEmpty()) null else completed.toFloat() / files.size
+                    if (files.isEmpty() || previewing) null else completed.toFloat() / files.size
                 )
             }
         }
@@ -565,10 +594,12 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
     var state by remember { mutableStateOf(ConvertState.SELECT) }
     var showMarkdown by remember { mutableStateOf(false) }
     var completed by remember { mutableStateOf(0) }
+    var previewing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun clearResults() {
         parsedSongs = emptyList(); markdown = ""; log = emptyList(); state = ConvertState.SELECT; completed = 0
+        previewing = false
     }
 
     fun pick(): List<File> = pickers.sourceFiles(source, DocumentFormat)
@@ -635,7 +666,7 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
                 } else {
                     SelectedFilesCard(
                         summary = Strings.filesSelected(files.size),
-                        entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
+                        entries = rememberSelectedEntries(files),
                         onChange = {
                             val picked = pick()
                             if (picked.isNotEmpty()) { files = picked; clearResults() }
@@ -669,6 +700,7 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
                 doneLabel = if (state == ConvertState.DONE) Strings.nConverted(log.count { it.startsWith("OK") }) else null,
                 onPreview = {
                     state = ConvertState.CONVERTING
+                    previewing = true
                     scope.launch {
                         withContext(Dispatchers.IO) {
                             val allSongs = mutableListOf<ParsedSong>()
@@ -681,6 +713,7 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
                             markdown = textParts.joinToString("\n\n")
                             parsedSongs = allSongs
                         }
+                        previewing = false
                         state = ConvertState.PREVIEW
                     }
                 },
@@ -693,7 +726,7 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
             item {
                 ConversionProgressRow(
                     Strings.convertingFiles(files.size),
-                    if (files.isEmpty()) null else completed.toFloat() / files.size
+                    if (files.isEmpty() || previewing) null else completed.toFloat() / files.size
                 )
             }
         }

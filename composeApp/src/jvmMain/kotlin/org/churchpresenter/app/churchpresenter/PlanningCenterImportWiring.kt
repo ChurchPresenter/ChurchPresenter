@@ -41,7 +41,9 @@ internal fun MainDesktopScope.PlanningCenterImport(isVisible: Boolean, onDismiss
     val sink = remember(scheduleViewModel, onSettingsChange) {
         PlanningCenterImportSink(scheduleViewModel, onSettingsChange)
     }
-    PlanningCenterImportPane(isVisible, theme, appSettings.planningCenterSettings, sink, onDismiss)
+    PlanningCenterImportPane(
+        isVisible, theme, appSettings.planningCenterSettings, sink, onDismiss, appSettings = appSettings,
+    )
 }
 
 /**
@@ -56,6 +58,8 @@ internal fun PlanningCenterImportPane(
     sink: PlanningCenterImportSink,
     onDismiss: () -> Unit,
     window: PlanningCenterWindow = planningCenterWindow(theme),
+    /** The settings the outputs draw by, for the song editor's Output tab -- null leaves it out. */
+    appSettings: AppSettings? = null,
 ) {
     if (!isVisible) return
     // One Bible load per open dialog, reused for every item the plan has.
@@ -72,7 +76,7 @@ internal fun PlanningCenterImportPane(
         settings = settings,
         services = services,
         window = window,
-        editSong = planningCenterSongEditor(theme),
+        editSong = planningCenterSongEditor(theme, appSettings),
         onDismiss = onDismiss,
         onTokensRefreshed = sink::tokensRefreshed,
         onAddSong = sink::addSong,
@@ -162,7 +166,7 @@ private fun planningCenterWindow(theme: ThemeMode): PlanningCenterWindow = { spe
 }
 
 /** The song editor a plan's unmatched song is filled in with before it is saved. */
-internal fun planningCenterSongEditor(theme: ThemeMode): PlanningCenterSongEditor =
+internal fun planningCenterSongEditor(theme: ThemeMode, appSettings: AppSettings? = null): PlanningCenterSongEditor =
     { song, songbook, onEditDismiss, onSave ->
         EditSongDialog(
             backgroundButton = songEditorBackgroundButton,
@@ -171,6 +175,7 @@ internal fun planningCenterSongEditor(theme: ThemeMode): PlanningCenterSongEdito
             songbooks = listOf(songbook),
             isNewSong = true,
             theme = theme,
+            appSettings = appSettings,
             onDismiss = onEditDismiss,
             // Tempo and capo are not offered here (showTuningFields defaults off), so they come back unset.
             onSave = { savedSong, _ -> onSave(savedSong) },

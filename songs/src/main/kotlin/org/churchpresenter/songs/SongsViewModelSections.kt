@@ -7,9 +7,11 @@ import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.songBackgroundFrom
 import org.churchpresenter.core.models.songs.withBackgroundsOf
+import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.songchords.ChordTransposer
+import org.churchpresenter.songchords.SecondVoice
 import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
 import org.churchpresenter.sharedui.utils.isSlideBreak
@@ -61,11 +63,22 @@ fun SongsViewModel.getLyricSections(song: SongItem): List<LyricSection> {
     // song's own background onto every section — the presenter only ever sees a section.
     return sections.mapIndexed { index, section ->
         (if (index == sections.lastIndex) section.copy(isLastSection = true) else section)
-            .withBackgroundsOf(song)
+            .withBackgroundsOf(song).withTextOverridesOf(song)
     }
 }
 
 internal fun SongsViewModel.splitLyricsIntoSections(
+    lyrics: List<String>,
+    title: String,
+    number: String,
+): List<LyricSection> = repeatChorusAfterVerses(lyricSlidesOf(lyrics, title, number))
+
+/**
+ * [lyrics] as the slides they are written as — split at headers and slide breaks, chords off,
+ * directives applied, chord-only sections folded and every slide numbered — before the operator's
+ * chorus repeat, which is the one step that needs the settings. What the song editor previews by.
+ */
+internal fun lyricSlidesOf(
     lyrics: List<String>,
     title: String,
     number: String,
@@ -86,6 +99,10 @@ internal fun SongsViewModel.splitLyricsIntoSections(
     // applied from where it is written onward, so a directive after a slide break can even give
     // one slide of a section a background of its own.
     val backgroundFields = mutableMapOf<String, String>()
+
+    // The voice a `[voice: 2]` block puts its lines in, until `[voice: 1]` or the next header.
+    // Written onto each line as `2>`, so everything downstream reads one form of the markup.
+    var voice = SecondVoice.MAIN
 
     // A header with no body under it is still a section — navigation steps over it and the
     // editor shows it — but only once. Past the first slide the header has already been
@@ -119,36 +136,41 @@ internal fun SongsViewModel.splitLyricsIntoSections(
 
     lyrics.forEach { line ->
         val directive = songBackgroundDirectiveOf(line)
+        val voiceDirective = SecondVoice.voiceDirectiveOf(line)
         if (isHeaderLine(line)) {
             flushSection()
             slideOfSection = 0
             backgroundFields.clear()
+            voice = SecondVoice.MAIN
             currentHeader = line
             sectionType = if (isChorusHeader(line)) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
         } else if (directive != null) {
             backgroundFields[directive.first] = directive.second
+        } else if (voiceDirective != null) {
+            voice = voiceDirective
         } else if (isSlideBreak(line)) {
             // Ends the slide, not the section: the header and type carry on, so both halves of
             // a chorus still read "Chorus". Nothing is emitted for a break with no words behind
             // it, so a doubled or leading marker costs a blank slide rather than producing one.
             if (currentLines.isNotEmpty() || currentChordLines.isNotEmpty()) flushSection()
         } else if (line.isNotBlank()) {
-            // Kept as written, for the band's chart only.
-            currentChordLines.add(line)
+            // Kept as written, for the band's chart only — chords in, voice markup out.
+            currentChordLines.add(SecondVoice.plain(line))
             // The one place lyrics become presentable text, and so the one place chords have to
             // come off: everything downstream — presenter, stage monitor, companion server —
             // reads LyricSection.lines, and none of them should ever see a [G].
-            val stripped = ChordTransposer.stripChords(line)
+            val voiced = if (voice == SecondVoice.SECOND) SecondVoice.asSecondVoiceLine(line) else line
+            val stripped = ChordTransposer.stripChords(voiced)
             // A line that was nothing but chords — an intro, a turnaround — has no words to
             // show, so it contributes no slide. A section left with none at all is folded into
             // the one it leads into; see [foldChordOnlySections].
-            if (stripped.isNotBlank()) currentLines.add(stripped)
+            if (SecondVoice.plain(stripped).isNotBlank()) currentLines.add(stripped)
         }
     }
 
     flushSection()
 
-    return repeatChorusAfterVerses(numberSlides(foldChordOnlySections(rawSections)))
+    return numberSlides(foldChordOnlySections(rawSections))
 }
 
 /**
@@ -161,7 +183,7 @@ internal fun SongsViewModel.splitLyricsIntoSections(
  * header changing catches the one where [foldChordOnlySections] has already eaten a section's
  * first slide, so its surviving slides no longer start at zero.
  */
-internal fun SongsViewModel.slideGroupsOf(sections: List<LyricSection>): List<List<LyricSection>> {
+internal fun slideGroupsOf(sections: List<LyricSection>): List<List<LyricSection>> {
     val groups = mutableListOf<MutableList<LyricSection>>()
     sections.forEach { section ->
         val open = groups.lastOrNull()?.last()
@@ -181,7 +203,7 @@ internal fun SongsViewModel.slideGroupsOf(sections: List<LyricSection>): List<Li
  * remove a slide — a break with nothing but chords behind it — and the operator should be told
  * "2 of 2", counting what will actually go on screen, not what was typed.
  */
-internal fun SongsViewModel.numberSlides(sections: List<LyricSection>): List<LyricSection> =
+internal fun numberSlides(sections: List<LyricSection>): List<LyricSection> =
     slideGroupsOf(sections).flatMap { group ->
         group.mapIndexed { index, section -> section.copy(slideIndex = index, slideCount = group.size) }
     }
@@ -256,7 +278,7 @@ internal fun SongsViewModel.singsTheChorusAfterwards(group: List<LyricSection>):
  * previous one. When the section it lands on has no chords of its own, that section's words
  * become the rest of the chart, so the chart is never just the intro with the verse missing.
  */
-internal fun SongsViewModel.foldChordOnlySections(sections: List<LyricSection>): List<LyricSection> {
+internal fun foldChordOnlySections(sections: List<LyricSection>): List<LyricSection> {
     val carried = mutableListOf<String>()
     val out = mutableListOf<LyricSection>()
 

@@ -97,6 +97,7 @@ class SettingsManager {
         21 to ::migrateTopLevelStylingOut,
         22 to ::migrateBibleAndSongsOut,
         23 to ::migrateShowSwitchesIntoLooks,
+        24 to ::migrateDottedSettingPaths,
     )
 
     /**

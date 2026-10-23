@@ -12,6 +12,8 @@ import org.churchpresenter.settings.SettingsManager
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -346,5 +348,25 @@ class SystemSettingsActionsTest {
         assertTrue(other.exists())
         assertEquals(listOf("Delete uploads?" to SettingsQuestionKind.WARNING), ui.questions)
         assertEquals(listOf("Cleared" to SettingsMessageKind.INFO), ui.messages)
+    }
+
+    @Test
+    fun `a restart with no server relaunches at once`() {
+        var relaunches = 0
+        stopThenRelaunch(companionServer = null) { relaunches++ }
+        assertEquals(1, relaunches)
+    }
+
+    @Test
+    fun `a restart relaunches once the server has stopped`() {
+        val server = CompanionServer(shutdownGraceMs = 0)
+        val relaunched = CountDownLatch(1)
+        var runningAtRelaunch: Boolean? = null
+        stopThenRelaunch(server) {
+            runningAtRelaunch = server.isRunning.value
+            relaunched.countDown()
+        }
+        assertTrue(relaunched.await(10, TimeUnit.SECONDS), "the relaunch follows the stop")
+        assertEquals(false, runningAtRelaunch)
     }
 }

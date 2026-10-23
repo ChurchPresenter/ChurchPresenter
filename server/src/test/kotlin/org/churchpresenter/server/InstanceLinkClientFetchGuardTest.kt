@@ -121,7 +121,7 @@ class InstanceLinkClientFetchGuardTest {
             listOf(
                 SongItem(
                     number = "42", title = "Amazing Grace", songbook = "Hymns",
-                    lyrics = listOf("[Verse 1]", "Amazing grace"),
+                    lyrics = listOf("[Verse 1]", "Amazing grace", "2>How sweet"),
                 ),
             ),
         )
@@ -142,7 +142,13 @@ class InstanceLinkClientFetchGuardTest {
                 listOf<Byte>(1, 2, 3, 4),
                 assertNotNull(client.fetchPictureImageBytes("folder-1", 0)).toList(),
             )
-            assertEquals("Amazing Grace", assertNotNull(client.fetchSongDetail("42", "Hymns")).title)
+            val song = assertNotNull(client.fetchSongDetail("42", "Hymns"))
+            assertEquals("Amazing Grace", song.title)
+            assertEquals(
+                listOf("Amazing grace", "2>How sweet"),
+                song.sections.single().lines,
+                "a follower keeps the markup",
+            )
         }
     }
 

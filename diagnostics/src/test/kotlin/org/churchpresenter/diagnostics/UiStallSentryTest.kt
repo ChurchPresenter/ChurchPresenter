@@ -11,6 +11,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /** A stall as Sentry receives it, seen by a `beforeSend` hook ahead of the (no-op) transport. */
@@ -53,7 +54,7 @@ class UiStallSentryTest {
 
     @Test
     fun `a stall reaches Sentry as a warning carrying its stack, from a thread of its own`() {
-        val event = stallEvent(Stall(lateMs = 700, budgetMs = 100, frames = listOf(frame)), live = true)
+        val event = assertNotNull(stallEvent(Stall(lateMs = 700, budgetMs = 100, frames = listOf(frame)), live = true))
 
         UiStallReporter.sendToSentry(event)
 

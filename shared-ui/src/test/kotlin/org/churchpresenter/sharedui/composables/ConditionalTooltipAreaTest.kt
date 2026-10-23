@@ -10,8 +10,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -55,6 +57,27 @@ class ConditionalTooltipAreaVisibilityTest {
     @Test
     fun `a window with no size yet suppresses everything`() {
         assertFalse(isFullyVisibleInWindow(Rect(0f, 0f, 10f, 10f), 0f, 0f))
+    }
+
+    @Test
+    fun `bounds inside the root are kept as they are`() {
+        assertEquals(Rect(10f, 10f, 200f, 40f), clampToRoot(Rect(10f, 10f, 200f, 40f), 800f, 600f))
+    }
+
+    @Test
+    fun `bounds running past the root are cut to it`() {
+        assertEquals(Rect(0f, 0f, 800f, 600f), clampToRoot(Rect(-5f, -5f, 900f, 700f), 800f, 600f))
+    }
+
+    @Test
+    fun `bounds wholly outside the root collapse to nothing`() {
+        assertEquals(Rect.Zero, clampToRoot(Rect(900f, 10f, 950f, 40f), 800f, 600f))
+        assertEquals(Rect.Zero, clampToRoot(Rect(10f, -50f, 200f, -10f), 800f, 600f))
+    }
+
+    @Test
+    fun `a component never laid out shows its tooltip`() {
+        assertTrue(TooltipAnchor().isFullyVisibleIn(IntSize(800, 600)))
     }
 }
 

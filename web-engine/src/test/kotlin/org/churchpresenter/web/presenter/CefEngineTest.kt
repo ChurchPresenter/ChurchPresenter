@@ -1,9 +1,15 @@
 package org.churchpresenter.web.presenter
 
 import io.mockk.mockk
+import io.mockk.verify
 import org.cef.CefClient
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.nio.file.AccessDeniedException
 import java.nio.file.Files
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,12 +32,14 @@ class CefEngineTest {
     private val cleanedUp = mutableListOf<File>()
     private val failures = mutableListOf<Throwable>()
     private val warnings = mutableListOf<Pair<Throwable, Map<String, String>>>()
+    private val tags = mutableMapOf<String, String>()
     private var installs = 0
 
     private val engine = CefEngine(
         cleanupLegacy = { cleanedUp += it },
         reportFailure = { failures += it },
         reportWarning = { _, t, tags -> warnings += t to tags },
+        setTag = { key, value -> tags[key] = value },
     )
 
     @AfterTest
@@ -126,6 +134,38 @@ class CefEngineTest {
     }
 
     @Test
+    fun `a file of the install held open during extraction is tagged as in use instead of reported`() {
+        // CHURCH-PRESENTER-DESKTOP-BN, on a Spanish Windows: the reason is localised, the path is not.
+        val cause = FileNotFoundException("${root.absolutePath}\\jcef\\chrome_elf.dll (Acceso denegado)")
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, cause))
+
+        assertEquals("install_in_use", tags["jcef.blocked"])
+        assertFalse(engine.initialized)
+        assertEquals(emptyList(), failures)
+    }
+
+    @Test
+    fun `a denied file under the install is in use however it is wrapped`() {
+        val denied = AccessDeniedException(File(root, "jcef/libcef.dll").absolutePath)
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, IOException("extraction failed", denied)))
+
+        assertEquals("install_in_use", tags["jcef.blocked"])
+        assertEquals(emptyList(), failures)
+    }
+
+    @Test
+    fun `a file that will not open outside the install is still reported`() {
+        val elsewhere = FileNotFoundException("${File(root, "webview-cache").absolutePath}\\Cookies (Acceso denegado)")
+        val sibling = FileNotFoundException("${root.absolutePath}\\jcef-old\\chrome_elf.dll (Access is denied)")
+
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, elsewhere))
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, sibling))
+
+        assertEquals(listOf<Throwable>(elsewhere, sibling), failures)
+        assertNull(tags["jcef.blocked"])
+    }
+
+    @Test
     fun `an install that fails after one that worked takes its clients away`() {
         engine.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
         engine.clientSource = { mockk<CefClient>() }
@@ -189,5 +229,49 @@ class CefEngineTest {
         assertEquals(before + 1, logs.size, "the install failure, and only it, was written")
         assertTrue(logs.any { "chrome_elf.dll" in it.readText() })
         assertNull(defaults.clientSource, "the failed source is dropped")
+    }
+
+    // ── Starting early ──────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `with no engine nothing is started early`() {
+        val work = mutableListOf<() -> Unit>()
+        engine.startEarly { work += it }
+        assertEquals(0, work.size)
+    }
+
+    @Test
+    fun `an engine starts early once, off the caller's thread, with a client it disposes`() {
+        val client = mockk<CefClient>(relaxed = true)
+        var made = 0
+        engine.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
+        engine.clientSource = { made++; client }
+        val work = mutableListOf<() -> Unit>()
+
+        engine.startEarly { work += it }
+        engine.startEarly { work += it }
+        assertEquals(0, made, "nothing is made on the caller's thread")
+        assertEquals(1, work.size, "a second request starts nothing")
+
+        work.single()()
+        assertEquals(1, made)
+        verify(exactly = 1) { client.dispose() }
+    }
+
+    @Test
+    fun `on its own default the early start runs on a daemon thread`() {
+        val made = CountDownLatch(1)
+        var thread: Thread? = null
+        engine.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
+        engine.clientSource = {
+            thread = Thread.currentThread()
+            made.countDown()
+            mockk(relaxed = true)
+        }
+
+        engine.startEarly()
+        assertTrue(made.await(10, TimeUnit.SECONDS))
+        assertTrue(thread?.isDaemon == true)
+        assertFalse(thread === Thread.currentThread())
     }
 }

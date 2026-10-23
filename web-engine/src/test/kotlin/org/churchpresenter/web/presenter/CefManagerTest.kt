@@ -583,4 +583,11 @@ class CefManagerTest {
         assertNull(CefManager.createClient())
         assertFalse(CefManager.initialized, "answering null must not flip the flag on")
     }
+
+    @Test
+    fun `with no engine installed, starting early makes no client`() {
+        CefManager.startEarly()
+        assertNull(CefManager.createClient())
+        assertFalse(CefManager.initialized)
+    }
 }

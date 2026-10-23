@@ -135,7 +135,9 @@ internal fun BoxWithConstraintsScope.BibleFullScreenStack(
         // No full-size gate in front of the search: its own opening probe is that same
         // measurement and returns 1f when it fits, so gating here measured every
         // translation twice over.
-        val fitScale = binarySearchFitScale(iterations = 10) { scale -> everyBlockFits(scale) }
+        val fitScale = rememberFitScale(
+            visible, bs, isLowerThird, scaleFactor, density, textMeasurer, constraints.maxWidth, constraints.maxHeight,
+        ) { scale -> everyBlockFits(scale) }
         val dividerColor = if (isKey) Color.White else Color.White.copy(alpha = BIBLE_DIVIDER_ALPHA)
         // Half the spacing either side of the divider, so the rule sits on the centre line of
         // the gap whether or not it is drawn -- as it did when this was one Column.
@@ -253,7 +255,10 @@ internal fun BoxWithConstraintsScope.BibleLowerThirdGrid(slide: BibleSlide) {
                 textH + refH <= cell
             }
         }
-        val fitScale = binarySearchFitScale(iterations = 10) { scale -> everyBlockFits(scale) }
+        val fitScale = rememberFitScale(
+            lowerThirdMultiVisible, bs, isLowerThird, scaleFactor, density, textMeasurer,
+            constraints.maxWidth, constraints.maxHeight,
+        ) { scale -> everyBlockFits(scale) }
         val gap = with(density) { gapPx(fitScale).toDp() }
         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
             lowerThirdMultiVisible.chunked(cols).forEachIndexed { rowIndex, row ->

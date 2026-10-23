@@ -1,11 +1,13 @@
 package org.churchpresenter.sharedui.utils
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.em
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.songchords.SecondVoice
 
 /**
  * The three per-element typography settings that cannot simply be handed to a `TextStyle`:
@@ -92,5 +94,67 @@ fun styledDisplayText(
             }
             index++
         }
+    }
+}
+
+/**
+ * A lyric line as drawn: its voice markup (`2>`, `2>(…)`) taken out, cased by [transform], and the
+ * ranges of [text] the second voice sings, for its colour to go on.
+ *
+ * The line is cased whole rather than run by run, so a capitalised run mid-line is not mistaken for
+ * the start of a word; when casing changes the length (`ß` → `SS`) the ranges no longer line up, and
+ * the line is drawn in one colour rather than coloured in the wrong places.
+ */
+data class VoicedLine(val text: String, val secondVoiceRanges: List<IntRange>)
+
+/** [line] as a [VoicedLine] under [transform]. */
+fun voicedLine(line: String, transform: String): VoicedLine {
+    val runs = SecondVoice.runs(line)
+    val plain = runs.joinToString("") { it.text }
+    val cased = applyTextTransform(plain, transform)
+    if (cased.length != plain.length) return VoicedLine(cased, emptyList())
+    val ranges = mutableListOf<IntRange>()
+    var at = 0
+    runs.forEach { run ->
+        if (run.voice == SecondVoice.SECOND && run.text.isNotEmpty()) ranges += at until at + run.text.length
+        at += run.text.length
+    }
+    return VoicedLine(cased, ranges)
+}
+
+/**
+ * [styledDisplayText] for a lyric line that may carry voice markup: the markup taken out, and the
+ * second voice's words drawn in [secondVoiceColor]. Null draws every word in the paragraph's own
+ * colour — what a fit measures, and what a key output draws.
+ */
+fun voicedDisplayText(
+    raw: String,
+    transform: String,
+    letterSpacingEm: Float,
+    wordSpacingEm: Float,
+    secondVoiceColor: Color?,
+): AnnotatedString {
+    if (!SecondVoice.hasMarkup(raw)) return styledDisplayText(raw, transform, letterSpacingEm, wordSpacingEm)
+    // The markup comes off uncased; styledDisplayText cases the line.
+    val voiced = voicedLine(raw, Constants.TEXT_TRANSFORM_NONE)
+    val styled = styledDisplayText(voiced.text, transform, letterSpacingEm, wordSpacingEm)
+    if (secondVoiceColor == null || styled.length != voiced.text.length) return styled
+    return buildAnnotatedString {
+        append(styled)
+        voiced.secondVoiceRanges.forEach { addStyle(SpanStyle(color = secondVoiceColor), it.first, it.last + 1) }
+    }
+}
+
+/** [voicedDisplayText] for several lines drawn as one block, each line's markup read on its own. */
+fun voicedDisplayText(
+    lines: List<String>,
+    transform: String,
+    letterSpacingEm: Float,
+    wordSpacingEm: Float,
+    secondVoiceColor: Color?,
+): AnnotatedString = buildAnnotatedString {
+    lines.forEachIndexed { i, line ->
+        if (i > 0) append('\n')
+        append(voicedDisplayText(line, transform, letterSpacingEm, wordSpacingEm, secondVoiceColor))
     }
 }

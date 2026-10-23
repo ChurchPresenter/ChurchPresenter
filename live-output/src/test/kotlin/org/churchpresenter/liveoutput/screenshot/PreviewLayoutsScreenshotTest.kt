@@ -11,10 +11,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.liveoutput.preview.LivePreviewPanel
 import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
+import org.churchpresenter.liveoutput.preview.ProfileSetsPopover
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.PreviewArea
 import org.churchpresenter.settings.PreviewLayout
+import org.churchpresenter.settings.ProfileSet
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.SPLIT_ACROSS
 import org.churchpresenter.settings.SPLIT_DOWN
@@ -24,7 +27,10 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureComponent
 
-/** The preview panel as its layout draws and edits it, and the gear's layout list, in both themes. */
+/**
+ * The preview panel as its layout draws and edits it, the gear's layout list, and the profile sets
+ * menu, in both themes.
+ */
 class PreviewLayoutsScreenshotTest {
 
     private val screen0 = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, 0)
@@ -135,6 +141,39 @@ class PreviewLayoutsScreenshotTest {
     @Test
     fun `gear with two layouts`() = captureComponent(SECTION, "gear_layouts", rootIndex = 1) {
         Editor(projection(twoByTwo, tallBesideThree, fills = true))
+    }
+
+    // ── Profile sets ────────────────────────────────────────────────────────────────────────────
+
+    /** [projection] with two profiles to switch between, the sets button on and [sets] saved. */
+    private fun withProfiles(vararg sets: ProfileSet) = projection().let { proj ->
+        proj.copy(
+            outputProfiles = listOf(
+                OutputProfile(id = "fs", name = "Full screen"),
+                OutputProfile(id = "lt", name = "Lower third"),
+            ),
+            browserSourceOutputs = proj.browserSourceOutputs.map { it.copy(activeProfileId = "fs") },
+            ndiOutputs = proj.ndiOutputs.map { it.copy(activeProfileId = "lt") },
+            showProfileSetsButton = true,
+            profileSets = sets.toList(),
+        )
+    }
+
+    @Test
+    fun `gear with the profile sets switch`() = captureComponent(SECTION, "gear_profile_sets_switch", rootIndex = 1) {
+        Editor(withProfiles())
+    }
+
+    @Test
+    fun `profile sets, the one in use ticked`() = captureComponent(SECTION, "profile_sets", rootIndex = 1) {
+        val sunday = ProfileSet("set1", "Sunday service", mapOf(bs0 to "fs", bs1 to "fs", ndi0 to "lt"))
+        val youth = ProfileSet("set2", "", mapOf(bs0 to "lt", bs1 to "lt", ndi0 to "lt"))
+        ProfileSetsPopover(expanded = true, onDismiss = {}, proj = withProfiles(sunday, youth), onChange = {})
+    }
+
+    @Test
+    fun `profile sets with none saved`() = captureComponent(SECTION, "profile_sets_empty", rootIndex = 1) {
+        ProfileSetsPopover(expanded = true, onDismiss = {}, proj = withProfiles(), onChange = {})
     }
 
     private companion object {

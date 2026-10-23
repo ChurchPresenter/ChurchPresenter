@@ -35,7 +35,7 @@ class SongsTabTest {
             assertEquals(listOf(SongSources.SONGBEAMER), pickers.requestedSources)
 
             click(Strings.preview)
-            assertTrue(isShowing(Strings.previewLabel))
+            awaitShowing(Strings.previewLabel)
             assertTrue(isShowing("\"First Song\"", substring = true))
 
             click(Strings.convertNFiles(2))
@@ -150,7 +150,7 @@ class SongsTabTest {
             click(Strings.browse)
 
             click(Strings.preview)
-            assertTrue(isShowing(Strings.songbookPrefix("Hymns")))
+            awaitShowing(Strings.songbookPrefix("Hymns"))
             assertTrue(isShowing(Strings.songsFound(1)))
             assertTrue(isShowing("0001 - Amazing Grace"))
             assertTrue(isShowing(Strings.outputFolderOverwrite))
@@ -180,7 +180,7 @@ class SongsTabTest {
             click(Strings.selectFiles)
             click(Strings.browse)
             click(Strings.preview)
-            assertTrue(isShowing(Strings.errorPrefix(""), substring = true))
+            awaitShowing(Strings.errorPrefix(""), substring = true)
             onNodeWithText(Strings.convertNSongs(1)).assertIsNotEnabled()
             assertTrue(isShowing(Strings.songsFound(1)))
         }

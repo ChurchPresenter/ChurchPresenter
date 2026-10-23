@@ -1,5 +1,6 @@
 package org.churchpresenter.settings
 
+import kotlinx.serialization.KSerializer
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -16,6 +17,11 @@ import org.churchpresenter.settings.utils.Constants
  * Backgrounds are the exception: a profile follows the Background tab surface by surface unless it
  * says otherwise ([OutputProfile.backgroundOverrides]), so the house background -- what shows when
  * nothing is live -- stays one thing to change, and a profile overrides only what it means to.
+ *
+ * Each merged section is remembered by the identity of the two objects it is made from -- the
+ * document's section and the profile's copy -- because every output window, preview tile and
+ * off-screen output resolves on each settings change, and a merge encodes and decodes the whole
+ * section. Settings are immutable, so a change elsewhere in the document reuses the same answer.
  */
 fun AppSettings.resolvedFor(profile: OutputProfile): AppSettings = copy(
     stageMonitorSettings = profile.stageMonitorSettings,
@@ -25,16 +31,12 @@ fun AppSettings.resolvedFor(profile: OutputProfile): AppSettings = copy(
     // and a portrait confidence screen that wants Fit can show the same picture at once.
     pictureSettings = pictureSettings.copy(scaleMode = profile.pictureScaleMode),
     mediaScaleMode = profile.mediaScaleMode,
-    sttSettings = withSparseOverride(
-        sttSettings,
-        styleTreeOf(profile.sttSettings, STTSettings.serializer(), STT_GLOBAL_KEYS),
-        STTSettings.serializer(),
-    ),
-    qaSettings = withSparseOverride(
-        qaSettings,
-        styleTreeOf(profile.qaSettings, QASettings.serializer(), QA_GLOBAL_KEYS),
-        QASettings.serializer(),
-    ),
+    sttSettings = resolvedStt.of(sttSettings, profile.sttSettings) { global, own ->
+        global.styledBy(own, STTSettings.serializer(), STT_GLOBAL_KEYS)
+    },
+    qaSettings = resolvedQa.of(qaSettings, profile.qaSettings) { global, own ->
+        global.styledBy(own, QASettings.serializer(), QA_GLOBAL_KEYS)
+    },
     backgroundSettings = resolveBackgroundSurfaces(
         global = backgroundSettings,
         profile = profile.backgroundSettings,
@@ -45,16 +47,25 @@ fun AppSettings.resolvedFor(profile: OutputProfile): AppSettings = copy(
 )
 
 /** The song settings an output assigned to [profile] uses -- [resolvedFor]'s, without the rest. */
-fun AppSettings.songSettingsFor(profile: OutputProfile): SongSettings = withSparseOverride(
-    songSettings,
-    styleTreeOf(profile.songSettings, SongSettings.serializer(), SONG_GLOBAL_KEYS),
-    SongSettings.serializer(),
-)
+fun AppSettings.songSettingsFor(profile: OutputProfile): SongSettings =
+    resolvedSongs.of(songSettings, profile.songSettings) { global, own ->
+        global.styledBy(own, SongSettings.serializer(), SONG_GLOBAL_KEYS)
+    }
 
 /** The Bible settings an output assigned to [profile] uses -- [resolvedFor]'s, without the rest. */
-fun AppSettings.bibleSettingsFor(profile: OutputProfile): BibleSettings = bibleSettings.withSparseBibleOverride(
-    styleTreeOf(profile.bibleSettings, BibleSettings.serializer(), BIBLE_GLOBAL_KEYS),
-)
+fun AppSettings.bibleSettingsFor(profile: OutputProfile): BibleSettings =
+    resolvedBible.of(bibleSettings, profile.bibleSettings) { global, own ->
+        global.withSparseBibleOverride(styleTreeOf(own, BibleSettings.serializer(), BIBLE_GLOBAL_KEYS))
+    }
+
+/** This section of the document with [own]'s styling written over it -- see [styleTreeOf]. */
+private fun <T> T.styledBy(own: T, serializer: KSerializer<T>, globalKeys: Set<String>): T =
+    withSparseOverride(this, styleTreeOf(own, serializer, globalKeys), serializer)
+
+private val resolvedStt = RecentMerges<STTSettings>()
+private val resolvedQa = RecentMerges<QASettings>()
+private val resolvedSongs = RecentMerges<SongSettings>()
+private val resolvedBible = RecentMerges<BibleSettings>()
 
 /**
  * The ids of the profiles some output is following: screens first, then Browser Source, NDI and
@@ -98,27 +109,6 @@ private val operatorSongs = LastResult(
 private val operatorBible = LastResult(
     inputs = { s -> listOf(s.bibleSettings, s.projectionSettings.operatorProfile()) },
 ) { s -> s.projectionSettings.operatorProfile()?.let { s.bibleSettingsFor(it) } ?: s.bibleSettings }
-
-/**
- * [compute]'s answer for the last [inputs] it was asked about, compared by identity. [inputs] are
- * the parts of the document the answer reads, so a change anywhere else -- a column width, a recent
- * file -- does not decode the section again.
- */
-private class LastResult<T>(
-    private val inputs: (AppSettings) -> List<Any?>,
-    private val compute: (AppSettings) -> T,
-) {
-    @Volatile private var last: Pair<List<Any?>, T>? = null
-
-    fun of(settings: AppSettings): T {
-        val now = inputs(settings)
-        last?.let { (seen, value) -> if (sameInstances(seen, now)) return value }
-        return compute(settings).also { last = now to it }
-    }
-}
-
-private fun sameInstances(a: List<Any?>, b: List<Any?>): Boolean =
-    a.size == b.size && a.indices.all { a[it] === b[it] }
 
 /**
  * The profile [assignment] follows, or `null` when its [ScreenAssignment.activeProfileId] names no

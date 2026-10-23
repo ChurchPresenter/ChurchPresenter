@@ -148,6 +148,8 @@ data class AppSettings(
     /** The version the operator chose to skip; the launch check stops offering it, a manual check does not. */
     val skippedUpdateVersion: String = "",
     val storyPrompt: StoryPromptState = StoryPromptState(),
+    /** Spreads the dialogs that open unasked at startup across launches — see [StartupPromptPacing]. */
+    val startupPrompts: StartupPromptPacing = StartupPromptPacing(),
     /** The helper lamp in the main window's corner — shown or not, and what it was told to keep quiet. */
     val helper: HelperSettings = HelperSettings(),
     /** The backgrounds the preview panel's quick tray offers, in the order it shows them. */
@@ -184,6 +186,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 23
+        const val CURRENT_SETTINGS_VERSION = 24
     }
 }

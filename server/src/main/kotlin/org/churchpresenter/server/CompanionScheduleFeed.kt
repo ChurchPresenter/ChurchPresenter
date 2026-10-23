@@ -10,6 +10,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.sectionLabelOf
+import org.churchpresenter.sharedui.utils.plainLyricLine
 
 /*
  * The schedule, the pictures and backgrounds behind it, what is live, and the server's own access
@@ -127,7 +128,8 @@ fun CompanionServer.updateLiveState(content: LiveContent) = with(content) {
         songNumber = lyricSection?.songNumber,
         sectionType = lyricSection?.type?.ifEmpty { null },
         sectionLabel = lyricSection?.header?.let(::sectionLabelOf)?.ifEmpty { null },
-        lines = lyricSection?.lines,
+        // What is on screen, so the words without the second voice's markup.
+        lines = lyricSection?.lines?.map(::plainLyricLine),
         songSectionIndex = songSectionIndex,
         songLineIndex = songLineIndex,
         pictureFolderId = pictureFolderId,
