@@ -11,6 +11,7 @@ import org.cef.browser.CefFrame
 import org.cef.callback.CefContextMenuParams
 import org.cef.callback.CefMenuModel
 import org.cef.handler.CefContextMenuHandlerAdapter
+import org.cef.handler.CefRequestHandler
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.web.presenter.MobileUserAgentHandler
@@ -52,6 +53,7 @@ class OffscreenPage internal constructor(
     )
 
     private val os = options.os
+    private val clock = options.clock
     internal val stats = OffscreenStats()
     private val rgba = os.startsWith("Linux")
     private var pixels = IntSize(LAYOUT_WIDTH, DEFAULT_HEIGHT)
@@ -72,7 +74,7 @@ class OffscreenPage internal constructor(
         client.addContextMenuHandler(NoContextMenu)
         client.addDisplayHandler(ConsoleClipboardHandler(onUrlChanged, onTitleChanged, os))
         client.addLifeSpanHandler(PopupsInPlace)
-        client.addRequestHandler(MobileUserAgentHandler(options.mobileMode))
+        client.addRequestHandler(MobileUserAgentHandler(options.mobileMode, ::rendererEnded))
         val (view, scale) = layoutFor(pixels)
         val settings = CefBrowserSettings().apply { windowless_frame_rate = FRAME_RATE }
         CefBrowserHeadless(client, url, settings, view.width, view.height, scale, store)
@@ -82,6 +84,7 @@ class OffscreenPage internal constructor(
     private val tickTimer = Timer(TICK_MS) { reporter.tick(stats.drain(), stats.copyP95Ms()) }
     private var closed = false
     private var reported = false
+    private var lastReload = Long.MIN_VALUE / 2
 
     /** The page's browser: what the Web tab steers (address, history, zoom, scripts). */
     val browser: CefBrowserHeadless get() = headless
@@ -148,6 +151,19 @@ class OffscreenPage internal constructor(
         CrashReporter.breadcrumb("Off-screen web page closed", category = "web")
     }
 
+    /**
+     * The page's renderer process ended: reported, and the page reloaded so an output is not left
+     * blank, unless it ended within [RELOAD_AGAIN_AFTER_MS] of the last reload, which would only loop.
+     */
+    private fun rendererEnded(status: CefRequestHandler.TerminationStatus, errorCode: Int, message: String) {
+        reporter.rendererEnded(status.name, errorCode, message)
+        CrashReporter.breadcrumb("Off-screen web page's renderer ended: ${status.name}", category = "web")
+        val now = clock()
+        if (closed || now - lastReload < RELOAD_AGAIN_AFTER_MS) return
+        lastReload = now
+        headless.reload()
+    }
+
     /** Sends what the page's last second and its session came to, once. */
     private fun finishReports() {
         if (reported) return
@@ -171,6 +187,7 @@ class OffscreenPage internal constructor(
         private const val RESIZE_SETTLE_MS = 250
         private const val TICK_MS = 1000
         private const val FREE_AFTER_MS = 1000
+        private const val RELOAD_AGAIN_AFTER_MS = 10_000L
 
         /** The pages open now, so a quit can still report them; touched on the event thread only. */
         private val openPages = LinkedHashSet<OffscreenPage>()
@@ -237,7 +254,7 @@ private fun startBrowser(browser: CefBrowserHeadless) {
 
 /** [report] when it is a paint that threw: a page whose sessions are not reported still reports that. */
 private fun sendFailuresOnly(report: OffscreenReport) {
-    if (report is OffscreenReport.PaintThrew) sendToSentry(report)
+    if (report is OffscreenReport.PaintThrew || report is OffscreenReport.RendererEnded) sendToSentry(report)
 }
 
 private const val FRAME_RATE = 60

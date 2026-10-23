@@ -11,12 +11,14 @@ internal sealed interface OffscreenReport {
     data class PaintThrew(val failure: Throwable, override val tags: Map<String, String>) : OffscreenReport
     data class LowFrameRate(override val tags: Map<String, String>, val extras: Map<String, String>) : OffscreenReport
     data class Session(override val tags: Map<String, String>, val extras: Map<String, String>) : OffscreenReport
+    data class RendererEnded(override val tags: Map<String, String>, val extras: Map<String, String>) : OffscreenReport
 }
 
 /**
  * How one off-screen page is doing, for Sentry.
  *
- * - A paint that throws is sent once per page ([paintThrew]).
+ * - A paint that throws is sent once per page ([paintThrew]), and so is the page's renderer process
+ *   ending ([rendererEnded]); the session summary counts every renderer that ended.
  * - **Low frame rate**: once a second [tick] gets the page's counts. While Chromium paints at least
  *   [LOW_RATE_MIN_PAINTS] a second but the busiest output draws fewer than [LOW_RATE_SHARE] of them,
  *   for [LOW_RATE_HOLD_MS] running, one warning goes for the page. A page that does not change paints
@@ -36,6 +38,7 @@ internal class OffscreenReporter(
     private val openedAt = clock()
     private var lastTick = openedAt
     private var paintThrewSent = false
+    private var renderersEnded = 0
     private var lowSince = NONE
     private var lowSent = false
     private var paints = 0L
@@ -49,6 +52,17 @@ internal class OffscreenReporter(
         if (paintThrewSent) return
         paintThrewSent = true
         send(OffscreenReport.PaintThrew(failure, tags()))
+    }
+
+    /** The page's renderer process ended with [status], [errorCode] and [message]. */
+    fun rendererEnded(status: String, errorCode: Int, message: String) {
+        if (renderersEnded++ > 0) return
+        send(
+            OffscreenReport.RendererEnded(
+                tags() + ("web.offscreen.renderer_status" to status),
+                mapOf("error_code" to errorCode.toString(), "message" to message),
+            ),
+        )
     }
 
     /** The counts since the last tick, with [copyP95Ms] the page's copy-time p95 so far. */
@@ -107,6 +121,7 @@ internal class OffscreenReporter(
                     "copy_p95_ms" to "%.2f".format(copyP95Ms),
                     "latency_avg_ms" to avgMs(latencyNs, draws),
                     "largest_size" to largest,
+                    "renderers_ended" to renderersEnded.toString(),
                 ),
             ),
         )
@@ -137,6 +152,12 @@ internal fun sendToSentry(report: OffscreenReport) {
         is OffscreenReport.LowFrameRate ->
             CrashReporter.reportWarning(
                 "Off-screen web output below frame rate",
+                tags = report.tags,
+                extras = report.extras,
+            )
+        is OffscreenReport.RendererEnded ->
+            CrashReporter.reportWarning(
+                "Off-screen web page's renderer ended",
                 tags = report.tags,
                 extras = report.extras,
             )

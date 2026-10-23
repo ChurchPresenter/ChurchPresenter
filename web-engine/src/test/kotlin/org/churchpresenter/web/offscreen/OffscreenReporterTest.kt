@@ -101,6 +101,20 @@ class OffscreenReporterTest {
     }
 
     @Test
+    fun `a renderer that ends is reported once, and the summary counts every one`() {
+        reporter.rendererEnded("TS_PROCESS_CRASHED", 134, "stack smashing")
+        reporter.rendererEnded("TS_PROCESS_CRASHED", 134, "again")
+        now += 60_000
+        reporter.finish(1.0)
+
+        val ended = assertIs<OffscreenReport.RendererEnded>(sent.first())
+        assertEquals("TS_PROCESS_CRASHED", ended.tags["web.offscreen.renderer_status"])
+        assertEquals(mapOf("error_code" to "134", "message" to "stack smashing"), ended.extras)
+        assertEquals("2", assertIs<OffscreenReport.Session>(sent.last()).extras["renderers_ended"])
+        assertEquals(2, sent.size)
+    }
+
+    @Test
     fun `the counts drain from the busiest output and start again`() {
         val stats = OffscreenStats()
         val quiet = Any()

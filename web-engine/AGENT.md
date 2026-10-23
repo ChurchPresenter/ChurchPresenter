@@ -49,7 +49,8 @@ The shared 85% on all six counters, with no overrides and no excludes. Left unco
 reflective `patchJcefModuleAccess` paths, `pactl` audio routing (Linux only), `buildCefApp`'s
 `build()`, `CefManager.init`'s install lambda, and the `SwingPanel` itself; for off-screen rendering,
 `SentMessagePump`'s Windows timer, the pointer forwarding's native-event branch (a test's pointer
-events carry no AWT event), and a Linux clipboard message's write to the system clipboard. Keep a
+events carry no AWT event), a Linux clipboard message's write to the system clipboard, and
+`CefBrowserHeadless.setFocus`'s re-entry guard (only native Chromium calls back into it). Keep a
 new native call behind one of the seams above rather than in a composable.
 
 ## Rules

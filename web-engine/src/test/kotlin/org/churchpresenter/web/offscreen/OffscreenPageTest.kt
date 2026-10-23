@@ -32,9 +32,11 @@ import kotlin.test.assertTrue
 class OffscreenPageTest {
     private val contextMenu = slot<CefContextMenuHandler>()
     private val display = slot<CefDisplayHandler>()
+    private val request = slot<CefRequestHandler>()
     private val client = mockk<CefClient>(relaxed = true) {
         every { addContextMenuHandler(capture(contextMenu)) } returns this
         every { addDisplayHandler(capture(display)) } returns this
+        every { addRequestHandler(capture(request)) } returns this
     }
     private val sent = mutableListOf<OffscreenReport>()
     private val opened = mutableListOf<OffscreenPage>()
@@ -157,6 +159,17 @@ class OffscreenPageTest {
         page.close()
 
         assertEquals(1, sent.count { it is OffscreenReport.Session })
+    }
+
+    @Test
+    fun `a renderer that ends is reported once through the page's request handler`() {
+        val page = assertNotNull(open())
+        val crashed = CefRequestHandler.TerminationStatus.TS_PROCESS_CRASHED
+        request.captured.onRenderProcessTerminated(page.browser, crashed, 134, "stack smashing")
+        request.captured.onRenderProcessTerminated(page.browser, crashed, 134, null)
+
+        val ended = assertIs<OffscreenReport.RendererEnded>(sent.single())
+        assertEquals("stack smashing", ended.extras["message"])
     }
 
     @Test

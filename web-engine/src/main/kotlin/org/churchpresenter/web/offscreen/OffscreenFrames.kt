@@ -3,7 +3,6 @@ package org.churchpresenter.web.offscreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.cef.browser.HeadlessSink
-import org.churchpresenter.diagnostics.Log
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorType
 import org.jetbrains.skia.Image
@@ -101,7 +100,6 @@ internal class OffscreenFrames(
         }
         val target = ring?.takeIf { it.width == width && it.height == height }
             ?: FrameRing(width, height, swizzle = rgba, colorType = colorType).also { fresh ->
-                Log.info(LOG_TAG, "painting ${width}x$height for a ${dipWidth()} DIP wide page")
                 // Images over the old ring's buffers are still being retired; keep it alive until they are.
                 ring?.let { old -> oldRings.addLast(seq to old) }
                 ring = fresh
@@ -247,7 +245,5 @@ private class PopupMirror(val width: Int, val height: Int) {
         return Image.makeRaster(info, pixels, width * BYTES_PER_PIXEL)
     }
 }
-
-private const val LOG_TAG = "WebOffscreen"
 
 private fun daemon(name: String) = ThreadFactory { r -> Thread(r, name).apply { isDaemon = true } }

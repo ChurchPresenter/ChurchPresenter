@@ -78,7 +78,7 @@ class EmbeddedWebViewHandlersTest {
     @Test
     fun `requests carry the mobile User-Agent only while mobile mode is on, and load normally`() {
         var mobile = false
-        val handler = MobileUserAgentHandler { mobile }
+        val handler = MobileUserAgentHandler(mobileMode = { mobile })
         val request = mockk<CefRequest>(relaxed = true)
         val resources = handler.getResourceRequestHandler(browser, null, request, true, false, null, null)
 

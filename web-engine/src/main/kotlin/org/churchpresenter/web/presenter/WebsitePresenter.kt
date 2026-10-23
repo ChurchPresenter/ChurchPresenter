@@ -659,7 +659,7 @@ internal fun EmbeddedBrowser(
         client.addDisplayHandler(PageDisplayHandler(onUrlChanged, onTitleChanged))
         // Intercept popups (target="_blank" links) — load in current browser instead
         client.addLifeSpanHandler(PopupsInPlace)
-        client.addRequestHandler(MobileUserAgentHandler { navController?.mobileMode == true })
+        client.addRequestHandler(MobileUserAgentHandler(mobileMode = { navController?.mobileMode == true }))
         client.addLoadHandler(CursorRestoringLoadHandler { hideCursorState.value })
 
         // Snapshot timer — captures the browser's area of the screen
