@@ -181,6 +181,7 @@ class DemoTours {
             text("'Twas grace that taught"),
             Key.DirectionDown,
             "↓",
+            live = true,
         ) {
             settle()
         }
@@ -208,6 +209,8 @@ class DemoTours {
         )
         say("add-to-schedule")
         step("Add to Schedule", "Queue it for the service", menuItem("Add to Schedule"))
+        // The right-click began a drag of the row; a plain click on it ends that drag.
+        quietClick(text("It Is Well With My Soul"))
         val row = reveal { find(hasText("It Is Well", substring = true)) { it.right < dp(380f) } }
         say("added-to-your-schedule")
         note("Added to your schedule", "Run the whole service from this list", row)
@@ -233,6 +236,118 @@ class DemoTours {
         say("that-s-the-songs-tab")
         outro("Pictures")
     }
+}
+
+/** The Pictures tour: a folder of photos, sent to the screen one by one or as a slideshow. */
+class PicturesDemoTour {
+
+    @Test
+    fun pictures() {
+        seedRecentPictureFolders()
+        recordTour("pictures", tab = "Pictures", liveLabel = "Show a photo", steps = 9) { picturesTour() }
+    }
+
+    private fun DemoTour.picturesTour() {
+        say("intro")
+        intro("Show photos on the big screen, one at a time or as a slideshow.")
+        say("open-tab")
+        openTab("Pictures", "Every photo in a folder, ready to show")
+        waitFor("the thumbnails are decoded") { !hasNode(hasText("Loading...")) }
+        pause(0.3)
+
+        say("folder")
+        note("Pick a folder", "Every picture in it appears below", find(hasText("Select Folder")))
+        say("recents")
+        note("Recent folders", "One click brings a folder back", find(hasText("Easter Sunday", substring = true)))
+        say("click-photo")
+        step("Click a photo", "It shows in the preview first", find(hasText("04 Church")))
+        say("go-live")
+        goLive(sub = "Sends the photo to the projector")
+        say("live-1")
+        showLive(sub = "The church photo is on the big screen")
+
+        say("arrow")
+        val next = find(hasText("05 Cross"))
+        press("Next photo", "→ and ← step through the folder while live", next, Key.DirectionRight, "→", live = true) {
+            settle()
+        }
+        say("live-2")
+        showLive("Next photo", "Straight from the keyboard")
+        say("double-click")
+        val candles = find(hasText("07 Candles"))
+        step("Double-click a photo", "Goes live in one move", candles, double = true, live = true) {
+            candles.node.performTouchInput { doubleClick() }
+            ui.waitForIdle()
+            settle()
+        }
+        say("live-3")
+        showLive(sub = "Candles, live")
+
+        say("hide")
+        val mountains = find(hasText("09 Mountains")).bounds
+        val eye = find(hasContentDescription("Hide — skipped by Next and the slideshow")) {
+            it.center.y in mountains.top - dp(10f)..mountains.bottom + dp(10f) && it.left > mountains.left
+        }
+        step("Hide a photo", "It stays in the folder but the slideshow skips it", eye)
+        say("play")
+        note("Play a slideshow", "Photos change on their own", find(hasContentDescription("Play")))
+        say("interval")
+        note("How long each photo stays", "Set the seconds between photos", text("AUTO-SCROLL INTERVAL"))
+        say("transition")
+        note("Transition duration", "How long the change between photos takes", text("TRANSITION DURATION"))
+        say("loop")
+        note("Loop the slideshow", "It starts again after the last photo", find(hasContentDescription("Loop On")))
+        say("animation")
+        step("Choose the transition", "Crossfade, Fade, Slide and more", text("Crossfade"))
+        say("fade")
+        step("Fade", "A gentle fade between photos", menuItem("Fade"))
+        say("scale")
+        val scale = find(hasContentDescription("Picture scale", substring = true))
+        step("Fit or fill the screen", "One click switches how photos are scaled", scale, live = true) {
+            scale.node.performClick()
+            ui.waitForIdle()
+            settle()
+        }
+        say("live-4")
+        showLive("Filled", "The photo now covers the whole screen")
+        say("preset")
+        note(
+            "Save a preset",
+            "A named shortcut to this folder for any future service",
+            find(hasContentDescription("Save preset")) { it.left > dp(380f) && it.top < dp(140f) },
+        )
+        say("schedule")
+        step(
+            "Add the folder to the schedule",
+            "Bring the whole gallery back during the service",
+            find(hasContentDescription("Add to Schedule")) { it.left > dp(380f) && it.top < dp(140f) },
+        )
+        say("schedule-row")
+        val row = reveal { findAll(hasText("Gallery (12 images)")) { it.right < dp(380f) }.last() }
+        note("Added to your schedule", "Run the whole service from this list", row)
+        say("outro")
+        outro("Presentation")
+    }
+}
+
+/**
+ * Two more picture folders, and the recents list that names them, so the Pictures tab's recent bar has
+ * something to show. Written into the test home before the tab first reads it.
+ */
+private fun seedRecentPictureFolders() {
+    library()
+    val gallery = File(LIBRARY, "Gallery")
+    val photos = gallery.listFiles()?.sorted().orEmpty()
+    val folders = listOf("Easter Sunday" to photos.take(4), "Youth Retreat" to photos.drop(8))
+        .map { (name, files) ->
+            File(LIBRARY, name).apply {
+                mkdirs()
+                files.forEach { it.copyTo(File(this, it.name), overwrite = true) }
+            }
+        }
+    val recent = File(System.getProperty("user.home"), ".churchpresenter/recent_picture_folders.json")
+    recent.parentFile.mkdirs()
+    recent.writeText((listOf(gallery) + folders).joinToString(",", "[", "]") { "\"${it.absolutePath}\"" })
 }
 
 /** Clicks Swap and waits until the verse list leads with [leading], then republishes what is live. */

@@ -69,6 +69,7 @@ import org.junit.Assume.assumeTrue
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.math.abs
 import kotlin.math.hypot
 
 // The main window and, beside it off camera, the projector it drives — in dp.
@@ -98,7 +99,8 @@ private class LengthReached : RuntimeException()
  * Records one tour as 1920×1080 PNG frames in `$CP_DEMO_OUT/<name>/`, laid out as the Tab Demo Video
  * storyboard (see [DemoStage]), from the real main window and the output it drives. Skipped unless
  * `CP_DEMO_OUT` is set, so CI never records. The finished MP4, narrated (see [DemoNarrator]), goes to
- * `CP_DEMO_VIDEOS` — `~/Downloads` by default — as `churchpresenter-<name>-tab.mp4`.
+ * `<CP_DEMO_VIDEOS>/<tab>/` — `~/Downloads/ChurchPresenter Videos/<tab>/` by default — as
+ * `churchpresenter-<name>-tab.mp4`.
  *
  * [tab] names the tab in the cards; [liveLabel] is what the projector scene's header says it shows;
  * [steps] is how many numbered steps the tour has, for the progress dashes.
@@ -164,7 +166,12 @@ internal fun recordTour(
         } catch (_: LengthReached) {
             // CP_DEMO_SECONDS cut the tour short; what was recorded is the preview.
         }
-        val videos = System.getenv("CP_DEMO_VIDEOS")?.let(::File) ?: File(System.getenv("HOME"), "Downloads")
+        // One folder per tab, so each video sits with its own thumbnail and script.
+        val videos = File(
+            System.getenv("CP_DEMO_VIDEOS")?.let(::File)
+                ?: File(System.getenv("HOME"), "Downloads/ChurchPresenter Videos"),
+            tab,
+        )
         val suffix = if (MAX_FRAMES == null) "" else "-preview"
         narrator.encode(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"))
     }
@@ -412,12 +419,21 @@ internal class DemoTour(
         // The drawn pointer is the one the viewer follows; the real one leaves, so no tooltip lingers.
         runCatching { ui.onAllNodes(isRoot())[0].performMouseInput { exit() } }
         ui.waitForIdle()
+        // A click can scroll its list; the outline follows the control rather than where it was.
+        val moved = runCatching { target.node.fetchSemanticsNode().boundsInWindow }.getOrNull()
+        // Only a scroll (same column, same size): a control whose label changed now names another one.
+        val focus = scene.focus
+        if (moved != null && focus != null && sameColumn(moved, target.bounds)) {
+            scene.focus = Focus(moved, focus.step, focus.title, focus.body, focus.compact)
+        }
         refresh(0.3, live)
         hold(0.35)
         scene.keycap = null
         scene.pointerTag = null
         if (deferPad) spoken = start to talk else padTo(start, talk)
     }
+
+    private fun sameColumn(a: Rect, b: Rect) = abs(a.left - b.left) < 2f && abs(a.width - b.width) < 2f
 
     /** 03 Tab select: a 2× zoom on the tab bar; clicked again off camera until it really is open. */
     fun openTab(label: String, sub: String) {
@@ -446,7 +462,15 @@ internal class DemoTour(
         }
 
     /** A step that presses [key] — drawn as a keycap beside [area] — and fades to what it did. */
-    fun press(heading: String, sub: String, area: Target, key: Key, label: String, after: () -> Unit = {}) {
+    fun press(
+        heading: String,
+        sub: String,
+        area: Target,
+        key: Key,
+        label: String,
+        live: Boolean = false,
+        after: () -> Unit = {},
+    ) {
         val n = ++stepNumber
         scene.step = stepNumber
         val start = frame
@@ -460,6 +484,7 @@ internal class DemoTour(
         ui.onAllNodes(isRoot())[0].performKeyInput { pressKey(key) }
         ui.waitForIdle()
         after()
+        if (live) awaitProjectorChange()
         refresh(0.3)
         hold(0.6)
         scene.keycap = null
@@ -524,6 +549,11 @@ internal class DemoTour(
         val talk = narrate(heading, sub)
         scene.focus = null
         camTo(Camera.projector(appW, appH))
+        // The first live moment, unannotated, for the video's thumbnail.
+        File(out, "thumb-app.png").takeUnless { it.exists() }?.let {
+            ImageIO.write(scene.app, "png", it)
+            ImageIO.write(scene.projector, "png", File(out, "thumb-projector.png"))
+        }
         scene.caption = sub
         scene.captionAge = 0
         hold(maxOf(2.2, talk + 0.4))
@@ -637,6 +667,7 @@ internal class DemoTour(
 
     /** Takes a fresh capture and crossfades to it; a [live] change also draws the arrow and pulses LIVE. */
     private fun refresh(seconds: Double, live: Boolean = false) {
+        if (live) awaitProjectorChange()
         val (app, projector) = capture()
         scene.appBefore = scene.app
         scene.app = app
@@ -671,6 +702,43 @@ internal class DemoTour(
     private fun write(img: BufferedImage) {
         if (MAX_FRAMES != null && frame >= MAX_FRAMES) throw LengthReached()
         ImageIO.write(img, "png", File(out, "f%05d.png".format(frame++)))
+    }
+
+    /**
+     * Waits (up to 3s) for the projector to show something new: a picture or slide is decoded off the
+     * UI thread, so the frame after Go Live can still be the old one. Nothing changing is not a failure.
+     */
+    private fun awaitProjectorChange() {
+        val before = scene.projector
+        runCatching {
+            ui.waitUntil("the projector shows the new content", 3_000L) {
+                Snapshot.sendApplyNotifications()
+                capture().second.let { !sameImage(it, before) && !blank(it) }
+            }
+        }
+        ui.waitForIdle()
+    }
+
+    /** Nearly all black: a picture still decoding, not a picture. */
+    private fun blank(img: BufferedImage): Boolean {
+        var lit = 0
+        var seen = 0
+        val step = maxOf(1, img.width / 80)
+        for (y in 0 until img.height step step) for (x in 0 until img.width step step) {
+            val rgb = img.getRGB(x, y)
+            if (((rgb shr 16) and 0xFF) + ((rgb shr 8) and 0xFF) + (rgb and 0xFF) > 120) lit++
+            seen++
+        }
+        return lit * 200 < seen
+    }
+
+    private fun sameImage(a: BufferedImage, b: BufferedImage): Boolean {
+        if (a.width != b.width || a.height != b.height) return false
+        val step = maxOf(1, a.width / 64)
+        for (y in 0 until a.height step step) for (x in 0 until a.width step step) {
+            if (a.getRGB(x, y) != b.getRGB(x, y)) return false
+        }
+        return true
     }
 
     /** The app's window and the projector's picture, cut from one capture of both (and any open popup). */
