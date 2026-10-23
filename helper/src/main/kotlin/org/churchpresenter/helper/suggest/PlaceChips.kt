@@ -33,7 +33,8 @@ private fun tabChips(tab: Tabs): List<SuggestedRequest> = when (tab) {
     Tabs.LOWER_THIRD -> listOf(SuggestedRequest.LOWER_THIRD, SuggestedRequest.LOWER_THIRD_OUTPUT)
     Tabs.ANNOUNCEMENTS -> listOf(SuggestedRequest.ANNOUNCEMENT, SuggestedRequest.COUNTDOWN, SuggestedRequest.CLOCK)
     Tabs.WEB -> listOf(SuggestedRequest.WEBSITE)
-    Tabs.CANVAS, Tabs.QA, Tabs.STT, Tabs.CROSSWORD, Tabs.DICTIONARY, Tabs.COMPANION_SURFACE -> emptyList()
+    Tabs.CANVAS, Tabs.QA, Tabs.STT, Tabs.CROSSWORD, Tabs.DICTIONARY, Tabs.COMPANION_SURFACE,
+    Tabs.SIGNAGE -> emptyList()
 }
 
 private fun pageChips(page: SettingsPage): List<SuggestedRequest> = when (page) {

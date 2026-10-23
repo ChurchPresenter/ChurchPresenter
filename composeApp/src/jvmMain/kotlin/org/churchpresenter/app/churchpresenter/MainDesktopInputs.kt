@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.signage.tab.SignageController
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import kotlinx.coroutines.flow.Flow
@@ -200,6 +201,14 @@ data class InstanceLinkBridge(
 )
 
 /** The server addresses, the public tunnel and the remote-presentation controls the tabs show. */
+/** What the Signage tab (dev mode only) needs from the app. */
+class SignageTabInput(
+    val controller: SignageController,
+    /** Whether the companion server is on; the screens reach ChurchPresenter only through it. */
+    val serverRunning: Boolean,
+    val onTurnOnServer: () -> Unit,
+)
+
 data class WebAccessState(
     val serverUrl: String = "",
     val tunnelStatus: TunnelStatus = TunnelStatus.Idle,

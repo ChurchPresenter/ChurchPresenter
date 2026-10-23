@@ -858,7 +858,8 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
     fun `Show all in the tab visibility menu brings back every hidden tab`() {
         val wiring = Wiring()
         val base = withOneSong().copy(hiddenTabs = setOf(Tabs.WEB.name, Tabs.QA.name))
-        val total = Tabs.entries.size - 1
+        // The menu offers neither the hidden Crossword nor the dev-mode-only Signage tab.
+        val total = Tabs.entries.size - 2
         root(base, wiring = wiring) { _ ->
             onAllNodesWithContentDescription("Tab Visibility")[0].performClick()
             waitForIdle()

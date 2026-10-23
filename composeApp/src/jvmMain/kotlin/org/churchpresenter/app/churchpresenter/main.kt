@@ -453,6 +453,7 @@ private fun ApplicationScope.ChurchPresenterApp(
         CompanionServerWiring(tunnelStatus)
         VirtualOutputs(effectiveAppSettings)
         StartupEffect()
+        SignageEffect()
         OutputGuardWiring(relaunchedByGuard) {
             AppWindows(effectiveAppSettings, calendarSync, tunnelStatus, tunnelUrl, onThemeCustomizationChange)
         }

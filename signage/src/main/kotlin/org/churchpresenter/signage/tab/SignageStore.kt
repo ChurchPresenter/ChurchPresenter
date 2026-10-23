@@ -1,0 +1,127 @@
+package org.churchpresenter.signage.tab
+
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.signage.core.SignageJson
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.security.MessageDigest
+
+/** What the Signage tab keeps between runs, apart from the paired screens themselves. */
+@Serializable
+data class SignageSettings(
+    /** The signage folder; blank for the default. */
+    val folder: String = "",
+    /** How long each picture stays up. */
+    val pictureSeconds: Int = DEFAULT_PICTURE_SECONDS,
+    /** What each screen plays, by screen id. */
+    val screens: Map<String, ScreenPlan> = emptyMap(),
+) {
+    fun plan(id: String): ScreenPlan = screens[id] ?: ScreenPlan()
+
+    companion object {
+        const val DEFAULT_PICTURE_SECONDS = 10
+    }
+}
+
+/** What one screen plays: a playlist's id, [NOTHING], or null for the first playlist. */
+@Serializable
+data class ScreenPlan(val playlistId: String? = null) {
+    companion object {
+        /** The screen plays nothing and holds no content: it shows its idle card. */
+        const val NOTHING = "nothing:"
+
+        /** What a Plays choice named [name] stands for: a playlist's id, [NOTHING], or null if not listed. */
+        fun forChoice(name: String, nothing: String, playlists: List<PlaylistSummary>): String? =
+            if (name == nothing) NOTHING else playlists.firstOrNull { it.name == name }?.id
+    }
+}
+
+/** A file's hash, and the size and time it had when it was hashed. */
+@Serializable
+data class HashedFile(val size: Long, val modifiedMs: Long, val sha256: String)
+
+/**
+ * The tab's files in [dir]: its settings, and the hash of every file it has read, so a start-up only
+ * hashes what changed while ChurchPresenter was off. Blocking: run it on `Dispatchers.IO`.
+ */
+class SignageStore(private val dir: Path) {
+    private val settingsFile = dir.resolve("signage.json")
+    private val hashesFile = dir.resolve("hashes.json")
+    private var hashes: MutableMap<String, HashedFile> = mutableMapOf()
+
+    fun loadSettings(): SignageSettings = read(settingsFile, SignageSettings.serializer()) ?: SignageSettings()
+
+    fun saveSettings(settings: SignageSettings) = write(settingsFile, SignageSettings.serializer(), settings)
+
+    fun loadHashes() {
+        hashes = read(hashesFile, HashesFile.serializer())?.files?.toMutableMap() ?: mutableMapOf()
+    }
+
+    /** [file]'s SHA-256, read from the cache while its size and time are unchanged. */
+    fun hashOf(file: FolderFile): String? {
+        val key = file.path.toAbsolutePath().toString()
+        hashes[key]?.takeIf { it.size == file.size && it.modifiedMs == file.modifiedMs }?.let { return it.sha256 }
+        val sha = try {
+            hash(file.path)
+        } catch (e: IOException) {
+            Log.warn(TAG, "Could not read ${file.path}: ${e.message}")
+            return null
+        }
+        hashes[key] = HashedFile(file.size, file.modifiedMs, sha)
+        return sha
+    }
+
+    /** Forgets every file not in [keep] and saves the rest. */
+    fun saveHashes(keep: Set<Path>) {
+        val wanted = keep.map { it.toAbsolutePath().toString() }.toSet()
+        hashes.keys.retainAll(wanted)
+        write(hashesFile, HashesFile.serializer(), HashesFile(hashes.toMap()))
+    }
+
+    @Serializable
+    private data class HashesFile(val files: Map<String, HashedFile> = emptyMap())
+
+    private fun hash(path: Path): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        Files.newInputStream(path).use { input ->
+            val buffer = ByteArray(BUFFER_BYTES)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    private fun <T> read(file: Path, serializer: KSerializer<T>): T? = try {
+        if (Files.exists(file)) SignageJson.decodeFromString(serializer, Files.readString(file)) else null
+    } catch (e: IOException) {
+        Log.warn(TAG, "Could not read $file: ${e.message}")
+        null
+    } catch (e: SerializationException) {
+        Log.warn(TAG, "$file is damaged: ${e.message}")
+        null
+    }
+
+    private fun <T> write(file: Path, serializer: KSerializer<T>, value: T) {
+        try {
+            Files.createDirectories(dir)
+            val next = file.resolveSibling("${file.fileName}.next")
+            Files.writeString(next, SignageJson.encodeToString(serializer, value))
+            Files.move(next, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
+        } catch (e: IOException) {
+            Log.error(TAG, "Could not save $file: ${e.message}")
+        }
+    }
+
+    private companion object {
+        const val TAG = "Signage"
+        const val BUFFER_BYTES = 64 * 1024
+    }
+}

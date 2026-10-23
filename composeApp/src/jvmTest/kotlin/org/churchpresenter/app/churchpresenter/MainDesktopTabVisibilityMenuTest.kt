@@ -23,13 +23,13 @@ class MainDesktopTabVisibilityMenuTest {
     // ── visibleTabCount ──────────────────────────────────────────────────────────
 
     @Test
-    fun `nothing hidden counts every tab except Crossword`() {
-        assertEquals(Tabs.entries.size - 1, visibleTabCount(emptySet()))
+    fun `nothing hidden counts every tab except Crossword and Signage`() {
+        assertEquals(Tabs.entries.size - 2, visibleTabCount(emptySet()))
     }
 
     @Test
     fun `hiding a tab lowers the count by one`() {
-        assertEquals(Tabs.entries.size - 2, visibleTabCount(setOf(Tabs.MEDIA.name)))
+        assertEquals(Tabs.entries.size - 3, visibleTabCount(setOf(Tabs.MEDIA.name)))
     }
 
     @Test

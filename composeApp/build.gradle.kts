@@ -177,6 +177,8 @@ kotlin {
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
             implementation(projects.companionSurface)
+            implementation(projects.signage)
+            implementation(projects.signageCore)
             // The OBS Studio integration: client, scene mapping and settings page.
             implementation(projects.obs)
             // The layer model: layers, cues, program and preview.
