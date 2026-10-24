@@ -718,13 +718,19 @@ internal class DemoTour(
      * One spoken line that names several controls: the pointer and the outline move to each of [stops]
      * in turn, each held for its share of the line, so whatever is being said is what is pointed at.
      */
-    fun tour(vararg stops: Triple<String, String, Target>) {
+    fun tour(vararg stops: Triple<String, String, Target>, click: Boolean = false) {
         val start = frame
         val (heading, sub, _) = stops.first()
         val talk = narrate(heading, sub)
         val share = maxOf(1.6, (talk + 0.3) / stops.size)
         stops.forEach { (title, body, target) ->
             val begun = frame
+            if (click) {
+                // Each stop opened as it is named, so the viewer sees what it is.
+                target.node.performClick()
+                ui.waitForIdle()
+                refresh(0.3)
+            }
             scene.focus = null
             camTo(Camera.zoom(target.bounds, 1.5f, appW, appH))
             scene.focus = Focus(target.bounds, null, title, body, compact = false)
@@ -734,6 +740,22 @@ internal class DemoTour(
             if (left > 0) hold(left)
         }
         padTo(start, talk)
+    }
+
+    /**
+     * A spoken line with nothing on screen to point at: the view stays where it is, nothing is
+     * outlined, and only the caption changes.
+     */
+    fun caption(heading: String, sub: String) {
+        val start = frame
+        val talk = narrate(heading, sub)
+        scene.focus = null
+        camTo(Camera.full(appW, appH))
+        scene.caption = "$heading — $sub"
+        scene.captionAge = 0
+        hold(maxOf(2.0, talk + 0.3))
+        padTo(start, talk)
+        scene.caption = null
     }
 
     /** A tooltip with no click, on [target]. */
