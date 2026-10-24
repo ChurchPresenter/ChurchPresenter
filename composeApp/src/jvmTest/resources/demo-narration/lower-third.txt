@@ -1,0 +1,34 @@
+# What the narrator says in the lower third tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Lower Third tab, where you can introduce speakers and guests with an animated name banner across the bottom of the screen.
+open-tab = Let's open the Lower Third tab.
+list = Every lower third you've made is listed here, ready to use in any service.
+generate = To make a new one, click Generate. This opens the lower third generator, where you design the banner and its animation.
+canvas = At the top, the canvas is already set to match your screen, so the banner is sized correctly for your projector.
+style = Next, pick a style. Open the style list to see every design, each with a small preview.
+style-pick = We'll choose the Banner style. The preview on the right plays the animation straight away, so you always see exactly what the audience will see.
+alignment = You can place the banner on the left, in the center, or on the right of the screen.
+name = Now for the text. Type the speaker's name here. Our guest this morning is Pastor David Miller.
+info = The second line is for their role, or a short title. We'll add Guest Speaker, and the name of his church.
+detail = There's also an optional third line, for extra details such as a website or a sermon title.
+text-style = Open Text Style to choose the font, the size of each line, how bold it is, and whether it's written in capital letters.
+colors = In Colors, you can set the color of each line of text, the accent, the background and the border, and how see-through each one is.
+save-colors = Once you've found your church's colors, click Save Colors, and you can use the same look on every lower third you make.
+shape = Under Shape, you can round the corners, change the border, turn the background on or off, and add a soft shadow.
+timing = And under Timing, you choose how quickly the banner animates in and out, and how long it stays on screen. Fast, Medium and Slow give you a quick starting point.
+save = When it looks right, click Save Lower Third. It's saved straight into the Lower Third tab, ready to use.
+library = It's also saved in the Library, under the speaker's name. The next time Pastor David visits, just click his name, and his exact design comes back, ready to save again.
+batch = Got a whole list of people? Batch Import lets you add many names and titles at once, and Apply Style to All gives every one of them the same look.
+pick = Back in the Lower Third tab, our new banner is already in the list. Click it to see it in the preview.
+go-live = Then click Go Live, and the animation plays on the projector.
+live = And there it is, introducing our guest speaker.
+band = Bible verses and song lyrics use a different generator. Their lower thirds are bands that hold whatever verse or lyric is on screen, and the words are filled in live as you present. You open it from the Bible or Songs settings, under Lower Third Animation.
+band-style = It has its own collection of band designs, from simple bars to ribbons, waves and glass panels.
+band-layout = You can choose where the verse and its reference sit within the band.
+band-save = When you save a band, choose it in the Bible or Songs settings, and every verse or lyric you show uses it automatically.
+triggers = There's one more place lower thirds appear. Open Settings, and go to the Server page.
+triggers-list = When the companion server is running, every lower third gets its own trigger address. Visiting that address puts the lower third live, straight away.
+triggers-use = That means you can fire Pastor David's banner from a Stream Deck button, from Bitfocus Companion, or from any other system that can open a web link, without touching the computer.
+schedule = Finally, to bring the speaker's lower third up at the right moment, click Add to Schedule.
+outro = And that's the Lower Third tab. Design a banner once, save it for each speaker, and introduce them with a single click.

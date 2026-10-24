@@ -1,0 +1,26 @@
+# What the narrator says in the add-a-bible tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll add a new Bible translation. We'll see where your Bibles are kept, download and install a new one, and set up how it's named, ordered and shown.
+open-settings = Everything starts in Settings, so click the gear at the top of the window. Your storage folders are on the System page.
+storage = This is your Bible storage folder. Every Bible ChurchPresenter can show is a file kept in this folder.
+browse = Click Browse to choose a different folder, for example a shared folder that all of your church's computers use.
+detected = The Bibles already in the folder are listed here, so you can see at a glance what's installed.
+download-button = To add a new translation, click Download Bibles.
+catalog = This opens the Bible catalog, with free translations in hundreds of languages, ready to install.
+languages = Narrow the list down to a single language,
+search = or type part of a name to find a translation. We'll look for the World English Bible.
+pick = When you've found the one you want, click Download.
+licence = Before anything is downloaded, ChurchPresenter shows you the translation's copyright and licensing. Bible translations are protected by copyright, and some can't be shown publicly, streamed or broadcast without a license. Please make sure you only display Bibles your church is licensed to use.
+accept = Once you've checked, click I understand, Download, to confirm that you may use this translation.
+installed = The Bible is downloaded and installed straight into your Bible folder, ready to use.
+bible-settings = Now open the Bible page in Settings. Here you choose which translations to show, and in what order.
+add-translation = To show your new Bible, click Add translation. With two or more translations, every verse can be shown in all of them at once.
+pick-translation = Then choose the Bible you just downloaded from the list.
+order = Use the arrows to move a translation up or down. The first one is the main translation, and the others are shown alongside it.
+name = You can give each translation the name your church knows it by,
+abbreviation = and the short abbreviation that appears with every verse on screen.
+profiles = Finally, long verses. Open the Profiles page, and choose Bible to see how verses are laid out on each screen.
+split = Some verses are too long to fit comfortably on one slide. Switch on Split long verses, and ChurchPresenter shows them across two slides instead.
+split-words = Then choose how long is too long. Any verse with more words than this number is split in two.
+outro = And that's how to add a Bible. Download it from the catalog, check its license, then name it, put it in order, and choose how long verses are shown.

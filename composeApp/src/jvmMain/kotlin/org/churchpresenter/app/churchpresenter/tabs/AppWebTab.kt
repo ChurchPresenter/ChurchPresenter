@@ -5,6 +5,7 @@ import org.churchpresenter.app.churchpresenter.isDevWindowedFallback
 import org.churchpresenter.sharedui.utils.DevFlags
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import org.churchpresenter.profiles.PreviewOutputPicker
 import org.churchpresenter.profiles.rememberPreviewOutput
@@ -15,6 +16,12 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.web.tabs.WebTab
+
+/**
+ * Whether the Web tab may assume a browser engine; null (always, in the app) asks [CefManager]. A
+ * recording or test that composes the whole main window, where no engine can start, provides true.
+ */
+internal val LocalWebEngineAvailable = compositionLocalOf<Boolean?> { null }
 
 /**
  * The `:web` tab with the app's own parts filled in: the live output through
@@ -31,7 +38,7 @@ fun AppWebTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null,
-    cefInitialized: Boolean = CefManager.initialized,
+    cefInitialized: Boolean = LocalWebEngineAvailable.current ?: CefManager.initialized,
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
     cefMissingLibrary: String? = CefManager.missingLibrary,

@@ -1,0 +1,29 @@
+# What the narrator says in the bible tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+the-bible-tab = Welcome to ChurchPresenter. In this short tour, we'll look at the Bible tab, where you can find any passage in seconds and put it on the big screen for your congregation.
+open-tab = Let's start by opening the Bible tab. Every translation you have installed is available right here.
+pick-a-book = The first way to find a passage is simply to browse. Pick a book from the list. Here, we'll choose Romans.
+pick-a-chapter = Next, choose the chapter. We'll open chapter twelve.
+click-a-verse = Now click a verse. It appears in the preview straight away, so you can check it before anyone else sees it.
+shift-click-to-select-a-range = Want more than one verse? Hold Shift and click another verse, and the whole range is selected together.
+sends-the-verses-to-the-projecto = When you're ready, click Go Live, and the passage is sent to the projector.
+romans-12-1-2-in-both-translatio = And there it is on the big screen. Because two translations are switched on, every verse appears in both languages, one beneath the other.
+or-type-a-reference = If you already know the reference, there's an even faster way. Click the search box, type something like John three sixteen, and press Enter. Short forms work too.
+double-click-to-go-live = To show a verse instantly, just double-click it. That's the quickest way to get a verse up during the service.
+john-3-16-in-two-languages = John three sixteen is now live, again in both translations.
+swap-which-comes-first = You can also choose which language comes first. Click the Swap button, and the order flips.
+flipped = Now the second translation leads, and English follows underneath.
+click-again-to-flip-back = Click Swap once more to put it back. Use whichever order your congregation reads first.
+right-click-a-verse-for-more = Right-click any verse to see more options. From this menu you can go live, add the verse to your schedule, copy it, or open its cross references.
+add-to-schedule = Let's add this verse to the schedule, so it's ready for later in the service.
+added-to-your-schedule = It now appears at the bottom of your schedule on the left, where you can run the whole service in order.
+cross-references = If you'd like to explore further, click Refs to open the cross references. These are related passages for the verse you've selected. Using them is completely optional.
+switch-the-search-to-text = The search box can also look for words. By default it's set to Auto, which guesses what you mean. Click it to switch between Reference and Text searching.
+search-for-a-word = Now type a word, for example, Jesus. Every verse that contains it is listed as you type.
+every-verse-that-mentions-it = The number of results is shown at the top, and each match is highlighted, so it's easy to scan the list.
+pick-a-verse = Click any result, and the Bible jumps straight to that verse.
+puts-the-verse-you-picked-on-scr = Then click Go Live to put it on the screen.
+found-by-searching-a-word = And it's live, found simply by searching for a word.
+history = Finally, the History panel keeps every verse you've shown today. Click any entry to go straight back to it.
+that-s-the-bible-tab = And that's the Bible tab. Browse or search, add verses to your schedule, and go live with a single click.
