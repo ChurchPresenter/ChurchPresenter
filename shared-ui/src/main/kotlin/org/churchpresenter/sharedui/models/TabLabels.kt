@@ -13,6 +13,7 @@ import org.churchpresenter.strings.generated.resources.tab_canvas
 import org.churchpresenter.strings.generated.resources.tab_companion_surface
 import org.churchpresenter.strings.generated.resources.tab_dictionary
 import org.churchpresenter.strings.generated.resources.tab_qa
+import org.churchpresenter.strings.generated.resources.tab_signage
 import org.churchpresenter.strings.generated.resources.tab_stt
 import org.churchpresenter.strings.generated.resources.tab_web
 import org.jetbrains.compose.resources.StringResource
@@ -34,4 +35,5 @@ val Tabs.labelRes: StringResource
         Tabs.CROSSWORD -> Res.string.crossword_tab
         Tabs.DICTIONARY -> Res.string.tab_dictionary
         Tabs.COMPANION_SURFACE -> Res.string.tab_companion_surface
+        Tabs.SIGNAGE -> Res.string.tab_signage
     }

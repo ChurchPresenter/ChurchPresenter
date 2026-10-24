@@ -38,6 +38,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.theme.dropdownField
+import org.churchpresenter.theme.keyboardFocusRing
 
 /** The style the field draws its current value in. Shared with [rememberDropdownWidthFor] so a width
  *  measured for a set of options matches the text that will actually be drawn in it. */
@@ -87,12 +88,15 @@ fun DropdownSettingsField(
     width: Dp? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val shape = AppShape(8.dp)
 
     Box(
         modifier = modifier
             .then(if (width != null) Modifier.width(width) else Modifier)
             .heightIn(min = 42.dp)
-            .dropdownField(AppShape(8.dp), open = expanded)
+            // Before the field: its sunken surface clips, which would hide a ring drawn inside it.
+            .keyboardFocusRing(shape)
+            .dropdownField(shape, open = expanded)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null

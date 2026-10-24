@@ -94,6 +94,11 @@ object LiveMapReporter {
          */
         val liveMinutes: Int = 0,
         val liveStalls: Int = 0,
+        /**
+         * Signage screens paired, by the player platform's wire name (`linux_arm64`, `linux_x64`,
+         * `windows_x64`) — how many churches run lobby screens, and on what.
+         */
+        val signageScreens: Map<String, Int> = emptyMap(),
     )
 
     /**
@@ -143,6 +148,7 @@ object LiveMapReporter {
         sessionMinutes: Int = 0,
         liveMinutes: Int = 0,
         liveStalls: Int = 0,
+        signageScreens: Map<String, Int> = emptyMap(),
     ): SetupFacts {
         // Outputs with no display chosen, or on a monitor marked "Don't use", are configuration the
         // operator has switched off. Reading
@@ -160,6 +166,7 @@ object LiveMapReporter {
             sessionMinutes = sessionMinutes,
             liveMinutes = liveMinutes,
             liveStalls = liveStalls,
+            signageScreens = signageScreens,
         )
     }
 
@@ -309,6 +316,26 @@ private fun StringBuilder.appendSetupFacts(setup: LiveMapReporter.SetupFacts) {
     if (setup.sessionMinutes > 0) append("&sessionMinutes=${setup.sessionMinutes}")
     if (setup.liveMinutes > 0) append("&liveMinutes=${setup.liveMinutes}")
     if (setup.liveStalls > 0) append("&liveStalls=${setup.liveStalls}")
+    appendSignageScreens(setup.signageScreens)
+}
+
+/** The ping's name for each signage player platform, by the platform's wire name. */
+private val SIGNAGE_PLATFORM_PARAMS = mapOf(
+    "linux_arm64" to "signageLinuxArm64",
+    "linux_x64" to "signageLinuxX64",
+    "windows_x64" to "signageWindowsX64",
+)
+
+// The total counts every screen, a platform this build does not name included; each named platform
+// follows it.
+private fun StringBuilder.appendSignageScreens(screens: Map<String, Int>) {
+    val total = screens.values.sum()
+    if (total <= 0) return
+    append("&signageScreens=$total")
+    SIGNAGE_PLATFORM_PARAMS.forEach { (platform, param) ->
+        val count = screens[platform] ?: 0
+        if (count > 0) append("&$param=$count")
+    }
 }
 
 // Everything above describes the session that is starting. These are things that already

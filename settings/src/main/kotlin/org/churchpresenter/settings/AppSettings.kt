@@ -121,7 +121,7 @@ data class AppSettings(
     val windowHeight: Int = 800,
     val windowX: Int = -1,
     val windowY: Int = -1,
-    val hiddenTabs: Set<String> = setOf("QA", "STT"),
+    val hiddenTabs: Set<String> = setOf("QA", "STT", "SIGNAGE"),
     val tabLabelStyle: TabLabelStyle = TabLabelStyle.TEXT,
     val tabLabelMargin: TabLabelMargin = TabLabelMargin.NORMAL,
     val crosswordUnlockedLevel: Int = 0,
@@ -186,6 +186,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 24
+        const val CURRENT_SETTINGS_VERSION = 25
     }
 }

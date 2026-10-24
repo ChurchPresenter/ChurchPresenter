@@ -17,6 +17,8 @@ dependencies {
     implementation(projects.songs)
     implementation(projects.slidesEngine)
     implementation(projects.qa)
+    // The signage screens: their wire types and the hub the Signage tab shares with the server.
+    implementation(projects.signageCore)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
@@ -32,6 +34,8 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.websockets)
+    // The mDNS advert signage players find the server by.
+    implementation(libs.jmdns)
 
     // The self-signed certificate the companion server offers over HTTPS.
     implementation(libs.bouncycastle.pkix)

@@ -112,11 +112,15 @@ class FocusRingVisibleTest : MainDesktopComposeHarness() {
         assertTrue(unseen.isEmpty(), "on $tab, focus is invisible on:\n${unseen.joinToString("\n")}")
     }
 
-    /** One per tab, so a new tab cannot be left out. */
+    /**
+     * One per tab, so a new tab cannot be left out. The Signage tab is `:signage`'s
+     * `SignageTabAccessibilityTest`, as in [AccessibleNamesTest].
+     */
     @Test
     fun `every tab has a test of its own`() {
         val covered = this::class.java.declaredMethods.map { it.name }.toSet()
-        val missing = (Tabs.entries - Tabs.WEB).filter { tab -> covered.none { it.startsWith("the ${tab.name} tab") } }
+        val missing = (Tabs.entries - Tabs.WEB - Tabs.SIGNAGE)
+            .filter { tab -> covered.none { it.startsWith("the ${tab.name} tab") } }
         assertTrue(missing.isEmpty(), "no focus-ring test for: $missing")
     }
 

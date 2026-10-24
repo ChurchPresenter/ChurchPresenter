@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.signage.tab.SignageController
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import kotlinx.coroutines.flow.Flow
@@ -197,6 +198,14 @@ data class InstanceLinkBridge(
      *  connected. See PicturesTab/PresentationTab's fallback in their selected-item effects. */
     val fetchPictureImageBytes: (suspend (folderId: String, index: Int) -> ByteArray?)? = null,
     val fetchPresentationSlideBytes: (suspend (id: String, index: Int) -> ByteArray?)? = null,
+)
+
+/** What the Signage tab needs from the app. */
+class SignageTabInput(
+    val controller: SignageController,
+    /** Whether the companion server is on; the screens reach ChurchPresenter only through it. */
+    val serverRunning: Boolean,
+    val onTurnOnServer: () -> Unit,
 )
 
 /** The server addresses, the public tunnel and the remote-presentation controls the tabs show. */

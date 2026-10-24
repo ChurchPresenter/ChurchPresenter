@@ -21,6 +21,9 @@ private const val VERSION_QUICK_BACKGROUND_INHERITS = 17
 /** Version 20: the preview panel's groups became a layout. */
 private const val VERSION_PREVIEW_LAYOUTS = 20
 
+/** Version 25: the Signage tab came out of dev mode and starts hidden, as STT does. */
+private const val VERSION_SIGNAGE_TAB = 25
+
 // Load, migrate, save, import and export, all against one file. The per-version steps it runs are
 // in
 // the Settings*Migrations.kt files beside it, the repairs in SettingsRepair.kt and the backups in
@@ -182,6 +185,11 @@ class SettingsManager {
             settings = migrateQuickBackgroundLowerThird(settings)
         }
         if (fromVersion < VERSION_PREVIEW_LAYOUTS) settings = migratePreviewGroupsToLayout(settings)
+        if (fromVersion < VERSION_SIGNAGE_TAB) {
+            // A file written before it existed has an explicit hidden list that cannot mention it,
+            // so without this every existing install would open with a tab nobody asked for.
+            settings = settings.copy(hiddenTabs = settings.hiddenTabs + "SIGNAGE")
+        }
         // The primary/secondary-bible output shorthand ("primary"/"secondary" bibleMode, converted
         // to a position in the stack) used to be migrated here as a typed, per-[ScreenAssignment]
         // step gated on `fromVersion < 6`. An output no longer carries `bibleMode` at all -- that
