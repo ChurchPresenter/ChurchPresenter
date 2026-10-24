@@ -307,7 +307,9 @@ fun main(args: Array<String>) {
                 sessionMinutes = previousRun.sessionMinutes,
                 liveMinutes = previousRun.liveMinutes,
                 liveStalls = previousRun.liveStalls,
-                signageScreens = SignageHub.pairedScreensByPlatform(AppDataDir.resolve().toPath().resolve(SignageHub.DIR)),
+                signageScreens = SignageHub.pairedScreensByPlatform(
+                    AppDataDir.resolve().toPath().resolve(SignageHub.DIR),
+                ),
             )
         },
         events = pendingUsageEvents,
