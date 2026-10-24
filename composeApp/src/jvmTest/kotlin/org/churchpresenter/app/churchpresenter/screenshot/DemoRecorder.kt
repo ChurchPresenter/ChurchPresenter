@@ -637,7 +637,12 @@ internal class DemoTour(
             val g = createGraphics()
             g.color = java.awt.Color.BLACK
             g.fillRect(0, 0, w, h)
-            g.drawImage(BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB).also { it.setRGB(0, 0, w, h, argb, 0, w) }, 0, 0, null)
+            g.drawImage(
+                BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB).also { it.setRGB(0, 0, w, h, argb, 0, w) },
+                0,
+                0,
+                null,
+            )
             g.dispose()
         }
     }.getOrNull()
@@ -679,7 +684,8 @@ internal class DemoTour(
             .fetchSemanticsNodes(atLeastOneRootRequired = false)
             .filter { it.boundsInWindow.left >= CANVAS_W * d }
             .joinToString(" | ") { node ->
-                node.config.getOrNull(SemanticsProperties.Text)?.joinToString("") + "@" + node.boundsInWindow.top.toInt()
+                val text = node.config.getOrNull(SemanticsProperties.Text)?.joinToString("")
+                "$text@${node.boundsInWindow.top.toInt()}"
             },
     )
 

@@ -1,0 +1,31 @@
+# What the narrator says in the announcements tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Announcements tab, where you can put messages, countdowns and clocks on the big screen.
+open-tab = Let's open the Announcements tab.
+text = Start by typing your message in the box at the top. We'll let everyone know about coffee and fellowship after the service.
+text-style = Choose the text color, and make it bold, italic or underlined. You can even give the letters an outline, so they stand out on any background.
+font = Pick any font on this computer, and set the size so it's easy to read from the back of the room.
+position = Next, choose where the message appears. There are nine positions to pick from. We'll put it at the bottom center of the screen.
+background = You can place a color behind the text, or leave the background transparent, so it sits over whatever is already on the screen.
+animation = Now choose how the message moves. Open the animation list to see the options.
+animation-pick = You can fade it in, or slide it in from any side. We'll choose Slide From Right, so it scrolls across the screen like a news ticker.
+loop = The loop count sets how many times the message plays. Leave it at zero, and it keeps going until you take it down.
+speed = And the speed slider controls how quickly it moves across the screen.
+go-live = When it's ready, click Go Live, and the announcement is sent to the projector.
+live = And there it is, scrolling across the bottom of the big screen.
+preset = If you use this announcement often, save it as a preset. A preset keeps the message, its look and its animation, so you can bring it back in any service with one click.
+timers = Below the message are the timers. There are four kinds, and the first is a countdown, which is perfect for the minutes before the service starts.
+set-time = Use the plus and minus buttons to set the hours, minutes and seconds. We'll set it to five minutes.
+expired = You can also choose what the screen says when the countdown reaches zero, such as, the service is beginning.
+timer-live = Click Go Live to put the countdown on the projector.
+start = Then click Start, and it begins counting down.
+timer-on = Now everyone can see exactly how long it is until the service begins.
+duration = The second timer is Duration. It counts up from zero, so you can see how long a sermon or a song has been going.
+specific = The third is Specific Time. Instead of setting minutes, you choose a time of day, such as ten thirty, and it counts down to that moment.
+clock = And the fourth is Clock, which simply shows the time right now.
+format = You can show the clock in twelve or twenty four hour time, with or without the seconds.
+stage = Any timer can also be sent to the stage monitor, so the person speaking can keep an eye on the time without the congregation seeing it.
+schedule = And every timer can be added to your schedule, ready to run at the right moment in the service.
+schedule-row = The clock now appears in your schedule on the left.
+outro = And that's the Announcements tab. Type a message, choose where and how it moves, and keep the service on time with four kinds of timer.

@@ -88,9 +88,20 @@ class LowerThirdDemoTour {
         say("canvas")
         panelNote("Canvas", "Matches your screen: 1920 × 1080", panelItem(hasText("Canvas")))
         say("style")
-        panelNote("Pick a style", "Fourteen animated designs", panelItem(hasText("Style 1", substring = true)), click = true)
+        panelNote(
+            "Pick a style",
+            "Fourteen animated designs",
+            panelItem(hasText("Style 1", substring = true)),
+            click = true,
+        )
         say("style-pick")
-        panelNote("Banner", "The preview plays it straight away", panelItem(hasText("Style 4", substring = true)), click = true, numbered = true)
+        panelNote(
+            "Banner",
+            "The preview plays it straight away",
+            panelItem(hasText("Style 4", substring = true)),
+            click = true,
+            numbered = true,
+        )
         say("alignment")
         panelNote("Alignment", "Left, center or right", panelItem(hasText("Left")))
         val fields = panelItems(hasSetTextAction())
@@ -101,15 +112,33 @@ class LowerThirdDemoTour {
         say("detail")
         panelNote("Detail", "An optional third line", fields[2])
         say("text-style")
-        panelNote("Text style", "Font, sizes, weight and capitals", panelItem(hasText("Text Style")), click = true, numbered = true)
+        panelNote(
+            "Text style",
+            "Font, sizes, weight and capitals",
+            panelItem(hasText("Text Style")),
+            click = true,
+            numbered = true,
+        )
         say("colors")
         panelNote("Colors", "Text, accent, background and border", panelReveal(hasText("Accent")), numbered = true)
         say("save-colors")
         panelNote("Save Colors", "Reuse your church's colors on every one", panelReveal(hasText("Save Colors")))
         say("shape")
-        panelNote("Shape", "Corners, border, background and shadow", panelReveal(hasText("Shape")), click = true, numbered = true)
+        panelNote(
+            "Shape",
+            "Corners, border, background and shadow",
+            panelReveal(hasText("Shape")),
+            click = true,
+            numbered = true,
+        )
         say("timing")
-        panelNote("Timing", "How fast it animates, and how long it stays", panelReveal(hasText("Timing")), click = true, numbered = true)
+        panelNote(
+            "Timing",
+            "How fast it animates, and how long it stays",
+            panelReveal(hasText("Timing")),
+            click = true,
+            numbered = true,
+        )
     }
 
     /** Pauses the generator's preview where the banner is fully on screen. */
@@ -120,7 +149,13 @@ class LowerThirdDemoTour {
     /** Save Lower Third: the file for the tab, and the speaker kept in the Library. */
     private fun DemoTour.save() {
         say("save")
-        panelNote("Save Lower Third", "Adds it to the Lower Third tab", panelReveal(hasText("Save Lower Third")), click = true, numbered = true)
+        panelNote(
+            "Save Lower Third",
+            "Adds it to the Lower Third tab",
+            panelReveal(hasText("Save Lower Third")),
+            click = true,
+            numbered = true,
+        )
         waitFor("the lower third is saved", 30_000L) {
             File(LIBRARY, "Lower Thirds").listFiles { f -> f.name.startsWith(SPEAKER) }?.isNotEmpty() == true
         }
@@ -155,7 +190,11 @@ class LowerThirdDemoTour {
             numbered = true,
         )
         say("triggers-use")
-        panelNote("Use them anywhere", "Stream Deck, Bitfocus Companion or a script", panelReveal(hasText(SPEAKER, substring = true)))
+        panelNote(
+            "Use them anywhere",
+            "Stream Deck, Bitfocus Companion or a script",
+            panelReveal(hasText(SPEAKER, substring = true)),
+        )
         closePanel()
     }
 
