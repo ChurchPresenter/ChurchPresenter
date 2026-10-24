@@ -15,16 +15,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
@@ -38,6 +43,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
@@ -57,6 +63,7 @@ import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.PresenterOutputContent
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.qa.QAManager
@@ -67,6 +74,9 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import org.junit.Assume.assumeTrue
 import java.awt.image.BufferedImage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.churchpresenter.lowerthird.render.LowerThirdOffscreenRenderer
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.abs
@@ -81,8 +91,19 @@ private const val PROJ_H = 495f
 private const val CANVAS_W = APP_W + GAP + PROJ_W + GAP
 
 // A dialog a tour opens (see [recordTour]'s panel), rendered beside the projector at its own size.
-private const val PANEL_W = 600f
-private const val PANEL_H = 720f
+private const val PANEL_W = 1200f
+private const val PANEL_H = 800f
+
+/** How far the clock moves per capture while a dialog is open: far enough for a preview to show its design. */
+private const val PANEL_TICK_MS = 3_000L
+private const val PANEL_STEP_MS = 150
+
+/** Where in a lower third's run the video holds it: past the entrance, before the exit. */
+private const val LOWER_THIRD_HOLD = 0.55f
+private const val STILL_FRAMES = 120
+private const val STILL_FRAME_MS = 16L
+private const val PANEL_SCROLL_TRIES = 12
+private const val PANEL_SCROLL_PX = 200f
 
 /** Flip to record the app in light mode instead. */
 private const val DARK_MODE = true
@@ -576,7 +597,50 @@ internal class DemoTour(
             target.node.performClick()
             ui.waitForIdle()
             ui.settleLive(presenter)
+            holdLowerThirdOnScreen()
         }
+
+    /**
+     * A designed lower third animates out at its end, so its last frame (where the screenshot suites
+     * hold it) is empty; the video holds it part way through instead, with the banner fully in.
+     */
+    private fun holdLowerThirdOnScreen() {
+        if (presenter.slideContent.value != Presenting.LOWER_THIRD) return
+        val count = presenter.lottieFrameCount.value ?: return
+        val shown = (count * LOWER_THIRD_HOLD).toInt()
+        presenter.setLottieCurrentFrameIndex(shown)
+        ui.waitForIdle()
+        if (!blank(capture().second)) return
+        // The projector's own frames, rendered at its size, can lag far behind; a still of the banner,
+        // rendered here the way the output screenshots do, stands in on the projector until it clears.
+        projectorStill = lowerThirdStill(presenter.lottieJsonContent.value)
+    }
+
+    /** Shown on the projector instead of its capture while set — a lower third's still frame. */
+    private var projectorStill: BufferedImage? = null
+
+    private fun lowerThirdStill(json: String): BufferedImage? = runCatching {
+        val w = (PROJ_W * d).toInt()
+        val h = (PROJ_H * d).toInt()
+        val argb = runBlocking {
+            LowerThirdOffscreenRenderer(w, h).withSession(json, initialProgress = LOWER_THIRD_HOLD) { renderFrame ->
+                var pixels = renderFrame(LOWER_THIRD_HOLD)
+                var pumped = 1
+                while (pixels.none { (it ushr 24) and 0xFF > 8 } && pumped++ < STILL_FRAMES) {
+                    delay(STILL_FRAME_MS)
+                    pixels = renderFrame(LOWER_THIRD_HOLD)
+                }
+                pixels.copyOf()
+            }
+        }
+        BufferedImage(w, h, BufferedImage.TYPE_INT_RGB).apply {
+            val g = createGraphics()
+            g.color = java.awt.Color.BLACK
+            g.fillRect(0, 0, w, h)
+            g.drawImage(BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB).also { it.setRGB(0, 0, w, h, argb, 0, w) }, 0, 0, null)
+            g.dispose()
+        }
+    }.getOrNull()
 
     /** 05: the operator and the projector side by side, a caption saying what the audience sees. */
     fun showLive(heading: String = "It's live!", sub: String) {
@@ -610,16 +674,70 @@ internal class DemoTour(
     // ── A dialog, as a floating window ────────────────────────────────────
 
     /** A control inside the tour's panel (the dialog rendered beside the projector). */
-    fun panelItem(matcher: SemanticsMatcher): Target {
+    fun panelItem(matcher: SemanticsMatcher): Target = panelItems(matcher).firstOrNull() ?: error(
+        "nothing in the panel matches $matcher; it shows: " + ui.onAllNodes(hasText("", substring = true))
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .filter { it.boundsInWindow.left >= CANVAS_W * d }
+            .joinToString(" | ") { node ->
+                node.config.getOrNull(SemanticsProperties.Text)?.joinToString("") + "@" + node.boundsInWindow.top.toInt()
+            },
+    )
+
+    /** Every control in the panel matching [matcher], top to bottom. */
+    fun panelItems(matcher: SemanticsMatcher): List<Target> {
         val nodes = ui.onAllNodes(matcher)
-        val hit = nodes.fetchSemanticsNodes().withIndex()
-            .first { it.value.boundsInWindow.left >= CANVAS_W * d }
-        return Target(nodes[hit.index], hit.value.boundsInWindow)
+        return nodes.fetchSemanticsNodes().withIndex()
+            .filter { it.value.boundsInWindow.left >= CANVAS_W * d }
+            .sortedBy { it.value.boundsInWindow.top }
+            .map { Target(nodes[it.index], it.value.boundsInWindow) }
+    }
+
+    /** Scrolls the panel until [target] is in view, off camera, and returns it where it now is. */
+    fun panelReveal(matcher: SemanticsMatcher): Target {
+        scene.focus = null
+        // Below the dialog's fold a control is not in the tree at all, so the dialog is scrolled to it.
+        repeat(PANEL_SCROLL_TRIES) {
+            if (panelItems(matcher).isNotEmpty()) return@repeat
+            panelItems(hasScrollAction()).firstOrNull()?.node
+                ?.performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, PANEL_SCROLL_PX * d) }
+            ui.waitForIdle()
+        }
+        runCatching { panelItem(matcher).node.performScrollTo() }
+        ui.waitForIdle()
+        refresh(0.25)
+        return panelItem(matcher)
+    }
+
+    /**
+     * Holds a dialog's looping preview on one frame: under test an endless animation never advances,
+     * so a tap [fraction] of the way along its timeline (right of [play], up to [end]) pauses it there
+     * and it draws that frame directly.
+     */
+    fun panelScrub(play: Target, end: Target, fraction: Float) {
+        val x = play.bounds.right + (end.bounds.left - play.bounds.right) * fraction
+        ui.onAllNodes(isRoot())[0].performTouchInput { click(Offset(x, play.bounds.center.y)) }
+        ui.waitForIdle()
+        refresh(0.2)
+    }
+
+    /** A tooltip on a field in the open panel, which is then filled with [text]. */
+    fun panelEdit(heading: String, sub: String, target: Target, text: String) {
+        val start = frame
+        val talk = narrate(heading, sub)
+        scene.focus = Focus(panelToFrame(target.bounds), null, heading, sub, compact = false, onFrame = true)
+        scene.focusAge = 0
+        hold(1.0)
+        target.node.performTextReplacement(text)
+        ui.waitForIdle()
+        refresh(0.3)
+        hold(0.4)
+        padTo(start, talk)
     }
 
     /** Opens the panel as a window titled [title], [width]×[height] dp, sliding in over the dimmed app. */
     fun openPanel(title: String, width: Float, height: Float) {
         panelSize = Size(width, height)
+        panelOpen = true
         scene.focus = null
         scene.panelTitle = title
         refresh(0.1)
@@ -633,6 +751,7 @@ internal class DemoTour(
     }
 
     fun closePanel() {
+        panelOpen = false
         scene.focus = null
         val n = frames(0.35)
         for (i in n - 1 downTo 0) {
@@ -664,7 +783,20 @@ internal class DemoTour(
         padTo(start, talk)
     }
 
+    /**
+     * Lets an open dialog catch up: a generator parses its preview off the UI thread (real time) and
+     * then animates it (the test clock), so both are given time — this is a recording, not a test.
+     */
+    private fun settlePanel() {
+        repeat(PANEL_TICK_MS.toInt() / PANEL_STEP_MS) {
+            Thread.sleep(PANEL_STEP_MS.toLong())
+            ui.mainClock.advanceTimeBy(PANEL_STEP_MS.toLong())
+            ui.waitForIdle()
+        }
+    }
+
     private var savedCursor: Pt? = null
+    private var panelOpen = false
 
     private fun panelToFrame(r: Rect): Rect {
         val content = panelContent(panelSize.width * d, panelSize.height * d)
@@ -773,6 +905,8 @@ internal class DemoTour(
     /** Takes a fresh capture and crossfades to it; a [live] change also draws the arrow and pulses LIVE. */
     private fun refresh(seconds: Double, live: Boolean = false) {
         if (live) awaitProjectorChange()
+        // A dialog's own animations (a generator's preview) only move when the clock does.
+        if (panelOpen) settlePanel()
         val (app, projector, panel) = capture()
         scene.panel = panel
         scene.appBefore = scene.app
@@ -873,7 +1007,8 @@ internal class DemoTour(
             (CANVAS_W * d).toInt(), ((APP_H - PANEL_H) / 2 * d).toInt(), (panelSize.width * d).toInt(),
             (panelSize.height * d).toInt(),
         )
-        return Triple(app, projector, panel)
+        if (presenter.slideContent.value != Presenting.LOWER_THIRD) projectorStill = null
+        return Triple(app, projectorStill ?: projector, panel)
     }
 
     /** The tab-select tooltip is titled with the tab's own name, as in the storyboard. */

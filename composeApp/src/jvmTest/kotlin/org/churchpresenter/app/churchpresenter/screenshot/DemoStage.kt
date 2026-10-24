@@ -42,6 +42,13 @@ private val OPERATOR_DST = Rect(56f, 182f, 1208f, 902f)
 
 /** Where an open dialog of [w]×[h] pixels sits on the frame: right of center, under a 36px title bar. */
 internal fun panelContent(w: Float, h: Float): Rect {
+    if (w > h * 1.1f) {
+        // A wide window (a whole tool, not a small dialog) gets most of the frame, centered.
+        val k = min(1720f / w, 890f / h)
+        val left = (OUT_W - w * k) / 2
+        val top = 140f + (890f - h * k) / 2
+        return Rect(left, top, left + w * k, top + h * k)
+    }
     val k = min(824f / h, 860f / w)
     val width = w * k
     val height = h * k
