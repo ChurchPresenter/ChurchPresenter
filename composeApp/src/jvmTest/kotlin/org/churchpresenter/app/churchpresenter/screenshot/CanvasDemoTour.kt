@@ -97,8 +97,7 @@ class CanvasDemoTour {
         say("color-props")
         tour(
             stop("Color", "A single solid color", props("Color 1")),
-            stop("Gradient", "Blend two colors together", props("Gradient")),
-            stop("Angle", "Which way the blend runs", props("Angle")),
+            stop("Gradient", "Blend two colors, at any angle", props("Gradient")),
         )
         add("video", "Video", "A video file, looped if you like")
         say("video-props")
