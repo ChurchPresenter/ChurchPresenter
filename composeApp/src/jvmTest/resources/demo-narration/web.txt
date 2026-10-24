@@ -1,0 +1,18 @@
+# What the narrator says in the web tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Web tab, where you can show any web page on the big screen, such as your church's notices, a giving page, or a live map.
+open-tab = Let's open the Web tab. It works like a web browser built right into ChurchPresenter.
+url = Type the address of any website in the box at the top, and press Enter. We'll open our church's weekly notices page.
+bookmark = If you use a page often, click the star to bookmark it.
+bookmarks = Your bookmarks appear in a row just below, so your giving page, your notices and your prayer requests are always one click away.
+navigate = The back, forward and refresh buttons work just like any other browser, and you can clear the cache if a page isn't updating.
+zoom = Use the zoom buttons to make the page larger or smaller, so it's easy to read from the back of the room.
+mobile = You can even show a page as a phone would see it, which often looks cleaner on a projector.
+go-live = When it's ready, click Go Live, and the page is sent to the projector.
+live = And there it is, the church notices page, on the big screen.
+mirror = While a page is live, Mirror shows you exactly what the audience sees. Switch to Interactive, and you can click and scroll the live page yourself, right from this tab.
+type-to-page = You can even type into the live page. Click a search box or a form on the page, then type here, and the words appear on the big screen.
+schedule = To bring this page back later in the service, click Add to Schedule.
+schedule-row = The page now appears in your schedule on the left, ready whenever you need it.
+outro = And that's the Web tab. Type an address, bookmark the pages you use, and put any website on the big screen in one click.

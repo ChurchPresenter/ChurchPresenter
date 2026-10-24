@@ -506,7 +506,7 @@ private fun writeQuestions() {
  * Writes the Canvas scenes where `SceneViewModel` reads them — it owns its own file under
  * `user.home` and MainDesktop builds it internally, so there is no instance to seed directly.
  */
-private fun writeScenes() {
+internal fun writeScenes() {
     val file = File(System.getProperty("user.home"), ".churchpresenter/scenes.json")
     file.parentFile?.mkdirs()
     file.writeText(Json { prettyPrint = false }.encodeToString(previewScenes()))

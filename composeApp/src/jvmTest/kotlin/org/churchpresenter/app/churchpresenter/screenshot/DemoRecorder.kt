@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
@@ -59,6 +60,7 @@ import org.churchpresenter.app.churchpresenter.MainDesktopPublishers
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.WebAccessState
+import org.churchpresenter.app.churchpresenter.tabs.LocalWebEngineAvailable
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
@@ -159,7 +161,11 @@ internal fun recordTour(
         setContent {
             PinnedFonts {
                 ChurchPresenterTheme(themeMode = THEME) {
-                    CompositionLocalProvider(LocalMediaViewModel provides media) {
+                    // No browser engine starts here; the Web tab is told it has one, and is shown a page.
+                    CompositionLocalProvider(
+                        LocalMediaViewModel provides media,
+                        LocalWebEngineAvailable provides true,
+                    ) {
                         Row(Modifier.fillMaxSize().background(Color.Black)) {
                             Box(Modifier.size(APP_W.dp, APP_H.dp)) {
                                 MainDesktop(
@@ -341,6 +347,14 @@ internal class DemoTour(
     }
 
     fun settle() = ui.settleLive(presenter)
+
+    /** What a live web page puts on the outputs, without a browser: [title] and a picture of it. */
+    fun showWebPage(title: String, page: BufferedImage) {
+        presenter.setPresentingMode(Presenting.WEBSITE)
+        presenter.setWebPageTitle(title)
+        presenter.setWebSnapshot(page.toComposeImageBitmap())
+        ui.waitForIdle()
+    }
 
     /** True once the selected verses lead with [text] — what Go Live would show first. */
     fun selectionLeads(text: String) =
@@ -550,7 +564,7 @@ internal class DemoTour(
     fun type(heading: String, sub: String, field: Target, text: String, enter: Boolean = false) {
         step(heading, sub, field, deferPad = true, aim = Pt(field.bounds.left + 120f * d, field.bounds.center.y))
         for (i in 1..text.length) {
-            field.node.performTextReplacement(text.take(i))
+            fieldAt(field.bounds).performTextReplacement(text.take(i))
             ui.waitForIdle()
             capture().let { (app, projector) ->
                 scene.app = app
@@ -564,11 +578,19 @@ internal class DemoTour(
         if (enter) {
             scene.keycap = "Enter ⏎"
             hold(0.7)
-            field.node.performKeyInput { pressKey(Key.Enter) }
+            fieldAt(field.bounds).performKeyInput { pressKey(Key.Enter) }
             ui.waitForIdle()
             scene.keycap = null
             refresh(0.3)
         }
+    }
+
+    /** The text field drawn where [bounds] is: found afresh, since a field can be rebuilt as it is typed in. */
+    private fun fieldAt(bounds: Rect): SemanticsNodeInteraction {
+        val nodes = ui.onAllNodes(hasSetTextAction())
+        val hit = nodes.fetchSemanticsNodes().withIndex()
+            .firstOrNull { it.value.boundsInWindow.contains(bounds.center) } ?: error("no text field at $bounds")
+        return nodes[hit.index]
     }
 
     /** Scrolls [target] into view off camera, so the next step can point at it. */
