@@ -347,6 +347,16 @@ class WickCoverageTest {
     }
 
     @Test
+    fun `a numbered song is added to the schedule by its number`() {
+        root.helperSongs = listOf(SongItem(number = "12", title = "Amazing Grace"))
+        root.helperSongCount = 1
+        val added = mutableListOf<Int>()
+        root.scheduleActions = ScheduleActions(addSong = { number, _, _, _ -> added += number })
+        assertIs<ActionOutcome.Done>(executor.execute(HelperAction.AddSongToSchedule("amazing")))
+        assertEquals(listOf(12), added)
+    }
+
+    @Test
     fun `a single verse is added to the schedule with no range`() {
         val ranges = mutableListOf<String>()
         root.scheduleActions = ScheduleActions(addBibleVerse = { _, _, _, _, range, _ -> ranges += range })
