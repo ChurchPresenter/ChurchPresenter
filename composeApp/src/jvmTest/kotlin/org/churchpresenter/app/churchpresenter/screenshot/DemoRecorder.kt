@@ -41,6 +41,7 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
@@ -93,8 +94,8 @@ private const val PROJ_H = 495f
 private const val CANVAS_W = APP_W + GAP + PROJ_W + GAP
 
 // A dialog a tour opens (see [recordTour]'s panel), rendered beside the projector at its own size.
-private const val PANEL_W = 1200f
-private const val PANEL_H = 800f
+private const val PANEL_W = 1500f
+private const val PANEL_H = 900f
 
 /** How far the clock moves per capture while a dialog is open: far enough for a preview to show its design. */
 private const val PANEL_TICK_MS = 3_000L
@@ -138,6 +139,7 @@ internal fun recordTour(
     liveLabel: String,
     steps: Int,
     startTab: String? = null,
+    heading: Pair<String, String> = "The " to " Tab",
     settings: (AppSettings) -> AppSettings = { it },
     panel: (@Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit) -> Unit)? = null,
     script: DemoTour.() -> Unit,
@@ -210,7 +212,7 @@ internal fun recordTour(
         }
         val narrator = DemoNarrator(root)
         try {
-            val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null)
+            val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null, heading = heading)
             DemoTour(setup, this, presenter, out, changeSettings, narrator).script()
         } catch (_: LengthReached) {
             // CP_DEMO_SECONDS cut the tour short; what was recorded is the preview.
@@ -219,7 +221,7 @@ internal fun recordTour(
         val videos = File(
             System.getenv("CP_DEMO_VIDEOS")?.let(::File)
                 ?: File(System.getenv("HOME"), "Downloads/ChurchPresenter Videos"),
-            tab,
+            if (heading.second == " Tab") tab else heading.first + tab + heading.second,
         )
         val suffix = if (MAX_FRAMES == null) "" else "-preview"
         narrator.encode(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"))
@@ -286,6 +288,7 @@ internal class TourSetup(
     val liveLabel: String,
     val steps: Int,
     val hasPanel: Boolean = false,
+    val heading: Pair<String, String> = "The " to " Tab",
 )
 
 internal class DemoTour(
@@ -302,7 +305,7 @@ internal class DemoTour(
     private val d = DENSITY
     private val appW = APP_W * d
     private val appH = APP_H * d
-    private val stage = DemoStage(appW, appH)
+    private val stage = DemoStage(appW, appH, setup.heading)
     private var frame = 0
     private var stepNumber = 0
 
@@ -1044,9 +1047,22 @@ internal class DemoTour(
         val img = BufferedImage(base.width, base.height, BufferedImage.TYPE_INT_RGB)
         val g = img.createGraphics()
         g.drawImage(base, 0, 0, null)
+        val panelArea = panelArea()
         for (i in 1 until nodes.size) {
             val at = nodes[i].boundsInWindow
-            g.drawImage(roots[i].captureToImage().toAwtImage(), at.left.toInt(), at.top.toInt(), null)
+            // A dropdown's pop-up spans the whole window; only its menu is drawn, where it opened.
+            if (panelOpen && at.width > panelArea.width * 1.2f) {
+                val menu = roots[i].onChildren()
+                menu.fetchSemanticsNodes().forEachIndexed { c, node ->
+                    val m = node.boundsInWindow
+                    g.drawImage(menu[c].captureToImage().toAwtImage(), m.left.toInt(), m.top.toInt(), null)
+                }
+                continue
+            }
+            // A pop-up the open dialog raised (an alert is centered on the whole window) is drawn
+            // over that dialog instead, where the viewer is looking.
+            val to = if (relocated(at, panelArea)) dialogPopupOrigin(at, panelArea) else Pt(at.left, at.top)
+            g.drawImage(roots[i].captureToImage().toAwtImage(), to.x.toInt(), to.y.toInt(), null)
         }
         g.dispose()
         val app = img.getSubimage(0, 0, appW.toInt(), appH.toInt())
@@ -1059,6 +1075,37 @@ internal class DemoTour(
         )
         if (presenter.slideContent.value != Presenting.LOWER_THIRD) projectorStill = null
         return Triple(app, projectorStill ?: projector, panel)
+    }
+
+    /** Where the open dialog sits in the window, in pixels. */
+    private fun panelArea() = Rect(
+        CANVAS_W * d,
+        (APP_H - PANEL_H) / 2 * d,
+        CANVAS_W * d + panelSize.width * d,
+        (APP_H - PANEL_H) / 2 * d + panelSize.height * d,
+    )
+
+    /** An alert the dialog raised: centered on the whole window, so not already inside the dialog. */
+    private fun relocated(popup: Rect, dialog: Rect) = panelOpen && popup.center.x > appW &&
+        !(popup.left >= dialog.left - 1f && popup.right <= dialog.right + 1f)
+
+    /** A pop-up of [size] drawn centered over the open dialog. */
+    private fun dialogPopupOrigin(popup: Rect, dialog: Rect) =
+        Pt(dialog.center.x - popup.width / 2, dialog.center.y - popup.height / 2)
+
+    /** A control inside a pop-up the open dialog raised, where it is drawn (over the dialog). */
+    fun dialogPopupItem(matcher: SemanticsMatcher): Target {
+        val roots = ui.onAllNodes(isRoot()).fetchSemanticsNodes().drop(1)
+        val nodes = ui.onAllNodes(matcher)
+        val hit = nodes.fetchSemanticsNodes().withIndex().last()
+        val b = hit.value.boundsInWindow
+        val popup = roots.firstOrNull { it.boundsInWindow.contains(b.center) }?.boundsInWindow
+            ?: return Target(nodes[hit.index], b)
+        if (!relocated(popup, panelArea())) return Target(nodes[hit.index], b)
+        val origin = dialogPopupOrigin(popup, panelArea())
+        val dx = origin.x - popup.left
+        val dy = origin.y - popup.top
+        return Target(nodes[hit.index], Rect(b.left + dx, b.top + dy, b.right + dx, b.bottom + dy))
     }
 
     /** The tab-select tooltip is titled with the tab's own name, as in the storyboard. */

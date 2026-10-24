@@ -146,7 +146,11 @@ internal class Scene(var app: BufferedImage, var projector: BufferedImage, var c
 }
 
 /** Draws the storyboard's components. Holds no timeline of its own: ages in [Scene] drive its animations. */
-internal class DemoStage(private val appW: Float, private val appH: Float) {
+internal class DemoStage(
+    private val appW: Float,
+    private val appH: Float,
+    private val heading: Pair<String, String> = "The " to " Tab",
+) {
     private var base: BufferedImage? = null
     private var baseKey: List<Any?> = emptyList()
 
@@ -577,10 +581,9 @@ internal class DemoStage(private val appW: Float, private val appH: Float) {
         return img
     }
 
-    /** "The <accent> Tab": the accent word in Cormorant Garamond italic and the accent color. */
+    /** "The <accent> Tab", or the tour's own [heading]: the accent word in Cormorant italic and the accent color. */
     private fun title(g: Graphics2D, accent: String, size: Float, x: Float, baseline: Float) {
-        val before = "The "
-        val after = " Tab"
+        val (before, after) = heading
         val sans = DemoFonts.sans(500, size, -0.04f)
         val serif = DemoFonts.serifItalic(size * 1.08f)
         var cx = x
@@ -598,8 +601,7 @@ internal class DemoStage(private val appW: Float, private val appH: Float) {
     }
 
     private fun titleWidth(g: Graphics2D, accent: String, size: Float): Float {
-        val before = "The "
-        val after = " Tab"
+        val (before, after) = heading
         val sans = g.getFontMetrics(DemoFonts.sans(500, size, -0.04f))
         val serif = g.getFontMetrics(DemoFonts.serifItalic(size * 1.08f))
         return (sans.stringWidth(before) + serif.stringWidth(accent) + sans.stringWidth(after)) + size * 0.04f
