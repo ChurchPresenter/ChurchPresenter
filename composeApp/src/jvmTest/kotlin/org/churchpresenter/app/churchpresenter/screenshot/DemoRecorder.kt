@@ -1050,10 +1050,13 @@ internal class DemoTour(
         val panelArea = panelArea()
         for (i in 1 until nodes.size) {
             val at = nodes[i].boundsInWindow
-            // A dropdown's pop-up spans the whole window; only its menu is drawn, where it opened.
-            if (panelOpen && at.width > panelArea.width * 1.2f) {
-                val menu = roots[i].onChildren()
-                menu.fetchSemanticsNodes().forEachIndexed { c, node ->
+            // A dropdown the dialog opened spans the whole window; only its menu is drawn, where it opened.
+            val menu = roots[i].onChildren()
+            val items = menu.fetchSemanticsNodes()
+            // An alert is centered on the window and is relocated below instead.
+            val inDialog = items.isNotEmpty() && items.none { abs(it.boundsInWindow.center.x - at.center.x) < 2f }
+            if (panelOpen && at.width > panelArea.width * 1.2f && inDialog) {
+                items.forEachIndexed { c, node ->
                     val m = node.boundsInWindow
                     g.drawImage(menu[c].captureToImage().toAwtImage(), m.left.toInt(), m.top.toInt(), null)
                 }
