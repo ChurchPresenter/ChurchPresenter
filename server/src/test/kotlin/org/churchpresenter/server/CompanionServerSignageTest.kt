@@ -63,7 +63,7 @@ class CompanionServerSignageTest {
     fun startServer() {
         runBlocking { hub.registry.load() }
         server = CompanionServer(shutdownGraceMs = 0)
-        server.devMode = true
+        server.signageEnabled = true
         server.signage = hub
         server.start(port = testPort(39_970))
         port = runBlocking {
@@ -112,8 +112,8 @@ class CompanionServerSignageTest {
     )
 
     @Test
-    fun outsideDevModeEveryRouteRefuses() = runBlocking<Unit> {
-        server.devMode = false
+    fun withSignageOffEveryRouteRefuses() = runBlocking<Unit> {
+        server.signageEnabled = false
         assertEquals(403, client.get(url("/manifest")).status.value)
     }
 

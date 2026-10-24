@@ -33,7 +33,7 @@ data class SignageFolderState(
 
 /**
  * Keeps every paired screen's manifest in step with the signage folder and the tab's choices, while
- * ChurchPresenter runs in dev mode. The folder is read every [pollMs]; a change is published once it
+ * the Signage tab is shown in the tab bar. The folder is read every [pollMs]; a change is published once it
  * has stood still for one more read, so a copy in progress is not sent half-written. Changes made
  * while ChurchPresenter was off are simply what the first reads find.
  *

@@ -86,10 +86,8 @@ fun MainDesktop(
     val vms = rememberMainDesktopViewModels(appSettings, publish, link)
     val hasCompanionTabConnections = appSettings.companionSatelliteConnections
         .any { it.showInTab && it.host.isNotBlank() }
-    val showSignageTab = signage != null
-    val hiddenTabs = appSettings.hiddenTabs
-    val visibleTabs = remember(hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections, showSignageTab) {
-        computeVisibleTabs(hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections, showSignageTab)
+    val visibleTabs = remember(appSettings.hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections) {
+        computeVisibleTabs(appSettings.hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections)
     }
     val mediaViewModel = LocalMediaViewModel.current
     val clickerScope = rememberCoroutineScope()

@@ -5,9 +5,10 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 The **signage screens' wire types**, and the **hub of paired screens** the companion server and the
-Signage tab share. Dev mode only, like everything signage. A foundation-layer module with no
+Signage tab share. A foundation-layer module with no
 Compose: `:server` and `:signage` both depend on it, and `:composeApp` makes the one `SignageHub`
-and hands it to both.
+and hands it to both. `SignageHub.pairedScreensByPlatform` reads the paired-screen counts from disk
+without starting a hub, for the launch ping.
 
 The player itself lives in its own repo, `ChurchPresenter/ChurchPresenter-Signage`.
 

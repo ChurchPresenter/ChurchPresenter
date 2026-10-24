@@ -161,3 +161,20 @@ class ScreenRegistry(
         const val TOKEN_BYTES = 32
     }
 }
+
+/**
+ * How many of the screens in [file] are on each platform; empty when there is no file or it cannot
+ * be read. Reads only: unlike [ScreenRegistry.load], it never starts a file of its own.
+ */
+internal fun countByPlatform(file: Path): Map<Platform, Int> = try {
+    if (Files.exists(file)) {
+        SignageJson.decodeFromString(RegistryFile.serializer(), Files.readString(file))
+            .screens.groupingBy { it.platform }.eachCount()
+    } else {
+        emptyMap()
+    }
+} catch (_: IOException) {
+    emptyMap()
+} catch (_: SerializationException) {
+    emptyMap()
+}

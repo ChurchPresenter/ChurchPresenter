@@ -174,6 +174,19 @@ class ScreenCardAloneTest {
         }
 
     @Test
+    fun aPlaylistDeletedFromTheFolderReadsAsTheIdleCardAndWipeWaitsForAPlayerThatCan() =
+        card(
+            ScreenRowState(
+                screen,
+                link.copy(features = emptyList(), status = PlayerMessage.Status(showingPlaylistId = "folder:Gone")),
+                folder,
+            ),
+        ) {
+            onNodeWithText("Showing the idle card", substring = true).assertExists()
+            onNodeWithContentDescription("Wipe content").assertIsNotEnabled()
+        }
+
+    @Test
     fun aPictureThatWillNotDecodeShowsAsNone() =
         card(ScreenRowState(screen, link.copy(preview = PlayerMessage.Preview("not a picture", 1, 1, 1)), folder)) {
             onNodeWithText("No picture right now").assertExists()

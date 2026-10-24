@@ -18,18 +18,17 @@ import org.churchpresenter.sharedui.models.Tabs
  * the composable and is reached through one of these.
  */
 
-/** The tabs offered by [hiddenTabs]' menu: all but the hidden Crossword and the dev-mode-only Signage. */
-internal val MENU_TABS: List<Tabs> = Tabs.entries.filter { it != Tabs.CROSSWORD && it != Tabs.SIGNAGE }
+/** The tabs offered by [hiddenTabs]' menu: all but the hidden Crossword. */
+internal val MENU_TABS: List<Tabs> = Tabs.entries.filter { it != Tabs.CROSSWORD }
 
 internal fun computeVisibleTabs(
     hiddenTabs: Set<String>,
     showCrosswordTab: Boolean,
     hasCompanionTabConnections: Boolean,
-    showSignageTab: Boolean = false,
 ): List<Tabs> =
     (MENU_TABS.filter { tab ->
         tab.name !in hiddenTabs && (tab != Tabs.COMPANION_SURFACE || hasCompanionTabConnections)
-    } + listOfNotNull(Tabs.SIGNAGE.takeIf { showSignageTab }, Tabs.CROSSWORD.takeIf { showCrosswordTab }))
+    } + listOfNotNull(Tabs.CROSSWORD.takeIf { showCrosswordTab }))
         .ifEmpty { listOf(Tabs.BIBLE) }
 
 internal fun clampedTabIndex(selectedTabIndex: Int, visibleTabs: List<Tabs>): Int =

@@ -1496,10 +1496,11 @@ runs plain HTTP.
 
 ## Signage Players
 
-Dev mode only. Lobby screens running the ChurchPresenter Signage player (its own repo,
-`ChurchPresenter/ChurchPresenter-Signage`, whose `docs/PROTOCOL.md` is the full protocol). The server
-advertises itself as `_churchpresenter._tcp` over mDNS while dev mode and the server are on, so a
-player on the same network finds it without an address.
+Lobby screens running the ChurchPresenter Signage player (its own repo,
+`ChurchPresenter/ChurchPresenter-Signage`, whose `docs/PROTOCOL.md` is the full protocol). Signage is
+on while the desktop's Signage tab is shown (it starts hidden). The server advertises itself as
+`_churchpresenter._tcp` over mDNS while signage and the server are on, so a player on the same
+network finds it without an address.
 
 - `WS /api/signage/ws` — the player's first message is `hello`. An unpaired player is answered
   `pairing_pending` and listed in the Signage tab with the code its TV shows; on approval it is sent
@@ -1514,7 +1515,7 @@ player on the same network finds it without an address.
   signed signage release for that player's platform (`linux_arm64`, `linux_x64`, `windows_x64`);
   `404` for another platform or before an update was offered.
 
-Outside dev mode every route answers `403 {"ok":false,"reason":"dev mode only"}`; the players keep
+With signage off every route answers `403 {"ok":false,"reason":"signage is off"}`; the players keep
 playing what they have.
 
 ---

@@ -45,6 +45,7 @@ import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
+import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.appsettings.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
@@ -306,6 +307,7 @@ fun main(args: Array<String>) {
                 sessionMinutes = previousRun.sessionMinutes,
                 liveMinutes = previousRun.liveMinutes,
                 liveStalls = previousRun.liveStalls,
+                signageScreens = SignageHub.pairedScreensByPlatform(AppDataDir.resolve().toPath().resolve(SignageHub.DIR)),
             )
         },
         events = pendingUsageEvents,

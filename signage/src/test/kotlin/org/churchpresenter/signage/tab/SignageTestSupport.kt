@@ -87,6 +87,16 @@ class SignageWorld : AutoCloseable {
     }
 
     /**
+     * Starts the controller and pairs a screen once it has loaded the registry. Pairing before then
+     * races its load, which can land after the pairing and read the file back without it.
+     */
+    suspend fun startAndPairScreen() {
+        controller.start()
+        withTimeout(WAIT_MS) { controller.state.first { it.ready } }
+        pairScreen(load = false)
+    }
+
+    /**
      * The next message [id] is sent that [match]es, within a few seconds. Listening starts at once,
      * before this returns: messages are not replayed, so call it before what sends one.
      */

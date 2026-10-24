@@ -117,6 +117,16 @@ class SignageHub(
         fun platformName(platform: Platform): String =
             SignageJson.encodeToString(Platform.serializer(), platform).trim('"')
 
+        /** The hub's folder under ChurchPresenter's app data. */
+        const val DIR = "signage"
+
+        /**
+         * How many screens the hub in [dir] has paired, by the platform's wire name. Read from disk
+         * without starting a hub, for the launch ping, so it blocks: call it off the event thread.
+         */
+        fun pairedScreensByPlatform(dir: Path): Map<String, Int> =
+            countByPlatform(dir.resolve(REGISTRY_FILE)).mapKeys { platformName(it.key) }
+
         private const val REGISTRY_FILE = "screens.json"
         private const val BUILDS_DIR = "player-builds"
         private const val TAG = "Signage"

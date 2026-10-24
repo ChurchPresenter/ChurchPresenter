@@ -10,33 +10,37 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.signage.hub.AgentUpdates
 import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.signage.tab.SignageController
+import org.churchpresenter.sharedui.models.Tabs
 import java.io.IOException
 import java.net.InetAddress
 import java.nio.file.Path
 import kotlin.io.path.Path
 
 /*
- * Signage (dev mode only): lobby screens that keep playing after hours. The hub of paired screens is
- * made the first time dev mode is on, off the event thread, and shared by the companion server and
- * the Signage tab. Dev mode off stops the folder sync and the mDNS advert, and the server refuses the
- * players; the screens keep playing what they have.
+ * Signage: lobby screens that keep playing after hours. The tab starts hidden, as STT does, and
+ * signage runs while it is shown: the hub of paired screens is made the first time, off the event
+ * thread, and shared by the companion server and the Signage tab. Hiding the tab stops the folder
+ * sync and the mDNS advert, and the server refuses the players; the screens keep playing what they
+ * have.
  */
 
-/** Keeps the companion server's dev mode current, and starts or stops signage with it. */
+/** Keeps the companion server's dev mode current, and starts or stops signage with its tab. */
 @Composable
 internal fun AppRootState.SignageEffect() {
     val devMode = devMode
+    LaunchedEffect(devMode) { companionServer.devMode = devMode }
     // The screens follow this ChurchPresenter's analytics setting for their own crash reports.
     val analytics = appSettings.analyticsReportingEnabled
     LaunchedEffect(analytics) { signageDiagnostics.value = analytics }
-    LaunchedEffect(devMode) {
-        companionServer.devMode = devMode
-        if (!devMode) {
+    val shown = signageTabShown()
+    LaunchedEffect(shown) {
+        companionServer.signageEnabled = shown
+        if (!shown) {
             signageController?.stop()
             return@LaunchedEffect
         }
         val controller = signageController ?: withContext(Dispatchers.IO) {
-            val dir = AppDataDir.resolve().toPath().resolve(SIGNAGE_DIR)
+            val dir = AppDataDir.resolve().toPath().resolve(SignageHub.DIR)
             val releases = System.getProperty(AgentUpdates.RELEASE_URL_PROPERTY) ?: AgentUpdates.RELEASE_URL
             val hub = SignageHub(
                 dir, computerName(), coroutineScope,
@@ -49,10 +53,10 @@ internal fun AppRootState.SignageEffect() {
     }
 }
 
-/** What the Signage tab gets: null while signage is off, so the tab is not offered. */
+/** What the Signage tab gets: null while its tab is hidden, so signage is off. */
 @Composable
 internal fun AppRootState.signageTabInput(): SignageTabInput? {
-    val controller = signageController?.takeIf { devMode } ?: return null
+    val controller = signageController?.takeIf { signageTabShown() } ?: return null
     val running = companionServer.isRunning.collectAsState().value
     return SignageTabInput(
         controller = controller,
@@ -65,6 +69,8 @@ internal fun AppRootState.signageTabInput(): SignageTabInput? {
     )
 }
 
+private fun AppRootState.signageTabShown(): Boolean = Tabs.SIGNAGE.name !in appSettings.hiddenTabs
+
 private fun computerName(): String = try {
     InetAddress.getLocalHost().hostName.substringBefore('.')
 } catch (_: IOException) {
@@ -74,5 +80,4 @@ private fun computerName(): String = try {
 private fun defaultSignageFolder(): Path =
     Path(System.getProperty(Constants.SystemProperties.USER_HOME), "Documents", Constants.SERVER_APP_NAME, "Signage")
 
-private const val SIGNAGE_DIR = "signage"
 private const val PLAYER_BUILDS_DIR = "player-builds"

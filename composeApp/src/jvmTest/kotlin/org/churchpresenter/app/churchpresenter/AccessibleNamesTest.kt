@@ -46,8 +46,8 @@ class AccessibleNamesTest : MainDesktopComposeHarness() {
     /**
      * One per tab, so a new tab cannot be left out. The Web tab is `:web`'s `WebTabAccessibleNamesTest`:
      * composing it through the main window here disturbs this suite's later main-window tests in the
-     * same JVM. The Signage tab is `:signage`'s `SignageTabAccessibilityTest`: it is dev mode only and
-     * needs a running signage hub, which this harness does not start.
+     * same JVM. The Signage tab is `:signage`'s `SignageTabAccessibilityTest`: it needs a running
+     * signage hub, which this harness does not start.
      */
     @Test
     fun `every tab has a test of its own`() {

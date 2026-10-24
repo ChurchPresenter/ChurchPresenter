@@ -237,7 +237,7 @@ internal class AppRootState(
     var showMemoryMonitorWindow by mutableStateOf(false)
     var developerMenuUnlocked by mutableStateOf(false)
 
-    /** Signage's controller, made the first time dev mode is on -- see `SignageEffect`. */
+    /** Signage's controller, made the first time the Signage tab is shown -- see `SignageEffect`. */
     var signageController by mutableStateOf<SignageController?>(null)
 
     /** The analytics setting as the signage screens are sent it: whether they may report crashes. */

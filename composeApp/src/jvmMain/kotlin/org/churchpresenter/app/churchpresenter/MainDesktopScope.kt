@@ -64,7 +64,7 @@ internal class MainDesktopScope(
     val dialogDismissSignal: Int,
     val companionSatelliteViewModel: CompanionSatelliteViewModel,
     val onRequestDeveloperMenuUnlock: () -> Unit,
-    /** The Signage tab's input; null outside dev mode, when the tab is not offered. */
+    /** The Signage tab's input; null while the tab is hidden and signage is off. */
     val signage: SignageTabInput?,
     private val owned: MainDesktopOwned,
 ) {

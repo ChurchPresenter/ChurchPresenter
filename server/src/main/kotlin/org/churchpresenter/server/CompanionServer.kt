@@ -451,14 +451,17 @@ class CompanionServer(
      * production refuse remote clients; see [requireDevMode].
      */
     @Volatile var devMode: Boolean = false
+
+    /** Whether signage is on -- kept current by the app: on while the Signage tab is shown. */
+    @Volatile var signageEnabled: Boolean = false
         set(value) {
             field = value
             signageAdvert.refresh()
         }
 
     /**
-     * The signage screens this ChurchPresenter owns, set by the app. With it and dev mode on, the
-     * server answers `/api/signage/` and advertises itself over mDNS for the players to find.
+     * The signage screens this ChurchPresenter owns, set by the app. With it and [signageEnabled],
+     * the server answers `/api/signage/` and advertises itself over mDNS for the players to find.
      */
     @Volatile var signage: SignageHub? = null
         set(value) {
@@ -466,9 +469,9 @@ class CompanionServer(
             signageAdvert.refresh()
         }
 
-    /** Advertised while the server runs in dev mode with a signage hub. */
+    /** Advertised while the server runs with signage on and a signage hub. */
     private val signageAdvert = SignageAdvert {
-        signage?.takeIf { _isRunning.value && devMode }?.let { SignageAdvert.Wanted(currentPort, it.ownerName) }
+        signage?.takeIf { _isRunning.value && signageEnabled }?.let { SignageAdvert.Wanted(currentPort, it.ownerName) }
     }
 
     /** The macros a remote client may run -- kept current by the app from its settings. */

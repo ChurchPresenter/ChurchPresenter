@@ -107,6 +107,26 @@ class ScreenRegistryTest {
         assertEquals(emptyList(), registry.screens.value)
     }
 
+    @Test
+    fun theLaunchPingCountsPairedScreensByPlatformWithoutStartingAFile() = runTest {
+        assertEquals(emptyMap(), SignageHub.pairedScreensByPlatform(dir))
+        assertTrue(!file.toFile().exists(), "counting must not make a registry")
+        val registry = registry().also { it.load() }
+        registry.pair(pending(id = "a").copy(platform = Platform.LINUX_ARM64), "Lobby")
+        registry.pair(pending(id = "b").copy(platform = Platform.LINUX_ARM64), "Hall")
+        registry.pair(pending(id = "c").copy(platform = Platform.WINDOWS_X64), "Cafe")
+        scope.settle()
+        assertEquals(mapOf("linux_arm64" to 2, "windows_x64" to 1), SignageHub.pairedScreensByPlatform(dir))
+    }
+
+    @Test
+    fun aFileThatCannotBeReadCountsAsNoScreens() {
+        file.writeText("{ not json")
+        assertEquals(emptyMap(), countByPlatform(file))
+        // A folder where the file should be cannot be read at all.
+        assertEquals(emptyMap(), countByPlatform(dir))
+    }
+
     private companion object {
         const val SCREENS = 20
     }

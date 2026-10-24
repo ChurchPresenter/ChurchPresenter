@@ -53,9 +53,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * The Signage tab (dev mode only): the lobby screens this ChurchPresenter owns, the ones asking to
+ * The Signage tab: the lobby screens this ChurchPresenter owns, the ones asking to
  * join, and the signage folder their playlists come from. Everything it changes is kept by
- * [controller], which goes on running when the tab is not showing.
+ * [controller], which goes on running while another tab is selected.
  *
  * @param serverRunning whether the companion server is on; the screens reach ChurchPresenter only
  *   through it.

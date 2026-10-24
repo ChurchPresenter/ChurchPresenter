@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -48,15 +49,12 @@ class SignageTabTest {
     @AfterTest
     fun cleanUp() = world.close()
 
-    private fun connected() = runBlocking {
-        world.controller.start()
-        world.pairScreen()
-    }
+    private fun connected() = runBlocking { world.startAndPairScreen() }
 
-    private fun androidx.compose.ui.test.ComposeUiTest.waitFor(condition: () -> Boolean) =
+    private fun ComposeUiTest.waitFor(condition: () -> Boolean) =
         waitUntil(timeoutMillis = SignageWorld.WAIT_MS) { condition() }
 
-    private fun androidx.compose.ui.test.ComposeUiTest.waitForText(text: String, substring: Boolean = false) =
+    private fun ComposeUiTest.waitForText(text: String, substring: Boolean = false) =
         waitFor { onAllNodesWithText(text, substring = substring).fetchSemanticsNodes().isNotEmpty() }
 
     @Test

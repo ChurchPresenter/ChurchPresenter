@@ -102,15 +102,15 @@ internal fun Route.signageRoutes(server: CompanionServer) {
 }
 
 /**
- * Before any signage route runs: 403 outside dev mode or with no signage hub, and 401 for a token
+ * Before any signage route runs: 403 with signage off or no signage hub, and 401 for a token
  * that names no paired screen — before the WebSocket upgrade, so a revoked player sees the 401.
  */
 private val SignageGate = createRouteScopedPlugin("SignageGate", ::SignageGateConfig) {
     val server = pluginConfig.server
     onCall { call ->
         when {
-            !server.devMode || server.signage == null ->
-                call.respond(HttpStatusCode.Forbidden, """{"ok":false,"reason":"dev mode only"}""")
+            !server.signageEnabled || server.signage == null ->
+                call.respond(HttpStatusCode.Forbidden, """{"ok":false,"reason":"signage is off"}""")
             call.bearerToken() != null && call.signageScreen(server, respond = false) == null ->
                 call.respond(HttpStatusCode.Unauthorized, """{"ok":false,"reason":"unknown screen"}""")
         }

@@ -200,8 +200,7 @@ data class InstanceLinkBridge(
     val fetchPresentationSlideBytes: (suspend (id: String, index: Int) -> ByteArray?)? = null,
 )
 
-/** The server addresses, the public tunnel and the remote-presentation controls the tabs show. */
-/** What the Signage tab (dev mode only) needs from the app. */
+/** What the Signage tab needs from the app. */
 class SignageTabInput(
     val controller: SignageController,
     /** Whether the companion server is on; the screens reach ChurchPresenter only through it. */
@@ -209,6 +208,7 @@ class SignageTabInput(
     val onTurnOnServer: () -> Unit,
 )
 
+/** The server addresses, the public tunnel and the remote-presentation controls the tabs show. */
 data class WebAccessState(
     val serverUrl: String = "",
     val tunnelStatus: TunnelStatus = TunnelStatus.Idle,

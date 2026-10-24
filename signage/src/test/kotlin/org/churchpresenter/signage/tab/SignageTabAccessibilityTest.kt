@@ -42,10 +42,7 @@ class SignageTabAccessibilityTest {
     private fun everything(block: ComposeUiTest.() -> Unit) {
         world.file("welcome.jpg")
         world.file("Events/flyer.png")
-        runBlocking {
-            world.controller.start()
-            world.pairScreen()
-        }
+        runBlocking { world.startAndPairScreen() }
         world.scope.async {
             world.hub.pairing.await(
                 PlayerMessage.Hello("waiting", "26.0.8", 1, 1, null, 1920, 1080, Platform.LINUX_ARM64, "4821"),

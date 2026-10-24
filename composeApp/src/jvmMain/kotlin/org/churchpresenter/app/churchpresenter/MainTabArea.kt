@@ -143,7 +143,7 @@ private fun TabBar(tabBar: TabBarState, actions: TabBarActions) {
     }
 }
 
-/** The tab bar's show/hide menu: every tab but the crossword and signage, never letting the last one go. */
+/** The tab bar's show/hide menu: every tab but the crossword, never letting the last one go. */
 @Composable
 private fun TabVisibilityMenu(hiddenTabs: Set<String>, onToggleTabHidden: (Tabs) -> Unit) {
     var showTabVisibilityMenu by remember { mutableStateOf(false) }
