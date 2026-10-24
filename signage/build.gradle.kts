@@ -1,6 +1,7 @@
 plugins {
     id("cp.jvm-module")
     id("cp.compose")
+    id("cp.screenshots")
     alias(libs.plugins.kotlinx.serialization)
 }
 

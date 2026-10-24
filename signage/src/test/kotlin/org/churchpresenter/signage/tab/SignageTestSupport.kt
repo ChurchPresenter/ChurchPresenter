@@ -34,8 +34,10 @@ import kotlin.io.path.writeText
  * the test owns. Player releases come from memory, signed with a key made for the test.
  */
 @OptIn(ExperimentalPathApi::class)
-class SignageWorld : AutoCloseable {
-    val root: Path = createTempDirectory("signage-tab")
+class SignageWorld(
+    /** The folder the world lives in, deleted on close. A screenshot pins it: the tab shows its path. */
+    val root: Path = createTempDirectory("signage-tab"),
+) : AutoCloseable {
     val folder: Path = root.resolve("Signage").createDirectories()
     val scope = CoroutineScope(Job())
     val release = SignedRelease()
