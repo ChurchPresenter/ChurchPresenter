@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -41,7 +43,6 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
@@ -84,6 +85,8 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.abs
 import kotlin.math.hypot
+import kotlin.math.min
+import kotlin.math.max
 
 // The main window and, beside it off camera, the projector it drives — in dp.
 private const val APP_W = 1600f
@@ -196,7 +199,10 @@ internal fun recordTour(
                                 Box(
                                     Modifier.padding(start = GAP.dp, top = ((APP_H - PANEL_H) / 2).dp)
                                         .size(PANEL_W.dp, PANEL_H.dp),
-                                ) { it(current, changeSettings) }
+                                ) {
+                                    // The dialog window's own surface: its background, and its text's color.
+                                    Surface(color = MaterialTheme.colorScheme.surface) { it(current, changeSettings) }
+                                }
                             }
                         }
                     }
@@ -308,6 +314,9 @@ internal class DemoTour(
     private val stage = DemoStage(appW, appH, setup.heading)
     private var frame = 0
     private var stepNumber = 0
+
+    /** The open dialog's pop-ups are dropdowns, drawn where they open, not alerts centered over it. */
+    var menusInPlace = false
 
     /** The open panel's own size in dp — each dialog is drawn top-left in the panel area at its size. */
     private var panelSize = Size(PANEL_W, PANEL_H)
@@ -1050,16 +1059,18 @@ internal class DemoTour(
         val panelArea = panelArea()
         for (i in 1 until nodes.size) {
             val at = nodes[i].boundsInWindow
-            // A dropdown the dialog opened spans the whole window; only its menu is drawn, where it opened.
-            val menu = roots[i].onChildren()
-            val items = menu.fetchSemanticsNodes()
-            // An alert is centered on the window and is relocated below instead.
-            val inDialog = items.isNotEmpty() && items.none { abs(it.boundsInWindow.center.x - at.center.x) < 2f }
-            if (panelOpen && at.width > panelArea.width * 1.2f && inDialog) {
-                items.forEachIndexed { c, node ->
-                    val m = node.boundsInWindow
-                    g.drawImage(menu[c].captureToImage().toAwtImage(), m.left.toInt(), m.top.toInt(), null)
-                }
+            // A pop-up layer spans the whole window, backdrop and all; only the card on it is drawn —
+            // a dropdown where it opened, an alert over the dialog that raised it.
+            val layerWide = panelOpen && at.width > panelArea.width * 1.2f
+            val card = if (layerWide) cardBounds(nodes[i], panelArea.width) else null
+            if (card != null) {
+                val shift = if (menusInPlace) Pt(at.left, at.top) else dialogPopupOrigin(at, panelArea)
+                val layer = roots[i].captureToImage().toAwtImage()
+                val x0 = (card.left - at.left).toInt().coerceIn(0, layer.width - 1)
+                val y0 = (card.top - at.top).toInt().coerceIn(0, layer.height - 1)
+                val w = card.width.toInt().coerceAtMost(layer.width - x0)
+                val cut = layer.getSubimage(x0, y0, w, card.height.toInt().coerceAtMost(layer.height - y0))
+                g.drawImage(cut, (shift.x + x0).toInt(), (shift.y + y0).toInt(), null)
                 continue
             }
             // A pop-up the open dialog raised (an alert is centered on the whole window) is drawn
@@ -1116,3 +1127,20 @@ internal class DemoTour(
 }
 
 internal data class Pt(val x: Float, val y: Float)
+
+/** The union of what a pop-up layer shows narrower than [maxWidth]: its card, without the backdrop. */
+private fun cardBounds(layer: SemanticsNode, maxWidth: Float): Rect? {
+    var card: Rect? = null
+    fun walk(n: SemanticsNode) {
+        val b = n.boundsInWindow
+        if (b.width !in 1f..maxWidth) {
+            n.children.forEach(::walk)
+            return
+        }
+        card = card?.let {
+            Rect(min(it.left, b.left), min(it.top, b.top), max(it.right, b.right), max(it.bottom, b.bottom))
+        } ?: b
+    }
+    layer.children.forEach(::walk)
+    return card
+}

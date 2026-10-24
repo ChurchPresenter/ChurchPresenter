@@ -15,6 +15,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.appsettings.SystemSettingsTab
@@ -139,7 +140,12 @@ class AddBibleDemoTour {
             dialogPopupItem(hasText("I understand", substring = true)),
             click = true,
         )
-        waitFor("the Bible is installed", 180_000L) { panelItems(hasText("Installed")).isNotEmpty() }
+        waitFor("the Bible is installed", 180_000L) { runCatching { dialogPopupItem(hasText("OK")) }.isSuccess }
+        dialogPopupItem(hasText("OK")).node.performClick()
+        waitFor("the list is back", 60_000L) { downloadButtons().isNotEmpty() }
+        // The list reloads with the install; the search is put back without a word.
+        panelItems(hasSetTextAction()).last().node.performTextReplacement("World English")
+        waitFor("the installed Bible is listed", 30_000L) { panelItems(hasText("Installed")).isNotEmpty() }
         say("installed")
         panelNote("Installed", "It's in your Bible folder, ready to use", panelItems(hasText("Installed")).first())
         closePanel()
@@ -149,6 +155,7 @@ class AddBibleDemoTour {
     private fun DemoTour.translations() {
         say("bible-settings")
         screen.value = "bible"
+        menusInPlace = true
         openPanel("Settings — Bible", 520f, 760f)
         panelNote("Translations", "The Bibles you show, in order", panelItem(hasText("Translations")), numbered = true)
         say("add-translation")
@@ -179,6 +186,7 @@ class AddBibleDemoTour {
     /** Profiles → Bible: long verses split across two slides. */
     private fun DemoTour.split() {
         say("profiles")
+        menusInPlace = false
         screen.value = "profiles"
         openPanel("Settings — Profiles", 1500f, 900f)
         panelNote(

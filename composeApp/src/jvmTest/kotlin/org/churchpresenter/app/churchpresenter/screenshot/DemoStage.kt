@@ -10,7 +10,6 @@ import java.awt.MultipleGradientPaint
 import java.awt.RadialGradientPaint
 import java.awt.RenderingHints
 import java.awt.font.TextAttribute
-import java.awt.geom.Area
 import java.awt.geom.Ellipse2D
 import java.awt.geom.GeneralPath
 import java.awt.geom.Point2D
@@ -108,7 +107,7 @@ internal data class Camera(val src: Rect, val dst: Rect, val chrome: Float, val 
     }
 }
 
-/** A highlighted control: its outline, the dim around it, and its tooltip. */
+/** A highlighted control: its outline and its tooltip. */
 internal class Focus(
     val rect: Rect,
     val step: Int?,
@@ -343,10 +342,8 @@ internal class DemoStage(
         }
     }
 
-    /** An open dialog: the app dimmed behind it, the window sliding in from the right as it fades up. */
+    /** An open dialog: the window sliding in from the right as it fades up, the app left as it is behind it. */
     private fun panelWindow(g: Graphics2D, panel: BufferedImage, title: String, shown: Float) {
-        g.color = Color(0, 0, 0, (140 * shown).toInt())
-        g.fillRect(0, 0, OUT_W, OUT_H)
         g.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, shown)
         val dx = (1 - shown) * 60f
         val p = panelContent(panel.width.toFloat(), panel.height.toFloat())
@@ -373,7 +370,7 @@ internal class DemoStage(
         g.composite = AlphaComposite.SrcOver
     }
 
-    // ── Outline, dim, tooltip ─────────────────────────────────────────────
+    // ── Outline, tooltip ─────────────────────────────────────────────
 
     private fun focus(g: Graphics2D, s: Scene, f: Focus) {
         val age = s.focusAge
@@ -388,11 +385,7 @@ internal class DemoStage(
         val h = (r.height + pad * 2) * grow
         val radius = if (compact) 20f else 28f
         val hole = RoundRectangle2D.Float(cx - w / 2, cy - h / 2, w, h, radius, radius)
-
-        val dim = Area(Rectangle2D.Float(0f, 0f, OUT_W.toFloat(), OUT_H.toFloat()))
-        dim.subtract(Area(hole))
-        g.color = Color(0, 0, 0, (128 * draw).toInt())
-        g.fill(dim)
+        // Nothing around the control is dimmed: the outline and halo alone point at it.
 
         // Halo: 0 0 0 10px rgba(134,239,172,.18), breathing every 1.6s while held.
         val breathe = 0.5f + 0.5f * sin(age / (1.6f * 30f) * 2 * PI).toFloat()
