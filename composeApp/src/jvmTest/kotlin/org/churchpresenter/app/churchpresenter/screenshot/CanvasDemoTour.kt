@@ -97,10 +97,15 @@ class CanvasDemoTour {
     private fun DemoTour.textSource() {
         add("text", "Text", "Words on top of everything else")
         say("text-edit")
-        val fields = findAll(hasSetTextAction()) { it.left > dp(1100f) }
-        type("Type the words", "They appear on the canvas as you type", fields[1], "Welcome Home")
+        val field = reveal { textContentField() }
+        type("Type the words", "They appear on the canvas as you type", field, "Welcome Home")
         say("text-font")
         note("Font and size", "Any font on this computer", props("Font Size"))
+        say("text-styles")
+        val italic = find(hasContentDescription("Italic")) { it.left > dp(1100f) }
+        note("Bold, italic, underline", "Strikethrough and outline too", italic)
+        say("text-align")
+        note("Alignment", "Left, center or right, top, middle or bottom", props("Horizontal"))
         say("text-color")
         note("Font color", "And the background behind the words", props("Font Color"))
         say("text-spacing")
@@ -161,6 +166,12 @@ class CanvasDemoTour {
         quietClick(find(hasContentDescription("Add source")))
         say("add-$key")
         step("Add $label", sub, menuItem(label))
+    }
+
+    /** The text layer's own words: the first field under the properties' "Text" heading, not Name or X. */
+    private fun DemoTour.textContentField(): Target {
+        val heading = findAll(hasText("Text") and !hasSetTextAction()) { it.left > dp(1100f) }.last()
+        return findAll(hasSetTextAction()) { it.left > dp(1100f) && it.top >= heading.bounds.bottom - 1f }.first()
     }
 
     private fun DemoTour.inTab(m: SemanticsMatcher) = find(m) { it.left > dp(380f) }

@@ -419,7 +419,7 @@ private fun serviceSchedule(actions: ScheduleActions) {
  * The wrapper object is private to `QAManager`, so the two DTO lists are serialised and the
  * envelope written around them.
  */
-private fun writeQuestions() {
+internal fun writeQuestions() {
     val asked = listOf(
         QuestionDto(
             "q1",
