@@ -6,6 +6,11 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.factoryOutputProfile
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
 /** The Announcements tour: a message styled and placed on screen, then the four timers. */
@@ -16,7 +21,8 @@ class AnnouncementsDemoTour {
         "announcements",
         tab = "Announcements",
         liveLabel = "Show an announcement",
-        steps = 16,
+        steps = 17,
+        settings = ::withStageMonitor,
     ) { announcementsTour() }
 
     private fun DemoTour.announcementsTour() {
@@ -36,6 +42,9 @@ class AnnouncementsDemoTour {
             "Keep this message, its look and its motion",
             find(hasContentDescription("Save preset")) { it.left > dp(380f) && it.top < dp(140f) },
         )
+        say("stage-message")
+        val toStage = find(hasContentDescription("Send to Stage Monitor")) { it.left > dp(380f) && it.top < dp(140f) }
+        step("Send to Stage Monitor", "A note only the pastor or worship team sees", toStage)
         timers()
         say("outro")
         outro()
@@ -93,6 +102,14 @@ class AnnouncementsDemoTour {
         }
         say("timer-on")
         showLive("Counting down", "Five minutes until the service")
+        say("stage")
+        note(
+            "Stage Monitor",
+            "Show the timer to the speaker only",
+            find(hasContentDescription("Send to Stage Monitor") or hasContentDescription("Hide Announcement")) {
+                it.left > dp(380f) && it.top > dp(400f)
+            },
+        )
         say("duration")
         step("Duration", "Counts up from zero — how long it's been", timerTab("Duration"))
         say("specific")
@@ -100,13 +117,7 @@ class AnnouncementsDemoTour {
         say("clock")
         step("Clock", "Shows the time right now", timerTab("Clock"))
         say("format")
-        note("Clock format", "12 or 24 hour, with or without seconds", text("Format"))
-        say("stage")
-        note(
-            "Stage Monitor",
-            "Show the timer to the speaker only",
-            find(hasContentDescription("Send to Stage Monitor")) { it.left > dp(380f) },
-        )
+        note("Clock format", "12 or 24 hour, with or without seconds", text("FORMAT"))
         say("schedule")
         step(
             "Add it to the schedule",
@@ -119,6 +130,18 @@ class AnnouncementsDemoTour {
     }
 
     private fun DemoTour.timerTab(label: String) = find(hasText(label)) { it.left > dp(380f) && it.top > dp(250f) }
+}
+
+/** A second output used as a stage monitor, so the tab offers Send to Stage Monitor. */
+private fun withStageMonitor(s: AppSettings): AppSettings {
+    val proj = s.projectionSettings
+    val stage = OutputProfile(id = "demo-stage", name = "Stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+    return s.copy(
+        projectionSettings = proj.copy(
+            outputProfiles = proj.outputProfiles.ifEmpty { listOf(factoryOutputProfile()) } + stage,
+            screenAssignments = proj.screenAssignments.take(1) + ScreenAssignment(activeProfileId = stage.id),
+        ),
+    )
 }
 
 private const val MESSAGE = "Coffee and fellowship in the hall after the service"
