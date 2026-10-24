@@ -204,7 +204,9 @@ class QADemoTour {
         val row = text(rowText).bounds
         if (!hasNode(hasContentDescription(desc)) { it.left > dp(380f) && it.center.y in row.top..row.bottom }) {
             val seen = ui.onAllNodes(hasContentDescription("Live", substring = true)).fetchSemanticsNodes()
-                .joinToString(" | ") { "${it.config.getOrNull(SemanticsProperties.ContentDescription)}@${it.boundsInWindow}" }
+                .joinToString(" | ") { node ->
+                    "${node.config.getOrNull(SemanticsProperties.ContentDescription)}@${node.boundsInWindow}"
+                }
             error("no $desc on row $row; live buttons: $seen")
         }
         return find(hasContentDescription(desc)) { it.left > dp(380f) && it.center.y in row.top..row.bottom }
