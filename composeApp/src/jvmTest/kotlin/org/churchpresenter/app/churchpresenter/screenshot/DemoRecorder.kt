@@ -218,7 +218,7 @@ internal fun recordTour(
         }
         val narrator = DemoNarrator(root)
         try {
-            val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null, heading = heading)
+            val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null, heading = heading) { actions }
             DemoTour(setup, this, presenter, out, changeSettings, narrator).script()
         } catch (_: LengthReached) {
             // CP_DEMO_SECONDS cut the tour short; what was recorded is the preview.
@@ -295,6 +295,7 @@ internal class TourSetup(
     val steps: Int,
     val hasPanel: Boolean = false,
     val heading: Pair<String, String> = "The " to " Tab",
+    val schedule: () -> ScheduleActions = { ScheduleActions() },
 )
 
 internal class DemoTour(
@@ -305,6 +306,9 @@ internal class DemoTour(
     private val changeSettings: ((AppSettings) -> AppSettings) -> Unit,
     private val narrator: DemoNarrator,
 ) {
+    /** What the app's schedule offers, for what a tour adds through a dialog drawn in the panel. */
+    val schedule = setup.schedule
+
     private val name = setup.name
     private val tab = setup.tab
     private val hasPanel = setup.hasPanel
@@ -359,6 +363,18 @@ internal class DemoTour(
     }
 
     fun settle() = ui.settleLive(presenter)
+
+    /**
+     * Rests the mouse on [target], as the drawn cursor does, so what shows only under the pointer (a
+     * schedule row's buttons) is there in the picture.
+     */
+    private fun hover(target: Target) {
+        if (target.bounds.left >= appW) return
+        runCatching { ui.onAllNodes(isRoot())[0].performMouseInput { moveTo(target.bounds.center) } }
+        ui.mainClock.advanceTimeBy(HOVER_FADE_MS)
+        ui.waitForIdle()
+        refresh(0.2)
+    }
 
     /** What a live web page puts on the outputs, without a browser: [title] and a picture of it. */
     fun showWebPage(title: String, page: BufferedImage) {
@@ -481,6 +497,7 @@ internal class DemoTour(
         scene.step = stepNumber
         val start = frame
         val talk = narrate(heading, sub)
+        hover(target)
         scene.focus = null
         scene.caption = null
         camTo(if (live) Camera.projector(appW, appH) else Camera.zoom(target.bounds, zoom, appW, appH))
@@ -723,6 +740,7 @@ internal class DemoTour(
     fun note(heading: String, sub: String, target: Target, seconds: Double = 2.4) {
         val start = frame
         val talk = narrate(heading, sub)
+        hover(target)
         scene.focus = null
         camTo(Camera.zoom(target.bounds, 1.5f, appW, appH))
         scene.focus = Focus(target.bounds, null, heading, sub, compact = false)
@@ -1144,3 +1162,5 @@ private fun cardBounds(layer: SemanticsNode, maxWidth: Float): Rect? {
     layer.children.forEach(::walk)
     return card
 }
+
+private const val HOVER_FADE_MS = 400L
