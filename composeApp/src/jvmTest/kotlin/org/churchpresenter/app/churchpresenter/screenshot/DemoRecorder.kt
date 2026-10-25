@@ -493,7 +493,8 @@ internal class DemoTour(
             if (double) target.node.performTouchInput { doubleClick() } else target.node.performClick()
         },
     ) {
-        val n = if (numbered) ++stepNumber else null
+        // No tooltip shows a number; a numbered step only moves the progress dashes on.
+        if (numbered) ++stepNumber
         scene.step = stepNumber
         val start = frame
         val talk = narrate(heading, sub)
@@ -501,7 +502,7 @@ internal class DemoTour(
         scene.focus = null
         scene.caption = null
         camTo(if (live) Camera.projector(appW, appH) else Camera.zoom(target.bounds, zoom, appW, appH))
-        scene.focus = Focus(target.bounds, n, if (numbered) heading else tabTitle(heading), sub, compact = live)
+        scene.focus = Focus(target.bounds, null, if (numbered) heading else tabTitle(heading), sub, compact = live)
         scene.focusAge = 0
         scene.keycap = keycap
         scene.pointerTag = when {
@@ -569,13 +570,13 @@ internal class DemoTour(
         live: Boolean = false,
         after: () -> Unit = {},
     ) {
-        val n = ++stepNumber
+        ++stepNumber
         scene.step = stepNumber
         val start = frame
         val talk = narrate(heading, sub)
         scene.focus = null
         camTo(Camera.zoom(area.bounds, 1.5f, appW, appH))
-        scene.focus = Focus(area.bounds, n, heading, sub, compact = false)
+        scene.focus = Focus(area.bounds, null, heading, sub, compact = false)
         scene.focusAge = 0
         scene.keycap = label
         hold(1.4)
@@ -869,11 +870,12 @@ internal class DemoTour(
 
     /** A tooltip on a control in the open panel; with [click], the control is pressed too. */
     fun panelNote(heading: String, sub: String, target: Target, click: Boolean = false, numbered: Boolean = false) {
-        val n = if (numbered) ++stepNumber else null
+        // No tooltip shows a number; a numbered one only moves the progress dashes on.
+        if (numbered) ++stepNumber
         scene.step = stepNumber
         val start = frame
         val talk = narrate(heading, sub)
-        scene.focus = Focus(panelToFrame(target.bounds), n, heading, sub, compact = false, onFrame = true)
+        scene.focus = Focus(panelToFrame(target.bounds), null, heading, sub, compact = false, onFrame = true)
         scene.focusAge = 0
         hold(1.2)
         if (click) {
@@ -1097,12 +1099,14 @@ internal class DemoTour(
         val g = img.createGraphics()
         g.drawImage(base, 0, 0, null)
         val panelArea = panelArea()
+        val unmerged = ui.onAllNodes(isRoot(), useUnmergedTree = true).fetchSemanticsNodes()
         for (i in 1 until nodes.size) {
             val at = nodes[i].boundsInWindow
             // A pop-up layer spans the whole window, backdrop and all; only the card on it is drawn —
             // a dropdown where it opened, an alert over the dialog that raised it.
             val layerWide = panelOpen && at.width > panelArea.width * 1.2f
-            val card = if (layerWide) cardBounds(nodes[i], panelArea.width) else null
+            // The unmerged tree: a clickable backdrop merges the card under it out of the merged one.
+            val card = if (layerWide) cardBounds(unmerged.getOrElse(i) { nodes[i] }, panelArea.width) else null
             if (card != null) {
                 val shift = if (menusInPlace) Pt(at.left, at.top) else dialogPopupOrigin(at, panelArea)
                 val layer = roots[i].captureToImage().toAwtImage()
