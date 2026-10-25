@@ -12,6 +12,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -37,9 +38,13 @@ import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.server.CalendarJoin
+import org.churchpresenter.calendar.sync.SyncOutcome
 import org.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.appsettings.SystemSettingsTab
+import org.churchpresenter.dialogs.SavePresetDialogContent
 import org.churchpresenter.serverui.AddComputerContent
 import org.churchpresenter.serverui.CalendarEnrollQrContent
 import org.churchpresenter.serverui.RemoteClientManager
@@ -47,12 +52,15 @@ import org.churchpresenter.serverui.ServerSettingsTab
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Instant
 import java.time.LocalTime
 import kotlin.math.abs
 import kotlin.test.Test
 
 /** The Calendar Manager: planning ahead, a pre-service loop that runs itself, loading, printing, phones. */
 class CalendarDemoTour {
+    // While the add-item picker is open: its title also labels the run of show's own add button.
+    private var inPicker = false
 
     private val companion = CompanionServer(shutdownGraceMs = 0)
 
@@ -67,6 +75,11 @@ class CalendarDemoTour {
             settings = { syncSettings },
             saveSettings = {},
             initialDevices = SAMPLE_PHONES,
+            // A round already done, so the card reads Synced rather than Off beside its switch.
+            initialStatus = CalendarSyncStatus.Synced(
+                Instant.now().minusSeconds(SYNCED_AGO_S).toString(),
+                SyncOutcome(0L, 0, 0, 0),
+            ),
         )
         recordTour(
             "calendar",
@@ -79,6 +92,13 @@ class CalendarDemoTour {
             panel = { settings, change ->
                 if (screen.value == "qr") {
                     Box(Modifier.size(QR_W.dp, QR_H.dp)) { CalendarEnrollQrContent(SAMPLE_ENROLLMENT, onDismiss = {}) }
+                } else if (screen.value == "preset") {
+                    // The main window's dialogs never reach the recording, so the sheet is drawn here.
+                    Box(Modifier.size(PRESET_W.dp, PRESET_H.dp)) {
+                        SavePresetDialogContent(ANNOUNCEMENTS, emptyList(), onConfirm = {}, onDismiss = {})
+                    }
+                } else if (screen.value == "system") {
+                    Box(Modifier.size(SYSTEM_W.dp, SYSTEM_H.dp)) { SystemSettingsTab(settings, change) }
                 } else if (screen.value == "computer") {
                     Box(Modifier.size(COMPUTER_W.dp, COMPUTER_H.dp)) {
                         AddComputerContent(onCreate = { _, _ -> SAMPLE_JOIN }, onDismiss = {})
@@ -133,11 +153,17 @@ class CalendarDemoTour {
         point("Month, day, run of show", "Colored by service type", hasText("November 2026", substring = true))
         say("saved")
         point("Saved as you go", "No Save button", hasText("All changes saved"))
+        segment("planning")
         planning()
+        segment("loop")
         loop()
+        segment("repeat")
         repeating()
+        segment("loading")
         loading()
+        segment("phones")
         phones()
+        segment("end")
         say("getting-started")
         quietClick(tab("Pictures"))
         val save = hasContentDescription("Save preset")
@@ -170,6 +196,7 @@ class CalendarDemoTour {
         say("add-items")
         val add = hasText("Add song, verse or section")
         panelNote("Add song, verse or section", "Five tabs", seek(add), click = true, numbered = true)
+        inPicker = true
         say("add-song")
         sheet("Songs", "By title or number", hasText("Songs"), tab = true)
         say("add-bible")
@@ -185,6 +212,7 @@ class CalendarDemoTour {
         sheetClick(hasText("Presets"))
         sheet("Presets", "Reusable pieces of a service", hasText("Presets"), tab = true)
         closeSheet()
+        inPicker = false
         closePanel()
         say("presets-how")
         // A preset is made on its own tab: here, the Pictures tab's Save preset, named and saved.
@@ -282,7 +310,9 @@ class CalendarDemoTour {
             find(hasText("Schedule")) { it.right < dp(720f) },
         )
         say("schedule-times")
-        inSchedule("Length and start time", "Bold: starts on its own", hasText("9:55 AM", substring = true))
+        inSchedule("Bold time", "Starts on its own at 9:55", hasText("9:55 AM", substring = true))
+        say("schedule-times-dim")
+        inSchedule("Dimmer time", "An estimate, from the items before", hasText("10:05 AM", substring = true))
         say("schedule-badges")
         inSchedule(
             "What it will do",
@@ -319,14 +349,15 @@ class CalendarDemoTour {
      */
     /** The "5:00" length cell on [title]'s own line -- the countdown and two songs all run five minutes. */
     private fun DemoTour.lengthOn(title: String): SemanticsMatcher {
-        val line = ui.onAllNodes(hasText(title, substring = true)).fetchSemanticsNodes().first().boundsInRoot.center.y
+        // The calendar's own line: the Schedule behind it lists the same songs.
+        val line = panelItems(hasText(title, substring = true)).first().bounds.center.y
         return SemanticsMatcher("length on $title") {
             it.config.getOrNull(SemanticsProperties.Text)?.any { t -> t.text == "5:00" } == true &&
-                abs(it.boundsInRoot.center.y - line) < SAME_LINE
+                abs(it.boundsInWindow.center.y - line) < dp(SAME_LINE)
         }
     }
 
-    private fun DemoTour.tabsTop(): Float = runCatching {
+    private fun DemoTour.tabsTop(): Float = if (!inPicker) Float.NEGATIVE_INFINITY else runCatching {
         val title = hasText("Add song, verse or section")
         ui.onAllNodes(title).fetchSemanticsNodes().minOf { it.boundsInWindow.bottom }
     }.getOrElse { Float.NEGATIVE_INFINITY }
@@ -346,7 +377,7 @@ class CalendarDemoTour {
         openPanel("Settings — Server", SERVER_W, SERVER_H)
         point("Calendar sync", "Switch it on here", hasText("Calendar sync"))
         say("relay")
-        val relay = hasText("Plan services from the mobile app", substring = true)
+        val relay = hasText("Plan services from", substring = true)
         point("Through the relay", "No account, no church WiFi needed", relay)
         closePanel()
         say("sync-calendar")
@@ -375,6 +406,7 @@ class CalendarDemoTour {
         openPanel("Settings — Server", SERVER_W, SERVER_H)
         val phone = hasText("Pastor Mark's iPhone", substring = true) or hasText("Phones")
         point("Enrolled phones", "Revoke when a volunteer moves on", phone)
+        segment("computers")
         say("computers")
         point("Add a computer", "Plan from the office or from home", hasText("Add a computer", substring = true))
         closePanel()
@@ -392,32 +424,30 @@ class CalendarDemoTour {
         openPanel("Settings — Server", SERVER_W, SERVER_H)
         say("computer-join")
         point("Join another…", "On the other computer", hasText("Join another", substring = true))
+        closePanel()
+        say("shared-folder")
+        screen.value = "system"
+        openPanel("Settings — System", SYSTEM_W, SYSTEM_H)
+        point("The Calendar folder", "In Dropbox, Google Drive or OneDrive", hasText("Calendar"))
+        closePanel()
+        screen.value = "calendar"
         say("mobile")
         caption("On the phone", "See the month, plan, build the run of show")
         say("sync-timing")
         caption("Every five minutes", "At startup, and on Sync now")
-        closePanel()
     }
 
     /** The Pictures tab's Save preset, opened, named and saved: how the calendar's presets are made. */
     private fun DemoTour.makePreset() {
         quietClick(tab("Pictures"))
-        menusInPlace = true
-        val save = find(hasContentDescription("Save preset")) { it.left > dp(380f) }
-        step("Save preset", "On Pictures, Presentation, Media, Announcements, Canvas", save)
-        // The dialog's label is drawn in capitals, as the calendar's sheets draw theirs.
-        val open = runCatching {
-            waitFor("the Save preset dialog") { hasNode(hasText("Preset name", ignoreCase = true)) }
-        }.isSuccess
-        if (open) {
-            type("Name it", "Sunday announcements", dialogPopupItem(hasSetTextAction()), "Sunday announcements")
-            step("OK", "Now it's in every service's Presets", dialogPopupItem(hasText("OK", ignoreCase = true)))
-            ui.waitForIdle()
-        } else {
-            File(System.getenv("CP_DEMO_OUT"), "missed.txt").appendText("Save preset dialog\n")
-            caption("Name it, and click OK", "Now it's in every service's Presets")
-        }
-        menusInPlace = false
+        val save = find(hasContentDescription("Save preset") and hasClickAction()) { it.left > dp(380f) }
+        note("Save preset", "On Pictures, Presentation, Media, Announcements, Canvas", save)
+        screen.value = "preset"
+        openPanel("Save preset", PRESET_W, PRESET_H)
+        panelEdit("Name it", "Sunday announcements", seek(hasSetTextAction()), "Sunday announcements")
+        panelNote("OK", "Now it's in every service's Presets", seek(hasText("OK", ignoreCase = true)))
+        closePanel()
+        screen.value = "calendar"
     }
 
     /** Points at [m] in the Schedule panel, or says the line over a caption when it isn't there. */
@@ -569,7 +599,7 @@ private fun month(): CalendarDocument {
 
 private const val SHEET_WAIT_MS = 5_000L
 private const val SHEET_CLICK_HOLD = 0.1
-private const val SAME_LINE = 20f
+private const val SAME_LINE = 16f
 private const val CALENDAR_W = 1300f
 private const val CALENDAR_H = 850f
 
@@ -579,6 +609,11 @@ private val SAMPLE_PHONES = listOf(
     PairedDevice("phone-2", "Worship leader · Sarah", "2026-09-13T09:02:00Z", "2026-11-01T07:58:00Z"),
     PairedDevice("phone-3", "Announcements · Dave", "2026-10-04T12:30:00Z", "2026-10-29T20:11:00Z"),
 )
+private const val SYNCED_AGO_S = 120L
+private const val SYSTEM_W = 900f
+private const val SYSTEM_H = 640f
+private const val PRESET_W = 440f
+private const val PRESET_H = 300f
 private const val COMPUTER_W = 520f
 private const val COMPUTER_H = 640f
 private val SAMPLE_JOIN = CalendarJoin(

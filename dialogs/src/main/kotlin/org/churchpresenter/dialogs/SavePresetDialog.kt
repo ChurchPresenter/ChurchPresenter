@@ -69,7 +69,7 @@ fun SavePresetDialog(
 
 /** The sheet itself, apart from the dialog so it can be composed without one. */
 @Composable
-internal fun SavePresetDialogContent(
+fun SavePresetDialogContent(
     item: ScheduleItem,
     existingNames: List<String>,
     onConfirm: (name: String) -> Unit,

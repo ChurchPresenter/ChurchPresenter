@@ -7,6 +7,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.file.Files
 import java.security.MessageDigest
 import javax.sound.sampled.AudioSystem
 
@@ -43,8 +44,38 @@ internal class DemoNarrator(root: File) {
         return AudioSystem.getAudioFileFormat(wav).let { it.frameLength / it.format.frameRate.toDouble() }
     }
 
+    /** The lines spoken since the last call, by the frame each starts on; forgotten here. */
+    fun drainCues(): List<Pair<Int, File>> = cues.toList().also { cues.clear() }
+
+    /**
+     * Encodes a tour from its segment folders in `segments.txt` order (see [DemoTour.segment]): their
+     * frames linked end to end into one numbering, each voice cue moved by where its segment starts.
+     */
+    fun encodeSegments(tour: File, fps: Int, video: File) {
+        val order = File(tour, "segments.txt").readLines().filter { it.isNotBlank() }
+        val all = File(tour, "all").apply {
+            deleteRecursively()
+            mkdirs()
+        }
+        var offset = 0
+        val placed = mutableListOf<Pair<Int, File>>()
+        for (name in order) {
+            val folder = File(tour, "seg-$name")
+            check(folder.isDirectory) { "segment $name was never recorded: run the whole tour once first" }
+            val frames = folder.listFiles { f -> f.name.endsWith(".png") }.orEmpty().sortedBy { it.name }
+            frames.forEachIndexed { i, f ->
+                Files.createSymbolicLink(File(all, "f%05d.png".format(offset + i)).toPath(), f.absoluteFile.toPath())
+            }
+            File(folder, "cues.txt").takeIf { it.isFile }?.readLines()?.filter { it.isNotBlank() }?.forEach {
+                placed += offset + it.substringBefore('\t').toInt() to File(it.substringAfter('\t'))
+            }
+            offset += frames.size
+        }
+        encode(all, fps, video, placed)
+    }
+
     /** Encodes [frames] at [fps] with every spoken line in place into [video]. */
-    fun encode(frames: File, fps: Int, video: File) {
+    fun encode(frames: File, fps: Int, video: File, cues: List<Pair<Int, File>> = this.cues) {
         val ffmpeg = ffmpeg()
         video.parentFile?.mkdirs()
         val command = mutableListOf(ffmpeg, "-y", "-loglevel", "error")

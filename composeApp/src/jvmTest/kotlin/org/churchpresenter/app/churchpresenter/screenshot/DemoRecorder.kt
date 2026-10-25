@@ -129,6 +129,14 @@ private val MAX_FRAMES = System.getenv("CP_DEMO_SECONDS")?.toIntOrNull()?.let { 
 private class LengthReached : RuntimeException()
 
 /**
+ * `CP_DEMO_ONLY=a,b` re-records only those segments (see [DemoTour.segment]): the rest play through
+ * unseen to reach the same state, keep the frames and voice they were last recorded with, and the
+ * whole video is encoded again from every segment's folder.
+ */
+private val ONLY = System.getenv("CP_DEMO_ONLY")?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet()
+private const val FIRST_SEGMENT = "start"
+
+/**
  * Records one tour as 1920×1080 PNG frames in `$CP_DEMO_OUT/<name>/`, laid out as the Tab Demo Video
  * storyboard (see [DemoStage]), from the real main window and the output it drives. Skipped unless
  * `CP_DEMO_OUT` is set, so CI never records. The finished MP4, narrated (see [DemoNarrator]), goes to
@@ -151,7 +159,10 @@ internal fun recordTour(
 ) {
     val root = System.getenv("CP_DEMO_OUT")?.let(::File)
     assumeTrue("CP_DEMO_OUT is not set", root != null)
-    val out = File(root!!, name).apply { deleteRecursively(); mkdirs() }
+    val out = File(root!!, name).apply {
+        if (ONLY == null) deleteRecursively()
+        mkdirs()
+    }
     TestSingletons.latchSkikoHostOs()
     TestSingletons.latchToTestHome()
     // A previous tour's schedule autosave would open every recording on "Restore unsaved schedule?".
@@ -220,12 +231,14 @@ internal fun recordTour(
             waitForIdle()
         }
         val narrator = DemoNarrator(root)
+        val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null, heading = heading) { actions }
+        val tour = DemoTour(setup, this, presenter, out, changeSettings, narrator)
         try {
-            val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null, heading = heading) { actions }
-            DemoTour(setup, this, presenter, out, changeSettings, narrator).script()
+            tour.script()
         } catch (_: LengthReached) {
-            // CP_DEMO_SECONDS cut the tour short; what was recorded is the preview.
+            // CP_DEMO_SECONDS cut the tour short, or CP_DEMO_ONLY's last segment is done.
         }
+        tour.finishSegment()
         // One folder per tab, so each video sits with its own thumbnail and script.
         val videos = File(
             System.getenv("CP_DEMO_VIDEOS")?.let(::File)
@@ -233,7 +246,7 @@ internal fun recordTour(
             if (heading.second == " Tab") tab else heading.first + tab + heading.second,
         )
         val suffix = if (MAX_FRAMES == null) "" else "-preview"
-        narrator.encode(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"))
+        narrator.encodeSegments(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"))
     }
 }
 
@@ -321,6 +334,14 @@ internal class DemoTour(
     private val stage = DemoStage(appW, appH, setup.heading)
     private var frame = 0
     private var stepNumber = 0
+
+    // The segment being played: its frames go to its own folder, or nowhere when CP_DEMO_ONLY skips it.
+    private var segmentName = FIRST_SEGMENT
+    private var segmentStart = 0
+    private var segmentFrame = 0
+    private val order = mutableListOf(FIRST_SEGMENT)
+    private var recording = ONLY == null || FIRST_SEGMENT in ONLY
+    private var segmentDir = segmentFolder(FIRST_SEGMENT)
 
     /** The open dialog's pop-ups are dropdowns, drawn where they open, not alerts centered over it. */
     var menusInPlace = false
@@ -923,6 +944,39 @@ internal class DemoTour(
         hold(seconds)
     }
 
+    // ── Segments ──────────────────────────────────────────────────────────
+
+    /**
+     * Starts the segment [name]: what follows, up to the next one, is recorded on its own and can be
+     * re-recorded alone with `CP_DEMO_ONLY`. Ends the run once every segment asked for is done.
+     */
+    fun segment(name: String) {
+        finishSegment()
+        if (ONLY != null && ONLY.all { it in order }) throw LengthReached()
+        segmentName = name
+        order += name
+        recording = ONLY == null || name in ONLY
+        segmentStart = frame
+        segmentFrame = 0
+        segmentDir = segmentFolder(name)
+    }
+
+    /** Writes the segment's voice cues beside its frames, and the order of every segment so far. */
+    fun finishSegment() {
+        val cues = narrator.drainCues()
+        if (!recording) return
+        val lines = cues.joinToString("") { (at, wav) -> "${at - segmentStart}\t${wav.path}\n" }
+        File(segmentDir, "cues.txt").writeText(lines)
+        if (ONLY == null) File(out, "segments.txt").writeText(order.joinToString("\n"))
+    }
+
+    private fun segmentFolder(name: String) = File(out, "seg-$name").apply {
+        if (recording) {
+            deleteRecursively()
+            mkdirs()
+        }
+    }
+
     // ── Narration ─────────────────────────────────────────────────────────
 
     /** The spoken script, `key = line`, from `demo-narration/<tour>.txt` in the test resources. */
@@ -1041,7 +1095,7 @@ internal class DemoTour(
     }
 
     private fun emit() {
-        write(stage.render(scene))
+        if (recording) write(stage.render(scene))
         scene.focusAge++
         scene.captionAge++
         scene.liveAge++
@@ -1049,7 +1103,8 @@ internal class DemoTour(
 
     private fun write(img: BufferedImage) {
         if (MAX_FRAMES != null && frame >= MAX_FRAMES) throw LengthReached()
-        ImageIO.write(img, "png", File(out, "f%05d.png".format(frame++)))
+        ImageIO.write(img, "png", File(segmentDir, "f%05d.png".format(segmentFrame++)))
+        frame++
     }
 
     /**

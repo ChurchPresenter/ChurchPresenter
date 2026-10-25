@@ -96,8 +96,10 @@ class CalendarSyncService(
     private val multiComputer: () -> Boolean = { true },
     /** The phones listed before the first sync answers; none in the app, sample ones in a demo. */
     initialDevices: List<PairedDevice> = emptyList(),
+    /** The status shown before the first round runs; Off in the app, a finished round in a demo. */
+    initialStatus: CalendarSyncStatus = CalendarSyncStatus.Off,
 ) {
-    private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
+    private val _status = MutableStateFlow(initialStatus)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
 
     /** When the timer in [run] next pulls from the relay, or null while no timer is running. */
