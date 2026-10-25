@@ -210,19 +210,7 @@ internal fun appPreview(
             }
             selectTab(tab)
             drive()
-            // main.kt owns the transition effects that move selected -> displayed and raise the
-            // fade alphas; MainDesktop does not, so nothing would ever reach the live preview.
-            presenterManager.setDisplayedVerses(presenterManager.selectedVerses.value)
-            presenterManager.setDisplayedImagePath(presenterManager.selectedImagePath.value)
-            presenterManager.setPictureTransitionAlpha(1f)
-            presenterManager.setDisplayedSlide(presenterManager.selectedSlide.value)
-            presenterManager.setSlideTransitionAlpha(1f)
-            presenterManager.setDisplayedAnnouncementText(presenterManager.announcementText.value)
-            presenterManager.setAnnouncementTransitionAlpha(1f)
-            presenterManager.setBibleTransitionAlpha(1f)
-            presenterManager.setSongTransitionAlpha(1f)
-            pinLottieFrame(presenterManager)
-            waitForIdle()
+            settleLive(presenterManager)
             // Checked here rather than after selectTab: what matters is the tab the frame is
             // taken of, and `drive()` runs in between. A mis-click in a driver is exactly how the
             // Q&A capture became a picture of the Pictures tab, and nothing failed — the file was
@@ -231,6 +219,24 @@ internal fun appPreview(
             captureTo(File("$ROOT/${name}_$suffix.png"))
         }
     }
+}
+
+/**
+ * What main.kt's transition effects do and MainDesktop does not: moves what is selected to
+ * displayed and raises the fade alphas, so what went live reaches the outputs.
+ */
+internal fun ComposeUiTest.settleLive(presenterManager: PresenterManager) {
+    presenterManager.setDisplayedVerses(presenterManager.selectedVerses.value)
+    presenterManager.setDisplayedImagePath(presenterManager.selectedImagePath.value)
+    presenterManager.setPictureTransitionAlpha(1f)
+    presenterManager.setDisplayedSlide(presenterManager.selectedSlide.value)
+    presenterManager.setSlideTransitionAlpha(1f)
+    presenterManager.setDisplayedAnnouncementText(presenterManager.announcementText.value)
+    presenterManager.setAnnouncementTransitionAlpha(1f)
+    presenterManager.setBibleTransitionAlpha(1f)
+    presenterManager.setSongTransitionAlpha(1f)
+    pinLottieFrame(presenterManager)
+    waitForIdle()
 }
 
 /**
@@ -414,7 +420,7 @@ private fun serviceSchedule(actions: ScheduleActions) {
  * The wrapper object is private to `QAManager`, so the two DTO lists are serialised and the
  * envelope written around them.
  */
-private fun writeQuestions() {
+internal fun writeQuestions() {
     val asked = listOf(
         QuestionDto(
             "q1",
@@ -501,7 +507,7 @@ private fun writeQuestions() {
  * Writes the Canvas scenes where `SceneViewModel` reads them — it owns its own file under
  * `user.home` and MainDesktop builds it internally, so there is no instance to seed directly.
  */
-private fun writeScenes() {
+internal fun writeScenes() {
     val file = File(System.getProperty("user.home"), ".churchpresenter/scenes.json")
     file.parentFile?.mkdirs()
     file.writeText(Json { prettyPrint = false }.encodeToString(previewScenes()))

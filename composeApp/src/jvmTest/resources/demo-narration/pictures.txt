@@ -1,0 +1,27 @@
+# What the narrator says in the pictures tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Pictures tab, where you can put photos on the big screen, one at a time or as a slideshow.
+open-tab = Let's open the Pictures tab. Every photo in your chosen folder is shown here as a thumbnail.
+folder = To choose your photos, click Select Folder and pick any folder on your computer. Every picture inside it appears below. JPEG, PNG, GIF, BMP, WebP and HEIC photos are all supported.
+recents = The folders you've used recently are listed right here, so you can switch back to last Sunday's photos with a single click. You can also pin the ones you use most.
+click-photo = Click a photo to select it. It appears in the preview first, so you can check it before anyone else sees it.
+go-live = When you're ready, click Go Live, and the photo is sent to the projector.
+live-1 = And there it is, filling the big screen.
+arrow = While a photo is live, you can use the arrow keys. Press the right arrow to move to the next photo, and the left arrow to go back.
+live-2 = The next photo is now on screen, straight from the keyboard.
+double-click = You can also double-click any photo to put it live in a single move.
+live-3 = And now the candles are on the big screen.
+hide = If there's a photo you don't want to show, click the eye on its card to hide it. It stays in the folder, but the arrow keys and the slideshow will skip right over it.
+play = To let the photos run on their own, press Play, and they'll change automatically as a slideshow.
+interval = You can choose how long each photo stays on screen before the next one appears.
+transition = Next to it, the transition duration sets how long the change from one photo to the next takes. Half a second feels smooth without slowing things down.
+loop = Loop is switched on, so the slideshow starts over again after the last photo. It's perfect for a welcome loop before the service.
+animation = You can also choose how one photo changes into the next. Open the transition list to see the options.
+fade = We'll pick Fade, for a gentle change between photos.
+scale = Photos come in all shapes and sizes. This button switches between fitting the whole photo on screen and filling the screen edge to edge.
+live-4 = Now the photo fills the entire screen.
+preset = If you show this folder often, save it as a preset. A preset is a named shortcut, like Welcome Loop, that you can add to any future service in one click, without searching for the folder again.
+schedule = Finally, click Add to Schedule to bring this whole folder back later in the service.
+schedule-row = The gallery now appears in your schedule on the left, ready whenever you need it.
+outro = And that's the Pictures tab. Pick a folder, click a photo, go live, and let the slideshow do the rest.

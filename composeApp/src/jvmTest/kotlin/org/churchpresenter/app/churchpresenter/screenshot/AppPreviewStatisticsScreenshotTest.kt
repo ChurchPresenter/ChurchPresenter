@@ -113,78 +113,78 @@ class AppPreviewStatisticsScreenshotTest {
             )
         }
 
-    /**
-     * Half a year of Sunday services in the two files `StatisticsManager` reads at construction:
-     * the running totals it shows in Statistics, and the timestamped log the CCLI report filters
-     * by date.
-     */
-    private fun seedSixMonths() {
-        val zone = ZoneId.systemDefault()
-        val today = FIXED_TODAY
-        val sundays = (0 until 26).map { week ->
-            today.minusWeeks(week.toLong()).atTime(10, 30).atZone(zone).toInstant().toEpochMilli()
-        }
+    internal companion object {
+        /**
+         * Half a year of Sunday services in the two files `StatisticsManager` reads at construction:
+         * the running totals it shows in Statistics, and the timestamped log the CCLI report filters
+         * by date.
+         */
+        internal fun seedSixMonths() {
+            val zone = ZoneId.systemDefault()
+            val today = FIXED_TODAY
+            val sundays = (0 until 26).map { week ->
+                today.minusWeeks(week.toLong()).atTime(10, 30).atZone(zone).toInstant().toEpochMilli()
+            }
 
-        val songEvents = mutableListOf<SongPlayEvent>()
-        val verseEvents = mutableListOf<VersePlayEvent>()
-        sundays.forEachIndexed { week, stamp ->
-            SERVICE_SETS[week % SERVICE_SETS.size].forEach { (number, rest) ->
-                val (title, author) = rest
-                songEvents += SongPlayEvent(
-                    songNumber = number,
-                    title = title,
-                    songbook = if (number < 100) "Gospel Songs" else "Hymnal",
-                    author = author,
+            val songEvents = mutableListOf<SongPlayEvent>()
+            val verseEvents = mutableListOf<VersePlayEvent>()
+            sundays.forEachIndexed { week, stamp ->
+                SERVICE_SETS[week % SERVICE_SETS.size].forEach { (number, rest) ->
+                    val (title, author) = rest
+                    songEvents += SongPlayEvent(
+                        songNumber = number,
+                        title = title,
+                        songbook = if (number < 100) "Gospel Songs" else "Hymnal",
+                        author = author,
+                        timestamp = stamp,
+                    )
+                }
+                val (book, chapter, verse) = READINGS[week % READINGS.size]
+                verseEvents += VersePlayEvent(
+                    bibleName = "King James Version",
+                    bookName = book,
+                    chapter = chapter,
+                    verseNumber = verse,
                     timestamp = stamp,
                 )
             }
-            val (book, chapter, verse) = READINGS[week % READINGS.size]
-            verseEvents += VersePlayEvent(
-                bibleName = "King James Version",
-                bookName = book,
-                chapter = chapter,
-                verseNumber = verse,
-                timestamp = stamp,
+
+            val songCounts = songEvents.groupBy { "${it.songbook}:${it.songNumber}" }
+                .mapValues { (_, events) ->
+                    SongDisplayEntry(
+                        songNumber = events.first().songNumber,
+                        title = events.first().title,
+                        songbook = events.first().songbook,
+                        count = events.size,
+                    )
+                }
+            val verseCounts = verseEvents.groupBy { "${it.bookName} ${it.chapter}:${it.verseNumber}" }
+                .mapValues { (_, events) ->
+                    VerseDisplayEntry(
+                        bibleName = events.first().bibleName,
+                        bookName = events.first().bookName,
+                        chapter = events.first().chapter,
+                        verseNumber = events.first().verseNumber,
+                        count = events.size,
+                    )
+                }
+
+            val json = Json { encodeDefaults = true }
+            val dir = File(System.getProperty("user.home"), ".churchpresenter").apply { mkdirs() }
+            File(dir, "statistics.json").writeText(
+                json.encodeToString(
+                    DisplayStatistics.serializer(),
+                    DisplayStatistics(songDisplayCounts = songCounts, verseDisplayCounts = verseCounts),
+                )
+            )
+            File(dir, "play_log.json").writeText(
+                json.encodeToString(
+                    PlayEventLog.serializer(),
+                    PlayEventLog(songEvents = songEvents, verseEvents = verseEvents),
+                )
             )
         }
 
-        val songCounts = songEvents.groupBy { "${it.songbook}:${it.songNumber}" }
-            .mapValues { (_, events) ->
-                SongDisplayEntry(
-                    songNumber = events.first().songNumber,
-                    title = events.first().title,
-                    songbook = events.first().songbook,
-                    count = events.size,
-                )
-            }
-        val verseCounts = verseEvents.groupBy { "${it.bookName} ${it.chapter}:${it.verseNumber}" }
-            .mapValues { (_, events) ->
-                VerseDisplayEntry(
-                    bibleName = events.first().bibleName,
-                    bookName = events.first().bookName,
-                    chapter = events.first().chapter,
-                    verseNumber = events.first().verseNumber,
-                    count = events.size,
-                )
-            }
-
-        val json = Json { encodeDefaults = true }
-        val dir = File(System.getProperty("user.home"), ".churchpresenter").apply { mkdirs() }
-        File(dir, "statistics.json").writeText(
-            json.encodeToString(
-                DisplayStatistics.serializer(),
-                DisplayStatistics(songDisplayCounts = songCounts, verseDisplayCounts = verseCounts),
-            )
-        )
-        File(dir, "play_log.json").writeText(
-            json.encodeToString(
-                PlayEventLog.serializer(),
-                PlayEventLog(songEvents = songEvents, verseEvents = verseEvents),
-            )
-        )
-    }
-
-    private companion object {
         /**
          * The day these images are recorded as, so they do not go stale overnight.
          *

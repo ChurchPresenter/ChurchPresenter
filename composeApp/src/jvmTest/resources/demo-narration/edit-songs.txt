@@ -1,0 +1,34 @@
+# What the narrator says in the adding and editing songs tour, in order. One line per key.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll add a new song, write its lyrics and chords, sing it in a second language, and give it its own backgrounds and look.
+open-tab = Let's open the Songs tab, where your whole song library lives.
+new-song = To add a song, click the plus button. The song editor opens.
+title = Start with the title. We'll call ours Holy, Holy, Holy.
+details = Below it, you can choose a song book, and add the song number, author, composer, CCLI number and tune.
+lyrics = Now the lyrics. Type them or paste them in. Each section starts with its name in square brackets, like Verse 1.
+insert = You don't have to remember the names. Click any of these buttons to insert Verse, Chorus, Bridge and more right where your cursor is.
+chords = Chords go in square brackets too, right before the syllable they land on. The syntax line underneath is there whenever you need a reminder.
+chords-pane = Open the Chords tab to see the song the way your band reads it, with every chord above its word.
+transpose = Need it in another key? Transpose it up or down a step at a time.
+palette = Underneath are the chords that belong to the song's key. Click one, and it's inserted where your cursor is.
+slide-break = If a verse is too long for one slide, add a Slide Break where you want it to split.
+slide-split = Verse two now shows as two slides, one and two, so every line stays easy to read.
+add-language = Want to sing in more than one language? Each language gets its own tab. Click Add a language for another, up to five in all.
+language-tab = Let's open the second language.
+language-name = Give the language a name, like Español. The name is shared by all your songs, so you only set it once.
+translation = Then paste in the translated lyrics, with the same sections as the original.
+titles = Each language has its own title too. The English title stays, and we'll add the Spanish one.
+background = Next, the background. Click Background to give this song one of its own.
+custom = Choose Custom to pick a color, a picture or a video, instead of the profile's usual background.
+song-color = We'll choose Deep Navy for the whole song.
+applies-to = Backgrounds can change from verse to verse too. Open Applies To and pick a single section.
+verse-two = Let's choose Verse 2.
+verse-color = And give it a warmer color, Ember. Verse two will now appear on this background, and the rest of the song on Deep Navy.
+save-background = Click Save to keep the backgrounds.
+output = The Output tab shows the slide under your cursor exactly as your projector will show it.
+look = Under This song's look, you can change the font, size and text color for this song only. Everything else keeps your profile's style.
+larger = We'll make the words a little larger.
+timing = At the bottom, you'll see the song's sections, lines and words. ChurchPresenter also times each song while you use it, and shows how long it usually runs, so you can plan your service.
+save = Click Save, and the song joins your library.
+edit = To change a song later, select it and click Edit. The same editor opens, with everything you've written.
+outro = And that's how to add and edit songs. Lyrics, chords, languages, backgrounds and a look of their own, all in one place.

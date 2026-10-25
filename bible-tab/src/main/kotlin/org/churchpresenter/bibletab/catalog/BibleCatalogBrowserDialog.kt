@@ -116,7 +116,7 @@ fun BibleCatalogBrowserDialog(
 }
 
 @Composable
-internal fun BibleCatalogBrowserDialogContent(
+fun BibleCatalogBrowserDialogContent(
     viewModels: List<BibleCatalogViewModel>,
     tabLabels: List<String>,
     onDismiss: () -> Unit,

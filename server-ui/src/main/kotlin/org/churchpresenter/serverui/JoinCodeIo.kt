@@ -10,7 +10,7 @@ import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 
 /** What the join dialogs do outside their window: the clipboard, a file chooser, the mail app. */
-internal interface JoinCodeIo {
+interface JoinCodeIo {
     fun copy(text: String): Boolean
 
     fun paste(): String?
@@ -25,7 +25,7 @@ internal interface JoinCodeIo {
 }
 
 /** The real clipboard, file choosers and mail app. */
-internal object SystemJoinCodeIo : JoinCodeIo {
+object SystemJoinCodeIo : JoinCodeIo {
     override fun copy(text: String): Boolean = SystemClipboard.copy(text)
 
     override fun paste(): String? = SystemClipboard.paste()

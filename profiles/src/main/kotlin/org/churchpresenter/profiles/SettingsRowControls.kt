@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -243,6 +245,7 @@ internal fun RowStepper(
 }
 
 private val STEPPER_FIELD_WIDTH = 66.dp
+private val NUMBER_MIN_WIDTH = 24.dp
 private val STEP_KEY_WIDTH = 26.dp
 private val STEP_ICON = 14.dp
 
@@ -269,8 +272,10 @@ internal fun RowNumberField(
             Text(caption, fontSize = 10.sp, color = faint, maxLines = 1)
         }
         Row(
+            // At least [width], and wider when the number and its unit need it: a long unit such as
+            // "words" used to leave the number no room and push it out of the well.
             modifier = Modifier
-                .width(width)
+                .widthIn(min = width)
                 .height(CONTROL_HEIGHT)
                 .sunken(
                     AppShape(7.dp),
@@ -279,6 +284,7 @@ internal fun RowNumberField(
                 )
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End,
         ) {
             BasicTextField(
                 value = text,
@@ -296,7 +302,8 @@ internal fun RowNumberField(
                     color = MaterialTheme.colorScheme.onSurface,
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.weight(1f).then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
+                modifier = Modifier.width(IntrinsicSize.Min).widthIn(min = NUMBER_MIN_WIDTH)
+                    .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
             )
             if (unit != null) {
                 Box(Modifier.padding(start = 3.dp)) {

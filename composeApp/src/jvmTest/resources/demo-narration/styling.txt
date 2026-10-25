@@ -1,0 +1,31 @@
+# What the narrator says in the styling tour, in order. One line per key.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll set up a lower third, and style how Bible verses, song lyrics and subtitles look on every screen: the fonts, sizes, colors, spacing, backgrounds and transitions.
+open = Everything here lives in Settings, under Profiles. Click the Settings button, then choose Profiles.
+profiles = A profile is the look of a screen. Each screen uses one, so your projector, your livestream and your stage monitor can each look different. Your profiles are listed on the left.
+lower-third-mode = Let's set up a lower third. Choose the profile for that screen, and on its General page, set the display mode to Lower third. Instead of filling the screen, verses and lyrics now sit in a band across the bottom, which is ideal for a livestream or a camera feed.
+outputs = On the Outputs page, you choose which screen uses this profile.
+over-content = And on the Content page, you decide whether a lower third goes over what's already on the screen, or replaces it.
+preview = On the right, the preview shows exactly how this screen will look, and it updates as you change anything. Switch between short, medium and long text to check that everything fits.
+basic-advanced = The most common settings show straight away. Switch to Advanced to see every option, and use Open all and Fold all to expand or tidy the sections.
+bible-page = Now let's style the Bible. Open the Bible page.
+font = Choose any font on this computer, and set its size.
+style = Make the text bold, italic or underlined, and give the letters an outline, so they stand out on any background.
+color = Pick the text color, and add a soft shadow behind the words.
+alignment = Set the alignment to left, center or right.
+letter-case = Letter case shows your verses as typed, in capitals, in lowercase, or capitalized.
+spacing = Letter spacing spreads the letters apart, and word spacing adds room between the words.
+reference = The verse reference has its own style, and you can place it above the verse or after it.
+place = Under placement, choose where the text sits on the screen.
+margins = Margins keep the words away from the edges, which matters on projectors and TVs that crop the picture.
+box = The text box sets how wide and tall the text can be, and auto-fit shrinks a long verse so it always fits.
+move = You can even drag an element on the preview, or nudge it into place with Move X and Y.
+translations = When two or more Bibles are shown together, choose the layout, stacked or side by side, with a divider and the space between them.
+background = In Background, give this content its own color, gradient, picture or video, or keep the profile's default.
+transition = And in Transition, choose how one verse changes into the next: fade in, fade out, how long it takes, or a crossfade between items.
+songs-page = The Songs page works the same way, with the same font, color, spacing and placement settings, plus a few just for songs.
+song-options = Show the section label, like Verse 1 or Chorus, open each song with a title slide that shows its title and credits, repeat the chorus after each verse, and choose how two languages fit together.
+subtitles-page = Finally, the Subtitles page styles the subtitles on your videos: the text, how many lines show, where they sit on the screen, the line spacing, and a background behind them.
+defaults = The Different from defaults list shows everything you've changed. Click Revert on any setting to put it back.
+each-screen = Remember, each profile has its own look. Style your projector one way and your lower third another, and each screen keeps its own settings.
+outro = And that's how to style your screens. Set up a lower third, choose your fonts, colors and spacing, and preview every change before it goes live.

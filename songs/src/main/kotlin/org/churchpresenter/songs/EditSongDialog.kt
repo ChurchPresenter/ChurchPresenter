@@ -153,7 +153,7 @@ fun EditSongDialog(
  * the switch is remembered for the next song rather than reset with each one.
  */
 @Composable
-internal fun EditSongContent(
+fun EditSongContent(
     song: SongItem,
     backgroundButton: SongBackgroundButtonSlot,
     songbooks: List<String>,

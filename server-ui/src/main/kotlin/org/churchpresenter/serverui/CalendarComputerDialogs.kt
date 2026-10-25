@@ -122,7 +122,7 @@ internal fun AddComputerDialog(
 
 /** What [AddComputerDialog] holds, without its window -- what a test draws. */
 @Composable
-internal fun AddComputerContent(
+fun AddComputerContent(
     onCreate: suspend (role: String, name: String) -> CalendarJoin?,
     onDismiss: () -> Unit,
     io: JoinCodeIo = SystemJoinCodeIo,
