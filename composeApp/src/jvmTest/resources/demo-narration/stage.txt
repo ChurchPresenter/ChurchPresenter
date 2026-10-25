@@ -1,0 +1,25 @@
+# What the narrator says in the stage monitor tour, in order. One line per key.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll set up a stage monitor: the screen that faces the people on stage, so your pastor, worship leader and band can see what's live, what's coming next, and the time.
+what = A stage monitor shows things the congregation never sees: the current time, the next item in your schedule, the presenter notes from your slides, and chord charts for the band.
+setup = A stage monitor is a profile, like any other screen. Open Settings, then Profiles, and choose your stage profile, or create a new one.
+mode = On its General page, set the display mode to Stage monitor.
+outputs = Then, on the Outputs page, choose which screen it goes to: a TV at the front of the stage, a monitor by the pulpit, or a confidence screen at the back of the room.
+stage-page = Now open the Stage page. This is where you decide what goes where.
+layout = First, pick a layout. Split the screen into two, three, four or five zones, with two arrangements for every count: Top and Bottom, Left and Right, Classic, Three rows, a Quad grid, and more.
+zones = Each zone is numbered, and the preview shows exactly where it sits on the screen.
+sizes = Drag a divider to give one zone more room than its neighbor. Even out sets them back to equal sizes, for one row or for the whole screen.
+what-goes-where = Then, under What goes where, choose a zone for each kind of content. The song lyrics might go in zone one, the clock in zone two, and what's next in zone three.
+full-screen = Any content can also take the whole screen. Choose Full Screen, and while that content is live, it fills the stage monitor on its own.
+none = Or choose None, to keep that content off the stage monitor entirely.
+stranded = If you switch to a layout with fewer zones, ChurchPresenter tells you what's no longer shown, so nothing goes missing by accident.
+clock = The clock shows the current time, so the speaker always knows where the service is.
+next = Next shows what comes after this in your schedule, so the team is ready for the change.
+notes = Presenter Notes shows the speaker notes from your PowerPoint or Keynote slides.
+chords = For songs, switch on Show Chords. The band sees each chord above its word, in its own color, for the section that's live and the one coming next, along with the song's key, capo and tempo. The congregation's screen never shows a chord.
+metronome = When a song has a tempo, a metronome can pulse on the stage monitor, in the position you choose, to keep everyone in time.
+style = Every zone has its own text style: the font, size, color, bold and italic, alignment and shadow, and a background color behind the zone.
+messages = From the Announcements tab, you can also send a message straight to the stage monitor, such as, one more song, or please wrap up. Timers can go there too, so the speaker can keep an eye on the time.
+live = Let's see it working. We'll put a song live.
+live-stage = On the projector, the congregation sees the lyrics. On the stage monitor, the team sees the same verse, along with what's next and the time.
+outro = And that's the stage monitor. Choose a layout, decide what goes in each zone, style it, and keep everyone on stage one step ahead.
