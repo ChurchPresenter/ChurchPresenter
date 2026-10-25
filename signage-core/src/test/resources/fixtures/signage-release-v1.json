@@ -1,0 +1,9 @@
+{
+  "version": "0.2.0",
+  "protocolMin": 1,
+  "protocolMax": 1,
+  "assets": {
+    "linux_arm64": { "name": "churchpresenter-signage-linux-arm64.tar.gz", "size": 61234567, "sha256": "1111111111111111111111111111111111111111111111111111111111111111" },
+    "linux_x64": { "name": "churchpresenter-signage-linux-x64.tar.gz", "size": 60012973, "sha256": "2222222222222222222222222222222222222222222222222222222222222222" }
+  }
+}

@@ -161,7 +161,7 @@ private fun TabVisibilityMenu(hiddenTabs: Set<String>, onToggleTabHidden: (Tabs)
             onDismissRequest = { showTabVisibilityMenu = false },
             width = TAB_MENU_WIDTH,
         ) {
-            val menuTabs = Tabs.entries.filter { it != Tabs.CROSSWORD }
+            val menuTabs = MENU_TABS
             val visibleCount = visibleTabCount(hiddenTabs)
             ToggleMenuHeader(
                 title = stringResource(Res.string.tab_visibility_tabs),

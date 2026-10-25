@@ -6,7 +6,8 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 What the app reports about itself, and nothing that draws:
 - `LiveMapReporter`: the launch ping to the live map, with the anonymous setup facts and the
-  usage-event counts it carries, and its retry;
+  usage-event counts it carries, and its retry. Its signage screen counts arrive as plain
+  platform-name → count pairs (`signageScreens`), so the module takes nothing of `:signage-core`;
 - `UsageDetection.kt` and `UsageEventMappings.kt`: which presentations count as which usage event
   (dual-language songs, chord charts, split screens, multi-translation Bibles) and the mappings
   from the Calendar, Song Library and converter usage enums;

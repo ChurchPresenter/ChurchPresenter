@@ -78,6 +78,7 @@ fun MainDesktop(
     dialogDismissSignal: Int = 0,
     companionSatelliteViewModel: CompanionSatelliteViewModel,
     onRequestDeveloperMenuUnlock: () -> Unit = {},
+    signage: SignageTabInput? = null,
 ) {
     val state = rememberMainDesktopState {
         CrashReporter.didCrashLastRun && appSettings.analyticsReportingEnabled
@@ -107,7 +108,7 @@ fun MainDesktop(
         hostWindow, appSettings, livePreviewAppSettings, activeQuickBackground, onQuickBackgroundPicked,
         presenterManager, statisticsManager, verseSequenceLog, live, service, publish, flows, link, web, onShowSettings,
         onShowBackgroundSettings, onSettingsChange, theme, qaManager, onOpenLottieGen, sttManager, dialogDismissSignal,
-        companionSatelliteViewModel, onRequestDeveloperMenuUnlock, owned
+        companionSatelliteViewModel, onRequestDeveloperMenuUnlock, signage, owned
     ) {
         MainDesktopScope(
             hostWindow = hostWindow,
@@ -134,6 +135,7 @@ fun MainDesktop(
             dialogDismissSignal = dialogDismissSignal,
             companionSatelliteViewModel = companionSatelliteViewModel,
             onRequestDeveloperMenuUnlock = onRequestDeveloperMenuUnlock,
+            signage = signage,
             owned = owned,
         )
     }

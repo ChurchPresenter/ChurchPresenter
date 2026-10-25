@@ -20,7 +20,7 @@ Replace `http://192.168.1.10:8765` with the URL shown there in every sample belo
 
 ## Authentication
 
-Every route checks one of five things, named in the **Auth** column of the [route index](#route-index):
+Every route checks one of six things, named in the **Auth** column of the [route index](#route-index):
 
 | Auth | How it is checked | Fails with |
 |------|-------------------|------------|
@@ -28,6 +28,7 @@ Every route checks one of five things, named in the **Auth** column of the [rout
 | **Output key** | Browser Source routes only: the API key, but only when that output has *Require API key* switched on and a key is set — the global enable switch does not apply. | `401 Invalid API key` (WebSocket: closed with `VIOLATED_POLICY`) |
 | **Presentation password** | Presentation remote only. The remote must be enabled (else `403 {"error":"remote control is disabled"}`); when a password is set, send `X-Presentation-Password: <pw>` or `?password=<pw>`. | `401 {"error":"Invalid password"}` |
 | **Q&A admin password** | Q&A moderation only. When an admin password is set, send `X-QA-Password: <pw>` or `?password=<pw>`. | `401 {"error":"Invalid admin password"}` |
+| **Player token** | Signage players only: `Authorization: Bearer <token>`, issued when the player is approved in the Signage tab. An unpaired player may open `WS /api/signage/ws` without one, to ask to be paired. | `401 {"ok":false,"reason":"unknown screen"}` (also before a WebSocket upgrade) |
 | **Open** | No check at all: the public Q&A and remote pages, and the CA certificate downloads. | — |
 
 If the API key is wrong the server responds `HTTP 401 Unauthorized`.
@@ -86,7 +87,7 @@ curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
 
 ## Route Index
 
-Every HTTP and WebSocket route the server registers (87). Paths are written exactly as the server
+Every HTTP and WebSocket route the server registers (90). Paths are written exactly as the server
 registers them; `{name}` is a path parameter.
 
 ### Info, songs and schedule
@@ -206,6 +207,15 @@ registers them; `{name}` is a path parameter.
 | `WS /api/browser-source/{index}/ws` | Output key | — | Binary frame stream |
 | `POST /api/browser-source/{index}/auth` | Output key | — | *approval* (once per device) |
 | `POST /api/browser-source/{index}/transpose` | Output key | — | Approved device only |
+
+### Signage players
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `WS /api/signage/ws` | Player token | dev | The player's control channel; see [Signage Players](#signage-players) |
+| `GET /api/signage/manifest` | Player token | dev | Its manifest; version in `ETag` |
+| `GET /api/signage/files/{sha256}` | Player token | dev | A file of its manifest, by SHA-256 |
+| `GET /api/signage/agent/{platform}` | Player token | dev | The player build it was offered, for its own platform |
 
 ### Calendar, certificates and the WebSocket
 
@@ -1481,6 +1491,32 @@ or `{"reset":true}` from an approved device (`403 {"error":"device not approved"
 of the server's own certificate authority, for a device to install before talking HTTPS to it. Both
 are open — a device needs them before it can make any other call — and answer `404` while the server
 runs plain HTTP.
+
+---
+
+## Signage Players
+
+Lobby screens running the ChurchPresenter Signage player (its own repo,
+`ChurchPresenter/ChurchPresenter-Signage`, whose `docs/PROTOCOL.md` is the full protocol). Signage is
+on while the desktop's Signage tab is shown (it starts hidden). The server advertises itself as
+`_churchpresenter._tcp` over mDNS while signage and the server are on, so a player on the same
+network finds it without an address.
+
+- `WS /api/signage/ws` — the player's first message is `hello`. An unpaired player is answered
+  `pairing_pending` and listed in the Signage tab with the code its TV shows; on approval it is sent
+  `paired` with its token and reconnects with it. A paired player is sent `manifest_changed`,
+  `override`, `identify`, `refresh` and `released`, and reports `status`. A player that lists
+  `preview` in its hello is sent `preview_request` while the Signage tab is open and answers
+  `preview`; one that lists `update` can be sent `update_available` and reports `update_progress`.
+- `GET /api/signage/manifest` — that player's manifest as JSON, its version in the `ETag` header;
+  `404` before anything is published to it.
+- `GET /api/signage/files/{sha256}` — one file of that manifest; `404` for any other hash.
+- `GET /api/signage/agent/{platform}` — the player build ChurchPresenter downloaded from the latest
+  signed signage release for that player's platform (`linux_arm64`, `linux_x64`, `windows_x64`);
+  `404` for another platform or before an update was offered.
+
+With signage off every route answers `403 {"ok":false,"reason":"signage is off"}`; the players keep
+playing what they have.
 
 ---
 
