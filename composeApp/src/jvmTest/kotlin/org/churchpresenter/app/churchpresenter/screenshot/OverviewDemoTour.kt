@@ -358,7 +358,7 @@ private fun planItem(id: String, title: String, type: String, song: String? = nu
     )
 
 /** The projector, a second display showing only lower thirds, and a stage monitor. */
-private fun threeScreens(s: AppSettings): AppSettings {
+internal fun threeScreens(s: AppSettings): AppSettings {
     val proj = s.projectionSettings
     val lowerThird = OutputProfile(
         id = "demo-lower-third",
