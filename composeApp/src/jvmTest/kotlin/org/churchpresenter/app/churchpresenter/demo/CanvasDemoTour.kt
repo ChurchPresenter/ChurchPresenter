@@ -14,6 +14,7 @@ import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performTouchInput
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.screenshot.writeScenes
 
 /** The Canvas tour: scenes built from every kind of source and shape, saved and put live. */
 class CanvasDemoTour {

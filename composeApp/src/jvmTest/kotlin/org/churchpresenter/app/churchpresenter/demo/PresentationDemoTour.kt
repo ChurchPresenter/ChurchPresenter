@@ -30,6 +30,8 @@ import java.awt.Dimension
 import java.awt.Rectangle
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.screenshot.LIBRARY
+import org.churchpresenter.app.churchpresenter.screenshot.library
 
 /** The Presentation tour: an animated deck opened from the recents, presented, blanked and run from a phone. */
 class PresentationDemoTour {

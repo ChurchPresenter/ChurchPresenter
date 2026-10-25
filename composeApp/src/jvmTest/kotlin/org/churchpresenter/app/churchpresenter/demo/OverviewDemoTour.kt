@@ -40,6 +40,8 @@ import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.screenshot.AppPreviewStatisticsScreenshotTest
+import org.churchpresenter.app.churchpresenter.screenshot.LIBRARY
 
 /** A first look around the main window: the schedule, the tabs, going live, the previews and the tools. */
 class OverviewDemoTour {

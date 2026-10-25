@@ -22,6 +22,7 @@ import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.serverui.ServerSettingsTab
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.screenshot.writeQuestions
 
 /** The Q&A tour: the server, sharing with phones, moderating questions, going live and sessions. */
 class QADemoTour {

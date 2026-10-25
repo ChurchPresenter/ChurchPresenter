@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performClick
 import org.churchpresenter.media.tabs.RecentMediaFiles
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.screenshot.LIBRARY
+import org.churchpresenter.app.churchpresenter.screenshot.library
 
 /** The Media tour: a video from the recents, played on the big screen, with its sound and subtitles. */
 class MediaDemoTour {

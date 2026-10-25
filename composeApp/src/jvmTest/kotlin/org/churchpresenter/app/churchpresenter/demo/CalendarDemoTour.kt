@@ -56,6 +56,7 @@ import java.time.Instant
 import java.time.LocalTime
 import kotlin.math.abs
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.screenshot.LIBRARY
 
 /** The Calendar Manager: planning ahead, a pre-service loop that runs itself, loading, printing, phones. */
 class CalendarDemoTour {

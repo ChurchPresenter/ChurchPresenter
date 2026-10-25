@@ -89,6 +89,9 @@ import org.churchpresenter.calendar.model.UpcomingLoad
 import kotlin.math.hypot
 import kotlin.math.min
 import kotlin.math.max
+import org.churchpresenter.app.churchpresenter.screenshot.LIBRARY
+import org.churchpresenter.app.churchpresenter.screenshot.library
+import org.churchpresenter.app.churchpresenter.screenshot.settleLive
 
 // The main window and, beside it off camera, the projector it drives — in dp.
 private const val APP_W = 1600f
@@ -967,7 +970,10 @@ internal class DemoTour(
         if (!recording) return
         val lines = cues.joinToString("") { (at, wav) -> "${at - segmentStart}\t${wav.path}\n" }
         File(segmentDir, "cues.txt").writeText(lines)
-        if (ONLY == null) File(out, "segments.txt").writeText(order.joinToString("\n"))
+        // A CP_DEMO_ONLY run stops early: its order is a prefix of the whole one, which it keeps.
+        val list = File(out, "segments.txt")
+        val known = if (list.isFile) list.readLines().filter { it.isNotBlank() } else emptyList()
+        if (ONLY == null || known.take(order.size) != order) list.writeText(order.joinToString("\n"))
     }
 
     private fun segmentFolder(name: String) = File(out, "seg-$name").apply {
