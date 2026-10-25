@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.click
@@ -121,8 +122,10 @@ class SongLibraryDemoTour {
         pause(0.3)
         say("books")
         point("Song book", "One book, or songs in none", hasText("All Song Books"))
+        say("books-pick")
         filterBook("Gospel Songs")
-        point("Just that book", "6 of 32 songs", hasText("of 32 songs", substring = true))
+        pause(1.0)
+        say("books-back")
         filterBook("All Song Books")
         say("sort")
         panelNote("Sort", "Click a heading", seek(hasText("Title", ignoreCase = true)), click = true, numbered = true)
@@ -131,9 +134,11 @@ class SongLibraryDemoTour {
         quietPanelClick(hasText("Columns"))
         menusInPlace = true
         val list = menuEntry(hasText("Show all"))
+        say("columns-menu")
         if (list != null) panelNote("Every column", "Tick to show, untick to hide", list)
-        // Escape closes the menu, as it does for a user; it must be gone before Duration is shown.
-        runCatching { panelItems(hasText("Show all")).last().node.performKeyInput { pressKey(Key.Escape) } }
+        // A press outside the menu closes it, as for a user -- not on its button, which would open it
+        // again. It must be gone before Duration is shown.
+        runCatching { panelItems(hasText("song books", substring = true)).first().node.performTouchInput { click() } }
         ui.waitForIdle()
         menusInPlace = false
         pause(0.2)
@@ -157,6 +162,7 @@ class SongLibraryDemoTour {
         panelNote("Click a field", "Enter keeps it, Escape throws it away", seek(hasText("Carl Boberg")), click = true)
         runCatching {
             val field = seek(hasSetTextAction() and hasText("Carl Boberg"))
+            say("edit-type")
             panelEdit("Type", "Changed in place", field, "Carl Gustav Boberg")
             // Enter keeps it, as the narration says; until then Revert has nothing to undo.
             panelItem(hasSetTextAction() and hasText("Carl Gustav Boberg")).node.performKeyInput { pressKey(Key.Enter) }
@@ -234,8 +240,10 @@ class SongLibraryDemoTour {
         menusInPlace = false
         pause(0.3)
         runCatching {
+            say("new-book-name")
             panelEdit("Name it", "Like Christmas 2026", dialogPopupItem(hasSetTextAction()), "Christmas 2026")
             val assign = dialogPopupItem(hasText("File the", substring = true))
+            say("new-book-file")
             panelNote("File them under it", "The songs you selected", assign)
             dialogPopupItem(hasText("Cancel")).node.performClick()
             ui.waitForIdle()
@@ -266,7 +274,15 @@ class SongLibraryDemoTour {
             // The tooltip opens under the mark, so it is drawn where it opens.
             menusInPlace = true
             panelHover(mark)
-            panelNote("The flashing !", "Hover it to see what's wrong", mark, numbered = true)
+            // The tooltip opens under the mark: outlined itself, so the callout does not cover it.
+            // The tooltip opens centered under the mark and is not in the semantics tree, so the
+            // outline takes in the space it fills -- the callout then sits below it, not on it.
+            val c = mark.bounds.center
+            val tip = Target(
+                mark.node,
+                Rect(c.x - dp(TIP_HALF_W), mark.bounds.top, c.x + dp(TIP_HALF_W), mark.bounds.bottom + dp(TIP_H)),
+            )
+            panelNote("The flashing !", "Hover it to see what's wrong", tip, numbered = true)
             menusInPlace = false
         } else {
             caption("The flashing !", "Hover it to see what's wrong")
@@ -278,16 +294,19 @@ class SongLibraryDemoTour {
         comparing.value = SongFileParser().parseSongFile(bilingual, "Hymnal")
         scrollGrid(-GRID_SCROLL_PX)
         pause(0.5)
+        say("compare-open")
         point("Side by side", "Every problem marked", hasText("need attention", substring = true))
         say("compare-problem")
         // The first match is verse 2's own mark; the legend at the foot repeats the words.
         point("Verse 2: line count differs", "4 lines in English, 3 in Spanish", hasText("Line count differs"))
-        point("What's short", "Language 2 has 3", hasText("has 3", substring = true))
+        say("compare-short")
+        point("What's short", "3 lines, where English has 4", hasText("L1 has", substring = true))
         say("compare-show")
         val third = runCatching { seek(hasText("Language 3", substring = true)) }.getOrNull()
         if (third != null) {
             panelNote("Hide a language", "Click its chip", third, click = true)
             pause(0.6)
+            say("compare-back")
             panelNote("Bring it back", "Click it again", seek(hasText("Language 3", substring = true)), click = true)
         } else {
             caption("Hide a language", "Click its chip")
@@ -302,6 +321,8 @@ private val comparing = mutableStateOf<SongItem?>(null)
 
 private const val LIBRARY_W = 1420f
 private const val GRID_SCROLL_PX = 2_000f
+private const val TIP_HALF_W = 120f
+private const val TIP_H = 30f
 private const val LIBRARY_H = 880f
 
 private val TYPICAL = mapOf(
