@@ -46,12 +46,14 @@ class AccessibleNamesTest : MainDesktopComposeHarness() {
     /**
      * One per tab, so a new tab cannot be left out. The Web tab is `:web`'s `WebTabAccessibleNamesTest`:
      * composing it through the main window here disturbs this suite's later main-window tests in the
-     * same JVM.
+     * same JVM. The Signage tab is `:signage`'s `SignageTabAccessibilityTest`: it needs a running
+     * signage hub, which this harness does not start.
      */
     @Test
     fun `every tab has a test of its own`() {
         val covered = this::class.java.declaredMethods.map { it.name }.toSet()
-        val missing = (Tabs.entries - Tabs.WEB).filter { tab -> covered.none { it.startsWith("the ${tab.name} tab") } }
+        val missing = (Tabs.entries - Tabs.WEB - Tabs.SIGNAGE)
+            .filter { tab -> covered.none { it.startsWith("the ${tab.name} tab") } }
         assertTrue(missing.isEmpty(), "no accessible-names test for: $missing")
     }
 

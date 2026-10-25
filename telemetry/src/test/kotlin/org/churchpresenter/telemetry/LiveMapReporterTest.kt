@@ -356,6 +356,31 @@ class LiveMapReporterTest {
     }
 
     @Test
+    fun `paired signage screens are sent as a total and a count per platform`() {
+        val facts = LiveMapReporter.setupFacts(
+            AppSettings(), screenCount = 1,
+            signageScreens = mapOf("linux_arm64" to 2, "windows_x64" to 1, "riscv64" to 1),
+        )
+        val url = LiveMapReporter.buildPingUrl("linux", "26.1.0", null, isDevBuild = false, setup = facts)
+
+        // A platform this build has no name for still counts in the total.
+        assertTrue("&signageScreens=4" in url, url)
+        assertTrue("&signageLinuxArm64=2" in url, url)
+        assertTrue("&signageWindowsX64=1" in url, url)
+        assertFalse("signageLinuxX64" in url, url)
+        assertFalse("riscv64" in url, url)
+    }
+
+    @Test
+    fun `an install with no signage screens sends nothing about signage`() {
+        val url = LiveMapReporter.buildPingUrl(
+            "linux", "26.1.0", null, isDevBuild = false,
+            setup = LiveMapReporter.SetupFacts(signageScreens = mapOf("linux_x64" to 0)),
+        )
+        assertFalse("signage" in url, url)
+    }
+
+    @Test
     fun `song counts from an unset song folder are zero rather than an error`() {
         assertEquals(0 to 0, LiveMapReporter.gatherSongCounts(AppSettings()))
     }

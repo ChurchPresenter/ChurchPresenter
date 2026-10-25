@@ -176,6 +176,7 @@ internal fun MainWindowScope.MainDesktopHost() {
                 flows = remoteControlFlows(),
                 link = instanceLinkBridge(instanceLinkIsControllerConnected, instanceLinkUsesRemoteContent),
                 web = webAccessState(),
+                signage = root.signageTabInput(),
             )
         }
     }

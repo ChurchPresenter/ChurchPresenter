@@ -164,6 +164,12 @@ include(":bible-tab")
 // use, the tunnel, SSL and calendar sync. Depended on by :composeApp, which applies what remote
 // clients ask for to the live output.
 include(":server")
+// The signage screens' wire types (a copy of the ChurchPresenter-Signage repo's :core, kept to its
+// fixtures) and the hub of paired screens the server and the Signage tab share.
+include(":signage-core")
+// The Signage tab (dev mode only): the lobby screens, the players asking to join, and the signage
+// folder their playlists come from.
+include(":signage")
 
 // The Schedule tab and ScheduleViewModel: the running order, its rows, and the .schedule files it
 // opens and saves. Depended on by :composeApp, which hands it the Planning Center import.

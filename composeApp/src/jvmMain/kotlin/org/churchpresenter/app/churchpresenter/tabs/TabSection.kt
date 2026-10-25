@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Dashboard
@@ -110,4 +111,5 @@ internal fun tabIcon(tab: Tabs): ImageVector = when (tab) {
     Tabs.CROSSWORD -> Icons.Filled.GridOn
     Tabs.DICTIONARY -> Icons.Filled.Book
     Tabs.COMPANION_SURFACE -> Icons.Filled.Apps
+    Tabs.SIGNAGE -> Icons.Filled.Tv
 }

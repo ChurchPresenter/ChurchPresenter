@@ -1,0 +1,25 @@
+{
+  "protocol": 1,
+  "ownerId": "cp-7f3a",
+  "screen": { "name": "Lobby left", "orientation": "portrait", "width": 1080, "height": 1920 },
+  "playlists": [
+    {
+      "id": "welcome",
+      "name": "Welcome",
+      "items": [
+        { "sha256": "1111111111111111111111111111111111111111111111111111111111111111", "kind": "image", "durationMs": 8000, "transition": "crossfade", "transitionMs": 800 },
+        { "sha256": "2222222222222222222222222222222222222222222222222222222222222222", "kind": "video", "durationMs": null, "transition": "cut", "transitionMs": 0 }
+      ]
+    },
+    { "id": "events", "name": "Events", "items": [] }
+  ],
+  "schedule": [
+    { "id": "night", "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "start": "22:00", "end": "06:00", "action": { "type": "tv_off" } },
+    { "id": "sunday", "days": ["sun"], "start": "09:30", "end": "12:30", "action": { "type": "service" } },
+    { "id": "wednesday", "days": ["wed"], "start": "17:00", "end": "20:00", "action": { "type": "play", "playlistId": "events" } }
+  ],
+  "defaultPlaylistId": "welcome",
+  "idleCard": { "title": "Grace Church", "logoSha256": "3333333333333333333333333333333333333333333333333333333333333333" },
+  "timeZone": "America/Chicago",
+  "diagnostics": false
+}

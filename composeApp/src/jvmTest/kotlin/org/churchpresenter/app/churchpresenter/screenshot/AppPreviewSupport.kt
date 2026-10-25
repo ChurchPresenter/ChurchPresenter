@@ -355,6 +355,7 @@ private fun tabLabel(tab: Tabs) = when (tab) {
     // and nothing noticed, because no preview used this tab until one was added for the website.
     Tabs.STT -> "STT"
     Tabs.DICTIONARY -> "Dictionary"
+    Tabs.SIGNAGE -> "Signage"
     Tabs.CROSSWORD -> "Crossword"
     Tabs.COMPANION_SURFACE -> "Companion"
 }

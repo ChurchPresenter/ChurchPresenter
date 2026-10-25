@@ -286,6 +286,9 @@ class BandControlPanelTest {
         val release = CompletableDeferred<File?>()
         val vm = viewModel()
         showDark { BandControlPanel(vm, 460.dp, pickImage = { release.await() }) }
+        // The first generation clears the status line as it finishes; let it, or on a slow machine
+        // it lands after the unreadable picture's message and wipes it.
+        waitUntil(timeoutMillis = 5_000) { vm.generatedJson != null }
         clickDescription(Strings.bandLookTooltip)
         click(Strings.bandImageChoose)
         assertTrue(vm.choosingImage)
