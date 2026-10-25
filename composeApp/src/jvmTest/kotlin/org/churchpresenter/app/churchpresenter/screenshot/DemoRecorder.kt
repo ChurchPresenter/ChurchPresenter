@@ -84,6 +84,8 @@ import org.churchpresenter.lowerthird.render.LowerThirdOffscreenRenderer
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.math.abs
+import org.churchpresenter.app.churchpresenter.ServicePlanLink
+import org.churchpresenter.calendar.model.UpcomingLoad
 import kotlin.math.hypot
 import kotlin.math.min
 import kotlin.math.max
@@ -183,6 +185,7 @@ internal fun recordTour(
                                     theme = THEME,
                                     live = liveCallbacks(presenter),
                                     publish = MainDesktopPublishers(onScheduleActionsReady = { actions = it }),
+                                    service = ServicePlanLink(upcomingServiceLoad = demoUpcomingLoad.value),
                                     web = WebAccessState(
                                         serverUrl = "http://192.168.1.42:8080",
                                         // What AppWiring does: Blank Output freezes the slide output.
@@ -751,7 +754,8 @@ internal class DemoTour(
         val start = frame
         val talk = narrate(heading, sub)
         scene.focus = null
-        camTo(Camera.full(appW, appH))
+        // With a window open the app behind it stays put; zooming it out would only stir the backdrop.
+        if (!panelOpen) camTo(Camera.full(appW, appH))
         scene.caption = "$heading — $sub"
         scene.captionAge = 0
         hold(maxOf(2.0, talk + 0.3))
@@ -1152,10 +1156,17 @@ internal class DemoTour(
         Pt(dialog.center.x - popup.width / 2, dialog.center.y - popup.height / 2)
 
     /** A control inside a pop-up the open dialog raised, where it is drawn (over the dialog). */
-    fun dialogPopupItem(matcher: SemanticsMatcher): Target {
+    fun dialogPopupItem(
+        matcher: SemanticsMatcher,
+        topmost: Boolean = false,
+        below: Float = Float.NEGATIVE_INFINITY,
+    ): Target {
         val roots = ui.onAllNodes(isRoot()).fetchSemanticsNodes().drop(1)
         val nodes = ui.onAllNodes(matcher)
-        val hit = nodes.fetchSemanticsNodes().withIndex().last()
+        val all = nodes.fetchSemanticsNodes().withIndex().filter { it.value.boundsInWindow.top > below }
+        // Topmost for a tab, whose label the open tab's own content can repeat further down; [below]
+        // keeps the match under a control of the sheet, away from the window behind it.
+        val hit = if (topmost) all.minBy { it.value.boundsInWindow.top } else all.last()
         val b = hit.value.boundsInWindow
         val popup = roots.firstOrNull { it.boundsInWindow.contains(b.center) }?.boundsInWindow
             ?: return Target(nodes[hit.index], b)
@@ -1190,3 +1201,6 @@ private fun cardBounds(layer: SemanticsNode, maxWidth: Float): Rect? {
 }
 
 private const val HOVER_FADE_MS = 400L
+
+/** The calendar's next automatic load, as a tour wants the Schedule tab to announce it; none by default. */
+internal val demoUpcomingLoad = androidx.compose.runtime.mutableStateOf<UpcomingLoad?>(null)

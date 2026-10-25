@@ -58,7 +58,7 @@ fun CalendarEnrollQrDialog(invite: CalendarInvite, onDismiss: () -> Unit) {
 }
 
 @Composable
-internal fun CalendarEnrollQrContent(enrollment: CalendarEnrollment, onDismiss: () -> Unit) {
+fun CalendarEnrollQrContent(enrollment: CalendarEnrollment, onDismiss: () -> Unit) {
     val bitmap = remember(enrollment) { connectionQrBitmap(enrollment.qrContent, QR_PX) }
     // The QR carries the phone's token and the calendar key, and this machine is often on a projector
     // or a stream. It goes away by itself; the phone can ask again.

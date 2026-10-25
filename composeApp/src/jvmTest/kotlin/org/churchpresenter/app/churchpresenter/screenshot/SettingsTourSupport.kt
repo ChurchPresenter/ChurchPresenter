@@ -29,6 +29,8 @@ internal fun DemoTour.rail(label: String) = panelItems(hasText(label)).minBy { i
 internal fun DemoTour.quietPanelClick(m: SemanticsMatcher) {
     panelItems(m).firstOrNull()?.node?.performClick()
     ui.waitForIdle()
+    // A fresh picture, so what the click opened is in the frames that follow.
+    pause(QUIET_CLICK_HOLD)
 }
 
 /**
@@ -49,5 +51,6 @@ internal fun DemoTour.seek(m: SemanticsMatcher): Target {
     return panelReveal(m)
 }
 
+private const val QUIET_CLICK_HOLD = 0.1
 private const val SEEK_STEPS = 40
 private const val SEEK_PX = 220f

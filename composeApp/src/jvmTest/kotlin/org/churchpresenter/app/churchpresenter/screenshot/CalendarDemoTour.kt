@@ -9,33 +9,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.performKeyInput
-import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.calendar.model.CalendarDocument
+import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.PresetDocument
 import org.churchpresenter.calendar.model.ServiceKind
+import org.churchpresenter.calendar.model.UpcomingLoad
 import org.churchpresenter.calendar.ui.CalendarApp
 import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.serverui.CalendarEnrollQrContent
 import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.serverui.ServerSettingsTab
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.test.Test
 
@@ -49,7 +52,13 @@ class CalendarDemoTour {
         TestSingletons.latchToTestHome()
         val folder = File(System.getProperty("user.home"), "demo-calendar").apply { deleteRecursively(); mkdirs() }
         seed(folder)
-        val sync = CalendarSyncService(folder, File(LIBRARY, "Songs"), settings = { syncSettings }, saveSettings = {})
+        val sync = CalendarSyncService(
+            folder,
+            File(LIBRARY, "Songs"),
+            settings = { syncSettings },
+            saveSettings = {},
+            initialDevices = SAMPLE_PHONES,
+        )
         recordTour(
             "calendar",
             tab = "Calendar Manager",
@@ -58,7 +67,9 @@ class CalendarDemoTour {
             heading = "The " to "",
             settings = ::threeScreens,
             panel = { settings, change ->
-                if (screen.value == "server") {
+                if (screen.value == "qr") {
+                    Box(Modifier.size(QR_W.dp, QR_H.dp)) { CalendarEnrollQrContent(SAMPLE_ENROLLMENT, onDismiss = {}) }
+                } else if (screen.value == "server") {
                     Box(Modifier.size(SERVER_W.dp, SERVER_H.dp)) {
                         ServerSettingsTab(settings, change, companion, remember { RemoteClientManager() }, sync)
                     }
@@ -67,9 +78,13 @@ class CalendarDemoTour {
                         CalendarApp(
                             storeFolder = folder,
                             songFolder = File(LIBRARY, "Songs"),
-                            host = CalendarHost(loadIntoSchedule = { items, timing, replace, _, start ->
-                                loadInto(items, timing, replace, start)
-                            }),
+                            host = CalendarHost(
+                                loadIntoSchedule = { items, timing, replace, _, start ->
+                                    loadInto(items, timing, replace, start)
+                                },
+                                // Sync shown switched on, so the header offers Invite a phone.
+                                cloudSync = CalendarCloudSync(enabled = { true }, setEnabled = {}),
+                            ),
                             today = TODAY,
                             now = { NOW },
                             watchStoreFolder = false,
@@ -138,22 +153,32 @@ class CalendarDemoTour {
         val add = hasText("Add song, verse or section")
         panelNote("Add song, verse or section", "Five tabs", seek(add), click = true, numbered = true)
         say("add-song")
-        sheet("Songs", "By title or number", hasText("Songs"))
+        sheet("Songs", "By title or number", hasText("Songs"), tab = true)
         say("add-bible")
         sheetClick(hasText("Bible"))
-        sheet("Bible", "Type a reference, or browse", hasText("Bible"))
+        sheet("Bible", "Type a reference, or browse", hasText("Bible"), tab = true)
         say("add-section")
         sheetClick(hasText("Section"))
-        sheet("Section", "Pre-Service, Worship, Word…", hasText("Section"))
+        sheet("Section", "Pre-Service, Worship, Word…", hasText("Section"), tab = true)
         say("add-ministry")
         sheetClick(hasText("Ministry"))
-        sheet("Ministry", "Planned and timed, never on screen", hasText("Ministry"))
+        sheet("Ministry", "Planned and timed, never on screen", hasText("Ministry"), tab = true)
         say("add-preset")
         sheetClick(hasText("Presets"))
-        sheet("Presets", "Reusable pieces of a service", hasText("Sunday announcements") or hasText("Presets"))
-        say("presets-how")
-        caption("Save preset", "On Pictures, Presentation, Media, Announcements, Canvas")
+        sheet("Presets", "Reusable pieces of a service", hasText("Presets"), tab = true)
         closeSheet()
+        closePanel()
+        say("presets-how")
+        // A preset is made on its own tab: here, the Pictures tab's Save preset.
+        quietClick(tab("Pictures"))
+        inSchedule(
+            "Save preset",
+            "On Pictures, Presentation, Media, Announcements, Canvas",
+            hasContentDescription("Save preset"),
+            tabArea = true,
+        )
+        quietClick(tab("Bible"))
+        openPanel("Calendar", CALENDAR_W, CALENDAR_H)
         say("durations")
         point("How long each row runs", "Measured over real services", hasText("5:00"))
         say("lay-out")
@@ -165,7 +190,8 @@ class CalendarDemoTour {
         say("reorder")
         point("Drag, or the arrows", "Change the order", hasContentDescription("Move down"))
         say("attention")
-        point("Rows that need attention", "Click to fix", hasText("need attention", substring = true))
+        val attention = hasText("needs attention", substring = true) or hasText("need attention", substring = true)
+        point("Items that need attention", "Click to fix", attention)
     }
 
     /** The pre-service loop: the slideshow from −30, the countdown from −5, armed. */
@@ -173,7 +199,7 @@ class CalendarDemoTour {
         say("loop-intro")
         point("A pre-service loop", "Slideshow from −30, countdown from −5", hasText("Sunday announcements"))
         say("timing")
-        escape()
+        closeSheet()
         panelNote("Its timing", "Four settings", seek(hasText("Sunday announcements")), click = true, numbered = true)
         runCatching {
             waitFor("the row's timing panel", SHEET_WAIT_MS) {
@@ -192,6 +218,8 @@ class CalendarDemoTour {
         val summary = hasText("Starts on its own", substring = true)
         sheet("In plain words", "Starts at 9:30, loops until cued, then holds", summary)
         closeSheet()
+        say("chips")
+        point("Timing at a glance", "−30, Loop, Next, After previous", hasText("Loop"))
         say("countdown")
         point("The countdown", "Starts at −5, then next", hasText("Countdown · 5 min"))
         say("post-service")
@@ -206,16 +234,16 @@ class CalendarDemoTour {
 
     private fun DemoTour.repeating() {
         say("repeat")
-        val copy = hasContentDescription("Copy this service to another date, or repeat it")
-        panelNote("Copy and repeat", "Weekly, every 2 weeks, monthly", seek(copy), click = true, numbered = true)
-        sheet("Repeat", "Once, weekly, every 2 weeks, monthly", hasText("Weekly"))
+        quietPanelClick(hasContentDescription("Copy this service to another date, or repeat it"))
+        sheet("Repeat", "Once, weekly, every 2 weeks, monthly", hasText("Weekly"), tab = true)
+        sheetClick(hasText("Weekly"))
         say("series")
-        sheet("Each copy its own", "Or All in series", hasText("How many times") or hasText("Repeat"))
+        val times = hasText("How many times", ignoreCase = true)
+        sheet("How many times", "Each copy is its own service", times, tab = true)
         closeSheet()
         say("template")
-        val template = hasContentDescription("Save this run of show as a template")
-        panelNote("Save as template", "Sections, or items too", seek(template), click = true)
-        sheet("Sections, or items too", "Timings and presets included", hasText("Items") or hasText("Template name"))
+        quietPanelClick(hasContentDescription("Save this run of show as a template"))
+        sheet("Sections, or items too", "Timings and presets included", hasText("Items"), tab = true)
         closeSheet()
     }
 
@@ -225,6 +253,11 @@ class CalendarDemoTour {
         sheetClick(hasText("Replace and load"))
         say("auto-load")
         point("Load the service automatically", "5 minutes ahead, up to 2 hours", hasText("Turn on"))
+        say("auto-load-where")
+        quietPanelClick(hasText("Calendar settings"))
+        sheetClick(hasText("Defaults"))
+        sheet("Calendar settings → Defaults", "And how far ahead", hasText("Load the service automatically"))
+        closeSheet()
         say("pdf")
         point("Export PDF", "Public or staff copy", hasText("Export PDF"))
         closePanel()
@@ -235,7 +268,7 @@ class CalendarDemoTour {
             find(hasText("Schedule")) { it.right < dp(720f) },
         )
         say("schedule-times")
-        inSchedule("Length and start time", "Bold: starts on its own", hasText("9:30", substring = true))
+        inSchedule("Length and start time", "Bold: starts on its own", hasText("9:55 AM", substring = true))
         say("schedule-badges")
         inSchedule(
             "What it will do",
@@ -247,12 +280,17 @@ class CalendarDemoTour {
         say("schedule-drift")
         caption("Ahead, behind, or on plan", "On the row that's live")
         say("schedule-notice")
-        caption("Loading Sunday Morning in 10 min", "Load now, or let it load itself")
+        // What the Schedule tab shows before an automatic load: the next service and when it loads.
+        demoUpcomingLoad.value = UpcomingLoad("sunday-1", "Sunday Morning", LocalDateTime.now().plusMinutes(10))
+        ui.waitForIdle()
+        inSchedule("Loading Sunday Morning in 10 min", "Load now, or let it load itself", hasText("Load now"))
+        demoUpcomingLoad.value = null
     }
 
     /** Points at [m] in the sheet open over the calendar, or says the line over a caption. */
-    private fun DemoTour.sheet(heading: String, sub: String, m: SemanticsMatcher) {
-        val target = runCatching { dialogPopupItem(m) }.getOrNull()
+    private fun DemoTour.sheet(heading: String, sub: String, m: SemanticsMatcher, tab: Boolean = false) {
+        val below = if (tab) tabsTop() else Float.NEGATIVE_INFINITY
+        val target = runCatching { dialogPopupItem(m, topmost = tab, below = below) }.getOrNull()
         if (target != null) {
             panelNote(heading, sub, target)
         } else {
@@ -261,10 +299,20 @@ class CalendarDemoTour {
         }
     }
 
+    /**
+     * Where a sheet's own tabs and buttons start: under its search field when it has one (the
+     * picker), else under its title -- so a label is never matched in the window behind the sheet.
+     */
+    private fun DemoTour.tabsTop(): Float = runCatching {
+        val search = hasText("Search songs", substring = true)
+        ui.onAllNodes(search).fetchSemanticsNodes().first().boundsInWindow.top
+    }.getOrElse { Float.NEGATIVE_INFINITY }
+
     private fun DemoTour.sheetClick(m: SemanticsMatcher) {
         // A pointer press, not a semantics click: the picker's tabs answer only to the pointer.
-        runCatching { dialogPopupItem(m).node.performTouchInput { click() } }
+        runCatching { dialogPopupItem(m, topmost = true, below = tabsTop()).node.performTouchInput { click() } }
         ui.waitForIdle()
+        pause(SHEET_CLICK_HOLD)
     }
 
     private fun DemoTour.phones() {
@@ -273,15 +321,34 @@ class CalendarDemoTour {
         say("sync-on")
         screen.value = "server"
         openPanel("Settings — Server", SERVER_W, SERVER_H)
-        point("Calendar on phones & tablets", "Sync the calendar with phones", hasText("Calendar on phones & tablets"))
+        point("Calendar sync", "Switch it on here", hasText("Calendar sync"))
         say("relay")
-        point("Through the relay", "No account, no church WiFi needed", hasText("Sync the calendar with phones"))
+        val relay = hasText("Plan services from the mobile app", substring = true)
+        point("Through the relay", "No account, no church WiFi needed", relay)
+        closePanel()
+        say("sync-calendar")
+        screen.value = "calendar"
+        openPanel("Calendar", CALENDAR_W, CALENDAR_H)
+        quietPanelClick(hasText("Calendar settings"))
+        sheetClick(hasText("Defaults"))
+        val calendarSwitch = hasText("Sync with the cloud and mobile devices")
+        sheet("In the calendar's settings too", "Sync with the cloud and mobile devices", calendarSwitch)
+        closeSheet()
         say("secure")
         caption("Private, even from us", "Encrypted before it leaves; the key travels by QR code")
         say("invite")
-        point("Invite a phone", "Scan the code with the app", hasText("Invite a phone", substring = true))
+        point("Invite a phone", "In the calendar's header", hasText("Invite a phone"))
+        closePanel()
+        say("invite-qr")
+        screen.value = "qr"
+        openPanel("Invite a phone", QR_W, QR_H)
+        point("Scan this code", "Works for 15 minutes, from anywhere", hasText("Scan this code", substring = true))
+        closePanel()
         say("enrolled")
-        point("Enrolled phones", "Revoke when a volunteer moves on", hasText("Phones") or hasText("Enrolled phones"))
+        screen.value = "server"
+        openPanel("Settings — Server", SERVER_W, SERVER_H)
+        val phone = hasText("Pastor Mark's iPhone", substring = true) or hasText("Phones")
+        point("Enrolled phones", "Revoke when a volunteer moves on", phone)
         say("mobile")
         caption("On the phone", "See the month, plan, build the run of show")
         say("sync-timing")
@@ -290,22 +357,19 @@ class CalendarDemoTour {
     }
 
     /** Points at [m] in the Schedule panel, or says the line over a caption when it isn't there. */
-    private fun DemoTour.inSchedule(heading: String, sub: String, m: SemanticsMatcher) {
-        val target = runCatching { find(m) { it.right < dp(720f) && it.top > dp(100f) } }.getOrNull()
+    private fun DemoTour.inSchedule(heading: String, sub: String, m: SemanticsMatcher, tabArea: Boolean = false) {
+        val target = runCatching {
+            if (tabArea) find(m) { it.left > dp(380f) } else find(m) { it.right < dp(720f) && it.top > dp(100f) }
+        }.getOrNull()
         if (target != null) note(heading, sub, target) else caption(heading, sub)
     }
 
-    /** Closes whatever sheet is open over the calendar: its own button, or Escape (the picker has only an ×). */
+    /** Closes whatever sheet is open over the calendar, by its × (labeled Close), or Cancel or Done. */
     private fun DemoTour.closeSheet() {
-        sheetClick(hasText("Cancel") or hasText("Done"))
-        escape()
-    }
-
-    private fun DemoTour.escape() {
         repeat(2) {
             runCatching {
-                val roots = ui.onAllNodes(isRoot())
-                roots[roots.fetchSemanticsNodes().size - 1].performKeyInput { pressKey(Key.Escape) }
+                val close = ui.onAllNodes(hasContentDescription("Close") or hasText("Cancel") or hasText("Done"))
+                close[close.fetchSemanticsNodes().size - 1].performClick()
             }
             ui.waitForIdle()
         }
@@ -327,10 +391,10 @@ private var loadInto: (List<ScheduleItem>, Map<String, RowTiming>, Boolean, Stri
 /** Which window the panel shows: the calendar, or Settings → Server. */
 private val screen = mutableStateOf("calendar")
 
-private val syncSettings = org.churchpresenter.settings.CalendarSyncSettings()
+private val syncSettings = org.churchpresenter.settings.CalendarSyncSettings(enabled = true)
 
-internal val TODAY: LocalDate = LocalDate.of(2026, 11, 1)
-internal val NOW: LocalTime = LocalTime.of(9, 20)
+private val TODAY: LocalDate = LocalDate.of(2026, 11, 1)
+private val NOW: LocalTime = LocalTime.of(9, 20)
 
 private val ANNOUNCEMENTS = ScheduleItem.PictureItem(
     id = "announcements",
@@ -362,7 +426,7 @@ private fun song(number: Int, title: String) = ScheduleItem.SongItem(
 )
 
 /** This morning's service, with the pre-service loop the tour explains, and a month around it. */
-internal fun month(): CalendarDocument {
+private fun month(): CalendarDocument {
     val rows = listOf(
         label("pre", "Pre-Service", "#64748B"),
         ANNOUNCEMENTS,
@@ -389,6 +453,8 @@ internal fun month(): CalendarDocument {
         ScheduleItem.MinistryItem(id = "violin", title = "Violin solo", detail = "Josh"),
         label("response", "Response", "#22C55E"),
         song(455, "It Is Well With My Soul"),
+        // Not in the library: the calendar flags it, for the line about items that need attention.
+        song(999, "Shine, Jesus, Shine"),
         label("closing", "Closing", "#A855F7"),
         WELCOME,
     )
@@ -432,7 +498,24 @@ internal fun month(): CalendarDocument {
 }
 
 private const val SHEET_WAIT_MS = 5_000L
+private const val SHEET_CLICK_HOLD = 0.1
 private const val CALENDAR_W = 1300f
 private const val CALENDAR_H = 850f
+
+/** Three phones already enrolled, for the card's list. */
+private val SAMPLE_PHONES = listOf(
+    PairedDevice("phone-1", "Pastor Mark's iPhone", "2026-09-06T10:15:00Z", "2026-10-31T18:42:00Z"),
+    PairedDevice("phone-2", "Worship leader · Sarah", "2026-09-13T09:02:00Z", "2026-11-01T07:58:00Z"),
+    PairedDevice("phone-3", "Announcements · Dave", "2026-10-04T12:30:00Z", "2026-10-29T20:11:00Z"),
+)
+private const val QR_W = 460f
+private const val QR_H = 620f
+private val SAMPLE_ENROLLMENT = CalendarEnrollment(
+    relayUrl = "https://relay.churchpresenter.org",
+    instanceId = "demo-church",
+    deviceId = "demo-phone",
+    deviceToken = "demo-token",
+    instanceKey = "demo-key",
+)
 private const val SERVER_W = 1100f
 private const val SERVER_H = 760f

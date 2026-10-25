@@ -51,8 +51,8 @@ through `:profiles`' test fixtures.
 - The QR dialogs are real windows and cannot open headless; their content composables are what the
   suite draws. The calendar's computer dialogs draw in place under `LocalCalendarDialogInPlace`
   (tests only), and do their clipboard, file and mail work through `JoinCodeIo`, which a test fakes.
-- The other computers reach the card as one `ComputerActions`, null outside dev mode — the card's
-  dev-mode gate is that one argument.
+- The other computers reach the card as one `ComputerActions`; null hides that section (only tests
+  pass null).
 
 ## Commands
 
