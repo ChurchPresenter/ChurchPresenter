@@ -7,8 +7,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.click
@@ -31,8 +36,11 @@ import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.server.CalendarEnrollment
+import org.churchpresenter.server.CalendarJoin
 import org.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.serverui.AddComputerContent
 import org.churchpresenter.serverui.CalendarEnrollQrContent
 import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.serverui.ServerSettingsTab
@@ -40,6 +48,7 @@ import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import kotlin.math.abs
 import kotlin.test.Test
 
 /** The Calendar Manager: planning ahead, a pre-service loop that runs itself, loading, printing, phones. */
@@ -65,10 +74,15 @@ class CalendarDemoTour {
             liveLabel = "Plan ahead",
             steps = 12,
             heading = "The " to "",
-            settings = ::threeScreens,
+            // Calendar sync on, so the Server card lists its phones and other computers.
+            settings = { threeScreens(it).copy(calendarSync = syncSettings) },
             panel = { settings, change ->
                 if (screen.value == "qr") {
                     Box(Modifier.size(QR_W.dp, QR_H.dp)) { CalendarEnrollQrContent(SAMPLE_ENROLLMENT, onDismiss = {}) }
+                } else if (screen.value == "computer") {
+                    Box(Modifier.size(COMPUTER_W.dp, COMPUTER_H.dp)) {
+                        AddComputerContent(onCreate = { _, _ -> SAMPLE_JOIN }, onDismiss = {})
+                    }
                 } else if (screen.value == "server") {
                     Box(Modifier.size(SERVER_W.dp, SERVER_H.dp)) {
                         ServerSettingsTab(settings, change, companion, remember { RemoteClientManager() }, sync)
@@ -222,6 +236,8 @@ class CalendarDemoTour {
         point("Timing at a glance", "−30, Loop, Next, After previous", hasText("Loop"))
         say("countdown")
         point("The countdown", "Starts at −5, then next", hasText("Countdown · 5 min"))
+        say("countdown-edit")
+        point("Change the timer", "Click its length and type a new one", countdownLength())
         say("post-service")
         point("A post-service loop", "After previous, or a clock time", hasText("Welcome video") or hasText("CLOSING"))
         say("armed")
@@ -300,12 +316,21 @@ class CalendarDemoTour {
     }
 
     /**
-     * Where a sheet's own tabs and buttons start: under its search field when it has one (the
-     * picker), else under its title -- so a label is never matched in the window behind the sheet.
+     * Where the picker's own tabs start: under its title, which stays put while the search field's
+     * placeholder changes per tab -- so a label is never matched in the window behind the sheet.
      */
+    /** The countdown's length cell: the "5:00" on the countdown's own line, not a song's. */
+    private fun DemoTour.countdownLength(): SemanticsMatcher {
+        val line = ui.onAllNodes(hasText("Countdown · 5 min")).fetchSemanticsNodes().first().boundsInRoot.center.y
+        return SemanticsMatcher("countdown length") {
+            it.config.getOrNull(SemanticsProperties.Text)?.any { t -> t.text == "5:00" } == true &&
+                abs(it.boundsInRoot.center.y - line) < SAME_LINE
+        }
+    }
+
     private fun DemoTour.tabsTop(): Float = runCatching {
-        val search = hasText("Search songs", substring = true)
-        ui.onAllNodes(search).fetchSemanticsNodes().first().boundsInWindow.top
+        val title = hasText("Add song, verse or section")
+        ui.onAllNodes(title).fetchSemanticsNodes().minOf { it.boundsInWindow.bottom }
     }.getOrElse { Float.NEGATIVE_INFINITY }
 
     private fun DemoTour.sheetClick(m: SemanticsMatcher) {
@@ -332,6 +357,9 @@ class CalendarDemoTour {
         quietPanelClick(hasText("Calendar settings"))
         sheetClick(hasText("Defaults"))
         val calendarSwitch = hasText("Sync with the cloud and mobile devices")
+        // The switch is the last line of Defaults, below the sheet's fold: bring it into view first.
+        runCatching { ui.onAllNodes(calendarSwitch).onLast().performScrollTo() }
+        ui.waitForIdle()
         sheet("In the calendar's settings too", "Sync with the cloud and mobile devices", calendarSwitch)
         closeSheet()
         say("secure")
@@ -351,10 +379,19 @@ class CalendarDemoTour {
         point("Enrolled phones", "Revoke when a volunteer moves on", phone)
         say("computers")
         point("Add a computer", "Plan from the office or from home", hasText("Add a computer", substring = true))
+        closePanel()
+        screen.value = "computer"
+        openPanel("Add a computer", COMPUTER_W, COMPUTER_H)
         say("computer-role")
-        caption("Follower or View only", "Then Create join code")
+        panelEdit("Give it a name", "Office iMac", seek(hasSetTextAction()), "Office iMac")
+        point("Follower", "Plans and changes services", hasText("Follower"))
+        point("View only", "Looks, never changes", hasText("View only"))
+        panelNote("Create join code", "For the other computer", seek(hasText("Create join code")), click = true)
         say("computer-code")
-        caption("Copy, save or email the code", "It works once, for 24 hours")
+        point("Copy, save or email the code", "It works once, for 24 hours", hasText("Copy code"))
+        closePanel()
+        screen.value = "server"
+        openPanel("Settings — Server", SERVER_W, SERVER_H)
         say("computer-join")
         point("Join another…", "On the other computer", hasText("Join another", substring = true))
         say("mobile")
@@ -399,7 +436,13 @@ private var loadInto: (List<ScheduleItem>, Map<String, RowTiming>, Boolean, Stri
 /** Which window the panel shows: the calendar, or Settings → Server. */
 private val screen = mutableStateOf("calendar")
 
-private val syncSettings = org.churchpresenter.settings.CalendarSyncSettings(enabled = true)
+// Paired, so the Server card lists the enrolled phones and the computers.
+private val syncSettings = CalendarSyncSettings(
+    enabled = true,
+    instanceId = "demo-calendar",
+    desktopToken = "demoDesktopToken0123456789",
+    instanceKey = "ZGVtby1jYWxlbmRhci1rZXktMDEyMzQ1Njc4OWFi",
+)
 
 private val TODAY: LocalDate = LocalDate.of(2026, 11, 1)
 private val NOW: LocalTime = LocalTime.of(9, 20)
@@ -473,7 +516,7 @@ private fun month(): CalendarDocument {
         startTime = "10:00",
         items = rows,
         plannedSeconds = mapOf(
-            "song-12" to 300, "song-320" to 270, "reading" to 120, "sermon" to 1800, "violin" to 240,
+            "countdown" to 300, "song-12" to 300, "song-320" to 270, "reading" to 120, "sermon" to 1800, "violin" to 240,
             "song-455" to 300,
         ),
         timing = mapOf(
@@ -507,6 +550,7 @@ private fun month(): CalendarDocument {
 
 private const val SHEET_WAIT_MS = 5_000L
 private const val SHEET_CLICK_HOLD = 0.1
+private const val SAME_LINE = 20f
 private const val CALENDAR_W = 1300f
 private const val CALENDAR_H = 850f
 
@@ -515,6 +559,18 @@ private val SAMPLE_PHONES = listOf(
     PairedDevice("phone-1", "Pastor Mark's iPhone", "2026-09-06T10:15:00Z", "2026-10-31T18:42:00Z"),
     PairedDevice("phone-2", "Worship leader · Sarah", "2026-09-13T09:02:00Z", "2026-11-01T07:58:00Z"),
     PairedDevice("phone-3", "Announcements · Dave", "2026-10-04T12:30:00Z", "2026-10-29T20:11:00Z"),
+)
+private const val COMPUTER_W = 520f
+private const val COMPUTER_H = 640f
+private val SAMPLE_JOIN = CalendarJoin(
+    relay = "https://relay.churchpresenter.app",
+    instance = "demo-calendar",
+    desktop = "demo-church-mac",
+    token = "demoJoinToken0123456789",
+    key = "ZGVtby1jYWxlbmRhci1rZXktMDEyMzQ1Njc4OWFi",
+    role = CalendarSyncSettings.ROLE_FOLLOWER,
+    mainName = "Church Mac",
+    expires = "2026-11-02T09:20:00Z",
 )
 private const val QR_W = 460f
 private const val QR_H = 620f

@@ -28,6 +28,7 @@ at-end = At end decides what happens when it's done. Hold keeps the last picture
 timing-summary = Underneath, the panel sums it all up in plain words: starts on its own at nine thirty, loops until cued, then holds.
 chips = Back in the run of show, every item wears its timing at a glance: minus thirty for when it starts, Loop for how it repeats, Next when it hands over, and After previous when it follows the one before.
 countdown = Then add the countdown preset after it, and set it to start at minus five.
+countdown-edit = You can also change the timer itself right here. Click its length and type a new one, and the countdown runs for that long.
 post-service = A post-service loop works the same way. Add it at the end, and set it to start after previous, or at a clock time.
 armed = Finally, make sure the service is Armed. This is the switch that turns its timed cues on.
 when-fire = Timed items fire only when the service is in the Schedule tab and armed. And if something else is already live when a cue comes due, say the worship team is still playing, ChurchPresenter won't cut them off. It skips the cue and shows a note, so you can start it by hand if it should still go.
