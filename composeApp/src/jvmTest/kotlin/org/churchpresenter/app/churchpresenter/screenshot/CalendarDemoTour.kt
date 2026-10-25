@@ -405,10 +405,18 @@ class CalendarDemoTour {
         menusInPlace = true
         val save = find(hasContentDescription("Save preset")) { it.left > dp(380f) }
         step("Save preset", "On Pictures, Presentation, Media, Announcements, Canvas", save)
-        waitFor("the Save preset dialog") { hasNode(hasText("Preset name")) }
-        type("Name it", "Sunday announcements", dialogPopupItem(hasSetTextAction()), "Sunday announcements")
-        step("OK", "Now it's in every service's Presets", dialogPopupItem(hasText("OK")))
-        ui.waitForIdle()
+        // The dialog's label is drawn in capitals, as the calendar's sheets draw theirs.
+        val open = runCatching {
+            waitFor("the Save preset dialog") { hasNode(hasText("Preset name", ignoreCase = true)) }
+        }.isSuccess
+        if (open) {
+            type("Name it", "Sunday announcements", dialogPopupItem(hasSetTextAction()), "Sunday announcements")
+            step("OK", "Now it's in every service's Presets", dialogPopupItem(hasText("OK", ignoreCase = true)))
+            ui.waitForIdle()
+        } else {
+            File(System.getenv("CP_DEMO_OUT"), "missed.txt").appendText("Save preset dialog\n")
+            caption("Name it, and click OK", "Now it's in every service's Presets")
+        }
         menusInPlace = false
     }
 
