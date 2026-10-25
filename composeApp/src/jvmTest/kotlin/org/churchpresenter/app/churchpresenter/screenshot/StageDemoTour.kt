@@ -5,6 +5,7 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
@@ -21,6 +22,7 @@ class StageDemoTour {
         tab = "Stage Monitor",
         liveLabel = "Set up the stage monitor",
         steps = 10,
+        heading = "The " to "",
         settings = ::threeScreens,
         panel = { settings, change ->
             Box(Modifier.size(SETTINGS_W.dp, SETTINGS_H.dp)) { ProfilesSettingsTab(settings, change) }
@@ -71,7 +73,7 @@ class StageDemoTour {
 
     private fun DemoTour.layout() {
         say("stage-page")
-        panelNote("The Stage page", "What goes where", rail("Stage layout"), click = true, numbered = true)
+        panelNote("Stage layout", "Under Stage Monitor", rail("Stage layout"), click = true, numbered = true)
         quietPanelClick(hasText("Advanced"))
         quietPanelClick(hasText("Open all"))
         say("layout")
@@ -121,10 +123,20 @@ class StageDemoTour {
         note("On the stage monitor", "The verse, what's next, the time", stageTile())
     }
 
-    /** The stage monitor's tile in the previews down the right. */
-    private fun DemoTour.stageTile() = findAll(hasContentDescription("Hide this preview"))[2]
+    /**
+     * The stage monitor's tile in the previews down the right: its header and the picture under it,
+     * so the tooltip sits below the picture rather than over it.
+     */
+    private fun DemoTour.stageTile(): Target {
+        val header = findAll(hasContentDescription("Hide this preview"))[2]
+        val b = header.bounds
+        return Target(header.node, Rect(b.left, b.top, b.right, b.bottom + b.width * PICTURE_SHARE))
+    }
 }
 
 // The real Settings window opens at this size (OptionsDialog).
 private const val SETTINGS_W = 1400f
 private const val SETTINGS_H = 900f
+
+/** A 16:9 preview picture is this much of its tile's width tall. */
+private const val PICTURE_SHARE = 9f / 16f
