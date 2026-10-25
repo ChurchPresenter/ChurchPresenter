@@ -108,6 +108,7 @@ private const val PANEL_H = 900f
 /** How far the clock moves per capture while a dialog is open: far enough for a preview to show its design. */
 private const val PANEL_TICK_MS = 3_000L
 private const val PANEL_STEP_MS = 150
+private const val PANEL_HOVER_MS = 1_500L
 
 /** Where in a lower third's run the video holds it: past the entrance, before the exit. */
 private const val LOWER_THIRD_HOLD = 0.55f
@@ -170,7 +171,10 @@ internal fun recordTour(
     TestSingletons.latchToTestHome()
     // A previous tour's schedule autosave would open every recording on "Restore unsaved schedule?".
     File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp").delete()
-    val appSettings = settings(library())
+    // The Calendar folder defaults to the app data folder, under the home folder of whoever records:
+    // pinned beside the demo library so the System page never shows a personal path.
+    val calendarFolder = File(LIBRARY, "Calendar").apply { mkdirs() }
+    val appSettings = settings(library().copy(calendarStorageDirectory = calendarFolder.path))
     val width = if (panel == null) CANVAS_W else CANVAS_W + PANEL_W
     runSkikoComposeUiTest(size = Size(width, APP_H) * DENSITY, density = Density(DENSITY)) {
         var actions = ScheduleActions()
@@ -402,6 +406,14 @@ internal class DemoTour(
         if (target.bounds.left >= appW) return
         runCatching { ui.onAllNodes(isRoot())[0].performMouseInput { moveTo(target.bounds.center) } }
         ui.mainClock.advanceTimeBy(HOVER_FADE_MS)
+        ui.waitForIdle()
+        refresh(0.2)
+    }
+
+    /** Rests the mouse on [target] in the panel and holds it there past the tooltip's delay. */
+    fun panelHover(target: Target, holdMs: Long = PANEL_HOVER_MS) {
+        runCatching { ui.onAllNodes(isRoot())[0].performMouseInput { moveTo(target.bounds.center) } }
+        ui.mainClock.advanceTimeBy(holdMs)
         ui.waitForIdle()
         refresh(0.2)
     }
