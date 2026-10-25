@@ -139,7 +139,11 @@ class CalendarDemoTour {
         loading()
         phones()
         say("getting-started")
-        caption("Getting started", "Presets, one Sunday, a template, copies, a phone")
+        quietClick(tab("Pictures"))
+        val save = hasContentDescription("Save preset")
+        inSchedule("1. Save your presets", "Slideshow and countdown", save, tabArea = true)
+        quietClick(tab("Bible"))
+        caption("Then one Sunday", "A template, copies, a phone")
         say("outro")
         outro()
     }
@@ -183,18 +187,12 @@ class CalendarDemoTour {
         closeSheet()
         closePanel()
         say("presets-how")
-        // A preset is made on its own tab: here, the Pictures tab's Save preset.
-        quietClick(tab("Pictures"))
-        inSchedule(
-            "Save preset",
-            "On Pictures, Presentation, Media, Announcements, Canvas",
-            hasContentDescription("Save preset"),
-            tabArea = true,
-        )
+        // A preset is made on its own tab: here, the Pictures tab's Save preset, named and saved.
+        makePreset()
         quietClick(tab("Bible"))
         openPanel("Calendar", CALENDAR_W, CALENDAR_H)
         say("durations")
-        point("How long each row runs", "Measured over real services", hasText("5:00"))
+        point("How long each row runs", "Measured over real services", lengthOn("Amazing Grace"))
         say("lay-out")
         point(
             "Time every row",
@@ -237,7 +235,7 @@ class CalendarDemoTour {
         say("countdown")
         point("The countdown", "Starts at −5, then next", hasText("Countdown · 5 min"))
         say("countdown-edit")
-        point("Change the timer", "Click its length and type a new one", countdownLength())
+        point("Change the timer", "Click its length and type a new one", lengthOn("Countdown · 5 min"))
         say("post-service")
         point("A post-service loop", "After previous, or a clock time", hasText("Welcome video") or hasText("CLOSING"))
         say("armed")
@@ -319,10 +317,10 @@ class CalendarDemoTour {
      * Where the picker's own tabs start: under its title, which stays put while the search field's
      * placeholder changes per tab -- so a label is never matched in the window behind the sheet.
      */
-    /** The countdown's length cell: the "5:00" on the countdown's own line, not a song's. */
-    private fun DemoTour.countdownLength(): SemanticsMatcher {
-        val line = ui.onAllNodes(hasText("Countdown · 5 min")).fetchSemanticsNodes().first().boundsInRoot.center.y
-        return SemanticsMatcher("countdown length") {
+    /** The "5:00" length cell on [title]'s own line -- the countdown and two songs all run five minutes. */
+    private fun DemoTour.lengthOn(title: String): SemanticsMatcher {
+        val line = ui.onAllNodes(hasText(title, substring = true)).fetchSemanticsNodes().first().boundsInRoot.center.y
+        return SemanticsMatcher("length on $title") {
             it.config.getOrNull(SemanticsProperties.Text)?.any { t -> t.text == "5:00" } == true &&
                 abs(it.boundsInRoot.center.y - line) < SAME_LINE
         }
@@ -399,6 +397,19 @@ class CalendarDemoTour {
         say("sync-timing")
         caption("Every five minutes", "At startup, and on Sync now")
         closePanel()
+    }
+
+    /** The Pictures tab's Save preset, opened, named and saved: how the calendar's presets are made. */
+    private fun DemoTour.makePreset() {
+        quietClick(tab("Pictures"))
+        menusInPlace = true
+        val save = find(hasContentDescription("Save preset")) { it.left > dp(380f) }
+        step("Save preset", "On Pictures, Presentation, Media, Announcements, Canvas", save)
+        waitFor("the Save preset dialog") { hasNode(hasText("Preset name")) }
+        type("Name it", "Sunday announcements", dialogPopupItem(hasSetTextAction()), "Sunday announcements")
+        step("OK", "Now it's in every service's Presets", dialogPopupItem(hasText("OK")))
+        ui.waitForIdle()
+        menusInPlace = false
     }
 
     /** Points at [m] in the Schedule panel, or says the line over a caption when it isn't there. */
@@ -516,8 +527,8 @@ private fun month(): CalendarDocument {
         startTime = "10:00",
         items = rows,
         plannedSeconds = mapOf(
-            "countdown" to 300, "song-12" to 300, "song-320" to 270, "reading" to 120, "sermon" to 1800, "violin" to 240,
-            "song-455" to 300,
+            "countdown" to 300, "song-12" to 300, "song-320" to 270, "reading" to 120, "sermon" to 1800,
+            "violin" to 240, "song-455" to 300,
         ),
         timing = mapOf(
             "announcements" to RowTiming(startAt = "09:30", repeats = 0),
