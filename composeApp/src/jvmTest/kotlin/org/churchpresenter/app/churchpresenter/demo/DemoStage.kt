@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.app.churchpresenter.demo
 
 import androidx.compose.ui.geometry.Rect
 import java.awt.AlphaComposite

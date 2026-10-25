@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.app.churchpresenter.demo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -182,7 +182,7 @@ internal fun recordTour(
                     // No browser engine starts here; the Web tab is told it has one, and is shown a page.
                     CompositionLocalProvider(
                         LocalMediaViewModel provides media,
-                        LocalWebEngineAvailable provides true,
+                        LocalWebEngineAvailable provides { true },
                     ) {
                         Row(Modifier.fillMaxSize().background(Color.Black)) {
                             Box(Modifier.size(APP_W.dp, APP_H.dp)) {

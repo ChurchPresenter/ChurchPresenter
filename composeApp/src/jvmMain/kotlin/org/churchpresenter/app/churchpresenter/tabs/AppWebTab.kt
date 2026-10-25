@@ -18,10 +18,11 @@ import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.web.tabs.WebTab
 
 /**
- * Whether the Web tab may assume a browser engine; null (always, in the app) asks [CefManager]. A
- * recording or test that composes the whole main window, where no engine can start, provides true.
+ * Asks whether the Web tab may assume a browser engine: [CefManager], read afresh each time, unless
+ * provided. A recording or test that composes the whole main window, where no engine can start,
+ * provides `{ true }`.
  */
-internal val LocalWebEngineAvailable = compositionLocalOf<Boolean?> { null }
+internal val LocalWebEngineAvailable = compositionLocalOf<() -> Boolean> { { CefManager.initialized } }
 
 /**
  * The `:web` tab with the app's own parts filled in: the live output through
@@ -38,7 +39,7 @@ fun AppWebTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null,
-    cefInitialized: Boolean = LocalWebEngineAvailable.current ?: CefManager.initialized,
+    cefInitialized: Boolean = LocalWebEngineAvailable.current(),
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
     cefMissingLibrary: String? = CefManager.missingLibrary,
