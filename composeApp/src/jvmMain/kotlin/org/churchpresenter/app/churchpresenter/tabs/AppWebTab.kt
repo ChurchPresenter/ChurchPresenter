@@ -22,6 +22,7 @@ import org.churchpresenter.web.tabs.WebTab
  * provided. A recording or test that composes the whole main window, where no engine can start,
  * provides `{ true }`.
  */
+@JvmField
 internal val LocalWebEngineAvailable = compositionLocalOf<() -> Boolean> { { CefManager.initialized } }
 
 /**

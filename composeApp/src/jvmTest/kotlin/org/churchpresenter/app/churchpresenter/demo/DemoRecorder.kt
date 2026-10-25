@@ -249,7 +249,7 @@ internal fun recordTour(
             if (heading.second == " Tab") tab else heading.first + tab + heading.second,
         )
         val suffix = if (MAX_FRAMES == null) "" else "-preview"
-        narrator.encodeSegments(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"))
+        narrator.encodeSegments(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"), tour.recorded)
     }
 }
 
@@ -343,6 +343,9 @@ internal class DemoTour(
     private var segmentStart = 0
     private var segmentFrame = 0
     private val order = mutableListOf(FIRST_SEGMENT)
+
+    /** The segments this run drew, rather than played through unseen. */
+    val recorded: Set<String> get() = order.filter { ONLY == null || it in ONLY }.toSet()
     private var recording = ONLY == null || FIRST_SEGMENT in ONLY
     private var segmentDir = segmentFolder(FIRST_SEGMENT)
 

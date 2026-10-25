@@ -51,7 +51,7 @@ internal class DemoNarrator(root: File) {
      * Encodes a tour from its segment folders in `segments.txt` order (see [DemoTour.segment]): their
      * frames linked end to end into one numbering, each voice cue moved by where its segment starts.
      */
-    fun encodeSegments(tour: File, fps: Int, video: File) {
+    fun encodeSegments(tour: File, fps: Int, video: File, recorded: Set<String> = emptySet()) {
         val order = File(tour, "segments.txt").readLines().filter { it.isNotBlank() }
         val all = File(tour, "all").apply {
             deleteRecursively()
@@ -66,8 +66,13 @@ internal class DemoNarrator(root: File) {
             frames.forEachIndexed { i, f ->
                 Files.createSymbolicLink(File(all, "f%05d.png".format(offset + i)).toPath(), f.absoluteFile.toPath())
             }
-            File(folder, "cues.txt").takeIf { it.isFile }?.readLines()?.filter { it.isNotBlank() }?.forEach {
-                placed += offset + it.substringBefore('\t').toInt() to File(it.substringAfter('\t'))
+            val own = File(folder, "cues.txt").takeIf { it.isFile }?.readLines().orEmpty().filter { it.isNotBlank() }
+                .map { it.substringBefore('\t').toInt() to File(it.substringAfter('\t')) }
+            own.forEach { (at, wav) -> placed += offset + at to wav }
+            // Each piece re-recorded this run is also its own video, to review on its own.
+            if (name in recorded) {
+                val piece = File(video.parentFile, "pieces/%02d-%s.mp4".format(order.indexOf(name) + 1, name))
+                encode(folder, fps, piece, own)
             }
             offset += frames.size
         }
