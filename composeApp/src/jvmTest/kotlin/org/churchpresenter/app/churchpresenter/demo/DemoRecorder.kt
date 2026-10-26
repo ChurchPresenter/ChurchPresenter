@@ -66,6 +66,7 @@ import org.churchpresenter.app.churchpresenter.tabs.LocalWebEngineAvailable
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.PresenterTransitionEffects
 import org.churchpresenter.liveoutput.PresenterOutputContent
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
@@ -218,6 +219,8 @@ internal fun recordTour(
                                     ),
                                 )
                             }
+                            // What the app's output windows run beside the outputs: Clear fades out and clears here.
+                            PresenterTransitionEffects(presenter, current)
                             Projector(presenter, current, media)
                             panel?.let {
                                 Box(

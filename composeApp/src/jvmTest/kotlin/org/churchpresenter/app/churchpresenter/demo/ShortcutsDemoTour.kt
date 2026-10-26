@@ -55,43 +55,52 @@ class ShortcutsDemoTour {
         caption("Page Down / Page Up", "A live presentation, from any tab")
         say("escape")
         val clear = find(hasContentDescription("Clear Display") or hasText("Clear Display"))
-        press("Escape", "Clears the screen", clear, Key.Escape, "Esc", live = true)
+        press("Clear the screen", "Nothing on the projector", clear, Key.Escape, "Esc", live = true) {
+            // Under the recorder the key does not reach the window's handler; cleared as it would.
+            runCatching { clear.node.performClick() }
+            ui.waitForIdle()
+            settle()
+            refocus()
+        }
         dialog()
         say("outro")
         outro()
     }
 
     private fun DemoTour.songs() {
-        say("f7")
-        press("F7", "The Songs tab", tab("Songs"), Key.F7, "F7") { ensureTab("Songs") }
         say("f-keys")
-        caption("F6 to F12", "Each F key opens a tab")
+        caption(
+            "F6 Bible · F7 Songs · F8 Pictures · F9 Presentation",
+            "F10 Media · F11 Lower Third · F12 Announcements",
+        )
+        switchTab(Key.F7, "Songs")
         say("search")
         type("Type the song", "The search box is ready", searchField(), "amazing grace")
         say("enter")
-        press("Enter", "The highlighted song goes live", searchField(), Key.Enter, "Enter ⏎", live = true) {
+        press("Go live", "The highlighted song", searchField(), Key.Enter, "Enter ⏎", live = true) {
             quietGoLive()
         }
         say("down")
-        press("↓", "The next verse", text("'Twas grace that taught"), Key.DirectionDown, "↓", live = true) { settle() }
+        val verse2 = text("'Twas grace that taught")
+        press("Next verse", "While it's live", verse2, Key.DirectionDown, "↓", live = true) { settle() }
         say("up")
-        press("↑", "Back one", text("Amazing grace! how sweet"), Key.DirectionUp, "↑", live = true) { settle() }
+        val verse1 = text("Amazing grace! how sweet")
+        press("Previous verse", "Back one", verse1, Key.DirectionUp, "↑", live = true) { settle() }
         say("f2")
-        press("F2", "Adds it to the schedule", find(hasText("Schedule")), Key.F2, "F2") {
+        press("Add to schedule", "For later in the service", find(hasText("Schedule")), Key.F2, "F2") {
             // F2 is the menu bar's accelerator, and the recording has no menu bar: added as it would.
             schedule().addSong(AMAZING_GRACE, "Amazing Grace", "Hymnal", "Hymnal::$AMAZING_GRACE")
         }
     }
 
     private fun DemoTour.bible() {
-        say("f6")
-        press("F6", "The Bible tab", tab("Bible"), Key.F6, "F6") { ensureTab("Bible") }
+        switchTab(Key.F6, "Bible")
         say("reference")
         type("Type a reference", "Book, chapter and verse", searchField(), "John 3:16")
         say("bible-enter")
-        press("Enter", "On the screen", searchField(), Key.Enter, "Enter ⏎", live = true) { quietGoLive() }
+        press("Go live", "The verse you typed", searchField(), Key.Enter, "Enter ⏎", live = true) { quietGoLive() }
         say("bible-down")
-        press("↓", "The next verse", searchField(), Key.DirectionDown, "↓", live = true) { settle() }
+        press("Next verse", "While it's live", searchField(), Key.DirectionDown, "↓", live = true) { settle() }
     }
 
     private fun DemoTour.dialog() {
@@ -102,6 +111,9 @@ class ShortcutsDemoTour {
         say("categories")
         val songsTab = rail("Songs Tab")
         panelNote("Grouped by where they work", "Menus, everywhere, each tab", songsTab, click = true, numbered = true)
+        say("managers")
+        quietPanelClick(hasText("Menus"))
+        point("The managers", "Song Library, Calendar, Converter", hasText("Open Song Library Manager"))
         say("search-actions")
         val search = seek(hasSetTextAction())
         panelEdit("Search", "By name", search, "live")
@@ -127,23 +139,53 @@ class ShortcutsDemoTour {
         val chip = seek(hasTestTag("shortcut_chip_SWITCH_TO_SONGS"))
         say("rebind")
         panelNote("Click its keys", "Then press the new ones", chip, click = true, numbered = true)
-        runCatching {
-            panelItem(hasTestTag("shortcut_recording_SWITCH_TO_SONGS")).node.performKeyInput { pressKey(Key.F6) }
-            ui.waitForIdle()
-        }
-        pause(0.4)
+        record("SWITCH_TO_SONGS", Key.F6)
         say("conflict")
         point("Already used", "Can't be saved until it's sorted out", hasText("Already used by", substring = true))
         say("conflicts-list")
         val conflicts = seek(hasTestTag(CONFLICTS_FILTER))
         panelNote("Conflicts", "Every clash in one list", conflicts, click = true, numbered = true)
         pause(0.8)
-        quietPanelClick(hasTestTag(CONFLICTS_FILTER))
+        say("fix")
+        val bible = seek(hasTestTag("shortcut_chip_SWITCH_TO_BIBLE"))
+        panelNote("Give it a new key", "F5 for the Bible tab", bible, click = true, numbered = true)
+        record("SWITCH_TO_BIBLE", Key.F5)
+        say("fixed")
+        point("No conflicts", "OK works again", hasText(" OK", substring = true))
+        // The conflicts view holds the rail until it is left; Press key, on and off, leaves it.
+        quietPanelClick(hasText("Press key"))
+        quietPanelClick(hasText("Press key"))
         quietPanelClick(hasText("Global"))
+        say("clear")
+        point("Clear", "No keys at all", hasTestTag("shortcut_revert_SWITCH_TO_ANNOUNCEMENTS"))
         say("reset")
         val revert = seek(hasTestTag("shortcut_revert_SWITCH_TO_SONGS"))
         panelNote("Reset", "Back the way it was", revert, click = true, numbered = true)
-        point("Reset All to Defaults", "Every shortcut back", hasTestTag(RESET_ALL))
+        say("reset-all")
+        panelNote("Reset All to Defaults", "Every shortcut back", seek(hasTestTag(RESET_ALL)), click = true)
+    }
+
+    /** Presses [key] into [action]'s row while it is listening for a new combination. */
+    private fun DemoTour.record(action: String, key: Key) {
+        runCatching {
+            panelItem(hasTestTag("shortcut_recording_$action")).node.performKeyInput { pressKey(key) }
+            ui.waitForIdle()
+        }
+        pause(0.4)
+    }
+
+    /** A click in the Clear button leaves the tab without the keyboard, and the app says so in a banner. */
+    private fun DemoTour.refocus() {
+        if (hasNode(hasText("Keyboard focus lost", substring = true))) {
+            quietClick(find(hasText("Keyboard focus lost", substring = true)))
+        }
+    }
+
+    /** [key] pressed off camera; the tab it opens is named in the F-key list, not shown again. */
+    private fun DemoTour.switchTab(key: Key, label: String) {
+        runCatching { searchField().node.performKeyInput { pressKey(key) } }
+        ensureTab(label)
+        pause(0.3)
     }
 
     /** What a key press should have opened, opened anyway if the key went astray. */
