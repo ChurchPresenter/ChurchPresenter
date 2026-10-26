@@ -301,20 +301,28 @@ private fun Projector(presenter: PresenterManager, appSettings: AppSettings, med
             .size(PROJ_W.dp, PROJ_H.dp)
             .background(Color.Black),
     ) {
-        PresenterOutputContent(
-            screenAssignment = appSettings.projectionSettings.getAssignment(0),
-            effectiveMode = mode,
-            screenNumber = 1,
-            presenterManager = presenter,
-            appSettings = appSettings,
-            mediaViewModel = media,
-            sttManager = demoStt,
-            serverUrl = "",
-            qaDisplayUrl = "",
-            identifyingScreen = false,
-            lottieComposition = null,
-            clearAnnouncementOnFinish = {},
-        )
+        // Captions are an overlay, up over whatever else is live, so they are drawn on top of it.
+        val shown = listOf(mode) + if (Presenting.STT in presenter.overlays.value && mode != Presenting.STT) {
+            listOf(Presenting.STT)
+        } else {
+            emptyList()
+        }
+        shown.forEach { layer ->
+            PresenterOutputContent(
+                screenAssignment = appSettings.projectionSettings.getAssignment(0),
+                effectiveMode = layer,
+                screenNumber = 1,
+                presenterManager = presenter,
+                appSettings = appSettings,
+                mediaViewModel = media,
+                sttManager = demoStt,
+                serverUrl = "",
+                qaDisplayUrl = "",
+                identifyingScreen = false,
+                lottieComposition = null,
+                clearAnnouncementOnFinish = {},
+            )
+        }
     }
 }
 
