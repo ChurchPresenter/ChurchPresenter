@@ -199,7 +199,7 @@ internal fun recordTour(
                                     presenterManager = presenter,
                                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
                                     qaManager = QAManager(),
-                                    sttManager = STTManager(),
+                                    sttManager = demoStt,
                                     theme = THEME,
                                     live = liveCallbacks(presenter),
                                     publish = MainDesktopPublishers(onScheduleActionsReady = { actions = it }),
@@ -262,6 +262,12 @@ internal fun recordTour(
     }
 }
 
+/**
+ * The caption feed the main window and the projector share, so what a tour feeds in (see the STT
+ * tour) reaches both; one per run, where each used to make its own on every recomposition.
+ */
+internal val demoStt = STTManager()
+
 /** A short service — half a panel — so what a tour adds to it stands out. */
 private fun demoSchedule(actions: ScheduleActions) {
     actions.addMedia(File(LIBRARY, "Media/Welcome Loop.mp4").absolutePath, "Welcome Loop", "video", "")
@@ -302,7 +308,7 @@ private fun Projector(presenter: PresenterManager, appSettings: AppSettings, med
             presenterManager = presenter,
             appSettings = appSettings,
             mediaViewModel = media,
-            sttManager = STTManager(),
+            sttManager = demoStt,
             serverUrl = "",
             qaDisplayUrl = "",
             identifyingScreen = false,
@@ -807,6 +813,37 @@ internal class DemoTour(
         scene.caption = "$heading — $sub"
         scene.captionAge = 0
         hold(maxOf(2.0, talk + 0.3))
+        padTo(start, talk)
+        scene.caption = null
+    }
+
+    /**
+     * A tooltip on [target] while [body] runs, its line spoken over whatever [body] does -- live text
+     * arriving, say -- and held until the line is done. [body] moves time on with [pause].
+     */
+    fun noteWhile(heading: String, sub: String, target: Target, body: DemoTour.() -> Unit) {
+        val start = frame
+        val talk = narrate(heading, sub)
+        scene.focus = null
+        camTo(Camera.zoom(target.bounds, 1.5f, appW, appH))
+        scene.focus = Focus(target.bounds, null, heading, sub, compact = false)
+        scene.focusAge = 0
+        body()
+        padTo(start, talk)
+    }
+
+    /**
+     * A caption while [body] runs, as [noteWhile]: over the whole window, or with [projector] on the
+     * projector, large, for what [body] puts on air.
+     */
+    fun captionWhile(heading: String, sub: String, projector: Boolean = false, body: DemoTour.() -> Unit) {
+        val start = frame
+        val talk = narrate(heading, sub)
+        scene.focus = null
+        if (projector) camTo(Camera.projector(appW, appH)) else if (!panelOpen) camTo(Camera.full(appW, appH))
+        scene.caption = "$heading — $sub"
+        scene.captionAge = 0
+        body()
         padTo(start, talk)
         scene.caption = null
     }
