@@ -273,7 +273,7 @@ private fun Panel(settings: AppSettings, change: ((AppSettings) -> AppSettings) 
 
 /** What the operator sees when a phone asks to add a reading to the schedule. */
 @Composable
-private fun PermissionPrompt() = RemoteEventDialogContent(
+internal fun PermissionPrompt() = RemoteEventDialogContent(
     event = RemoteEvent(
         type = RemoteEventType.ADD_TO_SCHEDULE,
         title = "Psalm 23:1-3",

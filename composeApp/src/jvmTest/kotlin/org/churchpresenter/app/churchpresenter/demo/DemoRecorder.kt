@@ -1039,9 +1039,13 @@ internal class DemoTour(
         if (!segmentOpen) return
         segmentOpen = false
         val cues = narrator.drainCues()
+        val spoken = spokenLines.toList().also { spokenLines.clear() }
         if (!recording) return
         val lines = cues.joinToString("") { (at, wav) -> "${at - segmentStart}\t${wav.path}\n" }
         File(segmentDir, "cues.txt").writeText(lines)
+        // Which script line starts where, for a dub in another language to be laid against.
+        val keys = spoken.joinToString("") { (at, key) -> "${at - segmentStart}\t$key\n" }
+        File(segmentDir, "lines.txt").writeText(keys)
         // A CP_DEMO_ONLY run stops early: its order is a prefix of the whole one, which it keeps.
         val list = File(out, "segments.txt")
         val known = if (list.isFile) list.readLines().filter { it.isNotBlank() } else emptyList()
@@ -1065,6 +1069,10 @@ internal class DemoTour(
 
     /** What the narrator says over the next step, in place of reading its callout. */
     private var nextLine: String? = null
+    private var nextKey: String? = null
+
+    /** Each script line spoken in this segment, by the frame it starts on: what a dub is laid against. */
+    private val spokenLines = mutableListOf<Pair<Int, String>>()
 
     /** A typing step's line, padded once the typing is done rather than before it starts. */
     private var spoken: Pair<Int, Double>? = null
@@ -1072,12 +1080,15 @@ internal class DemoTour(
     /** Says the script's [key] line over the next step — full sentences, where the callout is a few words. */
     fun say(key: String) {
         nextLine = script[key] ?: error("demo-narration/$name.txt has no line \"$key\"")
+        nextKey = key
     }
 
     /** Says the line queued by [say], or the callout itself; returns its length in seconds. */
     private fun narrate(heading: String, sub: String): Double {
         nextLine?.let {
             nextLine = null
+            nextKey?.let { key -> spokenLines += frame to key }
+            nextKey = null
             return narrator.say(it, frame)
         }
         val sentence = heading.trim().let { if (it.last() in ".!?…") it else "$it." }
