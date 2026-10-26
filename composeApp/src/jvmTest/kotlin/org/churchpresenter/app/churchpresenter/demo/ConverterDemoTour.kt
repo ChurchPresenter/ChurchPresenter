@@ -99,10 +99,12 @@ class ConverterDemoTour {
         caption("Your songs come with you", "Which software you use is your choice")
         say("songs-formats")
         // The whole list of programs, from its heading to its last entry.
-        // Both headings are drawn in capitals.
-        val list = listOf("Convert from", "Documents")
-            .mapNotNull { panelItems(hasText(it, ignoreCase = true)).firstOrNull() }
-        if (list.size == 2) {
+        // From the CONVERT FROM heading down to the Documents entry, and across to the extensions on the
+        // right; the headings are drawn in capitals, so case is ignored.
+        val list = panelItems(hasText("Convert from", ignoreCase = true)).take(1) +
+            panelItems(hasText("Documents", ignoreCase = true)) +
+            panelItems(hasText(".json"))
+        if (list.size >= RAIL_PARTS) {
             val b = list.map { it.bounds }
             val rail = Rect(b.minOf { it.left }, b.minOf { it.top }, b.maxOf { it.right }, b.maxOf { it.bottom })
             panelNote("Pick your program", "Song formats and documents", Target(list.first().node, rail))
@@ -226,6 +228,7 @@ private class DemoPickers : ConverterPickers {
 
 private const val CONVERTER_W = 1200f
 private const val TAB_COUNT = 4
+private const val RAIL_PARTS = 3
 private const val CONVERTER_H = 800f
 
 private fun sng(title: String, author: String, vararg sections: Pair<String, String>): String =

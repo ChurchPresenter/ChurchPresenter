@@ -358,6 +358,10 @@ internal class DemoTour(
     private var recording = ONLY == null || FIRST_SEGMENT in ONLY
     private var segmentDir = segmentFolder(FIRST_SEGMENT)
 
+    // Closed once: a run that stops at a segment's start has already closed the one before it, and
+    // closing it again would overwrite its voice cues with none.
+    private var segmentOpen = true
+
     /** The open dialog's pop-ups are dropdowns, drawn where they open, not alerts centered over it. */
     var menusInPlace = false
 
@@ -982,10 +986,13 @@ internal class DemoTour(
         segmentStart = frame
         segmentFrame = 0
         segmentDir = segmentFolder(name)
+        segmentOpen = true
     }
 
     /** Writes the segment's voice cues beside its frames, and the order of every segment so far. */
     fun finishSegment() {
+        if (!segmentOpen) return
+        segmentOpen = false
         val cues = narrator.drainCues()
         if (!recording) return
         val lines = cues.joinToString("") { (at, wav) -> "${at - segmentStart}\t${wav.path}\n" }
