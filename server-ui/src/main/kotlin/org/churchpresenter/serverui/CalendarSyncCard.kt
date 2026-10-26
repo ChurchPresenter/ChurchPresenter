@@ -40,7 +40,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.calendar.sync.PairedDevice
-import org.churchpresenter.profiles.LocalSettingsDevMode
 import org.churchpresenter.server.CalendarInvite
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CalendarSyncStatus
@@ -94,8 +93,6 @@ internal fun CalendarSyncCard(
     val status by sync.status.collectAsState()
     val devices by sync.devices.collectAsState()
     val computers by sync.computers.list.collectAsState()
-    // Other computers on one calendar are not ready for production: dev mode only, here and in the service.
-    val multiComputer = LocalSettingsDevMode.current
     // The invite QR this card opens; the card owns it so the Server tab needs no plumbing for it.
     var invite by remember { mutableStateOf<CalendarInvite?>(null) }
     var addingComputer by remember { mutableStateOf(false) }
@@ -112,18 +109,14 @@ internal fun CalendarSyncCard(
         onUnpair = { sync.unpair() },
         onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
         onInvite = { scope.launch { invite = sync.invitePhone().asInvite(sync) } },
-        computerActions = if (multiComputer) {
-            ComputerActions(
-                computers = computers,
-                onAdd = { addingComputer = true },
-                onRemove = { id -> scope.launch { sync.computers.remove(id) } },
-                onMakeMain = { id -> scope.launch { sync.computers.promote(id, ownName) } },
-                onJoin = { joining = true },
-                onTakeOver = { scope.launch { sync.computers.takeOver() } },
-            )
-        } else {
-            null
-        },
+        computerActions = ComputerActions(
+            computers = computers,
+            onAdd = { addingComputer = true },
+            onRemove = { id -> scope.launch { sync.computers.remove(id) } },
+            onMakeMain = { id -> scope.launch { sync.computers.promote(id, ownName) } },
+            onJoin = { joining = true },
+            onTakeOver = { scope.launch { sync.computers.takeOver() } },
+        ),
     )
     invite?.let { CalendarEnrollQrDialog(invite = it, onDismiss = { invite = null }) }
     if (addingComputer) {
@@ -175,7 +168,7 @@ internal fun CalendarSyncCardContent(
     now: Instant = Instant.now(),
     /** The relay shown when settings name none -- see [CalendarSyncCard]. */
     builtInRelayUrl: String = "",
-    /** The other computers on this calendar and what to do about them; null outside dev mode, for now. */
+    /** The other computers on this calendar and what to do about them; null hides the section. */
     computerActions: ComputerActions? = null,
 ) {
     val current = settings.calendarSync
@@ -249,7 +242,7 @@ private fun CardHeader(
     enabled: Boolean,
     status: CalendarSyncStatus,
     clock: LocalTimeText,
-    /** Other computers can join -- dev mode, for now -- so the description names them too. */
+    /** Other computers can join, so the description names them too. */
     computers: Boolean,
     onEnabledChange: (Boolean) -> Unit,
 ) {
