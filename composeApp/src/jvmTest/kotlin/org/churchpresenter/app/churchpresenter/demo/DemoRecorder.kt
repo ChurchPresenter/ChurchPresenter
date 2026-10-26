@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
@@ -161,6 +162,7 @@ internal fun recordTour(
     heading: Pair<String, String> = "The " to " Tab",
     settings: (AppSettings) -> AppSettings = { it },
     statistics: StatisticsManager? = null,
+    companion: CompanionSatelliteViewModel? = null,
     panel: (@Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit) -> Unit)? = null,
     script: DemoTour.() -> Unit,
 ) {
@@ -200,7 +202,8 @@ internal fun recordTour(
                                     appSettings = current,
                                     onSettingsChange = changeSettings,
                                     presenterManager = presenter,
-                                    companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                                    companionSatelliteViewModel = companion
+                                        ?: remember { CompanionSatelliteViewModel() },
                                     qaManager = QAManager(),
                                     sttManager = demoStt,
                                     theme = THEME,
