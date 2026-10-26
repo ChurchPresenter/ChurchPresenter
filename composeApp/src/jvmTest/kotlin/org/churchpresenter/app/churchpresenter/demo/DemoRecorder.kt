@@ -240,11 +240,11 @@ internal fun recordTour(
         val narrator = DemoNarrator(root)
         val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null, heading = heading) { actions }
         val tour = DemoTour(setup, this, presenter, out, changeSettings, narrator)
-        try {
-            tour.script()
-        } catch (_: LengthReached) {
-            // CP_DEMO_SECONDS cut the tour short, or CP_DEMO_ONLY's last segment is done.
-        }
+        // A tour that fails partway still leaves what it recorded, voice and all, as a "-failed" video
+        // to look at; the failure is thrown again once that is written.
+        // LengthReached is not a failure: CP_DEMO_SECONDS cut the tour short, or CP_DEMO_ONLY's last
+        // segment is done.
+        val failure = runCatching { tour.script() }.exceptionOrNull()?.takeUnless { it is LengthReached }
         tour.finishSegment()
         // One folder per tab, so each video sits with its own thumbnail and script.
         val videos = File(
@@ -252,8 +252,13 @@ internal fun recordTour(
                 ?: File(System.getenv("HOME"), "Downloads/ChurchPresenter Videos"),
             if (heading.second == " Tab") tab else heading.first + tab + heading.second,
         )
-        val suffix = if (MAX_FRAMES == null) "" else "-preview"
+        val suffix = when {
+            failure != null -> "-failed"
+            MAX_FRAMES == null -> ""
+            else -> "-preview"
+        }
         narrator.encodeSegments(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"), tour.recorded)
+        failure?.let { throw it }
     }
 }
 
