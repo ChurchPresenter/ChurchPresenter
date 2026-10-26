@@ -72,6 +72,7 @@ import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -158,6 +159,7 @@ internal fun recordTour(
     startTab: String? = null,
     heading: Pair<String, String> = "The " to " Tab",
     settings: (AppSettings) -> AppSettings = { it },
+    statistics: StatisticsManager? = null,
     panel: (@Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit) -> Unit)? = null,
     script: DemoTour.() -> Unit,
 ) {
@@ -201,6 +203,7 @@ internal fun recordTour(
                                     qaManager = QAManager(),
                                     sttManager = demoStt,
                                     theme = THEME,
+                                    statisticsManager = statistics,
                                     live = liveCallbacks(presenter),
                                     publish = MainDesktopPublishers(onScheduleActionsReady = { actions = it }),
                                     service = ServicePlanLink(upcomingServiceLoad = demoUpcomingLoad.value),
