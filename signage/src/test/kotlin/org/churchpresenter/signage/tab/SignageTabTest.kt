@@ -261,7 +261,7 @@ class SignageTabTest {
             hub.registry.pair(PendingScreen("pi", "1", Platform.LINUX_ARM64, "26.0.8", 3840, 2160, "a"), "Hall")
             hub.registry.pair(PendingScreen("win", "2", Platform.WINDOWS_X64, "26.0.8", 1920, 1080, "b"), "Office")
         }
-        waitForText("Raspberry Pi", substring = true)
+        waitForText("Linux (ARM)", substring = true)
         onNodeWithText("Windows PC", substring = true).assertExists()
         // Neither is connected, so neither offers to wipe, preview or update.
         onAllNodesWithText("Offline", substring = true).fetchSemanticsNodes().size.let { assertEquals(2, it) }

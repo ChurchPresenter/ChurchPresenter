@@ -8,6 +8,7 @@ import org.churchpresenter.signage.core.Features
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.signage.core.ServerMessage
+import org.churchpresenter.signage.core.WebTestRun
 import org.churchpresenter.signage.hub.PairingDecision
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -55,6 +56,23 @@ class ScreenControlsTest {
         identify.await()
         assertFalse(controls.identify("away"))
         assertFalse(controls.wipe("away"))
+    }
+
+    @Test
+    fun aWebTestIsSentOnlyToAPlayerThatCanRunItAndOnlyOnceAtATime() = runBlocking {
+        world.pairScreen(features = listOf(Features.WEB, Features.WEB_TEST))
+        val test = with(world) { expect { it as? ServerMessage.WebTest } }
+        assertTrue(controls.testWebPages("player-1"))
+        test.await()
+        assertTrue(hub.links.links.value.getValue("player-1").webTestStartedAtMs != null)
+        // Running: a second press sends nothing.
+        assertFalse(controls.testWebPages("player-1"))
+        hub.links.reported("player-1", PlayerMessage.WebTestResult(listOf(WebTestRun(15, 15.0))))
+        val link = hub.links.links.value.getValue("player-1")
+        assertEquals(null to 15.0, link.webTestStartedAtMs to link.webTest?.runs?.single()?.shownFps)
+        world.pairScreen(id = "player-2", features = listOf(Features.WEB))
+        assertFalse(controls.testWebPages("player-2"))
+        assertFalse(controls.testWebPages("away"))
     }
 
     @Test

@@ -32,6 +32,10 @@ data class ScreenLink(
     val previewAtMs: Long? = null,
     /** How an update is going: ChurchPresenter's download first, then the player's own steps. */
     val update: PlayerMessage.UpdateProgress? = null,
+    /** When a web page test was asked for, while it runs; null once it answers. */
+    val webTestStartedAtMs: Long? = null,
+    /** The last web page test's answer, for as long as the screen stays connected. */
+    val webTest: PlayerMessage.WebTestResult? = null,
 )
 
 /**
@@ -71,9 +75,13 @@ class ScreenLinks(private val clock: () -> Long = System::currentTimeMillis) {
             is PlayerMessage.Status -> link.copy(status = message, statusAtMs = clock())
             is PlayerMessage.Preview -> link.copy(preview = message, previewAtMs = clock())
             is PlayerMessage.UpdateProgress -> link.copy(update = message)
+            is PlayerMessage.WebTestResult -> link.copy(webTest = message, webTestStartedAtMs = null)
             is PlayerMessage.Hello -> link
         }
     }
+
+    /** Notes that a web page test was sent to [id], so its card shows one running. */
+    fun webTestStarted(id: String) = _links.edit(id) { it.copy(webTestStartedAtMs = clock()) }
 
     fun synced(id: String, manifestVersion: String) = _links.edit(id) { it.copy(manifestVersion = manifestVersion) }
 

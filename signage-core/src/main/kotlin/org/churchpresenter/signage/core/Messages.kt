@@ -51,6 +51,17 @@ sealed interface PlayerMessage {
         val takenAtMs: Long,
     ) : PlayerMessage
 
+    /**
+     * The answer to [ServerMessage.WebTest]: for each frame rate tried, what reached the screen and
+     * what it cost. [error] says why there are no runs, when the test could not be done.
+     */
+    @Serializable
+    @SerialName("web_test_result")
+    data class WebTestResult(
+        val runs: List<WebTestRun> = emptyList(),
+        val error: String? = null,
+    ) : PlayerMessage
+
     /** How an update sent with [ServerMessage.UpdateAvailable] is going. */
     @Serializable
     @SerialName("update_progress")
@@ -62,6 +73,20 @@ sealed interface PlayerMessage {
     ) : PlayerMessage
 }
 
+/**
+ * One frame rate of a [PlayerMessage.WebTestResult]: the test page drawn at most [fps] frames a
+ * second, and on average [shownFps] reached the screen.
+ */
+@Serializable
+data class WebTestRun(
+    val fps: Int,
+    val shownFps: Double,
+    /** How busy the whole processor was, 0–100; null where the player cannot tell. */
+    val cpuPercent: Double? = null,
+    /** The hottest the processor got, in °C; null where the player cannot tell. */
+    val maxTempC: Double? = null,
+)
+
 /** What a player lists in [PlayerMessage.Hello.features]. */
 object Features {
     /** Answers [ServerMessage.PreviewRequest]. */
@@ -72,6 +97,15 @@ object Features {
 
     /** Answers [ServerMessage.Wipe]. */
     const val WIPE = "wipe"
+
+    /** Plays [MediaKind.STREAM] items. */
+    const val STREAM = "stream"
+
+    /** Draws [MediaKind.WEB] items: listed only when the player has a Chromium. */
+    const val WEB = "web"
+
+    /** Answers [ServerMessage.WebTest]; listed with [WEB]. */
+    const val WEB_TEST = "web_test"
 }
 
 @Serializable
@@ -150,6 +184,22 @@ sealed interface ServerMessage {
     @Serializable
     @SerialName("wipe")
     data object Wipe : ServerMessage
+
+    /**
+     * Shows a built-in moving test page at each of [fps] frames a second for [secondsEach] seconds,
+     * then goes back to what it played and answers with [PlayerMessage.WebTestResult].
+     */
+    @Serializable
+    @SerialName("web_test")
+    data class WebTest(
+        val fps: List<Int> = DEFAULT_FPS,
+        val secondsEach: Int = DEFAULT_SECONDS_EACH,
+    ) : ServerMessage {
+        companion object {
+            val DEFAULT_FPS = listOf(15, 30)
+            const val DEFAULT_SECONDS_EACH = 20
+        }
+    }
 
     /** Asks for a [PlayerMessage.Preview] no wider than [maxWidth]. Sent only while someone looks. */
     @Serializable

@@ -1,5 +1,7 @@
 package org.churchpresenter.signage.core
 
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,7 +11,8 @@ import kotlinx.serialization.Serializable
  * plays from it whether or not ChurchPresenter is reachable.
  *
  * Files are named by their SHA-256 only; the player fetches each from
- * `GET /api/signage/files/{sha256}` and checks the hash before using it.
+ * `GET /api/signage/files/{sha256}` and checks the hash before using it. A link (a stream or a web
+ * page) is no file: the player opens its URL when it plays.
  */
 @Serializable
 data class Manifest(
@@ -32,9 +35,9 @@ data class Manifest(
 ) {
     fun playlist(id: String?): Playlist? = id?.let { wanted -> playlists.firstOrNull { it.id == wanted } }
 
-    /** Every file the manifest refers to, once each. */
+    /** Every file the manifest refers to, once each; links have none. */
     fun fileHashes(): Set<String> = buildSet {
-        playlists.forEach { playlist -> playlist.items.forEach { add(it.sha256) } }
+        playlists.forEach { playlist -> playlist.items.filterNot { it.kind.isLink }.forEach { add(it.sha256) } }
         idleCard.logoSha256?.let(::add)
     }
 }
@@ -70,25 +73,60 @@ data class Playlist(
     val items: List<PlaylistItem> = emptyList(),
 )
 
+/**
+ * One entry of a playlist: a file by its hash, or a link by its [url].
+ *
+ * [url], [refreshMs] and [maxFps] are written only when set, so an item without them encodes exactly as it did
+ * before links existed and an older manifest keeps its version.
+ */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class PlaylistItem(
-    val sha256: String,
+    /** The file's hash; empty for a link. */
+    val sha256: String = "",
     val kind: MediaKind,
-    /** How long a picture stays up. A video plays to its end when this is null. */
+    /**
+     * How long a picture stays up. A video plays to its end when this is null; a link stays up for as
+     * long as its playlist plays.
+     */
     val durationMs: Long? = null,
     val transition: Transition = Transition.CROSSFADE,
     val transitionMs: Long = DEFAULT_TRANSITION_MS,
+    /** What a [MediaKind.STREAM] or [MediaKind.WEB] item opens. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val url: String? = null,
+    /** How often a [MediaKind.WEB] page reloads; never when null. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val refreshMs: Long? = null,
+    /**
+     * At most how many frames a second a [MediaKind.WEB] page is drawn at; [DEFAULT_WEB_FPS] when
+     * null. More is smoother and costs the player more.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val maxFps: Int? = null,
 ) {
     companion object {
         const val DEFAULT_TRANSITION_MS = 800L
+        const val DEFAULT_WEB_FPS = 15
     }
 }
 
+/**
+ * What an item is. [STREAM] and [WEB] are links: a player that does not list [Features.STREAM] or
+ * [Features.WEB] cannot decode them, so ChurchPresenter never sends it one.
+ */
 @Serializable
 enum class MediaKind {
     @SerialName("image") IMAGE,
 
     @SerialName("video") VIDEO,
+
+    /** A video or live stream at a URL (a file, HLS, RTSP, or a page yt-dlp reads, such as YouTube). */
+    @SerialName("stream") STREAM,
+
+    /** A web page, drawn by the player's Chromium. */
+    @SerialName("web") WEB,
+    ;
+
+    /** Opened from a URL rather than a file. */
+    val isLink: Boolean get() = this == STREAM || this == WEB
 }
 
 @Serializable

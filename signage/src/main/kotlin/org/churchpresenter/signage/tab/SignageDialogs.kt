@@ -17,11 +17,16 @@ import org.churchpresenter.strings.generated.resources.signage_rename_title
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun RenameDialog(name: String, onRename: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun RenameDialog(
+    name: String,
+    onRename: (String) -> Unit,
+    onDismiss: () -> Unit,
+    title: String = stringResource(Res.string.signage_rename_title),
+) {
     var text by remember { mutableStateOf(name) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.signage_rename_title)) },
+        title = { Text(title) },
         text = { OutlinedTextField(value = text, onValueChange = { text = it }, singleLine = true) },
         confirmButton = {
             TextButton(
