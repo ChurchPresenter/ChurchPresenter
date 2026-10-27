@@ -6,7 +6,10 @@ import java.awt.GraphicsEnvironment
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.InvalidPathException
 import java.nio.file.Path
+import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.Path
 import kotlin.io.path.extension
 import kotlin.io.path.isDirectory
 import kotlin.io.path.isHidden
@@ -20,10 +23,14 @@ data class FolderFile(val path: Path, val kind: MediaKind, val size: Long, val m
  * A playlist that follows a folder: everything in it, in file-name order. The signage folder's own
  * files are one; each folder directly inside it is another.
  */
-data class FolderPlaylist(val id: String, val name: String, val files: List<FolderFile>)
+data class FolderPlaylist(override val id: String, override val name: String, val files: List<FolderFile>) :
+    PlaylistSource
 
-/** A folder playlist with each file's hash; null where the file could not be read. */
-data class HashedPlaylist(val playlist: FolderPlaylist, val hashes: Map<FolderFile, String?>)
+/**
+ * A playlist with each of its files' hashes, null where a file could not be read: a folder's files,
+ * a file playlist's one file (none when it is missing), and nothing for a link.
+ */
+data class HashedPlaylist(val playlist: PlaylistSource, val hashes: Map<FolderFile, String?> = emptyMap())
 
 /** [this] as the tab lists it. */
 internal fun FolderPlaylist.summary() = PlaylistSummary(
@@ -33,10 +40,46 @@ internal fun FolderPlaylist.summary() = PlaylistSummary(
     videos = files.count { it.kind == MediaKind.VIDEO },
 )
 
+/** [this] playlist's file as it stands now; null when it is gone or cannot be read. Blocking. */
+internal fun FilePlaylist.currentFile(): FolderFile? = try {
+    val file = Path(path)
+    if (!file.isRegularFile()) null else {
+        FolderFile(file, kind, Files.size(file), Files.getLastModifiedTime(file).toMillis())
+    }
+} catch (_: IOException) {
+    null
+} catch (_: InvalidPathException) {
+    null
+}
+
+/** A file chooser's filter for every picture and video a playlist can hold. */
+// FileNameExtensionFilter takes its extensions only as varargs.
+@Suppress("SpreadOperator")
+internal fun picturesAndVideosFilter(description: String) =
+    FileNameExtensionFilter(description, *(SignageFolder.IMAGES + SignageFolder.VIDEOS).toTypedArray())
+
+/** [this] added playlist as the tab lists it; a file playlist whose file is gone is [PlaylistSummary.missing]. */
+internal fun HashedPlaylist.addedSummary(): PlaylistSummary = when (val source = playlist) {
+    is FilePlaylist -> PlaylistSummary(
+        id = source.id,
+        name = source.name,
+        kind = if (source.kind == MediaKind.IMAGE) SourceKind.PICTURE else SourceKind.VIDEO,
+        detail = Path(source.path).name,
+        missing = hashes.values.none { it != null },
+    )
+    is LinkPlaylist -> PlaylistSummary(
+        id = source.id,
+        name = source.name,
+        kind = if (source.kind == LinkKind.WEB) SourceKind.WEB else SourceKind.STREAM,
+        detail = source.url,
+    )
+    is FolderPlaylist -> source.summary()
+}
+
 /** Reads the signage folder. Blocking: run it on `Dispatchers.IO`. */
 object SignageFolder {
-    private val IMAGES = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
-    private val VIDEOS = setOf("mp4", "m4v", "mov", "webm", "mkv")
+    internal val IMAGES = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
+    internal val VIDEOS = setOf("mp4", "m4v", "mov", "webm", "mkv")
 
     /** The id of the playlist made of the signage folder's own files. */
     const val ROOT_ID = "folder:"

@@ -218,6 +218,7 @@ private fun RowScope.ScreenDetails(
             Text(error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
         UpdateLine(row, onUpdate = { actions.onUpdate(screen.id) })
+        WebTestLine(row, onTest = { actions.onTestWebPages(screen.id) })
         PlaylistPicker(row, onPlay = { actions.onPlay(screen.id, it) })
     }
 }

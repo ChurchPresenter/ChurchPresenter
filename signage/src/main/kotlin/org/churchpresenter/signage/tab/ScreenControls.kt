@@ -34,6 +34,18 @@ class ScreenControls internal constructor(private val hub: SignageHub, private v
      */
     fun wipe(screenId: String): Boolean = hub.links.send(screenId, ServerMessage.Wipe)
 
+    /**
+     * Has [screenId] show its moving test page for about a minute and report how smoothly it went;
+     * false when it is not connected or cannot run the test.
+     */
+    fun testWebPages(screenId: String): Boolean {
+        val link = hub.links.links.value[screenId] ?: return false
+        if (Features.WEB_TEST !in link.features || link.webTestStartedAtMs != null) return false
+        if (!hub.links.send(screenId, ServerMessage.WebTest())) return false
+        hub.links.webTestStarted(screenId)
+        return true
+    }
+
     /** Looks for a newer player release. */
     fun checkForUpdates() {
         scope.launch { hub.updates.check() }

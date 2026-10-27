@@ -17,7 +17,7 @@ The player itself lives in its own repo, `ChurchPresenter/ChurchPresenter-Signag
 | Package | Holds |
 |---|---|
 | `org.churchpresenter.signage.core` | **A copy** of the signage repo's `:core`: `Manifest`, `ScheduleBlock`, `ScreenOverride`, `PlayerMessage`/`ServerMessage`, `decide()`, `SignageJson`, `PROTOCOL_VERSION` |
-| `org.churchpresenter.signage.hub` | `SignageHub` and its parts: `ScreenRegistry` (paired screens and their token hashes, `screens.json`), `PairingQueue` (players waiting for approval), `ScreenLinks` (who is connected, what they can do, what they report — status, previews, update progress — and messages on their way), `AgentUpdates` (the latest signed player release from GitHub, and each platform's build, downloaded and checked only when a screen is updated) |
+| `org.churchpresenter.signage.hub` | `SignageHub` and its parts: `ScreenRegistry` (paired screens and their token hashes, `screens.json`), `PairingQueue` (players waiting for approval), `ScreenLinks` (who is connected, what they can do, what they report — status, previews, update progress, the web page test — and messages on their way), `AgentUpdates` (the latest signed player release from GitHub, and each platform's build, downloaded and checked only when a screen is updated) |
 
 ## Rules
 

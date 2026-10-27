@@ -12,6 +12,7 @@ import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.signage.core.ScreenOverride
 import org.churchpresenter.signage.core.ServerMessage
 import org.churchpresenter.signage.core.UpdateState
+import org.churchpresenter.signage.core.WebTestRun
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -55,6 +56,18 @@ class ScreenLinksTest {
         assertEquals(2_000L, link.previewAtMs)
         assertEquals(UpdateState.CHECKING, link.update?.state)
         assertEquals("v2", link.manifestVersion)
+    }
+
+    @Test
+    fun aWebTestRunsUntilItsResultArrives() {
+        links.opened("p", "a", "v1")
+        now = 3_000
+        links.webTestStarted("p")
+        assertEquals(3_000L, links.links.value.getValue("p").webTestStartedAtMs)
+        val result = PlayerMessage.WebTestResult(listOf(WebTestRun(15, 14.0)))
+        links.reported("p", result)
+        val link = links.links.value.getValue("p")
+        assertEquals(null to result, link.webTestStartedAtMs to link.webTest)
     }
 
     @Test
