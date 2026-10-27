@@ -24,6 +24,8 @@ import kotlin.math.sin
 
 // The storyboard's frame: 1920×1080 at 30fps. Every size below is in those pixels.
 internal const val OUT_W = 1920
+private const val INTRO_TITLE = 168f
+private const val OUTRO_TITLE = 150f
 internal const val OUT_H = 1080
 
 private val BG = Color(0x09, 0x09, 0x0B)
@@ -185,7 +187,7 @@ internal class DemoStage(
         g.color = ACCENT
         g.drawString(label, 188f, y + 39f)
         y += 58f + 40f
-        title(g, tab, 168f, 160f, y + 140f)
+        title(g, tab, fitTitle(g, tab, INTRO_TITLE, OUT_W - 2 * 160f), 160f, y + 140f)
         y += 160f + 40f
         g.font = DemoFonts.sans(400, 40f)
         g.color = MUTED
@@ -200,8 +202,9 @@ internal class DemoStage(
         val t = ease(min(1f, age / 18f))
         g.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, t)
         val rise = (1 - t) * 24f
-        val w = titleWidth(g, tab, 150f)
-        title(g, tab, 150f, 960f - w / 2, 530f + rise)
+        val size = fitTitle(g, tab, OUTRO_TITLE, OUT_W - 2 * 160f)
+        val w = titleWidth(g, tab, size)
+        title(g, tab, size, 960f - w / 2, 530f + rise)
         g.font = DemoFonts.sans(400, 34f)
         g.color = MUTED
         centered(g, "churchpresenter.org", 960f, 630f + rise)
@@ -592,6 +595,10 @@ internal class DemoStage(
         g.font = sans
         g.drawString(after, cx, baseline)
     }
+
+    /** [size], or smaller when a long title would run past [maxWidth] at it. */
+    private fun fitTitle(g: Graphics2D, accent: String, size: Float, maxWidth: Float): Float =
+        min(size, size * maxWidth / titleWidth(g, accent, size))
 
     private fun titleWidth(g: Graphics2D, accent: String, size: Float): Float {
         val (before, after) = heading

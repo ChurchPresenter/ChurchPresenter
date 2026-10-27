@@ -238,7 +238,8 @@ internal fun approved(show: () -> Int): Boolean = try {
     false
 }
 
-internal interface ConverterPickers {
+/** Where the tabs get the files and folders a person picks; the system file choosers in the app. */
+interface ConverterPickers {
     fun files(description: String, vararg extensions: String, multiSelection: Boolean): List<File>
     fun directory(): File?
     fun sourceFiles(source: SongSource, format: SongFormatConverter): List<File>
@@ -254,7 +255,8 @@ internal object SwingPickers : ConverterPickers {
         pickSourceFiles(source, format)
 }
 
-internal val LocalConverterPickers = staticCompositionLocalOf<ConverterPickers> { SwingPickers }
+/** The pickers the converter's tabs use; a test or a demo recording provides its own. */
+val LocalConverterPickers = staticCompositionLocalOf<ConverterPickers> { SwingPickers }
 
 internal fun pickFiles(description: String, vararg extensions: String, multiSelection: Boolean): List<File> {
     val chooser = JFileChooser(defaultDir).apply {
