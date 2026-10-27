@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.app.churchpresenter.remote.drawingEventLabel
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -121,6 +122,11 @@ class RemoteEventDialogScreenshotTest {
 
     @Test
     fun `putting a song on screen`() = shoot("project_song", projected(SONG))
+
+    /** A tablet's canvas asking to go live — labelled as the app labels it, by `drawingEventLabel`. */
+    @Test
+    fun `putting a drawing on screen`() =
+        shoot("project_drawing", labelled(RemoteEventType.PROJECT, drawingEventLabel("Good Shepherd sketch")))
 
     /** Driving the media player — play, seek, volume all arrive as this. */
     @Test

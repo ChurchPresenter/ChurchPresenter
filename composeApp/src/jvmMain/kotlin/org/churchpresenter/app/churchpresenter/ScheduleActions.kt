@@ -123,3 +123,27 @@ internal fun scheduleActionsFrom(
     presentScene = presentScene,
     playSlideshow = playSlideshow,
 )
+
+/**
+ * These actions with every add a no-op and everything else kept: for putting an item live
+ * without leaving a row behind. A phone projecting a song used to add it to the schedule each
+ * time; adding is what the phone's own Add to Schedule is for.
+ */
+fun ScheduleActions.withoutAdds(): ScheduleActions {
+    val none = ScheduleActions()
+    return copy(
+        addSong = none.addSong,
+        addBibleVerse = none.addBibleVerse,
+        addPicture = none.addPicture,
+        addPresentation = none.addPresentation,
+        addMedia = none.addMedia,
+        addScene = none.addScene,
+        addDictionary = none.addDictionary,
+        addAnnouncement = none.addAnnouncement,
+        addWebsite = none.addWebsite,
+        addCue = none.addCue,
+        addRow = none.addRow,
+        addLabel = none.addLabel,
+        addLowerThird = none.addLowerThird,
+    )
+}

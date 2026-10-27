@@ -238,13 +238,11 @@ internal fun MainWindowScope.RemoteProjectRequests() {
                         appSettings = appSettings.withAnnouncement(shown)
                     }
                     if (row != null) currentScheduleActions.selectItem(row.id)
-                    // Putting something live from a phone does not add it to the schedule:
-                    // that is what the phone's own Add to Schedule is for, and projecting a
-                    // song used to leave a new row behind every time. The no-op actions keep
-                    // executeProjectItem's adds from happening; everything else it does stands.
+                    // Putting something live from a phone does not add it to the schedule —
+                    // see withoutAdds.
                     executeProjectItem(
                         shown,
-                        ScheduleActions(),
+                        currentScheduleActions.withoutAdds(),
                         presenterManager,
                         currentScheduleItems,
                     )
