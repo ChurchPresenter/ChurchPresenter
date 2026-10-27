@@ -151,8 +151,12 @@ internal fun parseReconnectDelayMs(text: String, fallback: Int): Int =
     text.trim().toIntOrNull()?.coerceIn(INSTANCE_LINK_MIN_RECONNECT_DELAY_MS, INSTANCE_LINK_MAX_RECONNECT_DELAY_MS)
         ?: fallback
 
+/**
+ * Everything the Instance Link window holds, without the window: public so a recording can draw it
+ * in place, as the other windows' contents are.
+ */
 @Composable
-internal fun InstanceLinkDialogContent(
+fun InstanceLinkDialogContent(
     isVisible: Boolean,
     settings: InstanceLinkSettings,
     connectionStatus: InstanceLinkStatus,

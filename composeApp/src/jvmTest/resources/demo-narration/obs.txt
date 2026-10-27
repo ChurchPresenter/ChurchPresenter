@@ -1,0 +1,16 @@
+intro = Welcome to ChurchPresenter. In this tour, we'll have ChurchPresenter change your OBS scenes for you, as the content changes.
+why = When a song goes live, your stream should show the lyrics scene. During the reading, it should show the scripture scene. ChurchPresenter makes those switches, so nobody has to.
+obs-side = First, in OBS, open the Tools menu, choose WebSocket Server Settings, and turn the server on. Note the port and the password it shows.
+settings = Then, in ChurchPresenter, open Settings, and go to the OBS page.
+enable = Turn on Connect to OBS.
+host = If OBS runs on this computer, leave the host as localhost. Otherwise, type the address of the OBS computer.
+password = Enter the password from OBS, or leave it empty if you didn't set one.
+connect = Click Connect. Once it says Connected, ChurchPresenter can switch your scenes.
+mappings = Under Scene Mappings, type the OBS scene for each kind of content, spelled exactly as it is in OBS.
+songs = For Songs, that's your lyrics scene.
+bible = For the Bible, it's your scripture scene.
+default = The Default Scene is used for everything else, like when the screen is cleared.
+song-live = Now, when a song goes live, OBS switches to the lyrics scene.
+bible-live = A Bible verse switches it to the scripture scene.
+clear = And clearing the screen sends OBS back to the default scene.
+outro = And that's OBS: the right scene for every moment, without touching OBS.
