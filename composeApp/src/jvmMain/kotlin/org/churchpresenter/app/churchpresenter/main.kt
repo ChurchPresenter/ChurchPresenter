@@ -45,6 +45,7 @@ import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
+import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.appsettings.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
@@ -190,6 +191,18 @@ private fun runAsOutputGuard(args: Array<String>): Boolean {
     return true
 }
 
+/**
+ * With the website rendered off screen, the AWT event thread is also Chromium's browser thread, and
+ * on Linux skiko waits for the screen's refresh inside each buffer swap on that thread, so a playing
+ * video misses refreshes on every window. Skiko latches this on its first SkiaLayer; a value already
+ * set (`-Dskiko.vsync.enabled=true`) wins.
+ */
+private fun turnOffLinuxVsync() {
+    if (System.getProperty("os.name", "").startsWith("Linux") && System.getProperty("skiko.vsync.enabled") == null) {
+        System.setProperty("skiko.vsync.enabled", "false")
+    }
+}
+
 private fun setLatchedSystemProperties() {
     // Skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
@@ -241,6 +254,8 @@ fun main(args: Array<String>) {
     }
 
     val startupSettings = SettingsManager().loadSettings()
+    val offscreenWeb = startupSettings.projectionSettings.offscreenWebEnabled
+    if (offscreenWeb) turnOffLinuxVsync()
     CrashReporter.initialize(
         startupSettings.analyticsReportingEnabled,
         // BuildConfig is generated into :composeApp, so :diagnostics is told what this build is
@@ -292,6 +307,9 @@ fun main(args: Array<String>) {
                 sessionMinutes = previousRun.sessionMinutes,
                 liveMinutes = previousRun.liveMinutes,
                 liveStalls = previousRun.liveStalls,
+                signageScreens = SignageHub.pairedScreensByPlatform(
+                    AppDataDir.resolve().toPath().resolve(SignageHub.DIR),
+                ),
             )
         },
         events = pendingUsageEvents,
@@ -318,8 +336,9 @@ fun main(args: Array<String>) {
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")
     }
 
-    CefManager.init()
+    CefManager.init(offscreen = offscreenWeb)
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())
+    CrashReporter.setTag("web.render", if (CefManager.offscreen) "offscreen" else "windowed")
     if (CefManager.macOsUnsupported) CrashReporter.setTag("jcef.macos_unsupported", "true")
     if (CefManager.windowsUnsupported) CrashReporter.setTag("jcef.windows_unsupported", "true")
 
@@ -420,7 +439,6 @@ private fun ApplicationScope.ChurchPresenterApp(
                 },
                 typicalSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
                 endpoints = builtInRelayEndpoints,
-                multiComputer = { devMode },
             )
         }
         DisposableEffect(Unit) {
@@ -438,6 +456,7 @@ private fun ApplicationScope.ChurchPresenterApp(
         CompanionServerWiring(tunnelStatus)
         VirtualOutputs(effectiveAppSettings)
         StartupEffect()
+        SignageEffect()
         OutputGuardWiring(relaunchedByGuard) {
             AppWindows(effectiveAppSettings, calendarSync, tunnelStatus, tunnelUrl, onThemeCustomizationChange)
         }

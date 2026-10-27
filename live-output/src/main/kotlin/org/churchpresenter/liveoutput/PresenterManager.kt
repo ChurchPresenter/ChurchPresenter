@@ -61,6 +61,9 @@ class PresenterManager private constructor(
     constructor(showPresenterWindowInitially: Boolean = true) :
         this(showPresenterWindowInitially, PresenterContext())
 
+    /** A manager whose web page is [web], made over [context]: how a test opens an off-screen page. */
+    internal constructor(context: PresenterContext, web: LiveWebState) : this(true, context, web = web)
+
     init {
         context.notify = { source -> onLiveStateChanged?.invoke(this, source) }
         context.setPresentingMode = ::setPresentingMode

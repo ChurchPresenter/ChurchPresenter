@@ -1,6 +1,11 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.isDevWindowedFallback
+import org.churchpresenter.sharedui.utils.DevFlags
+import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import org.churchpresenter.profiles.PreviewOutputPicker
 import org.churchpresenter.profiles.rememberPreviewOutput
@@ -11,6 +16,14 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.web.tabs.WebTab
+
+/**
+ * Asks whether the Web tab may assume a browser engine: [CefManager], read afresh each time, unless
+ * provided. A recording or test that composes the whole main window, where no engine can start,
+ * provides `{ true }`.
+ */
+@JvmField
+internal val LocalWebEngineAvailable = compositionLocalOf<() -> Boolean> { { CefManager.initialized } }
 
 /**
  * The `:web` tab with the app's own parts filled in: the live output through
@@ -27,7 +40,7 @@ fun AppWebTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null,
-    cefInitialized: Boolean = CefManager.initialized,
+    cefInitialized: Boolean = LocalWebEngineAvailable.current(),
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
     cefMissingLibrary: String? = CefManager.missingLibrary,
@@ -50,6 +63,10 @@ fun AppWebTab(
         cefBlockedByPolicy = cefBlockedByPolicy,
         cefMissingLibrary = cefMissingLibrary,
         previewAspectRatio = previewOutput.size.aspectRatio,
+        // The dev windows PresenterWindows opens when there is no second display are outputs too.
+        devOutputWindows = isDevWindowedFallback(
+            BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, rememberScreenDevices().size - 1,
+        ),
         outputPicker = { pickerModifier ->
             PreviewOutputPicker(
                 settings = appSettings,

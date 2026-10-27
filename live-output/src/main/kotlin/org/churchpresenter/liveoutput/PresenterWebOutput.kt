@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import org.cef.browser.CefBrowser
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.web.WebOutput
+import org.churchpresenter.web.offscreen.OffscreenPage
 
 /**
  * [PresenterManager] as the `:web` tab sees it: every call goes straight through.
@@ -18,6 +19,7 @@ class PresenterWebOutput(private val manager: PresenterManager) : WebOutput {
     override val webPageTitle: State<String> get() = manager.webPageTitle
     override val liveBrowser: State<CefBrowser?> get() = manager.liveBrowser
     override val webSnapshot: State<ImageBitmap?> get() = manager.webSnapshot
+    override val offscreenPage: State<OffscreenPage?> get() = manager.offscreenPage
 
     override fun setPresentingMode(mode: Presenting) = manager.setPresentingMode(mode)
     override fun setWebsiteUrl(url: String) = manager.setWebsiteUrl(url)

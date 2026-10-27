@@ -29,7 +29,7 @@ class MainDesktopTabsTest {
             hasCompanionTabConnections = false,
         )
 
-        assertEquals(Tabs.entries.filter { it != Tabs.CROSSWORD && it != Tabs.COMPANION_SURFACE }, tabs)
+        assertEquals(Tabs.entries.filter { it !in setOf(Tabs.CROSSWORD, Tabs.COMPANION_SURFACE) }, tabs)
     }
 
     @Test

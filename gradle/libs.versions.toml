@@ -1,13 +1,13 @@
 [versions]
 cyclonedx = "3.5.1"
 # Not a dependency of the app: the floor for the Jackson the CycloneDX plugin loads (see composeApp).
-jackson-core = "2.22.3"
+jackson-core = "2.22.4"
 jna = "5.19.1"
 javafx = "21.0.12"
 vlcj = "4.8.3"
 androidx-lifecycle = "2.11.0"
 sentry = "8.61.0"
-sentryPlugin = "6.23.0"
+sentryPlugin = "6.24.0"
 logback = "1.6.5"
 composeHotReload = "1.2.0"
 roborazzi = "1.76.0"
@@ -25,9 +25,13 @@ kotlinx-serialization = "1.11.0"
 material3 = "1.12.0-alpha03"
 compottie = "2.3.3"
 compose = "1.5.0"
-navigationComposeJvmstubs = "2.9.6"
+navigationComposeJvmstubs = "2.10.2"
 sqliteJdbc = "3.53.4.0"
 ktor = "3.6.0"
+# 3.6.4 binds its socket to the computer's own address on macOS, which macOS refuses while its own
+# mDNS service holds port 5353, so the signage advert never starts there. Held at 3.6.3 until a
+# release fixes it (.github/dependabot.yml skips 3.6.4).
+jmdns = "3.6.3"
 bouncycastle = "1.86"
 apache-poi = "5.5.1"
 pdfbox = "2.0.37"
@@ -105,6 +109,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core-jvm", version.ref = "kto
 ktor-client-cio = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor" }
 ktor-client-websockets = { module = "io.ktor:ktor-client-websockets-jvm", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock-jvm", version.ref = "ktor" }
+jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 apache-poi = { module = "org.apache.poi:poi", version.ref = "apache-poi" }

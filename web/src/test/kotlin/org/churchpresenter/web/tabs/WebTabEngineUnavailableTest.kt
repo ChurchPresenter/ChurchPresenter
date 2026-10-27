@@ -104,6 +104,20 @@ class WebTabEngineUnavailableTest {
     }
 
     @Test
+    fun `normaliseUrl leaves an address with its own scheme as typed`() {
+        assertEquals("file:///home/a/page.html", normaliseUrl("file:///home/a/page.html"))
+        assertEquals("FILE:///C:/page.html", normaliseUrl("FILE:///C:/page.html"))
+        assertEquals("data:text/html,<b>hi</b>", normaliseUrl("data:text/html,<b>hi</b>"))
+        assertEquals("about:blank", normaliseUrl("about:blank"))
+        assertEquals("view-source:https://a.b", normaliseUrl("view-source:https://a.b"))
+    }
+
+    @Test
+    fun `normaliseUrl treats host and port as a bare host`() {
+        assertEquals("https://localhost:8080/x", normaliseUrl("localhost:8080/x"))
+    }
+
+    @Test
     fun `normaliseUrl leaves blank input blank`() {
         assertEquals("", normaliseUrl(""))
         assertEquals("", normaliseUrl("   "))

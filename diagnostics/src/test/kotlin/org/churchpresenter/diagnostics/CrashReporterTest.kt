@@ -78,6 +78,7 @@ class CrashReporterTest {
             tags = mapOf("k" to "v"),
             extras = mapOf("detail" to "the long version"),
         )
+        CrashReporter.reportInfo("a measurement", tags = mapOf("k" to "v"), extras = mapOf("n" to "1"))
         CrashReporter.sendUserFeedback("it broke", name = "Sam", email = "sam@example.org")
         assertFalse(CrashReporter.sendTestEvent(), "a test event cannot be sent while disabled")
     }

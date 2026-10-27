@@ -128,6 +128,13 @@ data class ProjectionSettings(
     /** Whether the guard also covers the outputs with their stills while the app's UI is hung. Off. */
     val outputGuardOnHang: Boolean = false,
     /**
+     * Render the live website once, off screen, and draw that one page on every output, the
+     * previews and the Web tab, at the page's own frame rate. Off, each output window has a browser
+     * of its own and everything else mirrors a screenshot of it. Read when the web engine starts, so
+     * a change takes effect after a restart. On unless turned off.
+     */
+    val offscreenWebEnabled: Boolean = true,
+    /**
      * Named, reusable [OutputProfile]s, any of which an output can follow via
      * [ScreenAssignment.activeProfileId] -- see `AppSettings.resolvedFor(profile)`
      * (`OutputProfileResolution.kt`). A fresh install starts with exactly one, factory-default

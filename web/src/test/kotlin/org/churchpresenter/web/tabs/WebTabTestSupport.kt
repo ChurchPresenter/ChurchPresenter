@@ -2,6 +2,7 @@
 
 package org.churchpresenter.web.tabs
 
+import org.churchpresenter.web.offscreen.OffscreenPage
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ internal class FakeWebOutput : WebOutput {
     override val webPageTitle = mutableStateOf("")
     override val liveBrowser = mutableStateOf<CefBrowser?>(null)
     override val webSnapshot = mutableStateOf<ImageBitmap?>(null)
+    override val offscreenPage = mutableStateOf<OffscreenPage?>(null)
 
     override fun setPresentingMode(mode: Presenting) {
         onAir.value = mode
@@ -77,6 +79,7 @@ internal fun webTab(
     cefBlockedByPolicy: Boolean = false,
     startEngine: () -> Unit = {},
     hasSecondaryDisplay: Boolean = false,
+    devOutputWindows: Boolean = false,
     includeAddToSchedule: Boolean = true,
     /**
      * Constrains the tab's width.
@@ -112,6 +115,7 @@ internal fun webTab(
                         cefBlockedByPolicy = cefBlockedByPolicy,
                         startEngine = startEngine,
                         hasSecondaryDisplay = hasSecondaryDisplay,
+                        devOutputWindows = devOutputWindows,
                     )
                 }
             }

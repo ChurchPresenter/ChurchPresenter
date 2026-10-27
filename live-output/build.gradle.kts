@@ -47,6 +47,7 @@ dependencies {
     testImplementation(projects.announcements)
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))
+    testImplementation(testFixtures(projects.webEngine))
     testImplementation(testFixtures(projects.coreModels))
     testImplementation(testFixtures(projects.diagnostics))
     testImplementation(testFixtures(projects.presenter))

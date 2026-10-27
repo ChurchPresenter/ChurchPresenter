@@ -4,6 +4,7 @@ plugins {
     // own under build/ so a test can never touch the real ~/.churchpresenter.
     id("cp.test-home")
     id("cp.compose")
+    `java-test-fixtures`
 }
 
 dependencies {
@@ -20,12 +21,24 @@ dependencies {
     api(libs.jcefmaven)
 
     implementation(compose.desktop.currentOs)
+    // The off-screen page's Windows message pump (SentMessagePump) calls User32 directly.
+    implementation(libs.jna)
+    implementation(libs.jna.platform)
     implementation(libs.compose.material3)
 
+    // stubOffscreenPage(): a live page for the suites of the modules that draw one.
+    testFixturesImplementation(libs.mockk)
+    testFixturesImplementation(libs.compose.runtime)
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+}
+
+// JcefShutdownHook reads the JDK's shutdown-hook table, which the app opens with
+// --add-opens=java.base/java.lang (composeApp's jvmArgs); the tests run it the same way.
+tasks.test {
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
 }

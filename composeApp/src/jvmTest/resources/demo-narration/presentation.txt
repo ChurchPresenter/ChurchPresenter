@@ -1,0 +1,45 @@
+# What the narrator says in the presentation tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Presentation tab, where you can show your sermon slides, announcements and other presentations on the big screen.
+open-tab = Let's open the Presentation tab.
+select-file = To open a presentation, click Select File. ChurchPresenter supports PowerPoint files, Keynote files and PDF documents, so you can use the slides you already have.
+recents = Files you've opened recently are listed right here. Double-click one, and its slides load straight away. We'll open this morning's sermon on the Good Shepherd.
+click-slide = Every slide appears as a thumbnail. Click a slide to select it, and it shows in the preview first, so you can check it before anyone else sees it.
+go-live = When you're ready, click Go Live, and the slide is sent to the projector.
+live-1 = Notice that only the title is showing. This slide was built with animations in PowerPoint, and ChurchPresenter plays them exactly as they were designed.
+build-first = Press the right arrow, and the first animation plays.
+built-first = The first point fades in, just as it would in PowerPoint.
+build-second = Press it again for the next point.
+built-second = The second point appears.
+build-third = And once more for the last one.
+built-third = Now every point is on the screen. You stay in control of the pace, one press at a time.
+transition-slide = When all the animations have played, the next press moves on to the next slide, with the slide transition from your original file.
+live-2 = That push transition came straight from the PowerPoint file, along with the animation that brings in the reference.
+double-click = You can also double-click any slide to jump to it and put it live in a single move.
+live-3 = And now slide four is on the big screen.
+hide = If there's a slide you'd rather skip today, use its visibility switch. Click the eye on its card to hide it. It stays in the file, but the arrow keys and the slideshow will pass right over it.
+play = Press Play to let the slides advance on their own, which is handy for announcements before the service.
+interval = You can choose how long each slide stays on screen before the next one appears.
+transition = The transition duration sets how long the change from one slide to the next takes.
+loop = With Loop switched on, the presentation starts over again after the last slide.
+animation = For slides that don't have their own transitions, you can choose how one slide changes into the next. Open the transition list to see the options.
+fade = We'll pick Fade, for a gentle change between slides.
+blank = Need the screen to go dark for a moment, perhaps for a prayer? The eye button at the top controls the output's visibility. Click Blank Output, and the audience sees nothing at all.
+blanked = The projector is now blank, but your slide is still waiting underneath.
+unblank = Click the button again, and the slide comes straight back.
+keys = There are keyboard shortcuts for all of this. The space bar plays and pauses, and the B key or the full stop blanks the screen.
+server = Remote Control works through ChurchPresenter's companion server, so let's make sure it's switched on first. Open Settings, and go to the Server page.
+server-enable = Turn on the Companion Server. This is what lets phones, tablets and other devices connect to ChurchPresenter. Once it's running, its status changes to Running.
+server-key = For extra safety, you can also turn on API Key Protection, so only devices that have your key can connect.
+remote = Now for one of the most useful features. With Remote Control, the person preaching can change the slides from a phone or tablet, right from the pulpit. Click Remote Control to open its settings.
+remote-enable = First, switch on Enable Remote Control. This lets phones and tablets that are connected to ChurchPresenter browse and change your slides.
+remote-qr = To connect a phone, simply scan this QR code with its camera. The remote opens right in the phone's web browser, so there's no app to install.
+remote-copy = You can also copy the address and send it to whoever is presenting, so they can open it on their own device.
+remote-key = The link is protected by your server's API key, so only people you've given it to can control your slides.
+remote-public = Phones on the church WiFi can connect straight away. But what about a guest speaker, or a phone that isn't on your church's network? That's what Public Access is for. Turn it on, and ChurchPresenter opens a secure tunnel, so devices that aren't on the church WiFi can connect over their own mobile data. Public links are temporary, and they change each time you start a new tunnel.
+preset = If you use this presentation often, save it as a preset. A preset is a named shortcut that you can add to any future service in one click.
+schedule = To bring this presentation back later in the service, click Add to Schedule.
+schedule-row = The sermon now appears in your schedule on the left, ready whenever you need it.
+clear = And when you've finished, the red button clears the presentation away.
+outro = And that's the Presentation tab. Open your slides, let the animations play, and move through them from the keyboard or a phone.

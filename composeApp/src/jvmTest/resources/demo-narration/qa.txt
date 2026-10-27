@@ -1,0 +1,30 @@
+# What the narrator says in the q&a tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Q and A tab, where your congregation can send in questions from their phones during the service.
+open-tab = Let's open the Q and A tab.
+server = Q and A works through ChurchPresenter's companion server, so let's make sure it's switched on first. Open Settings, and go to the Server page.
+server-enable = Turn on the Companion Server. This is what lets phones connect to ChurchPresenter. Once it's running, its status changes to Running.
+sharing = Now click Sharing and Remote Access to see how people can reach your Q and A.
+qr-scan = Everyone in the room can simply scan this QR code with their phone camera. It opens the question page right in their web browser, so there's no app to download.
+admin = There's also an admin panel, so a volunteer can approve and manage the questions from their own phone or tablet.
+wifi = The local address works for anyone whose phone is connected to the church WiFi.
+public = But not everyone will be on your church's network. For those people, turn on Public Access. ChurchPresenter opens a secure tunnel, so phones can send questions over their own mobile data, without joining your WiFi.
+cooldown = The cooldown sets how many seconds someone has to wait between questions, so one person can't flood the list.
+qr-message = And you can change the message shown next to the QR code, such as, scan to ask a question.
+show-qr = Back in the tab, this button puts the QR code on the big screen, so everyone can scan it from their seat.
+voting = Turn on voting, and people can vote for the questions they most want answered. The vote count appears next to each question.
+incoming = New questions appear here, with the name of the person who asked and how many votes it has.
+approve = Click the tick to approve a question, so it's ready to be answered.
+deny = Click the cross to deny a question you don't want to use.
+edit = The pencil lets you edit a question, to fix a typo or tidy up the wording before it goes on screen.
+delete = And the bin removes a question for good.
+filter = Use Filter and Sort to show only the approved or denied questions, or to put the most popular ones at the top.
+go-live = When you're ready to answer an approved question, click its Go Live button. Questions that haven't been approved yet ask you to confirm first, so nothing goes up by accident.
+live = And there it is, the question on the big screen, ready to be answered.
+clear = When it's been answered, click Clear Display to take it down.
+history = Questions from earlier services are kept in History, so you can look back at them at any time.
+new-session = At the start of each service, click New Session for a fresh list. The previous questions are saved to history.
+add-own = You can also add your own questions. Type one in here.
+add-click = Then click Add, and it joins the list just like the others.
+outro = And that's the Q and A tab. Share the QR code, approve the best questions, and put them on screen with a single click.

@@ -63,6 +63,17 @@ class CrashReporterSentryTest {
     }
 
     @Test
+    fun `an info event carries its tags and extras without throwing`() {
+        CrashReporter.reportInfo(
+            "Off-screen web session",
+            tags = mapOf("os" to "Mac OS X"),
+            extras = mapOf("duration_s" to "30"),
+        )
+
+        assertTrue(CrashReporter.isEnabled())
+    }
+
+    @Test
     fun `tags and context are accepted`() {
         CrashReporter.setTag("output.count", "3")
         CrashReporter.setConfigTags(mapOf("vlc" to "present", "jcef" to "absent"))

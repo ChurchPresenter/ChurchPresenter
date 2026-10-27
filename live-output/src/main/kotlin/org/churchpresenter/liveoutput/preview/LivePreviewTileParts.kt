@@ -1,5 +1,6 @@
 package org.churchpresenter.liveoutput.preview
 
+import org.churchpresenter.web.offscreen.OffscreenWebView
 import org.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.presenter.LocalLottieBandClock
@@ -137,13 +138,17 @@ internal fun PreviewMode(
 }
 
 /**
- * A website on the tile: the live snapshot WebTab pushes every 200ms through the presenter manager.
- * A second JFXPanel instance can't be scaled or clipped by Compose, so this mirrors one instead.
+ * A website on the tile: the off-screen page's own frames while one is open, or else the snapshot the
+ * windowed browser takes every 150 ms. A second windowed browser can't be scaled or clipped by
+ * Compose, so this mirrors the output's instead.
  */
 @Composable
 internal fun PreviewWebsiteMirror(presenterManager: PresenterManager) {
+    val page = presenterManager.offscreenPage.value
     val snapshot = presenterManager.webSnapshot.value
-    if (snapshot != null) {
+    if (page != null) {
+        OffscreenWebView(page, Modifier.fillMaxSize(), small = true)
+    } else if (snapshot != null) {
         Image(
             bitmap = snapshot,
             contentDescription = null,

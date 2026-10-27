@@ -54,6 +54,7 @@ import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.SERVER_PORTS
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.signage.hub.SignageHub
 
 private const val PORT_SCAN_RANGE = 40
 
@@ -475,6 +476,28 @@ class CompanionServer(
      */
     @Volatile var devMode: Boolean = false
 
+    /** Whether signage is on -- kept current by the app: on while the Signage tab is shown. */
+    @Volatile var signageEnabled: Boolean = false
+        set(value) {
+            field = value
+            signageAdvert.refresh()
+        }
+
+    /**
+     * The signage screens this ChurchPresenter owns, set by the app. With it and [signageEnabled],
+     * the server answers `/api/signage/` and advertises itself over mDNS for the players to find.
+     */
+    @Volatile var signage: SignageHub? = null
+        set(value) {
+            field = value
+            signageAdvert.refresh()
+        }
+
+    /** Advertised while the server runs with signage on and a signage hub. */
+    private val signageAdvert = SignageAdvert {
+        signage?.takeIf { _isRunning.value && signageEnabled }?.let { SignageAdvert.Wanted(currentPort, it.ownerName) }
+    }
+
     /** The macros a remote client may run -- kept current by the app from its settings. */
     @Volatile var macros: List<Macro> = emptyList()
 
@@ -626,6 +649,7 @@ class CompanionServer(
             server?.start(wait = false)
             _isRunning.value = true
             _serverUrl.value = "http://$displayHost:$port"
+            signageAdvert.refresh()
             CrashReporter.breadcrumb("Server started on port $port", category = "server")
             scope.launch { pictures.clearDeviceUploads() }
         } catch (_: java.net.BindException) {
@@ -700,6 +724,7 @@ class CompanionServer(
                 )
                 browserSourceTransposeRoutes(this@CompanionServer)
                 qaRoutes(this@CompanionServer, json, scope)
+                signageRoutes(this@CompanionServer)
                 drawingRoutes(this@CompanionServer, scope)
             }
     }
@@ -719,6 +744,7 @@ class CompanionServer(
         scope.coroutineContext[Job]?.cancelChildren()
         _isRunning.value = false
         _serverUrl.value = ""
+        signageAdvert.refresh()
         CrashReporter.breadcrumb("Server stopped", category = "server")
     }
 

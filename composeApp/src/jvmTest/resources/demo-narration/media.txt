@@ -1,0 +1,26 @@
+# What the narrator says in the media tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Media tab, where you can play videos, music and live streams on the big screen.
+open-tab = Let's open the Media tab.
+vlc = Before you start, there's one thing to know. ChurchPresenter uses VLC media player to play video and audio, so VLC needs to be installed on this computer. It's free from videolan dot org. Install it once, restart ChurchPresenter, and you're ready to go.
+select-file = To play something from your computer, click Select File. ChurchPresenter plays all the common formats, including MP4, MOV, AVI, MKV, WMV and WebM video, and MP3, WAV, FLAC, AAC and M4A audio.
+network = Your video doesn't have to be on this computer. Switch to Network URL to play something from the web or your network instead.
+url = Paste in the address of a video or a live stream. Web links, streaming links and RTSP camera feeds all work, as long as VLC can open them.
+local = We'll switch back to Local File for now.
+recents = The files you've played recently are listed right here, so last week's welcome video is always a single click away.
+favorite = Click the star on any recent file to pin it as a favorite. Pinned files stay at the front of the list, so the ones you use every week are always easy to find.
+open-recent = Let's open the welcome loop. Click it once, and it loads, ready to play.
+go-live = When you're ready, click Go Live, and the video plays on the projector.
+live = And there it is, playing on the big screen.
+transport = The controls work just as you'd expect. Play and pause, skip backward or forward, or stop the video altogether.
+loop = Turn on Loop to repeat the video. You can choose how many times it plays, or let it repeat forever, which is perfect for a welcome loop before the service.
+subtitles = If your video has subtitles, click here to choose them. You can use the subtitles built into the video, or load a separate subtitle file, such as an S R T or V T T file.
+subtitle-menu = Each subtitle language appears in this list, along with Off to hide them. You can even choose which screens show the subtitles.
+volume = Drag the volume slider to set how loud the video plays in the room.
+mute = Need silence for a moment? Click Mute, and the sound stops straight away, while the picture keeps playing.
+unmute = Click it again, and the sound comes back at the same volume.
+preset = If you play this video often, save it as a preset. A preset is a named shortcut that you can add to any future service in one click.
+schedule = To play it at just the right moment in your service, click Add to Schedule.
+schedule-row = The video now appears in your schedule on the left, ready whenever you need it.
+outro = And that's the Media tab. Pick a file or a stream, go live, and control the sound and subtitles from right here.

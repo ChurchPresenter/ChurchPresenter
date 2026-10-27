@@ -101,7 +101,7 @@ fun AddLabelDialog(
  * since the `DialogWindow` call sits after that guard.
  */
 @Composable
-internal fun AddLabelDialogContent(
+fun AddLabelDialogContent(
     onDismiss: () -> Unit,
     onConfirm: (text: String, textColor: String, backgroundColor: String) -> Unit,
     existingText: String = "",

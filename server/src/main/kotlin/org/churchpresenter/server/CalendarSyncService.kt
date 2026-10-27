@@ -92,17 +92,21 @@ class CalendarSyncService(
     private val usage: UsageEventStore = UsageEvents,
     private val endpoints: RelayEndpoints = RelayEndpoints.NONE,
     private val now: () -> Instant = Instant::now,
-    /** Whether other computers may join this calendar or this one join another's -- dev mode, for now. */
-    private val multiComputer: () -> Boolean = { false },
+    /** Whether other computers may join this calendar or this one join another's. */
+    private val multiComputer: () -> Boolean = { true },
+    /** The phones listed before the first sync answers; none in the app, sample ones in a demo. */
+    initialDevices: List<PairedDevice> = emptyList(),
+    /** The status shown before the first round runs; Off in the app, a finished round in a demo. */
+    initialStatus: CalendarSyncStatus = CalendarSyncStatus.Off,
 ) {
-    private val _status = MutableStateFlow<CalendarSyncStatus>(CalendarSyncStatus.Off)
+    private val _status = MutableStateFlow(initialStatus)
     val status: StateFlow<CalendarSyncStatus> = _status.asStateFlow()
 
     /** When the timer in [run] next pulls from the relay, or null while no timer is running. */
     private val _nextPullAt = MutableStateFlow<Instant?>(null)
     val nextPullAt: StateFlow<Instant?> = _nextPullAt.asStateFlow()
 
-    private val _devices = MutableStateFlow<List<PairedDevice>>(emptyList())
+    private val _devices = MutableStateFlow(initialDevices)
     val devices: StateFlow<List<PairedDevice>> = _devices.asStateFlow()
 
     private val watcher = CalendarFileWatcher(folder, io)

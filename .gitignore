@@ -94,3 +94,7 @@ screenshots-compare/
 
 # Local planning notes
 docs/PHASE2_PLAN.md
+
+# Demo-video fonts (Inter weights, Cormorant Garamond) made locally for the demo recorder; not shipped.
+# Without them the recorder falls back to the Mac system fonts.
+composeApp/src/jvmTest/resources/demo-fonts/

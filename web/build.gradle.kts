@@ -25,6 +25,8 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
+    testImplementation(testFixtures(projects.webEngine))
+
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(libs.compose.uiTestJunit4)

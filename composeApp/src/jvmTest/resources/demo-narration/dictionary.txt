@@ -1,0 +1,19 @@
+# What the narrator says in the dictionary tour, in order. Edit freely: one line per key.
+# Write it the way it should sound -- full sentences; numbers as words where it matters.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at the Dictionary tab, where you can look up the original Hebrew and Greek words behind the Bible, using Strong's dictionary.
+open-tab = Let's open the Dictionary tab.
+filters = Every entry is listed on the left. Show all of them, just the Hebrew words from the Old Testament, or just the Greek words from the New Testament.
+search = You can search by Strong's number, by the word itself, or by its meaning. We'll look up G twenty six.
+pick = Click an entry, and its full details open on the right.
+details = At the top is the original word in Greek, with its Strong's number. Below it is the transliteration, which spells it in English letters, and the pronunciation, so you know how to say it.
+definition = Then comes the definition, and the KJV usage, which shows how the King James Bible translates this word.
+scripture = Below that, In Scripture lists every verse where this word appears, and how many there are. This is agape, the word for God's love.
+words = Each verse shows its original words underneath. Click any of them to look that word up next.
+history = The back and forward buttons take you between the words you've looked at, just like a web browser.
+language = This button switches the language of the definitions, if your dictionary includes another language.
+translation = Choose which Bible translation the verses come from, and narrow the list to a single book.
+go-live = When you're ready, click Go Live, and the word and its meaning are sent to the projector.
+live = And there it is, agape explained on the big screen, perfect for a sermon on love.
+schedule = To bring it back during the sermon, click Add to Schedule.
+outro = And that's the Dictionary tab. Look up any Hebrew or Greek word, see where it's used, and show its meaning to your congregation.

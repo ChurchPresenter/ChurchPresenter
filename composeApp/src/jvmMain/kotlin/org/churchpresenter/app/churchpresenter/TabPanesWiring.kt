@@ -16,6 +16,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.AppAnnouncementsTab
 import org.churchpresenter.canvas.CanvasTab
 import org.churchpresenter.dictionary.DictionaryTab
+import org.churchpresenter.signage.tab.SignageTab
 import org.churchpresenter.app.churchpresenter.tabs.AppLowerThirdTab
 import org.churchpresenter.media.tabs.MediaTab
 import org.churchpresenter.slides.tabs.PicturesTab
@@ -88,6 +89,14 @@ internal fun MainDesktopScope.TabContentPane(tab: Tabs) {
             viewModel = companionSatelliteViewModel
         )
         Tabs.DICTIONARY -> DictionaryTabPane()
+        Tabs.SIGNAGE -> signage?.let { input ->
+            SignageTab(
+                controller = input.controller,
+                serverRunning = input.serverRunning,
+                onTurnOnServer = input.onTurnOnServer,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 
