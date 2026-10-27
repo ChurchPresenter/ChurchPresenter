@@ -938,9 +938,22 @@ internal class DemoTour(
         hold(1.0)
         target.node.performTextReplacement(text)
         ui.waitForIdle()
+        giveKeyboardBack()
         refresh(0.3)
         hold(0.4)
         padTo(start, talk)
+    }
+
+    /**
+     * A click or keystroke in the panel takes the keyboard from the main window, which says so in a
+     * red bar across it -- a recording's artifact, since the panel stands in for a separate window.
+     * The bar is pressed, as it asks, without moving the callout.
+     */
+    fun giveKeyboardBack() {
+        val bar = hasText("Keyboard focus lost", substring = true)
+        if (!hasNode(bar)) return
+        runCatching { find(bar).node.performClick() }
+        ui.waitForIdle()
     }
 
     /** Opens the panel as a window titled [title], [width]×[height] dp, sliding in over the dimmed app. */
@@ -987,6 +1000,7 @@ internal class DemoTour(
         if (click) {
             target.node.performClick()
             ui.waitForIdle()
+            giveKeyboardBack()
             refresh(0.3)
         }
         hold(0.4)
