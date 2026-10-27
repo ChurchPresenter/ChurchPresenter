@@ -337,7 +337,7 @@ internal fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: (
  * `LocalLibraryDialogContent`.
  */
 @Composable
-internal fun ConnectionQrDialogContent(serverUrl: String, apiKey: String?, onDismiss: () -> Unit) {
+fun ConnectionQrDialogContent(serverUrl: String, apiKey: String?, onDismiss: () -> Unit) {
     // Parse host and port from serverUrl (e.g. "http://192.168.1.50:8765")
     val (parsedHost, parsedPort) = remember(serverUrl) { parseServerUrlHostPort(serverUrl) }
 
