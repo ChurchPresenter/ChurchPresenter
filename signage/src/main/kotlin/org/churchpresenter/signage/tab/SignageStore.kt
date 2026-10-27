@@ -20,8 +20,16 @@ data class SignageSettings(
     val pictureSeconds: Int = DEFAULT_PICTURE_SECONDS,
     /** What each screen plays, by screen id. */
     val screens: Map<String, ScreenPlan> = emptyMap(),
+    /** The playlists added in the tab, in the order they were added; folders are read from disk. */
+    val added: List<AddedPlaylist> = emptyList(),
 ) {
     fun plan(id: String): ScreenPlan = screens[id] ?: ScreenPlan()
+
+    /** Without [id] added, and with no screen still playing it: those play the first playlist again. */
+    fun withoutAdded(id: String): SignageSettings = copy(
+        added = added.filterNot { it.id == id },
+        screens = screens.mapValues { (_, plan) -> if (plan.playlistId == id) ScreenPlan() else plan },
+    )
 
     companion object {
         const val DEFAULT_PICTURE_SECONDS = 10
@@ -74,6 +82,17 @@ class SignageStore(private val dir: Path) {
         }
         hashes[key] = HashedFile(file.size, file.modifiedMs, sha)
         return sha
+    }
+
+    /**
+     * The playlists added in the tab, each with its file's hash: an added picture or video is hashed
+     * again only when it changed, and a missing one has none.
+     */
+    fun hashAdded(added: List<AddedPlaylist>): List<HashedPlaylist> = added.map { entry ->
+        when (entry) {
+            is FilePlaylist -> HashedPlaylist(entry, entry.currentFile()?.let { mapOf(it to hashOf(it)) }.orEmpty())
+            is LinkPlaylist -> HashedPlaylist(entry)
+        }
     }
 
     /** Forgets every file not in [keep] and saves the rest. */

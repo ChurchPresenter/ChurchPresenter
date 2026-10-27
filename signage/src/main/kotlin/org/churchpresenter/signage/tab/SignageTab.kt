@@ -87,6 +87,7 @@ fun SignageTab(
             onWipe = controller::wipe,
             onUpdate = controller.controls::update,
             onPreviewOpen = { largePreview = it },
+            onTestWebPages = { controller.controls.testWebPages(it) },
         )
     }
     // Only while the tab is showing: look for a player update now and daily, and ask for pictures.
@@ -132,6 +133,10 @@ fun SignageTab(
                         onChangeFolder = controller::setFolder,
                         onPictureSeconds = controller::setPictureSeconds,
                         desktop = desktop,
+                        onAddLink = controller.added::addLink,
+                        onAddFile = controller.added::addFile,
+                        onRename = controller.added::rename,
+                        onRemove = controller.added::remove,
                     ),
                     modifier = Modifier.weight(1f).fillMaxSize(),
                 )
@@ -154,6 +159,10 @@ internal class FolderActions(
     val onChangeFolder: (Path) -> Unit,
     val onPictureSeconds: (Int) -> Unit,
     val desktop: SignageDesktop,
+    val onAddLink: (NewLink) -> Unit = {},
+    val onAddFile: (Path) -> Unit = {},
+    val onRename: (id: String, name: String) -> Unit = { _, _ -> },
+    val onRemove: (id: String) -> Unit = {},
 )
 
 /**
@@ -183,6 +192,8 @@ internal class ScreenActions(
     val onUpdate: (String) -> Unit = {},
     /** A screen's picture opened big, or null when it is closed: that screen is asked for a sharper one. */
     val onPreviewOpen: (String?) -> Unit = {},
+    /** Has the screen test how smoothly it shows web pages. */
+    val onTestWebPages: (String) -> Unit = {},
 )
 
 @Composable
