@@ -42,6 +42,11 @@ updates:
       # change of its own, not a version bump.
       - dependency-name: "org.apache.pdfbox:*"
         update-types: ["version-update:semver-major"]
+      # JmDNS 3.6.4 cannot advertise on macOS (it binds port 5353 to the computer's own address,
+      # which the system's mDNS service keeps); the signage advert stays on 3.6.3. A later release
+      # is still offered.
+      - dependency-name: "org.jmdns:jmdns"
+        versions: ["3.6.4"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
