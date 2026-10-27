@@ -39,6 +39,14 @@ sealed interface PlayerMessage {
         val freeDiskBytes: Long? = null,
         val cec: CecState = CecState.UNKNOWN,
         val errors: List<String> = emptyList(),
+        /** How busy the whole processor was since the last status, 0–100; null where unknown. */
+        val cpuPercent: Int? = null,
+        /** How much of the memory is in use, 0–100; null where unknown. */
+        val memoryPercent: Int? = null,
+        /** The processor's temperature in °C; null where the player cannot tell. */
+        val temperatureC: Double? = null,
+        /** How long the machine has been up. */
+        val uptimeSeconds: Long? = null,
     ) : PlayerMessage
 
     /** The answer to [ServerMessage.PreviewRequest]: what the screen shows, as a small JPEG. */
@@ -60,6 +68,8 @@ sealed interface PlayerMessage {
     data class WebTestResult(
         val runs: List<WebTestRun> = emptyList(),
         val error: String? = null,
+        /** Whether the page was drawn with the GPU; null from a player that does not say. */
+        val gpu: Boolean? = null,
     ) : PlayerMessage
 
     /** How an update sent with [ServerMessage.UpdateAvailable] is going. */
@@ -106,6 +116,14 @@ object Features {
 
     /** Answers [ServerMessage.WebTest]; listed with [WEB]. */
     const val WEB_TEST = "web_test"
+
+    /**
+     * Shows a playlist that has a link one item at a time, each for its `durationMs` (a video without
+     * one to its end). A player without it would draw every web page of the playlist at once and never
+     * leave one, so ChurchPresenter sends a link that is not alone in its playlist only to players
+     * that list it.
+     */
+    const val ROTATION = "rotation"
 }
 
 @Serializable
