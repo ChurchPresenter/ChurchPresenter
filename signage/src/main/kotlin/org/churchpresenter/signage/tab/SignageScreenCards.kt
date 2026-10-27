@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +58,8 @@ import org.churchpresenter.strings.generated.resources.signage_factory_reset_tex
 import org.churchpresenter.strings.generated.resources.signage_factory_reset_title
 import org.churchpresenter.strings.generated.resources.signage_nothing
 import org.churchpresenter.strings.generated.resources.signage_rename
+import org.churchpresenter.strings.generated.resources.signage_schedule
+import org.churchpresenter.strings.generated.resources.signage_schedule_summary
 import org.churchpresenter.strings.generated.resources.signage_showing
 import org.churchpresenter.strings.generated.resources.signage_showing_idle
 import org.churchpresenter.strings.generated.resources.signage_synced_at
@@ -160,12 +163,19 @@ internal fun ScreenCard(row: ScreenRowState, actions: ScreenActions) {
             onConfirm = { actions.onRemove(screen.id) },
             onDismiss = { asking = null },
         )
+        CardQuestion.SCHEDULE -> ScheduleDialog(
+            screenName = screen.name,
+            playlists = row.folder.playlists,
+            blocks = row.folder.settings.plan(screen.id).schedule,
+            onSave = { actions.onSchedule(screen.id, it) },
+            onDismiss = { asking = null },
+        )
         null -> Unit
     }
 }
 
 /** What a card asks before doing. */
-private enum class CardQuestion { WIPE, FACTORY_RESET }
+private enum class CardQuestion { WIPE, FACTORY_RESET, SCHEDULE }
 
 /** The card's text and controls, beside the picture. */
 @Composable
@@ -186,6 +196,11 @@ private fun RowScope.ScreenDetails(
                 text = stringResource(Res.string.signage_identify),
                 onClick = { actions.onIdentify(screen.id) },
                 enabled = row.link != null,
+            )
+            TooltipIconButton(
+                painter = rememberVectorPainter(Icons.Filled.Schedule),
+                text = stringResource(Res.string.signage_schedule),
+                onClick = { onAsk(CardQuestion.SCHEDULE) },
             )
             TooltipIconButton(
                 painter = rememberVectorPainter(Icons.Filled.Edit),
@@ -214,12 +229,20 @@ private fun RowScope.ScreenDetails(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        ScreenHealthLine(row.link?.status)
         row.link?.status?.errors?.forEach { error ->
             Text(error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
         UpdateLine(row, onUpdate = { actions.onUpdate(screen.id) })
         WebTestLine(row, onTest = { actions.onTestWebPages(screen.id) })
         PlaylistPicker(row, onPlay = { actions.onPlay(screen.id, it) })
+        row.folder.settings.plan(screen.id).schedule.takeIf { it.isNotEmpty() }?.let { blocks ->
+            Text(
+                stringResource(Res.string.signage_schedule_summary, blocks.sumOf { it.days.size }),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

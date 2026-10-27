@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.PendingScreen
 import org.churchpresenter.signage.hub.ScreenLink
@@ -32,6 +33,9 @@ data class PlaylistSummary(
     val kind: SourceKind = SourceKind.FOLDER,
     val detail: String? = null,
     val missing: Boolean = false,
+    /** A rotation's steps, and their seconds added up (a folder or a video without a time adds none). */
+    val steps: Int = 0,
+    val seconds: Int = 0,
 ) {
     /** Added in the tab, so it can be renamed, and removed without touching any file. */
     val added: Boolean get() = kind != SourceKind.FOLDER
@@ -52,18 +56,24 @@ data class SignageFolderState(
  * has stood still for one more read, so a copy in progress is not sent half-written. Changes made
  * while ChurchPresenter was off are simply what the first reads find.
  *
+ * The settings may sit in a folder another computer shares: what it writes there (its edits, the
+ * screens it pairs) is read again on the next poll, and the screens are sent what changed.
+ *
  * All folder and store work runs on one IO thread, so it never overlaps itself.
  */
 class SignageController(
     private val hub: SignageHub,
+    /** Where the settings are kept: the signage folder, which other computers may share. */
     storeDir: Path,
     private val defaultFolder: Path,
     private val scope: CoroutineScope,
     private val pollMs: Long = DEFAULT_POLL_MS,
     /** This ChurchPresenter's analytics setting, sent to every screen as whether it may report crashes. */
     private val diagnostics: StateFlow<Boolean> = MutableStateFlow(true),
+    /** This computer's own cache (file hashes), kept out of the shared folder. */
+    cacheDir: Path = storeDir,
 ) {
-    private val store = SignageStore(storeDir)
+    private val store = SignageStore(storeDir, cacheDir)
     private val io = Dispatchers.IO.limitedParallelism(1)
     private val _state = MutableStateFlow(SignageFolderState(defaultFolder))
     val state: StateFlow<SignageFolderState> = _state.asStateFlow()
@@ -107,6 +117,9 @@ class SignageController(
 
     /** Adding, renaming and removing the playlists added by hand. */
     val added = AddedPlaylistEdits(::update)
+
+    /** Each screen's weekly schedule. */
+    val schedules = ScreenSchedules(::update)
 
     fun setPictureSeconds(seconds: Int) = update { it.copy(pictureSeconds = seconds.coerceIn(1, MAX_PICTURE_SECONDS)) }
 
@@ -157,6 +170,13 @@ class SignageController(
                 published = snapshot
             }
             lastRead = snapshot
+            // What another computer sharing the signage folder changed: its settings, and the
+            // screens it paired, renamed or removed (the screens flow republishes those on its own).
+            store.settingsChangedElsewhere()?.let { settings ->
+                _state.update { it.copy(settings = settings, folder = folderOf(settings, defaultFolder)) }
+                publishAll()
+            }
+            hub.registry.reloadIfChanged()
             delay(pollMs)
         }
     }
@@ -243,7 +263,26 @@ class AddedPlaylistEdits internal constructor(
                     when (entry) {
                         is FilePlaylist -> entry.copy(name = name.trim())
                         is LinkPlaylist -> entry.copy(name = name.trim())
+                        is RotationPlaylist -> entry.copy(name = name.trim())
                     }
+                }
+            },
+        )
+    }
+
+    /** Adds a rotation of [steps], other entries by id. */
+    fun addRotation(name: String, steps: List<RotationStep>) = update({}) { settings ->
+        settings.copy(added = settings.added + RotationPlaylist.create(name.trim(), steps))
+    }
+
+    /** Replaces rotation [id]'s name and steps. */
+    fun updateRotation(id: String, name: String, steps: List<RotationStep>) = update({}) { settings ->
+        settings.copy(
+            added = settings.added.map { entry ->
+                if (entry is RotationPlaylist && entry.id == id) {
+                    entry.copy(name = name.trim(), steps = steps)
+                } else {
+                    entry
                 }
             },
         )
@@ -251,4 +290,14 @@ class AddedPlaylistEdits internal constructor(
 
     /** Removes the added playlist [id], leaving its file alone; a screen that played it plays the first. */
     fun remove(id: String) = update({}) { it.withoutAdded(id) }
+}
+
+/** The tab's edits to each screen's weekly schedule, saved and published by [update]. */
+class ScreenSchedules internal constructor(
+    private val update: (then: () -> Unit, change: (SignageSettings) -> SignageSettings) -> Unit,
+) {
+    /** Replaces [screenId]'s schedule with [blocks]; what it plays outside them stays. */
+    fun set(screenId: String, blocks: List<ScheduleBlock>) = update({}) { settings ->
+        settings.copy(screens = settings.screens + (screenId to settings.plan(screenId).copy(schedule = blocks)))
+    }
 }

@@ -21,11 +21,13 @@ import org.churchpresenter.strings.generated.resources.signage_web_test
 import org.churchpresenter.strings.generated.resources.signage_web_test_again
 import org.churchpresenter.strings.generated.resources.signage_web_test_cpu
 import org.churchpresenter.strings.generated.resources.signage_web_test_failed
+import org.churchpresenter.strings.generated.resources.signage_web_test_gpu
 import org.churchpresenter.strings.generated.resources.signage_web_test_hot
 import org.churchpresenter.strings.generated.resources.signage_web_test_normal_only
 import org.churchpresenter.strings.generated.resources.signage_web_test_run
 import org.churchpresenter.strings.generated.resources.signage_web_test_running
 import org.churchpresenter.strings.generated.resources.signage_web_test_smooth
+import org.churchpresenter.strings.generated.resources.signage_web_test_software
 import org.churchpresenter.strings.generated.resources.signage_web_test_too_slow
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
@@ -74,7 +76,11 @@ private fun WebTestResultText(result: PlayerMessage.WebTestResult, onTest: () ->
             stringResource(Res.string.signage_web_test_run, run.fps, shown)
         }
         val busiest = result.runs.mapNotNull { it.cpuPercent }.maxOrNull()
-        val numbers = runs + listOfNotNull(busiest?.let { stringResource(Res.string.signage_web_test_cpu, it.toInt()) })
+        val drawnBy = result.gpu?.let { gpu ->
+            stringResource(if (gpu) Res.string.signage_web_test_gpu else Res.string.signage_web_test_software)
+        }
+        val cpu = busiest?.let { stringResource(Res.string.signage_web_test_cpu, it.toInt()) }
+        val numbers = runs + listOfNotNull(cpu, drawnBy)
         if (numbers.isNotEmpty()) {
             Text(
                 numbers.joinToString(" · "),

@@ -9,7 +9,8 @@ The settings that belong to the app as a whole rather than to one feature:
   (`TabLabelsRow`), start-up, crash reporting and the storage card (`SystemStorageCard`,
   `SystemStorageDetails`, `SystemStoragePrompts`), with its file and dialog actions behind
   `SystemSettingsActions`;
-- the default calendar folder (`DefaultCalendarFolder`, `LocalDefaultCalendarFolder`);
+- the default calendar folder (`DefaultCalendarFolder`, `LocalDefaultCalendarFolder`), which also
+  pins the signage folder's default (its `signage` folder) in pictures;
 - `AutoStartManager`, the launch-at-login entry on each OS, and `SpsConverter`, the old `.sps`
   songbook converter;
 - the first-run setup wizard (`SetupWizardDialog` and the `SetupWizard*` step files), with the

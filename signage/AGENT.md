@@ -17,12 +17,12 @@ gives the same `SignageHub` to both.
 |---|---|
 | `SignageController.kt` | Keeps every paired screen's manifest in step with the folder and the tab's choices; runs while the tab is shown in the tab bar, whichever tab is selected |
 | `SignageFolder.kt` | Reads the folder: its own files and each folder inside it are playlists |
-| `PlaylistSource.kt` | What a playlist can be: a folder, or one added in the tab — a single picture or video (`FilePlaylist`) or a link (`LinkPlaylist`, a web page or a stream, its kind guessed from the address) |
-| `SignageStore.kt` | The tab's settings (`signage.json`, the added playlists among them) and the hash cache (`hashes.json`) |
+| `PlaylistSource.kt` | What a playlist can be: a folder, or one added in the tab — a single picture or video (`FilePlaylist`), a link (`LinkPlaylist`, a web page or a stream, its kind guessed from the address), or a rotation (`RotationPlaylist`: other entries in turn, each for its own time) |
+| `SignageStore.kt` | The tab's settings (`signage.json`: the added playlists, and each screen's plan with its weekly schedule) in the signage folder, and the hash cache (`hashes.json`) in this computer's own |
 | `ManifestBuilder.kt` | One screen's `Manifest` and the file behind each hash; a link only for a player that listed its kind |
 | `WebTestVerdict.kt` | What a screen's web page test says: smooth, normal motion only, or too slow — decided here, so the thresholds change without a player update |
 | `ScreenControls.kt` | What the tab does to screens without the folder: pairing, rename, identify, wipe, previews, player updates |
-| `SignageTab.kt`, `SignageScreenCards.kt`, `SignageFolderPanel.kt`, `SignageDialogs.kt`, `LinkDialog.kt`, `ScreenPreview.kt`, `ScreenUpdateLine.kt`, `WebTestLine.kt` | The tab: each screen's card with its live picture, update line and web page test, the folder panel with its Add menu, the dialogs. `SignageDesktop` (in `SignageTab.kt`) is the file manager, folder chooser and Trash it uses |
+| `SignageTab.kt`, `SignageScreenCards.kt`, `SignageFolderPanel.kt`, `SignageDialogs.kt`, `LinkDialog.kt`, `RotationDialog.kt`, `ScheduleDialog.kt`, `ScreenPreview.kt`, `ScreenUpdateLine.kt`, `ScreenHealthLine.kt`, `WebTestLine.kt` | The tab: each screen's card with its live picture, health, update line, schedule and web page test, the folder panel with its Add menu, the dialogs. `SignageDesktop` (in `SignageTab.kt`) is the file manager, folder chooser and Trash it uses |
 
 ## Rules
 
@@ -40,7 +40,12 @@ gives the same `SignageHub` to both.
   decode one. What each screen can do is remembered after it disconnects (`KnownFeatures`), so a
   screen away for a moment is not sent a manifest without its links.
 - **Removing an added playlist never touches a file**, and sends any screen that played it back to
-  the first playlist.
+  the first playlist; it also leaves every rotation, and a screen's schedule stays.
+- **The setup may be shared.** The signage folder (`AppSettings.signageStorageDirectory`, blank for
+  the app data folder's `signage`) holds `screens.json` and `signage.json`; any computer pointed at
+  it runs the same screens. What another computer writes there is read on the next poll, by content
+  not time (a share keeps times only to a second or two). This computer's caches (`hashes.json`,
+  player builds) stay in its app data folder.
 
 ## Tests
 

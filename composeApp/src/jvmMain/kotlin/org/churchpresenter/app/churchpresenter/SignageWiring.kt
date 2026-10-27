@@ -7,6 +7,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.SIGNAGE_DIR
+import org.churchpresenter.settings.signageFolder
+import org.churchpresenter.diagnostics.Log
+import java.nio.file.Files
 import org.churchpresenter.signage.hub.AgentUpdates
 import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.signage.tab.SignageController
@@ -33,22 +37,35 @@ internal fun AppRootState.SignageEffect() {
     val analytics = appSettings.analyticsReportingEnabled
     LaunchedEffect(analytics) { signageDiagnostics.value = analytics }
     val shown = signageTabShown()
-    LaunchedEffect(shown) {
+    val folderSetting = appSettings.signageStorageDirectory
+    LaunchedEffect(shown, folderSetting) {
         companionServer.signageEnabled = shown
         if (!shown) {
             signageController?.stop()
             return@LaunchedEffect
         }
-        val controller = signageController ?: withContext(Dispatchers.IO) {
-            val dir = AppDataDir.resolve().toPath().resolve(SignageHub.DIR)
+        val current = signageController?.takeIf { signageFolderInUse == folderSetting }
+        val controller = current ?: withContext(Dispatchers.IO) {
+            signageController?.stop()
+            // The setup (screens, playlists, schedules) in the signage folder, which other computers may
+            // share; this computer's own downloads and caches in its app data folder.
+            val local = AppDataDir.resolve().toPath().resolve(SIGNAGE_DIR)
+            val shared = appSettings.signageFolder().toPath()
+            if (shared != local) adoptSignageSetup(from = local, to = shared)
             val releases = System.getProperty(AgentUpdates.RELEASE_URL_PROPERTY) ?: AgentUpdates.RELEASE_URL
             val hub = SignageHub(
-                dir, computerName(), coroutineScope,
-                updates = AgentUpdates(dir.resolve(PLAYER_BUILDS_DIR), baseUrl = releases),
+                shared, computerName(), coroutineScope,
+                updates = AgentUpdates(local.resolve(PLAYER_BUILDS_DIR), baseUrl = releases),
             )
             companionServer.signage = hub
-            SignageController(hub, dir, defaultSignageFolder(), coroutineScope, diagnostics = signageDiagnostics)
-        }.also { signageController = it }
+            SignageController(
+                hub, shared, defaultSignageFolder(), coroutineScope,
+                diagnostics = signageDiagnostics, cacheDir = local,
+            )
+        }.also {
+            signageController = it
+            signageFolderInUse = folderSetting
+        }
         controller.start()
     }
 }
@@ -81,3 +98,21 @@ private fun defaultSignageFolder(): Path =
     Path(System.getProperty(Constants.SystemProperties.USER_HOME), "Documents", Constants.SERVER_APP_NAME, "Signage")
 
 private const val PLAYER_BUILDS_DIR = "player-builds"
+
+/**
+ * Brings this computer's signage setup into the folder it is moving to, the first time: the paired
+ * screens and the tab's settings. A folder that already holds a setup is another computer's, and is
+ * joined as it stands — this one's own is left where it was. Blocking: run it on `Dispatchers.IO`.
+ */
+internal fun adoptSignageSetup(from: Path, to: Path) {
+    val files = listOf(SignageHub.REGISTRY_FILE, SIGNAGE_SETTINGS_FILE)
+    if (files.any { Files.exists(to.resolve(it)) }) return
+    try {
+        Files.createDirectories(to)
+        files.map(from::resolve).filter(Files::exists).forEach { Files.copy(it, to.resolve(it.fileName)) }
+    } catch (e: IOException) {
+        Log.warn("Signage", "Could not copy the signage setup to $to: ${e.message}")
+    }
+}
+
+private const val SIGNAGE_SETTINGS_FILE = "signage.json"

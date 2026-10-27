@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.hub.LatestRelease
 import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.ScreenLink
@@ -88,6 +89,7 @@ fun SignageTab(
             onUpdate = controller.controls::update,
             onPreviewOpen = { largePreview = it },
             onTestWebPages = { controller.controls.testWebPages(it) },
+            onSchedule = controller.schedules::set,
         )
     }
     // Only while the tab is showing: look for a player update now and daily, and ask for pictures.
@@ -137,6 +139,8 @@ fun SignageTab(
                         onAddFile = controller.added::addFile,
                         onRename = controller.added::rename,
                         onRemove = controller.added::remove,
+                        onAddRotation = controller.added::addRotation,
+                        onEditRotation = controller.added::updateRotation,
                     ),
                     modifier = Modifier.weight(1f).fillMaxSize(),
                 )
@@ -163,6 +167,8 @@ internal class FolderActions(
     val onAddFile: (Path) -> Unit = {},
     val onRename: (id: String, name: String) -> Unit = { _, _ -> },
     val onRemove: (id: String) -> Unit = {},
+    val onAddRotation: (name: String, steps: List<RotationStep>) -> Unit = { _, _ -> },
+    val onEditRotation: (id: String, name: String, steps: List<RotationStep>) -> Unit = { _, _, _ -> },
 )
 
 /**
@@ -194,6 +200,8 @@ internal class ScreenActions(
     val onPreviewOpen: (String?) -> Unit = {},
     /** Has the screen test how smoothly it shows web pages. */
     val onTestWebPages: (String) -> Unit = {},
+    /** Replaces a screen's weekly schedule. */
+    val onSchedule: (String, List<ScheduleBlock>) -> Unit = { _, _ -> },
 )
 
 @Composable

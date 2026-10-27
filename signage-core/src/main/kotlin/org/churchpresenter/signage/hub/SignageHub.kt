@@ -127,7 +127,8 @@ class SignageHub(
         fun pairedScreensByPlatform(dir: Path): Map<String, Int> =
             countByPlatform(dir.resolve(REGISTRY_FILE)).mapKeys { platformName(it.key) }
 
-        private const val REGISTRY_FILE = "screens.json"
+        /** The paired screens and the owner id, in the signage folder every sharing computer reads. */
+        const val REGISTRY_FILE = "screens.json"
         private const val BUILDS_DIR = "player-builds"
         private const val TAG = "Signage"
     }
