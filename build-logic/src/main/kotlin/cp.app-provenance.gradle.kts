@@ -21,12 +21,12 @@ val generateBuildConfig = tasks.register("generateBuildConfig") {
     // is matched like any other string: `--tests '*KeySignalModifierTest*'` contains "sign", so
     // naming that class compiled the whole run as a release -- and every test that branches on
     // IS_RELEASE saw production behaviour, depending on which classes the command line happened
-    // to name.
+    // to name. And the task's own name only, not its path: `:signage:test` contains "sign" too.
     val requested = gradle.startParameter.taskNames
     val isRelease = requested.filterIndexed { i, arg ->
         !arg.startsWith("-") && requested.getOrNull(i - 1) != "--tests"
     }.any { task ->
-        val t = task.lowercase()
+        val t = task.substringAfterLast(':').lowercase()
         listOf("package", "distributable", "sign", "notariz").any { t.contains(it) }
     }
     // Planning Center integration: one shared OAuth app for the whole project (per PCO's own
