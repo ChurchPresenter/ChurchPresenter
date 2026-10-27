@@ -60,7 +60,9 @@ import org.churchpresenter.strings.generated.resources.signage_remove
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist_text
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist_title
-import org.churchpresenter.strings.generated.resources.signage_rename_playlist
+import org.churchpresenter.strings.generated.resources.signage_link_title_edit
+import org.churchpresenter.strings.generated.resources.signage_file_title_edit
+import org.churchpresenter.strings.generated.resources.signage_rotation_title_edit
 import org.churchpresenter.strings.generated.resources.signage_add_rotation
 import org.churchpresenter.strings.generated.resources.signage_rotation_summary
 import org.churchpresenter.strings.generated.resources.signage_rotation_minutes
@@ -249,13 +251,19 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
             onDismiss = { renaming = null },
         )
     }
-    renaming?.takeUnless { it.kind == SourceKind.ROTATION }?.let { playlist ->
-        RenameDialog(
-            name = playlist.name,
-            onRename = { actions.onRename(playlist.id, it) },
+    when (val editing = renaming?.let { playlist -> state.settings.added.firstOrNull { it.id == playlist.id } }) {
+        is LinkPlaylist -> LinkDialog(
+            initial = editing,
+            onAdd = { actions.onEditLink(editing.id, it) },
             onDismiss = { renaming = null },
-            title = stringResource(Res.string.signage_rename_playlist),
         )
+        is FilePlaylist -> FileDialog(
+            initial = editing,
+            desktop = desktop,
+            onSave = { name, file -> actions.onEditFile(editing.id, name, file) },
+            onDismiss = { renaming = null },
+        )
+        is RotationPlaylist, null -> Unit
     }
     deleting?.takeIf { it.added }?.let { playlist ->
         ConfirmDialog(
@@ -313,7 +321,13 @@ private fun PlaylistRow(playlist: PlaylistSummary, onRename: () -> Unit, onDelet
         if (playlist.added) {
             TooltipIconButton(
                 painter = rememberVectorPainter(Icons.Filled.Edit),
-                text = stringResource(Res.string.signage_rename_playlist),
+                text = stringResource(
+                    when (playlist.kind) {
+                        SourceKind.WEB, SourceKind.STREAM -> Res.string.signage_link_title_edit
+                        SourceKind.ROTATION -> Res.string.signage_rotation_title_edit
+                        else -> Res.string.signage_file_title_edit
+                    },
+                ),
                 onClick = onRename,
             )
         }

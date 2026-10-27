@@ -10,16 +10,17 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.signage.core.MediaKind
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import kotlin.io.path.Path
@@ -36,11 +37,18 @@ class AddPlaylistUiTest {
             PlaylistSummary("link:1", "Weather", kind = SourceKind.WEB, detail = "https://weather.example.org"),
             PlaylistSummary("file:1", "Old flyer", kind = SourceKind.PICTURE, detail = "flyer.jpg", missing = true),
         ),
+        settings = SignageSettings(
+            added = listOf(
+                LinkPlaylist("link:1", "Weather", "https://weather.example.org", LinkKind.WEB),
+                FilePlaylist("file:1", "Old flyer", "flyer.jpg", MediaKind.IMAGE),
+            ),
+        ),
         ready = true,
     )
     private val links = mutableListOf<NewLink>()
     private val files = mutableListOf<String>()
-    private val renames = mutableListOf<Pair<String, String>>()
+    private val linkEdits = mutableListOf<Pair<String, NewLink>>()
+    private val fileEdits = mutableListOf<Triple<String, String, String>>()
     private val removed = mutableListOf<String>()
 
     private fun panel(desktop: FakeDesktop, block: ComposeUiTest.() -> Unit) = runComposeUiTest {
@@ -50,7 +58,8 @@ class AddPlaylistUiTest {
             desktop = desktop.desktop,
             onAddLink = { links += it },
             onAddFile = { files += it.toString() },
-            onRename = { id, name -> renames += id to name },
+            onEditLink = { id, link -> linkEdits += id to link },
+            onEditFile = { id, name, file -> fileEdits += Triple(id, name, file.toString()) },
             onRemove = { removed += it },
         )
         setContent {
@@ -125,23 +134,33 @@ class AddPlaylistUiTest {
     }
 
     @Test
-    fun anAddedPlaylistIsRenamedAndRemovedAndAMissingFileSaysSo() = panel(FakeDesktop()) {
+    fun anAddedPlaylistIsEditedAndRemovedAndAMissingFileSaysSo() = panel(FakeDesktop(chosen = NEW_FILE)) {
         onNodeWithText("File not found: flyer.jpg").assertExists()
         onNodeWithText("https://weather.example.org").assertExists()
-        onAllNodesWithContentDescription("Rename playlist")[0].performClick()
-        // The dialog's field, holding the name: the last editable field, after the panel's own.
-        val field = onAllNodes(hasSetTextAction()).onLast()
-        field.assertTextEquals("Weather")
-        field.performTextClearance()
-        onNodeWithText("Save").assertIsNotEnabled()
-        field.performTextInput("Forecast")
+        // A link opens the Link dialog, filled in.
+        onNodeWithContentDescription("Edit link").performClick()
+        address().assertTextContains("https://weather.example.org")
+        val name = onAllNodesWithText("Name")[0]
+        name.performTextClearance()
+        name.performTextInput("Forecast")
         onNodeWithText("Save").performClick()
-        assertEquals(listOf("link:1" to "Forecast"), renames)
+        assertEquals(listOf("link:1" to NewLink("Forecast", "https://weather.example.org", LinkKind.WEB)), linkEdits)
+        // A file: its name, and another file chosen.
+        onNodeWithContentDescription("Edit picture or video").performClick()
+        onNodeWithText("flyer.jpg").assertExists()
+        onNodeWithText("Change file…").performClick()
+        waitUntil { onAllNodesWithText(NEW_FILE.toString()).fetchSemanticsNodes().isNotEmpty() }
+        onNodeWithText("Save").performClick()
+        assertEquals(listOf(Triple("file:1", "Old flyer", NEW_FILE.toString())), fileEdits)
         onAllNodesWithContentDescription("Remove playlist")[1].performClick()
         onNodeWithText("Remove Old flyer?").assertExists()
         onNodeWithText("Remove").performClick()
         assertEquals(listOf("file:1"), removed)
         // A folder is still deleted from disk, not removed from the list.
         assertEquals(1, onAllNodesWithContentDescription("Delete playlist").fetchSemanticsNodes().size)
+    }
+
+    private companion object {
+        val NEW_FILE = Path("/pictures/new.jpg")
     }
 }

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.churchpresenter.signage.core.Orientation
 import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.PendingScreen
@@ -118,8 +119,8 @@ class SignageController(
     /** Adding, renaming and removing the playlists added by hand. */
     val added = AddedPlaylistEdits(::update)
 
-    /** Each screen's weekly schedule. */
-    val schedules = ScreenSchedules(::update)
+    /** Each screen's weekly schedule, and how it is mounted. */
+    val plans = ScreenPlans(::update)
 
     fun setPictureSeconds(seconds: Int) = update { it.copy(pictureSeconds = seconds.coerceIn(1, MAX_PICTURE_SECONDS)) }
 
@@ -129,7 +130,8 @@ class SignageController(
      */
     fun wipe(screenId: String) = update(
         change = { settings ->
-            settings.copy(screens = settings.screens + (screenId to ScreenPlan(ScreenPlan.NOTHING)))
+            val emptied = ScreenPlan(ScreenPlan.NOTHING, orientation = settings.plan(screenId).orientation)
+            settings.copy(screens = settings.screens + (screenId to emptied))
         },
         then = { controls.wipe(screenId) },
     )
@@ -244,6 +246,40 @@ class AddedPlaylistEdits internal constructor(
         settings.copy(added = settings.added + playlist)
     }
 
+    /** Replaces link [id]'s name, address, kind, refresh and smoothness with [link]'s; it keeps its id. */
+    fun updateLink(id: String, link: NewLink) = update({}) { settings ->
+        settings.copy(
+            added = settings.added.map { entry ->
+                if (entry is LinkPlaylist && entry.id == id) {
+                    entry.copy(
+                        name = link.name.trim(),
+                        url = link.url.trim(),
+                        kind = link.kind,
+                        refreshMinutes = link.refreshMinutes,
+                        smooth = link.smooth,
+                    )
+                } else {
+                    entry
+                }
+            },
+        )
+    }
+
+    /** Renames file playlist [id] and points it at [file]; a file that is no picture or video is not taken. */
+    fun updateFile(id: String, name: String, file: Path) = update({}) { settings ->
+        val kind = SignageFolder.kindOf(file)
+        settings.copy(
+            added = settings.added.map { entry ->
+                if (entry is FilePlaylist && entry.id == id) {
+                    kind?.let { entry.copy(name = name.trim(), path = file.toString(), kind = it) }
+                        ?: entry.copy(name = name.trim())
+                } else {
+                    entry
+                }
+            },
+        )
+    }
+
     /** Adds [file] as a playlist of its own, named after it; nothing when it is no picture or video. */
     fun addFile(file: Path) {
         val kind = SignageFolder.kindOf(file) ?: return
@@ -251,23 +287,6 @@ class AddedPlaylistEdits internal constructor(
             val playlist = FilePlaylist.create(file.nameWithoutExtension, file.toString(), kind)
             settings.copy(added = settings.added + playlist)
         }
-    }
-
-    /** Renames the added playlist [id]; folders keep their folder's name. */
-    fun rename(id: String, name: String) = update({}) { settings ->
-        settings.copy(
-            added = settings.added.map { entry ->
-                if (entry.id != id) {
-                    entry
-                } else {
-                    when (entry) {
-                        is FilePlaylist -> entry.copy(name = name.trim())
-                        is LinkPlaylist -> entry.copy(name = name.trim())
-                        is RotationPlaylist -> entry.copy(name = name.trim())
-                    }
-                }
-            },
-        )
     }
 
     /** Adds a rotation of [steps], other entries by id. */
@@ -292,12 +311,18 @@ class AddedPlaylistEdits internal constructor(
     fun remove(id: String) = update({}) { it.withoutAdded(id) }
 }
 
-/** The tab's edits to each screen's weekly schedule, saved and published by [update]. */
-class ScreenSchedules internal constructor(
+/** The tab's edits to each screen's plan, saved and published by [update]. */
+class ScreenPlans internal constructor(
     private val update: (then: () -> Unit, change: (SignageSettings) -> SignageSettings) -> Unit,
 ) {
     /** Replaces [screenId]'s schedule with [blocks]; what it plays outside them stays. */
-    fun set(screenId: String, blocks: List<ScheduleBlock>) = update({}) { settings ->
-        settings.copy(screens = settings.screens + (screenId to settings.plan(screenId).copy(schedule = blocks)))
+    fun setSchedule(screenId: String, blocks: List<ScheduleBlock>) = change(screenId) { it.copy(schedule = blocks) }
+
+    /** How [screenId] is mounted; it turns everything it shows to match. */
+    fun setOrientation(screenId: String, orientation: Orientation) =
+        change(screenId) { it.copy(orientation = orientation) }
+
+    private fun change(screenId: String, edit: (ScreenPlan) -> ScreenPlan) = update({}) { settings ->
+        settings.copy(screens = settings.screens + (screenId to edit(settings.plan(screenId))))
     }
 }

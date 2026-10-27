@@ -2,6 +2,7 @@ package org.churchpresenter.signage.tab
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import org.churchpresenter.signage.core.Orientation
 import kotlinx.serialization.SerializationException
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.signage.core.ScheduleBlock
@@ -49,7 +50,12 @@ data class SignageSettings(
  * their times. Outside every block the screen plays [playlistId].
  */
 @Serializable
-data class ScreenPlan(val playlistId: String? = null, val schedule: List<ScheduleBlock> = emptyList()) {
+data class ScreenPlan(
+    val playlistId: String? = null,
+    val schedule: List<ScheduleBlock> = emptyList(),
+    /** How the screen is mounted: everything it shows is turned to match. */
+    val orientation: Orientation = Orientation.LANDSCAPE,
+) {
     companion object {
         /** The screen plays nothing and holds no content: it shows its idle card. */
         const val NOTHING = "nothing:"

@@ -2,14 +2,11 @@ package org.churchpresenter.signage.tab
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,8 +14,6 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.signage.core.Features
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.signage_web_test
-import org.churchpresenter.strings.generated.resources.signage_web_test_again
 import org.churchpresenter.strings.generated.resources.signage_web_test_cpu
 import org.churchpresenter.strings.generated.resources.signage_web_test_failed
 import org.churchpresenter.strings.generated.resources.signage_web_test_gpu
@@ -34,11 +29,11 @@ import org.jetbrains.compose.resources.stringResource
 import java.util.Locale
 
 /**
- * For a connected screen that can draw web pages: test how smoothly it shows them, then what the
- * test found. Nothing for any other screen.
+ * For a connected screen that can draw web pages: the web page test running, then what it found (the
+ * card's test icon starts it). Nothing for any other screen, or before a test.
  */
 @Composable
-internal fun WebTestLine(row: ScreenRowState, onTest: () -> Unit) {
+internal fun WebTestLine(row: ScreenRowState) {
     val link = row.link ?: return
     if (Features.WEB_TEST !in link.features) return
     val result = link.webTest
@@ -50,13 +45,12 @@ internal fun WebTestLine(row: ScreenRowState, onTest: () -> Unit) {
             CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
             Text(stringResource(Res.string.signage_web_test_running), style = MaterialTheme.typography.bodySmall)
         }
-        result == null -> OutlinedButton(onClick = onTest) { Text(stringResource(Res.string.signage_web_test)) }
-        else -> WebTestResultText(result, onTest)
+        result != null -> WebTestResultText(result)
     }
 }
 
 @Composable
-private fun WebTestResultText(result: PlayerMessage.WebTestResult, onTest: () -> Unit) {
+private fun WebTestResultText(result: PlayerMessage.WebTestResult) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         val verdict = result.verdict()
         val (text, color) = when {
@@ -94,10 +88,6 @@ private fun WebTestResultText(result: PlayerMessage.WebTestResult, onTest: () ->
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.semantic.warning,
             )
-        }
-        // No padding of its own, so it lines up with the text above it.
-        TextButton(onClick = onTest, contentPadding = PaddingValues(0.dp)) {
-            Text(stringResource(Res.string.signage_web_test_again))
         }
     }
 }

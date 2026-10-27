@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -57,9 +57,9 @@ import org.churchpresenter.strings.generated.resources.signage_factory_reset
 import org.churchpresenter.strings.generated.resources.signage_factory_reset_text
 import org.churchpresenter.strings.generated.resources.signage_factory_reset_title
 import org.churchpresenter.strings.generated.resources.signage_nothing
-import org.churchpresenter.strings.generated.resources.signage_rename
 import org.churchpresenter.strings.generated.resources.signage_schedule
 import org.churchpresenter.strings.generated.resources.signage_schedule_summary
+import org.churchpresenter.strings.generated.resources.signage_screen_settings
 import org.churchpresenter.strings.generated.resources.signage_showing
 import org.churchpresenter.strings.generated.resources.signage_showing_idle
 import org.churchpresenter.strings.generated.resources.signage_synced_at
@@ -68,6 +68,7 @@ import org.churchpresenter.strings.generated.resources.signage_tv_control_workin
 import org.churchpresenter.strings.generated.resources.signage_wipe
 import org.churchpresenter.strings.generated.resources.signage_wipe_confirm
 import org.churchpresenter.strings.generated.resources.signage_wipe_text
+import org.churchpresenter.strings.generated.resources.signage_web_test
 import org.churchpresenter.strings.generated.resources.signage_wipe_title
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.StringResource
@@ -146,7 +147,17 @@ internal fun ScreenCard(row: ScreenRowState, actions: ScreenActions) {
         }
     }
     if (renaming) {
-        RenameDialog(screen.name, onRename = { actions.onRename(screen.id, it) }, onDismiss = { renaming = false })
+        val plan = row.folder.settings.plan(screen.id)
+        ScreenSettingsDialog(
+            name = screen.name,
+            orientation = plan.orientation,
+            onSave = { name, orientation ->
+                if (name != screen.name) actions.onRename(screen.id, name)
+                if (orientation != plan.orientation) actions.onOrientation(screen.id, orientation)
+            },
+            onFactoryReset = { asking = CardQuestion.FACTORY_RESET },
+            onDismiss = { renaming = false },
+        )
     }
     when (asking) {
         CardQuestion.WIPE -> ConfirmDialog(
@@ -190,7 +201,9 @@ private fun RowScope.ScreenDetails(
         Row(verticalAlignment = Alignment.CenterVertically) {
             StatusDot(online = row.link != null)
             Spacer(Modifier.width(10.dp))
-            Text(screen.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            Text(screen.name, style = MaterialTheme.typography.titleMedium)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
             TooltipIconButton(
                 painter = rememberVectorPainter(Icons.Filled.Visibility),
                 text = stringResource(Res.string.signage_identify),
@@ -203,8 +216,14 @@ private fun RowScope.ScreenDetails(
                 onClick = { onAsk(CardQuestion.SCHEDULE) },
             )
             TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Edit),
-                text = stringResource(Res.string.signage_rename),
+                painter = rememberVectorPainter(Icons.Filled.Speed),
+                text = stringResource(Res.string.signage_web_test),
+                onClick = { actions.onTestWebPages(screen.id) },
+                enabled = row.link?.let { Features.WEB_TEST in it.features && it.webTestStartedAtMs == null } == true,
+            )
+            TooltipIconButton(
+                painter = rememberVectorPainter(Icons.Filled.Settings),
+                text = stringResource(Res.string.signage_screen_settings),
                 onClick = onRename,
             )
             TooltipIconButton(
@@ -212,11 +231,6 @@ private fun RowScope.ScreenDetails(
                 text = stringResource(Res.string.signage_wipe),
                 onClick = { onAsk(CardQuestion.WIPE) },
                 enabled = row.link?.features?.contains(Features.WIPE) == true,
-            )
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.RestartAlt),
-                text = stringResource(Res.string.signage_factory_reset),
-                onClick = { onAsk(CardQuestion.FACTORY_RESET) },
             )
         }
         Text(
@@ -234,7 +248,7 @@ private fun RowScope.ScreenDetails(
             Text(error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
         UpdateLine(row, onUpdate = { actions.onUpdate(screen.id) })
-        WebTestLine(row, onTest = { actions.onTestWebPages(screen.id) })
+        WebTestLine(row)
         PlaylistPicker(row, onPlay = { actions.onPlay(screen.id, it) })
         row.folder.settings.plan(screen.id).schedule.takeIf { it.isNotEmpty() }?.let { blocks ->
             Text(

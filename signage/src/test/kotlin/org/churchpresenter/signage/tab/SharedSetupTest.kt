@@ -49,7 +49,7 @@ class SharedSetupTest {
         settled { state -> state.playlists.any { it.name == "Nights" && it.steps == 2 } }
         val block =
             ScheduleBlock("b", setOf(Day.MON), ClockTime.parse("08:00"), ClockTime.parse("09:00"), BlockAction.Play(id))
-        controller.schedules.set("player-1", listOf(block))
+        controller.plans.setSchedule("player-1", listOf(block))
         settled { it.settings.plan("player-1").schedule == listOf(block) }
         val saved = SignageStore(world.root.resolve("store")).loadSettings()
         assertEquals("Nights", saved.added.filterIsInstance<RotationPlaylist>().single().name)

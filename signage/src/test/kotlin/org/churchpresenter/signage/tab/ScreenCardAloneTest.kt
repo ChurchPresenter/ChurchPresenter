@@ -47,6 +47,7 @@ class ScreenCardAloneTest {
         onWipe = { calls += "$tag wipe $it" },
         onUpdate = { calls += "$tag update $it" },
         onPreviewOpen = { calls += "$tag preview $it" },
+        onOrientation = { id, orientation -> calls += "$tag mounted $id $orientation" },
     )
 
     private val screen = PairedScreen("p", "Lobby", "h", Platform.LINUX_X64, "26.0.8", 1920, 1080, 0)
@@ -104,9 +105,15 @@ class ScreenCardAloneTest {
         onNodeWithContentDescription("Show its name on the TV").performClick()
         onNodeWithContentDescription("Wipe content").performClick()
         onNodeWithText("Wipe").performClick()
-        onNodeWithContentDescription("Factory reset").performClick()
+        // Factory reset is in Screen settings, and still asks.
+        onNodeWithContentDescription("Screen settings").performClick()
         onNodeWithText("Factory reset").performClick()
-        onNodeWithContentDescription("Rename").performClick()
+        onNodeWithText("Factory reset").performClick()
+        onNodeWithContentDescription("Screen settings").performClick()
+        onNode(hasSetTextAction() and hasText("Lobby")).performTextReplacement("Hall")
+        onNodeWithText("MOUNTED").performClick()
+        waitForIdle()
+        onNodeWithText("Portrait").performClick()
         onNodeWithText("Save").performClick()
         onAllNodesWithText("PLAYS")[0].performClick()
         waitForIdle()
@@ -116,7 +123,7 @@ class ScreenCardAloneTest {
             listOf(
                 " identify p", " preview p", " preview null",
                 "second identify p", "second wipe p", "second reset p",
-                "second rename p Lobby", "second play p folder:",
+                "second rename p Hall", "second mounted p PORTRAIT", "second play p folder:",
             ),
             calls,
         )
@@ -140,20 +147,30 @@ class ScreenCardAloneTest {
     @Test
     fun anOpenDialogStaysOpenAsReportsArriveAndStillActsOnItsScreen() = card(row(link)) { swap ->
         val busier = ScreenRowState(screen, link.copy(status = PlayerMessage.Status(cec = CecState.UNKNOWN)), folder)
+        val reportsArrive = {
+            swap(busier, actions("same"))
+            swap(ScreenRowState(screen, link, folder), actions("newer"))
+        }
         for ((open, confirm) in listOf(
             "Wipe content" to "Wipe",
-            "Factory reset" to "Factory reset",
-            "Rename" to "Save",
             "What the TV shows. Click to see it larger." to "Close",
         )) {
             onNodeWithContentDescription(open).performClick()
-            swap(busier, actions("same"))
-            swap(ScreenRowState(screen, link, folder), actions("newer"))
+            reportsArrive()
             onNodeWithText(confirm).performClick()
             waitForIdle()
         }
+        onNodeWithContentDescription("Screen settings").performClick()
+        onNode(hasSetTextAction() and hasText("Lobby")).performTextReplacement("Hall")
+        reportsArrive()
+        onNodeWithText("Save").performClick()
+        onNodeWithContentDescription("Screen settings").performClick()
+        onNodeWithText("Factory reset").performClick()
+        reportsArrive()
+        onNodeWithText("Factory reset").performClick()
+        waitForIdle()
         assertEquals(
-            listOf("newer wipe p", "newer reset p", "newer rename p Lobby", "newer preview p", "newer preview null"),
+            listOf("newer wipe p", "newer preview p", "newer preview null", "newer rename p Hall", "newer reset p"),
             calls.filterNot { it.startsWith("same") },
         )
     }
@@ -202,7 +219,7 @@ class ScreenCardAloneTest {
 
     @Test
     fun aBlankNameCannotBeSaved() = card(ScreenRowState(screen, link, folder)) {
-        onNodeWithContentDescription("Rename").performClick()
+        onNodeWithContentDescription("Screen settings").performClick()
         onNode(hasSetTextAction() and hasText("Lobby")).performTextReplacement(" ")
         onNodeWithText("Save").assertIsNotEnabled()
     }

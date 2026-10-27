@@ -70,14 +70,15 @@ class AddedPlaylistsTest {
     }
 
     @Test
-    fun renamingKeepsThePlaylistAndRemovingSendsItsScreensBackToTheFirst() = runBlocking {
+    fun editingKeepsThePlaylistAndRemovingSendsItsScreensBackToTheFirst() = runBlocking {
         world.file("welcome.jpg")
         world.startAndPairScreen()
         controller.added.addLink(NewLink("Live", "rtsp://camera", LinkKind.STREAM))
         val id = listed { it.size == 2 }[1].id
         controller.play("player-1", id)
-        controller.added.rename(id, "Camera")
-        assertEquals("Camera", listed { list -> list.any { it.name == "Camera" } }[1].name)
+        controller.added.updateLink(id, NewLink("Camera", "rtsp://camera-2", LinkKind.STREAM))
+        val edited = listed { list -> list.any { it.name == "Camera" } }[1]
+        assertEquals(id to "rtsp://camera-2", edited.id to edited.detail)
         controller.added.remove(id)
         listed { it.size == 1 }
         assertEquals(ScreenPlan(), controller.state.value.settings.plan("player-1"))

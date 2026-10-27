@@ -62,14 +62,14 @@ fun buildManifest(
     if (wanted == ScreenPlan.NOTHING) {
         return Manifest(
             ownerId = ownerId,
-            screen = ScreenSettings(name = screen.name, width = screen.screenWidth, height = screen.screenHeight),
+            screen = screenSettings(screen, settings),
             timeZone = timeZone,
             diagnostics = diagnostics,
         ) to emptyMap()
     }
     val manifest = Manifest(
         ownerId = ownerId,
-        screen = ScreenSettings(name = screen.name, width = screen.screenWidth, height = screen.screenHeight),
+        screen = screenSettings(screen, settings),
         playlists = built,
         defaultPlaylistId = built.firstOrNull { it.id == wanted }?.id ?: built.firstOrNull()?.id,
         // A block that plays what this screen cannot (a playlist gone, or links it cannot rotate) is left
@@ -128,3 +128,11 @@ private const val MS_PER_SECOND = 1_000L
 private const val DEFAULT_PICTURE_STEP_MS = 10_000L
 private const val DEFAULT_LINK_STEP_MS = 60_000L
 private const val MS_PER_MINUTE = 60_000L
+
+/** The screen's name, size and how it is mounted. */
+private fun screenSettings(screen: PairedScreen, settings: SignageSettings) = ScreenSettings(
+    name = screen.name,
+    orientation = settings.plan(screen.id).orientation,
+    width = screen.screenWidth,
+    height = screen.screenHeight,
+)

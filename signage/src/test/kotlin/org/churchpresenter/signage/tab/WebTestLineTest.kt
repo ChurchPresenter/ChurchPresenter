@@ -8,7 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -24,7 +25,6 @@ import org.churchpresenter.theme.ThemeMode
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /** A screen card's web page test: offered only where it can run, running, and each kind of answer. */
 class WebTestLineTest {
@@ -51,17 +51,17 @@ class WebTestLineTest {
                 }
             }
         }
-        onNodeWithText("Run test").performClick()
+        onNodeWithContentDescription("Run test").performClick()
         assertEquals(listOf("p"), tests)
 
         row = row.copy(link = link.copy(webTestStartedAtMs = 1))
         onNodeWithText("Testing web pages", substring = true).assertExists()
-        assertTrue(onAllNodesWithText("Run test").fetchSemanticsNodes().isEmpty())
+        onNodeWithContentDescription("Run test").assertIsNotEnabled()
 
         row = row.copy(link = link.copy(webTest = result(15.0, 29.6, 58.0)))
         onNodeWithText("this screen handles Smooth motion well", substring = true).assertExists()
         onNodeWithText("15 fps: 15.0 shown · 30 fps: 29.6 shown · processor 58% busy").assertExists()
-        onNodeWithText("Run test again").performClick()
+        onNodeWithContentDescription("Run test").performClick()
         assertEquals(listOf("p", "p"), tests)
 
         row = row.copy(link = link.copy(webTest = result(14.9, 21.3, 96.0, temp = 82.5)))
@@ -85,9 +85,9 @@ class WebTestLineTest {
                 }
             }
         }
-        assertTrue(onAllNodesWithText("Run test").fetchSemanticsNodes().isEmpty())
+        onNodeWithContentDescription("Run test").assertIsNotEnabled()
         row = row.copy(link = null)
         waitForIdle()
-        assertTrue(onAllNodesWithText("Run test").fetchSemanticsNodes().isEmpty())
+        onNodeWithContentDescription("Run test").assertIsNotEnabled()
     }
 }
