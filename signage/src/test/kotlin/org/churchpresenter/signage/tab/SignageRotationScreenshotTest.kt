@@ -15,6 +15,7 @@ import org.churchpresenter.signage.core.CecState
 import org.churchpresenter.signage.core.ClockTime
 import org.churchpresenter.signage.core.Day
 import org.churchpresenter.signage.core.Features
+import org.churchpresenter.signage.core.Orientation
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.signage.core.ScheduleBlock
@@ -90,6 +91,11 @@ class SignageRotationScreenshotTest {
     @Test
     fun `the schedule dialog`() = captureComponent(SECTION, "schedule_dialog", rootIndex = 1) {
         ScheduleDialog("Lobby", folder.playlists, schedule, {}, {})
+    }
+
+    @Test
+    fun `a screen's settings, mounted on its side`() = captureComponent(SECTION, "screen_settings", rootIndex = 1) {
+        ScreenSettingsDialog("Lobby", Orientation.PORTRAIT, { _, _ -> }, {}, {})
     }
 
     @Test
