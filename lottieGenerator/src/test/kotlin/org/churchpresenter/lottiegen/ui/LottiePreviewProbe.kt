@@ -17,7 +17,10 @@ internal class LottiePreviewProbe private constructor(private val scene: ImageCo
 
     private var timeNanos = 0L
 
-    fun redPixels(): Int {
+    fun redPixels(): Int = frame().count(::isRed)
+
+    /** The next frame's pixels, ARGB, row by row. */
+    fun frame(): IntArray {
         timeNanos += FRAME_STEP_NANOS
         val image = scene.render(timeNanos)
         val pixels = IntArray(WIDTH * HEIGHT)
@@ -26,7 +29,18 @@ internal class LottiePreviewProbe private constructor(private val scene: ImageCo
         } finally {
             image.close()
         }
-        return pixels.count(::isRed)
+        return pixels
+    }
+
+    /** Frames until one meets [condition], which that frame is returned for. */
+    suspend fun pumpUntilFrame(what: String, condition: (IntArray) -> Boolean): IntArray {
+        val deadline = System.currentTimeMillis() + TIMEOUT_MS
+        while (System.currentTimeMillis() < deadline) {
+            val pixels = frame()
+            if (condition(pixels)) return pixels
+            yield()
+        }
+        throw AssertionError("timed out after ${TIMEOUT_MS}ms waiting for $what")
     }
 
     suspend fun pumpUntil(what: String, condition: (Int) -> Boolean): Int {
@@ -57,7 +71,7 @@ internal class LottiePreviewProbe private constructor(private val scene: ImageCo
                 }
             }
 
-        private fun isRed(argb: Int): Boolean {
+        fun isRed(argb: Int): Boolean {
             val r = (argb shr 16) and 0xFF
             val g = (argb shr 8) and 0xFF
             val b = argb and 0xFF

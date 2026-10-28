@@ -1,5 +1,7 @@
 package org.churchpresenter.presenter
 
+import org.churchpresenter.lottiegen.lottie.ShapedLines
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -67,5 +69,31 @@ class BibleLottieTextFitTest {
         val fitted = fitLottieSlot(request, tenWide)
         assertEquals(emptyList(), fitted.lines)
         assertEquals(20f, fitted.fontSize)
+    }
+
+    @Test
+    fun `a shaped measure wraps and sizes by whole words`() {
+        // Words ten a character and a space five: the per-letter sum would make "aa bb" 50, not 45.
+        val shaped = shapedMeasure(ShapedLines(wordWidth = { it.length * 10f }, spaceWidth = 5f))
+        val box = LottieSlotBox(0f, 0f, 45f, 100f)
+
+        val fitted = fitLottieSlot(SlotFitRequest("aa bb cc", box, 10f, 0f, singleLine = false), shaped)
+
+        assertEquals(10f, fitted.fontSize)
+        assertEquals(listOf("aa bb", "cc"), fitted.lines)
+        assertEquals(45f, fitted.lineWidthPx)
+    }
+
+    @Test
+    fun `a shaped measure scales with the fitted size`() {
+        val shaped = shapedMeasure(ShapedLines(wordWidth = { it.length * 10f }, spaceWidth = 5f))
+        // One line 45 wide at the base size has to fit a 30-wide box: two-thirds of the size or less.
+        val box = LottieSlotBox(0f, 0f, 30f, 100f)
+
+        val fitted = fitLottieSlot(SlotFitRequest("aa bb", box, 30f, 0f, singleLine = true), shaped)
+
+        assertEquals(listOf("aa bb"), fitted.lines)
+        assertTrue(fitted.lineWidthPx <= 30f)
+        assertTrue(fitted.fontSize < 30f * 2f / 3f + 0.1f)
     }
 }

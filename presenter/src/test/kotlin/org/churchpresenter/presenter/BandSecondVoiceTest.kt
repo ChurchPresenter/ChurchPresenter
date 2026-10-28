@@ -70,6 +70,25 @@ class BandSecondVoiceTest {
     }
 
     @Test
+    fun `lines the band placed itself start where it put them, whatever the justification says`() {
+        val text = "aa bb"
+        val placed = layout(text, listOf(3..4), listOf("aa", "bb"), TextJustify.Center)
+            .copy(lineLefts = listOf(150f, 170f))
+
+        assertEquals(listOf(Rect(170f, 50f, 190f, 80f)), secondVoiceRects(placed, tenEach))
+    }
+
+    @Test
+    fun `a run measured shaped is cut at its shaped edges`() {
+        val text = "aa bb"
+        val shaped = layout(text, listOf(3..4), listOf(text), TextJustify.Left)
+        // A shaped measure that is not the sum of its letters: every run is five per character, less two.
+        val rects = secondVoiceRuns(shaped) { run -> (run.length * 5f - 2f).coerceAtLeast(0f) }
+
+        assertEquals(listOf(Rect(113f, 20f, 123f, 50f)), rects)
+    }
+
+    @Test
     fun `an empty line or one not found in the text is skipped`() {
         val rects = secondVoiceRects(
             layout("abc", listOf(0..2), listOf("", "zzz", "abc"), TextJustify.Left),
