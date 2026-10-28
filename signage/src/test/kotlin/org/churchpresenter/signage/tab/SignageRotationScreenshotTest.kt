@@ -15,10 +15,13 @@ import org.churchpresenter.signage.core.CecState
 import org.churchpresenter.signage.core.ClockTime
 import org.churchpresenter.signage.core.Day
 import org.churchpresenter.signage.core.Features
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import org.churchpresenter.signage.core.Orientation
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.signage.core.ScheduleBlock
+import org.churchpresenter.signage.core.UpdateState
 import org.churchpresenter.signage.core.WebTestRun
 import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.ScreenLink
@@ -95,7 +98,26 @@ class SignageRotationScreenshotTest {
 
     @Test
     fun `a screen's settings, mounted on its side`() = captureComponent(SECTION, "screen_settings", rootIndex = 1) {
-        ScreenSettingsDialog("Lobby", Orientation.PORTRAIT, { _, _ -> }, {}, {})
+        val pages = listOf(
+            PlaylistSummary("link:signup", "Event sign-up", kind = SourceKind.WEB),
+            PlaylistSummary("link:checkin", "Check-in", kind = SourceKind.WEB),
+        )
+        ScreenSettingsDialog(
+            initial = ScreenSettingsInput(
+                "Lobby", Orientation.PORTRAIT, hasPin = true, touchPlaylists = pages, canTv = true,
+            ),
+            onSave = {},
+            onAsk = {},
+            onDismiss = {},
+            deviceInfo = {
+                Text("Address: 192.168.1.40", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "Raspberry Pi · 1920×1080 · Player 26.0.41",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+        )
     }
 
     @Test
@@ -108,6 +130,11 @@ class SignageRotationScreenshotTest {
     @Test
     fun `a card whose screen is hot and nearly out of memory`() = captureComponent(SECTION, "card_strained") {
         Card(link.copy(status = status.copy(temperatureC = 83.0, memoryPercent = 92, uptimeSeconds = 5_400)))
+    }
+
+    @Test
+    fun `a card whose screen is updating its system`() = captureComponent(SECTION, "card_updating_system") {
+        Card(link.copy(update = PlayerMessage.UpdateProgress("26.0.41", UpdateState.INSTALLING, "system")))
     }
 
     private companion object {

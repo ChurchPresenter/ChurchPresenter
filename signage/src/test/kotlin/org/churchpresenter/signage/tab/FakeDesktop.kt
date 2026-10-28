@@ -2,6 +2,10 @@
 
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.theme.FocusVisibility
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
+import org.churchpresenter.theme.LocalFocusVisibility
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.test.ComposeUiTest
@@ -41,9 +45,14 @@ fun signageTab(
     block: ComposeUiTest.() -> Unit,
 ) = runComposeUiTest {
     setContent {
-        ChurchPresenterTheme(ThemeMode.LIGHT) {
-            Surface(color = MaterialTheme.colorScheme.background) {
-                SignageTab(world.controller, serverRunning, onTurnOnServer, desktop = desktop.desktop)
+        // The tab inside a window where Tab has been used, as it is once someone tabs into it from the
+        // tab bar: focus rings show from the first stop.
+        val tabbed = remember { FocusVisibility().apply { afterTab = true } }
+        CompositionLocalProvider(LocalFocusVisibility provides tabbed) {
+            ChurchPresenterTheme(ThemeMode.LIGHT) {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    SignageTab(world.controller, serverRunning, onTurnOnServer, desktop = desktop.desktop)
+                }
             }
         }
     }

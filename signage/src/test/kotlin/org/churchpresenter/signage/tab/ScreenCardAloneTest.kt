@@ -2,6 +2,8 @@
 
 package org.churchpresenter.signage.tab
 
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.onLast
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
@@ -96,13 +98,13 @@ class ScreenCardAloneTest {
 
     @Test
     fun everyControlHandsBackItsScreen() = card(ScreenRowState(screen, link, folder)) { swap ->
-        onNodeWithContentDescription("Show its name on the TV").performClick()
+        onNodeWithContentDescription("Show its name on the screen").performClick()
         onNodeWithContentDescription("What the TV shows. Click to see it larger.").performClick()
         onNodeWithText("Close").performClick()
         // The same screen with a new report, then new actions: the card follows both.
         swap(row(link.copy(status = PlayerMessage.Status(cec = CecState.UNAVAILABLE))), actions())
         swap(ScreenRowState(screen, link, folder), actions("second"))
-        onNodeWithContentDescription("Show its name on the TV").performClick()
+        onNodeWithContentDescription("Show its name on the screen").performClick()
         onNodeWithContentDescription("Wipe content").performClick()
         onNodeWithText("Wipe").performClick()
         // Factory reset is in Screen settings, and still asks.
@@ -127,6 +129,91 @@ class ScreenCardAloneTest {
             ),
             calls,
         )
+    }
+
+    @Test
+    fun everyTouchscreenAndDeviceControlHandsBackItsScreen() {
+        val touch = LinkPlaylist(
+            "link:t", "Sign-up", "https://signup.example.org", LinkKind.WEB, interactive = InteractiveLink(),
+        )
+        val withTouch = folder.copy(
+            playlists = folder.playlists + PlaylistSummary("link:t", "Sign-up", kind = SourceKind.WEB),
+            settings = SignageSettings(added = listOf(touch)),
+        )
+        val able = link.copy(
+            features = listOf(Features.POWER, Features.TV, Features.WEB_TEST, Features.SYSTEM_UPDATE),
+            status = PlayerMessage.Status(cec = CecState.WORKING),
+        )
+        val withPin = withTouch.copy(
+            settings = withTouch.settings.copy(screens = mapOf("p" to ScreenPlan(kioskPinHash = "pbkdf2:1:00:00"))),
+        )
+        val all = actions().let {
+            ScreenActions(
+                onPlay = it.onPlay, onIdentify = it.onIdentify, onRename = it.onRename, onRemove = it.onRemove,
+                onUpdate = it.onUpdate,
+                onTestWebPages = { id -> calls += "test $id" },
+                onSchedule = { id, blocks -> calls += "schedule $id ${blocks.size}" },
+                onKioskPin = { id, pin -> calls += "pin $id $pin" },
+                onGesture = { id, on, playlist -> calls += "gesture $id $on $playlist" },
+                onPower = { id, action -> calls += "power $id $action" },
+                onTv = { id, on -> calls += "tv $id $on" },
+            )
+        }
+        card(ScreenRowState(screen, able, withTouch)) { swap ->
+            swap(ScreenRowState(screen, able, withTouch), all)
+            onNodeWithContentDescription("Run test").performClick()
+            onNodeWithContentDescription("Schedule").performClick()
+            onNodeWithText("Save").performClick()
+            onNodeWithText("Update").performClick()
+            // The TV acts at once; Restart and Shut down ask on the card first.
+            onNodeWithContentDescription("Screen settings").performClick()
+            onNodeWithText("TV off").performClick()
+            onNodeWithText("TV on").performClick()
+            onNodeWithText("Restart").performClick()
+            onNodeWithText("Restart Lobby?").assertExists()
+            onAllNodesWithText("Restart").onLast().performClick()
+            onNodeWithContentDescription("Screen settings").performClick()
+            onNodeWithText("Shut down").performClick()
+            onAllNodesWithText("Shut down").onLast().performClick()
+            // The touchscreen: a PIN, the touch page chosen, then the corner off.
+            onNodeWithContentDescription("Screen settings").performClick()
+            field(SCREEN_PIN_TAG).performTextInput("2468")
+            onNodeWithText("Save").performClick()
+            onNodeWithContentDescription("Screen settings").performClick()
+            onNodeWithText("Holding the top-left corner switches to a touch page").performClick()
+            onNodeWithText("Save").performClick()
+            // With a PIN set, it can be removed; nothing else changed saves nothing else.
+            swap(ScreenRowState(screen, able, withPin), all)
+            onNodeWithContentDescription("Screen settings").performClick()
+            onNodeWithText("Remove PIN").performClick()
+            onNodeWithText("Save").performClick()
+            onNodeWithContentDescription("Screen settings").performClick()
+            onNodeWithText("Save").performClick()
+            waitForIdle()
+        }
+        assertEquals(
+            listOf(
+                "test p", "schedule p 0", " update p", "tv p false", "tv p true",
+                "power p RESTART", "power p SHUT_DOWN", "pin p 2468", "gesture p false null", "pin p null",
+            ),
+            calls,
+        )
+    }
+
+    @Test
+    fun theTvIsOfferedOnlyWhereItAnswersAndPowerOnlyWhileConnected() {
+        val silentTv =
+            link.copy(features = listOf(Features.TV), status = PlayerMessage.Status(cec = CecState.UNAVAILABLE))
+        card(row(silentTv)) { swap ->
+            onNodeWithContentDescription("Screen settings").performClick()
+            onNodeWithText("TV on").assertDoesNotExist()
+            onNodeWithText("Restart").assertIsNotEnabled()
+            onNodeWithText("Cancel").performClick()
+            swap(row(null), actions())
+            onNodeWithContentDescription("Screen settings").performClick()
+            onNodeWithText("Not connected").assertExists()
+            onNodeWithText("TV on").assertDoesNotExist()
+        }
     }
 
     @Test

@@ -47,6 +47,11 @@ sealed interface PlayerMessage {
         val temperatureC: Double? = null,
         /** How long the machine has been up. */
         val uptimeSeconds: Long? = null,
+        /**
+         * An interactive page (or its PIN pad) is on screen. Its preview shows the page live, with
+         * whatever someone is typing, so the church can see it works.
+         */
+        val interactive: Boolean = false,
     ) : PlayerMessage
 
     /** The answer to [ServerMessage.PreviewRequest]: what the screen shows, as a small JPEG. */
@@ -124,6 +129,34 @@ object Features {
      * that list it.
      */
     const val ROTATION = "rotation"
+
+    /**
+     * Shows an `interactive` web page in a visible, touchable browser. A player without it would draw
+     * the page as a picture nobody can use, so ChurchPresenter sends an interactive link only to
+     * players that list it.
+     */
+    const val INTERACTIVE = "interactive"
+
+    /** Answers [ServerMessage.Power]: the player may restart and shut down its machine. */
+    const val POWER = "power"
+
+    /**
+     * Updates its machine when asked: [ServerMessage.UpdateSystem], and before installing an
+     * [ServerMessage.UpdateAvailable].
+     */
+    const val SYSTEM_UPDATE = "system_update"
+
+    /** Answers [ServerMessage.Tv]; whether the TV answers is its status's `cec`. */
+    const val TV = "tv"
+}
+
+/** What [ServerMessage.Power] does to the player's machine. */
+@Serializable
+enum class PowerAction {
+    @SerialName("restart") RESTART,
+
+    /** Off until someone turns its power off and on again: nothing can wake it over the network. */
+    @SerialName("shut_down") SHUT_DOWN,
 }
 
 @Serializable
@@ -202,6 +235,29 @@ sealed interface ServerMessage {
     @Serializable
     @SerialName("wipe")
     data object Wipe : ServerMessage
+
+    /**
+     * Updates the machine itself (Chromium, mpv, every package, the player's settings) and restarts
+     * the player, when Update is pressed with no newer player to install; an [UpdateAvailable] does the
+     * same before it installs the player. Answered with [PlayerMessage.UpdateProgress] for the version
+     * already installed. Only a player that lists [Features.SYSTEM_UPDATE] gets it.
+     */
+    @Serializable
+    @SerialName("update_system")
+    data object UpdateSystem : ServerMessage
+
+    /**
+     * Turns the TV on or puts it in standby now, over HDMI-CEC, without changing what plays; the
+     * schedule's next change sets it again. Only a player that lists [Features.TV] gets it.
+     */
+    @Serializable
+    @SerialName("tv")
+    data class Tv(val on: Boolean) : ServerMessage
+
+    /** Restarts or shuts down the whole machine; only a player that lists [Features.POWER] gets it. */
+    @Serializable
+    @SerialName("power")
+    data class Power(val action: PowerAction) : ServerMessage
 
     /**
      * Shows a built-in moving test page at each of [fps] frames a second for [secondsEach] seconds,

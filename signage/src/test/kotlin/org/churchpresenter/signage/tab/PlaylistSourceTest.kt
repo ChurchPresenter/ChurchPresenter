@@ -43,7 +43,7 @@ class PlaylistSourceTest {
     @Test
     fun addedPlaylistsAreKeptWithTheSettings() {
         val store = SignageStore(dir)
-        val link = LinkPlaylist.create("Weather", "https://example.org", LinkKind.WEB, 10, smooth = true)
+        val link = LinkPlaylist.create(NewLink("Weather", "https://example.org", LinkKind.WEB, 10, smooth = true))
         val file = FilePlaylist.create("Welcome", "/pictures/welcome.png", MediaKind.IMAGE)
         assertTrue(link.id.startsWith("link:") && file.id.startsWith("file:"))
         store.saveSettings(SignageSettings(added = listOf(link, file)))

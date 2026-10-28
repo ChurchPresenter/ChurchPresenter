@@ -1,5 +1,6 @@
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.churchpresenter.signage.core.Orientation
+import org.churchpresenter.signage.core.PowerAction
 import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.hub.LatestRelease
 import org.churchpresenter.signage.hub.PairedScreen
@@ -92,6 +93,10 @@ fun SignageTab(
             onTestWebPages = { controller.controls.testWebPages(it) },
             onSchedule = controller.plans::setSchedule,
             onOrientation = controller.plans::setOrientation,
+            onKioskPin = controller.plans::setKioskPin,
+            onGesture = controller.plans::setGesture,
+            onPower = { id, action -> controller.power.run(id, action) },
+            onTv = { id, on -> controller.power.tv(id, on) },
         )
     }
     // Only while the tab is showing: look for a player update now and daily, and ask for pictures.
@@ -208,6 +213,14 @@ internal class ScreenActions(
     val onSchedule: (String, List<ScheduleBlock>) -> Unit = { _, _ -> },
     /** How a screen is mounted. */
     val onOrientation: (String, Orientation) -> Unit = { _, _ -> },
+    /** Sets a screen's touchscreen PIN, or removes it with null. */
+    val onKioskPin: (String, String?) -> Unit = { _, _ -> },
+    /** Whether holding a screen's corner switches to a touch page, and to which playlist. */
+    val onGesture: (String, Boolean, String?) -> Unit = { _, _, _ -> },
+    /** Restarts or shuts down a screen's machine. */
+    val onPower: (String, PowerAction) -> Unit = { _, _ -> },
+    /** Turns a screen's TV on or to standby now. */
+    val onTv: (String, Boolean) -> Unit = { _, _ -> },
 )
 
 @Composable
@@ -264,7 +277,7 @@ private fun ServerOffBanner(onTurnOnServer: () -> Unit) {
             modifier = Modifier.weight(1f),
         )
         Spacer(Modifier.width(12.dp))
-        Box { Button(onClick = onTurnOnServer) { Text(stringResource(Res.string.signage_turn_on_server)) } }
+        Box { RaisedButton(onClick = onTurnOnServer) { Text(stringResource(Res.string.signage_turn_on_server)) } }
     }
 }
 

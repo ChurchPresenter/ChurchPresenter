@@ -42,12 +42,26 @@ data class Manifest(
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ScreenSettings(
     val name: String,
     val orientation: Orientation = Orientation.LANDSCAPE,
     val width: Int = DEFAULT_WIDTH,
     val height: Int = DEFAULT_HEIGHT,
+    /**
+     * What the touch gesture on the screen asks for before it switches between the playlist and an
+     * interactive page, as [KioskPin.hash] makes it; no PIN is asked when null. Set, changed and
+     * removed in ChurchPresenter only; the PIN itself never leaves it.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val kioskPinHash: String? = null,
+    /** Whether holding the screen's corner switches to and from a touch page at all. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val kioskGesture: Boolean = true,
+    /**
+     * The playlist the corner gesture switches to; the first with a touch page when null, or when this
+     * one has none.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val kioskGesturePlaylistId: String? = null,
 ) {
     companion object {
         const val DEFAULT_WIDTH = 1920
@@ -76,8 +90,8 @@ data class Playlist(
 /**
  * One entry of a playlist: a file by its hash, or a link by its [url].
  *
- * [url], [refreshMs] and [maxFps] are written only when set, so an item without them encodes exactly as it did
- * before links existed and an older manifest keeps its version.
+ * [url], [refreshMs], [maxFps] and the interactive fields are written only when set, so an item without
+ * them encodes exactly as it did before they existed and an older manifest keeps its version.
  */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -101,10 +115,34 @@ data class PlaylistItem(
      * null. More is smoother and costs the player more.
      */
     @EncodeDefault(EncodeDefault.Mode.NEVER) val maxFps: Int? = null,
+    /**
+     * A [MediaKind.WEB] page people use on a touchscreen, such as an event sign-up: shown in a visible
+     * browser instead of mpv, and staying up until its playlist goes off screen. Nothing typed into it
+     * is kept: the browser starts from nothing after [idleResetMs] without a touch.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val interactive: Boolean = false,
+    /**
+     * How long an [interactive] page waits without a touch before it starts over;
+     * [DEFAULT_IDLE_RESET_MS] when null.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val idleResetMs: Long? = null,
+    /**
+     * Other sites an [interactive] page may go to, as host names (`"churchcenter.com"` also allows its
+     * subdomains), or [ANY_HOST] for every site. Its own [url]'s site is always allowed; any other page
+     * is not opened. Only where the page itself goes is checked: what it embeds (a payment field, a
+     * map) always loads.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val allowedHosts: List<String> = emptyList(),
 ) {
     companion object {
         const val DEFAULT_TRANSITION_MS = 800L
         const val DEFAULT_WEB_FPS = 15
+        const val DEFAULT_IDLE_RESET_MS = 90_000L
+        const val MIN_IDLE_RESET_MS = 15_000L
+        const val MAX_IDLE_RESET_MS = 30L * 60_000L
+
+        /** In [allowedHosts]: an interactive page may go to any site. */
+        const val ANY_HOST = "*"
     }
 }
 
