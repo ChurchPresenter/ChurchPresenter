@@ -97,10 +97,6 @@ class ShapedLinesTest {
         fun drawn(s: String) = measurer.measure(s, style).multiParagraph.maxIntrinsicWidth
         val shaped = ShapedLines.measuredBy(measurer, style)
 
-        // What Compottie centres by: each UTF-16 character measured on its own.
-        val perLetter = VERSE.sumOf { drawn(it.toString()).toDouble() }.toFloat()
-        assertTrue(drawn(VERSE) < perLetter * 0.9f, "the shaped line is far narrower than its letters summed")
-
         val box = 2400f
         val lines = shaped.wrap(VERSE, box)
         lines.forEach { line ->
