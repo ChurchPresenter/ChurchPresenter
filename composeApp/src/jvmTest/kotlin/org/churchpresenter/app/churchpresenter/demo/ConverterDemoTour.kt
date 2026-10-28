@@ -13,6 +13,7 @@ import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.screenshot.LIBRARY
+import org.churchpresenter.app.churchpresenter.screenshot.library
 import org.churchpresenter.converter.song.SongFormatConverter
 import org.churchpresenter.converter.ui.App
 import org.churchpresenter.converter.ui.ConverterPickers
@@ -37,6 +38,8 @@ class ConverterDemoTour {
             parentFile.mkdirs()
             writeText(ZEFANIA)
         }
+        // The demo library is written here too: which test makes it first depends on how the suite is split.
+        library()
         // A library that collected copies over the years: the demo songs, and an old folder holding three of them.
         val dupes = File(root, "Library").apply { File(LIBRARY, "Songs").copyRecursively(this) }
         val old = File(dupes, "Old Hymnal").apply { mkdirs() }

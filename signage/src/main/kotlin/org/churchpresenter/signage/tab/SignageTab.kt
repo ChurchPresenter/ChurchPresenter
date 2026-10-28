@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import org.churchpresenter.signage.core.Orientation
+import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.hub.LatestRelease
 import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.ScreenLink
@@ -88,6 +90,8 @@ fun SignageTab(
             onUpdate = controller.controls::update,
             onPreviewOpen = { largePreview = it },
             onTestWebPages = { controller.controls.testWebPages(it) },
+            onSchedule = controller.plans::setSchedule,
+            onOrientation = controller.plans::setOrientation,
         )
     }
     // Only while the tab is showing: look for a player update now and daily, and ask for pictures.
@@ -135,8 +139,11 @@ fun SignageTab(
                         desktop = desktop,
                         onAddLink = controller.added::addLink,
                         onAddFile = controller.added::addFile,
-                        onRename = controller.added::rename,
                         onRemove = controller.added::remove,
+                        onAddRotation = controller.added::addRotation,
+                        onEditRotation = controller.added::updateRotation,
+                        onEditLink = controller.added::updateLink,
+                        onEditFile = controller.added::updateFile,
                     ),
                     modifier = Modifier.weight(1f).fillMaxSize(),
                 )
@@ -161,8 +168,11 @@ internal class FolderActions(
     val desktop: SignageDesktop,
     val onAddLink: (NewLink) -> Unit = {},
     val onAddFile: (Path) -> Unit = {},
-    val onRename: (id: String, name: String) -> Unit = { _, _ -> },
     val onRemove: (id: String) -> Unit = {},
+    val onAddRotation: (name: String, steps: List<RotationStep>) -> Unit = { _, _ -> },
+    val onEditRotation: (id: String, name: String, steps: List<RotationStep>) -> Unit = { _, _, _ -> },
+    val onEditLink: (id: String, link: NewLink) -> Unit = { _, _ -> },
+    val onEditFile: (id: String, name: String, file: Path) -> Unit = { _, _, _ -> },
 )
 
 /**
@@ -194,6 +204,10 @@ internal class ScreenActions(
     val onPreviewOpen: (String?) -> Unit = {},
     /** Has the screen test how smoothly it shows web pages. */
     val onTestWebPages: (String) -> Unit = {},
+    /** Replaces a screen's weekly schedule. */
+    val onSchedule: (String, List<ScheduleBlock>) -> Unit = { _, _ -> },
+    /** How a screen is mounted. */
+    val onOrientation: (String, Orientation) -> Unit = { _, _ -> },
 )
 
 @Composable

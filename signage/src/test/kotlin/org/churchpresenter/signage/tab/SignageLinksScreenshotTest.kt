@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.screenshot.captureComponent
 import org.churchpresenter.signage.core.CecState
 import org.churchpresenter.signage.core.Features
+import org.churchpresenter.signage.core.MediaKind
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.signage.core.WebTestRun
@@ -84,6 +85,25 @@ class SignageLinksScreenshotTest {
         onAllNodesWithText("Address")[0].performTextInput(LIVE)
         waitForIdle()
     }) { LinkDialog(onAdd = {}, onDismiss = {}) }
+
+    @Test
+    fun `editing a link`() = captureComponent(SECTION, "link_edit", rootIndex = 1) {
+        LinkDialog(
+            onAdd = {},
+            onDismiss = {},
+            initial = LinkPlaylist("link:1", "Countdown", "http://192.168.2.240/?font-size=300", LinkKind.WEB, 0, true),
+        )
+    }
+
+    @Test
+    fun `editing a picture`() = captureComponent(SECTION, "file_edit", rootIndex = 1) {
+        FileDialog(
+            FilePlaylist("file:1", "Welcome", "/Users/church/Pictures/welcome.png", MediaKind.IMAGE),
+            FakeDesktop().desktop,
+            { _, _ -> },
+            {},
+        )
+    }
 
     @Test
     fun `a card offering the test`() = captureComponent(SECTION, "test_offered") { Card(link) }

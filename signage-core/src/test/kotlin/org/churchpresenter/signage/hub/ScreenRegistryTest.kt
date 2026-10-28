@@ -13,6 +13,7 @@ import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -32,6 +33,21 @@ class ScreenRegistryTest {
     }
 
     private fun registry() = ScreenRegistry(file, scope, clock = { 1_000 }, random = SecureRandom())
+
+    @Test
+    fun aScreenPairedByAnotherComputerSharingTheFileIsReadOnTheNextLook() = runTest {
+        val here = registry().also { it.load() }
+        scope.settle()
+        val there = registry().also { it.load() }
+        assertEquals(here.ownerId, there.ownerId)
+        // Nothing changed elsewhere yet.
+        assertFalse(here.reloadIfChanged())
+        there.pair(PendingScreen("player-9", "1234", Platform.LINUX_ARM64, "26.0.32", 1920, 1080, "10.0.0.9"), "Hall")
+        scope.settle()
+        assertTrue(here.reloadIfChanged())
+        assertEquals(listOf("Hall"), here.screens.value.map { it.name })
+        assertFalse(here.reloadIfChanged())
+    }
 
     @Test
     fun aNewRegistryMakesAnOwnerIdAndKeepsIt() = runTest {

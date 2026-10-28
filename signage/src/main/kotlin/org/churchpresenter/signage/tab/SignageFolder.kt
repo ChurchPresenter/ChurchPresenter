@@ -73,6 +73,13 @@ internal fun HashedPlaylist.addedSummary(): PlaylistSummary = when (val source =
         kind = if (source.kind == LinkKind.WEB) SourceKind.WEB else SourceKind.STREAM,
         detail = source.url,
     )
+    is RotationPlaylist -> PlaylistSummary(
+        id = source.id,
+        name = source.name,
+        kind = SourceKind.ROTATION,
+        steps = source.steps.size,
+        seconds = source.steps.sumOf { it.seconds ?: 0 },
+    )
     is FolderPlaylist -> source.summary()
 }
 

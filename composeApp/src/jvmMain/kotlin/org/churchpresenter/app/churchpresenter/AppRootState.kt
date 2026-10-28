@@ -240,6 +240,9 @@ internal class AppRootState(
     /** Signage's controller, made the first time the Signage tab is shown -- see `SignageEffect`. */
     var signageController by mutableStateOf<SignageController?>(null)
 
+    /** The signage folder setting [signageController] was made for; a change makes a new one. */
+    var signageFolderInUse: String? = null
+
     /** The analytics setting as the signage screens are sent it: whether they may report crashes. */
     val signageDiagnostics = MutableStateFlow(appSettings.analyticsReportingEnabled)
 

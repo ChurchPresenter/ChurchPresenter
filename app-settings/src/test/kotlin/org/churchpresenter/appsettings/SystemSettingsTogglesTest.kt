@@ -77,8 +77,26 @@ class SystemSettingsTogglesTest {
         try {
             runComposeUiTest {
                 val read = tab(AppSettings(calendarStorageDirectory = shared.absolutePath))
-                press("Use Default")
+                // The calendar's comes first; the signage folder's, below it, is on its default already.
+                onAllNodesWithText("Use Default")[0].performScrollTo().performClick()
+                waitForIdle()
                 assertEquals("", read().calendarStorageDirectory)
+            }
+        } finally {
+            shared.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `Use Default puts the signage setup back in the app data folder`() {
+        val shared = Files.createTempDirectory("shared-signage").toFile()
+        try {
+            runComposeUiTest {
+                val read = tab(AppSettings(signageStorageDirectory = shared.absolutePath))
+                // The signage folder's comes second, below the calendar's, which is on its default.
+                onAllNodesWithText("Use Default")[1].performScrollTo().performClick()
+                waitForIdle()
+                assertEquals("", read().signageStorageDirectory)
             }
         } finally {
             shared.deleteRecursively()

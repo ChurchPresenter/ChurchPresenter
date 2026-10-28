@@ -63,6 +63,31 @@ data class LinkPlaylist(
     }
 }
 
+/**
+ * A rotation: other entries of the list, shown one after another, each for its own time — a web
+ * page, a picture, a stream, a folder's pictures in turn. Its steps point at those entries, so a
+ * link changed once changes in every rotation that shows it. A rotation is never a step of one.
+ */
+@Serializable
+@SerialName("rotation")
+data class RotationPlaylist(
+    override val id: String,
+    override val name: String,
+    val steps: List<RotationStep>,
+) : AddedPlaylist {
+    companion object {
+        fun create(name: String, steps: List<RotationStep>) =
+            RotationPlaylist("rotation:${UUID.randomUUID()}", name, steps)
+    }
+}
+
+/**
+ * One step of a rotation: the entry [sourceId], for [seconds] — none for a folder (one round of its
+ * pictures) or a video that plays to its end.
+ */
+@Serializable
+data class RotationStep(val sourceId: String, val seconds: Int? = null)
+
 /** A link as the Link dialog makes it, before it has an id. */
 data class NewLink(
     val name: String,
@@ -108,4 +133,4 @@ enum class LinkKind {
 }
 
 /** What a playlist is, as its row shows it. */
-enum class SourceKind { FOLDER, PICTURE, VIDEO, WEB, STREAM }
+enum class SourceKind { FOLDER, PICTURE, VIDEO, WEB, STREAM, ROTATION }

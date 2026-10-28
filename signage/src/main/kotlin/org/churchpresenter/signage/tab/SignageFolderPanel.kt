@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -59,7 +60,13 @@ import org.churchpresenter.strings.generated.resources.signage_remove
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist_text
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist_title
-import org.churchpresenter.strings.generated.resources.signage_rename_playlist
+import org.churchpresenter.strings.generated.resources.signage_link_title_edit
+import org.churchpresenter.strings.generated.resources.signage_file_title_edit
+import org.churchpresenter.strings.generated.resources.signage_rotation_title_edit
+import org.churchpresenter.strings.generated.resources.signage_add_rotation
+import org.churchpresenter.strings.generated.resources.signage_rotation_summary
+import org.churchpresenter.strings.generated.resources.signage_rotation_minutes
+import org.churchpresenter.strings.generated.resources.signage_rotation_seconds_short
 import org.churchpresenter.strings.generated.resources.signage_change_folder
 import org.churchpresenter.strings.generated.resources.signage_choose_folder
 import org.churchpresenter.strings.generated.resources.signage_delete
@@ -137,6 +144,7 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
     val scope = rememberCoroutineScope()
     var open by remember { mutableStateOf(false) }
     var addingLink by remember { mutableStateOf(false) }
+    var addingRotation by remember { mutableStateOf(false) }
     val chooseTitle = stringResource(Res.string.signage_choose_file)
     val filterName = stringResource(Res.string.signage_pictures_and_videos)
     Box {
@@ -168,6 +176,14 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
                 },
             )
             DropdownMenuItem(
+                text = { Text(stringResource(Res.string.signage_add_rotation)) },
+                leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
+                onClick = {
+                    open = false
+                    addingRotation = true
+                },
+            )
+            DropdownMenuItem(
                 text = { Text(stringResource(Res.string.signage_add_folder)) },
                 leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },
                 onClick = {
@@ -178,6 +194,14 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
         }
     }
     if (addingLink) LinkDialog(onAdd = actions.onAddLink, onDismiss = { addingLink = false })
+    if (addingRotation) {
+        RotationDialog(
+            entries = state.playlists.filter { it.kind != SourceKind.ROTATION },
+            initial = null,
+            onSave = actions.onAddRotation,
+            onDismiss = { addingRotation = false },
+        )
+    }
 }
 
 @Composable
@@ -219,13 +243,27 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
             }
         }
     }
-    renaming?.let { playlist ->
-        RenameDialog(
-            name = playlist.name,
-            onRename = { actions.onRename(playlist.id, it) },
+    renaming?.takeIf { it.kind == SourceKind.ROTATION }?.let { playlist ->
+        RotationDialog(
+            entries = state.playlists.filter { it.kind != SourceKind.ROTATION },
+            initial = state.settings.added.filterIsInstance<RotationPlaylist>().firstOrNull { it.id == playlist.id },
+            onSave = { name, steps -> actions.onEditRotation(playlist.id, name, steps) },
             onDismiss = { renaming = null },
-            title = stringResource(Res.string.signage_rename_playlist),
         )
+    }
+    when (val editing = renaming?.let { playlist -> state.settings.added.firstOrNull { it.id == playlist.id } }) {
+        is LinkPlaylist -> LinkDialog(
+            initial = editing,
+            onAdd = { actions.onEditLink(editing.id, it) },
+            onDismiss = { renaming = null },
+        )
+        is FilePlaylist -> FileDialog(
+            initial = editing,
+            desktop = desktop,
+            onSave = { name, file -> actions.onEditFile(editing.id, name, file) },
+            onDismiss = { renaming = null },
+        )
+        is RotationPlaylist, null -> Unit
     }
     deleting?.takeIf { it.added }?.let { playlist ->
         ConfirmDialog(
@@ -283,7 +321,13 @@ private fun PlaylistRow(playlist: PlaylistSummary, onRename: () -> Unit, onDelet
         if (playlist.added) {
             TooltipIconButton(
                 painter = rememberVectorPainter(Icons.Filled.Edit),
-                text = stringResource(Res.string.signage_rename_playlist),
+                text = stringResource(
+                    when (playlist.kind) {
+                        SourceKind.WEB, SourceKind.STREAM -> Res.string.signage_link_title_edit
+                        SourceKind.ROTATION -> Res.string.signage_rotation_title_edit
+                        else -> Res.string.signage_file_title_edit
+                    },
+                ),
                 onClick = onRename,
             )
         }
@@ -303,10 +347,18 @@ private fun AddedPlaylistText(playlist: PlaylistSummary, modifier: Modifier) {
     Column(modifier = modifier) {
         Text(playlist.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(
-            if (playlist.missing) {
-                stringResource(Res.string.signage_file_missing, playlist.detail.orEmpty())
-            } else {
-                playlist.detail.orEmpty()
+            when {
+                playlist.missing -> stringResource(Res.string.signage_file_missing, playlist.detail.orEmpty())
+                playlist.kind == SourceKind.ROTATION -> stringResource(
+                    Res.string.signage_rotation_summary,
+                    playlist.steps,
+                    if (playlist.seconds >= SECONDS_PER_MINUTE) {
+                        stringResource(Res.string.signage_rotation_minutes, playlist.seconds / SECONDS_PER_MINUTE)
+                    } else {
+                        stringResource(Res.string.signage_rotation_seconds_short, playlist.seconds)
+                    },
+                )
+                else -> playlist.detail.orEmpty()
             },
             style = MaterialTheme.typography.bodySmall,
             color = with(MaterialTheme.colorScheme) { if (playlist.missing) error else onSurfaceVariant },
@@ -322,6 +374,9 @@ private fun iconOf(kind: SourceKind): ImageVector = when (kind) {
     SourceKind.VIDEO -> Icons.Filled.Movie
     SourceKind.WEB -> Icons.Filled.Language
     SourceKind.STREAM -> Icons.Filled.LiveTv
+    SourceKind.ROTATION -> Icons.Filled.Repeat
 }
 
 private val PICTURE_SECONDS = 1..600
+
+private const val SECONDS_PER_MINUTE = 60

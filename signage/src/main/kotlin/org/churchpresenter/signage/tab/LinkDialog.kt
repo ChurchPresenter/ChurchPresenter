@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.save
 import org.churchpresenter.strings.generated.resources.signage_add
 import org.churchpresenter.strings.generated.resources.signage_link_address
 import org.churchpresenter.strings.generated.resources.signage_link_address_hint
@@ -40,30 +41,35 @@ import org.churchpresenter.strings.generated.resources.signage_link_smooth
 import org.churchpresenter.strings.generated.resources.signage_link_smooth_hint
 import org.churchpresenter.strings.generated.resources.signage_link_stream
 import org.churchpresenter.strings.generated.resources.signage_link_title
+import org.churchpresenter.strings.generated.resources.signage_link_title_edit
 import org.churchpresenter.strings.generated.resources.signage_link_web
 import org.jetbrains.compose.resources.stringResource
 import java.net.URI
 import java.net.URISyntaxException
 
 /**
- * Adds a link playlist: its address, a name, and whether it is a web page or a stream, guessed from
- * the address until it is chosen by hand. A web page can reload every few minutes.
+ * Adds a link playlist, or edits [initial]: its address, a name, and whether it is a web page or a
+ * stream, guessed from the address until it is chosen by hand. A web page can reload every few minutes.
  */
 @Composable
 internal fun LinkDialog(
     onAdd: (NewLink) -> Unit,
     onDismiss: () -> Unit,
+    initial: LinkPlaylist? = null,
 ) {
-    var url by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var chosenKind by remember { mutableStateOf<LinkKind?>(null) }
-    var refreshMinutes by remember { mutableIntStateOf(0) }
-    var smooth by remember { mutableStateOf(false) }
+    var url by remember { mutableStateOf(initial?.url.orEmpty()) }
+    var name by remember { mutableStateOf(initial?.name.orEmpty()) }
+    var chosenKind by remember { mutableStateOf(initial?.kind) }
+    var refreshMinutes by remember { mutableIntStateOf(initial?.refreshMinutes ?: 0) }
+    var smooth by remember { mutableStateOf(initial?.smooth == true) }
     val kind = chosenKind ?: LinkKind.guess(url)
     val valid = isLinkAddress(url)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.signage_link_title)) },
+        title = {
+            val title = if (initial == null) Res.string.signage_link_title else Res.string.signage_link_title_edit
+            Text(stringResource(title))
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.width(DIALOG_WIDTH)) {
                 OutlinedTextField(
@@ -124,7 +130,7 @@ internal fun LinkDialog(
                     onDismiss()
                 },
                 enabled = valid,
-            ) { Text(stringResource(Res.string.signage_add)) }
+            ) { Text(stringResource(if (initial == null) Res.string.signage_add else Res.string.save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )

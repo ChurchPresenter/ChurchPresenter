@@ -2,8 +2,10 @@ package org.churchpresenter.signage.tab
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import org.churchpresenter.signage.core.Orientation
 import kotlinx.serialization.SerializationException
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.core.SignageJson
 import java.io.IOException
 import java.nio.file.Files
@@ -25,10 +27,16 @@ data class SignageSettings(
 ) {
     fun plan(id: String): ScreenPlan = screens[id] ?: ScreenPlan()
 
-    /** Without [id] added, and with no screen still playing it: those play the first playlist again. */
+    /**
+     * Without [id] added, in no rotation, and with no screen still playing it: those play the first
+     * playlist again.
+     */
     fun withoutAdded(id: String): SignageSettings = copy(
-        added = added.filterNot { it.id == id },
-        screens = screens.mapValues { (_, plan) -> if (plan.playlistId == id) ScreenPlan() else plan },
+        added = added.filterNot { it.id == id }.map { entry ->
+            if (entry is RotationPlaylist) entry.copy(steps = entry.steps.filterNot { it.sourceId == id }) else entry
+        },
+        // Only what the screen plays goes back to the first playlist: its schedule stays.
+        screens = screens.mapValues { (_, plan) -> if (plan.playlistId == id) plan.copy(playlistId = null) else plan },
     )
 
     companion object {
@@ -36,9 +44,18 @@ data class SignageSettings(
     }
 }
 
-/** What one screen plays: a playlist's id, [NOTHING], or null for the first playlist. */
+/**
+ * What one screen plays: a playlist's id, [NOTHING], or null for the first playlist — and its weekly
+ * [schedule], whose blocks play another playlist, turn the TV off or keep it on the service input at
+ * their times. Outside every block the screen plays [playlistId].
+ */
 @Serializable
-data class ScreenPlan(val playlistId: String? = null) {
+data class ScreenPlan(
+    val playlistId: String? = null,
+    val schedule: List<ScheduleBlock> = emptyList(),
+    /** How the screen is mounted: everything it shows is turned to match. */
+    val orientation: Orientation = Orientation.LANDSCAPE,
+) {
     companion object {
         /** The screen plays nothing and holds no content: it shows its idle card. */
         const val NOTHING = "nothing:"
@@ -54,17 +71,34 @@ data class ScreenPlan(val playlistId: String? = null) {
 data class HashedFile(val size: Long, val modifiedMs: Long, val sha256: String)
 
 /**
- * The tab's files in [dir]: its settings, and the hash of every file it has read, so a start-up only
- * hashes what changed while ChurchPresenter was off. Blocking: run it on `Dispatchers.IO`.
+ * The tab's files: its settings in [dir], which another computer may share and change, and in
+ * [cacheDir], this computer's own, the hash of every file it has read, so a start-up only hashes
+ * what changed while ChurchPresenter was off. Blocking: run it on `Dispatchers.IO`.
  */
-class SignageStore(private val dir: Path) {
+class SignageStore(private val dir: Path, private val cacheDir: Path = dir) {
     private val settingsFile = dir.resolve("signage.json")
-    private val hashesFile = dir.resolve("hashes.json")
+    private val hashesFile = cacheDir.resolve("hashes.json")
     private var hashes: MutableMap<String, HashedFile> = mutableMapOf()
 
-    fun loadSettings(): SignageSettings = read(settingsFile, SignageSettings.serializer()) ?: SignageSettings()
+    /**
+     * The settings file as it was last read or written here, to tell another computer's write from
+     * ours. Its content, not its time: a network share keeps times only to a second or two.
+     */
+    private var settingsSeen: String? = null
 
-    fun saveSettings(settings: SignageSettings) = write(settingsFile, SignageSettings.serializer(), settings)
+    fun loadSettings(): SignageSettings {
+        settingsSeen = textOf(settingsFile)
+        return read(settingsFile, SignageSettings.serializer()) ?: SignageSettings()
+    }
+
+    fun saveSettings(settings: SignageSettings) {
+        write(settingsFile, SignageSettings.serializer(), settings)
+        settingsSeen = textOf(settingsFile)
+    }
+
+    /** The settings again when another computer has changed them since they were read or written here. */
+    fun settingsChangedElsewhere(): SignageSettings? =
+        if (textOf(settingsFile) == settingsSeen) null else loadSettings()
 
     fun loadHashes() {
         hashes = read(hashesFile, HashesFile.serializer())?.files?.toMutableMap() ?: mutableMapOf()
@@ -91,7 +125,7 @@ class SignageStore(private val dir: Path) {
     fun hashAdded(added: List<AddedPlaylist>): List<HashedPlaylist> = added.map { entry ->
         when (entry) {
             is FilePlaylist -> HashedPlaylist(entry, entry.currentFile()?.let { mapOf(it to hashOf(it)) }.orEmpty())
-            is LinkPlaylist -> HashedPlaylist(entry)
+            is LinkPlaylist, is RotationPlaylist -> HashedPlaylist(entry)
         }
     }
 
@@ -130,7 +164,7 @@ class SignageStore(private val dir: Path) {
 
     private fun <T> write(file: Path, serializer: KSerializer<T>, value: T) {
         try {
-            Files.createDirectories(dir)
+            Files.createDirectories(file.parent)
             val next = file.resolveSibling("${file.fileName}.next")
             Files.writeString(next, SignageJson.encodeToString(serializer, value))
             Files.move(next, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
@@ -143,4 +177,11 @@ class SignageStore(private val dir: Path) {
         const val TAG = "Signage"
         const val BUFFER_BYTES = 64 * 1024
     }
+}
+
+/** What [file] holds now; null when it is not there or cannot be read. */
+private fun textOf(file: Path): String? = try {
+    if (Files.exists(file)) Files.readString(file) else null
+} catch (_: IOException) {
+    null
 }

@@ -13,3 +13,14 @@ fun AppSettings.calendarFolder(): File =
  */
 fun AppSettings.calendarFolderShown(): File =
     calendarStorageDirectory.takeIf { it.isNotBlank() }?.let(::File) ?: AppDataDir.resolvedThisRun()
+
+/** Where the signage setup lives: the chosen folder, or the app data folder's `signage` folder. */
+fun AppSettings.signageFolder(): File =
+    signageStorageDirectory.takeIf { it.isNotBlank() }?.let(::File) ?: File(AppDataDir.resolve(), SIGNAGE_DIR)
+
+/** [signageFolder] for a screen that only prints it, as [calendarFolderShown] is to the calendar. */
+fun AppSettings.signageFolderShown(): File =
+    signageStorageDirectory.takeIf { it.isNotBlank() }?.let(::File) ?: File(AppDataDir.resolvedThisRun(), SIGNAGE_DIR)
+
+/** The signage setup's folder inside the app data folder, as the signage hub has always named it. */
+const val SIGNAGE_DIR = "signage"

@@ -567,9 +567,10 @@ class SystemSettingsTabTest {
         ).forEach { title ->
             onAllNodesWithText(title).onFirst().assertExists("the $title heading must render")
         }
-        onAllNodesWithText("Browse...").assertCountEquals(8)
+        onAllNodesWithText("Browse...").assertCountEquals(9)
         onAllNodesWithText("Set All").assertCountEquals(7)
-        onAllNodesWithText("Use Default").assertCountEquals(1)
+        // The calendar and signage: the two folders with a default rather than "not set".
+        onAllNodesWithText("Use Default").assertCountEquals(2)
     }
 
     @Test
@@ -1271,7 +1272,7 @@ class SystemSettingsTabTest {
         val missing = File(tempDir(), "moved-away")
         showAllFolders(bible.path, missing.path)
 
-        waitUntil { onAllNodesWithText("6 linked").fetchSemanticsNodes().isNotEmpty() }
+        waitUntil { onAllNodesWithText("7 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("1 need attention").onFirst()
             .assertExists("the folder that is gone is counted as needing attention")
     }
@@ -1281,7 +1282,7 @@ class SystemSettingsTabTest {
         val dir = tempDir()
         showAllFolders(dir.path, tempDir().path)
 
-        waitUntil { onAllNodesWithText("7 linked").fetchSemanticsNodes().isNotEmpty() }
+        waitUntil { onAllNodesWithText("8 linked").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("need attention", substring = true).assertCountEquals(0)
     }
 
@@ -1293,9 +1294,9 @@ class SystemSettingsTabTest {
         // The calendar's folder is checked off the UI thread, so the count is 0 until that lands --
         // wait for the number itself, as the two counting tests above do, rather than for the seven
         // rows that are "Not set" the instant they compose.
-        waitUntil { onAllNodesWithText("1 linked").fetchSemanticsNodes().isNotEmpty() }
-        onAllNodesWithText("1 linked").onFirst()
-            .assertExists("only the calendar, at its default, is linked before anything is chosen")
+        waitUntil { onAllNodesWithText("2 linked").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText("2 linked").onFirst()
+            .assertExists("only the calendar and signage, at their defaults, are linked before anything is chosen")
     }
 
     @Test
