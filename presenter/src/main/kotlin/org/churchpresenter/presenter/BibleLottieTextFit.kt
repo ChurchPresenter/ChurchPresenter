@@ -1,5 +1,7 @@
 package org.churchpresenter.presenter
 
+import org.churchpresenter.lottiegen.lottie.ShapedLines
+
 /**
  * The lines a Lottie player breaks [text] into inside a box [boxWidth] wide.
  *
@@ -67,40 +69,69 @@ internal data class SlotFitRequest(
     val singleLine: Boolean,
 )
 
+/** How a slot's lines are broken and measured at a scale of its base size. */
+internal interface SlotMeasure {
+    /** [line] — one written line — wrapped inside [width] at [scale]; no width wraps nothing. */
+    fun wrap(line: String, width: Float, scale: Float): List<String>
+
+    /** [line]'s width at [scale]. */
+    fun width(line: String, scale: Float): Float
+}
+
+/**
+ * The player's letter-by-letter measure: [charWidthAtBase] per character at the base size, plus
+ * [trackingAtBase] after each. Glyph widths scale with the size, so smaller sizes are derived
+ * rather than re-measured.
+ */
+internal fun perCharMeasure(trackingAtBase: Float, charWidthAtBase: (Char) -> Float): SlotMeasure =
+    object : SlotMeasure {
+        override fun wrap(line: String, width: Float, scale: Float): List<String> =
+            wrapLikeLottie(line, width, trackingAtBase * scale) { charWidthAtBase(it) * scale }
+
+        override fun width(line: String, scale: Float): Float =
+            line.sumOf { (charWidthAtBase(it) * scale + trackingAtBase * scale).toDouble() }.toFloat()
+    }
+
+/** The whole-line measure (see [ShapedLines]), laid out at the base size and scaled. */
+internal fun shapedMeasure(atBase: ShapedLines): SlotMeasure = object : SlotMeasure {
+    override fun wrap(line: String, width: Float, scale: Float): List<String> =
+        atBase.wrap(line, if (width > 0f) width / scale else 0f)
+
+    override fun width(line: String, scale: Float): Float = atBase.width(line) * scale
+}
+
 /**
  * The largest size at or below the request's base size whose wrapped lines fit inside the box,
- * found by the same binary search the classic band uses. [charWidthAtBase] measures a character
- * at the base size; glyph widths scale with the size, so smaller sizes are derived rather than
- * re-measured.
+ * found by the same binary search the classic band uses, measured letter by letter.
  */
-internal fun fitLottieSlot(request: SlotFitRequest, charWidthAtBase: (Char) -> Float): FittedSlot {
+internal fun fitLottieSlot(request: SlotFitRequest, charWidthAtBase: (Char) -> Float): FittedSlot =
+    fitLottieSlot(request, perCharMeasure(request.trackingAtBase, charWidthAtBase))
+
+/** [fitLottieSlot] with the lines broken and measured by [measure]. */
+internal fun fitLottieSlot(request: SlotFitRequest, measure: SlotMeasure): FittedSlot {
     val text = request.text
     val box = request.box
     val baseSize = request.baseSize
-    val trackingAtBase = request.trackingAtBase
     val singleLine = request.singleLine
     if (text.isEmpty() || baseSize <= 0f) return FittedSlot(baseSize.coerceAtLeast(1f), emptyList(), 0f)
     // A lyric keeps its own line breaks: each written line wraps on its own, as the player does.
     fun linesAt(scale: Float): List<String> {
         val width = if (singleLine) 0f else box.w
-        return text.split('\n').flatMap { line ->
-            wrapLikeLottie(line, width, trackingAtBase * scale) { charWidthAtBase(it) * scale }.ifEmpty { listOf("") }
-        }
+        return text.split('\n').flatMap { line -> measure.wrap(line, width, scale).ifEmpty { listOf("") } }
     }
-    fun widthAt(scale: Float, line: String): Float =
-        line.sumOf { (charWidthAtBase(it) * scale + trackingAtBase * scale).toDouble() }.toFloat()
     fun fits(scale: Float): Boolean {
         val size = baseSize * scale
         val lines = linesAt(scale)
         return if (singleLine) {
-            lines.size <= 1 && widthAt(scale, lines.firstOrNull() ?: "") <= box.w && size * LINE_HEIGHT_FACTOR <= box.h
+            lines.size <= 1 && measure.width(lines.firstOrNull() ?: "", scale) <= box.w &&
+                size * LINE_HEIGHT_FACTOR <= box.h
         } else {
             lines.size * size * LINE_HEIGHT_FACTOR <= box.h
         }
     }
     val scale = binarySearchFitScale(iterations = FIT_ITERATIONS) { fits(it) }
     val lines = linesAt(scale)
-    val widest = lines.maxOfOrNull { widthAt(scale, it) } ?: 0f
+    val widest = lines.maxOfOrNull { measure.width(it, scale) } ?: 0f
     return FittedSlot(baseSize * scale, lines, widest)
 }
 

@@ -40,6 +40,11 @@ internal data class BandVoiceLayout(
     /** The first line's top, in template pixels. */
     val top: Float,
     val lineHeight: Float,
+    /**
+     * Each line's left edge when the band places the lines itself (whole-line text, see
+     * SlotRender.pads); null when the player places them by [justify].
+     */
+    val lineLefts: List<Float>? = null,
 )
 
 /**
@@ -47,7 +52,14 @@ internal data class BandVoiceLayout(
  * run of them on each line. [advance] is a character's width at the fitted size, tracking included,
  * which is the measure the lines were wrapped by.
  */
-internal fun secondVoiceRects(layout: BandVoiceLayout, advance: (Char) -> Float): List<Rect> {
+internal fun secondVoiceRects(layout: BandVoiceLayout, advance: (Char) -> Float): List<Rect> =
+    secondVoiceRuns(layout) { run -> run.sumOf { advance(it).toDouble() }.toFloat() }
+
+/**
+ * [secondVoiceRects] with [runWidth] measuring a leading run of a line at the fitted size — summed
+ * letter by letter, or shaped as the player draws a whole line.
+ */
+internal fun secondVoiceRuns(layout: BandVoiceLayout, runWidth: (String) -> Float): List<Rect> {
     val rects = mutableListOf<Rect>()
     var cursor = 0
     layout.lines.forEachIndexed { row, line ->
@@ -56,36 +68,31 @@ internal fun secondVoiceRects(layout: BandVoiceLayout, advance: (Char) -> Float)
         // broke at is not in either.
         val start = layout.text.indexOf(line, cursor).takeIf { it >= 0 } ?: return@forEachIndexed
         cursor = start + line.length
-        val widths = line.map(advance)
-        val lineWidth = widths.sum()
         val box = layout.box
-        val left = when (layout.justify) {
+        val left = layout.lineLefts?.getOrNull(row) ?: when (layout.justify) {
             TextJustify.Left -> box.x
-            TextJustify.Right -> box.x + box.w - lineWidth
-            else -> box.x + (box.w - lineWidth) / 2f
+            TextJustify.Right -> box.x + box.w - runWidth(line)
+            else -> box.x + (box.w - runWidth(line)) / 2f
         }
         val y = layout.top + row * layout.lineHeight
-        var x = left
-        var runStart = Float.NaN
-        line.indices.forEach { i ->
-            val sung = layout.voiceRanges.any { start + i in it }
-            if (sung && runStart.isNaN()) runStart = x
-            if (!sung && !runStart.isNaN()) {
-                rects += Rect(runStart, y, x, y + layout.lineHeight)
-                runStart = Float.NaN
+        var runStart = -1
+        for (i in 0..line.length) {
+            val sung = i < line.length && layout.voiceRanges.any { start + i in it }
+            if (sung && runStart < 0) runStart = i
+            if (!sung && runStart >= 0) {
+                val from = left + runWidth(line.take(runStart))
+                rects += Rect(from, y, left + runWidth(line.take(i)), y + layout.lineHeight)
+                runStart = -1
             }
-            x += widths[i]
         }
-        if (!runStart.isNaN()) rects += Rect(runStart, y, x, y + layout.lineHeight)
     }
     return rects
 }
 
-/** A slot's second voice: where its words sit and each character's advance, to cut to at any frame. */
-internal data class BandVoice(val layout: BandVoiceLayout, val advances: Map<Char, Float>) {
+/** A slot's second voice: where its words sit and how wide a run of them is, to cut to at any frame. */
+internal class BandVoice(val layout: BandVoiceLayout, private val runWidth: (String) -> Float) {
     /** The rectangles for [shown] — the part of the slot's text the player draws this frame. */
-    fun rectsFor(shown: String): List<Rect> =
-        secondVoiceRects(layout.copy(lines = shown.split('\n'))) { c -> advances[c] ?: 0f }
+    fun rectsFor(shown: String): List<Rect> = secondVoiceRuns(layout.copy(lines = shown.split('\n')), runWidth)
 }
 
 /**

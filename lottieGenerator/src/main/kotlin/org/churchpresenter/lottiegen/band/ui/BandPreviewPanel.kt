@@ -128,7 +128,8 @@ private fun Stage(
         }
         val composition by rememberLottieComposition(jsonString) { LottieCompositionSpec.JsonString(jsonString) }
         // The typewriter and the ticker are the player's to drive; the preview drives them the same way.
-        val textMotion = rememberPreviewTextMotion(viewModel.config, viewModel.timeline, jsonString)
+        val grouped = rememberTextGrouping(jsonString)
+        val textMotion = rememberPreviewTextMotion(viewModel.config, viewModel.timeline, jsonString, grouped)
         val progress by animateLottieCompositionAsState(
             composition = composition, isPlaying = isPlaying, iterations = Int.MAX_VALUE,
         )
@@ -136,7 +137,6 @@ private fun Stage(
         val shown = if (isPlaying) progress else seekValue
         // Compottie keeps the first progress lambda it is given, so it must read state, not a value.
         val currentShown by rememberUpdatedState(shown)
-        val grouped = rememberTextGrouping(jsonString)
         composition?.let {
             Image(
                 painter = rememberShapedLottiePainter(

@@ -37,9 +37,9 @@ enum class TextShaping(val key: String) {
  * what Lottie has no field for; other players skip it — and decides, for a player, whether to
  * pass Compottie's `enableTextGrouping`.
  *
- * Both ways of measuring a line still sum per-letter widths (Compottie's own line splitter and
- * the band player's wrap), so a shaped line in a script like Tamil comes out a little narrower
- * than measured: it breaks early, never overflows.
+ * Compottie still measures a whole line letter by letter, so it would break a shaped line early
+ * and centre it off to the left. The band and the generator's band preview lay their own lines
+ * out instead (see [ShapedLines]); a lower-third style still gets Compottie's placement.
  */
 object LottieTextShaping {
     const val METADATA_KEY = "cp"
