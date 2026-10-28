@@ -247,8 +247,7 @@ class SongFileParser {
                 background = background,
                 lowerThirdBackground = lowerThirdBackground,
                 textOverrides = textOverrides,
-                skippedSections = arrangement.skippedSections,
-                chorusRepeat = arrangement.chorusRepeat,
+                sectionOrder = arrangement.sectionOrder,
                 notes = arrangement.notes,
                 extraHeader = extraHeader,
             ).withTranslations(extraTranslations)

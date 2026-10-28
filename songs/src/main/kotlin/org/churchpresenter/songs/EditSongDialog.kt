@@ -50,6 +50,8 @@ import org.churchpresenter.sharedui.composables.PaneTab
 import org.churchpresenter.sharedui.composables.PaneTabRow
 import org.churchpresenter.strings.generated.resources.song_pane_output
 import org.churchpresenter.strings.generated.resources.song_chords
+import org.churchpresenter.strings.generated.resources.song_pane_in_order
+import org.churchpresenter.settings.operatorSongSettings
 
 /** The Background button's slot: the app draws `:profiles`' `SongBackgroundButton` in it. */
 typealias SongBackgroundButtonSlot = @Composable (SongBackgroundButtonState) -> Unit
@@ -102,7 +104,7 @@ fun EditSongDialog(
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberCenteredDialogState(mainWindowState, 1120.dp, 760.dp),
+        state = rememberCenteredDialogState(mainWindowState, 1280.dp, 820.dp),
         title = if (isNewSong) stringResource(Res.string.new_song) else stringResource(Res.string.edit_song),
         resizable = true
     ) {
@@ -184,6 +186,10 @@ fun EditSongContent(
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
+    val repeatChorus = appSettings?.operatorSongSettings()?.autoRepeatChorus ?: false
+    val sections = rememberBuiltOffEventThread(state.lyrics.text, repeatChorus, null) {
+        editSongSectionsOf(state.lyrics.text, repeatChorus)
+    }
     val duplicates = remember(existingSongs) { SongDuplicateIndex(existingSongs) }
     val isDuplicate = remember(duplicates, state.number, state.title, state.songbook) {
         state.isDuplicateIn(duplicates)
@@ -227,9 +233,13 @@ fun EditSongContent(
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                     VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    EditSongRightPane(state, showChords, appSettings)
+                    EditSongOrderColumn(state, sections)
+                    VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    EditSongRightPane(state, sections, showChords, appSettings)
                 }
 
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                EditSongComments(notes = state.notes, onNotesChange = { state.notes = it })
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                 EditSongFooter(
@@ -254,15 +264,20 @@ fun EditSongContent(
 private fun rememberSongStats(text: String): SongStats =
     rememberBuiltOffEventThread(text, null, null) { songStatsOf(buildPreviewSections(text, showChords = false)) }
 
-/** The two views of the open pane on the right: as the outputs show it, and as the band reads it. */
-private enum class RightPane { OUTPUT, CHORDS }
+/** The views on the right: as the outputs show it, as the band reads it, and in the order it plays. */
+private enum class RightPane { OUTPUT, CHORDS, IN_ORDER }
 
 /**
  * The right-hand pane: the Output and Chords tabs, or the chord preview alone where the editor was
  * opened without the settings the outputs draw by.
  */
 @Composable
-private fun EditSongRightPane(state: EditSongState, showChords: Boolean, appSettings: AppSettings?) {
+private fun EditSongRightPane(
+    state: EditSongState,
+    sections: EditSongSections,
+    showChords: Boolean,
+    appSettings: AppSettings?,
+) {
     val paneModifier = Modifier.width(RIGHT_PANE_WIDTH).fillMaxHeight()
     if (appSettings == null) {
         EditSongChordPreview(state, showChords, paneModifier)
@@ -281,10 +296,16 @@ private fun EditSongRightPane(state: EditSongState, showChords: Boolean, appSett
                 pane == RightPane.CHORDS,
                 Modifier.testTag(RIGHT_PANE_CHORDS_TAG),
             ) { pane = RightPane.CHORDS }
+            PaneTab(
+                stringResource(Res.string.song_pane_in_order),
+                pane == RightPane.IN_ORDER,
+                Modifier.testTag(RIGHT_PANE_IN_ORDER_TAG),
+            ) { pane = RightPane.IN_ORDER }
         }
         when (pane) {
             RightPane.OUTPUT -> EditSongOutputPane(state, appSettings, Modifier.weight(1f).fillMaxWidth())
             RightPane.CHORDS -> EditSongChordPreview(state, showChords, Modifier.weight(1f).fillMaxWidth())
+            RightPane.IN_ORDER -> EditSongOrderPreview(state, sections, Modifier.weight(1f).fillMaxWidth())
         }
     }
 }
@@ -294,6 +315,7 @@ private val RIGHT_PANE_WIDTH = 452.dp
 /** Test handles for the right pane's two tabs. */
 internal const val RIGHT_PANE_OUTPUT_TAG = "song_editor_pane_output"
 internal const val RIGHT_PANE_CHORDS_TAG = "song_editor_pane_chords"
+internal const val RIGHT_PANE_IN_ORDER_TAG = "song_editor_pane_in_order"
 
 /** The open pane as the band reads it, with the key, transposition and chord palette. */
 @Composable

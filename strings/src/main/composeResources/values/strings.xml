@@ -1931,13 +1931,25 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Song Title Slide</string>
-    <string name="song_section_sung">Sing %1$s</string>
-    <string name="song_chorus_repeat">Chorus</string>
-    <string name="song_chorus_repeat_settings">As in Settings</string>
-    <string name="song_chorus_repeat_on">After every verse</string>
-    <string name="song_chorus_repeat_off">As written</string>
-    <string name="song_notes">Notes</string>
-    <string name="song_notes_placeholder">Notes for whoever runs this song (not shown on screen)</string>
+    <string name="song_order">Order</string>
+    <string name="song_order_default">Default</string>
+    <string name="song_order_custom">Custom</string>
+    <string name="song_order_presets">Presets</string>
+    <string name="song_order_add_section">Add section</string>
+    <string name="song_order_unused">unused</string>
+    <string name="song_order_slides">%1$d slides</string>
+    <string name="song_order_remove">Remove %1$s</string>
+    <string name="song_order_not_in_lyrics">Not in lyrics</string>
+    <string name="song_order_repeat">Repeat</string>
+    <string name="song_order_hint">Drag the sections in Order to reorder them. A section can appear more than once. Remove them all and the song plays in its default order.</string>
+    <string name="song_order_preset_chorus_each">Chorus after each verse</string>
+    <string name="song_order_preset_start_chorus">Start with chorus</string>
+    <string name="song_order_preset_double_chorus">End with double chorus</string>
+    <string name="song_order_preset_bridge">Bridge before last chorus</string>
+    <string name="song_pane_in_order">In order</string>
+    <string name="song_comments">Comments</string>
+    <string name="song_comments_hint">For your team only, never shown on screen</string>
+    <string name="song_comments_placeholder">Key changes, who leads, cues for the band…</string>
     <string name="show_song_number_before_title">Show song number before title</string>
 
     <!-- Stage Monitor Settings -->

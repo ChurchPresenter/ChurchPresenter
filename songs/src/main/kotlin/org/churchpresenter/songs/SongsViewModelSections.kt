@@ -28,8 +28,8 @@ fun SongsViewModel.getLyricSections(): List<LyricSection> {
  *  state, so it can be used with freshly-edited content that hasn't round-tripped through
  *  the (async) catalog reload yet, e.g. right after [updateSong] returns. */
 fun SongsViewModel.getLyricSections(song: SongItem): List<LyricSection> {
-    // Split primary lyrics into sections. What the song leaves out and whether it repeats its
-    // chorus are decided once, from the primary, and applied alike to every language, so the
+    // Split primary lyrics into sections. The order they are sung in is decided once, from the
+    // primary, and applied alike to every language, so the
     // groups the languages are paired by below still line up.
     val primarySlides = lyricSlidesOf(song.lyrics, song.title, song.number)
     val plan = sectionPlanOf(song, primarySlides)
@@ -62,9 +62,8 @@ fun SongsViewModel.getLyricSections(song: SongItem): List<LyricSection> {
         }
     }
 
-    // Mark the last section sung so the presenter can show end-of-song indicator — the last one
-    // written when the song leaves every one out — and stamp the song's own background onto every
-    // section, since the presenter only ever sees a section.
+    // Mark the last section sung so the presenter can show end-of-song indicator, and stamp the
+    // song's own background onto every section, since the presenter only ever sees a section.
     val lastSung = sections.indexOfLast { !it.skipped }.takeIf { it >= 0 } ?: sections.lastIndex
     return sections.mapIndexed { index, section ->
         (if (index == lastSung) section.copy(isLastSection = true) else section)
@@ -212,8 +211,8 @@ internal fun numberSlides(sections: List<LyricSection>): List<LyricSection> =
  * section that was written exactly where it was written.
  *
  * A hymnal writes the chorus once and expects it sung after every verse, which is what
- * `SongSettings.autoRepeatChorus` turns on and why it defaults on — unless the song's own
- * [ChorusRepeat] says otherwise. A verse the song leaves out collects no chorus. With it off the sections are
+ * `SongSettings.autoRepeatChorus` turns on and why it defaults on — unless the song has an order
+ * of its own (`SongItem.sectionOrder`), which is sung exactly as it says. With it off the sections are
  * presented as authored -- the only way to express a chorus placed before verse 1, or after
  * verse 2 only, or written out in full at each repeat.
  *
@@ -245,14 +244,11 @@ internal fun repeatChorusAfterVerses(groups: List<List<LyricSection>>): List<Lyr
     groups.forEachIndexed { index, group ->
         if (isChorusGroup(group)) precedingChorus = group
         result.addAll(group)
-        // A verse the song leaves out is not sung, so neither is a chorus after it.
-        if (!singsTheChorusAfterwards(group) || group.first().skipped) return@forEachIndexed
+        if (!singsTheChorusAfterwards(group)) return@forEachIndexed
         // Already followed by a chorus as written — repeating it here would show it twice.
         if (groups.getOrNull(index + 1)?.let { isChorusGroup(it) } == true) return@forEachIndexed
         val chorus = precedingChorus ?: groups.drop(index + 1).firstOrNull { isChorusGroup(it) }
-        // The repeat is not a written section of its own, so it carries no key to be skipped by:
-        // it is left out with the chorus it repeats.
-        if (chorus != null) result.addAll(chorus.map { it.copy(sectionKey = "") })
+        if (chorus != null) result.addAll(chorus)
     }
 
     return result

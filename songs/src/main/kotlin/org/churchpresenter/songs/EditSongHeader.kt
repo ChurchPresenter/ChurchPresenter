@@ -45,8 +45,10 @@ import org.churchpresenter.strings.generated.resources.Res
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.platform.testTag
 import org.churchpresenter.sharedui.composables.tabMovesFocus
-import org.churchpresenter.strings.generated.resources.song_notes
-import org.churchpresenter.strings.generated.resources.song_notes_placeholder
+import org.churchpresenter.strings.generated.resources.song_comments
+import org.churchpresenter.strings.generated.resources.song_comments_hint
+import org.churchpresenter.strings.generated.resources.song_comments_placeholder
+import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.strings.generated.resources.author
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.ccli_number
@@ -88,7 +90,6 @@ internal fun EditSongMetadata(
     ) {
         EditSongTitleRow(state, names, songbooks, isVisible)
         EditSongDetailsRow(state, tuning)
-        NotesCard(notes = state.notes, onNotesChange = { state.notes = it })
         if (isDuplicate) {
             Text(
                 text = stringResource(Res.string.duplicate_song_error),
@@ -256,24 +257,38 @@ private fun RowScope.FieldCard(
 }
 
 /**
- * The song's notes, the full width under the details: for the operator, never presented. Up to
+ * The song's comments, the full width under the editor: for the team, never presented. Up to
  * three lines show; Tab leaves the field rather than typing into it.
  */
 @Composable
-private fun NotesCard(notes: String, onNotesChange: (String) -> Unit) {
+internal fun EditSongComments(notes: String, onNotesChange: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
-            .padding(horizontal = 11.dp, vertical = 6.dp),
-        verticalArrangement = Arrangement.spacedBy(1.dp),
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(horizontal = 18.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        CardLabel(stringResource(Res.string.song_notes))
-        Box {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CardLabel(stringResource(Res.string.song_comments))
+            Text(
+                text = stringResource(Res.string.song_comments_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
+                .padding(horizontal = 11.dp, vertical = 8.dp),
+        ) {
             if (notes.isEmpty()) {
                 Text(
-                    text = stringResource(Res.string.song_notes_placeholder),
+                    text = stringResource(Res.string.song_comments_placeholder),
                     style = fieldValueStyle(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 )
@@ -281,7 +296,7 @@ private fun NotesCard(notes: String, onNotesChange: (String) -> Unit) {
             BasicTextField(
                 value = notes,
                 onValueChange = onNotesChange,
-                minLines = 1,
+                minLines = 2,
                 maxLines = NOTES_MAX_LINES,
                 textStyle = fieldValueStyle(),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
@@ -291,10 +306,10 @@ private fun NotesCard(notes: String, onNotesChange: (String) -> Unit) {
     }
 }
 
-/** How many lines of notes the editor shows before the field scrolls. */
+/** How many lines of comments the editor shows before the field scrolls. */
 private const val NOTES_MAX_LINES = 3
 
-/** The editor's notes field. */
+/** The editor's comments field. */
 const val EDIT_SONG_NOTES_TAG = "editSongNotes"
 
 /**

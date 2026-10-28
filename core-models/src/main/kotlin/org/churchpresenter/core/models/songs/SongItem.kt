@@ -31,12 +31,11 @@ data class SongItem(
     /** This song's own font, size and colours over the profile's — none by default. */
     val textOverrides: SongTextOverrides = SongTextOverrides(),
     /**
-     * The written sections this song leaves out, by [sectionKeysOf] key — the verses of a hymn the
-     * church does not sing. They stay in the list, dimmed, but navigation steps over them.
+     * The order this song's sections are sung in, by [sectionKeysOf] key; a key may appear more
+     * than once. Empty sings the song as written, with the chorus repeated as Settings say. A
+     * written section the order leaves out stays in the list, dimmed, but navigation steps over it.
      */
-    val skippedSections: List<String> = emptyList(),
-    /** Whether this song repeats its chorus after each verse, or leaves that to the setting. */
-    val chorusRepeat: ChorusRepeat = ChorusRepeat.SETTINGS,
+    val sectionOrder: List<String> = emptyList(),
     /** The operator's notes on this song, shown above its lyrics; never presented. */
     val notes: String = "",
     /**

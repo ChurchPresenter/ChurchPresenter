@@ -62,6 +62,7 @@ import org.churchpresenter.strings.generated.resources.song_insert_slide_break
 import org.churchpresenter.strings.generated.resources.song_language_name_hint
 import org.churchpresenter.strings.generated.resources.song_pane_lyrics
 import org.churchpresenter.strings.generated.resources.song_syntax
+import org.churchpresenter.strings.generated.resources.song_order_hint
 import org.churchpresenter.strings.generated.resources.song_syntax_chord_hint
 import org.churchpresenter.strings.generated.resources.song_translation_label
 import org.churchpresenter.strings.generated.resources.song_insert_second_voice
@@ -126,6 +127,12 @@ internal fun EditSongEditorColumn(
             visualTransformation = rememberLyricsHighlight(),
         )
 
+        Text(
+            text = stringResource(Res.string.song_order_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 8.dp),
+        )
         SyntaxLegend(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp))
     }
 }
