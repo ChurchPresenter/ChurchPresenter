@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
 import org.churchpresenter.sharedui.composables.BottomAlignedText
 import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
@@ -109,15 +108,22 @@ internal fun Modifier.captionCard(s: STTSettings, background: Color, inTextBox: 
 
 /**
  * One side's caption text the way the profile presents it: a crawling ticker, an RSVP flash of the
- * newest words, a pop-on block that fills and clears, or the rolling transcript.
+ * newest words, a pop-on block that fills and clears, or the rolling transcript. [inTextBox] when it
+ * is in a text box of its own, which the page's bottom edge does not hold.
  */
 @Composable
-internal fun CaptionLines(text: AnnotatedString, style: TextStyle, s: STTSettings, modifier: Modifier = Modifier) {
+internal fun CaptionLines(
+    text: CaptionShown,
+    style: TextStyle,
+    s: STTSettings,
+    modifier: Modifier = Modifier,
+    inTextBox: Boolean = false,
+) {
     when (s.reading.style) {
-        CAPTION_STYLE_TICKER -> CaptionTicker(text, style, s.outline, s.reading.tickerSpeed, modifier)
+        CAPTION_STYLE_TICKER -> CaptionTicker(text.text, style, s.outline, s.reading.tickerSpeed, modifier)
         CAPTION_STYLE_RSVP -> BottomAlignedText(
             // Already cut down to the flash on screen -- see withReadingAids
-            text = text,
+            text = text.text,
             style = style,
             maxLines = RSVP_MAX_LINES,
             modifier = modifier,
@@ -125,7 +131,7 @@ internal fun CaptionLines(text: AnnotatedString, style: TextStyle, s: STTSetting
             outline = s.outline,
         )
         else -> BottomAlignedText(
-            text = text,
+            text = text.text,
             style = style,
             maxLines = s.maxLines,
             modifier = modifier,
@@ -133,9 +139,19 @@ internal fun CaptionLines(text: AnnotatedString, style: TextStyle, s: STTSetting
             outline = s.outline,
             rollUpMillis = s.reading.rollUpMillisOrOff(),
             paged = s.reading.style == CAPTION_STYLE_POP_ON,
+            keepFrom = text.keepFrom,
+            layoutText = text.layoutText,
+            slideWhenGrowing = !inTextBox && s.isHeldByBottom,
+            onSafeCut = text.onSafeCut,
         )
     }
 }
+
+/** True when the captions sit at the bottom of the page, so their card grows upward. */
+private val STTSettings.isHeldByBottom: Boolean
+    get() = sttPositionToAlignment(position).let {
+        it == Alignment.BottomStart || it == Alignment.BottomCenter || it == Alignment.BottomEnd
+    }
 
 /** A flash of a word or three fits one line at caption sizes; a long one may take a second. */
 private const val RSVP_MAX_LINES = 2
