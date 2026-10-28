@@ -96,13 +96,13 @@ class ScreenCardAloneTest {
 
     @Test
     fun everyControlHandsBackItsScreen() = card(ScreenRowState(screen, link, folder)) { swap ->
-        onNodeWithContentDescription("Show its name on the TV").performClick()
+        onNodeWithContentDescription("Show its name on the screen").performClick()
         onNodeWithContentDescription("What the TV shows. Click to see it larger.").performClick()
         onNodeWithText("Close").performClick()
         // The same screen with a new report, then new actions: the card follows both.
         swap(row(link.copy(status = PlayerMessage.Status(cec = CecState.UNAVAILABLE))), actions())
         swap(ScreenRowState(screen, link, folder), actions("second"))
-        onNodeWithContentDescription("Show its name on the TV").performClick()
+        onNodeWithContentDescription("Show its name on the screen").performClick()
         onNodeWithContentDescription("Wipe content").performClick()
         onNodeWithText("Wipe").performClick()
         // Factory reset is in Screen settings, and still asks.

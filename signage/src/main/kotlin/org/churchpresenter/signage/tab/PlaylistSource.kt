@@ -3,6 +3,7 @@ package org.churchpresenter.signage.tab
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.churchpresenter.signage.core.MediaKind
+import org.churchpresenter.signage.core.PlaylistItem
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.Locale
@@ -42,7 +43,8 @@ data class FilePlaylist(
 /**
  * A web page or a stream, opened by the screen itself; it needs the internet there, and shows the
  * idle card when it cannot load. A web page reloads every [refreshMinutes], never when 0, and is shown
- * at 30 frames a second rather than 15 when [smooth].
+ * at 30 frames a second rather than 15 when [smooth]. An [interactive] page is used on a touchscreen
+ * instead, such as an event sign-up: it neither reloads nor counts frames.
  */
 @Serializable
 @SerialName("link")
@@ -53,13 +55,38 @@ data class LinkPlaylist(
     val kind: LinkKind,
     val refreshMinutes: Int = 0,
     val smooth: Boolean = false,
+    val interactive: InteractiveLink? = null,
 ) : AddedPlaylist {
     companion object {
         /** Frames a second for a page that moves smoothly; the screen's own default is 15. */
         const val SMOOTH_FPS = 30
 
-        fun create(name: String, url: String, kind: LinkKind, refreshMinutes: Int, smooth: Boolean = false) =
-            LinkPlaylist("link:${UUID.randomUUID()}", name, url, kind, refreshMinutes, smooth)
+        fun create(link: NewLink) = with(link) {
+            val id = "link:${UUID.randomUUID()}"
+            LinkPlaylist(id, name.trim(), url.trim(), kind, refreshMinutes, smooth, interactive)
+        }
+    }
+}
+
+/**
+ * How a web page people use on a touchscreen behaves: it starts over, keeping nothing anyone typed,
+ * after [idleResetSeconds] without a touch, and may go only to its own site and [allowedHosts].
+ */
+@Serializable
+data class InteractiveLink(
+    val idleResetSeconds: Int = DEFAULT_IDLE_RESET_SECONDS,
+    val allowedHosts: List<String> = emptyList(),
+) {
+    companion object {
+        const val DEFAULT_IDLE_RESET_SECONDS = 90
+
+        /** In [allowedHosts]: the page may go to any site. */
+        const val ANY_HOST = PlaylistItem.ANY_HOST
+        val IDLE_RESET_SECONDS = 15..1800
+
+        /** Sites typed one after another, split at commas, spaces or new lines. */
+        fun hostsFrom(typed: String): List<String> =
+            typed.split(',', ' ', '\n').map(String::trim).filter(String::isNotEmpty)
     }
 }
 
@@ -95,6 +122,7 @@ data class NewLink(
     val kind: LinkKind,
     val refreshMinutes: Int = 0,
     val smooth: Boolean = false,
+    val interactive: InteractiveLink? = null,
 )
 
 /** What a link is: a page the screen draws, or a video stream it plays. */

@@ -1,5 +1,10 @@
 package org.churchpresenter.theme.components
 
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
@@ -391,5 +396,36 @@ class SettingsTextFieldBehaviorTest {
         // Both variants share one borderColor, but they are separate BasicTextField call sites and
         // the bare one is what the inline settings rows use.
         assertTrue(topEdgeHas("bare", accent), "the bare variant must show focus as well")
+    }
+
+    @Test
+    fun `a field holding its cursor types where the cursor is, with or without a label`() = runComposeUiTest {
+        // Text with the cursor at its end: what is typed carries on from there, not from the start.
+        var labelled by mutableStateOf(TextFieldValue("https://www.", TextRange(12)))
+        var plain by mutableStateOf(TextFieldValue("ab", TextRange(2)))
+        setContent {
+            MaterialTheme {
+                Column {
+                    SettingsTextField(
+                        value = labelled,
+                        onValueChange = { labelled = it },
+                        label = "Address",
+                        placeholder = { Text("an address") },
+                        supportingText = { Text("A web page") },
+                        modifier = Modifier.testTag("labelled"),
+                    )
+                    SettingsTextField(
+                        value = plain,
+                        onValueChange = { plain = it },
+                        modifier = Modifier.testTag("plain"),
+                    )
+                }
+            }
+        }
+        onNodeWithText("A web page").assertExists("its supporting text shows")
+        onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("labelled"))).performTextInput("example.org")
+        assertEquals("https://www.example.org", labelled.text)
+        onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("plain"))).performTextInput("c")
+        assertEquals("abc", plain.text)
     }
 }

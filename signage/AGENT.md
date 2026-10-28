@@ -21,8 +21,9 @@ gives the same `SignageHub` to both.
 | `SignageStore.kt` | The tab's settings (`signage.json`: the added playlists, and each screen's plan with its weekly schedule) in the signage folder, and the hash cache (`hashes.json`) in this computer's own |
 | `ManifestBuilder.kt` | One screen's `Manifest` and the file behind each hash; a link only for a player that listed its kind |
 | `WebTestVerdict.kt` | What a screen's web page test says: smooth, normal motion only, or too slow — decided here, so the thresholds change without a player update |
-| `ScreenControls.kt` | What the tab does to screens without the folder: pairing, rename, identify, wipe, previews, player updates |
-| `SignageTab.kt`, `SignageScreenCards.kt`, `SignageFolderPanel.kt`, `SignageDialogs.kt`, `LinkDialog.kt`, `RotationDialog.kt`, `ScheduleDialog.kt`, `ScreenPreview.kt`, `ScreenUpdateLine.kt`, `ScreenHealthLine.kt`, `WebTestLine.kt` | The tab: each screen's card with its live picture, health, update line, schedule and web page test, the folder panel with its Add menu, the dialogs. `SignageDesktop` (in `SignageTab.kt`) is the file manager, folder chooser and Trash it uses |
+| `ScreenControls.kt` | What the tab does to screens without the folder: pairing, rename, identify, wipe, previews, updates (`ScreenPower`: restart, shut down, the TV) |
+| `ScreenSettingsDialog.kt`, `ScreenSettingsEdit.kt`, `ScreenSettingsWiring.kt` | A screen's settings: name and mounting, the touchscreen (corner gesture, which touch page, PIN), and Device (address, details, health, TV, restart, shut down, factory reset); what it opens on and saves |
+| `SignageTab.kt`, `SignageScreenCards.kt`, `SignageFolderPanel.kt`, `SignageDialogs.kt`, `LinkDialog.kt`, `RotationDialog.kt`, `ScheduleDialog.kt`, `ScreenPreview.kt`, `ScreenUpdateLine.kt`, `ScreenHealthLine.kt`, `WebTestLine.kt` | The tab: each screen's card with its live picture, what it shows, its update line and button, schedule and web page test (its details and health are in its settings; the card shows health only under strain), the folder panel with its Add menu, the dialogs. `SignageDesktop` (in `SignageTab.kt`) is the file manager, folder chooser and Trash it uses |
 
 ## Rules
 
@@ -39,6 +40,14 @@ gives the same `SignageHub` to both.
 - **A link goes only to a player that listed its kind** (`stream`, `web`): an older player cannot
   decode one. What each screen can do is remembered after it disconnects (`KnownFeatures`), so a
   screen away for a moment is not sent a manifest without its links.
+- **A touch page goes only to a player that lists `interactive`**, as a link only goes to one that
+  lists its kind; a rotation stops on it. A PIN is kept and sent only as `KioskPin.hash`, made on
+  the store's IO thread (it is slow on purpose); set, changed and removed here, never on the screen.
+- **Restart, shut down, the TV and Update's system step go only to a player that lists `power`,
+  `tv` and `system_update`.** Update sends `UpdateSystem` when no newer player is offered.
+- **The tab uses the app's own controls** (`:theme`'s `RaisedButton`, `KeyButton`, `SettingsTextField`;
+  `RingedGhostButton` here for the quiet actions, which draws the focus ring `GhostButton` does not).
+  A settings field draws its caption apart from its box: tests find the box by its tag (`field(tag)`).
 - **Removing an added playlist never touches a file**, and sends any screen that played it back to
   the first playlist; it also leaves every rotation, and a screen's schedule stays.
 - **The setup may be shared.** The signage folder (`AppSettings.signageStorageDirectory`, blank for

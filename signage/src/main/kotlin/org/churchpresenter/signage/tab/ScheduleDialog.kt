@@ -1,5 +1,7 @@
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +20,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -119,7 +119,7 @@ internal fun ScheduleDialog(
                         onRemove = { drafts.removeAt(index) },
                     )
                 }
-                TextButton(onClick = { drafts += newDraft(playlists) }) {
+                RingedGhostButton(onClick = { drafts += newDraft(playlists) }) {
                     Icon(rememberVectorPainter(Icons.Filled.Add), null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(stringResource(Res.string.signage_schedule_add))
@@ -132,7 +132,7 @@ internal fun ScheduleDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            RaisedButton(
                 onClick = {
                     onSave(drafts.mapNotNull { it.block() })
                     onDismiss()
@@ -140,7 +140,7 @@ internal fun ScheduleDialog(
                 enabled = valid,
             ) { Text(stringResource(Res.string.save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { RingedGhostButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
@@ -194,13 +194,13 @@ private fun TimeBlock(
 
 @Composable
 private fun TimeField(label: String, value: String, onChange: (String) -> Unit) {
-    OutlinedTextField(
+    SettingsTextField(
         value = value,
         onValueChange = onChange,
-        label = { Text(label) },
-        placeholder = { Text(TIME_PLACEHOLDER) },
+        label = label,
+        placeholder = { Text(TIME_PLACEHOLDER, style = MaterialTheme.typography.bodySmall) },
         isError = runCatching { ClockTime.parse(value.trim()) }.isFailure,
-        singleLine = true,
+        fillWidth = true,
         modifier = Modifier.width(TIME_WIDTH),
     )
 }
