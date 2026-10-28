@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -75,14 +74,26 @@ class SignageLinksScreenshotTest {
 
     @Test
     fun `a web page link moving smoothly`() = captureComponent(SECTION, "link_web", rootIndex = 1, drive = {
-        onAllNodesWithText("Address")[0].performTextInput(WEATHER)
+        field(LINK_ADDRESS_TAG).performTextInput(WEATHER)
         onNodeWithText("Smooth motion").performClick()
         waitForIdle()
     }) { LinkDialog(onAdd = {}, onDismiss = {}) }
 
     @Test
+    fun `a touch page kept to its own sites`() = captureComponent(SECTION, "link_touch", rootIndex = 1) {
+        LinkDialog(
+            onAdd = {},
+            onDismiss = {},
+            initial = LinkPlaylist(
+                "link:2", "Fall retreat sign-up", "https://www.churchcenter.com/registrations/events/123",
+                LinkKind.WEB, interactive = InteractiveLink(120, listOf("pay.churchcenter.com")),
+            ),
+        )
+    }
+
+    @Test
     fun `a stream link`() = captureComponent(SECTION, "link_stream", rootIndex = 1, drive = {
-        onAllNodesWithText("Address")[0].performTextInput(LIVE)
+        field(LINK_ADDRESS_TAG).performTextInput(LIVE)
         waitForIdle()
     }) { LinkDialog(onAdd = {}, onDismiss = {}) }
 

@@ -38,6 +38,60 @@ class STTManagerParsingTest {
     private fun STTManager.translation(json: String) = transcript.handleTranslationUpdate(JSONObject(json))
     private fun STTManager.highlighting(json: String) = transcript.handleWordHighlightingUpdate(JSONObject(json))
 
+    // ── Starting afresh ──────────────────────────────────────────────────────────
+
+    @Test
+    fun `a window keeps its ids through an append, a front trim and a correction`() {
+        val stt = manager()
+
+        stt.translateWindow(1 to "alpha", 2 to "bravo")
+        stt.translateWindow(1 to "alpha", 2 to "bravo", 3 to "charlie")
+        stt.translateWindow(2 to "bravo", 3 to "charlie", 4 to "delta")
+        stt.translateWindow(2 to "bravo", 3 to "CHARLIE", 4 to "delta")
+
+        assertEquals(listOf(2, 3, 4), stt.translationSegments.map { it.id })
+        assertEquals(listOf("bravo", "CHARLIE", "delta"), stt.translationSegments.map { it.text })
+        assertEquals(0, stt.translationEpoch.value, "none of these is a fresh start")
+    }
+
+    @Test
+    fun `a new session starts the translation afresh, the first one does not`() {
+        val stt = manager()
+
+        stt.translateWindow(1 to "alpha", sessionId = "s-one")
+        stt.translateWindow(1 to "alpha", 2 to "bravo", sessionId = "s-one")
+        assertEquals(0, stt.translationEpoch.value)
+
+        stt.translateWindow(1 to "kilo", sessionId = "s-two")
+        assertEquals(1, stt.translationEpoch.value)
+        assertEquals(0, stt.transcriptEpoch.value, "the transcript has had no update of its own yet")
+    }
+
+    @Test
+    fun `the first lists after a connect start afresh, the updates after them do not`() {
+        val stt = manager()
+        stt.translateWindow(1 to "alpha")
+
+        stt.transcript.expectResync()
+        stt.translateWindow(1 to "kilo", 2 to "lima")
+        stt.translateWindow(1 to "kilo", 2 to "lima", 3 to "mike")
+        stt.transcribe("hello")
+
+        assertEquals(1, stt.translationEpoch.value)
+        assertEquals(1, stt.transcriptEpoch.value)
+    }
+
+    @Test
+    fun `an in-progress update alone does not use up the fresh start`() {
+        val stt = manager()
+
+        stt.transcript.expectResync()
+        stt.translateInProgress("still")
+        stt.translateWindow(1 to "kilo")
+
+        assertEquals(1, stt.translationEpoch.value)
+    }
+
     // ── Transcription ────────────────────────────────────────────────────────────
 
     @Test

@@ -69,6 +69,23 @@ class STTManagerSocketEventsTest {
     }
 
     @Test
+    fun `the lists sent after a connect start the captions afresh`() {
+        val stt = manager()
+        stt.translateWindow(1 to "alpha")
+
+        stt.event(Socket.EVENT_CONNECT)
+        stt.event(
+            "translation_update",
+            JSONObject("""{"segments":[{"id":1,"translated_text":"kilo"}],"target_language_name":"Lima"}"""),
+        )
+
+        // The language is the update's last write: once it shows, the list is no longer being replaced
+        awaitUntil("the resent list to be taken in") { stt.translationLanguage.value == "Lima" }
+        assertEquals("kilo", stt.translationSegments.single().text)
+        assertEquals(1, stt.translationEpoch.value)
+    }
+
+    @Test
     fun `a dropped connection says it is reconnecting`() {
         val stt = manager()
         stt.applyConnected()

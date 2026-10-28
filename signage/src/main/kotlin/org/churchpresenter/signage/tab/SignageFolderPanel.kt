@@ -1,5 +1,6 @@
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,9 +27,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,10 +103,10 @@ internal fun SignageFolderPanel(state: SignageFolderState, actions: FolderAction
                 overflow = TextOverflow.Ellipsis,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = {
+                KeyButton(onClick = {
                     scope.launch(Dispatchers.IO) { actions.desktop.openFolder(state.folder) }
                 }) { Text(stringResource(Res.string.signage_open_folder)) }
-                OutlinedButton(onClick = {
+                KeyButton(onClick = {
                     scope.launch {
                         actions.desktop.fileChooser
                             .chooseSingle(state.folder, emptyList(), chooseTitle, selectDirectory = true)
@@ -148,7 +147,7 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
     val chooseTitle = stringResource(Res.string.signage_choose_file)
     val filterName = stringResource(Res.string.signage_pictures_and_videos)
     Box {
-        TextButton(onClick = { open = true }) {
+        RingedGhostButton(onClick = { open = true }) {
             Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(stringResource(Res.string.signage_add))

@@ -62,6 +62,20 @@ fun STTManager.translate(vararg texts: String) {
     transcript.handleTranslationUpdate(JSONObject("""{"segments":[${segments.joinToString(",")}]}"""))
 }
 
+/**
+ * The translation window as `translation_update` delivers it, with the ids given: what a sequence
+ * of appends, front trims and in-place corrections looks like to the client. With [sessionId] the
+ * payload names its STT session, as the server's do.
+ */
+@Suppress("MaxLineLength")
+fun STTManager.translateWindow(vararg entries: Pair<Int, String>, sessionId: String? = null) {
+    val segments = entries.map { (id, text) ->
+        """{"id":$id,"timestamp":"","translated_text":"$text","start":$id.0,"end":${id + 1}.0,"completed":true}"""
+    }
+    val session = sessionId?.let { ""","session_id":"$it"""" }.orEmpty()
+    transcript.handleTranslationUpdate(JSONObject("""{"segments":[${segments.joinToString(",")}]$session}"""))
+}
+
 fun STTManager.translateInProgress(text: String) {
     // As with [transcribeInProgress], no "segments" key — it would clear the translated captions.
     transcript.handleTranslationUpdate(JSONObject("""{"in_progress":{"translated_text":"$text"}}"""))

@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.STTSettings
@@ -38,9 +37,9 @@ internal fun CaptionCard(
  */
 @Composable
 internal fun BothLanguages(
-    first: AnnotatedString,
+    first: CaptionShown,
     firstStyle: TextStyle,
-    second: AnnotatedString,
+    second: CaptionShown,
     secondStyle: TextStyle,
     s: STTSettings,
     cardBg: Color,
@@ -48,7 +47,7 @@ internal fun BothLanguages(
     alignment: Alignment,
 ) {
     val separate = s.separateLanguageBoxes
-    val part: @Composable (AnnotatedString, TextStyle, Modifier) -> Unit = { text, style, modifier ->
+    val part: @Composable (CaptionShown, TextStyle, Modifier) -> Unit = { text, style, modifier ->
         if (separate) {
             CaptionCard(s, cardBg, modifier) { CaptionLines(text, style, s, Modifier.fillMaxWidth()) }
         } else {

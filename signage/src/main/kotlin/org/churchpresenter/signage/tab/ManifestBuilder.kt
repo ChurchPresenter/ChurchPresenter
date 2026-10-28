@@ -117,10 +117,21 @@ private fun linkItem(link: LinkPlaylist, features: Collection<String>): Playlist
     }
     if (feature !in features) return null
     val web = kind == MediaKind.WEB
+    val touch = link.interactive?.takeIf { web }
+    // Drawn as a picture nobody can use by a screen that cannot show it in a browser: not sent there.
+    if (touch != null) return interactiveItem(link.url, touch).takeIf { Features.INTERACTIVE in features }
     val refreshMs = (link.refreshMinutes * MS_PER_MINUTE).takeIf { web && it > 0 }
     val maxFps = LinkPlaylist.SMOOTH_FPS.takeIf { web && link.smooth }
     return PlaylistItem(kind = kind, url = link.url, refreshMs = refreshMs, maxFps = maxFps)
 }
+
+private fun interactiveItem(url: String, touch: InteractiveLink) = PlaylistItem(
+    kind = MediaKind.WEB,
+    url = url,
+    interactive = true,
+    idleResetMs = touch.idleResetSeconds.coerceIn(InteractiveLink.IDLE_RESET_SECONDS) * MS_PER_SECOND,
+    allowedHosts = touch.allowedHosts,
+)
 
 private const val MS_PER_SECOND = 1_000L
 
@@ -135,4 +146,7 @@ private fun screenSettings(screen: PairedScreen, settings: SignageSettings) = Sc
     orientation = settings.plan(screen.id).orientation,
     width = screen.screenWidth,
     height = screen.screenHeight,
+    kioskPinHash = settings.plan(screen.id).kioskPinHash,
+    kioskGesture = settings.plan(screen.id).kioskGesture,
+    kioskGesturePlaylistId = settings.plan(screen.id).kioskGesturePlaylistId,
 )

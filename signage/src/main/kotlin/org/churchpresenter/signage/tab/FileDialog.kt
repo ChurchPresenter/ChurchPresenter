@@ -1,15 +1,15 @@
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.churchpresenter.strings.generated.resources.Res
@@ -49,19 +50,19 @@ internal fun FileDialog(
         title = { Text(stringResource(Res.string.signage_file_title_edit)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.width(DIALOG_WIDTH)) {
-                OutlinedTextField(
+                SettingsTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(Res.string.signage_link_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    label = stringResource(Res.string.signage_link_name),
+                    fillWidth = true,
+                    modifier = Modifier.fillMaxWidth().testTag(FILE_NAME_TAG),
                 )
                 Text(
                     file.toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                OutlinedButton(
+                KeyButton(
                     onClick = {
                         scope.launch {
                             val filters = listOf(picturesAndVideosFilter(filterName))
@@ -74,7 +75,7 @@ internal fun FileDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            RaisedButton(
                 onClick = {
                     onSave(name, file)
                     onDismiss()
@@ -82,8 +83,10 @@ internal fun FileDialog(
                 enabled = name.isNotBlank(),
             ) { Text(stringResource(Res.string.save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { RingedGhostButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
+/** The name field, whose caption is drawn apart from the box a test types into. */
+internal const val FILE_NAME_TAG = "signage-file-name"
 private val DIALOG_WIDTH = 480.dp
