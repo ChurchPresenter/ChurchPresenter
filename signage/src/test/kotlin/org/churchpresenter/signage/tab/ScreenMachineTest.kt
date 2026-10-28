@@ -57,9 +57,14 @@ class ScreenMachineTest {
     @Test
     fun updateWithNoNewerPlayerUpdatesTheMachineAlone() = runBlocking {
         world.pairScreen(version = "99.0.0", features = listOf(Features.SYSTEM_UPDATE))
+        world.pairScreen(id = "player-2", version = "99.0.0", features = listOf(Features.WIPE), load = false)
         val update = with(world) { expect { it as? ServerMessage.UpdateSystem } }
+        // One that cannot, and one not connected, are left alone; the one that can is updated.
+        controller.controls.update("player-2")
+        controller.controls.update("away")
         controller.controls.update("player-1")
         update.await()
+        assertFalse(Features.SYSTEM_UPDATE in hub.links.links.value.getValue("player-2").features)
     }
 
     @Test

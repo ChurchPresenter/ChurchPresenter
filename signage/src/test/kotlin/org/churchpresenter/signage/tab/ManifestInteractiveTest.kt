@@ -98,5 +98,16 @@ class ManifestInteractiveTest {
         assertEquals("https://www.", withoutPrefixTwice("https://www."))
         assertFalse(isLinkAddress("https://www."), "the prefill alone is no address")
         assertTrue(isLinkAddress("https://www.example.org"))
+        assertEquals("rtsp://camera/live", withoutPrefixTwice("rtsp://camera/live"), "no prefill, left as typed")
+        assertEquals("abchttps://www.", withoutPrefixTwice("abchttps://www."), "no whole address: left as typed")
+    }
+
+    @Test
+    fun whatIsNoAddressSaysSoAndIsGuessedAWebPage() {
+        listOf("example.org", "https://", "mailto:office@example.org", "http://bad host/", "")
+            .forEach { assertFalse(isLinkAddress(it), it) }
+        // Half-typed or odd addresses are taken for web pages, never for streams.
+        listOf("example.org", "mailto:office@example.org", "https://www.", "http://bad host/")
+            .forEach { assertEquals(LinkKind.WEB, LinkKind.guess(it), it) }
     }
 }

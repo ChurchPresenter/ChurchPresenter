@@ -1,5 +1,7 @@
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.signage.core.CecState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -131,6 +133,20 @@ class TouchSettingsUiTest {
     }
 
     @Test
+    fun typingANewPinAfterRemoveSetsItInstead() = runComposeUiTest {
+        val saved = mutableListOf<ScreenSettingsEdit>()
+        settings(ScreenSettingsInput("Lobby", Orientation.LANDSCAPE, hasPin = true, touchPlaylists = pages), saved)
+        onNodeWithText("Remove PIN").performClick()
+        field(SCREEN_PIN_TAG).performTextInput("9876")
+        onNodeWithText("A PIN is set", substring = true).assertExists()
+        onNodeWithText("MOUNTED").performClick()
+        waitForIdle()
+        onNodeWithText("Portrait").performClick()
+        onNodeWithText("Save").performClick()
+        assertEquals(PinChange.Set("9876") to Orientation.PORTRAIT, saved.single().pin to saved.single().orientation)
+    }
+
+    @Test
     fun withNoTouchPageItSaysSo() = runComposeUiTest {
         settings(ScreenSettingsInput("Lobby", Orientation.LANDSCAPE), mutableListOf())
         onNodeWithText("No playlist has a touch page yet.").assertExists()
@@ -175,6 +191,23 @@ class TouchSettingsUiTest {
         row = row.copy(link = link.copy(update = progress))
         waitForIdle()
         onNodeWithText("Update").assertDoesNotExist()
+    }
+
+    @Test
+    fun theDeviceSaysWhereItIsAndWhatItKnows() = runComposeUiTest {
+        var row by mutableStateOf(ScreenRowState(screen, null, folder))
+        show { Column { DeviceDetails(row) } }
+        onNodeWithText("Not connected").assertExists()
+        onNodeWithText("Player 26.0.41", substring = true).assertExists()
+        val status = PlayerMessage.Status(lastSyncMs = 1, freeDiskBytes = 3_000_000_000, cec = CecState.UNAVAILABLE)
+        row = ScreenRowState(screen, ScreenLink("::ffff:10.0.0.5", 0, "v", session = 1, status = status), folder)
+        waitForIdle()
+        onNodeWithText("Address: 10.0.0.5").assertExists()
+        onNodeWithText("3.0 GB free", substring = true).assertExists()
+        onNodeWithText("No TV on/off").assertExists()
+        row = row.copy(link = row.link!!.copy(status = status.copy(cec = CecState.UNKNOWN)))
+        waitForIdle()
+        onNodeWithText("No TV on/off").assertDoesNotExist()
     }
 
     @Test
