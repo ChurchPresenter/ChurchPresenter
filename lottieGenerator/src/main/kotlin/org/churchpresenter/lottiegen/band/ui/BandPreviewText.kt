@@ -1,6 +1,16 @@
 package org.churchpresenter.lottiegen.band.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.TextMeasurer as ComposeTextMeasurer
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import io.github.alexzhirkevich.compottie.ExperimentalCompottieApi
@@ -15,13 +25,16 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.lottiegen.band.BandLayerNames
+import org.churchpresenter.lottiegen.band.BandTextAlign
 import org.churchpresenter.lottiegen.band.BandTimeline
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.SlotBox
 import org.churchpresenter.lottiegen.band.TextAnimation
 import org.churchpresenter.lottiegen.band.computeSlots
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
+import org.churchpresenter.lottiegen.lottie.ShapedLines
 import org.churchpresenter.lottiegen.lottie.TextMeasurer
+import org.churchpresenter.lottiegen.render.GeneratorLottieFonts
 import kotlin.math.ceil
 
 private const val TICKER_GAP = "    "
@@ -32,8 +45,12 @@ private const val REGULAR_WEIGHT = 400
  * The run-time text motions, done to the preview the way the app's player does them to the live
  * verse. The file carries `TYPEWRITER`, `TYPEWRITER_WORDS` and `TICKER` as still text — the
  * Compottie runtime has no text range selectors — and the player reveals or scrolls the string
- * itself, so the preview must too or those three look like nothing at all. Null for the keyframed
- * motions, which the file plays on its own.
+ * itself, so the preview must too or those three look like nothing at all.
+ *
+ * Text drawn as whole lines ([grouped], see `TextShaping`) is laid out here too, as the app's band
+ * lays it out: wrapped and placed by its shaped widths (see [ShapedLines]).
+ *
+ * Null for letter-by-letter text with a keyframed motion, which the file plays on its own.
  */
 @OptIn(ExperimentalCompottieApi::class)
 @Composable
@@ -41,8 +58,11 @@ internal fun rememberPreviewTextMotion(
     cfg: BibleLottieGenConfig,
     timeline: BandTimeline,
     jsonString: String,
+    grouped: Boolean,
 ): LottieDynamicProperties? {
-    if (!cfg.textAnimation.isRuntimeDriven) return null
+    val ticker = cfg.textAnimation == TextAnimation.TICKER
+    val placesLines = grouped && !ticker
+    if (!cfg.textAnimation.isRuntimeDriven && !placesLines) return null
     val slots = computeSlots(cfg)
     val docs = readTextDocuments(jsonString)
     val previews = listOf(
@@ -55,22 +75,96 @@ internal fun rememberPreviewTextMotion(
         val (text, reference) = previews[i]
         listOf(textLayer to text, refLayer to reference)
     }.toMap()
-    val ticker = TickerSetup(cfg, timeline, samples, docs)
-    return rememberLottieDynamicProperties(cfg, timeline, jsonString) {
-        if (cfg.textAnimation == TextAnimation.TICKER) {
+    val tickerSetup = TickerSetup(cfg, timeline, samples, docs)
+    val measurer = rememberPreviewMeasurer()
+    val placed = remember(cfg, jsonString, placesLines, measurer) {
+        if (placesLines) placeSamples(cfg, samples, docs, measurer) else emptyMap()
+    }
+    return rememberLottieDynamicProperties(cfg, timeline, jsonString, placed) {
+        if (ticker) {
             slots.slots.forEachIndexed { i, _ ->
                 val (textLayer, refLayer) = BandLayerNames.SLOT_LAYER_NAMES[i]
-                tickerLayer(textLayer, slots.slots[i].text, ticker)
+                tickerLayer(textLayer, slots.slots[i].text, tickerSetup)
                 // The reference rides at the head of the ticker line; its own slot goes quiet.
                 textLayer(refLayer) { text { "" } }
             }
         } else {
             samples.keys.forEach { name ->
-                textLayer(name) { text { original -> revealedText(cfg.textAnimation, timeline, original, frame) } }
+                val lines = placed[name]
+                textLayer(name) {
+                    text { original ->
+                        val shown = lines?.text ?: original
+                        val typed = if (cfg.textAnimation.isRuntimeDriven) {
+                            revealedText(cfg.textAnimation, timeline, shown, frame)
+                        } else {
+                            shown
+                        }
+                        if (lines == null) typed else ShapedLines.applyPadding(typed, lines.pads)
+                    }
+                    if (lines != null) {
+                        // Drawn from the box's left edge in a box too wide to wrap again; the
+                        // padding puts each line where its justification would.
+                        textJustify { TextJustify.Left }
+                        size { original -> Size(NO_WRAP_WIDTH, original.height) }
+                    }
+                }
             }
         }
     }
 }
+
+/** A sample laid out as whole lines: its wrapped lines and what goes before each. */
+private class PlacedSample(val text: String, val pads: List<String>)
+
+/**
+ * Each slot's sample wrapped and placed by its shaped widths, at the size the file fitted it to
+ * and in the face the preview draws whole lines with.
+ */
+private fun placeSamples(
+    cfg: BibleLottieGenConfig,
+    samples: Map<String, String>,
+    docs: Map<String, TextDocument>,
+    measurer: ComposeTextMeasurer,
+): Map<String, PlacedSample> {
+    val slots = computeSlots(cfg)
+    val boxes = slots.slots.flatMapIndexed { i, slot ->
+        val (textLayer, refLayer) = BandLayerNames.SLOT_LAYER_NAMES[i]
+        listOf(textLayer to slot.text, refLayer to slot.reference)
+    }.toMap()
+    val fontStyle = if (cfg.previewItalic) FontStyle.Italic else FontStyle.Normal
+    val font = GeneratorLottieFonts.load(cfg.previewFontFamily, cfg.previewBold, fontStyle)
+    return samples.mapNotNull { (name, sample) ->
+        val doc = docs[name] ?: return@mapNotNull null
+        val box = boxes[name] ?: return@mapNotNull null
+        val style = TextStyle(
+            fontFamily = FontFamily(font),
+            fontWeight = if (cfg.previewBold) FontWeight.Bold else FontWeight.Normal,
+            fontStyle = fontStyle,
+            fontSize = doc.fontSize.sp,
+        )
+        val shaped = ShapedLines.measuredBy(measurer, style)
+        val isReference = BandLayerNames.SLOT_LAYER_NAMES.any { it.second == name }
+        val align = if (isReference) cfg.referenceAlign else cfg.textAlign
+        val alignment = when (align) {
+            BandTextAlign.LEFT -> 0f
+            BandTextAlign.RIGHT -> 1f
+            else -> 0.5f
+        }
+        val width = box.w.toFloat()
+        val lines = if (isReference) listOf(sample) else shaped.wrap(sample, width)
+        name to PlacedSample(lines.joinToString("\n"), lines.map { shaped.padding(it, width, alignment) })
+    }.toMap()
+}
+
+/** A measurer at density 1, so a size in template pixels measures in template pixels — as the band's. */
+@Composable
+private fun rememberPreviewMeasurer(): ComposeTextMeasurer {
+    val resolver = LocalFontFamilyResolver.current
+    return remember(resolver) { ComposeTextMeasurer(resolver, Density(1f), LayoutDirection.Ltr) }
+}
+
+/** The box width whole-line text is handed, so the player never wraps a padded line again. */
+private const val NO_WRAP_WIDTH = 1_000_000f
 
 /** What every ticker line is built and timed from. */
 private class TickerSetup(
