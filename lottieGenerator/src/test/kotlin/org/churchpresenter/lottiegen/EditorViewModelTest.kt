@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import org.churchpresenter.lottiegen.editor.BuildRegistrar
 import org.churchpresenter.lottiegen.editor.EditorViewModel
 import org.churchpresenter.lottiegen.editor.ExportIssue
 import org.churchpresenter.lottiegen.editor.NewElementKind
@@ -68,8 +69,11 @@ class EditorViewModelTest {
         StyleSpec(id = id, name = name).addElement(NewElementKind.RECT)
 
     /** An editor whose initial render has completed (construction schedules it with no delay). */
-    private fun editor(initial: StyleSpec = spec()): EditorViewModel {
-        val vm = EditorViewModel(scope, initial)
+    private fun editor(
+        initial: StyleSpec = spec(),
+        locateStylesDir: () -> File? = BuildRegistrar::locateStylesDir,
+    ): EditorViewModel {
+        val vm = EditorViewModel(scope, initial, locateStylesDir = locateStylesDir)
         waitFor("the initial render") { vm.generatedJson != null }
         return vm
     }
@@ -315,7 +319,8 @@ class EditorViewModelTest {
     @Test
     fun `registering outside a checkout, or into a folder without a registry, reports nothing written`() {
         assertNull(EditorViewModel(scope, spec(), locateStylesDir = { null }).registerIntoBuild())
-        val vm = EditorViewModel(scope, spec(), locateStylesDir = { File(temp, "missing") })
+        // After the initial render: it ends by writing the status, and would clear the error
+        val vm = editor(locateStylesDir = { File(temp, "missing") })
         assertNull(vm.registerIntoBuild())
         assertTrue(vm.statusText.startsWith("Error: "), vm.statusText)
     }
