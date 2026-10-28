@@ -14,12 +14,15 @@ import java.util.Calendar
 // at the point its tasks have to be configured.
 
 // The CycloneDX plugin's own Jackson carries two high advisories (GHSA-p6pp-m3f8-5c89,
-// GHSA-7hhh-6rmp-j9qf) until 2.22.3; hold the build classpath at the fixed release. Build-time
-// only -- nothing here reaches the app.
+// GHSA-7hhh-6rmp-j9qf) until 2.22.3, and its Guava (through Maven's resolver) an unbounded
+// allocation on deserialization until 33.7.2; hold the build classpath at the fixed releases.
+// Build-time only -- nothing here reaches the app.
 buildscript {
     dependencies {
         constraints {
             classpath(libs.jackson.core)
+            // Guava publishes only `-jre` and `-android` releases; the plugin asks for `-jre`.
+            classpath("${libs.guava.get()}-jre")
         }
     }
 }
