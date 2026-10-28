@@ -104,7 +104,10 @@ class ShapedLinesTest {
             val pad = shaped.padding(line, box, 0.5f)
             val left = drawn(pad + line) - drawn(line)
             val wanted = (box - drawn(line)) / 2f
-            assertTrue(abs(left - wanted) < 2f, "'$line' starts at $left, wanted $wanted")
+            // The padding lands within half a hair space, and these widths are measured at the
+            // real size, rounded to whole pixels; a tenth of an em covers both on every platform.
+            // Placed letter by letter, the line was off by far more than that.
+            assertTrue(abs(left - wanted) < style.fontSize.value / 10f, "'$line' starts at $left, wanted $wanted")
         }
     }
 
