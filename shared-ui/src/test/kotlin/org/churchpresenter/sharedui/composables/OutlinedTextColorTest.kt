@@ -37,6 +37,15 @@ class OutlinedTextColorTest {
     }
 
     @Test
+    fun `a transparent run stays unstroked, as it is only there to be laid out`() {
+        val typing = buildAnnotatedString {
+            withStyle(SpanStyle(color = Color.White)) { append("Grace and ") }
+            withStyle(SpanStyle(color = Color.Transparent)) { append("peace") }
+        }
+        assertEquals(listOf(Color.Red, Color.Transparent), typing.inColor(Color.Red).spanStyles.map { it.item.color })
+    }
+
+    @Test
     fun `text with no coloured runs is handed back as it is`() {
         val plain = buildAnnotatedString { append("Grace and peace") }
         assertSame(plain, plain.inColor(Color.Red))

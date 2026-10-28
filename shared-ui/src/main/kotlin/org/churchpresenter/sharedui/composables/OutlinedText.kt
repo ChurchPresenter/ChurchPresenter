@@ -177,7 +177,10 @@ internal fun AnnotatedString.inColor(color: Color): AnnotatedString {
     if (spanStyles.none { it.item.color.isSpecified }) return this
     return AnnotatedString(
         text = text,
-        spanStyles = spanStyles.map { range -> range.copy(item = range.item.copy(color = color)) },
+        // A transparent run is laid out but not seen -- see `brokenAsLaidOut` -- so it stays unstroked
+        spanStyles = spanStyles.map { range ->
+            if (range.item.color == Color.Transparent) range else range.copy(item = range.item.copy(color = color))
+        },
         paragraphStyles = paragraphStyles,
     )
 }

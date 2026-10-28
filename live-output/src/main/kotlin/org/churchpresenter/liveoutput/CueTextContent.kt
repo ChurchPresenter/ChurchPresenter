@@ -193,6 +193,8 @@ internal fun CaptionsCue(surface: OutputSurface) {
         inProgressTranslation = stt.inProgressTranslation.value,
         highlightedWords = stt.highlightedWords,
         sttSettings = surface.appSettings.sttSettings,
+        transcriptEpoch = stt.transcriptEpoch.value,
+        translationEpoch = stt.translationEpoch.value,
         // Only the preview tile has drawn captions in its output's role.
         outputRole = if (surface.kind == OutputSurfaceKind.PREVIEW) {
             surface.outputRole

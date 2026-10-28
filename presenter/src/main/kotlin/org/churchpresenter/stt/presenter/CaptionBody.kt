@@ -9,8 +9,59 @@ import java.text.BreakIterator
 /**
  * One side of the captions as it is drawn: the [text], the [units] the dimming steps over (oldest
  * first), and where the in-progress words start, or null when none are shown.
+ *
+ * [spans] are the units' ranges in the segments joined by single spaces (see `captionText`), and
+ * [pieces] the segments with words, in that same joined text: together they say where a place in a
+ * segment is drawn, and which segment a place in the [text] belongs to.
  */
-internal data class CaptionBody(val text: String, val units: List<IntRange>, val inProgressStart: Int?)
+internal data class CaptionBody(
+    val text: String,
+    val units: List<IntRange>,
+    val inProgressStart: Int?,
+    val spans: List<IntRange> = emptyList(),
+    val pieces: List<CaptionPiece> = emptyList(),
+)
+
+/** A segment with words, where it starts in the segments joined by spaces and how long it is. */
+internal data class CaptionPiece(val id: Int, val start: Int, val length: Int)
+
+/** A place in a segment: [offset] characters into the words of the segment [id]. */
+internal data class SegmentPoint(val id: Int, val offset: Int)
+
+/** Where the place [joined] in the joined segments is in the [CaptionBody.text]. */
+internal fun CaptionBody.shapedAt(joined: Int): Int {
+    for (i in spans.indices) {
+        val span = spans[i]
+        // Between two units -- the space after one -- is where the next one starts
+        if (joined < span.first) return units[i].first
+        if (joined <= span.last + 1) return units[i].first + (joined - span.first)
+    }
+    return text.length
+}
+
+/** Where the place [shaped] in the [CaptionBody.text] is in the joined segments. */
+internal fun CaptionBody.joinedAt(shaped: Int): Int {
+    for (i in units.indices) {
+        val unit = units[i]
+        if (shaped < unit.first) return spans[i].first
+        if (shaped <= unit.last + 1) return spans[i].first + (shaped - unit.first)
+    }
+    return spans.lastOrNull()?.let { it.last + 1 } ?: 0
+}
+
+/** The segment the place [shaped] in the text falls in, or null when it is in the in-progress words. */
+internal fun CaptionBody.pointAt(shaped: Int): SegmentPoint? {
+    val joined = joinedAt(shaped)
+    val piece = pieces.lastOrNull { it.start <= joined } ?: return null
+    return when {
+        joined - piece.start <= piece.length -> SegmentPoint(piece.id, joined - piece.start)
+        else -> pieces.firstOrNull { it.start > joined }?.let { SegmentPoint(it.id, 0) }
+    }
+}
+
+/** Where the newest [count] segments start in the text: 0 when there are no more than that, or [count] is 0. */
+internal fun CaptionBody.newestStart(count: Int): Int =
+    if (count <= 0 || pieces.size <= count) 0 else shapedAt(pieces[pieces.size - count].start)
 
 /**
  * The caption [segments] and the [inProgress] words after them, shaped the way [reading] asks: each
@@ -24,7 +75,10 @@ internal fun captionBody(
     reading: CaptionReading,
     allCaps: Boolean,
 ): CaptionBody {
-    val pieces = segments.mapNotNull { normalizeSegmentText(it.text).takeIf(String::isNotEmpty) }
+    val worded = segments.mapNotNull { segment ->
+        normalizeSegmentText(segment.text).takeIf(String::isNotEmpty)?.let { segment.id to it }
+    }
+    val pieces = worded.map { it.second }
     val progress = inProgress?.let(::normalizeSegmentText)?.takeIf(String::isNotEmpty)
     val joined = (pieces + listOfNotNull(progress)).joinToString(" ")
     val progressStart = progress?.let { joined.length - it.length }
@@ -52,7 +106,9 @@ internal fun captionBody(
     }
     var shaped = wrapAtChars(text.toString(), reading.maxCharsPerLine)
     if (allCaps) shaped = upperCaseInPlace(shaped)
-    return CaptionBody(shaped, units, newProgressStart)
+    var at = 0
+    val placed = worded.map { (id, piece) -> CaptionPiece(id, at, piece.length).also { at += piece.length + 1 } }
+    return CaptionBody(shaped, units, newProgressStart, spans, placed)
 }
 
 /** Each piece's range in the pieces joined by single spaces. */
