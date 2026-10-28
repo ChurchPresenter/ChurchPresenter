@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -115,7 +114,9 @@ internal fun LargePreviewDialog(screenName: String, preview: PlayerMessage.Previ
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.signage_preview_close)) } },
+        confirmButton = {
+            RingedGhostButton(onClick = onDismiss) { Text(stringResource(Res.string.signage_preview_close)) }
+        },
     )
 }
 

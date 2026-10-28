@@ -2,6 +2,7 @@
 
 package org.churchpresenter.signage.tab
 
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -102,8 +103,10 @@ class SignageTabTest {
                 errors = listOf("Disk nearly full"),
             ),
         )
+        waitForText("Disk nearly full")
+        // The rest is in the screen's settings, which follow what it reports while they are open.
+        onNodeWithContentDescription("Screen settings").performClick()
         waitForText("TV on/off works", substring = true)
-        onNodeWithText("Disk nearly full").assertExists()
         onNodeWithText("Player 26.0.8", substring = true).assertExists()
         hub.links.reported("player-1", PlayerMessage.Status(cec = CecState.UNAVAILABLE))
         waitForText("No TV on/off", substring = true)
@@ -114,7 +117,7 @@ class SignageTabTest {
         connected()
         hub.links.closed("player-1", hub.links.links.value.getValue("player-1").session)
         waitForText("Offline", substring = true)
-        onNodeWithContentDescription("Show its name on the TV").assertIsNotEnabled()
+        onNodeWithContentDescription("Show its name on the screen").assertIsNotEnabled()
         onNodeWithContentDescription("Wipe content").assertIsNotEnabled()
     }
 
@@ -122,7 +125,7 @@ class SignageTabTest {
     fun identifyingShowsTheNameOnTheTv() = signageTab(world) {
         connected()
         val identify = with(world) { world.scope.expect { it as? ServerMessage.Identify } }
-        onNodeWithContentDescription("Show its name on the TV").assertIsEnabled().performClick()
+        onNodeWithContentDescription("Show its name on the screen").assertIsEnabled().performClick()
         runBlocking { identify.await() }
     }
 
@@ -262,8 +265,17 @@ class SignageTabTest {
             hub.registry.pair(PendingScreen("pi", "1", Platform.LINUX_ARM64, "26.0.8", 3840, 2160, "a"), "Hall")
             hub.registry.pair(PendingScreen("win", "2", Platform.WINDOWS_X64, "26.0.8", 1920, 1080, "b"), "Office")
         }
-        waitForText("Linux (ARM)", substring = true)
-        onNodeWithText("Windows PC", substring = true).assertExists()
+        waitForText("Hall")
+        waitForText("Office")
+        // What each runs on is in its settings.
+        val named = (0..1).flatMap { card ->
+            onAllNodesWithContentDescription("Screen settings")[card].performClick()
+            val found = listOf("Linux (ARM)", "Windows PC")
+                .filter { onAllNodesWithText(it, substring = true).fetchSemanticsNodes().isNotEmpty() }
+            onNodeWithText("Cancel").performClick()
+            found
+        }
+        assertEquals(setOf("Linux (ARM)", "Windows PC"), named.toSet())
         // Neither is connected, so neither offers to wipe, preview or update.
         onAllNodesWithText("Offline", substring = true).fetchSemanticsNodes().size.let { assertEquals(2, it) }
         onNodeWithText("No picture right now").assertDoesNotExist()

@@ -345,6 +345,21 @@
 - `server-ui/…/InstanceLinkDialog.kt`, `server-ui/…/InstanceLinkToast.kt`
 - `server-ui/…/ConnectionStatusRow.kt`
 
+## Lobby Signage
+- **Screens that keep playing after hours** — a Raspberry Pi or mini PC behind a lobby TV plays pictures, videos, streams and web pages from a signage folder on a weekly schedule, with ChurchPresenter's PC switched off. Show the **Signage** tab from the tab bar's menu to pair screens and run them.
+- **Touch pages** — a web page people use on a touchscreen, such as an event sign-up or check-in, shown full screen with its own on-screen keyboard. It keeps nothing anyone types: the browser starts on an empty profile in memory, deleted after the page goes untouched for the time set on the link, and never offers to save a password, address or card. The page can be kept to its own site and the ones listed. Holding the screen's corner switches to the touch page and back, optionally behind a PIN set in ChurchPresenter.
+- **Run each screen from its settings** — its address and health, TV on and off over HDMI, restart, shut down and factory reset; **Update** updates the whole screen, Chromium and the system included, from the signed release.
+
+**Source locations:**
+- `signage/` (the `:signage` Gradle module) — `SignageTab.kt`, `SignageScreenCards.kt`,
+  `ScreenSettingsDialog.kt` with `ScreenSettingsEdit.kt` and `ScreenSettingsWiring.kt`, `LinkDialog.kt`,
+  `ScreenUpdateLine.kt`, `SignageController.kt`, `ScreenControls.kt` (pairing, updates, power and the
+  TV), `ManifestBuilder.kt`
+- `signage-core/` — the wire types (a copy of the player's own), `KioskPin.kt` and the hub of paired
+  screens
+- `:server`'s `SignageRoutes.kt`
+- The player itself: the `ChurchPresenter/ChurchPresenter-Signage` repository
+
 ## Broadcast Integrations
 - **Blackmagic ATEM** — upload animated lower thirds straight into the ATEM media pool and drive the upstream key automatically when you go live — one tap, perfectly timed.
 - **OBS Studio** — automatically switch OBS scenes as your content changes, with per-content-type scene mapping.

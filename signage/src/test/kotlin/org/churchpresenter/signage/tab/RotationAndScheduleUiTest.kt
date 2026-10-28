@@ -58,7 +58,7 @@ class RotationAndScheduleUiTest {
         var saved: Pair<String, List<RotationStep>>? = null
         show { RotationDialog(entries, null, { name, steps -> saved = name to steps }, {}) }
         onNodeWithText("Save").assertIsNotEnabled()
-        onAllNodesWithText("Name")[0].performTextInput("Evenings")
+        field(ROTATION_NAME_TAG).performTextInput("Evenings")
         onNodeWithText("Save").assertIsNotEnabled()
         onNodeWithText("Add step").performClick()
         onNodeWithText("Add step").performClick()
@@ -145,7 +145,12 @@ class RotationAndScheduleUiTest {
         val scheduled = mutableListOf<List<ScheduleBlock>>()
         val actions = ScreenActions({ _, _ -> }, {}, { _, _ -> }, {}, onSchedule = { _, blocks -> scheduled += blocks })
         show { ScreenCard(ScreenRowState(screen, link, folder), actions) }
+        // A screen in good health keeps its health off the card: it is in its settings.
+        onNodeWithText("Processor 23% · Memory 61% · 54 °C · up 3 d").assertDoesNotExist()
+        onNodeWithContentDescription("Screen settings").performClick()
         onNodeWithText("Processor 23% · Memory 61% · 54 °C · up 3 d").assertExists()
+        onNodeWithText("Address: 10.0.0.5").assertExists()
+        onNodeWithText("Cancel").performClick()
         onNodeWithText("drawn in software", substring = true).assertExists()
         onNodeWithText("On a schedule: 2 times a week").assertExists()
         onNodeWithContentDescription("Schedule").performClick()

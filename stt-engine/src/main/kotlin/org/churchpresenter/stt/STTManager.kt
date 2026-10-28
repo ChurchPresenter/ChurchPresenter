@@ -46,6 +46,8 @@ class STTManager {
     val translationSegments: List<STTSegment> get() = transcript.translationSegments
     val inProgressTranslation: State<String> get() = transcript.inProgressTranslation
     val translationLanguage: State<String> get() = transcript.translationLanguage
+    val transcriptEpoch: State<Int> get() = transcript.transcriptEpoch
+    val translationEpoch: State<Int> get() = transcript.translationEpoch
     val highlightedWords: List<HighlightedWord> get() = transcript.highlightedWords
     val wordHighlightingEnabled: State<Boolean> get() = transcript.wordHighlightingEnabled
 
@@ -138,7 +140,11 @@ class STTManager {
     internal fun onSocketEvent(event: String, args: Array<out Any?>, url: String, emit: (String) -> Unit) {
         when (event) {
             Socket.EVENT_CONNECT -> {
-                scope.launch { applyConnected() }
+                scope.launch {
+                    applyConnected()
+                    // On the same thread as the updates, and before the replies to what is asked next
+                    transcript.expectResync()
+                }
                 // Request initial data
                 emit("request_all_entries")
                 emit("request_all_translation_entries")

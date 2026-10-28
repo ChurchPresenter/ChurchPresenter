@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.churchpresenter.signage.core.KioskPin
 import org.churchpresenter.signage.core.Orientation
 import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.hub.PairedScreen
@@ -86,6 +87,7 @@ class SignageController(
 
     /** Approving, declining, renaming, identifying, previewing and updating screens: what needs no folder. */
     val controls = ScreenControls(hub, scope)
+    val power = ScreenPower(hub)
 
     private var job: Job? = null
     private var hashed: List<HashedPlaylist> = emptyList()
@@ -242,11 +244,10 @@ class AddedPlaylistEdits internal constructor(
 ) {
     /** Adds [link] as a playlist. */
     fun addLink(link: NewLink) = update({}) { settings ->
-        val playlist = with(link) { LinkPlaylist.create(name.trim(), url.trim(), kind, refreshMinutes, smooth) }
-        settings.copy(added = settings.added + playlist)
+        settings.copy(added = settings.added + LinkPlaylist.create(link))
     }
 
-    /** Replaces link [id]'s name, address, kind, refresh and smoothness with [link]'s; it keeps its id. */
+    /** Replaces link [id]'s name, address, kind, refresh, smoothness and touch use with [link]'s; it keeps its id. */
     fun updateLink(id: String, link: NewLink) = update({}) { settings ->
         settings.copy(
             added = settings.added.map { entry ->
@@ -257,6 +258,7 @@ class AddedPlaylistEdits internal constructor(
                         kind = link.kind,
                         refreshMinutes = link.refreshMinutes,
                         smooth = link.smooth,
+                        interactive = link.interactive,
                     )
                 } else {
                     entry
@@ -321,6 +323,17 @@ class ScreenPlans internal constructor(
     /** How [screenId] is mounted; it turns everything it shows to match. */
     fun setOrientation(screenId: String, orientation: Orientation) =
         change(screenId) { it.copy(orientation = orientation) }
+
+    /** Whether holding [screenId]'s corner switches to a touch page, and to which playlist (null: the first). */
+    fun setGesture(screenId: String, on: Boolean, playlistId: String?) =
+        change(screenId) { it.copy(kioskGesture = on, kioskGesturePlaylistId = playlistId) }
+
+    /**
+     * The PIN [screenId]'s touch gesture asks for, or none when [pin] is null. Only its hash is kept
+     * and sent to the screen; the hashing is slow on purpose, so it happens with the save, off the UI.
+     */
+    fun setKioskPin(screenId: String, pin: String?) =
+        change(screenId) { it.copy(kioskPinHash = pin?.takeIf(KioskPin::isValid)?.let(KioskPin::hash)) }
 
     private fun change(screenId: String, edit: (ScreenPlan) -> ScreenPlan) = update({}) { settings ->
         settings.copy(screens = settings.screens + (screenId to edit(settings.plan(screenId))))

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.signage.core.Features
+import org.churchpresenter.signage.core.PowerAction
 import org.churchpresenter.signage.core.ServerMessage
 import org.churchpresenter.signage.hub.LatestRelease
 import org.churchpresenter.signage.hub.PairedScreen
@@ -55,9 +56,22 @@ class ScreenControls internal constructor(private val hub: SignageHub, private v
     fun offerFor(screen: PairedScreen, link: ScreenLink?): LatestRelease? =
         link?.let { hub.updates.offerFor(screen, it.features) }
 
-    /** Downloads the latest player build and sends it to [screenId]; its card follows the steps. */
+    /**
+     * Updates [screenId]: its machine (Chromium, mpv and every package) and, when a newer one is
+     * offered, its player, downloaded here and sent to it. Its card follows the steps.
+     */
     fun update(screenId: String) {
-        scope.launch { hub.update(screenId) }
+        scope.launch {
+            val link = hub.links.links.value[screenId]
+            val screen = hub.registry.screen(screenId)
+            // A newer player updates the machine too; without one, the machine alone.
+            val newer = screen != null && link != null && hub.updates.offerFor(screen, link.features) != null
+            when {
+                newer -> hub.update(screenId)
+                link != null && Features.SYSTEM_UPDATE in link.features ->
+                    hub.links.send(screenId, ServerMessage.UpdateSystem)
+            }
+        }
     }
 
     /**
@@ -76,5 +90,23 @@ class ScreenControls internal constructor(private val hub: SignageHub, private v
     private companion object {
         const val TAG = "Signage"
         const val LARGE_PREVIEW_WIDTH = 1280
+    }
+}
+
+/** Restarts and shuts down screens' machines, and turns their TVs on and off, for those whose player can. */
+class ScreenPower internal constructor(private val hub: SignageHub) {
+    /** Restarts or shuts down [screenId]'s machine; false when it is not connected or cannot. */
+    fun run(screenId: String, action: PowerAction): Boolean {
+        val link = hub.links.links.value[screenId] ?: return false
+        if (Features.POWER !in link.features) return false
+        Log.info("Signage", "Asking screen $screenId to ${action.name.lowercase()}")
+        return hub.links.send(screenId, ServerMessage.Power(action))
+    }
+
+    /** Turns [screenId]'s TV on or to standby now; false when it is not connected or cannot. */
+    fun tv(screenId: String, on: Boolean): Boolean {
+        val link = hub.links.links.value[screenId] ?: return false
+        if (Features.TV !in link.features) return false
+        return hub.links.send(screenId, ServerMessage.Tv(on))
     }
 }

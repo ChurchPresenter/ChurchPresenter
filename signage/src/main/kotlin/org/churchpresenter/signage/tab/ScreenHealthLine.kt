@@ -20,7 +20,11 @@ import org.jetbrains.compose.resources.stringResource
  * the warning colour. Nothing for a screen whose player sends none.
  */
 @Composable
-internal fun ScreenHealthLine(status: PlayerMessage.Status?) {
+internal fun ScreenHealthLine(
+    status: PlayerMessage.Status?,
+    /** Only a screen running hot or short of memory: the line as a warning, on the card. */
+    onlyWhenStrained: Boolean = false,
+) {
     status ?: return
     val parts = listOfNotNull(
         status.cpuPercent?.let { stringResource(Res.string.signage_health_cpu, it) },
@@ -30,6 +34,7 @@ internal fun ScreenHealthLine(status: PlayerMessage.Status?) {
     )
     if (parts.isEmpty()) return
     val strained = (status.temperatureC ?: 0.0) >= HOT_C || (status.memoryPercent ?: 0) >= FULL_PERCENT
+    if (onlyWhenStrained && !strained) return
     Text(
         parts.joinToString(" · "),
         style = MaterialTheme.typography.bodySmall,

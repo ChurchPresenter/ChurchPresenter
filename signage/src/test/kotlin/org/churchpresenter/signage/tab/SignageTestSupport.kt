@@ -1,5 +1,10 @@
 package org.churchpresenter.signage.tab
 
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -159,3 +164,7 @@ class SignedRelease(val version: String = "26.0.9") {
         bytes.inputStream().use(consume)
     }
 }
+
+/** The text box inside the field tagged [tag]: a settings field draws its caption apart from it. */
+@OptIn(ExperimentalTestApi::class)
+internal fun ComposeUiTest.field(tag: String) = onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(tag)))

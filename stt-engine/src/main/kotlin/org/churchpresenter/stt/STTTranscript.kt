@@ -2,6 +2,7 @@ package org.churchpresenter.stt
 
 import org.churchpresenter.sharedui.utils.SttClock
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
@@ -49,9 +50,32 @@ internal class STTTranscript(private val scope: CoroutineScope) {
     private val _wordHighlightingEnabled = mutableStateOf(true)
     val wordHighlightingEnabled: State<Boolean> = _wordHighlightingEnabled
 
+    /**
+     * Bumped whenever the transcript starts afresh: a new session, or the whole list sent again
+     * after a connect. Within one epoch the list only grows at its end, loses its oldest from the
+     * front, or has one segment corrected in place; across a bump it may not extend the last one.
+     */
+    private val _transcriptEpoch = mutableIntStateOf(0)
+    val transcriptEpoch: State<Int> = _transcriptEpoch
+
+    /** [transcriptEpoch] for the translation. */
+    private val _translationEpoch = mutableIntStateOf(0)
+    val translationEpoch: State<Int> = _translationEpoch
+
+    private val transcriptResync = Resync()
+    private val translationResync = Resync()
+
+    /** A connect asks for both lists whole: what comes next is a fresh start, not an edit. */
+    fun expectResync() {
+        transcriptResync.pending = true
+        translationResync.pending = true
+    }
+
     fun handleTranscriptionUpdate(data: JSONObject) {
-        applySessionId(data.stringOrNull("session_id"))
+        val session = data.stringOrNull("session_id")
+        applySessionId(session)
         data.optJSONArray("segments")?.let { array ->
+            if (transcriptResync.startsAfresh(session)) _transcriptEpoch.intValue++
             _segments.clear()
             _segments.addAll(segmentsFrom(array) { it.stringOr("text") })
             // How far into the recording STT has transcribed, as of now: the on-screen history's clock
@@ -67,8 +91,10 @@ internal class STTTranscript(private val scope: CoroutineScope) {
     }
 
     fun handleTranslationUpdate(data: JSONObject) {
-        applySessionId(data.stringOrNull("session_id"))
+        val session = data.stringOrNull("session_id")
+        applySessionId(session)
         data.optJSONArray("segments")?.let { array ->
+            if (translationResync.startsAfresh(session)) _translationEpoch.intValue++
             _translationSegments.clear()
             // STT app sends "translated_text" for translation segments
             _translationSegments.addAll(
@@ -133,6 +159,20 @@ internal class STTTranscript(private val scope: CoroutineScope) {
                 completed = seg.optBoolean("completed", true)
             )
         }
+
+    /** Whether one list's next update starts it afresh: the first after a connect, or a new session. */
+    private class Resync {
+        var pending = false
+        private var session: String? = null
+
+        fun startsAfresh(sessionId: String?): Boolean {
+            val newSession = sessionId != null && session != null && sessionId != session
+            if (sessionId != null) session = sessionId
+            val afresh = pending || newSession
+            pending = false
+            return afresh
+        }
+    }
 
     /** The enabled highlighted words in the payload; words in a disabled colour group are dropped. */
     private fun highlightedWordsFrom(json: JSONObject): List<HighlightedWord> {

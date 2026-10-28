@@ -20,6 +20,11 @@ data class SignageRelease(
     val protocolMin: Int,
     val protocolMax: Int,
     val assets: Map<Platform, ReleaseAsset>,
+    /**
+     * The release's `install.sh`, which a player's machine runs as root (`--system-only`) when Update is
+     * pressed, only if it hashes to this; null in releases from before.
+     */
+    val setup: ReleaseAsset? = null,
 ) {
     companion object {
         const val FILE = "signage-release.json"
