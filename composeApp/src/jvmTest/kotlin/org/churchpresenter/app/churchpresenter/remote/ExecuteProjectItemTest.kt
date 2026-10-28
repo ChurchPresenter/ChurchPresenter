@@ -72,6 +72,20 @@ class ExecuteProjectItemTest {
     }
 
     @Test
+    fun `a cue sent to be put live is not shown and not added`() {
+        // A cue is fired, never projected as content.
+        val recorder = ScheduleActionsRecorder()
+        val presenter = PresenterManager()
+
+        val cue = ScheduleItem.CueItem(id = "cue-1", action = "go")
+
+        executeProjectItem(cue, recorder.actions(), presenter, emptyList())
+
+        assertEquals(emptyList(), recorder.added)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
+    }
+
+    @Test
     fun `without adds keeps every other action`() {
         var cleared = 0
         val actions = ScheduleActions(clearSchedule = { cleared++ }).withoutAdds()

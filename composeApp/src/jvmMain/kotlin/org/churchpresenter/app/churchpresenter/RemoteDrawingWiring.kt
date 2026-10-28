@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.remote.RemoteDrawingShow
 import org.churchpresenter.app.churchpresenter.remote.drawingEventLabel
+import org.churchpresenter.app.churchpresenter.remote.settle
 import org.churchpresenter.server.PendingDrawingRequest
-import org.churchpresenter.server.RemoteApproval
 import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.server.remoteAccessDecision
 import org.churchpresenter.server.remoteApproval
@@ -55,28 +55,13 @@ private fun MainWindowScope.askToShowDrawing(request: PendingDrawingRequest, sho
         coroutineScope.launch { show.allow(request) }
     }
     val (title, detail) = drawingEventLabel(request.title)
-    when (val outcome = remoteApproval(
+    val outcome = remoteApproval(
         access,
         type = RemoteEventType.PROJECT,
         title = title,
         detail = detail,
         clientId = clientId,
         clientLabel = remoteClientManager.getLabel(clientId),
-    )) {
-        RemoteApproval.Reject -> request.decision.complete(false)
-        is RemoteApproval.Approve -> {
-            allow()
-            notifyRemoteActivity(outcome.notification)
-        }
-        is RemoteApproval.Ask -> {
-            val deny: () -> Unit = { request.decision.complete(false) }
-            val entry = Triple(outcome.event, allow, deny)
-            remoteEventQueue.add(entry)
-            // A device that ends before the operator answers takes its request back: the prompt goes.
-            coroutineScope.launch {
-                request.decision.await()
-                remoteEventQueue.remove(entry)
-            }
-        }
-    }
+    )
+    request.settle(outcome, allow, ::notifyRemoteActivity, remoteEventQueue, coroutineScope)
 }

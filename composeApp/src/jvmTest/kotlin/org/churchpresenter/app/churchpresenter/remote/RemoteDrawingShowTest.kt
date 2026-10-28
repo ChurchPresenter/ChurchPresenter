@@ -123,4 +123,42 @@ class RemoteDrawingShowTest {
 
         assertFalse(presenter.clearDisplayRequested.value)
     }
+
+    @Test
+    fun `a request already answered is not answered again`() = runBlocking {
+        picture("first")
+        val (request, _) = desk.ask(frame("first"))
+        request.decision.complete(false)
+
+        show.allow(request)
+
+        assertNull(presenter.drawingFrame.value, "the device withdrew it; nothing goes up")
+    }
+
+    @Test
+    fun `a later page that is not a picture leaves the last one up`() = runBlocking {
+        val first = picture("first")
+        pages["broken"] = null
+        val (request, _) = desk.ask(frame("first"))
+        show.allow(request)
+
+        show.refresh(frame("broken"))
+
+        assertSame(first.bitmap, presenter.drawingFrame.value)
+    }
+
+    @Test
+    fun `a drawing that ends while its page is decoding does not go back up`() = runBlocking {
+        val first = picture("first")
+        val (request, _) = desk.ask(frame("first"))
+        show.allow(request)
+        val ending = RemoteDrawingShow(desk, presenter, Dispatchers.Unconfined) { frame ->
+            desk.end(frame.clientId)
+            picture("late")
+        }
+
+        ending.refresh(frame("late"))
+
+        assertSame(first.bitmap, presenter.drawingFrame.value)
+    }
 }
