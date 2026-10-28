@@ -118,6 +118,9 @@ internal fun activeStageTypes(
         Presenting.CANVAS -> add(StageMonitorContentType.CANVAS)
         Presenting.QA -> add(StageMonitorContentType.QA)
         Presenting.DICTIONARY -> add(StageMonitorContentType.DICTIONARY)
+        // A remote device's drawing has no stage zone: the Pictures zone draws a picture file, and
+        // the drawing is a page for the congregation rather than a cue for the stage.
+        Presenting.DRAWING,
         Presenting.ANNOUNCEMENTS, Presenting.MESSAGE, Presenting.PROPS, Presenting.NONE -> {}
     }
     if (announcementActive) add(StageMonitorContentType.ANNOUNCEMENT_TEXT)

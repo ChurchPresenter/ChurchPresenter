@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
@@ -66,12 +67,14 @@ import org.churchpresenter.app.churchpresenter.tabs.LocalWebEngineAvailable
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.PresenterTransitionEffects
 import org.churchpresenter.liveoutput.PresenterOutputContent
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -108,6 +111,7 @@ private const val PANEL_H = 900f
 /** How far the clock moves per capture while a dialog is open: far enough for a preview to show its design. */
 private const val PANEL_TICK_MS = 3_000L
 private const val PANEL_STEP_MS = 150
+private const val PANEL_HOVER_MS = 1_500L
 
 /** Where in a lower third's run the video holds it: past the entrance, before the exit. */
 private const val LOWER_THIRD_HOLD = 0.55f
@@ -157,6 +161,8 @@ internal fun recordTour(
     startTab: String? = null,
     heading: Pair<String, String> = "The " to " Tab",
     settings: (AppSettings) -> AppSettings = { it },
+    statistics: StatisticsManager? = null,
+    companion: CompanionSatelliteViewModel? = null,
     panel: (@Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit) -> Unit)? = null,
     script: DemoTour.() -> Unit,
 ) {
@@ -170,7 +176,10 @@ internal fun recordTour(
     TestSingletons.latchToTestHome()
     // A previous tour's schedule autosave would open every recording on "Restore unsaved schedule?".
     File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp").delete()
-    val appSettings = settings(library())
+    // The Calendar folder defaults to the app data folder, under the home folder of whoever records:
+    // pinned beside the demo library so the System page never shows a personal path.
+    val calendarFolder = File(LIBRARY, "Calendar").apply { mkdirs() }
+    val appSettings = settings(library().copy(calendarStorageDirectory = calendarFolder.path))
     val width = if (panel == null) CANVAS_W else CANVAS_W + PANEL_W
     runSkikoComposeUiTest(size = Size(width, APP_H) * DENSITY, density = Density(DENSITY)) {
         var actions = ScheduleActions()
@@ -193,10 +202,12 @@ internal fun recordTour(
                                     appSettings = current,
                                     onSettingsChange = changeSettings,
                                     presenterManager = presenter,
-                                    companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                                    companionSatelliteViewModel = companion
+                                        ?: remember { CompanionSatelliteViewModel() },
                                     qaManager = QAManager(),
-                                    sttManager = STTManager(),
+                                    sttManager = demoStt,
                                     theme = THEME,
+                                    statisticsManager = statistics,
                                     live = liveCallbacks(presenter),
                                     publish = MainDesktopPublishers(onScheduleActionsReady = { actions = it }),
                                     service = ServicePlanLink(upcomingServiceLoad = demoUpcomingLoad.value),
@@ -211,6 +222,8 @@ internal fun recordTour(
                                     ),
                                 )
                             }
+                            // What the app's output windows run beside the outputs: Clear fades out and clears here.
+                            PresenterTransitionEffects(presenter, current)
                             Projector(presenter, current, media)
                             panel?.let {
                                 Box(
@@ -236,11 +249,11 @@ internal fun recordTour(
         val narrator = DemoNarrator(root)
         val setup = TourSetup(name, tab, liveLabel, steps, hasPanel = panel != null, heading = heading) { actions }
         val tour = DemoTour(setup, this, presenter, out, changeSettings, narrator)
-        try {
-            tour.script()
-        } catch (_: LengthReached) {
-            // CP_DEMO_SECONDS cut the tour short, or CP_DEMO_ONLY's last segment is done.
-        }
+        // A tour that fails partway still leaves what it recorded, voice and all, as a "-failed" video
+        // to look at; the failure is thrown again once that is written.
+        // LengthReached is not a failure: CP_DEMO_SECONDS cut the tour short, or CP_DEMO_ONLY's last
+        // segment is done.
+        val failure = runCatching { tour.script() }.exceptionOrNull()?.takeUnless { it is LengthReached }
         tour.finishSegment()
         // One folder per tab, so each video sits with its own thumbnail and script.
         val videos = File(
@@ -248,10 +261,21 @@ internal fun recordTour(
                 ?: File(System.getenv("HOME"), "Downloads/ChurchPresenter Videos"),
             if (heading.second == " Tab") tab else heading.first + tab + heading.second,
         )
-        val suffix = if (MAX_FRAMES == null) "" else "-preview"
+        val suffix = when {
+            failure != null -> "-failed"
+            MAX_FRAMES == null -> ""
+            else -> "-preview"
+        }
         narrator.encodeSegments(out, FPS, File(videos, "churchpresenter-$name-tab$suffix.mp4"), tour.recorded)
+        failure?.let { throw it }
     }
 }
+
+/**
+ * The caption feed the main window and the projector share, so what a tour feeds in (see the STT
+ * tour) reaches both; one per run, where each used to make its own on every recomposition.
+ */
+internal val demoStt = STTManager()
 
 /** A short service — half a panel — so what a tour adds to it stands out. */
 private fun demoSchedule(actions: ScheduleActions) {
@@ -286,20 +310,28 @@ private fun Projector(presenter: PresenterManager, appSettings: AppSettings, med
             .size(PROJ_W.dp, PROJ_H.dp)
             .background(Color.Black),
     ) {
-        PresenterOutputContent(
-            screenAssignment = appSettings.projectionSettings.getAssignment(0),
-            effectiveMode = mode,
-            screenNumber = 1,
-            presenterManager = presenter,
-            appSettings = appSettings,
-            mediaViewModel = media,
-            sttManager = STTManager(),
-            serverUrl = "",
-            qaDisplayUrl = "",
-            identifyingScreen = false,
-            lottieComposition = null,
-            clearAnnouncementOnFinish = {},
-        )
+        // Captions are an overlay, up over whatever else is live, so they are drawn on top of it.
+        val shown = listOf(mode) + if (Presenting.STT in presenter.overlays.value && mode != Presenting.STT) {
+            listOf(Presenting.STT)
+        } else {
+            emptyList()
+        }
+        shown.forEach { layer ->
+            PresenterOutputContent(
+                screenAssignment = appSettings.projectionSettings.getAssignment(0),
+                effectiveMode = layer,
+                screenNumber = 1,
+                presenterManager = presenter,
+                appSettings = appSettings,
+                mediaViewModel = media,
+                sttManager = demoStt,
+                serverUrl = "",
+                qaDisplayUrl = "",
+                identifyingScreen = false,
+                lottieComposition = null,
+                clearAnnouncementOnFinish = {},
+            )
+        }
     }
 }
 
@@ -348,6 +380,10 @@ internal class DemoTour(
     val recorded: Set<String> get() = order.filter { ONLY == null || it in ONLY }.toSet()
     private var recording = ONLY == null || FIRST_SEGMENT in ONLY
     private var segmentDir = segmentFolder(FIRST_SEGMENT)
+
+    // Closed once: a run that stops at a segment's start has already closed the one before it, and
+    // closing it again would overwrite its voice cues with none.
+    private var segmentOpen = true
 
     /** The open dialog's pop-ups are dropdowns, drawn where they open, not alerts centered over it. */
     var menusInPlace = false
@@ -402,6 +438,14 @@ internal class DemoTour(
         if (target.bounds.left >= appW) return
         runCatching { ui.onAllNodes(isRoot())[0].performMouseInput { moveTo(target.bounds.center) } }
         ui.mainClock.advanceTimeBy(HOVER_FADE_MS)
+        ui.waitForIdle()
+        refresh(0.2)
+    }
+
+    /** Rests the mouse on [target] in the panel and holds it there past the tooltip's delay. */
+    fun panelHover(target: Target, holdMs: Long = PANEL_HOVER_MS) {
+        runCatching { ui.onAllNodes(isRoot())[0].performMouseInput { moveTo(target.bounds.center) } }
+        ui.mainClock.advanceTimeBy(holdMs)
         ui.waitForIdle()
         refresh(0.2)
     }
@@ -790,6 +834,37 @@ internal class DemoTour(
         scene.caption = null
     }
 
+    /**
+     * A tooltip on [target] while [body] runs, its line spoken over whatever [body] does -- live text
+     * arriving, say -- and held until the line is done. [body] moves time on with [pause].
+     */
+    fun noteWhile(heading: String, sub: String, target: Target, body: DemoTour.() -> Unit) {
+        val start = frame
+        val talk = narrate(heading, sub)
+        scene.focus = null
+        camTo(Camera.zoom(target.bounds, 1.5f, appW, appH))
+        scene.focus = Focus(target.bounds, null, heading, sub, compact = false)
+        scene.focusAge = 0
+        body()
+        padTo(start, talk)
+    }
+
+    /**
+     * A caption while [body] runs, as [noteWhile]: over the whole window, or with [projector] on the
+     * projector, large, for what [body] puts on air.
+     */
+    fun captionWhile(heading: String, sub: String, projector: Boolean = false, body: DemoTour.() -> Unit) {
+        val start = frame
+        val talk = narrate(heading, sub)
+        scene.focus = null
+        if (projector) camTo(Camera.projector(appW, appH)) else if (!panelOpen) camTo(Camera.full(appW, appH))
+        scene.caption = "$heading — $sub"
+        scene.captionAge = 0
+        body()
+        padTo(start, talk)
+        scene.caption = null
+    }
+
     /** A tooltip with no click, on [target]. */
     fun note(heading: String, sub: String, target: Target, seconds: Double = 2.4) {
         val start = frame
@@ -863,9 +938,22 @@ internal class DemoTour(
         hold(1.0)
         target.node.performTextReplacement(text)
         ui.waitForIdle()
+        giveKeyboardBack()
         refresh(0.3)
         hold(0.4)
         padTo(start, talk)
+    }
+
+    /**
+     * A click or keystroke in the panel takes the keyboard from the main window, which says so in a
+     * red bar across it -- a recording's artifact, since the panel stands in for a separate window.
+     * The bar is pressed, as it asks, without moving the callout.
+     */
+    fun giveKeyboardBack() {
+        val bar = hasText("Keyboard focus lost", substring = true)
+        if (!hasNode(bar)) return
+        runCatching { find(bar).node.performClick() }
+        ui.waitForIdle()
     }
 
     /** Opens the panel as a window titled [title], [width]×[height] dp, sliding in over the dimmed app. */
@@ -912,6 +1000,7 @@ internal class DemoTour(
         if (click) {
             target.node.performClick()
             ui.waitForIdle()
+            giveKeyboardBack()
             refresh(0.3)
         }
         hold(0.4)
@@ -965,14 +1054,21 @@ internal class DemoTour(
         segmentStart = frame
         segmentFrame = 0
         segmentDir = segmentFolder(name)
+        segmentOpen = true
     }
 
     /** Writes the segment's voice cues beside its frames, and the order of every segment so far. */
     fun finishSegment() {
+        if (!segmentOpen) return
+        segmentOpen = false
         val cues = narrator.drainCues()
+        val spoken = spokenLines.toList().also { spokenLines.clear() }
         if (!recording) return
         val lines = cues.joinToString("") { (at, wav) -> "${at - segmentStart}\t${wav.path}\n" }
         File(segmentDir, "cues.txt").writeText(lines)
+        // Which script line starts where, for a dub in another language to be laid against.
+        val keys = spoken.joinToString("") { (at, key) -> "${at - segmentStart}\t$key\n" }
+        File(segmentDir, "lines.txt").writeText(keys)
         // A CP_DEMO_ONLY run stops early: its order is a prefix of the whole one, which it keeps.
         val list = File(out, "segments.txt")
         val known = if (list.isFile) list.readLines().filter { it.isNotBlank() } else emptyList()
@@ -996,6 +1092,10 @@ internal class DemoTour(
 
     /** What the narrator says over the next step, in place of reading its callout. */
     private var nextLine: String? = null
+    private var nextKey: String? = null
+
+    /** Each script line spoken in this segment, by the frame it starts on: what a dub is laid against. */
+    private val spokenLines = mutableListOf<Pair<Int, String>>()
 
     /** A typing step's line, padded once the typing is done rather than before it starts. */
     private var spoken: Pair<Int, Double>? = null
@@ -1003,12 +1103,15 @@ internal class DemoTour(
     /** Says the script's [key] line over the next step — full sentences, where the callout is a few words. */
     fun say(key: String) {
         nextLine = script[key] ?: error("demo-narration/$name.txt has no line \"$key\"")
+        nextKey = key
     }
 
     /** Says the line queued by [say], or the callout itself; returns its length in seconds. */
     private fun narrate(heading: String, sub: String): Double {
         nextLine?.let {
             nextLine = null
+            nextKey?.let { key -> spokenLines += frame to key }
+            nextKey = null
             return narrator.say(it, frame)
         }
         val sentence = heading.trim().let { if (it.last() in ".!?…") it else "$it." }

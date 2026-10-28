@@ -46,9 +46,11 @@ import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.use_default_directory
 import org.churchpresenter.icons.generated.resources.ic_storage_calendar
+import org.churchpresenter.icons.generated.resources.ic_storage_signage
 import org.churchpresenter.icons.generated.resources.ic_storage_schedule
 import org.churchpresenter.strings.generated.resources.calendar_storage_status_default
 import org.churchpresenter.strings.generated.resources.calendar_storage
+import org.churchpresenter.strings.generated.resources.signage_storage
 import org.churchpresenter.strings.generated.resources.schedule_storage
 import org.churchpresenter.strings.generated.resources.bible
 import org.churchpresenter.icons.generated.resources.ic_storage_bible
@@ -83,10 +85,13 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.calendarFolderShown
+import org.churchpresenter.settings.SIGNAGE_DIR
+import org.churchpresenter.settings.signageFolderShown
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 import org.churchpresenter.profiles.SettingsCardBadge
 import org.churchpresenter.profiles.SettingsCard
 
@@ -216,11 +221,11 @@ internal class StorageFolder(
 internal class StorageStatusLine(val text: String, val color: Color)
 
 /**
- * The eight folders, in the order the pane lists them. The calendar is last and the odd one out:
- * blank means the app data folder, which is shown as the path in use rather than as "not set",
- * because it is set -- it is the default. *Set All* leaves it alone in both directions: it is
- * where the plan lives, not a content folder, and the reason to point it anywhere else is to share
- * it with another computer.
+ * The nine folders, in the order the pane lists them. The calendar and signage come last and are
+ * the odd ones out: blank means the app data folder, which is shown as the path in use rather than
+ * as "not set", because it is set -- it is the default. *Set All* leaves them alone in both
+ * directions: they hold a setup, not content, and the reason to point them anywhere else is to
+ * share it with another computer.
  */
 @Composable
 private fun storageFolders(
@@ -272,6 +277,19 @@ private fun storageFolders(
         isDefault = settings.calendarStorageDirectory.isBlank(),
         onUseDefault = { onSettingsChange { s -> s.copy(calendarStorageDirectory = "") } },
     ) { dir -> onSettingsChange { s -> s.copy(calendarStorageDirectory = dir) } },
+    StorageFolder(
+        stringResource(Res.string.signage_storage), IconRes.drawable.ic_storage_signage,
+        MaterialTheme.semantic.contentMedia,
+        // As the calendar's: the app data folder's own `signage` folder, pinned under test.
+        LocalDefaultCalendarFolder.current.let { pinned ->
+            remember(settings.signageStorageDirectory, pinned) {
+                pinned?.takeIf { settings.signageStorageDirectory.isBlank() }?.let { File(it, SIGNAGE_DIR).path }
+                    ?: settings.signageFolderShown().absolutePath
+            }
+        },
+        isDefault = settings.signageStorageDirectory.isBlank(),
+        onUseDefault = { onSettingsChange { s -> s.copy(signageStorageDirectory = "") } },
+    ) { dir -> onSettingsChange { s -> s.copy(signageStorageDirectory = dir) } },
 )
 
 /**
@@ -287,7 +305,12 @@ internal fun SystemStorageCard(
     onSetAll: (String) -> Unit,
 ) {
     val folders = storageFolders(settings, onSettingsChange)
-    val statuses = folders.map { rememberDirStatus(it.path) }
+    // A default folder not made yet is fine: the signage folder, say, is made the first time it is used.
+    val statuses = folders.map { folder ->
+        rememberDirStatus(folder.path).let { status ->
+            if (folder.isDefault && status == DirStatus.NOT_FOUND) DirStatus.WRITABLE else status
+        }
+    }
     val bibleFiles = rememberBibleFiles(fileManager, settings.bibleSettings.storageDirectory)
     val songScan = rememberSongScan(fileManager, settings.songSettings.storageDirectory)
 
@@ -327,7 +350,7 @@ internal fun SystemStorageCard(
                         MaterialTheme.semantic.warning,
                     )
                 }
-                CALENDAR_ROW -> if (folder.isDefault) {
+                CALENDAR_ROW, SIGNAGE_ROW -> if (folder.isDefault) {
                     StorageStatusLine(
                         stringResource(Res.string.calendar_storage_status_default),
                         MaterialTheme.semantic.success,
@@ -360,6 +383,7 @@ internal fun SystemStorageCard(
 private const val BIBLE_ROW = 0
 private const val SONGS_ROW = 1
 private const val CALENDAR_ROW = 7
+private const val SIGNAGE_ROW = 8
 private const val ROW_LINE_ALPHA = 0.5f
 private const val ICON_TILE_ALPHA = 0.16f
 

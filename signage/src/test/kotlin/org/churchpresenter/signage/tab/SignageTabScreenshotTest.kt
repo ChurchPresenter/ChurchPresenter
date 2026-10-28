@@ -89,7 +89,8 @@ class SignageTabScreenshotTest {
     @Test
     fun `the companion server is off`() {
         world.controller.start()
-        shoot("server_off", serverRunning = false)
+        // Once the folder is read, or the shot can catch it still reading.
+        shoot("server_off", serverRunning = false, "No pictures or videos here yet")
     }
 
     private companion object {

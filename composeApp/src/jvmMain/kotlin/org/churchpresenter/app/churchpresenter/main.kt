@@ -44,6 +44,7 @@ import org.churchpresenter.media.composables.vlcCustomPath
 import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
+import org.churchpresenter.settings.signageFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.settings.utils.Constants
@@ -307,9 +308,7 @@ fun main(args: Array<String>) {
                 sessionMinutes = previousRun.sessionMinutes,
                 liveMinutes = previousRun.liveMinutes,
                 liveStalls = previousRun.liveStalls,
-                signageScreens = SignageHub.pairedScreensByPlatform(
-                    AppDataDir.resolve().toPath().resolve(SignageHub.DIR),
-                ),
+                signageScreens = SignageHub.pairedScreensByPlatform(startupSettings.signageFolder().toPath()),
             )
         },
         events = pendingUsageEvents,

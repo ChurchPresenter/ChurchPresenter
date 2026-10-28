@@ -347,6 +347,7 @@ private fun AppRootState.MainWindowContent(
         RemoteEnrollRequests()
         RemoteRemoveRequests()
         RemoteProjectRequests()
+        RemoteDrawingRequests()
         CalendarAutomationWiring()
         ShowControlEffects()
         ControlInEffects()

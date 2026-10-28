@@ -53,10 +53,10 @@ class OutputContentRoutingTest {
     }
 
     @Test
-    fun `pictures and presentations share one switch`() {
+    fun `pictures, drawings and presentations share one switch`() {
         val pictures = nothing.withLook { copy(media = media.copy(pictures = true)) }
         assertEquals(
-            listOf(Presenting.PICTURES, Presenting.PRESENTATION),
+            listOf(Presenting.PICTURES, Presenting.DRAWING, Presenting.PRESENTATION),
             Presenting.entries.filter { showsContentFor(it, pictures) },
         )
     }

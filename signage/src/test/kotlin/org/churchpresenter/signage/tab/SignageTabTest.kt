@@ -130,9 +130,9 @@ class SignageTabTest {
     fun aScreenIsRenamed() = signageTab(world) {
         connected()
         waitForText("Lobby")
-        onNodeWithContentDescription("Rename").performClick()
+        onNodeWithContentDescription("Screen settings").performClick()
         onNodeWithText("Cancel").performClick()
-        onNodeWithContentDescription("Rename").performClick()
+        onNodeWithContentDescription("Screen settings").performClick()
         onNode(hasSetTextAction() and hasText("Lobby")).performTextReplacement("Front door")
         onNodeWithText("Save").performClick()
         waitFor { hub.registry.screen("player-1")?.name == "Front door" }
@@ -156,9 +156,10 @@ class SignageTabTest {
     fun aFactoryResetReleasesTheScreenAndTakesItOffTheList() = signageTab(world) {
         connected()
         val released = with(world) { world.scope.expect { it as? ServerMessage.Released } }
-        onNodeWithContentDescription("Factory reset").performClick()
+        onNodeWithContentDescription("Screen settings").performClick()
+        onNodeWithText("Factory reset").performClick()
+        // Screen settings closed, and it asks first.
         onNodeWithText("Factory reset Lobby?").assertExists()
-        // The dialog's confirm button: the card's own button is an icon, named but not labelled.
         onNodeWithText("Factory reset").performClick()
         runBlocking { released.await() }
         waitForText("No screens yet")
@@ -261,7 +262,7 @@ class SignageTabTest {
             hub.registry.pair(PendingScreen("pi", "1", Platform.LINUX_ARM64, "26.0.8", 3840, 2160, "a"), "Hall")
             hub.registry.pair(PendingScreen("win", "2", Platform.WINDOWS_X64, "26.0.8", 1920, 1080, "b"), "Office")
         }
-        waitForText("Raspberry Pi", substring = true)
+        waitForText("Linux (ARM)", substring = true)
         onNodeWithText("Windows PC", substring = true).assertExists()
         // Neither is connected, so neither offers to wipe, preview or update.
         onAllNodesWithText("Offline", substring = true).fetchSemanticsNodes().size.let { assertEquals(2, it) }

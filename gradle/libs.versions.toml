@@ -28,7 +28,10 @@ compose = "1.5.0"
 navigationComposeJvmstubs = "2.10.2"
 sqliteJdbc = "3.53.4.0"
 ktor = "3.6.0"
-jmdns = "3.6.4"
+# 3.6.4 binds its socket to the computer's own address on macOS, which macOS refuses while its own
+# mDNS service holds port 5353, so the signage advert never starts there. Held at 3.6.3 until a
+# release fixes it (.github/dependabot.yml skips 3.6.4).
+jmdns = "3.6.3"
 bouncycastle = "1.86"
 apache-poi = "5.5.1"
 pdfbox = "2.0.37"

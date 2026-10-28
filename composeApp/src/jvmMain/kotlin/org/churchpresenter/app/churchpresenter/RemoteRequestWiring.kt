@@ -238,9 +238,11 @@ internal fun MainWindowScope.RemoteProjectRequests() {
                         appSettings = appSettings.withAnnouncement(shown)
                     }
                     if (row != null) currentScheduleActions.selectItem(row.id)
+                    // Putting something live from a phone does not add it to the schedule —
+                    // see withoutAdds.
                     executeProjectItem(
                         shown,
-                        currentScheduleActions,
+                        currentScheduleActions.withoutAdds(),
                         presenterManager,
                         currentScheduleItems,
                     )

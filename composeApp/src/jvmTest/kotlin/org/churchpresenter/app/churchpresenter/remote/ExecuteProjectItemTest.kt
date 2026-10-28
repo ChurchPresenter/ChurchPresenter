@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.app.churchpresenter.ScheduleActions
+import org.churchpresenter.app.churchpresenter.withoutAdds
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
@@ -37,6 +39,60 @@ class ExecuteProjectItemTest {
         val presenter = PresenterManager()
         executeProjectItem(item, recorder.actions(), presenter, scheduleItems)
         return recorder to presenter
+    }
+
+    // ── Put live from a phone ───────────────────────────────────────────────────
+
+    @Test
+    fun `a song a phone puts live goes up without being added to the schedule`() {
+        val recorder = ScheduleActionsRecorder()
+        val presenter = PresenterManager()
+        val song = ScheduleItem.SongItem(
+            id = "phone-1", songNumber = 7, title = "Holy", songbook = "Hymnal", songId = "Hymnal::7",
+        )
+
+        executeProjectItem(song, recorder.actions().withoutAdds(), presenter, emptyList())
+
+        assertEquals(emptyList(), recorder.added, "projecting from a phone must not add a row")
+        assertTrue(presenter.showPresenterWindow.value, "it still goes up")
+    }
+
+    @Test
+    fun `a verse a phone puts live reaches the bible renderer without being added`() {
+        val recorder = ScheduleActionsRecorder()
+        val presenter = PresenterManager()
+        val verse = ScheduleItem.BibleVerseItem(
+            id = "phone-2", bookName = "John", chapter = 3, verseNumber = 16, verseText = "v",
+        )
+
+        executeProjectItem(verse, recorder.actions().withoutAdds(), presenter, emptyList())
+
+        assertEquals(emptyList(), recorder.added)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
+    }
+
+    @Test
+    fun `a cue sent to be put live is not shown and not added`() {
+        // A cue is fired, never projected as content.
+        val recorder = ScheduleActionsRecorder()
+        val presenter = PresenterManager()
+
+        val cue = ScheduleItem.CueItem(id = "cue-1", action = "go")
+
+        executeProjectItem(cue, recorder.actions(), presenter, emptyList())
+
+        assertEquals(emptyList(), recorder.added)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
+    }
+
+    @Test
+    fun `without adds keeps every other action`() {
+        var cleared = 0
+        val actions = ScheduleActions(clearSchedule = { cleared++ }).withoutAdds()
+
+        actions.clearSchedule()
+
+        assertEquals(1, cleared)
     }
 
     // ── A row already in the schedule ───────────────────────────────────────────

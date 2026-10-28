@@ -7,6 +7,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import org.churchpresenter.sharedui.models.Tabs
+import java.nio.file.Files
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
+import kotlin.test.assertNotSame
+import org.churchpresenter.settings.SIGNAGE_DIR
+import org.churchpresenter.settings.utils.AppDataDir
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -72,6 +78,30 @@ class SignageWiringTest {
         showTab(true)
         waitUntil(timeoutMillis = WAIT_MS) { input != null }
         assertSame(controller, root.signageController, "shown again, the same controller starts again")
+    }
+
+    @Test
+    fun `another signage folder starts a controller there with this computer's setup`() {
+        val shared = Files.createTempDirectory("shared-signage")
+        try {
+            runComposeUiTest {
+                showTab(true)
+                setContent { root.SignageEffect() }
+                waitUntil(timeoutMillis = WAIT_MS) { root.signageController != null }
+                val first = root.signageController
+                // This computer's setup, as the first controller keeps it in the app data folder.
+                val local = AppDataDir.resolve().toPath().resolve(SIGNAGE_DIR)
+                Files.createDirectories(local)
+                local.resolve("signage.json").writeText("""{"pictureSeconds":12}""")
+                root.appSettings = root.appSettings.copy(signageStorageDirectory = shared.toString())
+                waitUntil(timeoutMillis = WAIT_MS) { root.signageFolderInUse == shared.toString() }
+                assertNotSame(first, root.signageController, "a new folder gets its own controller")
+                assertEquals("""{"pictureSeconds":12}""", shared.resolve("signage.json").readText())
+            }
+        } finally {
+            root.signageController?.stop()
+            shared.toFile().deleteRecursively()
+        }
     }
 
     @Test

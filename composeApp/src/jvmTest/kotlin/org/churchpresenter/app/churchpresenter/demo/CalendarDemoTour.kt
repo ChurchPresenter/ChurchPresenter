@@ -68,7 +68,8 @@ class CalendarDemoTour {
     @Test
     fun calendar() {
         TestSingletons.latchToTestHome()
-        val folder = File(System.getProperty("user.home"), "demo-calendar").apply { deleteRecursively(); mkdirs() }
+        // Beside the rest of the demo library, so the System page shows a shared path, not a home folder.
+        val folder = File(LIBRARY, "Calendar").apply { deleteRecursively(); mkdirs() }
         seed(folder)
         val sync = CalendarSyncService(
             folder,
@@ -89,7 +90,7 @@ class CalendarDemoTour {
             steps = 12,
             heading = "The " to "",
             // Calendar sync on, so the Server card lists its phones and other computers.
-            settings = { threeScreens(it).copy(calendarSync = syncSettings) },
+            settings = { threeScreens(it).copy(calendarSync = syncSettings, calendarStorageDirectory = folder.path) },
             panel = { settings, change ->
                 if (screen.value == "qr") {
                     Box(Modifier.size(QR_W.dp, QR_H.dp)) { CalendarEnrollQrContent(SAMPLE_ENROLLMENT, onDismiss = {}) }
@@ -421,6 +422,7 @@ class CalendarDemoTour {
         say("computer-code")
         point("Copy, save or email the code", "It works once, for 24 hours", hasText("Copy code"))
         closePanel()
+        refocusMainWindow()
         screen.value = "server"
         openPanel("Settings — Server", SERVER_W, SERVER_H)
         say("computer-join")
@@ -438,6 +440,11 @@ class CalendarDemoTour {
         caption("Every five minutes", "At startup, and on Sync now")
     }
 
+    /** Typing in a dialog takes the keyboard from the main window; its banner's own click gives it back. */
+    private fun DemoTour.refocusMainWindow() {
+        runCatching { quietClick(find(hasText("Keyboard focus lost", substring = true))) }
+    }
+
     /** The Pictures tab's Save preset, opened, named and saved: how the calendar's presets are made. */
     private fun DemoTour.makePreset() {
         quietClick(tab("Pictures"))
@@ -448,6 +455,7 @@ class CalendarDemoTour {
         panelEdit("Name it", "Sunday announcements", seek(hasSetTextAction()), "Sunday announcements")
         panelNote("OK", "Now it's in every service's Presets", seek(hasText("OK", ignoreCase = true)))
         closePanel()
+        refocusMainWindow()
         screen.value = "calendar"
     }
 

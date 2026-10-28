@@ -17,6 +17,7 @@ class CueTest {
             Cue.Background(BackgroundSource.BIBLE) to Layer.BACKGROUND,
             Cue.Video("clip.mp4") to Layer.MEDIA,
             Cue.Picture("a.jpg") to Layer.MEDIA,
+            Cue.Drawing(frame = 1) to Layer.MEDIA,
             Cue.Verses(listOf(SelectedVerse())) to Layer.SLIDE,
             Cue.Song(LyricSection(), sectionIndex = 0, lineIndex = 0) to Layer.SLIDE,
             Cue.PresentationSlide("deck.pptx", 3) to Layer.SLIDE,

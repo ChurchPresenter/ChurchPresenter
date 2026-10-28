@@ -62,6 +62,12 @@ class ScreenRegistry(
 
     private val saving = Mutex()
 
+    /**
+     * [file] as it was last read or written here, to tell another computer's write from ours. Its
+     * content, not its time: a network share keeps times only to a second or two.
+     */
+    @Volatile private var seen: String? = null
+
     /** Reads [file], or starts a new owner id when there is none. */
     suspend fun load() = withContext(Dispatchers.IO) {
         val stored = try {
@@ -79,7 +85,29 @@ class ScreenRegistry(
         }
         ownerId = stored?.ownerId ?: UUID.randomUUID().toString()
         _screens.value = stored?.screens.orEmpty()
+        seen = textOf(file)
         if (stored == null) save()
+    }
+
+    /**
+     * Reads [file] again when another computer sharing the signage folder has changed it since it was
+     * read or written here: screens it paired, renamed or removed. True when it did.
+     */
+    suspend fun reloadIfChanged(): Boolean = withContext(Dispatchers.IO) {
+        saving.withLock {
+            val text = textOf(file)
+            if (text == null || text == seen) return@withLock false
+            val stored = try {
+                SignageJson.decodeFromString(RegistryFile.serializer(), text)
+            } catch (e: SerializationException) {
+                Log.warn(TAG, "Paired screens file is damaged: ${e.message}")
+                return@withLock false
+            }
+            ownerId = stored.ownerId
+            _screens.value = stored.screens
+            seen = text
+            true
+        }
     }
 
     fun screen(id: String): PairedScreen? = _screens.value.firstOrNull { it.id == id }
@@ -149,6 +177,7 @@ class ScreenRegistry(
                     val next = file.resolveSibling("${file.fileName}.next")
                     Files.writeString(next, SignageJson.encodeToString(RegistryFile.serializer(), snapshot))
                     Files.move(next, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
+                    seen = textOf(file)
                 } catch (e: IOException) {
                     Log.error(TAG, "Could not save the paired screens: ${e.message}")
                 }
@@ -158,6 +187,12 @@ class ScreenRegistry(
 
     private companion object {
         const val TAG = "Signage"
+
+        fun textOf(file: Path): String? = try {
+            if (Files.exists(file)) Files.readString(file) else null
+        } catch (_: IOException) {
+            null
+        }
         const val TOKEN_BYTES = 32
     }
 }

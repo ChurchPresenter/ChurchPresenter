@@ -83,6 +83,7 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
         is Cue.Verses -> BibleCue(surface)
         is Cue.Song -> SongCue(surface)
         is Cue.Picture -> PictureCue(surface)
+        is Cue.Drawing -> DrawingCue(surface)
         is Cue.PresentationSlide -> PresentationCue(surface)
         // Audio draws nothing; which of the two the media is follows the media view model, as it
         // always has, so a video and an audio cue go through the same check.

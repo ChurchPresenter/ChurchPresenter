@@ -50,6 +50,13 @@ data class AppSettings(
      * both at the same synced folder. Resolved by [calendarFolder].
      */
     val calendarStorageDirectory: String = "",
+    /**
+     * Where the signage setup is kept: the paired screens, the playlists added by hand, rotations,
+     * schedules and what each screen plays. Blank means the app data folder's `signage` folder,
+     * where it has always been; a shared or synced folder lets any computer pointed at it run the
+     * screens. Resolved by [signageFolder].
+     */
+    val signageStorageDirectory: String = "",
     /** Where the schedule's Open and Save As dialogs start. Blank means the home folder. */
     val scheduleStorageDirectory: String = "",
     /**
