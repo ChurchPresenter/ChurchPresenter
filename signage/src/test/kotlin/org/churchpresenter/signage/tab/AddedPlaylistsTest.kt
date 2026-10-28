@@ -84,6 +84,28 @@ class AddedPlaylistsTest {
         assertEquals(ScreenPlan(), controller.state.value.settings.plan("player-1"))
     }
 
+    @Test
+    fun removingALinkTakesItOutOfRotationsAndAMissingFileIsListedSo() = runBlocking {
+        world.file("welcome.jpg")
+        val flyer = world.root.resolve("elsewhere/flyer.png").also {
+            it.parent.toFile().mkdirs()
+            it.toFile().writeText("png")
+        }
+        controller.start()
+        controller.added.addLink(NewLink("Weather", WEATHER, LinkKind.WEB))
+        controller.added.addFile(flyer)
+        val (link, file) = listed { it.size == 3 }.drop(1).map { it.id }
+        controller.added.addRotation("Evenings", listOf(RotationStep(link, 60), RotationStep(file, 10)))
+        listed { it.size == 4 }
+        flyer.toFile().delete()
+        controller.added.remove(link)
+        val rotation = withTimeout(SignageWorld.WAIT_MS) {
+            controller.state.first { state -> state.settings.added.none { it.id == link } }
+        }.settings.added.filterIsInstance<RotationPlaylist>().single()
+        assertEquals(listOf(RotationStep(file, 10)), rotation.steps)
+        assertEquals(true, listed { list -> list.any { it.id == file && it.missing } }.single { it.id == file }.missing)
+    }
+
     private companion object {
         const val WEATHER = "https://weather.example.org"
     }

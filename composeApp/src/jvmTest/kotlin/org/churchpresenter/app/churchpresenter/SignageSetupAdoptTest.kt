@@ -40,4 +40,14 @@ class SignageSetupAdoptTest {
         assertEquals("""{"ownerId":"there"}""", shared.resolve("screens.json").readText())
         assertFalse(Files.exists(shared.resolve("signage.json")))
     }
+
+    @Test
+    fun aFolderThatCannotBeMadeLeavesTheSetupWhereItWas() {
+        local.resolve("screens.json").writeText("""{"ownerId":"here"}""")
+        // A file where the folder should go: it cannot be made, and nothing is thrown.
+        val blocked = root.resolve("blocked").also { it.writeText("not a folder") }
+        adoptSignageSetup(local, blocked.resolve("signage"))
+        assertEquals("""{"ownerId":"here"}""", local.resolve("screens.json").readText())
+        assertFalse(Files.exists(blocked.resolve("signage")))
+    }
 }

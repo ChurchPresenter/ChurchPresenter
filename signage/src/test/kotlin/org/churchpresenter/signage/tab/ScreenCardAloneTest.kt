@@ -218,6 +218,19 @@ class ScreenCardAloneTest {
     }
 
     @Test
+    fun screenSettingsSendOnlyWhatChanged() = card(ScreenRowState(screen, link, folder)) {
+        onNodeWithContentDescription("Screen settings").performClick()
+        onNodeWithText("MOUNTED").performClick()
+        waitForIdle()
+        onNodeWithText("Landscape, upside down").performClick()
+        onNodeWithText("Save").performClick()
+        // Saved again untouched: nothing to send.
+        onNodeWithContentDescription("Screen settings").performClick()
+        onNodeWithText("Save").performClick()
+        assertEquals(listOf(" mounted p LANDSCAPE_FLIPPED"), calls)
+    }
+
+    @Test
     fun aBlankNameCannotBeSaved() = card(ScreenRowState(screen, link, folder)) {
         onNodeWithContentDescription("Screen settings").performClick()
         onNode(hasSetTextAction() and hasText("Lobby")).performTextReplacement(" ")

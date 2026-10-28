@@ -13,6 +13,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
@@ -171,6 +172,52 @@ class RotationAndScheduleUiTest {
 
     private companion object {
         val TV_OFF = BlockAction.TvOff
+    }
+
+    @Test
+    fun aStepTakesAnotherEntryWithThatEntrysTime() = runComposeUiTest {
+        var saved: List<RotationStep>? = null
+        val withVideo = entries + PlaylistSummary("file:2", "Intro", kind = SourceKind.VIDEO)
+        val steps = listOf(RotationStep("file:2"), RotationStep("file:1", 10))
+        val rotation = RotationPlaylist("rotation:1", "Days", steps)
+        show { RotationDialog(withVideo, rotation, { _, steps -> saved = steps }, {}) }
+        // A video's time says that 0 plays it to its end.
+        onNodeWithText("0 plays it to its end", substring = true, ignoreCase = true).assertExists()
+        onNodeWithText("STEP 1").performClick()
+        waitForIdle()
+        onAllNodesWithText("Weather").onLast().performClick()
+        waitForIdle()
+        onNodeWithText("Save").performClick()
+        // A link is given a minute; the picture keeps its own ten seconds.
+        assertEquals(listOf(RotationStep("link:1", 60), RotationStep("file:1", 10)), saved)
+    }
+
+    @Test
+    fun aRotationWithNothingToShowCannotGainAStep() = runComposeUiTest {
+        show { RotationDialog(emptyList(), null, { _, _ -> }, {}) }
+        onNodeWithText("Add step").assertIsNotEnabled()
+    }
+
+    @Test
+    fun aTimesActionIsChangedAndAPlaylistGoneShowsItsId() = runComposeUiTest {
+        var saved: List<ScheduleBlock>? = null
+        val at = { action: BlockAction ->
+            ScheduleBlock("b$action", setOf(Day.MON), ClockTime.parse("09:00"), ClockTime.parse("12:00"), action)
+        }
+        val blocks = listOf(at(BlockAction.TvOff), at(BlockAction.Play("gone")))
+        show { ScheduleDialog("Lobby", entries, blocks, { saved = it }, {}) }
+        onNodeWithText("TV off").assertExists()
+        onNodeWithText("gone").assertExists()
+        onAllNodesWithText("SHOWS")[0].performClick()
+        waitForIdle()
+        onAllNodesWithText("Weather").onLast().performClick()
+        waitForIdle()
+        onAllNodesWithText("SHOWS")[1].performClick()
+        waitForIdle()
+        onAllNodesWithText("Service (TV on another input)").onLast().performClick()
+        waitForIdle()
+        onNodeWithText("Save").performClick()
+        assertEquals(listOf(BlockAction.Play("link:1"), BlockAction.Service), saved!!.map { it.action })
     }
 
     private fun dayName(day: DayOfWeek) = day.getDisplayName(TextStyle.SHORT, Locale.getDefault())

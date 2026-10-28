@@ -36,11 +36,13 @@ class AddPlaylistUiTest {
             PlaylistSummary("folder:", "Signage", 1, 0),
             PlaylistSummary("link:1", "Weather", kind = SourceKind.WEB, detail = "https://weather.example.org"),
             PlaylistSummary("file:1", "Old flyer", kind = SourceKind.PICTURE, detail = "flyer.jpg", missing = true),
+            PlaylistSummary("rotation:1", "Evenings", kind = SourceKind.ROTATION, steps = 1, seconds = 60),
         ),
         settings = SignageSettings(
             added = listOf(
                 LinkPlaylist("link:1", "Weather", "https://weather.example.org", LinkKind.WEB),
                 FilePlaylist("file:1", "Old flyer", "flyer.jpg", MediaKind.IMAGE),
+                RotationPlaylist("rotation:1", "Evenings", listOf(RotationStep("link:1", 60))),
             ),
         ),
         ready = true,
@@ -50,6 +52,7 @@ class AddPlaylistUiTest {
     private val linkEdits = mutableListOf<Pair<String, NewLink>>()
     private val fileEdits = mutableListOf<Triple<String, String, String>>()
     private val removed = mutableListOf<String>()
+    private val rotations = mutableListOf<String>()
 
     private fun panel(desktop: FakeDesktop, block: ComposeUiTest.() -> Unit) = runComposeUiTest {
         val actions = FolderActions(
@@ -61,6 +64,8 @@ class AddPlaylistUiTest {
             onEditLink = { id, link -> linkEdits += id to link },
             onEditFile = { id, name, file -> fileEdits += Triple(id, name, file.toString()) },
             onRemove = { removed += it },
+            onAddRotation = { name, steps -> rotations += "add $name ${steps.size}" },
+            onEditRotation = { id, name, steps -> rotations += "edit $id $name ${steps.size}" },
         )
         setContent {
             ChurchPresenterTheme(ThemeMode.LIGHT) {
@@ -123,6 +128,20 @@ class AddPlaylistUiTest {
         onAllNodesWithText("Name")[0].performTextInput("Ticker")
         dialogAdd().performClick()
         assertEquals(listOf(NewLink("Ticker", "https://example.org/live.m3u8", LinkKind.WEB, 0, smooth = true)), links)
+    }
+
+    @Test
+    fun aRotationIsAddedFromTheMenuAndEditedFromItsRow() = panel(FakeDesktop()) {
+        onNodeWithText("Add").performClick()
+        onNodeWithText("Rotation…").performClick()
+        // A new rotation offers every entry but a rotation.
+        onAllNodesWithText("Name")[0].performTextInput("Mornings")
+        onNodeWithText("Add step").performClick()
+        onNodeWithText("Save").performClick()
+        onNodeWithContentDescription("Edit rotation").performClick()
+        onNodeWithText("Edit rotation").assertExists()
+        onNodeWithText("Save").performClick()
+        assertEquals(listOf("add Mornings 1", "edit rotation:1 Evenings 1"), rotations)
     }
 
     @Test
