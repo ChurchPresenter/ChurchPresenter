@@ -168,18 +168,18 @@ class SongFileParser {
         }
     }
 
-    /** The `key: value` lines of a .song header, lowercased keys, unknown keys kept out. */
-    private fun parseHeaderFields(headerBody: List<String>): Map<String, String> {
-        val known = setOf("author", "composer", "tune", "ccli") + SONG_TEXT_OVERRIDE_KEYS +
-            BACKGROUND_PREFIXES.flatMap(::songBackgroundKeys)
-        return headerBody.mapNotNull { raw ->
+    /** Every header key this build reads; the rest are carried through as [SongItem.extraHeader]. */
+    private val knownHeaderKeys = setOf("author", "composer", "tune", "ccli") + SONG_TEXT_OVERRIDE_KEYS +
+        SONG_ARRANGEMENT_KEYS + BACKGROUND_PREFIXES.flatMap(::songBackgroundKeys)
+
+    /** The `key: value` lines of a .song header, lowercased keys, in the order they are written. */
+    private fun parseHeaderFields(headerBody: List<String>): Map<String, String> =
+        headerBody.mapNotNull { raw ->
             val line = raw.trim()
             val colonIndex = line.indexOf(':')
             if (colonIndex <= 0) return@mapNotNull null
-            val key = line.substring(0, colonIndex).trim().lowercase()
-            if (key !in known) null else key to line.substring(colonIndex + 1).trim()
+            line.substring(0, colonIndex).trim().lowercase() to line.substring(colonIndex + 1).trim()
         }.toMap()
-    }
 
     fun parseSongContent(content: String, filePath: String = "", songbook: String = ""): SongItem? {
         try {
@@ -193,6 +193,8 @@ class SongFileParser {
             var background = SongBackground()
             var lowerThirdBackground = SongBackground()
             var textOverrides = SongTextOverrides()
+            var arrangement = SongArrangement()
+            var extraHeader = emptyMap<String, String>()
             val headerStart = lines.indexOfFirst { it.trim() == "---" }
             val headerClose = if (headerStart < 0) -1 else
                 lines.subList(headerStart + 1, lines.size).indexOfFirst { it.trim() == "---" }
@@ -209,6 +211,8 @@ class SongFileParser {
                 background = songBackgroundFrom(header, SONG_BACKGROUND_PREFIX)
                 lowerThirdBackground = songBackgroundFrom(header, SONG_LOWER_THIRD_BACKGROUND_PREFIX)
                 textOverrides = songTextOverridesFrom(header)
+                arrangement = songArrangementFrom(header)
+                extraHeader = header.filterKeys { it !in knownHeaderKeys }
             }
 
             // Parse body after header
@@ -243,6 +247,10 @@ class SongFileParser {
                 background = background,
                 lowerThirdBackground = lowerThirdBackground,
                 textOverrides = textOverrides,
+                skippedSections = arrangement.skippedSections,
+                chorusRepeat = arrangement.chorusRepeat,
+                notes = arrangement.notes,
+                extraHeader = extraHeader,
             ).withTranslations(extraTranslations)
         } catch (_: Exception) {
             return null
@@ -260,7 +268,10 @@ class SongFileParser {
         // Write header if any metadata exists
         val credits = listOf(song.author, song.composer, song.tune, song.ccliNumber)
         val hasBackground = song.background.isCustom || song.lowerThirdBackground.isCustom
-        if (credits.any { it.isNotEmpty() } || hasBackground || song.textOverrides.isCustom) {
+        val arrangement = songArrangementFields(song)
+        val hasHeader = credits.any { it.isNotEmpty() } || hasBackground || song.textOverrides.isCustom ||
+            arrangement.isNotEmpty() || song.extraHeader.isNotEmpty()
+        if (hasHeader) {
             sb.appendLine("---")
             if (song.author.isNotEmpty()) sb.appendLine("author: ${song.author}")
             if (song.composer.isNotEmpty()) sb.appendLine("composer: ${song.composer}")
@@ -269,6 +280,8 @@ class SongFileParser {
             appendBackground(sb, SONG_BACKGROUND_PREFIX, song.background)
             appendBackground(sb, SONG_LOWER_THIRD_BACKGROUND_PREFIX, song.lowerThirdBackground)
             songTextOverrideFields(song.textOverrides).forEach { (key, value) -> sb.appendLine("$key: $value") }
+            arrangement.forEach { (key, value) -> sb.appendLine("$key: $value") }
+            song.extraHeader.forEach { (key, value) -> sb.appendLine("$key: $value") }
             sb.appendLine("---")
             sb.appendLine()
         }

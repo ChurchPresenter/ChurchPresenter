@@ -89,6 +89,9 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.ChorusRepeat
+import org.churchpresenter.sharedui.utils.isChorusHeader
+import androidx.compose.ui.draw.alpha
 import org.churchpresenter.sharedui.models.Presenting
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -139,6 +142,8 @@ internal fun RowScope.SongLyricsPanel(
     sendToPresenter: (goLive: Boolean) -> Unit,
     /** Moves one of the selected song's [available] languages in the install's Display order. */
     onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit = { _, _, _ -> },
+    /** Ticking a verse or changing the chorus rule from here; null where the library is read-only. */
+    arrangement: SongArrangementActions? = null,
 ) {
     val density = LocalDensity.current
     // Right panel — Lyrics display (fixed width, resizable via drag handle)
@@ -161,6 +166,9 @@ internal fun RowScope.SongLyricsPanel(
             sendToPresenter = sendToPresenter,
             songSettings = appSettings.operatorSongSettings(),
             onMoveLanguage = onMoveLanguage,
+            onChorusRepeatChange = arrangement?.let { actions ->
+                currentSong?.let { song -> { value: ChorusRepeat -> actions.onChorusRepeatChange(song, value) } }
+            },
         )
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
@@ -230,6 +238,7 @@ internal fun RowScope.SongLyricsPanel(
         if (noSongsLoaded) {
             NoSongDatabaseCard()
         } else {
+            currentSong?.notes?.takeIf { it.isNotBlank() }?.let { SongNotesCard(it) }
             LyricsList(
                 appSettings = appSettings,
                 currentSong = currentSong,
@@ -243,6 +252,11 @@ internal fun RowScope.SongLyricsPanel(
                 onLineSelected = onLineSelected,
                 onPresenting = onPresenting,
                 sendToPresenter = sendToPresenter,
+                onSectionSungChange = arrangement?.let { actions ->
+                    currentSong?.let { song ->
+                        { key: String, sung: Boolean -> actions.onSectionSungChange(song, key, sung) }
+                    }
+                },
             )
         }
     }
@@ -262,6 +276,7 @@ private fun LyricsActionBar(
     sendToPresenter: (goLive: Boolean) -> Unit,
     songSettings: SongSettings,
     onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit,
+    onChorusRepeatChange: ((ChorusRepeat) -> Unit)?,
 ) {
     val editSongStr    = stringResource(Res.string.edit_song)
     val goLiveStr      = stringResource(Res.string.go_live)
@@ -291,6 +306,11 @@ private fun LyricsActionBar(
                 onMove = { index, offset -> onMoveLanguage(languages, index, offset) },
                 modifier = Modifier.widthIn(min = 127.dp, max = 174.dp),
             )
+        }
+
+        // The song's own chorus rule — only for a song that has a chorus to repeat.
+        if (currentSong != null && onChorusRepeatChange != null && currentSong.lyrics.any(::isChorusHeader)) {
+            ChorusRepeatField(value = currentSong.chorusRepeat, onValueChange = onChorusRepeatChange)
         }
 
         if (currentSong != null) {
@@ -407,6 +427,7 @@ private fun LyricsList(
     onLineSelected: (Int) -> Unit,
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
+    onSectionSungChange: ((key: String, sung: Boolean) -> Unit)?,
 ) {
     Box {
         val lyricsListState = rememberLazyListState()
@@ -461,6 +482,7 @@ private fun LyricsList(
                         onLineSelected = onLineSelected,
                         onPresenting = onPresenting,
                         sendToPresenter = sendToPresenter,
+                        onSectionSungChange = onSectionSungChange,
                     )
                     // No separator between sections: each one opens with its own labelled
                     // chip and rule, which is what divides them now.
@@ -566,6 +588,7 @@ private fun LyricSectionEntry(
     onLineSelected: (Int) -> Unit,
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
+    onSectionSungChange: ((key: String, sung: Boolean) -> Unit)?,
 ) {
     val isSelected = !live.titleSlideSelected && sectionIndex == selectedSectionIndex
     val (hover, hovered) = rememberRowHover()
@@ -593,20 +616,47 @@ private fun LyricSectionEntry(
             )
             .padding(start = rowPad(14.dp), top = rowPad(10.dp), end = rowPad(14.dp), bottom = rowPad(12.dp))
     ) {
-        val textColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
+        // A section the song leaves out stays where it is written, faded, so it can still be
+        // clicked onto the screen when the pastor calls for it after all.
+        val baseColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
+        val textColor = when {
+            !section.skipped -> baseColor
+            isSelected -> baseColor.copy(alpha = SKIPPED_SELECTED_ALPHA)
+            else -> baseColor.copy(alpha = SKIPPED_ALPHA)
+        }
 
         val activeLineIndex = if (isPerLineMode && sectionIndex == selectedSectionIndex)
             selectedLineIndex else -1
 
         // Render section header if present — the same chip the editor's
         // preview uses, so a verse is recognised the same way in both.
+        // The written section's first slide carries the box that says whether it is sung; its
+        // later slides and a repeated chorus follow it.
         section.header?.let { header ->
-            SectionLabelRow(
-                label = sectionLabelOf(header),
-                modifier = Modifier.padding(vertical = 4.dp),
-                slideIndex = section.slideIndex,
-                slideCount = section.slideCount,
-            )
+            val label = sectionLabelOf(header)
+            Row(
+                modifier = Modifier.padding(vertical = 4.dp)
+                    .alpha(if (section.skipped && !isSelected) SKIPPED_ALPHA else 1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (section.sectionKey.isNotBlank() && section.slideIndex == 0) {
+                    SectionSungCheckbox(
+                        sectionKey = section.sectionKey,
+                        label = label,
+                        sung = !section.skipped,
+                        onSungChange = onSectionSungChange?.let { change ->
+                            { sung -> change(section.sectionKey, sung) }
+                        },
+                    )
+                }
+                SectionLabelRow(
+                    label = label,
+                    modifier = Modifier.weight(1f),
+                    slideIndex = section.slideIndex,
+                    slideCount = section.slideCount,
+                )
+            }
         }
 
         // The panel always shows every language the song carries — what an output shows is that

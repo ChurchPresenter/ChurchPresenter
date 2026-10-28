@@ -30,6 +30,20 @@ data class SongItem(
     val lowerThirdBackground: SongBackground = SongBackground(),
     /** This song's own font, size and colours over the profile's — none by default. */
     val textOverrides: SongTextOverrides = SongTextOverrides(),
+    /**
+     * The written sections this song leaves out, by [sectionKeysOf] key — the verses of a hymn the
+     * church does not sing. They stay in the list, dimmed, but navigation steps over them.
+     */
+    val skippedSections: List<String> = emptyList(),
+    /** Whether this song repeats its chorus after each verse, or leaves that to the setting. */
+    val chorusRepeat: ChorusRepeat = ChorusRepeat.SETTINGS,
+    /** The operator's notes on this song, shown above its lyrics; never presented. */
+    val notes: String = "",
+    /**
+     * Header lines this build does not read, kept as written so saving the song does not delete
+     * what a newer build or the converter put there (`copyright:`, say).
+     */
+    val extraHeader: Map<String, String> = emptyMap(),
 ) {
     /** Stable unique ID across songbooks: "songbook::number" or "songbook::title" when no number */
     val songId: String get() = if (number.isNotBlank()) "$songbook::$number" else "$songbook::$title"

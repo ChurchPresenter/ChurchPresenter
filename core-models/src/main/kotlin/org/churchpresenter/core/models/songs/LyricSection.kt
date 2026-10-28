@@ -75,6 +75,17 @@ data class LyricSection(
     val lowerThirdBackground: SongBackground = SongBackground(),
     /** The song's own font, size and colours, carried here for the same reason [background] is. */
     val textOverrides: SongTextOverrides = SongTextOverrides(),
+    /**
+     * True for a section the song leaves out ([SongItem.skippedSections]). It is still listed and
+     * still shows when clicked, but navigation and a stage monitor's "next" step over it.
+     */
+    val skipped: Boolean = false,
+    /**
+     * The key ([sectionKeysOf]) of the written section this slide belongs to — what the operator
+     * ticks or unticks it by. Blank on a repeated chorus, which is left out with the chorus it
+     * repeats, and on every section not built from a song.
+     */
+    val sectionKey: String = "",
 ) {
     /**
      * The second language's title and lines.

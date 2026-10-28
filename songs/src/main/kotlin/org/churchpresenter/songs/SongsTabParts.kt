@@ -349,6 +349,11 @@ private fun SongsTabController.SongLyricsSide(row: RowScope) = with(row) {
         onMoveLanguage = { available, index, offset ->
             onSettingsChange { s -> s.moveSongLanguageAmong(available, index, offset) }
         },
+        // An Instance Link follower shows the primary's library, which it cannot write.
+        arrangement = if (viewModel.remoteModeActive) null else SongArrangementActions(
+            onSectionSungChange = { song, key, sung -> changeArrangement(song) { it.withSectionSung(key, sung) } },
+            onChorusRepeatChange = { song, value -> changeArrangement(song) { it.copy(chorusRepeat = value) } },
+        ),
     )
 }
 

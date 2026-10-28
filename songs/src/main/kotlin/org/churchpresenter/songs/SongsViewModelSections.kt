@@ -9,7 +9,6 @@ import org.churchpresenter.core.models.songs.songBackgroundFrom
 import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.songchords.SecondVoice
 import org.churchpresenter.sharedui.utils.isChorusHeader
@@ -29,15 +28,19 @@ fun SongsViewModel.getLyricSections(): List<LyricSection> {
  *  state, so it can be used with freshly-edited content that hasn't round-tripped through
  *  the (async) catalog reload yet, e.g. right after [updateSong] returns. */
 fun SongsViewModel.getLyricSections(song: SongItem): List<LyricSection> {
-    // Split primary lyrics into sections
-    val primarySections = splitLyricsIntoSections(song.lyrics, song.title, song.number)
+    // Split primary lyrics into sections. What the song leaves out and whether it repeats its
+    // chorus are decided once, from the primary, and applied alike to every language, so the
+    // groups the languages are paired by below still line up.
+    val primarySlides = lyricSlidesOf(song.lyrics, song.title, song.number)
+    val plan = sectionPlanOf(song, primarySlides)
+    val primarySections = arrangeSections(primarySlides, plan)
     // Split each further language into sections (matched by order), keeping a language that has
     // no lyrics as an empty group rather than dropping it — position is what identifies a
     // language to an output, so a gap has to stay a gap.
     val extras = song.extraTranslations()
     val extraGroups = extras.map { translation ->
         if (translation.lyrics.isEmpty()) emptyList()
-        else slideGroupsOf(splitLyricsIntoSections(translation.lyrics, translation.title, song.number))
+        else slideGroupsOf(arrangeSections(lyricSlidesOf(translation.lyrics, translation.title, song.number), plan))
     }
 
     // Merge the languages by section first and by slide within it, rather than by a single
@@ -59,19 +62,15 @@ fun SongsViewModel.getLyricSections(song: SongItem): List<LyricSection> {
         }
     }
 
-    // Mark the very last section so the presenter can show end-of-song indicator, and stamp the
-    // song's own background onto every section — the presenter only ever sees a section.
+    // Mark the last section sung so the presenter can show end-of-song indicator — the last one
+    // written when the song leaves every one out — and stamp the song's own background onto every
+    // section, since the presenter only ever sees a section.
+    val lastSung = sections.indexOfLast { !it.skipped }.takeIf { it >= 0 } ?: sections.lastIndex
     return sections.mapIndexed { index, section ->
-        (if (index == sections.lastIndex) section.copy(isLastSection = true) else section)
+        (if (index == lastSung) section.copy(isLastSection = true) else section)
             .withBackgroundsOf(song).withTextOverridesOf(song)
     }
 }
-
-internal fun SongsViewModel.splitLyricsIntoSections(
-    lyrics: List<String>,
-    title: String,
-    number: String,
-): List<LyricSection> = repeatChorusAfterVerses(lyricSlidesOf(lyrics, title, number))
 
 /**
  * [lyrics] as the slides they are written as — split at headers and slide breaks, chords off,
@@ -213,7 +212,8 @@ internal fun numberSlides(sections: List<LyricSection>): List<LyricSection> =
  * section that was written exactly where it was written.
  *
  * A hymnal writes the chorus once and expects it sung after every verse, which is what
- * `SongSettings.autoRepeatChorus` turns on and why it defaults on. With it off the sections are
+ * `SongSettings.autoRepeatChorus` turns on and why it defaults on — unless the song's own
+ * [ChorusRepeat] says otherwise. A verse the song leaves out collects no chorus. With it off the sections are
  * presented as authored -- the only way to express a chorus placed before verse 1, or after
  * verse 2 only, or written out in full at each repeat.
  *
@@ -234,34 +234,35 @@ internal fun numberSlides(sections: List<LyricSection>): List<LyricSection> =
  * [foldChordOnlySections] runs first, so a chord-only intro has already been folded into the
  * section it leads into and cannot trigger a repeat of its own.
  */
-internal fun SongsViewModel.repeatChorusAfterVerses(sections: List<LyricSection>): List<LyricSection> {
-    if (!appSettings.operatorSongSettings().autoRepeatChorus) return sections
+internal fun repeatChorusAfterVerses(groups: List<List<LyricSection>>): List<LyricSection> {
     // Whole sections repeat, not slides: a chorus broken across two slides is sung as two
     // slides each time round, so the unit here is the group and never the section list.
-    val groups = slideGroupsOf(sections)
-    if (groups.none { isChorusGroup(it) }) return sections
-    if (groups.none { singsTheChorusAfterwards(it) }) return sections
+    if (groups.none { isChorusGroup(it) }) return groups.flatten()
+    if (groups.none { singsTheChorusAfterwards(it) }) return groups.flatten()
 
     val result = mutableListOf<LyricSection>()
     var precedingChorus: List<LyricSection>? = null
     groups.forEachIndexed { index, group ->
         if (isChorusGroup(group)) precedingChorus = group
         result.addAll(group)
-        if (!singsTheChorusAfterwards(group)) return@forEachIndexed
+        // A verse the song leaves out is not sung, so neither is a chorus after it.
+        if (!singsTheChorusAfterwards(group) || group.first().skipped) return@forEachIndexed
         // Already followed by a chorus as written — repeating it here would show it twice.
         if (groups.getOrNull(index + 1)?.let { isChorusGroup(it) } == true) return@forEachIndexed
         val chorus = precedingChorus ?: groups.drop(index + 1).firstOrNull { isChorusGroup(it) }
-        if (chorus != null) result.addAll(chorus)
+        // The repeat is not a written section of its own, so it carries no key to be skipped by:
+        // it is left out with the chorus it repeats.
+        if (chorus != null) result.addAll(chorus.map { it.copy(sectionKey = "") })
     }
 
     return result
 }
 
-internal fun SongsViewModel.isChorusGroup(group: List<LyricSection>): Boolean =
+internal fun isChorusGroup(group: List<LyricSection>): Boolean =
     group.first().type == Constants.SECTION_TYPE_CHORUS
 
 /** A verse is sung with the chorus after it; a bridge, an intro or a tag is not. */
-internal fun SongsViewModel.singsTheChorusAfterwards(group: List<LyricSection>): Boolean =
+internal fun singsTheChorusAfterwards(group: List<LyricSection>): Boolean =
     group.first().let { it.type == Constants.SECTION_TYPE_VERSE && isVerseHeader(it.header) }
 
 /**

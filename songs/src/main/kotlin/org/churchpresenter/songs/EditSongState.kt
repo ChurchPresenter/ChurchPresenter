@@ -80,6 +80,7 @@ internal class EditSongState(private val song: SongItem) {
     var author by mutableStateOf(song.author)
     var composer by mutableStateOf(song.composer)
     var ccli by mutableStateOf(song.ccliNumber)
+    var notes by mutableStateOf(song.notes)
     var lyrics by mutableStateOf(TextFieldValue(song.lyrics.joinToString("\n")))
 
     // One draft per language beside the primary, always [MAX_SONG_EXTRA_TRANSLATIONS] of them so a
@@ -236,6 +237,10 @@ internal class EditSongState(private val song: SongItem) {
         background = background,
         lowerThirdBackground = lowerThirdBackground,
         textOverrides = textOverrides,
+        skippedSections = skipKeysStillWritten(song.skippedSections, lyrics.text.split("\n"), title, number),
+        chorusRepeat = song.chorusRepeat,
+        notes = notes.trim(),
+        extraHeader = song.extraHeader,
     ).withTranslations(translations.map { it.toTranslation() })
 }
 

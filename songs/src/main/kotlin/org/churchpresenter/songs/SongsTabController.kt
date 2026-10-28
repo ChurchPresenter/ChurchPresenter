@@ -228,6 +228,19 @@ internal class SongsTabController(
         live.lineIndex = push.lineIndex
     }
 
+    /**
+     * Saves [song] with [change] applied — a verse ticked or unticked, the chorus rule changed in
+     * the lyrics panel — and puts it straight back on the output when it is the song that is live,
+     * the same way a save from the editor does.
+     */
+    fun changeArrangement(song: SongItem, change: (SongItem) -> SongItem) {
+        val updated = change(song)
+        val wasLive = isPresenting && live.songId == song.songId
+        if (viewModel.updateSong(song, updated) && wasLive) {
+            sendEditedSongToPresenter(updated, appSettings.tuningFor(song.songId))
+        }
+    }
+
     fun saveColWidths() {
         val dp = columns.widthsInDp()
         onSettingsChange { s ->

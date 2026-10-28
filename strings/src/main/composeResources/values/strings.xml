@@ -1931,6 +1931,13 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Song Title Slide</string>
+    <string name="song_section_sung">Sing %1$s</string>
+    <string name="song_chorus_repeat">Chorus</string>
+    <string name="song_chorus_repeat_settings">As in Settings</string>
+    <string name="song_chorus_repeat_on">After every verse</string>
+    <string name="song_chorus_repeat_off">As written</string>
+    <string name="song_notes">Notes</string>
+    <string name="song_notes_placeholder">Notes for whoever runs this song (not shown on screen)</string>
     <string name="show_song_number_before_title">Show song number before title</string>
 
     <!-- Stage Monitor Settings -->

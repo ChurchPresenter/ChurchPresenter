@@ -39,7 +39,7 @@ class EditSongChordsTest {
     }
 
     /** The lyrics box among the editor's typed fields; `EditSongContentTest` pins the order. */
-    private val LYRICS_FIELD = 7
+    private val LYRICS_FIELD = 8
 
     private fun song(lyrics: List<String>, secondaryLyrics: List<String> = emptyList()) = SongItem(
         number = "1",
