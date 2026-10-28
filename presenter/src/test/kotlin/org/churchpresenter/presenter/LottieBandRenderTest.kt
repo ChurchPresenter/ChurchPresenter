@@ -32,6 +32,8 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertTrue
+import kotlin.math.abs
 
 @OptIn(ExperimentalTestApi::class)
 class LottieBandRenderTest {
@@ -142,9 +144,81 @@ class LottieBandRenderTest {
         }
     }
 
+    /**
+     * Drawn as whole lines, a Tamil verse is placed by the band itself: the player would centre
+     * each line by its letters measured one at a time, which puts it far left of centre.
+     */
+    @Test
+    fun `a Tamil verse is centred line by line`() = runComposeUiTest {
+        val file = LottieBandTestSupport.writeTemplate(
+            dir,
+            cfg = BibleLottieGenConfig(
+                canvasW = 1920, canvasH = 194, textAnimation = TextAnimation.FADE,
+                textAlign = BandTextAlign.CENTER, referenceAlign = BandTextAlign.CENTER,
+            ),
+        )
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(bibleLowerThirdBackground = band(file)),
+            bibleSettings = BibleSettings().withTranslations(
+                listOf(
+                    BibleTranslationSettings(
+                        fileName = "tam.spb",
+                        lowerThirdTextFontType = TAMIL_FACE,
+                        lowerThirdReferenceFontType = TAMIL_FACE,
+                    ),
+                ),
+            ),
+        )
+        val tamil = verse(TAMIL_VERSE, "TAM").copy(translationFileName = "tam.spb", bookName = "2 தெசலோனிக்கேயர்")
+        drawsInk {
+            BiblePresenter(selectedVerses = listOf(tamil), appSettings = settings, isLowerThird = true)
+        }
+        lateinit var rows: List<IntRange>
+        waitUntil("the verse and its reference drawn", timeoutMillis = 5_000) {
+            rows = onNodeWithTag(SURFACE).captureToImage().toPixelMap().textRows()
+            rows.size >= 2
+        }
+        val width = onNodeWithTag(SURFACE).captureToImage().width
+        rows.forEach { span ->
+            val centre = (span.first + span.last) / 2f
+            assertTrue(abs(centre - width / 2f) < width * 0.01f, "a line spanning $span is centred in $width")
+        }
+    }
+
     private companion object {
         const val SURFACE = "surface"
+        const val TAMIL_FACE = "Noto Sans Tamil"
+        const val TAMIL_VERSE = "கர்த்தராகிய இயேசுவினாலே நாங்கள் உங்களுக்குக் கொடுத்த கட்டளைகளை " +
+            "அறிந்திருக்கிறீர்களே. நீங்கள் பரிசுத்தமுள்ளவர்களாகவேண்டுமென்பதே தேவனுடைய சித்தமாயிருக்கிறது."
     }
+}
+
+/** The horizontal extent of each run of rows holding white text, top to bottom. */
+private fun PixelMap.textRows(): List<IntRange> {
+    val spans = mutableListOf<IntRange>()
+    var left = Int.MAX_VALUE
+    var right = -1
+    for (y in 0 until height) {
+        var rowLeft = Int.MAX_VALUE
+        var rowRight = -1
+        for (x in 0 until width) {
+            val c = this[x, y]
+            if (c.red > 0.8f && c.green > 0.8f && c.blue > 0.8f) {
+                rowLeft = minOf(rowLeft, x)
+                rowRight = x
+            }
+        }
+        if (rowRight >= 0) {
+            left = minOf(left, rowLeft)
+            right = maxOf(right, rowRight)
+        } else if (right >= 0) {
+            spans += left..right
+            left = Int.MAX_VALUE
+            right = -1
+        }
+    }
+    if (right >= 0) spans += left..right
+    return spans
 }
 
 private fun PixelMap.inkCount(): Int {

@@ -1,0 +1,37 @@
+{
+  "protocol": 1,
+  "ownerId": "cp-7f3a",
+  "screen": {
+    "name": "Lobby touch",
+    "orientation": "landscape",
+    "width": 1920,
+    "height": 1080,
+    "kioskPinHash": "pbkdf2:100000:000102030405060708090a0b0c0d0e0f:6b27f7b5c0d56a1e644595b276cc3a6c9fffe1a44078e5a048e683b47fc1e4b8",
+    "kioskGesture": false,
+    "kioskGesturePlaylistId": "signup"
+  },
+  "playlists": [
+    {
+      "id": "signup",
+      "name": "Sign-up",
+      "items": [
+        {
+          "sha256": "",
+          "kind": "web",
+          "durationMs": null,
+          "transition": "crossfade",
+          "transitionMs": 800,
+          "url": "https://signup.example.org/fall-retreat",
+          "interactive": true,
+          "idleResetMs": 60000,
+          "allowedHosts": ["pay.example.com"]
+        }
+      ]
+    }
+  ],
+  "schedule": [],
+  "defaultPlaylistId": "signup",
+  "idleCard": { "title": "Grace Church", "logoSha256": null },
+  "timeZone": "America/Chicago",
+  "diagnostics": true
+}

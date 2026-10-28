@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -60,7 +61,63 @@ fun SettingsTextField(
     fillWidth: Boolean = false,
     /** The fill of the sunken well behind the text; unspecified is the theme's own well. */
     containerColor: Color = Color.Unspecified,
+) = SettingsTextFieldBody(
+    FieldValue.Plain(value, onValueChange), modifier, label, isError, supportingText, fillWidth, containerColor,
+    FieldOptions(
+        FieldInput(enabled, readOnly, keyboardOptions, keyboardActions, visualTransformation),
+        singleLine, maxLines, placeholder, trailingIcon,
+    ),
+)
+
+/**
+ * [SettingsTextField] holding its own [TextFieldValue], for a caller that places the cursor: a field
+ * that starts with text in it and is typed after it, say.
+ */
+@Composable
+fun SettingsTextField(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "",
+    enabled: Boolean = true,
+    singleLine: Boolean = true,
+    placeholder: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    supportingText: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    fillWidth: Boolean = false,
+) = SettingsTextFieldBody(
+    FieldValue.Rich(value, onValueChange), modifier, label, isError, supportingText, fillWidth, Color.Unspecified,
+    FieldOptions(
+        FieldInput(enabled, false, keyboardOptions, KeyboardActions.Default, VisualTransformation.None),
+        singleLine, if (singleLine) 1 else Int.MAX_VALUE, placeholder, null,
+    ),
+)
+
+/** What a field holds: plain text, or text with its cursor and selection. */
+private sealed interface FieldValue {
+    val text: String
+
+    class Plain(override val text: String, val onChange: (String) -> Unit) : FieldValue
+
+    class Rich(val value: TextFieldValue, val onChange: (TextFieldValue) -> Unit) : FieldValue {
+        override val text: String get() = value.text
+    }
+}
+
+@Suppress("LongParameterList") // the public fields' own parameters, passed through as they were given
+@Composable
+private fun SettingsTextFieldBody(
+    value: FieldValue,
+    modifier: Modifier,
+    label: String,
+    isError: Boolean,
+    supportingText: @Composable (() -> Unit)?,
+    fillWidth: Boolean,
+    containerColor: Color,
+    options: FieldOptions,
 ) {
+    val enabled = options.enabled
     val hasLabel = label.isNotEmpty()
     val interactionSource = remember { MutableInteractionSource() }
     // The one thing on this field that says which of the two dozen boxes on a settings screen a
@@ -77,13 +134,11 @@ fun SettingsTextField(
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
 
     val chrome = FieldChrome(interactionSource, borderColor, textColor, containerColor, elevationPalette())
-    val input = FieldInput(enabled, readOnly, keyboardOptions, keyboardActions, visualTransformation)
-    val options = FieldOptions(input, singleLine, maxLines, placeholder, trailingIcon)
     Column(modifier = modifier) {
         if (hasLabel) {
-            LabelledField(value, onValueChange, label, fillWidth, chrome, options)
+            LabelledField(value, label, fillWidth, chrome, options)
         } else {
-            PlainField(value, onValueChange, chrome, options)
+            PlainField(value, chrome, options)
         }
         if (supportingText != null) {
             CompositionLocalProvider(
@@ -134,8 +189,7 @@ private class FieldOptions(
  */
 @Composable
 private fun LabelledField(
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: FieldValue,
     label: String,
     fillWidth: Boolean,
     chrome: FieldChrome,
@@ -165,31 +219,13 @@ private fun LabelledField(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier.weight(1f),
-                enabled = o.input.enabled,
-                readOnly = o.input.readOnly,
-                singleLine = o.singleLine,
-                maxLines = o.maxLines,
-                minLines = if (o.singleLine) 1 else MULTI_LINE_MIN_LINES,
-                textStyle = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.sp,
-                    color = chrome.textColor
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = o.input.keyboardOptions,
-                keyboardActions = o.input.keyboardActions,
-                visualTransformation = o.input.visualTransformation,
-                interactionSource = chrome.interactionSource,
-                decorationBox = { innerTextField ->
-                    Box(contentAlignment = Alignment.CenterStart) {
-                        Placeholder(o.placeholder, value)
-                        innerTextField()
-                    }
+            val minLines = if (o.singleLine) 1 else MULTI_LINE_MIN_LINES
+            FieldText(value, Modifier.weight(1f), chrome, o, minLines) { innerTextField ->
+                Box(contentAlignment = Alignment.CenterStart) {
+                    Placeholder(o.placeholder, value.text)
+                    innerTextField()
                 }
-            )
+            }
             if (o.trailingIcon != null) {
                 Box(modifier = Modifier.padding(start = 4.dp)) { o.trailingIcon.invoke() }
             }
@@ -199,45 +235,78 @@ private fun LabelledField(
 
 /** The plain bordered box, used where there is no caption. */
 @Composable
-private fun PlainField(value: String, onValueChange: (String) -> Unit, chrome: FieldChrome, o: FieldOptions) {
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(if (o.singleLine) Modifier.height(28.dp) else Modifier.padding(vertical = 5.dp))
-            .sunken(FieldShape, chrome.palette, chrome.containerColor, chrome.borderColor)
-            .hoverTint(FieldShape),
-        enabled = o.input.enabled,
-        readOnly = o.input.readOnly,
-        singleLine = o.singleLine,
-        maxLines = o.maxLines,
-        textStyle = MaterialTheme.typography.bodySmall.copy(
-            fontSize = 12.sp,
-            color = chrome.textColor
-        ),
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        keyboardOptions = o.input.keyboardOptions,
-        keyboardActions = o.input.keyboardActions,
-        visualTransformation = o.input.visualTransformation,
-        interactionSource = chrome.interactionSource,
-        decorationBox = { innerTextField ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 9.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                    Placeholder(o.placeholder, value)
-                    innerTextField()
-                }
-                if (o.trailingIcon != null) {
-                    Box(modifier = Modifier.padding(start = 4.dp)) { o.trailingIcon.invoke() }
-                }
+private fun PlainField(value: FieldValue, chrome: FieldChrome, o: FieldOptions) {
+    val modifier = Modifier
+        .fillMaxWidth()
+        .then(if (o.singleLine) Modifier.height(28.dp) else Modifier.padding(vertical = 5.dp))
+        .sunken(FieldShape, chrome.palette, chrome.containerColor, chrome.borderColor)
+        .hoverTint(FieldShape)
+    FieldText(value, modifier, chrome, o, minLines = 1) { innerTextField ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 9.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                Placeholder(o.placeholder, value.text)
+                innerTextField()
+            }
+            if (o.trailingIcon != null) {
+                Box(modifier = Modifier.padding(start = 4.dp)) { o.trailingIcon.invoke() }
             }
         }
-    )
+    }
+}
+
+/** The `BasicTextField` for [value]'s kind, styled as every settings field is. */
+@Composable
+private fun FieldText(
+    value: FieldValue,
+    modifier: Modifier,
+    chrome: FieldChrome,
+    o: FieldOptions,
+    minLines: Int,
+    decorationBox: @Composable (innerTextField: @Composable () -> Unit) -> Unit,
+) {
+    val textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, color = chrome.textColor)
+    val cursor = SolidColor(MaterialTheme.colorScheme.primary)
+    when (value) {
+        is FieldValue.Plain -> BasicTextField(
+            value = value.text,
+            onValueChange = value.onChange,
+            modifier = modifier,
+            enabled = o.input.enabled,
+            readOnly = o.input.readOnly,
+            singleLine = o.singleLine,
+            maxLines = o.maxLines,
+            minLines = minLines,
+            textStyle = textStyle,
+            cursorBrush = cursor,
+            keyboardOptions = o.input.keyboardOptions,
+            keyboardActions = o.input.keyboardActions,
+            visualTransformation = o.input.visualTransformation,
+            interactionSource = chrome.interactionSource,
+            decorationBox = decorationBox,
+        )
+        is FieldValue.Rich -> BasicTextField(
+            value = value.value,
+            onValueChange = value.onChange,
+            modifier = modifier,
+            enabled = o.input.enabled,
+            readOnly = o.input.readOnly,
+            singleLine = o.singleLine,
+            maxLines = o.maxLines,
+            minLines = minLines,
+            textStyle = textStyle,
+            cursorBrush = cursor,
+            keyboardOptions = o.input.keyboardOptions,
+            keyboardActions = o.input.keyboardActions,
+            visualTransformation = o.input.visualTransformation,
+            interactionSource = chrome.interactionSource,
+            decorationBox = decorationBox,
+        )
+    }
 }
 
 /** The dimmed placeholder, shown while the field is empty. */

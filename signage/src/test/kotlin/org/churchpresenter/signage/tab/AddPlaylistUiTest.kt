@@ -80,7 +80,7 @@ class AddPlaylistUiTest {
         onNodeWithText("Link…").performClick()
     }
 
-    private fun ComposeUiTest.address() = onAllNodesWithText("Address")[0]
+    private fun ComposeUiTest.address() = field(LINK_ADDRESS_TAG)
 
     /** The dialog's Add button: the panel's own Add menu button comes first. */
     private fun ComposeUiTest.dialogAdd() = onAllNodesWithText("Add").onLast()
@@ -125,7 +125,7 @@ class AddPlaylistUiTest {
         onNodeWithText("Web page").performClick()
         onNodeWithText("Web page").assertIsSelected()
         onNodeWithText("Smooth motion").performClick()
-        onAllNodesWithText("Name")[0].performTextInput("Ticker")
+        field(LINK_NAME_TAG).performTextInput("Ticker")
         dialogAdd().performClick()
         assertEquals(listOf(NewLink("Ticker", "https://example.org/live.m3u8", LinkKind.WEB, 0, smooth = true)), links)
     }
@@ -135,7 +135,7 @@ class AddPlaylistUiTest {
         onNodeWithText("Add").performClick()
         onNodeWithText("Rotation…").performClick()
         // A new rotation offers every entry but a rotation.
-        onAllNodesWithText("Name")[0].performTextInput("Mornings")
+        field(ROTATION_NAME_TAG).performTextInput("Mornings")
         onNodeWithText("Add step").performClick()
         onNodeWithText("Save").performClick()
         onNodeWithContentDescription("Edit rotation").performClick()
@@ -159,7 +159,7 @@ class AddPlaylistUiTest {
         // A link opens the Link dialog, filled in.
         onNodeWithContentDescription("Edit link").performClick()
         address().assertTextContains("https://weather.example.org")
-        val name = onAllNodesWithText("Name")[0]
+        val name = field(LINK_NAME_TAG)
         name.performTextClearance()
         name.performTextInput("Forecast")
         onNodeWithText("Save").performClick()

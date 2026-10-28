@@ -45,6 +45,7 @@ import org.churchpresenter.sharedui.composables.keyColorFilter
 import org.churchpresenter.lowerthird.render.LottieFonts
 import org.churchpresenter.lottiegen.band.BandLayerNames
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
+import org.churchpresenter.lottiegen.lottie.ShapedLines
 import org.churchpresenter.settings.utils.Constants
 
 /** The output height the Bible font sizes are specified against, as the classic band scales them. */
@@ -82,6 +83,12 @@ private data class SlotRender(
     /** Where the second voice's words sit — null when the slot has none to colour. */
     val voice: BandVoice? = null,
     val voiceColor: Color = color,
+    /**
+     * What goes before each of the lines in [text] when they are drawn as whole lines: the player
+     * is told to draw them from the left, and this puts each where [justify] would (see
+     * [ShapedLines]). Empty when the player places the lines itself.
+     */
+    val pads: List<String> = emptyList(),
 )
 
 /** What a slot draws with — one content type's lower-third typography, resolved for the key role. */
@@ -243,6 +250,10 @@ private fun BandLayer(
         if (template.meta.textMotion != BandTextMotion.TICKER) plain else tickerTexts(plain)
     }
 
+    // Judged on the words being shown, not the file's sample: those are the player's to replace.
+    val groupsText = remember(template.meta.textShaping, texts) {
+        LottieTextShaping.groupsText(template.meta.textShaping, texts.values)
+    }
     val pxPerPoint = template.height / (bandFraction * REFERENCE_OUTPUT_HEIGHT)
     val measurer = rememberBandTextMeasurer()
     val renders: Map<String, State<SlotRender>> = BibleLottieTemplate.TEXT_LAYERS
@@ -259,7 +270,7 @@ private fun BandLayer(
                 else -> style.copy(justify = pinned.toJustify())
             }
             val ascent = template.textAscents[name] ?: 0f
-            val geometry = SlotGeometry(box, pxPerPoint, singleLine, template.meta.textMotion, ascent)
+            val geometry = SlotGeometry(box, pxPerPoint, singleLine, template.meta.textMotion, ascent, groupsText)
             // A ticker puts the reference ahead of the text, so the voice's places move along by it.
             val lead = text.length - slots[name]?.text.orEmpty().length
             val voiceRanges = if (lead < 0) {
@@ -300,10 +311,6 @@ private fun BandLayer(
         }
     }
 
-    // Judged on the words being shown, not the file's sample: those are the player's to replace.
-    val groupsText = remember(template.meta.textShaping, texts) {
-        LottieTextShaping.groupsText(template.meta.textShaping, texts.values)
-    }
     val painter = rememberLottiePainter(
         composition = composition,
         progress = progress,
@@ -397,6 +404,8 @@ private data class SlotGeometry(
     val motion: BandTextMotion,
     /** The ascent the layer's font declares, as a fraction of the em — 0 when it declares none. */
     val ascent: Float,
+    /** Whether the player draws whole lines (see `TextShaping`), which the band then lays out itself. */
+    val wholeLines: Boolean = false,
 )
 
 /** The fitted, centred layout of one slot, from its text and style alone. */
@@ -428,7 +437,13 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
     // draw over each other. Given lines that fit, it never wraps, and the margin keeps a
     // rounding difference between its measure and this one from making it.
     val fitBox = if (isTicker) box.copy(w = Float.MAX_VALUE) else box.copy(w = box.w * WRAP_SAFETY)
-    val fitted = fitLottieSlot(SlotFitRequest(text, fitBox, baseSize, trackingPx, singleLine && !isTicker), charWidth)
+    val shaped = if (geometry.wholeLines) ShapedLines.measuredBy(measurer, textStyle) else null
+    val measure = if (shaped == null) perCharMeasure(trackingPx, charWidth) else shapedMeasure(shaped)
+    val fitted = fitLottieSlot(SlotFitRequest(text, fitBox, baseSize, trackingPx, singleLine && !isTicker), measure)
+    val scale = fitted.fontSize / baseSize
+    // A ticker is one line drawn from the left already; anything else drawn as whole lines is
+    // placed by the band, line by line (see SlotRender.pads).
+    val placed = if (shaped == null || isTicker) null else placeLines(shaped, fitted.lines, box, style.justify, scale)
     val lineHeight = fitted.fontSize * LINE_HEIGHT_FACTOR
     val blockHeight = fitted.lines.size * lineHeight
     // The player draws the first line's top at `ps.y - fontSize * (1 - ascent)`, the ascent being
@@ -446,16 +461,17 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
             box = box,
             top = top,
             lineHeight = lineHeight,
+            lineLefts = placed?.lefts,
         ),
-        text.toSet().associateWith { c -> (charWidth(c) + trackingPx) * fitted.fontSize / baseSize },
+        voiceRunWidth(shaped, text, scale) { c -> charWidth(c) + trackingPx },
     )
     return SlotRender(
         text = if (isTicker) text else fitted.lines.joinToString("\n"),
         fontSize = fitted.fontSize,
         color = style.color,
         tracking = (fitted.fontSize / baseSize) * trackingPx * TRACKING_SCALE,
-        justify = if (isTicker) TextJustify.Left else style.justify,
-        box = if (isTicker) box.copy(w = fitted.lineWidthPx + box.w) else box,
+        justify = playerJustify(style.justify, isTicker, placed),
+        box = playerBox(box, isTicker, placed, fitted.lineWidthPx),
         slot = box,
         position = Offset(box.x, top + fitted.fontSize * (1f - geometry.ascent)),
         lineWidth = fitted.lineWidthPx,
@@ -466,6 +482,7 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
         shadowOffset = Offset(shadowPx, shadowPx),
         voice = voice,
         voiceColor = style.secondVoiceColor,
+        pads = placed?.pads.orEmpty(),
     )
 }
 
@@ -480,7 +497,10 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
 ) {
     val textIn = template.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
     val textOut = template.segment(BibleLottieTemplate.SEGMENT_TEXT_OUT)
-    text { revealedText(template, state.value.text, frame) }
+    text {
+        val r = state.value
+        ShapedLines.applyPadding(revealedText(template, r.text, frame), r.pads)
+    }
     fontSize { state.value.fontSize }
     lineHeight { state.value.fontSize * LINE_HEIGHT_FACTOR }
     fillColor {

@@ -55,6 +55,12 @@ data class ScreenPlan(
     val schedule: List<ScheduleBlock> = emptyList(),
     /** How the screen is mounted: everything it shows is turned to match. */
     val orientation: Orientation = Orientation.LANDSCAPE,
+    /** What the screen's touch gesture asks for, as `KioskPin.hash` makes it; no PIN when null. */
+    val kioskPinHash: String? = null,
+    /** Whether holding the screen's corner switches to and from a touch page. */
+    val kioskGesture: Boolean = true,
+    /** The playlist the corner switches to; the first with a touch page when null. */
+    val kioskGesturePlaylistId: String? = null,
 ) {
     companion object {
         /** The screen plays nothing and holds no content: it shows its idle card. */

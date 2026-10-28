@@ -1,5 +1,7 @@
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +20,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.composables.DropdownSettingsField
@@ -84,12 +85,12 @@ internal fun RotationDialog(
                     .heightIn(max = DIALOG_MAX_HEIGHT)
                     .verticalScroll(rememberScrollState()),
             ) {
-                OutlinedTextField(
+                SettingsTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(Res.string.signage_rotation_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    label = stringResource(Res.string.signage_rotation_name),
+                    fillWidth = true,
+                    modifier = Modifier.fillMaxWidth().testTag(ROTATION_NAME_TAG),
                 )
                 steps.forEachIndexed { index, step ->
                     StepRow(
@@ -107,7 +108,7 @@ internal fun RotationDialog(
                         isLast = index == steps.lastIndex,
                     )
                 }
-                TextButton(
+                RingedGhostButton(
                     onClick = { entries.firstOrNull()?.let { steps += defaultStep(it) } },
                     enabled = entries.isNotEmpty(),
                 ) {
@@ -123,7 +124,7 @@ internal fun RotationDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            RaisedButton(
                 onClick = {
                     onSave(name, steps.toList())
                     onDismiss()
@@ -131,7 +132,7 @@ internal fun RotationDialog(
                 enabled = name.isNotBlank() && steps.isNotEmpty(),
             ) { Text(stringResource(Res.string.save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { RingedGhostButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
@@ -211,6 +212,9 @@ internal fun defaultStep(entry: PlaylistSummary): RotationStep = RotationStep(
 private const val LINK_SECONDS = 60
 private const val PICTURE_SECONDS = 10
 private val SECONDS = 0..86_400
+
+/** The name field, whose caption is drawn apart from the box a test types into. */
+internal const val ROTATION_NAME_TAG = "signage-rotation-name"
 private val DIALOG_WIDTH = 560.dp
 private val DIALOG_MAX_HEIGHT = 520.dp
 private val SECONDS_WIDTH = 130.dp

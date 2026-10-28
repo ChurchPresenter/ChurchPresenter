@@ -49,6 +49,7 @@ import org.churchpresenter.lottiegen.band.BandContentKind
 import org.churchpresenter.lottiegen.band.BandEntrance
 import org.churchpresenter.lottiegen.band.BandImage
 import org.churchpresenter.lottiegen.band.BandStyle
+import org.churchpresenter.lottiegen.band.BandTextAlign
 import org.churchpresenter.lottiegen.band.BibleLottieGenApp
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.BibleLottieGenerator
@@ -151,6 +152,15 @@ class LottieBandScreenshotTest {
     fun `the scripture band's key signal`() =
         shootBible("bible_key", listOf(verse()), outputRole = Constants.OUTPUT_ROLE_KEY)
 
+    /** Tamil is drawn as whole lines and placed by the band, each line centred by its shaped width. */
+    @Test
+    fun `a Tamil scripture band, centred`() = shootBible(
+        "bible_tamil",
+        listOf(verse(text = TAMIL_VERSE, fileName = TAMIL_FILE, abbreviation = "TAM").copy(bookName = TAMIL_BOOK)),
+        bibleSettings(fileName = TAMIL_FILE, font = TAMIL_FACE),
+        BibleLottieGenConfig(textAlign = BandTextAlign.CENTER, referenceAlign = BandTextAlign.CENTER),
+    )
+
     @Test
     fun `a lyric band`() = shootSong("song", song())
 
@@ -175,6 +185,19 @@ class LottieBandScreenshotTest {
     /** Seeded as the settings tabs seed it, so the sample text and sizes are the ones a user sees. */
     @Test
     fun `the generator`() = generator("generator", lottieBandSeed(AppSettings(), BackgroundScope.BIBLE_LOWER_THIRD))
+
+    /** The preview places Tamil the way the band does, so what it shows is what plays. */
+    @Test
+    fun `the generator with a Tamil sample`() = generator(
+        "generator_tamil",
+        lottieBandSeed(AppSettings(), BackgroundScope.BIBLE_LOWER_THIRD).copy(
+            previewFontFamily = TAMIL_FACE,
+            previewText1 = TAMIL_VERSE,
+            previewReference1 = "$TAMIL_BOOK 4:2",
+            textAlign = BandTextAlign.CENTER,
+            referenceAlign = BandTextAlign.CENTER,
+        ),
+    )
 
     @Test
     fun `the generator for songs`() =
@@ -365,15 +388,19 @@ class LottieBandScreenshotTest {
         textBold: Boolean = false,
         textShadow: Boolean = false,
         referenceColor: String = BibleSettings().primaryReferenceLowerThirdColor,
+        fileName: String = KJV,
+        font: String = BibleTranslationSettings().lowerThirdTextFontType,
     ) = AppSettings(
         bibleSettings = BibleSettings(
             translations = listOf(
                 BibleTranslationSettings(
-                    fileName = KJV,
+                    fileName = fileName,
                     lowerThirdTextColor = textColor,
                     lowerThirdTextBold = textBold,
                     lowerThirdTextShadow = textShadow,
                     lowerThirdReferenceColor = referenceColor,
+                    lowerThirdTextFontType = font,
+                    lowerThirdReferenceFontType = font,
                 ),
             ),
         ),
@@ -442,6 +469,11 @@ class LottieBandScreenshotTest {
         const val SECTION = "lottieBand"
         const val LAST_CONFIG = ".churchpresenter/churchpresenter-lottiegen/bible-band-last.json"
         const val KJV = "kjv.spb"
+        const val TAMIL_FILE = "tam.spb"
+        const val TAMIL_FACE = "Noto Sans Tamil"
+        const val TAMIL_BOOK = "2 தெசலோனிக்கேயர்"
+        const val TAMIL_VERSE = "கர்த்தராகிய இயேசுவினாலே நாங்கள் உங்களுக்குக் கொடுத்த கட்டளைகளை " +
+            "அறிந்திருக்கிறீர்களே. நீங்கள் பரிசுத்தமுள்ளவர்களாகவேண்டுமென்பதே தேவனுடைய சித்தமாயிருக்கிறது."
         val TRANSLATION_FILES = listOf(KJV, "rst.spb")
         val FIXTURES = File("build/screenshot-fixtures/lottie-band")
 
