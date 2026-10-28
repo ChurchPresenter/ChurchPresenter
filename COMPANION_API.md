@@ -55,7 +55,7 @@ for its permissions. Read `GET /api/status`'s `permissions` to hide what would b
 | Control the screen | `POST /api/songs/{number}/select`, `/api/bible/select`, `/api/presentations/{id}/select`, `/api/pictures/select`, `/api/clear`, `/api/take`, `/api/lowerthirds/…`, `/api/atem/…`, `/api/message`, `/api/props/…`, `/api/macro/…`; every WebSocket command that changes the screen (`select_*`, `next_*`, `previous_*`, `media_*`, `clear`, `take`, `bible_hold`, `message`, `prop`, `macro`) |
 | Add to the schedule | `POST /api/schedule/add`, `/api/schedule/add-batch`; WS `add_to_schedule`, `add_batch_to_schedule` |
 | Remove from the schedule | WS `remove_from_schedule` |
-| Go live | `POST /api/project`; WS `project` |
+| Go live | `POST /api/project`, `/api/drawing/frame`, `/api/drawing/end`; WS `project` |
 | Upload files | `POST /api/presentations/upload`, `/api/pictures/upload`, `/api/media/upload` |
 
 A sixth switch, *Show activity notifications*, refuses nothing: it decides whether what the device
@@ -87,7 +87,7 @@ curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
 
 ## Route Index
 
-Every HTTP and WebSocket route the server registers (90). Paths are written exactly as the server
+Every HTTP and WebSocket route the server registers (92). Paths are written exactly as the server
 registers them; `{name}` is a path parameter.
 
 ### Info, songs and schedule
@@ -145,6 +145,8 @@ registers them; `{name}` is a path parameter.
 | `GET /api/media/stream/{id}` | API key | — | Range requests supported |
 | `GET /api/backgrounds` | API key | — | Background settings JSON |
 | `GET /api/backgrounds/asset/{slot}` | API key | — | Background image/video bytes |
+| `POST /api/drawing/frame` | API key | — | *approval* with `takeOver=true`; raw PNG bytes — see Drawing |
+| `POST /api/drawing/end` | API key | — | Takes the device's drawing down — see Drawing |
 
 ### Presentation remote
 
@@ -1319,6 +1321,62 @@ only the latest device upload is kept. Answers `{"ok":true,"id":"<hex>","name":"
 Saves the image into that day's *Device Photos* folder and broadcasts `pictures_updated` with it.
 Answers `{"ok":true,"folder-id":"…","image-index":3,"file-name":"photo.jpg"}`; the folder is then
 served by `/api/pictures/{id}` and can be shown with `POST /api/pictures/select`.
+
+---
+
+## Drawing
+
+A page drawn on a phone or tablet — the mobile app's Canvas — shown on the outputs. The device
+sends a picture of the page after each edit; the desktop keeps only the latest, in memory, and
+draws it fitted to the screen on the page's own background colour. Both routes need the *Go live*
+permission. (The desktop's own Canvas tab is something else: its scene editor.)
+
+### `POST /api/drawing/frame?takeOver=true|false&paper=%23RRGGBB&title=…`
+
+The body is the page as **raw PNG bytes** (`Content-Type: image/png`), at most 8 MB. `paper` is
+the page's background as `#RRGGBB` (black when missing); `title` names the drawing for the
+operator's prompt.
+
+- **`takeOver=true` is Go Live.** It asks the operator exactly as `POST /api/project` does — a
+  trusted device goes straight through, a blocked one is refused — and **suspends until they
+  answer**. Pages the device sends meanwhile replace the page waiting, so what goes live is the
+  page as it is when the operator allows it. A second Go Live from the same device replaces the
+  first request, which is answered as denied.
+- **Without `takeOver`** a page replaces the one on screen only while that device's drawing is
+  what is live, and never asks. Once anything else has gone live — or the drawing has been ended —
+  the page is dropped and the next Go Live asks again.
+
+```bash
+curl -k -X POST "https://192.168.1.10:8765/api/drawing/frame?takeOver=true&paper=%231B1D26&title=Sermon" \
+  -H "X-Device-Id: tablet-1" -H "Content-Type: image/png" --data-binary @page.png
+```
+
+**Shown** (Go Live allowed, or a page replacing the live one):
+```json
+{ "ok": true, "showing": true }
+```
+
+**Not shown** (a page while something else is live, or while its Go Live is still waiting):
+```json
+{ "ok": true, "showing": false }
+```
+
+**Denied** (`403`; the operator said no, or the device ended before they answered):
+```json
+{ "ok": false, "reason": "denied", "showing": false }
+```
+
+`413 {"ok":false,"reason":"too_large"}` for a page over 8 MB; `400 {"ok":false,"reason":"bad_image"}`
+for one that is not a PNG.
+
+While the drawing is up, `live_state_changed` reports `"liveSlide": "DRAWING"`. Read `liveSlide`,
+not `contentType`, to tell whether it is still on screen: `contentType` names whatever change set
+off that broadcast.
+
+### `POST /api/drawing/end`
+
+Takes the device's drawing down if it is the one live (the outputs clear as for Clear Display),
+and withdraws its Go Live if one is still waiting. Always answers `{"ok":true}`.
 
 ---
 

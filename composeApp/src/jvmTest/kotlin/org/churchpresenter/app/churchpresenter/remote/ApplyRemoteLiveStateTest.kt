@@ -14,6 +14,7 @@ import org.churchpresenter.app.churchpresenter.testPort
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -126,6 +127,35 @@ class ApplyRemoteLiveStateTest {
         // silently highlight the first line.
         assertEquals(-1, presenter.songDisplaySectionIndex.value)
         assertEquals(-1, presenter.songDisplayLineIndex.value)
+    }
+
+    @Test
+    fun `a section's label becomes its header`() {
+        val labelled = apply(
+            LiveStateDto(
+                contentType = "LYRICS", songTitle = "Amazing Grace", sectionType = "verse", sectionLabel = "2",
+            ),
+        )
+        val bare = apply(LiveStateDto(contentType = "LYRICS", songTitle = "Amazing Grace"))
+
+        assertNotNull(labelled.lyricSection.value.header, "a labelled section is headed")
+        assertNull(bare.lyricSection.value.header, "an unlabelled one is not")
+    }
+
+    @Test
+    fun `a label with no section type is still a header`() {
+        val presenter = apply(
+            LiveStateDto(contentType = "LYRICS", songTitle = "Amazing Grace", sectionLabel = "Bridge"),
+        )
+
+        assertNotNull(presenter.lyricSection.value.header)
+    }
+
+    @Test
+    fun `a picture state without its index puts no picture up`() {
+        val presenter = apply(LiveStateDto(contentType = "PICTURES", pictureFolderId = "folder-1"))
+
+        assertEquals(PresenterManager().selectedImagePath.value, presenter.selectedImagePath.value)
     }
 
     // ── Announcements ───────────────────────────────────────────────────────────

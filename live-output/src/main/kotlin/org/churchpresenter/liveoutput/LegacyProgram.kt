@@ -34,6 +34,7 @@ private fun legacyCue(mode: Presenting, live: PresenterManager): Cue? = when (mo
         Cue.Song(live.displayedLyricSection.value, it.sectionIndex, it.lineIndex)
     }
     Presenting.PICTURES -> Cue.Picture(live.displayedImagePath.value)
+    Presenting.DRAWING -> Cue.Drawing(live.drawingRevision.value)
     Presenting.PRESENTATION -> live.liveSlide.value.let { Cue.PresentationSlide(it?.fileName, it?.index ?: -1) }
     Presenting.MEDIA -> mediaCue(live.currentMediaUrl.value, live.currentMediaType.value)
     Presenting.LOWER_THIRD -> Cue.LowerThird(live.currentLowerThirdName.value)
@@ -56,6 +57,7 @@ val Cue.content: Presenting get() = when (this) {
     is Cue.Background -> Presenting.NONE
     is Cue.Video, is Cue.Audio -> Presenting.MEDIA
     is Cue.Picture -> Presenting.PICTURES
+    is Cue.Drawing -> Presenting.DRAWING
     is Cue.Verses -> Presenting.BIBLE
     is Cue.Song -> Presenting.LYRICS
     is Cue.PresentationSlide -> Presenting.PRESENTATION

@@ -89,7 +89,7 @@ internal fun Route.webSocketRoute(
                             .onSubscription { subscribed.complete(Unit) }
                             .collect { message ->
                                 snapshotSent.await()
-                                send(Frame.Text(message))
+                                send(Frame.Text(if (isInstanceLinkFollower) message else phoneFrame(message, json)))
                             }
                     }
                     // A scope already cancelled (server stopping) never runs the block above, so the
@@ -106,7 +106,7 @@ internal fun Route.webSocketRoute(
                     coroutineContext.job.invokeOnCompletion { broadcastJob.cancel() }
                     subscribed.await()
 
-                    sendConnectSnapshot(server, json)
+                    sendConnectSnapshot(server, json, toPhone = !isInstanceLinkFollower)
                     // The snapshot is complete; anything the collector queued during it now flows.
                     snapshotSent.complete(Unit)
 
@@ -187,12 +187,14 @@ internal suspend fun DefaultWebSocketServerSession.sendCommandAck(
 private suspend fun DefaultWebSocketServerSession.sendConnectSnapshot(
     server: CompanionServer,
     json: Json,
+    toPhone: Boolean,
 ) {
     val catalog = server._catalog.value
     val schedule = server._schedule.value
+    // A phone gets the bare signal and fetches /api/songs itself; see phoneFrame.
+    val songs = if (toPhone) "" else json.encodeToString(SongCatalogResponse.serializer(), catalog)
     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
-        WebSocketMessage(Constants.WS_EVENT_SONGS_UPDATED,
-            json.encodeToString(SongCatalogResponse.serializer(), catalog)))))
+        WebSocketMessage(Constants.WS_EVENT_SONGS_UPDATED, songs))))
     server._bibleCatalog.value?.let { bibleCatalog ->
         send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
             WebSocketMessage(Constants.WS_EVENT_BIBLE_UPDATED,
@@ -262,3 +264,25 @@ private fun frameRefused(wsClientId: String, e: Exception) {
         mapOf("deviceId" to wsClientId, "reason" to e.message)
     )
 }
+
+/**
+ * What a phone is sent in place of [frame]: the same message, with its payload dropped
+ * when the frame is over [PHONE_FRAME_LIMIT] characters.
+ *
+ * iOS refuses a WebSocket message over 1 MB and closes the socket. The song catalog
+ * alone is past that for a large library — 857 KB of mostly Cyrillic text is about
+ * 1.5 MB on the wire — so every iPad connect died seconds after it opened, and the
+ * app could neither project nor add to the schedule. The app reads songs_updated,
+ * bible_updated and pictures_updated only as "fetch it again", so the empty payload
+ * loses nothing; an Instance Link follower, which does read the catalog, is sent the
+ * frame untouched.
+ */
+internal fun phoneFrame(frame: String, json: Json): String {
+    if (frame.length <= PHONE_FRAME_LIMIT) return frame
+    val message = runCatching { json.decodeFromString(WebSocketMessage.serializer(), frame) }.getOrNull()
+        ?: return frame
+    return json.encodeToString(WebSocketMessage.serializer(), message.copy(payload = ""))
+}
+
+/** Half of iOS's 1 MB message limit in characters, so even two-byte text stays under it. */
+private const val PHONE_FRAME_LIMIT = 512 * 1024

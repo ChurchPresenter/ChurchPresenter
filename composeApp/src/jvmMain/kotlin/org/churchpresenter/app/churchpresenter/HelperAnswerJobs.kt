@@ -11,6 +11,7 @@ import org.churchpresenter.strings.generated.resources.message_title
 import org.churchpresenter.strings.generated.resources.props_title
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_live_announcement
+import org.churchpresenter.strings.generated.resources.helper_live_drawing
 import org.churchpresenter.strings.generated.resources.helper_live_countdown
 import org.churchpresenter.strings.generated.resources.helper_live_nothing
 import org.churchpresenter.strings.generated.resources.helper_live_now
@@ -47,6 +48,8 @@ private fun AppRootState.describeLive(mode: Presenting): HelperText? = when (mod
         helperText(Res.string.helper_live_announcement, presenterManager.announcementText.value)
     }
     Presenting.PICTURES -> helperTabName(Tabs.PICTURES)
+    // A drawing has no tab: it comes from a phone or tablet's canvas, through the companion server.
+    Presenting.DRAWING -> helperText(Res.string.helper_live_drawing)
     Presenting.PRESENTATION -> helperTabName(Tabs.PRESENTATION)
     Presenting.MEDIA -> helperTabName(Tabs.MEDIA)
     Presenting.LOWER_THIRD -> helperTabName(Tabs.LOWER_THIRD)

@@ -15,7 +15,8 @@ import org.churchpresenter.sharedui.models.Presenting
 fun showsContentFor(mode: Presenting, profile: OutputProfile): Boolean = when (mode) {
     Presenting.BIBLE -> profile.showBible
     Presenting.LYRICS -> profile.showSongs
-    Presenting.PICTURES, Presenting.PRESENTATION -> profile.look.media.pictures
+    // A drawing reaches the screen as a picture of the page, so it shows where pictures do.
+    Presenting.PICTURES, Presenting.DRAWING, Presenting.PRESENTATION -> profile.look.media.pictures
     Presenting.ANNOUNCEMENTS -> profile.look.announcements
     Presenting.LOWER_THIRD -> profile.look.graphics
     Presenting.MEDIA -> profile.look.media.video

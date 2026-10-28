@@ -32,6 +32,14 @@ sealed interface Cue {
         override val layer get() = Layer.MEDIA
     }
 
+    /**
+     * A page drawn on a remote device's canvas, full frame. [frame] counts the pictures received,
+     * so each new one is a new cue while the same picture is the same cue.
+     */
+    data class Drawing(val frame: Long) : Cue {
+        override val layer get() = Layer.MEDIA
+    }
+
     /** Bible verses, primary and secondary language together. */
     data class Verses(val verses: List<SelectedVerse>) : Cue {
         override val layer get() = Layer.SLIDE

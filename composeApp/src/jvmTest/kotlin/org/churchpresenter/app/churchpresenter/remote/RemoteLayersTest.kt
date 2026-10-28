@@ -56,6 +56,15 @@ class RemoteLayersTest {
     }
 
     @Test
+    fun `a primary that names no slide puts no slide up here`() {
+        val noSlide = state(Presenting.LYRICS, slide = null, overlays = emptyList())
+
+        followAir(noSlide, Presenting.LYRICS, follower, everything)
+
+        assertEquals(Presenting.NONE, follower.slideContent.value)
+    }
+
+    @Test
     fun `content the primary is not showing does not go live`() {
         follower.setPresentingMode(Presenting.BIBLE)
         followAir(state(Presenting.LYRICS, Presenting.BIBLE, emptyList()), Presenting.LYRICS, follower, everything)
@@ -183,6 +192,15 @@ class RemoteLayersTest {
         assertEquals(null, follower.messageOnAir?.durationSeconds, "the primary's clock takes it down")
         followMessage(withMessage(null), follower, everything)
         assertEquals(null, follower.messageOnAir)
+    }
+
+    @Test
+    fun `the same message again is left up rather than put up afresh`() {
+        follower.showMessage(Cue.Message("Nursery #4", durationSeconds = 30))
+
+        followMessage(withMessage("Nursery #4"), follower, everything)
+
+        assertEquals(30, follower.messageOnAir?.durationSeconds, "re-showing it would have restarted it")
     }
 
     @Test

@@ -3645,6 +3645,7 @@
     <string name="helper_live_now">On screen now: %1$s.</string>
     <string name="helper_live_countdown">a countdown, %1$s left</string>
     <string name="helper_live_announcement">the announcement “%1$s”</string>
+    <string name="helper_live_drawing">a drawing sent from a phone or tablet</string>
     <string name="helper_version">You're on version %1$s. I'm checking for a newer one; if there is, a window will say so.</string>
     <string name="menu_show_helper">Show Helper</string>
     <string name="settings_helper_title">Helper</string>
