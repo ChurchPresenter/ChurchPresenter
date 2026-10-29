@@ -65,7 +65,11 @@ internal fun DemoPhone(shot: String) {
                     contentDescription = DEMO_PHONE_LABEL,
                     contentScale = if (whole) ContentScale.Crop else ContentScale.Fit,
                     alignment = Alignment.TopCenter,
-                    modifier = if (whole) Modifier.fillMaxSize() else Modifier.fillMaxWidth().padding(DEMO_SHEET_PAD_DP.dp),
+                    modifier = if (whole) {
+                        Modifier.fillMaxSize()
+                    } else {
+                        Modifier.fillMaxWidth().padding(DEMO_SHEET_PAD_DP.dp)
+                    },
                 )
             }
         }
