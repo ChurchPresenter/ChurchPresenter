@@ -25,15 +25,16 @@ import kotlin.io.path.Path
 import kotlin.test.Test
 
 /**
- * Playlists added by hand and the web page test, in both themes: the list with every kind, the Add
- * menu, the Link dialog for a web page and a stream, and a screen card through the test.
+ * Playlists added by hand and the web page test, in both themes: the list with every kind and a
+ * copy still running, the Add menu, the Link, file and folder dialogs, and a screen card through the
+ * test.
  */
 class SignageLinksScreenshotTest {
     private val folder = SignageFolderState(
-        folder = Path("/Users/church/Documents/ChurchPresenter/Signage"),
         playlists = listOf(
-            PlaylistSummary("folder:", "Signage", 6, 1),
-            PlaylistSummary("folder:Events", "Events", 4, 0),
+            PlaylistSummary("folder:", "Welcome", 6, 1, detail = "Folders/Welcome", seconds = 8),
+            PlaylistSummary("folder:Events", "Events", 4, 0, detail = "Folders/Events", seconds = 15),
+            PlaylistSummary("dir:1", "Announcements", 9, 0, detail = "Announcements", seconds = 12),
             PlaylistSummary("file:1", "Welcome", kind = SourceKind.PICTURE, detail = "welcome-banner.png"),
             PlaylistSummary("file:2", "Lobby loop", kind = SourceKind.VIDEO, detail = "lobby-loop.mp4"),
             PlaylistSummary("link:1", "Weather", kind = SourceKind.WEB, detail = WEATHER),
@@ -41,6 +42,7 @@ class SignageLinksScreenshotTest {
             PlaylistSummary("file:3", "Old flyer", kind = SourceKind.PICTURE, detail = "flyer.jpg", missing = true),
         ),
         ready = true,
+        copying = listOf("Easter"),
     )
     private val screen = PairedScreen("p", "Lobby", "h", Platform.LINUX_ARM64, "26.0.31", 1920, 1080, 0)
     private val link = ScreenLink(
@@ -51,7 +53,7 @@ class SignageLinksScreenshotTest {
 
     @Composable
     private fun Panel() = Box(Modifier.size(PANEL_WIDTH.dp, PANEL_HEIGHT.dp)) {
-        SignageFolderPanel(folder, FolderActions({}, {}, FakeDesktop().desktop), Modifier)
+        SignageFolderPanel(folder, FolderActions(FakeDesktop().desktop), Modifier)
     }
 
     @Composable
@@ -110,6 +112,20 @@ class SignageLinksScreenshotTest {
     fun `editing a picture`() = captureComponent(SECTION, "file_edit", rootIndex = 1) {
         FileDialog(
             FilePlaylist("file:1", "Welcome", "/Users/church/Pictures/welcome.png", MediaKind.IMAGE),
+            FakeDesktop().desktop,
+            { _, _ -> },
+            {},
+        )
+    }
+
+    @Test
+    fun `how signage works`() = captureComponent(SECTION, "help", rootIndex = 1) { SignageHelpDialog(onDismiss = {}) }
+
+    @Test
+    fun `editing a folder`() = captureComponent(SECTION, "folder_edit", rootIndex = 1) {
+        FolderDialog(
+            PickedFolderPlaylist("folder:Events", "Events", "Folders/Events"),
+            Path("/Users/church/Documents/ChurchPresenter/signage/Folders/Events"),
             FakeDesktop().desktop,
             { _, _ -> },
             {},

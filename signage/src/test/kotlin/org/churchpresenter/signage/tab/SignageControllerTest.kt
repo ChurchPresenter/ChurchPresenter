@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.churchpresenter.signage.core.ServerMessage
-import kotlin.io.path.Path
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,7 +14,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SignageControllerTest {
-    private val world = SignageWorld()
+    private val world = SignageWorld(folders = listOf("", "Events"))
     private val controller = world.controller
     private val hub = world.hub
 
@@ -79,7 +78,7 @@ class SignageControllerTest {
     }
 
     @Test
-    fun picturesTimeAndFolderAreKept() = runBlocking {
+    fun aFoldersPicturesStayUpAtLeastASecond() = runBlocking {
         world.file("welcome.jpg")
         controller.start()
         ready()
@@ -87,15 +86,11 @@ class SignageControllerTest {
         world.pairScreen(load = false)
         first.await()
         val second = manifestChanged()
-        controller.setPictureSeconds(0)
+        controller.added.updateFolder("folder:", "Signage", 0)
         second.await()
-        assertEquals(1, controller.state.value.settings.pictureSeconds, "at least a second")
+        val folder = controller.state.value.settings.added.first() as PickedFolderPlaylist
+        assertEquals(1, folder.pictureSeconds, "at least a second")
         assertEquals(1_000L, hub.published("player-1")?.manifest?.playlists?.single()?.items?.single()?.durationMs)
-
-        val other = world.root.resolve("Other")
-        controller.setFolder(other)
-        withTimeout(SignageWorld.WAIT_MS) { controller.state.first { it.folder == other } }
-        assertEquals(other.toString(), controller.state.value.settings.folder)
     }
 
     @Test
@@ -129,8 +124,10 @@ class SignageControllerTest {
     @Test
     fun nothingIsPublishedBeforeTheScreensAreRead() = runBlocking {
         world.file("welcome.jpg")
-        controller.setPictureSeconds(5)
-        withTimeout(SignageWorld.WAIT_MS) { controller.state.first { it.settings.pictureSeconds == 5 } }
+        controller.added.updateFolder("folder:", "Welcome", 5)
+        withTimeout(SignageWorld.WAIT_MS) {
+            controller.state.first { state -> state.settings.added.any { it.name == "Welcome" } }
+        }
         assertNull(hub.published("player-1"))
     }
 
@@ -147,14 +144,5 @@ class SignageControllerTest {
         world.diagnostics.value = false
         changed.await()
         assertEquals(false, hub.published("player-1")?.manifest?.diagnostics)
-    }
-
-    @Test
-    fun aSavedFolderIsUsedAndABlankOneMeansTheDefault() = runBlocking {
-        controller.start()
-        ready()
-        controller.setFolder(Path(""))
-        withTimeout(SignageWorld.WAIT_MS) { controller.state.first { it.settings.folder.isEmpty() } }
-        assertEquals(world.folder, controller.state.value.folder)
     }
 }

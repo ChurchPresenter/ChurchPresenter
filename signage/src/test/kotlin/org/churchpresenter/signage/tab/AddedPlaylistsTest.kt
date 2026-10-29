@@ -27,7 +27,7 @@ class AddedPlaylistsTest {
     private fun CoroutineScope.manifestChanged() = with(world) { expect { it as? ServerMessage.ManifestChanged } }
 
     @Test
-    fun aLinkAndAPictureAreListedAfterTheFoldersAndKept() = runBlocking {
+    fun aLinkAndAPictureAreListedAfterTheFolderAndKept() = runBlocking {
         world.file("welcome.jpg")
         val picture = world.root.resolve("elsewhere/flyer.png").also {
             it.parent.toFile().mkdirs()
@@ -42,9 +42,9 @@ class AddedPlaylistsTest {
         assertEquals(listOf("Signage", "Weather", "flyer"), playlists.map { it.name })
         assertEquals(listOf(SourceKind.FOLDER, SourceKind.WEB, SourceKind.PICTURE), playlists.map { it.kind })
         assertEquals(WEATHER, playlists[1].detail)
-        val saved = SignageStore(world.root.resolve("store")).loadSettings().added
-        assertEquals(LinkPlaylist(playlists[1].id, "Weather", WEATHER, LinkKind.WEB, 10, true), saved[0])
-        assertEquals(FilePlaylist(playlists[2].id, "flyer", picture.toString(), MediaKind.IMAGE), saved[1])
+        val saved = SignageStore(world.signage).loadSettings().added
+        assertEquals(LinkPlaylist(playlists[1].id, "Weather", WEATHER, LinkKind.WEB, 10, true), saved[1])
+        assertEquals(FilePlaylist(playlists[2].id, "flyer", "Files/flyer.png", MediaKind.IMAGE), saved[2])
     }
 
     @Test
@@ -62,9 +62,9 @@ class AddedPlaylistsTest {
         assertEquals(2, hub.published("player-1")?.manifest?.playlists?.size)
         // Gone for a moment, it keeps its link: what it could do is remembered.
         hub.links.closed("player-1", hub.links.links.value.getValue("player-1").session)
-        controller.setPictureSeconds(12)
+        controller.added.updateFolder("folder:", "Signage", 12)
         withTimeout(SignageWorld.WAIT_MS) {
-            while (controller.state.value.settings.pictureSeconds != 12) yield()
+            while (controller.state.value.playlists.first().seconds != 12) yield()
         }
         assertEquals(2, hub.published("player-1")?.manifest?.playlists?.size)
     }
@@ -97,7 +97,8 @@ class AddedPlaylistsTest {
         val (link, file) = listed { it.size == 3 }.drop(1).map { it.id }
         controller.added.addRotation("Evenings", listOf(RotationStep(link, 60), RotationStep(file, 10)))
         listed { it.size == 4 }
-        flyer.toFile().delete()
+        // Its copy in the signage folder gone.
+        world.signage.resolve("Files/flyer.png").toFile().delete()
         controller.added.remove(link)
         val rotation = withTimeout(SignageWorld.WAIT_MS) {
             controller.state.first { state -> state.settings.added.none { it.id == link } }

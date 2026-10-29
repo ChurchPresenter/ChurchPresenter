@@ -25,7 +25,6 @@ import org.churchpresenter.signage.core.UpdateState
 import org.churchpresenter.signage.core.WebTestRun
 import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.ScreenLink
-import kotlin.io.path.Path
 import kotlin.test.Test
 
 /**
@@ -44,8 +43,8 @@ class SignageRotationScreenshotTest {
         ),
     )
     private val entries = listOf(
-        PlaylistSummary("folder:", "Signage", 6, 1),
-        PlaylistSummary("folder:Events", "Events", 4, 0),
+        PlaylistSummary("folder:", "Welcome", 6, 1, detail = "Folders/Welcome", seconds = 8),
+        PlaylistSummary("folder:Events", "Events", 4, 0, detail = "Folders/Events", seconds = 15),
         PlaylistSummary("file:1", "Welcome", kind = SourceKind.PICTURE, detail = "welcome-banner.png"),
         PlaylistSummary("link:1", "Weather", kind = SourceKind.WEB, detail = "https://weather.example.org"),
         PlaylistSummary("link:2", "Live", kind = SourceKind.STREAM, detail = "https://youtube.com/@gracechurch/live"),
@@ -57,7 +56,6 @@ class SignageRotationScreenshotTest {
         ScheduleBlock("c", setOf(Day.SUN), ClockTime.parse("09:30"), ClockTime.parse("12:30"), BlockAction.Service),
     )
     private val folder = SignageFolderState(
-        folder = Path("/Users/church/Documents/ChurchPresenter/Signage"),
         playlists = entries +
             PlaylistSummary("rotation:1", "Lobby evenings", kind = SourceKind.ROTATION, steps = 4, seconds = 195),
         settings = SignageSettings(screens = mapOf("p" to ScreenPlan("folder:", schedule)), added = listOf(rotation)),
@@ -82,7 +80,7 @@ class SignageRotationScreenshotTest {
     @Test
     fun `a rotation in the list`() = captureComponent(SECTION, "rotation_row") {
         Box(Modifier.size(PANEL_WIDTH.dp, PANEL_HEIGHT.dp)) {
-            SignageFolderPanel(folder, FolderActions({}, {}, FakeDesktop().desktop), Modifier)
+            SignageFolderPanel(folder, FolderActions(FakeDesktop().desktop), Modifier)
         }
     }
 

@@ -1,30 +1,31 @@
 package org.churchpresenter.signage.tab
 
 import org.churchpresenter.signage.core.MediaKind
-import java.awt.Desktop
-import java.awt.GraphicsEnvironment
-import java.io.File
 import java.io.IOException
 import java.nio.file.Files
-import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.extension
 import kotlin.io.path.isDirectory
-import kotlin.io.path.isHidden
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
 
-/** A picture or video in the signage folder, as it stood when the folder was read. */
+/** A picture or video in a playlist's folder, as it stood when the folder was read. */
 data class FolderFile(val path: Path, val kind: MediaKind, val size: Long, val modifiedMs: Long)
 
 /**
- * A playlist that follows a folder: everything in it, in file-name order. The signage folder's own
- * files are one; each folder directly inside it is another.
+ * A folder playlist as it was last read: everything in it, in file-name order, each picture up for
+ * [pictureSeconds]; [missing] when the folder is gone.
  */
-data class FolderPlaylist(override val id: String, override val name: String, val files: List<FolderFile>) :
-    PlaylistSource
+data class FolderPlaylist(
+    override val id: String,
+    override val name: String,
+    val files: List<FolderFile>,
+    val path: String,
+    val missing: Boolean = false,
+    val pictureSeconds: Int = PickedFolderPlaylist.DEFAULT_PICTURE_SECONDS,
+) : PlaylistSource
 
 /**
  * A playlist with each of its files' hashes, null where a file could not be read: a folder's files,
@@ -38,17 +39,21 @@ internal fun FolderPlaylist.summary() = PlaylistSummary(
     name = name,
     pictures = files.count { it.kind == MediaKind.IMAGE },
     videos = files.count { it.kind == MediaKind.VIDEO },
+    detail = path,
+    missing = missing,
+    seconds = pictureSeconds,
 )
 
-/** [this] playlist's file as it stands now; null when it is gone or cannot be read. Blocking. */
-internal fun FilePlaylist.currentFile(): FolderFile? = try {
-    val file = Path(path)
-    if (!file.isRegularFile()) null else {
+/**
+ * [this] playlist's file as it stands now, a copy found under [signage]; null when it is gone or
+ * cannot be read. Blocking.
+ */
+internal fun FilePlaylist.currentFile(signage: Path): FolderFile? = try {
+    val file = SignageMedia.resolve(signage, path)
+    if (file == null || !file.isRegularFile()) null else {
         FolderFile(file, kind, Files.size(file), Files.getLastModifiedTime(file).toMillis())
     }
 } catch (_: IOException) {
-    null
-} catch (_: InvalidPathException) {
     null
 }
 
@@ -58,13 +63,17 @@ internal fun FilePlaylist.currentFile(): FolderFile? = try {
 internal fun picturesAndVideosFilter(description: String) =
     FileNameExtensionFilter(description, *(SignageFolder.IMAGES + SignageFolder.VIDEOS).toTypedArray())
 
-/** [this] added playlist as the tab lists it; a file playlist whose file is gone is [PlaylistSummary.missing]. */
+/** [folder] with each of its files' hashes, from [this] store's cache where they did not change. */
+internal fun SignageStore.hashFolder(folder: FolderPlaylist): HashedPlaylist =
+    HashedPlaylist(folder, folder.files.associateWith(::hashOf))
+
+/** [this] playlist as the tab lists it; a file or folder that is gone is [PlaylistSummary.missing]. */
 internal fun HashedPlaylist.addedSummary(): PlaylistSummary = when (val source = playlist) {
     is FilePlaylist -> PlaylistSummary(
         id = source.id,
         name = source.name,
         kind = if (source.kind == MediaKind.IMAGE) SourceKind.PICTURE else SourceKind.VIDEO,
-        detail = Path(source.path).name,
+        detail = source.path.substringAfterLast('/').substringAfterLast('\\'),
         missing = hashes.values.none { it != null },
     )
     is LinkPlaylist -> PlaylistSummary(
@@ -81,63 +90,28 @@ internal fun HashedPlaylist.addedSummary(): PlaylistSummary = when (val source =
         seconds = source.steps.sumOf { it.seconds ?: 0 },
     )
     is FolderPlaylist -> source.summary()
+    // Listed as it stands until its first read.
+    is PickedFolderPlaylist -> PlaylistSummary(
+        source.id, source.name, detail = source.path, seconds = source.pictureSeconds,
+    )
 }
 
-/** Reads the signage folder. Blocking: run it on `Dispatchers.IO`. */
+/** Reads the folders playlists are made from. Blocking: run it on `Dispatchers.IO`. */
 object SignageFolder {
     internal val IMAGES = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
     internal val VIDEOS = setOf("mp4", "m4v", "mov", "webm", "mkv")
 
-    /** The id of the playlist made of the signage folder's own files. */
-    const val ROOT_ID = "folder:"
-
-    fun idOf(subfolder: String): String = "folder:$subfolder"
-
-    /** The playlists in [root], the root's own first; folders with nothing playable are left out. */
-    fun scan(root: Path, rootName: String): List<FolderPlaylist> {
-        if (!root.isDirectory()) return emptyList()
-        val own = FolderPlaylist(ROOT_ID, rootName, filesIn(root))
-        val subfolders = list(root)
-            .filter { it.isDirectory() && !it.isHidden() }
-            .sortedBy { it.name.lowercase() }
-            .map { FolderPlaylist(idOf(it.name), it.name, filesIn(it)) }
-        return (listOf(own) + subfolders).filter { it.files.isNotEmpty() }
-    }
-
-    /** Whether this computer has a Trash to move a deleted playlist to; where not, it is deleted for good. */
-    fun canTrash(): Boolean = trashAvailable(GraphicsEnvironment.isHeadless(), Desktop::isDesktopSupported) {
-        Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH)
-    }
-
-    /** A Trash needs a display, a desktop AWT can reach, and one that offers moving to it. */
-    internal fun trashAvailable(headless: Boolean, desktop: () -> Boolean, trash: () -> Boolean): Boolean =
-        !headless && desktop() && trash()
-
     /**
-     * Deletes playlist [id] from [root]: a folder inside it goes whole, the root's own playlist only
-     * its pictures and videos. [trash] moves a file or folder to the Trash; where it cannot
-     * ([canTrash] false), only the pictures and videos are deleted, for good. False when something
-     * could not be removed. Blocking: run it on `Dispatchers.IO`.
+     * [picked] as it stands now, a copy found under [signage]: its pictures and videos, or none and
+     * missing when the folder is gone.
      */
-    fun delete(root: Path, id: String, trash: ((File) -> Boolean)? = defaultTrash()): Boolean {
-        val target = if (id == ROOT_ID) root else root.resolve(id.removePrefix(ROOT_ID))
-        // Only the signage folder or a folder directly inside it, whatever the id says.
-        if (target != root && target.normalize().parent != root) return false
-        if (trash != null && id != ROOT_ID) return trash(target.toFile())
-        return filesIn(target).map { file ->
-            try {
-                if (trash != null) trash(file.path.toFile()) else Files.deleteIfExists(file.path)
-            } catch (_: IOException) {
-                false
-            }
-        }.all { it }
+    fun read(picked: PickedFolderPlaylist, signage: Path): FolderPlaylist {
+        val dir = SignageMedia.resolve(signage, picked.path)?.takeIf { it.isDirectory() }
+        return FolderPlaylist(
+            picked.id, picked.name, dir?.let(::filesIn).orEmpty(), picked.path,
+            missing = dir == null, pictureSeconds = picked.pictureSeconds,
+        )
     }
-
-    private fun defaultTrash(): ((File) -> Boolean)? = trashFor(canTrash())
-
-    /** The Trash's move where [available]; null where there is none, so files are deleted instead. */
-    internal fun trashFor(available: Boolean): ((File) -> Boolean)? =
-        if (available) Desktop.getDesktop()::moveToTrash else null
 
     fun kindOf(path: Path): MediaKind? = when (path.extension.lowercase()) {
         in IMAGES -> MediaKind.IMAGE
@@ -145,7 +119,8 @@ object SignageFolder {
         else -> null
     }
 
-    private fun filesIn(dir: Path): List<FolderFile> = list(dir)
+    /** The pictures and videos directly in [dir], in file-name order. */
+    internal fun filesIn(dir: Path): List<FolderFile> = list(dir)
         .filter { it.isRegularFile() && !it.name.startsWith(".") }
         .sortedBy { it.name.lowercase() }
         .mapNotNull { path ->

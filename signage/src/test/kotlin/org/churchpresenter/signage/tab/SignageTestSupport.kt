@@ -37,13 +37,30 @@ import kotlin.io.path.writeText
 /**
  * A signage folder, a hub with one paired screen, and a controller over them, in a temporary folder
  * the test owns. Player releases come from memory, signed with a key made for the test.
+ *
+ * The tab starts with a folder playlist already copied in for each of [folders], by name: `""` is
+ * [folder], `Folders/Signage`, as `folder:` ("Signage"), and `"Events"` is `Folders/Events` as
+ * `folder:Events`, listed even while that folder does not exist.
  */
 @OptIn(ExperimentalPathApi::class)
 class SignageWorld(
     /** The folder the world lives in, deleted on close. A screenshot pins it: the tab shows its path. */
     val root: Path = createTempDirectory("signage-tab"),
+    folders: List<String> = listOf(""),
 ) : AutoCloseable {
-    val folder: Path = root.resolve("Signage").createDirectories()
+    /** Where the controller keeps the setup and the copies its playlists play. */
+    val signage: Path = root.resolve("store")
+
+    /** The first playlist's copy. */
+    val folder: Path = signage.resolve("Folders/Signage").createDirectories()
+
+    init {
+        val seeded = folders.map { name ->
+            val shown = name.ifEmpty { "Signage" }
+            PickedFolderPlaylist("folder:$name", shown, "Folders/$shown")
+        }
+        if (seeded.isNotEmpty()) SignageStore(signage).saveSettings(SignageSettings(added = seeded))
+    }
     val scope = CoroutineScope(Job())
     val release = SignedRelease()
 
@@ -64,15 +81,23 @@ class SignageWorld(
 
     val controller = SignageController(
         hub,
-        root.resolve("store"),
-        folder,
+        signage,
         scope,
         pollMs = POLL_MS,
         diagnostics = diagnostics,
     )
 
-    /** Puts a file in the signage folder (a picture or video by its extension). */
-    fun file(relative: String, text: String = relative): Path = folder.resolve(relative).also {
+    /**
+     * Puts a file in [folder] (a picture or video by its extension), or with a folder part, such as
+     * `Events/flyer.png`, in that playlist's copy.
+     */
+    fun file(relative: String, text: String = relative): Path =
+        (if ('/' in relative) signage.resolve("Folders") else folder).resolve(relative).write(text)
+
+    /** Puts a file in a folder of pictures outside the signage folder, to be added from. */
+    fun original(relative: String, text: String = relative): Path = root.resolve("pictures/$relative").write(text)
+
+    private fun Path.write(text: String): Path = also {
         it.parent.createDirectories()
         it.writeText(text)
     }

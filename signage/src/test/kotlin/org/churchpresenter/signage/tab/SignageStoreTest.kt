@@ -28,8 +28,7 @@ class SignageStoreTest {
     fun settingsAreKeptBetweenRuns() {
         assertEquals(SignageSettings(), SignageStore(dir).loadSettings())
         val settings = SignageSettings(
-            folder = "/x",
-            pictureSeconds = 7,
+            added = listOf(PickedFolderPlaylist("dir:1", "Easter", "Folders/Easter", pictureSeconds = 7)),
             screens = mapOf("p" to ScreenPlan(ScreenPlan.NOTHING)),
         )
         SignageStore(dir).saveSettings(settings)

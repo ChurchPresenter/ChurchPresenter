@@ -10,20 +10,38 @@ import java.util.Locale
 import java.util.UUID
 
 /**
- * A playlist the tab lists and a screen can play: a folder, a single picture or video, or a link. A
- * new kind is one more subclass here and one more case in [buildManifest].
+ * A playlist the tab lists and a screen can play: a folder, a single picture or video, a link, or a
+ * rotation. A new kind is one more subclass here and one more case in [buildManifest].
  */
 sealed interface PlaylistSource {
     val id: String
     val name: String
 }
 
-/**
- * A playlist added in the tab rather than read from the signage folder, kept with its name in the
- * tab's settings. Added playlists are dev mode only: with it off they are neither listed nor sent.
- */
+/** A playlist added in the tab, kept with its name in the tab's settings. */
 @Serializable
 sealed interface AddedPlaylist : PlaylistSource
+
+/**
+ * A folder: every picture and video directly in it, in file-name order, each picture up for
+ * [pictureSeconds]; read again as it changes. Its copy is in the signage folder (see
+ * [SignageMedia]). Read into a [FolderPlaylist] before it is sent.
+ */
+@Serializable
+@SerialName("folder")
+data class PickedFolderPlaylist(
+    override val id: String,
+    override val name: String,
+    val path: String,
+    val pictureSeconds: Int = DEFAULT_PICTURE_SECONDS,
+) : AddedPlaylist {
+    companion object {
+        const val DEFAULT_PICTURE_SECONDS = 10
+        val PICTURE_SECONDS = 1..600
+
+        fun create(name: String, path: String) = PickedFolderPlaylist("dir:${UUID.randomUUID()}", name, path)
+    }
+}
 
 /** One picture or video from anywhere on this computer, which stays up (or loops) while it plays. */
 @Serializable
