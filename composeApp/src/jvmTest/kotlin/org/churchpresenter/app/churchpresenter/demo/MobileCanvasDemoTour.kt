@@ -372,8 +372,6 @@ private fun image(shot: String): ImageBitmap? = tabletImages.getOrPut(shot) {
         ?.toComposeImageBitmap()
 }
 
-private fun box(left: Float, top: Float, right: Float, bottom: Float) = Rect(left, top, right, bottom)
-
 /** The [y]th tool down the rail, its center as a fraction of the screen's height. */
 private fun tool(y: Float) = box(RAIL.left, y - TOOL_HALF, RAIL.right, y + TOOL_HALF)
 

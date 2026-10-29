@@ -44,7 +44,7 @@ class StandaloneDemoTour {
 
     @Test
     fun standalone() {
-        assumeTrue("ChurchPresenter-Mobile is not checked out beside this repo", SHOTS.isDirectory)
+        assumeTrue("ChurchPresenter-Mobile is not checked out beside this repo", MOBILE_ROOT.isDirectory)
         recordTour(
             "standalone",
             tab = "Standalone Mode",
@@ -58,11 +58,11 @@ class StandaloneDemoTour {
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Phone(phone.value)
+                        DemoPhone(phone.value)
                         Spacer(Modifier.width(GAP_DP.dp))
                         Tv(tv.value)
                     }
-                    WideSheet(wide.value)
+                    DemoSheet(wide.value)
                 }
             },
         ) { standaloneTour() }
@@ -76,10 +76,10 @@ class StandaloneDemoTour {
         say("why")
         panelNote("No computer needed", "Small groups, outdoors, a backup", shown())
         say("mode")
-        panelNote("Standalone", "Then Continue", phoneBox(MODE_CARD), numbered = true)
+        panelNote("Standalone", "Then Continue", screenBox(MODE_CARD), numbered = true)
         say("tabs")
         show(CONTROLLER)
-        panelNote("The tabs", "Present, Songs, Bible, Library, More", phoneBox(TAB_BAR))
+        panelNote("The tabs", "Present, Songs, Bible, Library, More", screenBox(TAB_BAR))
         settings()
         songs()
         bibles()
@@ -88,7 +88,7 @@ class StandaloneDemoTour {
         look()
         say("announcements")
         show("screenshots/local-notices/populated")
-        panelNote("Announcements", "Go live from More", phoneBox(NOTICE_GO_LIVE), numbered = true)
+        panelNote("Announcements", "Go live from More", screenBox(NOTICE_GO_LIVE), numbered = true)
         onTv("announcement")
         pause(1.2)
         closePanel()
@@ -99,10 +99,10 @@ class StandaloneDemoTour {
     /** The gear, and the three pages of it a standalone phone uses. */
     private fun DemoTour.settings() {
         say("settings")
-        panelNote("Settings", "The gear, top right", phoneBox(GEAR), numbered = true)
+        panelNote("Settings", "The gear, top right", screenBox(GEAR), numbered = true)
         say("settings-mode")
         show("screenshots/mode-picker/standalone-selected")
-        panelNote("Mode", "Standalone, Remote control or Calendar", phoneBox(MODES))
+        panelNote("Mode", "Standalone, Remote control or Calendar", screenBox(MODES))
         say("settings-computer")
         show("screenshots/desktop-address/with-hint")
         panelNote("Computer", "Where songs and Bibles come from", shown())
@@ -117,13 +117,13 @@ class StandaloneDemoTour {
         show(LIBRARY)
         panelNote("Library", "Songs and announcements", shown(), numbered = true)
         say("sync")
-        panelNote("Sync from Computer", "Same Wi-Fi as the computer", phoneBox(SYNC), numbered = true)
+        panelNote("Sync from Computer", "Same Wi-Fi as the computer", screenBox(SYNC), numbered = true)
         say("sync-books")
         show("screenshots/song-sync/idle")
         panelNote("Which songbooks?", "All of them, or just some", shown())
         say("write")
         show(LIBRARY)
-        panelNote("Add", "Write your own", phoneBox(ADD))
+        panelNote("Add", "Write your own", screenBox(ADD))
     }
 
     /** A Bible copied from the computer, or downloaded from the catalog after its licence. */
@@ -136,7 +136,7 @@ class StandaloneDemoTour {
         panelNote("From your computer", "See what your computer has", shown(), numbered = true)
         say("bible-web")
         show("screenshots/bible-empty/get-bibles")
-        panelNote("From the internet", "Get Bibles", phoneBox(GET_BIBLES), numbered = true)
+        panelNote("From the internet", "Get Bibles", screenBox(GET_BIBLES), numbered = true)
         say("bible-filter")
         show("screenshots/bible-catalog/english")
         panelNote("The catalog", "By language and by source", shown())
@@ -154,7 +154,7 @@ class StandaloneDemoTour {
     private fun DemoTour.screens() {
         say("screens")
         show(CONTROLLER)
-        panelNote("Screens", "At the top of Present", phoneBox(SCREEN_PILL), numbered = true)
+        panelNote("Screens", "At the top of Present", screenBox(SCREEN_PILL), numbered = true)
         show("screenshots/output-targets/mixed")
         say("ios")
         panelNote("iPhone and iPad", "Screen Mirroring to an Apple TV", shown())
@@ -175,20 +175,20 @@ class StandaloneDemoTour {
         onTv("")
         say("song")
         show("screenshots/song-detail/standalone")
-        panelNote("Present", "The button at the bottom right", phoneBox(PRESENT_BUTTON), numbered = true)
+        panelNote("Present", "The button at the bottom right", screenBox(PRESENT_BUTTON), numbered = true)
         say("present")
         show(CONTROLLER)
-        panelNote("Present tab", "Preview and every verse", phoneBox(PREVIEW))
+        panelNote("Present tab", "Preview and every verse", screenBox(PREVIEW))
         say("live")
-        panelNote("Live", "On the screen", phoneBox(LIVE), numbered = true)
+        panelNote("Live", "On the screen", screenBox(LIVE), numbered = true)
         onTv("song")
         pause(0.8)
         say("next")
         onTv("song-split-verse")
-        panelNote("Prev and Next", "Through the verses", phoneBox(PREV_NEXT))
+        panelNote("Prev and Next", "Through the verses", screenBox(PREV_NEXT))
         say("blank")
         onTv("blank")
-        panelNote("Blank and Clear", "Hide or take down", phoneBox(BLANK_CLEAR))
+        panelNote("Blank and Clear", "Hide or take down", screenBox(BLANK_CLEAR))
         onTv("")
         pause(0.5)
         say("bible-present")
@@ -203,21 +203,21 @@ class StandaloneDemoTour {
         onTv("")
         say("look")
         show("screenshots/standalone-controller/idle")
-        panelNote("Look", "How slides look", phoneBox(LOOK), numbered = true)
+        panelNote("Look", "How slides look", screenBox(LOOK), numbered = true)
         show("screenshots/look-sheet/saved-themes")
         say("look-themes")
         panelNote("Themes and colors", "Gradient, text, size, font", shown())
         say("saved-looks")
-        panelNote("Saved looks", "Ready for next week", phoneBox(SAVED_LOOKS))
+        panelNote("Saved looks", "Ready for next week", screenBox(SAVED_LOOKS))
         say("backdrop")
         show("screenshots/standalone-controller/idle")
-        panelNote("Backdrop", "Gradient, image or black", phoneBox(BACKDROP))
+        panelNote("Backdrop", "Gradient, image or black", screenBox(BACKDROP))
     }
 
     /** A whole screen goes on the phone; a sheet floats over the phone and the TV, large enough to read. */
     private fun DemoTour.show(shot: String) {
         clearNote()
-        if (phoneImage(shot)?.second == false) {
+        if (isSheet(shot)) {
             wide.value = shot
         } else {
             wide.value = ""
@@ -235,79 +235,9 @@ class StandaloneDemoTour {
 
     /** The screen a note points at: the floating sheet while one is up, else the phone's. */
     private fun DemoTour.shown(): Target =
-        if (wide.value.isEmpty()) phoneScreen() else panelItems(hasContentDescription(WIDE_LABEL)).first()
-
-    private fun DemoTour.phoneScreen(): Target = panelItems(hasContentDescription(PHONE_LABEL)).first()
+        if (wide.value.isEmpty()) phoneScreen() else panelItems(hasContentDescription(DEMO_SHEET_LABEL)).first()
 
     private fun DemoTour.tvScreen(): Target = panelItems(hasContentDescription(TV_LABEL)).first()
-
-    /** A box on the phone's screen, its edges as fractions of the screen's width and height. */
-    private fun DemoTour.phoneBox(box: Rect): Target {
-        val p = phoneScreen()
-        val b = p.bounds
-        return Target(
-            p.node,
-            Rect(
-                b.left + b.width * box.left,
-                b.top + b.height * box.top,
-                b.left + b.width * box.right,
-                b.top + b.height * box.bottom,
-            ),
-        )
-    }
-}
-
-/**
- * A phone: [shot] in a rounded black body. A whole screen fills it from the top; a sheet or a part
- * of one, cut down to what it shows, sits in the middle at its own shape.
- */
-@Composable
-private fun Phone(shot: String) {
-    Box(
-        Modifier.size(PHONE_W.dp, PHONE_H.dp)
-            .clip(RoundedCornerShape(PHONE_RADIUS_DP.dp))
-            .background(Color.Black)
-            .border(PHONE_BEZEL_DP.dp, Color(PHONE_EDGE), RoundedCornerShape(PHONE_RADIUS_DP.dp))
-            .padding(PHONE_BEZEL_DP.dp),
-    ) {
-        Box(
-            Modifier.fillMaxSize()
-                .clip(RoundedCornerShape((PHONE_RADIUS_DP - PHONE_BEZEL_DP).dp))
-                .background(Color(SCREEN_BG)),
-            contentAlignment = Alignment.Center,
-        ) {
-            phoneImage(shot)?.let { (image, whole) ->
-                Image(
-                    image,
-                    contentDescription = PHONE_LABEL,
-                    contentScale = if (whole) ContentScale.Crop else ContentScale.Fit,
-                    alignment = Alignment.TopCenter,
-                    modifier = if (whole) Modifier.fillMaxSize() else Modifier.fillMaxWidth().padding(SHEET_PAD_DP.dp),
-                )
-            }
-        }
-    }
-}
-
-/** A wide sheet of the app's, cut down to what it shows and floated over the phone and the TV. */
-@Composable
-private fun WideSheet(shot: String) {
-    if (shot.isEmpty()) return
-    val image = phoneImage(shot)?.first ?: return
-    val scale = minOf(WIDE_MAX_W / image.width, WIDE_MAX_H / image.height, WIDE_MAX_SCALE)
-    Box(
-        Modifier.clip(RoundedCornerShape(WIDE_RADIUS_DP.dp))
-            .border(2.dp, Color(PHONE_EDGE), RoundedCornerShape(WIDE_RADIUS_DP.dp))
-            .background(Color(SCREEN_BG))
-            .padding(WIDE_PAD_DP.dp),
-    ) {
-        Image(
-            image,
-            contentDescription = WIDE_LABEL,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.size((image.width * scale).dp, (image.height * scale).dp),
-        )
-    }
 }
 
 /** A TV on a stand, showing the output [slide] the phone sends, or dark with nothing on it. */
@@ -340,31 +270,15 @@ private fun Tv(slide: String) {
     }
 }
 
-/** A screen's picture, and whether it is a whole phone screen (rather than a sheet to fit). */
-private fun phoneImage(shot: String): Pair<ImageBitmap, Boolean>? = phoneImages.getOrPut(shot) {
-    File(SHOTS, "${shot}__dark.png").takeIf { it.isFile }?.let { ImageIO.read(it) }?.let {
-        val whole = it.width.toFloat() / it.height < PHONE_SHAPE
-        (if (whole) it else trimmed(it)).toComposeImageBitmap() to whole
-    }
-}
-
 private fun tvImage(slide: String): ImageBitmap? = if (slide.isEmpty()) null else tvImages.getOrPut(slide) {
-    File(SHOTS, "screenshots/output/${slide}__dark.png").takeIf { it.isFile }
+    File(MOBILE_ROOT, "screenshots/output/${slide}__dark.png").takeIf { it.isFile }
         ?.let { ImageIO.read(it).toComposeImageBitmap() }
 }
 
-private fun box(left: Float, top: Float, right: Float, bottom: Float) = Rect(left, top, right, bottom)
-
-private val phoneImages = mutableMapOf<String, Pair<ImageBitmap, Boolean>?>()
 private val tvImages = mutableMapOf<String, ImageBitmap?>()
 private val phone = mutableStateOf("")
 private val tv = mutableStateOf("")
 private val wide = mutableStateOf("")
-
-/** The mobile app's picture sets: `CP_MOBILE_SHOTS`'s parent, else the checkout beside this one. */
-private val SHOTS = File(
-    System.getenv("CP_MOBILE_SHOTS")?.let { File(it).parent } ?: "../../ChurchPresenter-Mobile/composeApp",
-).absoluteFile
 
 private const val CONTROLLER = "marketing/phone/07-standalone-controller"
 private const val LIBRARY = "marketing/phone/06-library"
@@ -388,25 +302,10 @@ private val LOOK = box(0.84f, 0.51f, 0.97f, 0.565f)
 private val BACKDROP = box(0.03f, 0.56f, 0.97f, 0.635f)
 private val SAVED_LOOKS = box(0.03f, 0.24f, 0.6f, 0.41f)
 
-private const val PHONE_LABEL = "Phone screen"
 private const val TV_LABEL = "TV screen"
-private const val WIDE_LABEL = "App sheet"
-private const val WIDE_MAX_W = 1100f
-private const val WIDE_MAX_H = 780f
-private const val WIDE_MAX_SCALE = 2.2f
-private const val WIDE_RADIUS_DP = 18
-private const val WIDE_PAD_DP = 10
-private const val PHONE_SHAPE = 0.6f
 private const val PANEL_W = 1500f
 private const val PANEL_H = 900f
 private const val GAP_DP = 60
-private const val PHONE_W = 380f
-private const val PHONE_H = 808f
-private const val PHONE_RADIUS_DP = 46
-private const val PHONE_BEZEL_DP = 10
-private const val PHONE_EDGE = 0xFF3F3F46
-private const val SCREEN_BG = 0xFF0E0E17
-private const val SHEET_PAD_DP = 8
 private const val TV_W = 960f
 private const val TV_H = 560f
 private const val TV_RADIUS_DP = 14

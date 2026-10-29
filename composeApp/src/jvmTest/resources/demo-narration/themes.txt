@@ -1,0 +1,31 @@
+# What the narrator says in the themes tour, in order. One line per key.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll look at every theme the app comes with, and then make one of our own with Customize Theme.
+why = A theme sets the colors of ChurchPresenter's own windows, so you can pick one that's comfortable in your booth, whether the room is bright or dark.
+menu = Themes are in the View menu, at the top of the screen. Pick one, and the whole app changes at once.
+outputs = A theme only changes ChurchPresenter's own windows. What your congregation sees on the screens stays exactly as it was.
+light = Light is a clean, neutral gray theme for a bright room.
+system = System follows your computer, and switches between light and dark whenever your computer does.
+warm = Warm is a light theme in cream and amber tones.
+ocean = Ocean is light, with soft, blue-tinted surfaces.
+rose = Rose is light, in a warm, pinkish gray.
+slate = Slate is a cool, blue-gray light theme, quieter than Ocean.
+sand = Sand is a warm, light taupe, a little grayer and browner than Warm.
+dark = Dark is a classic neutral dark theme, easy on the eyes in a dim booth.
+midnight = Midnight is dark, in a deep navy blue.
+forest = Forest is dark, with green-tinted surfaces.
+mocha = Mocha is dark, with a soft lilac accent.
+studio = Studio pairs deep navy panels with an amber accent.
+plum = Plum is a deep aubergine, with a warm pink accent.
+customize = To make a theme of your own, open the View menu and choose Customize Theme.
+use-custom = Switch on Use custom colors to build a whole palette of your own. With it off, you keep the current theme's colors, and change only the font and the text size.
+accent = Start with one accent color. Type it in, or pick it, and every other color is worked out from it.
+base = Then choose a light or a dark base underneath it.
+more = You can also set the background, text, secondary, selection, success, warning and error colors yourself. Any you leave on Auto come from the accent.
+font = Pick the font for ChurchPresenter's own windows.
+sizes = Text size and Interface size make everything larger or smaller, and Margin sets how much room there is around each item.
+preview = The preview on the right shows your theme as you build it, before anything changes.
+reset = If you change your mind, Reset to defaults puts everything back the way it started.
+apply = Click OK, and the whole app takes on your new colors.
+custom = Your theme is saved as Custom, in the theme list in the View menu, so you can switch back to it at any time.
+outro = And that's themes in ChurchPresenter: twelve ready-made looks, System, and one that's all your own.

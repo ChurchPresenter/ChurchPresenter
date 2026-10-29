@@ -1,0 +1,26 @@
+# What the narrator says in the mobile Calendar mode tour, in order. One line per key.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll plan services on your phone with the mobile app's Calendar mode, and send them to the church computer.
+why = Calendar mode is for the people who plan the service, like the pastor or the worship leader. Nothing is projected from the phone. The plans reach the church computer over the cloud, ready for Sunday.
+mode = The first time you open the app, choose Calendar, and tap Continue.
+desktop-first = Calendar sync has to be switched on at the church computer first. The Calendar Manager tour shows how.
+sync = Then, on the phone, open Sync with the church computer. There are two ways to join.
+invite = The first is an invite. Whoever runs the church computer opens the calendar's settings and chooses Invite a phone, and you scan the code it shows.
+ask = The second works on the church Wi-Fi. Tap Ask over the church WiFi.
+waiting = The phone shows a code, and so does the church computer. When the two match, whoever is at the computer allows the phone.
+scan = Then scan the QR code the computer shows, and you're done.
+enrolled = The phone now syncs the calendar. Stop syncing on this phone is always there, if you need it.
+month = The calendar opens on the month. Days with services are marked, and the services on the selected day are listed below.
+status = At the top, the sync line shows when the phone last synced, and when it will sync next. Tap the cloud button to sync right away.
+types = Each service type, like Sunday service, Midweek prayer or Special event, has its own color.
+empty-day = On an empty day, tap Add service, or Copy last Sunday to start from last week's plan.
+new = Give the service a name, a start time and a type. Then start from a blank service, or from one of your templates.
+run = The run of show lists everything in the service, in order, in sections like Worship and Word, with a start time and a length for each item.
+add = Tap the plus button to add songs from your church's song library, Bible passages, sections, ministry items like a welcome, or presets from the church computer.
+item = Tap any item to change it. Set its length, when it starts, how long it runs, whether it repeats, and what happens at the end.
+timing = Starts can be Cued, After previous, or a number of minutes before the service. Repeats can be Once, Loop, or a set number of times. And At end can Hold, move on to the Next item, or Blank the screens.
+loop = For example, an announcement slideshow can start after the item before it, loop, and then blank the screens.
+armed = The Armed switch at the top turns on the service's timed cues, so they run by themselves at the church computer.
+copy = Most weeks look alike. Copy the service, choose weekly, every two weeks or monthly, and how many times, and the app creates them all at once, with the run of show and the cues included.
+synced = Your changes reach the church computer when it syncs, and every phone that's enrolled sees the same plan.
+outro = And that's Calendar mode: plan your services on your phone, all week, from anywhere.
