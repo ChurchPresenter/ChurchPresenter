@@ -458,6 +458,25 @@ internal class DemoTour(
         ui.waitForIdle()
     }
 
+    /** Takes the last tooltip down, before what it pointed at changes under it. */
+    fun clearNote() {
+        scene.focus = null
+    }
+
+    /** A tablet's drawing page on the outputs, as `RemoteDrawingShow` puts each one up. */
+    fun showDrawing(page: BufferedImage, paper: Color) {
+        if (presenter.slideContent.value != Presenting.DRAWING) presenter.setPresentingMode(Presenting.DRAWING)
+        presenter.showDrawingFrame(page.toComposeImageBitmap(), paper)
+        ui.waitForIdle()
+    }
+
+    /** The tablet ended its drawing: the outputs clear, as for Clear Display. */
+    fun endDrawing() {
+        presenter.requestClearDisplay()
+        ui.waitForIdle()
+        ui.settleLive(presenter)
+    }
+
     /** True once the selected verses lead with [text] — what Go Live would show first. */
     fun selectionLeads(text: String) =
         presenter.selectedVerses.value.firstOrNull()?.verseText?.contains(text) == true
@@ -521,11 +540,18 @@ internal class DemoTour(
 
     // ── The storyboard's scenes ───────────────────────────────────────────
 
-    /** 01 Intro, then 02 Establish: the title card, then the whole window with its caption. */
-    fun intro(subtitle: String) {
+    /**
+     * 01 Intro, then 02 Establish: the title card, then the whole window with its caption. Without
+     * [establish] the card is all, for a tour that never uses the main window.
+     */
+    fun intro(subtitle: String, establish: Boolean = true) {
         val start = frame
         val talk = narrate("The $tab tab", subtitle)
         repeat(frames(4.0)) { age -> write(stage.intro(tab, subtitle, age)) }
+        if (!establish) {
+            repeat(frames(maxOf(0.0, talk + 0.35 - 4.0))) { age -> write(stage.intro(tab, subtitle, frames(4.0) + age)) }
+            return
+        }
         scene.camera = Camera.full(appW, appH).let { full ->
             val c = full.dst.center
             val hw = full.dst.width * 0.47f
