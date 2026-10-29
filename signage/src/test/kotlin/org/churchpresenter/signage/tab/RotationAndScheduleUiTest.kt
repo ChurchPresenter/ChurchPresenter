@@ -36,7 +36,6 @@ import org.churchpresenter.theme.ThemeMode
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
-import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -131,7 +130,7 @@ class RotationAndScheduleUiTest {
             ScheduleBlock("b", setOf(Day.MON, Day.TUE), ClockTime.parse("08:00"), ClockTime.parse("09:00"), TV_OFF),
         )
         val settings = SignageSettings(screens = mapOf("p" to ScreenPlan(null, schedule)))
-        val folder = SignageFolderState(Path("/s"), entries, settings, ready = true)
+        val folder = SignageFolderState(entries, settings, ready = true)
         val screen = PairedScreen("p", "Lobby", "h", Platform.LINUX_ARM64, "26.0.32", 1920, 1080, 0)
         val status = PlayerMessage.Status(
             cec = CecState.WORKING, cpuPercent = 23, memoryPercent = 61, temperatureC = 54.6, uptimeSeconds = 270_000,

@@ -15,17 +15,20 @@ class ManifestBuilderTest {
     private val unreadable = FolderFile(Path("/s/c.jpg"), MediaKind.IMAGE, 1, 1)
     private val playlists = listOf(
         HashedPlaylist(
-            FolderPlaylist("folder:", "Signage", listOf(picture, video, unreadable)),
+            FolderPlaylist("folder:", "Signage", listOf(picture, video, unreadable), "/s", pictureSeconds = 7),
             mapOf(picture to "a", video to "b", unreadable to null),
         ),
-        HashedPlaylist(FolderPlaylist("folder:Events", "Events", listOf(picture)), mapOf(picture to "a")),
-        HashedPlaylist(FolderPlaylist("folder:Broken", "Broken", listOf(unreadable)), mapOf(unreadable to null)),
+        HashedPlaylist(FolderPlaylist("folder:Events", "Events", listOf(picture), "/s/Events"), mapOf(picture to "a")),
+        HashedPlaylist(
+            FolderPlaylist("folder:Broken", "Broken", listOf(unreadable), "/s/Broken"),
+            mapOf(unreadable to null),
+        ),
     )
 
     private fun build(plan: String?) = buildManifest(
         screen = screen,
         ownerId = "owner",
-        settings = SignageSettings(pictureSeconds = 7, screens = mapOf("p" to ScreenPlan(plan))),
+        settings = SignageSettings(screens = mapOf("p" to ScreenPlan(plan))),
         playlists = playlists,
         timeZone = "UTC",
     )

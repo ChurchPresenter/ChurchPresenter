@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.readText
@@ -28,6 +29,20 @@ class SignageSetupAdoptTest {
         adoptSignageSetup(local, shared)
         assertEquals("""{"ownerId":"here"}""", shared.resolve("screens.json").readText())
         assertEquals("""{"pictureSeconds":12}""", shared.resolve("signage.json").readText())
+    }
+
+    @Test
+    fun theCopiesItsPlaylistsPlayComeWithIt() {
+        local.resolve("signage.json").writeText("""{"pictureSeconds":12}""")
+        local.resolve("Folders/Easter").createDirectories().resolve("a.jpg").writeText("jpg")
+        local.resolve("Files").createDirectories().resolve("flyer.png").writeText("png")
+        local.resolve("hashes.json").writeText("{}")
+        val shared = root.resolve("shared")
+        adoptSignageSetup(local, shared)
+        assertEquals("jpg", shared.resolve("Folders/Easter/a.jpg").readText())
+        assertEquals("png", shared.resolve("Files/flyer.png").readText())
+        // This computer's own cache stays behind.
+        assertFalse(Files.exists(shared.resolve("hashes.json")))
     }
 
     @Test

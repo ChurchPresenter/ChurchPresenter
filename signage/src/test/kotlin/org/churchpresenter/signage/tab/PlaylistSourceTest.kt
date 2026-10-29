@@ -70,13 +70,13 @@ class PlaylistSourceTest {
     fun anAddedPlaylistIsListedWithItsFileOrAddressAndAMissingFileSaysSo() {
         val picture = dir.resolve("welcome.png").also { it.writeText("png") }
         val file = FilePlaylist("file:1", "Welcome", picture.toString(), MediaKind.IMAGE)
-        val present = checkNotNull(file.currentFile())
+        val present = checkNotNull(file.currentFile(dir))
         assertEquals(
             PlaylistSummary("file:1", "Welcome", kind = SourceKind.PICTURE, detail = "welcome.png"),
             HashedPlaylist(file, mapOf(present to "hash")).addedSummary(),
         )
         val gone = file.copy(path = dir.resolve("gone.mp4").toString(), kind = MediaKind.VIDEO)
-        assertNull(gone.currentFile())
+        assertNull(gone.currentFile(dir))
         assertEquals(
             PlaylistSummary("file:1", "Welcome", kind = SourceKind.VIDEO, detail = "gone.mp4", missing = true),
             HashedPlaylist(gone).addedSummary(),
@@ -84,7 +84,6 @@ class PlaylistSourceTest {
         val stream = LinkPlaylist("link:1", "Live", "rtsp://camera", LinkKind.STREAM)
         val listed = HashedPlaylist(stream).addedSummary()
         assertEquals(SourceKind.STREAM to "rtsp://camera", listed.kind to listed.detail)
-        assertTrue(HashedPlaylist(stream).addedSummary().added)
         val filter = picturesAndVideosFilter("Pictures and videos")
         assertTrue(filter.extensions.toSet().containsAll(listOf("jpg", "png", "mp4", "mov")))
     }

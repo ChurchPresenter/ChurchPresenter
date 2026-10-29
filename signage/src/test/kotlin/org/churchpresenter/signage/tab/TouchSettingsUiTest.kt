@@ -30,7 +30,6 @@ import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.ScreenLink
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -176,7 +175,7 @@ class TouchSettingsUiTest {
     }
 
     private val screen = PairedScreen("p", "Lobby", "h", Platform.LINUX_ARM64, "26.0.41", 1920, 1080, 0)
-    private val folder = SignageFolderState(Path("/s"), pages, SignageSettings(), ready = true)
+    private val folder = SignageFolderState(pages, SignageSettings(), ready = true)
 
     @Test
     fun aScreenWithNoNewerPlayerStillUpdatesItsSystem() = runComposeUiTest {
