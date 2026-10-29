@@ -4093,6 +4093,7 @@
     <string name="signage_preview_close">Close</string>
     <string name="signage_update_to">Update to %1$s</string>
     <string name="signage_update_system">Update</string>
+    <string name="signage_update_system_count">Update (%1$d)</string>
     <string name="signage_updating">Updating to %1$s: %2$s</string>
     <string name="signage_updating_system">Updating the system: Chromium, the video player and the rest. This can take a while.</string>
     <string name="signage_update_downloading">downloading</string>
