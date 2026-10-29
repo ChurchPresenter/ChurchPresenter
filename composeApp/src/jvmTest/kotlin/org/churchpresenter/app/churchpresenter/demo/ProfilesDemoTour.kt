@@ -51,12 +51,18 @@ class ProfilesDemoTour {
         step("Settings", "Then Profiles", find(hasContentDescription("Settings", substring = true)), numbered = true) {}
         openPanel("Settings — Profiles", PROFILES_W, PROFILES_H)
         menusInPlace = true
+        segment("basics")
         basics()
+        segment("linked")
         linked()
+        segment("style")
         styleOne()
+        segment("preview")
         onThePreview()
         closePanel()
+        segment("sets")
         sets()
+        segment("end")
         say("outro")
         outro()
     }
@@ -86,7 +92,7 @@ class ProfilesDemoTour {
         say("linked")
         panelNote("Linked to Sanctuary", "Keeps only what it changes", row(OVERFLOW), click = true)
         say("differ")
-        point("Different from Sanctuary", "Revert to follow it again", hasText("Different from Sanctuary", substring = true))
+        point("Different from Sanctuary", "Revert to follow it again", hasText(DIFFERENT, substring = true))
         say("unlink")
         point("Unlink", "A standalone copy", hasText("Unlink"))
         say("sections")
@@ -120,7 +126,8 @@ class ProfilesDemoTour {
     private fun DemoTour.onThePreview() {
         quietPanelClick(hasText("Bible"))
         say("adjust")
-        panelNote("Adjust on preview", "Drag it on the picture", seek(hasText("Adjust on preview")), click = true, numbered = true)
+        val adjust = seek(hasText("Adjust on preview"))
+        panelNote("Adjust on preview", "Drag it on the picture", adjust, click = true, numbered = true)
         say("element")
         point("Move one element", "Reset positions puts it back", hasText("Reset positions"))
         say("larger")
@@ -130,7 +137,8 @@ class ProfilesDemoTour {
         point("Text boxes", "Drag and resize, text fits", hasText("Text boxes") or hasText("Text box"))
         say("box-options")
         boxOn()
-        point("Keep clear, snap to guides", "As you move them", hasText("Snap to guides") or hasText("Keep clear of other boxes"))
+        val options = hasText("Snap to guides") or hasText("Keep clear of other boxes")
+        point("Keep clear, snap to guides", "As you move them", options)
         say("defaults")
         point("Different from defaults", "Revert any change", hasText("Different from defaults"))
     }
@@ -247,6 +255,7 @@ private fun building(s: AppSettings): AppSettings {
 }
 
 private const val SANCTUARY = "Sanctuary"
+private const val DIFFERENT = "Different from Sanctuary"
 private const val OVERFLOW = "Overflow room"
 private const val YOUTH_SET = "Youth night"
 private const val CONTENT = "Content & sources"

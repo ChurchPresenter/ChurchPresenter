@@ -123,7 +123,7 @@ class MobileCanvasDemoTour {
         say("qr")
         desk.value = "qr"
         pause(0.3)
-        point("The connection code", "This computer's address", hasText("Close") or hasText("churchpresenter://", substring = true))
+        point("The connection code", "This computer's address", CONNECTION_CODE)
         desk.value = ""
         say("tablet-mode")
         show("mode-picker-tablet/remote-selected")
@@ -131,7 +131,7 @@ class MobileCanvasDemoTour {
         say("scan")
         desk.value = "qr"
         pause(0.3)
-        point("Scan the code", "With the tablet's camera", hasText("Close") or hasText("churchpresenter://", substring = true))
+        point("Scan the code", "With the tablet's camera", CONNECTION_CODE)
         desk.value = ""
         say("manual")
         show("settings-tablet/server")
@@ -162,10 +162,10 @@ class MobileCanvasDemoTour {
         panelNote("Use a stylus", "For better accuracy", tabletScreen())
         say("pen-bar")
         panelNote("The pen bar", "Color, thickness, opacity", tabletBox(PEN_BAR))
-        TOOL_OPTIONS.forEach { (key, shot, heading, sub, box) ->
-            say(key)
-            show(shot)
-            panelNote(heading, sub, tabletBox(box), numbered = key in NUMBERED)
+        TOOL_OPTIONS.forEach { stop ->
+            say(stop.key)
+            show(stop.shot)
+            panelNote(stop.heading, stop.sub, tabletBox(stop.box), numbered = stop.key in NUMBERED)
         }
         say("snap")
         show("options-shapes")
@@ -198,7 +198,8 @@ class MobileCanvasDemoTour {
         say("ask")
         prompt.value = true
         pause(0.3)
-        panelNote("Allow for Session", "Then it goes straight up", panelItem(hasContentDescription("Allow for Session")))
+        val allow = panelItem(hasContentDescription("Allow for Session"))
+        panelNote("Allow for Session", "Then it goes straight up", allow)
         prompt.value = false
         show("live")
         closePanel()
@@ -366,7 +367,9 @@ private fun pageOf(screen: BufferedImage): BufferedImage =
 
 /** A Canvas screenshot by its name, or any of the app's by `section/name`. */
 private fun image(shot: String): ImageBitmap? = tabletImages.getOrPut(shot) {
-    File(if ('/' in shot) CANVAS_SHOTS.parentFile else CANVAS_SHOTS, "${shot}__dark.png").takeIf { it.isFile }?.let { ImageIO.read(it) }?.toComposeImageBitmap()
+    File(if ('/' in shot) CANVAS_SHOTS.parentFile else CANVAS_SHOTS, "${shot}__dark.png").takeIf { it.isFile }
+        ?.let { ImageIO.read(it) }
+        ?.toComposeImageBitmap()
 }
 
 private fun box(left: Float, top: Float, right: Float, bottom: Float) = Rect(left, top, right, bottom)
@@ -396,12 +399,8 @@ private val RAIL = box(0.012f, 0.267f, 0.055f, 0.797f)
 private const val TOOL_HALF = 0.022f
 private const val PEN = 0.396f
 private const val HIGHLIGHTER = 0.443f
-private const val ERASER = 0.488f
 private const val SHAPES = 0.548f
-private const val LINE = 0.597f
 private const val TEXT = 0.644f
-private const val STICKY = 0.690f
-private const val IMAGE = 0.737f
 private val CANVAS_ENTRY = box(0.008f, 0.178f, 0.343f, 0.28f)
 private val REMOTE_CARD = box(0.048f, 0.345f, 0.343f, 0.785f)
 private val ADDRESS = box(0.258f, 0.305f, 0.982f, 0.62f)
@@ -418,15 +417,28 @@ private const val OPTIONS_LEFT = 0.062f
 private const val OPTIONS_RIGHT = 0.278f
 
 private val TOOL_OPTIONS = listOf(
-    ToolStop("pen-options", "options-pen", "Pen options", "Pen type, smoothing, pressure", box(OPTIONS_LEFT, 0.37f, OPTIONS_RIGHT, 0.9f)),
+    ToolStop(
+        "pen-options", "options-pen", "Pen options", "Pen type, smoothing, pressure",
+        box(OPTIONS_LEFT, 0.37f, OPTIONS_RIGHT, 0.9f),
+    ),
     ToolStop("highlighter", "options-highlighter", "Highlighter", "Marks without hiding", tool(HIGHLIGHTER)),
-    ToolStop("eraser", "options-eraser", "Eraser", "Stroke, pixel or area", box(OPTIONS_LEFT, 0.465f, OPTIONS_RIGHT, 0.8f)),
+    ToolStop(
+        "eraser", "options-eraser", "Eraser", "Stroke, pixel or area",
+        box(OPTIONS_LEFT, 0.465f, OPTIONS_RIGHT, 0.8f),
+    ),
     ToolStop("shapes", "options-shapes", "Shapes", "Fill and border", tool(SHAPES)),
-    ToolStop("line", "options-line", "Line & arrow", "Straight, curve or elbow", box(OPTIONS_LEFT, 0.44f, OPTIONS_RIGHT, 0.975f)),
+    ToolStop(
+        "line", "options-line", "Line & arrow", "Straight, curve or elbow",
+        box(OPTIONS_LEFT, 0.44f, OPTIONS_RIGHT, 0.975f),
+    ),
     ToolStop("text", "editing-text", "Text", "Headings and references", tool(TEXT)),
-    ToolStop("sticky", "options-sticky", "Sticky note", "A question or a reminder", box(OPTIONS_LEFT, 0.62f, OPTIONS_RIGHT, 0.975f)),
+    ToolStop(
+        "sticky", "options-sticky", "Sticky note", "A question or a reminder",
+        box(OPTIONS_LEFT, 0.62f, OPTIONS_RIGHT, 0.975f),
+    ),
     ToolStop("image", "insert-image", "Image", "Photos or files", box(0.745f, 0.135f, 0.977f, 0.4f)),
 )
+private val CONNECTION_CODE = hasText("Close") or hasText("churchpresenter://", substring = true)
 private val NUMBERED = setOf("highlighter", "eraser", "shapes", "line", "text", "sticky", "image")
 
 // The live page, in the screenshot's pixels: the board between the bars and right of the tools.

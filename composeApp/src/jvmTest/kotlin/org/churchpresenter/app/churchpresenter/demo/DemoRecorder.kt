@@ -413,10 +413,26 @@ internal class DemoTour(
     fun dp(value: Float) = value * d
 
     /** [text] inside the open menu or dropdown — a compose root of its own, listed after the window. */
-    fun menuItem(text: String): Target {
-        val nodes = ui.onAllNodes(hasText(text))
+    fun menuItem(text: String): Target = popupItem(hasText(text))
+
+    /** [matcher] inside the open menu — the last compose root — where the video draws it ([popupShift]). */
+    fun popupItem(matcher: SemanticsMatcher): Target {
+        val nodes = ui.onAllNodes(matcher)
         val hit = nodes.fetchSemanticsNodes().withIndex().last()
-        return Target(nodes[hit.index], hit.value.boundsInWindow)
+        val layer = ui.onAllNodes(isRoot(), useUnmergedTree = true).fetchSemanticsNodes().last()
+        return Target(nodes[hit.index], hit.value.boundsInWindow.translate(-popupShift(layer), 0f))
+    }
+
+    /**
+     * How far left a main-window menu is drawn: one that opens past the window's right edge is moved
+     * back inside, as a real window keeps it. Under test the window runs on past the app, into the
+     * projector's gap, so the menu is never pushed in by itself.
+     */
+    private fun popupShift(layer: SemanticsNode): Float {
+        if (panelOpen) return 0f
+        // The layer spans the whole window; the menu is the card drawn on it.
+        val card = cardBounds(layer, appW) ?: return 0f
+        return if (card.left < appW && card.right > appW) minOf(card.right - appW, card.left) else 0f
     }
 
     /** Every match, top to bottom. */
@@ -549,7 +565,8 @@ internal class DemoTour(
         val talk = narrate("The $tab tab", subtitle)
         repeat(frames(4.0)) { age -> write(stage.intro(tab, subtitle, age)) }
         if (!establish) {
-            repeat(frames(maxOf(0.0, talk + 0.35 - 4.0))) { age -> write(stage.intro(tab, subtitle, frames(4.0) + age)) }
+            val card = frames(4.0)
+            repeat(frames(maxOf(0.0, talk + 0.35 - 4.0))) { age -> write(stage.intro(tab, subtitle, card + age)) }
             return
         }
         scene.camera = Camera.full(appW, appH).let { full ->
@@ -1316,7 +1333,11 @@ internal class DemoTour(
             }
             // A pop-up the open dialog raised (an alert is centered on the whole window) is drawn
             // over that dialog instead, where the viewer is looking.
-            val to = if (relocated(at, panelArea)) dialogPopupOrigin(at, panelArea) else Pt(at.left, at.top)
+            val to = if (relocated(at, panelArea)) {
+                dialogPopupOrigin(at, panelArea)
+            } else {
+                Pt(at.left - popupShift(unmerged.getOrElse(i) { nodes[i] }), at.top)
+            }
             g.drawImage(roots[i].captureToImage().toAwtImage(), to.x.toInt(), to.y.toInt(), null)
         }
         g.dispose()
