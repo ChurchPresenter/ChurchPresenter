@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +26,7 @@ import org.churchpresenter.calendar.ui.CalendarApp
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.dialogs.RemoteEventDialogContent
+import org.churchpresenter.dialogs.resolveRemoteEventPresentation
 import org.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CalendarSyncStatus
@@ -229,9 +227,9 @@ class CalendarModeDemoTour {
         panelNote("The plus button", "Tap it", screenBox(PLUS), numbered = true)
         show("screenshots/demo/add-sheet")
         say("add")
-        panelNote("Five tabs", "Songs, Bible, Section, Ministry, Presets", screenBox(TABS, sheetScreen()))
+        panelNote("Five tabs", "Songs, Bible, Section, Ministry, Presets", screenBox(TABS))
         say("add-song")
-        panelNote("Amazing Grace", "Tap its plus", screenBox(FIRST_SONG_PLUS, sheetScreen()), numbered = true)
+        panelNote("Amazing Grace", "Tap its plus", screenBox(FIRST_SONG_PLUS), numbered = true)
         show("screenshots/calendar/run-of-show")
         say("filled")
         panelNote("Run of show", "In order, in sections", phoneScreen())
@@ -323,12 +321,14 @@ private fun EnrollRequest() {
         clientId = "f2a8c113",
         clientLabel = "Pastor's iPhone",
     )
+    // Labelled the way the app labels it (RemoteEventDialog), not with words of the tour's own.
+    val shown = resolveRemoteEventPresentation(event, 1, isClientKnownAllowed = false, isClientKnownBlocked = false)
     RemoteEventDialogContent(
         event = event,
-        actionLabel = "Plan the calendar",
-        typeIcon = Icons.Filled.Smartphone,
-        typeAccent = MaterialTheme.colorScheme.primary,
-        bodyTitle = event.title,
+        actionLabel = shown.actionLabel,
+        typeIcon = shown.typeIcon,
+        typeAccent = shown.typeAccent,
+        bodyTitle = shown.bodyTitle,
         remaining = 0,
         showAllowPermanently = false,
         isClientKnownAllowed = false,
