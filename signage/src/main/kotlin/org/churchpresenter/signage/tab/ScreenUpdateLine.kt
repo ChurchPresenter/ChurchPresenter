@@ -23,6 +23,7 @@ import org.churchpresenter.strings.generated.resources.signage_update_installing
 import org.churchpresenter.strings.generated.resources.signage_update_restarting
 import org.churchpresenter.strings.generated.resources.signage_update_rolled_back
 import org.churchpresenter.strings.generated.resources.signage_update_system
+import org.churchpresenter.strings.generated.resources.signage_update_system_count
 import org.churchpresenter.strings.generated.resources.signage_update_to
 import org.churchpresenter.strings.generated.resources.signage_updating
 import org.churchpresenter.strings.generated.resources.signage_updating_system
@@ -66,7 +67,8 @@ internal fun UpdateLine(row: ScreenRowState) {
 /**
  * The button that updates the screen while no update is under way: Update to a newer player when one
  * is offered (the machine is updated first), or Update for the machine alone (Chromium, mpv and
- * every package) on a screen that can. Offered again after a failure or a rollback.
+ * every package) on a screen that can and has something waiting — with how many, where it says; a
+ * screen that cannot say keeps the button. Offered again after a failure or a rollback.
  */
 @Composable
 internal fun UpdateButton(row: ScreenRowState, onUpdate: () -> Unit) {
@@ -77,8 +79,17 @@ internal fun UpdateButton(row: ScreenRowState, onUpdate: () -> Unit) {
         offer != null -> KeyButton(onClick = onUpdate) {
             Text(stringResource(Res.string.signage_update_to, offer.release.version), maxLines = 1, softWrap = false)
         }
-        row.link?.features?.contains(Features.SYSTEM_UPDATE) == true -> KeyButton(onClick = onUpdate) {
-            Text(stringResource(Res.string.signage_update_system), maxLines = 1, softWrap = false)
+        row.link?.features?.contains(Features.SYSTEM_UPDATE) == true -> {
+            val waiting = row.link.status?.systemUpdates
+            if (waiting == 0) return
+            KeyButton(onClick = onUpdate) {
+                val label = if (waiting == null) {
+                    stringResource(Res.string.signage_update_system)
+                } else {
+                    stringResource(Res.string.signage_update_system_count, waiting)
+                }
+                Text(label, maxLines = 1, softWrap = false)
+            }
         }
     }
 }

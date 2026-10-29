@@ -132,6 +132,26 @@ class ScreenCardAloneTest {
     }
 
     @Test
+    fun theMachinesUpdateShowsOnlyWhenSomethingIsWaiting() {
+        fun waiting(count: Int?) = row(
+            link.copy(
+                features = link.features + Features.SYSTEM_UPDATE,
+                status = link.status?.copy(systemUpdates = count),
+            ),
+        )
+        card(waiting(12)) { swap ->
+            onNodeWithText("Update (12)").performClick()
+            swap(waiting(0), actions())
+            onNodeWithText("Update").assertDoesNotExist()
+            onNodeWithText("Update (0)").assertDoesNotExist()
+            // A player that cannot count keeps the button it always had.
+            swap(waiting(null), actions())
+            onNodeWithText("Update").performClick()
+        }
+        assertEquals(listOf(" update p", " update p"), calls)
+    }
+
+    @Test
     fun everyTouchscreenAndDeviceControlHandsBackItsScreen() {
         val touch = LinkPlaylist(
             "link:t", "Sign-up", "https://signup.example.org", LinkKind.WEB, interactive = InteractiveLink(),
