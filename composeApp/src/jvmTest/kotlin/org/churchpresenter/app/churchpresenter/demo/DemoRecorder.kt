@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.LiveOutputCallbacks
 import org.churchpresenter.app.churchpresenter.MainDesktop
 import org.churchpresenter.app.churchpresenter.MainDesktopPublishers
+import org.churchpresenter.app.churchpresenter.RemoteControlFlows
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.WebAccessState
@@ -177,6 +178,13 @@ internal fun recordTour(
      * Wraps the main window, the way the app's own window wraps it — Wick's spotlight around it and its
      * lamp in the corner, say. Given the settings, their writer and the window to draw inside.
      */
+    /**
+     * What the main window tells others, as the app wires it — a tour adds, say, the presentation
+     * feed its own companion server reads. The schedule's actions are always the recorder's.
+     */
+    publish: (MainDesktopPublishers) -> MainDesktopPublishers = { it },
+    /** What reaches the main window from outside, as the app wires it — a remote's slide changes. */
+    flows: RemoteControlFlows = RemoteControlFlows(),
     appHost: (
         @Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit, @Composable () -> Unit) -> Unit
     )? = null,
@@ -228,7 +236,8 @@ internal fun recordTour(
                                     theme = windowTheme,
                                     statisticsManager = statistics,
                                     live = liveCallbacks(presenter),
-                                    publish = MainDesktopPublishers(onScheduleActionsReady = { actions = it }),
+                                    publish = publish(MainDesktopPublishers(onScheduleActionsReady = { actions = it })),
+                                    flows = flows,
                                     service = ServicePlanLink(upcomingServiceLoad = demoUpcomingLoad.value),
                                     web = WebAccessState(
                                         serverUrl = "http://192.168.1.42:8080",

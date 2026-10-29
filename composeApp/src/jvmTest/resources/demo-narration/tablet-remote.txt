@@ -1,0 +1,26 @@
+# What the narrator says in the tablet remote tour, in order. One line per key.
+# Every line plays over what it names, and every tap from one screen to the next is shown.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll change the slides from a tablet, so whoever is speaking can run their own presentation from the pulpit.
+tab = On the church computer, open the Presentation tab.
+recent = Double-click a recent file to load its slides. This one is a PowerPoint, with speaker notes on every slide.
+remote-open = Then click Remote Control, at the top of the slides.
+enable = Switch on Enable Remote Control.
+qr = The QR code holds the remote's address. Scan it with the tablet's camera.
+opens = The remote opens in the tablet's web browser, so there's no app to install. The first time, it waits for the computer to say yes.
+approve = On the computer, ChurchPresenter asks whether this tablet may control the slides.
+allow = Click Allow for Session, and the tablet can change the slides until ChurchPresenter closes.
+page = Now the tablet shows the slide that's on screen, with the next slide beside it, and every slide underneath.
+go-live = On the computer, click Go Live, so the slides are on the big screen.
+forward = On the tablet, tap Forward.
+notes = Across the top are the speaker notes, straight from the PowerPoint or Keynote file. They're only on the tablet, never on the big screen.
+forward-live = The next slide is on the big screen at once.
+jump = To jump straight to any slide, tap it in the list underneath. Let's tap slide five.
+jump-live = Slide five goes up on the big screen.
+backward = Tap Backward to go back a slide.
+backward-live = And the big screen goes back with it.
+upload = The speaker can bring their own slides, too. On the tablet, tap Upload.
+pick = The tablet's file picker opens. Choose the PowerPoint or Keynote file. Let's tap Easter Sunday.
+uploaded = The file goes straight to the church computer, and moments later the tablet shows its slides, notes and all.
+upload-desk = On the computer, the new presentation opens in the Presentation tab, ready to go live.
+outro = And that's the tablet remote: the slides and the notes in the speaker's hand, and their own presentations sent straight from the tablet.
