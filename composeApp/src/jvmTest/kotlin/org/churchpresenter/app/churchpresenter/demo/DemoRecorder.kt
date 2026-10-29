@@ -128,6 +128,7 @@ private const val DARK_MODE = true
 private val THEME = if (DARK_MODE) ThemeMode.DARK else ThemeMode.LIGHT
 
 private const val FPS = 30
+private const val FRAME_MS = 1000L / FPS
 private const val TAB_AREA_LEFT = 380f
 
 /** Captured at twice the dp size, so a 2× zoom on the 1080p frame stays sharp. */
@@ -172,6 +173,13 @@ internal fun recordTour(
      * hold, as the app builds it. The cards around the video keep their own look.
      */
     theme: State<ThemeMode>? = null,
+    /**
+     * Wraps the main window, the way the app's own window wraps it — Wick's spotlight around it and its
+     * lamp in the corner, say. Given the settings, their writer and the window to draw inside.
+     */
+    appHost: (
+        @Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit, @Composable () -> Unit) -> Unit
+    )? = null,
     script: DemoTour.() -> Unit,
 ) {
     val root = System.getenv("CP_DEMO_OUT")?.let(::File)
@@ -208,6 +216,7 @@ internal fun recordTour(
                     ) {
                         Row(Modifier.fillMaxSize().background(Color.Black)) {
                             Box(Modifier.size(APP_W.dp, APP_H.dp)) {
+                                val desktop = @Composable {
                                 MainDesktop(
                                     appSettings = current,
                                     onSettingsChange = changeSettings,
@@ -231,6 +240,8 @@ internal fun recordTour(
                                         },
                                     ),
                                 )
+                                }
+                                if (appHost != null) appHost(current, changeSettings, desktop) else desktop()
                             }
                             // What the app's output windows run beside the outputs: Clear fades out and clears here.
                             PresenterTransitionEffects(presenter, current)
@@ -1085,6 +1096,28 @@ internal class DemoTour(
             content.left + (r.right - CANVAS_W * d) * k,
             content.top + (r.bottom - top) * k,
         )
+    }
+
+    /**
+     * [seconds] of the window as it moves: the clock is stepped one video frame at a time and every
+     * frame captured, so an animation (Wick's lamp, a spinner) plays in the video rather than standing
+     * still. The clock is handed back as it was.
+     */
+    fun film(seconds: Double) {
+        val auto = ui.mainClock.autoAdvance
+        ui.mainClock.autoAdvance = false
+        try {
+            repeat(frames(seconds)) {
+                ui.mainClock.advanceTimeBy(FRAME_MS)
+                val (app, projector, panel) = capture()
+                scene.app = app
+                scene.projector = projector
+                scene.panel = panel
+                emit()
+            }
+        } finally {
+            ui.mainClock.autoAdvance = auto
+        }
     }
 
     fun pause(seconds: Double) {
