@@ -439,7 +439,7 @@ private fun image(shot: String): ImageBitmap? = phoneImages.getOrPut(shot) {
  * [image] cut down to what differs from its corner colour, with a margin: a dialog shot on a tablet
  * canvas, fitted whole into the phone, would otherwise be a small card in a lot of empty space.
  */
-private fun trimmed(image: BufferedImage): BufferedImage {
+internal fun trimmed(image: BufferedImage): BufferedImage {
     val bg = image.getRGB(0, 0)
     fun differs(x: Int, y: Int): Boolean {
         val p = image.getRGB(x, y)

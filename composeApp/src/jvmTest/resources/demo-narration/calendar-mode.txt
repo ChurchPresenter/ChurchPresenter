@@ -1,0 +1,42 @@
+# What the narrator says in the mobile Calendar mode tour, in order. One line per key.
+# Every line plays over what it names, and every move from one screen to the next is a tap shown.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll plan services on your phone with the mobile app's Calendar mode, and send them to the church computer.
+why = Calendar mode is for the people who plan the service, like the pastor or the worship leader. The first time you open the app, it asks how you'll present.
+mode = Tap Calendar.
+continue = Then tap Continue.
+home = The calendar opens on this month. The phone isn't joined to the church computer yet, so the cloud button at the top is crossed out.
+settings-open = First, on the church computer, click the Settings button.
+desktop-first = On the Server page, find Calendar sync, and switch it on.
+sync-open = Now, on the phone, tap the cloud button.
+sync = This opens Sync with the church computer. There are two ways to join.
+calendar-open = The first way is an invite. On the church computer, click the Calendar Manager button.
+invite = Then click Invite a phone, in the calendar's header.
+invite-qr = The computer shows a QR code. On the phone, tap Scan QR Code, and point the camera at it.
+ask = The second way works on the church Wi-Fi, without an invite. On the phone, tap Ask over the church WiFi instead.
+waiting = The phone shows a code.
+prompt = And the church computer asks whether to allow this phone, with the same code. Check that the two match.
+allow = If they match, click Allow on the church computer.
+scan = The computer then shows a QR code. Tap Scan QR Code on the phone, and scan it to finish.
+enrolled = The phone now syncs the calendar. Stop syncing on this phone is here, if you ever need it.
+synced-home = Back on the month, the line above the buttons shows when the phone last synced, and when it will sync next. Tap the cloud button any time to sync right away.
+marked = Days with a service have a dot under them, and the selected day's services are listed below.
+types = Under Service types, each kind of service has its own color.
+tap-day = To plan another Sunday, tap its day. Let's tap the thirteenth.
+empty-day = Nothing is planned yet. Tap Add service, or Copy last Sunday to start from last week's plan.
+new = Give the service a name, a start time and a type, and start from a blank service or one of your templates.
+create = Then tap Add service.
+empty-run = The new service opens on an empty run of show. Tap the plus button at the bottom to add to it.
+add = The add sheet has five tabs: Songs from your church's library, Bible passages, Section headings, Ministry items like a welcome, and Presets from the church computer.
+add-song = Tap the plus next to a song, like Amazing Grace, and it goes into the service.
+filled = Add the rest of the service the same way. The run of show lists everything in order, in sections like Worship and Word, with a start time and a length for each item.
+open-item = To change an item, tap it. Let's tap Amazing Grace.
+item = Set its length, then choose when it starts, how long it runs, whether it repeats, and what happens at the end.
+timing = Starts can be Cued, After previous, or a number of minutes before the service. Repeats can be Once, Loop, or a set number of times. And At end can Hold, move on to the Next item, or Blank the screens.
+save = Tap Save to keep the change.
+armed = The Armed switch at the top turns on the service's timed cues, so they run by themselves at the church computer.
+copy-open = To plan the coming weeks, tap the copy button at the bottom.
+copy = Choose weekly, every two weeks or monthly, and how many times. The run of show and the cues are copied too.
+create-copies = Tap Create 4, and the next four Sundays are planned.
+synced = On the church computer, the same Sunday Morning appears in the Calendar Manager once it syncs, ready to load into the schedule.
+outro = And that's Calendar mode: plan your services on your phone, all week, from anywhere.
