@@ -42,12 +42,16 @@ internal const val DEMO_SCREEN_BG = 0xFF0E0E17
 
 /**
  * A phone: [shot] (`screenshots/<section>/<state>` or `marketing/phone/<name>`) in a rounded black
- * body. A whole screen fills it from the top; a sheet is shown by [DemoSheet] instead, over it.
+ * body. A whole screen fills it, the body as wide as the screen's own shape needs so nothing is cut
+ * off its sides; a sheet is shown by [DemoSheet] instead, over it.
  */
 @Composable
 internal fun DemoPhone(shot: String) {
+    val screen = phoneShot(shot)?.takeIf { it.second }?.first
+    val inner = DEMO_PHONE_H - 2 * DEMO_PHONE_BEZEL_DP
+    val width = screen?.let { inner * it.width / it.height + 2 * DEMO_PHONE_BEZEL_DP } ?: DEMO_PHONE_W
     Box(
-        Modifier.size(DEMO_PHONE_W.dp, DEMO_PHONE_H.dp)
+        Modifier.size(width.dp, DEMO_PHONE_H.dp)
             .clip(RoundedCornerShape(DEMO_PHONE_RADIUS_DP.dp))
             .background(Color.Black)
             .border(DEMO_PHONE_BEZEL_DP.dp, Color(DEMO_PHONE_EDGE), RoundedCornerShape(DEMO_PHONE_RADIUS_DP.dp))
@@ -63,7 +67,7 @@ internal fun DemoPhone(shot: String) {
                 Image(
                     image,
                     contentDescription = DEMO_PHONE_LABEL,
-                    contentScale = if (whole) ContentScale.Crop else ContentScale.Fit,
+                    contentScale = if (whole) ContentScale.FillBounds else ContentScale.Fit,
                     alignment = Alignment.TopCenter,
                     modifier = if (whole) {
                         Modifier.fillMaxSize()
@@ -81,10 +85,10 @@ internal fun DemoPhone(shot: String) {
  * and floated over the devices at a size that can be read, never wider or taller than the panel allows.
  */
 @Composable
-internal fun DemoSheet(shot: String) {
+internal fun DemoSheet(shot: String, maxWidth: Float = SHEET_MAX_W) {
     if (shot.isEmpty()) return
     val image = phoneShot(shot)?.first ?: return
-    val scale = minOf(SHEET_MAX_W / image.width, SHEET_MAX_H / image.height, SHEET_MAX_SCALE)
+    val scale = minOf(maxWidth / image.width, SHEET_MAX_H / image.height, SHEET_MAX_SCALE)
     Box(
         Modifier.clip(RoundedCornerShape(SHEET_RADIUS_DP.dp))
             .border(2.dp, Color(DEMO_PHONE_EDGE), RoundedCornerShape(SHEET_RADIUS_DP.dp))
