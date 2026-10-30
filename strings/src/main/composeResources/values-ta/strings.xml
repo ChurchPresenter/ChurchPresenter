@@ -1024,6 +1024,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">செங்குத்து/கிடைமட்ட அமைப்பை நீக்கவா? அதன் நிலைகள் இழக்கப்படும்.</string>
     <string name="canvas_add_source">மூலத்தைச் சேர்</string>
+    <string name="canvas_layer_group_content">உள்ளடக்கம்</string>
+    <string name="canvas_layer_group_live">நேரலை தகவல்</string>
+    <string name="canvas_layer_group_sources">மூலங்கள்</string>
     <string name="canvas_delete_source">மூலத்தை நீக்கு</string>
     <string name="canvas_source_move_forward">முன்னால் நகர்த்து</string>
     <string name="canvas_source_move_backward">பின்னால் நகர்த்து</string>

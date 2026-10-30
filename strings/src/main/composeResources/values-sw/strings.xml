@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Ondoa mpangilio wa wima/mlalo? Nafasi zake zitapotea.</string>
     <string name="canvas_add_source">Ongeza chanzo</string>
+    <string name="canvas_layer_group_content">Maudhui</string>
+    <string name="canvas_layer_group_live">Taarifa za moja kwa moja</string>
+    <string name="canvas_layer_group_sources">Vyanzo</string>
     <string name="canvas_delete_source">Futa chanzo</string>
     <string name="canvas_source_move_forward">Hamisha mbele</string>
     <string name="canvas_source_move_backward">Hamisha nyuma</string>

@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Portret/albom joylashuvi olib tashlansinmi? Uning joylashuvlari yoʻqoladi.</string>
     <string name="canvas_add_source">Manba qoʻshish</string>
+    <string name="canvas_layer_group_content">Tarkib</string>
+    <string name="canvas_layer_group_live">Jonli maʼlumot</string>
+    <string name="canvas_layer_group_sources">Manbalar</string>
     <string name="canvas_delete_source">Manbani oʻchirish</string>
     <string name="canvas_source_move_forward">Oldinga surish</string>
     <string name="canvas_source_move_backward">Orqaga surish</string>

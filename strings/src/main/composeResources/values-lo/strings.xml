@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">ລຶບໂຄງຮ່າງແນວຕັ້ງ/ແນວນອນບໍ? ຕຳແໜ່ງຂອງມັນຈະເສຍໄປ.</string>
     <string name="canvas_add_source">ເພີ່ມແຫຼ່ງ</string>
+    <string name="canvas_layer_group_content">ເນື້ອຫາ</string>
+    <string name="canvas_layer_group_live">ຂໍ້ມູນສົດ</string>
+    <string name="canvas_layer_group_sources">ແຫຼ່ງ</string>
     <string name="canvas_delete_source">ລຶບແຫຼ່ງ</string>
     <string name="canvas_source_move_forward">ຍ້າຍຂຶ້ນໜ້າ</string>
     <string name="canvas_source_move_backward">ຍ້າຍລົງຫຼັງ</string>

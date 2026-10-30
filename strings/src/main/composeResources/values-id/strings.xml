@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Hapus tata letak potret/lanskap? Posisinya akan hilang.</string>
     <string name="canvas_add_source">Tambah sumber</string>
+    <string name="canvas_layer_group_content">Konten</string>
+    <string name="canvas_layer_group_live">Info langsung</string>
+    <string name="canvas_layer_group_sources">Sumber</string>
     <string name="canvas_delete_source">Hapus sumber</string>
     <string name="canvas_source_move_forward">Pindahkan ke depan</string>
     <string name="canvas_source_move_backward">Pindahkan ke belakang</string>
