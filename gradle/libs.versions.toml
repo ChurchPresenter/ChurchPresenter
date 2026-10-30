@@ -33,7 +33,7 @@ ktor = "3.6.0"
 # release fixes it (.github/dependabot.yml skips 3.6.4).
 jmdns = "3.6.3"
 bouncycastle = "1.86"
-apache-poi = "5.5.1"
+apache-poi = "6.0.0"
 pdfbox = "2.0.37"
 aircompressor = "2.0.3"
 junitJupiter = "6.1.3"
