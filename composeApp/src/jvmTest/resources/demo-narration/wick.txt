@@ -1,0 +1,31 @@
+# What the narrator says in the Wick tour, in order. One line per key.
+# Every line plays over what it names, and every click from one step to the next is shown.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll meet Wick, the little helper that lives in the corner of the app.
+start = Wick is off until you start it. Open the Help menu at the top of the screen, and choose Show Helper.
+hello = Wick lights up and introduces itself. It's a small helper bot, not an AI chatbot. It knows a set list of tasks, and it works without the internet.
+next-1 = Click Next.
+ask = You can type a short request in plain words, or try one of these. Let's click How do I add a song?
+reply = Wick tells you what it will do, before it does anything.
+next-2 = Click Next again.
+quiet = Wick stays out of the way. It goes quiet while something is live, and new tips wait as a small badge on its button.
+finish = Click Let's go.
+lamp = Now Wick lives as a little lamp in the bottom right corner of the window.
+open = Click the lamp to open Wick.
+greeting = Wick opens with a tip of the day for the tab you're on. Previous and Next tip go through the others.
+type = Type what you'd like in the box at the bottom, in plain words. Let's ask, where is the schedule?
+spotlight = Wick shines a spotlight on the schedule, down the left of the window, and says what it's for.
+request = Wick can do simple jobs, too. Let's type, make the song background blue.
+confirm = Anything that changes a setting, Wick asks about first. Click Do it.
+done = Wick makes the change, and offers Undo, in case you change your mind.
+display-type = Wick can also set up your screens. Type, set up my screens.
+display = Wick lists the screens connected to this computer. Click the one your congregation sees.
+display-confirm = Wick checks with you before it changes anything. Click Do it.
+test = Wick puts a big number on that screen. If you can see it, click Yes, I see it.
+all-set = All set. Whatever you put live now shows on that screen.
+close = When you're done, click the lamp again to close Wick.
+bible-tab = Now, let's put a verse on the screen. Click the Bible tab.
+pick-verse = Click a verse to choose it.
+quiet-live = Then click Go Live.
+still = While anything is live, Wick holds still and stays quiet, so it never pops up in the middle of a service.
+outro = And that's Wick: a helper in the corner, there when you need it, and quiet when you don't.
