@@ -841,6 +841,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Eliminați aranjamentul portret/peisaj? Pozițiile lui se vor pierde.</string>
     <string name="canvas_add_source">Adaugă sursă</string>
+    <string name="canvas_layer_group_content">Conținut</string>
+    <string name="canvas_layer_group_live">Informații live</string>
+    <string name="canvas_layer_group_sources">Surse</string>
     <string name="canvas_delete_source">Șterge sursă</string>
     <string name="canvas_source_move_forward">Mută în față</string>
     <string name="canvas_source_move_backward">Mută în spate</string>

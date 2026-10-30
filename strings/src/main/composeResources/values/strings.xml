@@ -1390,6 +1390,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Remove the portrait/landscape layout? Its positions will be lost.</string>
     <string name="canvas_add_source">Add source</string>
+    <string name="canvas_layer_group_content">Content</string>
+    <string name="canvas_layer_group_live">Live info</string>
+    <string name="canvas_layer_group_sources">Sources</string>
     <string name="canvas_delete_source">Delete source</string>
     <string name="canvas_source_move_forward">Move forward</string>
     <string name="canvas_source_move_backward">Move backward</string>

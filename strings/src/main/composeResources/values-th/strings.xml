@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">นำเลย์เอาต์แนวตั้ง/แนวนอนออกไหม? ตำแหน่งในเลย์เอาต์นั้นจะหายไป</string>
     <string name="canvas_add_source">เพิ่มแหล่ง</string>
+    <string name="canvas_layer_group_content">เนื้อหา</string>
+    <string name="canvas_layer_group_live">ข้อมูลสด</string>
+    <string name="canvas_layer_group_sources">แหล่ง</string>
     <string name="canvas_delete_source">ลบแหล่ง</string>
     <string name="canvas_source_move_forward">เลื่อนขึ้นหน้า</string>
     <string name="canvas_source_move_backward">เลื่อนลงหลัง</string>

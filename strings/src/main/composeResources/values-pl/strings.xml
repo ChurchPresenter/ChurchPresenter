@@ -1085,6 +1085,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Usunąć układ pionowy/poziomy? Jego pozycje zostaną utracone.</string>
     <string name="canvas_add_source">Dodaj źródło</string>
+    <string name="canvas_layer_group_content">Zawartość</string>
+    <string name="canvas_layer_group_live">Informacje na żywo</string>
+    <string name="canvas_layer_group_sources">Źródła</string>
     <string name="canvas_delete_source">Usuń źródło</string>
     <string name="canvas_source_move_forward">Przesuń do przodu</string>
     <string name="canvas_toggle_visibility">Przełącz widoczność</string>

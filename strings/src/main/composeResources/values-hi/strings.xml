@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">पोर्ट्रेट/लैंडस्केप लेआउट हटाएँ? इसकी स्थितियाँ खो जाएँगी।</string>
     <string name="canvas_add_source">स्रोत जोड़ें</string>
+    <string name="canvas_layer_group_content">सामग्री</string>
+    <string name="canvas_layer_group_live">लाइव जानकारी</string>
+    <string name="canvas_layer_group_sources">स्रोत</string>
     <string name="canvas_delete_source">स्रोत मिटाएँ</string>
     <string name="canvas_source_move_forward">आगे लाएँ</string>
     <string name="canvas_source_move_backward">पीछे भेजें</string>
