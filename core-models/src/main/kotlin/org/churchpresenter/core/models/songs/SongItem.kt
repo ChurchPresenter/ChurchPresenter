@@ -30,6 +30,19 @@ data class SongItem(
     val lowerThirdBackground: SongBackground = SongBackground(),
     /** This song's own font, size and colours over the profile's — none by default. */
     val textOverrides: SongTextOverrides = SongTextOverrides(),
+    /**
+     * The order this song's sections are sung in, by [sectionKeysOf] key; a key may appear more
+     * than once. Empty sings the song as written, with the chorus repeated as Settings say. A
+     * written section the order leaves out stays in the list, dimmed, but navigation steps over it.
+     */
+    val sectionOrder: List<String> = emptyList(),
+    /** The operator's notes on this song, shown above its lyrics; never presented. */
+    val notes: String = "",
+    /**
+     * Header lines this build does not read, kept as written so saving the song does not delete
+     * what a newer build or the converter put there (`copyright:`, say).
+     */
+    val extraHeader: Map<String, String> = emptyMap(),
 ) {
     /** Stable unique ID across songbooks: "songbook::number" or "songbook::title" when no number */
     val songId: String get() = if (number.isNotBlank()) "$songbook::$number" else "$songbook::$title"

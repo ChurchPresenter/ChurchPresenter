@@ -89,6 +89,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
+import androidx.compose.ui.draw.alpha
 import org.churchpresenter.sharedui.models.Presenting
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -230,6 +231,7 @@ internal fun RowScope.SongLyricsPanel(
         if (noSongsLoaded) {
             NoSongDatabaseCard()
         } else {
+            currentSong?.notes?.takeIf { it.isNotBlank() }?.let { SongNotesCard(it) }
             LyricsList(
                 appSettings = appSettings,
                 currentSong = currentSong,
@@ -593,7 +595,14 @@ private fun LyricSectionEntry(
             )
             .padding(start = rowPad(14.dp), top = rowPad(10.dp), end = rowPad(14.dp), bottom = rowPad(12.dp))
     ) {
-        val textColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
+        // A section the song's order leaves out stays in the list, faded, so it can still be
+        // clicked onto the screen when the pastor calls for it after all.
+        val baseColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
+        val textColor = when {
+            !section.skipped -> baseColor
+            isSelected -> baseColor.copy(alpha = SKIPPED_SELECTED_ALPHA)
+            else -> baseColor.copy(alpha = SKIPPED_ALPHA)
+        }
 
         val activeLineIndex = if (isPerLineMode && sectionIndex == selectedSectionIndex)
             selectedLineIndex else -1
@@ -603,7 +612,8 @@ private fun LyricSectionEntry(
         section.header?.let { header ->
             SectionLabelRow(
                 label = sectionLabelOf(header),
-                modifier = Modifier.padding(vertical = 4.dp),
+                modifier = Modifier.padding(vertical = 4.dp)
+                    .alpha(if (section.skipped && !isSelected) SKIPPED_ALPHA else 1f),
                 slideIndex = section.slideIndex,
                 slideCount = section.slideCount,
             )

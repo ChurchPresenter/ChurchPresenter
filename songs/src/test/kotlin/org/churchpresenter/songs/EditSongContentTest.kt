@@ -73,18 +73,19 @@ class EditSongContentTest {
         const val COMPOSER = 4
         const val CCLI = 5
         const val TUNE = 6
-        const val LYRICS = 7
-        const val COUNT = 8
+        const val NOTES = 7
+        const val LYRICS = 8
+        const val COUNT = 9
 
         /** Where the songbook lands once Add New turns it into a typed field. */
         const val SONGBOOK_TYPED = 2
 
         // With a stage monitor configured, capo and tempo are inserted after Tune and before the
-        // lyrics box, which moves down to 9. Verified against the rendered tree, not assumed — the
+        // notes and the lyrics box, which move down to 9 and 10. Verified against the rendered tree, not assumed — the
         // constant that used to live here put TEMPO at 7, which is where capo actually is.
         const val CAPO = 7
         const val TEMPO = 8
-        const val COUNT_WITH_TUNING = 10
+        const val COUNT_WITH_TUNING = 11
     }
 
     private object Label {
@@ -209,7 +210,7 @@ class EditSongContentTest {
         assertEquals(
             Field.COUNT,
             fieldCount(),
-            "the editor offers eight typed fields; the other tests address them by position",
+            "the editor offers nine typed fields; the other tests address them by position",
         )
         field(Field.NUMBER).assertTextContains("42")
         field(Field.TITLE).assertTextContains("Amazing Grace")

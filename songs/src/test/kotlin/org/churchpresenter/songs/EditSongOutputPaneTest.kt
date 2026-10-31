@@ -47,7 +47,7 @@ class EditSongOutputPaneTest {
     }
 
     /** The lyrics box among the editor's typed fields; `EditSongContentTest` pins the order. */
-    private val LYRICS_FIELD = 7
+    private val LYRICS_FIELD = 8
 
     private val lyrics = listOf("[Verse 1]", "Amazing grace", "2>That saved", "I once was lost")
 
