@@ -1,6 +1,7 @@
 package org.churchpresenter.songs
 
 import org.churchpresenter.core.models.songs.sectionKeysOf
+import org.churchpresenter.core.models.songs.sectionOrderAbbreviation
 import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.composables.sectionKindOf
 import org.churchpresenter.sharedui.utils.sectionLabelOf
@@ -16,7 +17,7 @@ internal data class WrittenSection(
 ) {
     /** Short enough for a chip: the name's first letter and its number — `V1`, `C`, `B`. */
     val abbreviation: String
-        get() = label.firstOrNull()?.uppercase().orEmpty() + label.filter { it.isDigit() }
+        get() = if (label.isEmpty()) "" else sectionOrderAbbreviation(label)
 }
 
 /** The sections of [text], with what the editor needs to order them, worked out as the outputs do. */

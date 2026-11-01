@@ -249,6 +249,7 @@ class SongFileParser {
                 textOverrides = textOverrides,
                 sectionOrder = arrangement.sectionOrder,
                 notes = arrangement.notes,
+                sectionNotes = arrangement.sectionNotes,
                 extraHeader = extraHeader,
             ).withTranslations(extraTranslations)
         } catch (_: Exception) {

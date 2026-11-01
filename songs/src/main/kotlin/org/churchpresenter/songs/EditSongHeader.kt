@@ -46,9 +46,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.platform.testTag
 import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.strings.generated.resources.song_comments
-import org.churchpresenter.strings.generated.resources.song_comments_hint
 import org.churchpresenter.strings.generated.resources.song_comments_placeholder
-import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.strings.generated.resources.author
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.ccli_number
@@ -269,16 +267,7 @@ internal fun EditSongComments(notes: String, onNotesChange: (String) -> Unit) {
             .padding(horizontal = 18.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            CardLabel(stringResource(Res.string.song_comments))
-            Text(
-                text = stringResource(Res.string.song_comments_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.End,
-                modifier = Modifier.weight(1f),
-            )
-        }
+        CardLabel(stringResource(Res.string.song_comments))
         Box(
             modifier = Modifier
                 .fillMaxWidth()

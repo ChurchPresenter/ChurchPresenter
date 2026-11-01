@@ -6,6 +6,7 @@
 
 package org.churchpresenter.songs
 
+import org.churchpresenter.strings.generated.resources.song_order
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.animation.AnimatedVisibility
@@ -276,7 +277,8 @@ private fun SongListScope.SongListColumn(modifier: Modifier) {
             SongColumnId.TUNE       to stringResource(Res.string.tune),
             SongColumnId.PLAY_COUNT to stringResource(Res.string.song_play_count),
             SongColumnId.AUTHOR     to stringResource(Res.string.author),
-            SongColumnId.COMPOSER   to stringResource(Res.string.composer)
+            SongColumnId.COMPOSER   to stringResource(Res.string.composer),
+            SongColumnId.ORDER      to stringResource(Res.string.song_order),
         )
         val allColLabels = colHeaderLabels + mapOf(
             SongColumnId.FAVORITES       to stringResource(Res.string.song_favorites),

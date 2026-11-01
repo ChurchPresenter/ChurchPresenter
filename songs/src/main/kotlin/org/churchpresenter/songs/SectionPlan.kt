@@ -59,6 +59,19 @@ internal fun orderKeysStillWritten(
     return order.filter { it in keys }
 }
 
+/** The [notes] whose section [lyrics] still has, trimmed, the blank ones dropped. */
+internal fun sectionNotesStillWritten(
+    notes: Map<String, String>,
+    lyrics: List<String>,
+    title: String,
+    number: String,
+): Map<String, String> {
+    val cues = notes.mapValues { it.value.trim() }.filterValues { it.isNotEmpty() }
+    if (cues.isEmpty()) return cues
+    val keys = writtenSectionKeys(lyrics, title, number)
+    return cues.filterKeys { it in keys }
+}
+
 /** The keys of [lyrics]' written sections, in the order they are written. */
 internal fun writtenSectionKeys(lyrics: List<String>, title: String, number: String): List<String> =
     sectionKeysOf(slideGroupsOf(lyricSlidesOf(lyrics, title, number)).map { it.first().header })

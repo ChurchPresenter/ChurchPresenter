@@ -375,6 +375,7 @@ curl -k "https://192.168.1.10:8765/api/songs/42?songbook=Hymns"
     {
       "type": "verse",
       "label": "Verse 1",
+      "key": "[Verse 1]",
       "lines": [
         "Great is Thy faithfulness, O God my Father",
         "There is no shadow of turning with Thee"
@@ -383,14 +384,24 @@ curl -k "https://192.168.1.10:8765/api/songs/42?songbook=Hymns"
     {
       "type": "chorus",
       "label": "Chorus",
+      "key": "{Chorus}",
       "lines": [
         "Great is Thy faithfulness!",
         "Great is Thy faithfulness!"
       ]
     }
-  ]
+  ],
+  "order": ["[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}"],
+  "notes": "Capo 2. Piano intro, 4 bars.",
+  "cues": { "[Verse 1]": "Piano only" }
 }
 ```
+
+`order` is the order the song is sung in, by section `key`; a key may appear more than once, and an
+empty list means the song is sung as written. `key` is the header as the song writes it, brackets
+included, with `#2`, `#3` on a header written again and `#n` (its position) for a section with no
+header. `notes` and `cues` (a short cue per section, by `key`) are for the team and never presented.
+In `/api/songs`, each song carries the same `order` when it has one; the field is left out otherwise.
 
 Section `type` values: `"verse"` · `"chorus"` · `"other"`. `type` follows the song file's brackets:
 a `{…}` header is a chorus and every `[…]` header is a verse, so `[Chorus 1]` and `[Bridge]` are

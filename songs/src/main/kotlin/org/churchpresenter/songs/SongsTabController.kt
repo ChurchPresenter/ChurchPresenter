@@ -242,6 +242,7 @@ internal class SongsTabController(
                     colWidthComposer    = dp[SongColumnId.COMPOSER] ?: s.songSettings.colWidthComposer,
                 ),
                 songColOrder = columns.order,
+                songColWidthOrder = dp[SongColumnId.ORDER] ?: s.songColWidthOrder,
                 songHiddenCols = columns.hidden,
             )
         }

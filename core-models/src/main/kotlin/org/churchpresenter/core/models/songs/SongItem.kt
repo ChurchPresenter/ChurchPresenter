@@ -38,6 +38,8 @@ data class SongItem(
     val sectionOrder: List<String> = emptyList(),
     /** The operator's notes on this song, shown above its lyrics; never presented. */
     val notes: String = "",
+    /** A short cue per section, by [sectionKeysOf] key, shown beside its label; never presented. */
+    val sectionNotes: Map<String, String> = emptyMap(),
     /**
      * Header lines this build does not read, kept as written so saving the song does not delete
      * what a newer build or the converter put there (`copyright:`, say).

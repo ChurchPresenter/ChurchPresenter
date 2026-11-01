@@ -426,6 +426,17 @@ internal fun EditSongOrderPreview(state: EditSongState, sections: EditSongSectio
                         }
                     }
                 }
+                if (section != null && !repeat) {
+                    SectionCueField(
+                        key = key,
+                        cue = state.sectionNotes[key].orEmpty(),
+                        onCueChange = { cue ->
+                            state.sectionNotes = if (cue.isEmpty()) state.sectionNotes - key
+                            else state.sectionNotes + (key to cue)
+                        },
+                        modifier = Modifier.padding(start = 26.dp),
+                    )
+                }
                 section?.lines?.forEach { line ->
                     Text(
                         text = line,
