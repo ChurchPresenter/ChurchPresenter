@@ -82,9 +82,14 @@ private fun CTTextCharacterProperties.shadow(sheet: XSLFSheet): TextShadow? {
     return TextShadow(color, blur, distance * cos(angle), distance * sin(angle))
 }
 
-/** The color [holder] carries as its child, with the theme and the sheet's color map applied. */
-private fun resolve(holder: XmlObject, sheet: XSLFSheet): Color? =
-    runCatching { XSLFColor(holder, sheet.theme, null, sheet).color }.getOrNull()
+/**
+ * The color [holder] carries as its child, with the theme and the sheet's color map applied; null
+ * when it carries none, which POI would otherwise answer with white.
+ */
+private fun resolve(holder: XmlObject, sheet: XSLFSheet): Color? {
+    if (holder.domNode.firstChild == null) return null
+    return runCatching { XSLFColor(holder, sheet.theme, null, sheet).color }.getOrNull()
+}
 
 private const val EMU_PER_POINT = 12_700.0
 private const val ANGLE_UNITS_PER_DEGREE = 60_000.0
