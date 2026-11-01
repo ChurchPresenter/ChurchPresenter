@@ -24,6 +24,8 @@
     <string name="column_composer">الملحّن</string>
     <string name="column_tune">اللحن</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">الترتيب</string>
+    <string name="order_as_written">كما هو مكتوب</string>
     <string name="edit_song">تحرير الترنيمة</string>
     <string name="delete_song">حذف الترنيمة</string>
     <string name="empty_title">لا توجد ترانيم تطابق عوامل التصفية</string>

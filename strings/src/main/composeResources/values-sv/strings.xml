@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Titelbild för sång</string>
+    <string name="song_order">Ordning</string>
+    <string name="song_order_default">Standard</string>
+    <string name="song_order_custom">Anpassad</string>
+    <string name="song_order_as_written">Som skriven</string>
+    <string name="song_order_presets">Förval</string>
+    <string name="song_order_add_section">Lägg till del</string>
+    <string name="song_order_unused">oanvänd</string>
+    <string name="song_order_slides">%1$d bilder</string>
+    <string name="song_order_remove">Ta bort %1$s</string>
+    <string name="song_order_not_in_lyrics">Finns inte i texten</string>
+    <string name="song_order_repeat">Upprepning</string>
+    <string name="song_order_preset_chorus_each">Refräng efter varje vers</string>
+    <string name="song_order_preset_start_chorus">Börja med refräng</string>
+    <string name="song_order_preset_double_chorus">Avsluta med dubbel refräng</string>
+    <string name="song_order_preset_bridge">Brygga före sista refrängen</string>
+    <string name="song_pane_in_order">I ordning</string>
+    <string name="song_comments">Kommentarer</string>
+    <string name="song_comments_placeholder">Tonartsbyten, vem som leder, signaler till bandet…</string>
+    <string name="song_notes_tag">Sång</string>
+    <string name="song_notes_edit">Redigera i sången</string>
+    <string name="song_section_cue">Signal för del</string>
+    <string name="song_section_cue_placeholder">Lägg till en signal för teamet…</string>
     <string name="show_song_number_before_title">Visa sångnummer före titeln</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Hela sången</string>
     <string name="song_background_untitled_section">Avsnitt utan titel</string>
     <string name="song_insert_slide_break">Bildbrytning</string>
+    <string name="song_insert_second_voice">Stämma 2</string>
+    <string name="song_pane_output">Utgång</string>
+    <string name="song_output_full_screen">Helskärm</string>
+    <string name="song_output_lower_third">Nedre tredjedel</string>
+    <string name="song_output_nothing">Skriv lite text för att se bilden under markören som utgångarna visar den.</string>
+    <string name="song_look_title">Den här sångens utseende</string>
+    <string name="song_look_sub">Över profilens, bara för den här sången, och sparas i sångfilen.</string>
+    <string name="song_look_font">Teckensnitt</string>
+    <string name="song_look_size">Storlek</string>
+    <string name="song_look_size_down">Mindre</string>
+    <string name="song_look_size_up">Större</string>
+    <string name="song_look_color">Textfärg</string>
+    <string name="song_look_voice2">Färg för stämma 2</string>
+    <string name="song_look_use_profile">Använd profilens</string>
+    <string name="song_insert_second_voice_hint">Markerar de valda orden, eller raderna där markören står, som andra stämma. Igen på markerade rader tar bort markeringen.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI-utgångar</string>
     <string name="ndi_outputs_help">Virtuella utgångar som skickas över nätverket som NDI®-källor — välj en i OBS, vMix eller en mixer. Alfaläget bär äkta transparens, så en namnskylt kommer redan nycklad.</string>

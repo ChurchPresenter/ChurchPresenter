@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Qoʻshiq sarlavhasi slaydi</string>
+    <string name="song_order">Tartib</string>
+    <string name="song_order_default">Standart</string>
+    <string name="song_order_custom">Maxsus</string>
+    <string name="song_order_as_written">Yozilganidek</string>
+    <string name="song_order_presets">Shablonlar</string>
+    <string name="song_order_add_section">Qism qo‘shish</string>
+    <string name="song_order_unused">ishlatilmagan</string>
+    <string name="song_order_slides">%1$d ta slayd</string>
+    <string name="song_order_remove">%1$s ni olib tashlash</string>
+    <string name="song_order_not_in_lyrics">Matnda yo‘q</string>
+    <string name="song_order_repeat">Takror</string>
+    <string name="song_order_preset_chorus_each">Har bandidan keyin naqarot</string>
+    <string name="song_order_preset_start_chorus">Naqarot bilan boshlash</string>
+    <string name="song_order_preset_double_chorus">Ikki marta naqarot bilan tugatish</string>
+    <string name="song_order_preset_bridge">Oxirgi naqarotdan oldin bridj</string>
+    <string name="song_pane_in_order">Tartib bo‘yicha</string>
+    <string name="song_comments">Izohlar</string>
+    <string name="song_comments_placeholder">Tonallik o‘zgarishi, kim boshqaradi, guruh uchun ishoralar…</string>
+    <string name="song_notes_tag">Qo‘shiq</string>
+    <string name="song_notes_edit">Qo‘shiqda tahrirlash</string>
+    <string name="song_section_cue">Qism ishorasi</string>
+    <string name="song_section_cue_placeholder">Jamoa uchun ishora qo‘shing…</string>
     <string name="show_song_number_before_title">Qoʻshiq raqamini sarlavhadan oldin koʻrsatish</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Butun qo‘shiq</string>
     <string name="song_background_untitled_section">Nomsiz bo‘lim</string>
     <string name="song_insert_slide_break">Slayd uzilishi</string>
+    <string name="song_insert_second_voice">2-ovoz</string>
+    <string name="song_pane_output">Chiqish</string>
+    <string name="song_output_full_screen">To‘liq ekran</string>
+    <string name="song_output_lower_third">Pastki uchdan bir</string>
+    <string name="song_output_nothing">Kursor ostidagi slaydni chiqishlar ko‘rsatgandek ko‘rish uchun matn yozing.</string>
+    <string name="song_look_title">Bu qo‘shiqning ko‘rinishi</string>
+    <string name="song_look_sub">Profil sozlamalari ustidan, faqat shu qo‘shiq uchun, qo‘shiq faylida saqlanadi.</string>
+    <string name="song_look_font">Shrift</string>
+    <string name="song_look_size">O‘lcham</string>
+    <string name="song_look_size_down">Kichikroq</string>
+    <string name="song_look_size_up">Kattaroq</string>
+    <string name="song_look_color">Matn rangi</string>
+    <string name="song_look_voice2">2-ovoz rangi</string>
+    <string name="song_look_use_profile">Profildagini ishlatish</string>
+    <string name="song_insert_second_voice_hint">Tanlangan so‘zlarni yoki kursor turgan qatorlarni ikkinchi ovoz deb belgilaydi. Belgilangan qatorlarda qayta bosish belgini olib tashlaydi.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI chiqishlari</string>
     <string name="ndi_outputs_help">Tarmoq orqali NDI® manbalari sifatida yuboriladigan virtual chiqishlar — ularni OBS, vMix yoki mikserda tanlang. Alpha rejimi haqiqiy shaffoflikni uzatadi, shuning uchun pastki uchdan bir tayyor kalit bilan keladi.</string>

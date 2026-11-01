@@ -12,6 +12,7 @@ object SongColumnId {
     const val PLAY_COUNT = "play_count"
     const val AUTHOR = "author"
     const val COMPOSER = "composer"
+    const val ORDER = "order"
     const val ADD_TO_SCHEDULE = "add_to_schedule"
     const val FAVORITES = "favorites"
 }

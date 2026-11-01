@@ -2,6 +2,7 @@ package org.churchpresenter.server
 
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.sectionKeysOf
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
@@ -20,29 +21,31 @@ import org.churchpresenter.sharedui.utils.sectionLabelOf
  * rebuilds the song from these lines and draws the second voice itself.
  */
 internal fun buildSongDetail(song: SongItem, keepMarkup: Boolean = false): SongDetailDto {
-    val sections = mutableListOf<SongSectionDto>()
-    var currentType = Constants.SECTION_TYPE_VERSE
-    var currentLabel: String? = null
-    var currentLines = mutableListOf<String>()
+    val raw = mutableListOf<RawSection>()
+    var current = RawSection(header = null, type = Constants.SECTION_TYPE_VERSE)
     for (line in song.lyrics) {
         val trimmed = line.trim()
-        val isSectionHeader = isHeaderLine(trimmed)
-        val isChorus = isChorusHeader(trimmed)
-        if (isSectionHeader) {
-            if (currentLines.isNotEmpty()) {
-                sections.add(SongSectionDto(type = currentType, lines = currentLines.toList(), label = currentLabel))
-                currentLines = mutableListOf()
-            }
-            currentType = if (isChorus) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
-            currentLabel = sectionLabelOf(trimmed).ifEmpty { null }
+        if (isHeaderLine(trimmed)) {
+            if (current.header != null || current.lines.isNotEmpty()) raw.add(current)
+            val type = if (isChorusHeader(trimmed)) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
+            current = RawSection(header = trimmed, type = type)
         } else if (keepMarkup) {
-            if (trimmed.isNotEmpty()) currentLines.add(line)
+            if (trimmed.isNotEmpty()) current.lines.add(line)
         } else if (!isLyricDirective(trimmed)) {
-            plainLyricLine(line).takeIf { it.isNotBlank() }?.let(currentLines::add)
+            plainLyricLine(line).takeIf { it.isNotBlank() }?.let(current.lines::add)
         }
     }
-    if (currentLines.isNotEmpty()) {
-        sections.add(SongSectionDto(type = currentType, lines = currentLines.toList(), label = currentLabel))
+    if (current.header != null || current.lines.isNotEmpty()) raw.add(current)
+    // Keyed over every written section, an empty one included, the way the song's order is.
+    val keys = sectionKeysOf(raw.map { it.header })
+    val sections = raw.mapIndexedNotNull { index, section ->
+        if (section.lines.isEmpty()) return@mapIndexedNotNull null
+        SongSectionDto(
+            type = section.type,
+            lines = section.lines.toList(),
+            label = section.header?.let(::sectionLabelOf)?.ifEmpty { null },
+            key = keys[index],
+        )
     }
     return SongDetailDto(
         number       = song.number,
@@ -52,8 +55,16 @@ internal fun buildSongDetail(song: SongItem, keepMarkup: Boolean = false): SongD
         author       = song.author,
         composer     = song.composer,
         sectionTotal = sections.size,
-        sections     = sections
+        sections     = sections,
+        order        = song.sectionOrder,
+        notes        = song.notes,
+        cues         = song.sectionNotes,
     )
+}
+
+/** A section of a song's lyrics as [buildSongDetail] reads it: its header as written, and its lines. */
+private class RawSection(val header: String?, val type: String) {
+    val lines = mutableListOf<String>()
 }
 
 internal fun buildCatalog(songs: List<SongItem>): SongCatalogResponse {
@@ -75,6 +86,7 @@ internal fun buildCatalog(songs: List<SongItem>): SongCatalogResponse {
                         tune = s.tune,
                         author = s.author,
                         secondaryTitle = s.secondaryTitle,
+                        order = s.sectionOrder,
                     )
                 }
             )

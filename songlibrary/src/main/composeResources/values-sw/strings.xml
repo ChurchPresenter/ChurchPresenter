@@ -24,6 +24,8 @@
     <string name="column_composer">Mtunzi</string>
     <string name="column_tune">Melodi</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Mpangilio</string>
+    <string name="order_as_written">Kama ilivyoandikwa</string>
     <string name="edit_song">Hariri wimbo</string>
     <string name="delete_song">Futa wimbo</string>
     <string name="empty_title">Hakuna wimbo unaolingana na vichujio vyako</string>

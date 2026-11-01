@@ -39,6 +39,7 @@ import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.toStyleZone
 import org.churchpresenter.settings.toZone
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.nextSungSection
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -78,8 +79,8 @@ internal fun stageCurrentText(
 }
 
 /**
- * The words the look-ahead zone shows: the next song section, or the next Bible verse — a dedicated
- * lookahead, not the secondary language of the current verse.
+ * The words the look-ahead zone shows: the next song section the song sings, or the next Bible
+ * verse — a dedicated lookahead, not the secondary language of the current verse.
  */
 internal fun stageNextText(
     slideContent: Presenting,
@@ -88,7 +89,7 @@ internal fun stageNextText(
     nextVerses: List<SelectedVerse>,
 ): String = when (slideContent) {
     Presenting.LYRICS ->
-        allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.lines
+        nextSungSection(allLyricSections, songDisplaySectionIndex)?.lines
             ?.joinToString("\n", transform = SecondVoice::plain).orEmpty()
     Presenting.BIBLE -> nextVerses.firstOrNull()?.asZoneText().orEmpty()
     else -> ""
@@ -223,7 +224,7 @@ fun StageMonitorScreen(
         },
         nextChordLines = if (showChords && slideContent == Presenting.LYRICS) {
             transposeChordLines(
-                allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.chordLines.orEmpty(),
+                nextSungSection(allLyricSections, songDisplaySectionIndex)?.chordLines.orEmpty(),
                 transposeSteps,
             )
         } else {

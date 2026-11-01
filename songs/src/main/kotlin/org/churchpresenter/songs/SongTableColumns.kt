@@ -47,6 +47,7 @@ internal class SongTableColumns(
         val MIN_WIDTHS = mapOf(
             SongColumnId.NUMBER to 30, SongColumnId.TITLE to 60, SongColumnId.SONGBOOK to 40, SongColumnId.TUNE to 40,
             SongColumnId.PLAY_COUNT to 30, SongColumnId.AUTHOR to 40, SongColumnId.COMPOSER to 40,
+            SongColumnId.ORDER to 60,
         )
     }
 }
@@ -67,7 +68,7 @@ internal fun rememberSongTableColumns(
     settings.songSettings.colWidthNumber, settings.songSettings.colWidthTitle,
     settings.songSettings.colWidthSongbook, settings.songSettings.colWidthTune,
     settings.songSettings.colWidthPlayCount, settings.songSettings.colWidthAuthor,
-    settings.songSettings.colWidthComposer,
+    settings.songSettings.colWidthComposer, settings.songColWidthOrder,
     settings.songColOrder, settings.songHiddenCols, availableColumns, density,
 ) {
     SongTableColumns(
@@ -81,9 +82,17 @@ internal fun rememberSongTableColumns(
                 SongColumnId.PLAY_COUNT to settings.songSettings.colWidthPlayCount.dp.toPx(),
                 SongColumnId.AUTHOR to settings.songSettings.colWidthAuthor.dp.toPx(),
                 SongColumnId.COMPOSER to settings.songSettings.colWidthComposer.dp.toPx(),
+                SongColumnId.ORDER to settings.songColWidthOrder.dp.toPx(),
             )
         },
         initialOrder = mergeColumnOrder(settings.songColOrder, availableColumns),
-        initialHidden = settings.songHiddenCols,
+        initialHidden = hiddenWithNewColumns(settings.songHiddenCols, settings.songColOrder),
     )
 }
+
+/**
+ * [hidden] with the Order column added while the saved [order] has never listed it: a column
+ * newer than the operator's saved layout starts off, as it does on a fresh install.
+ */
+internal fun hiddenWithNewColumns(hidden: Set<String>, order: List<String>): Set<String> =
+    if (SongColumnId.ORDER in order) hidden else hidden + SongColumnId.ORDER

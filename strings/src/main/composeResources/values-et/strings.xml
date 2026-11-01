@@ -1283,6 +1283,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Laulu pealkirja slaid</string>
+    <string name="song_order">Järjekord</string>
+    <string name="song_order_default">Vaikimisi</string>
+    <string name="song_order_custom">Kohandatud</string>
+    <string name="song_order_as_written">Nagu kirjutatud</string>
+    <string name="song_order_presets">Mallid</string>
+    <string name="song_order_add_section">Lisa osa</string>
+    <string name="song_order_unused">kasutamata</string>
+    <string name="song_order_slides">%1$d slaidi</string>
+    <string name="song_order_remove">Eemalda %1$s</string>
+    <string name="song_order_not_in_lyrics">Pole sõnades</string>
+    <string name="song_order_repeat">Kordus</string>
+    <string name="song_order_preset_chorus_each">Refrään iga salmi järel</string>
+    <string name="song_order_preset_start_chorus">Alusta refrääniga</string>
+    <string name="song_order_preset_double_chorus">Lõpeta topeltrefrääniga</string>
+    <string name="song_order_preset_bridge">Vahemäng enne viimast refrääni</string>
+    <string name="song_pane_in_order">Järjekorras</string>
+    <string name="song_comments">Kommentaarid</string>
+    <string name="song_comments_placeholder">Helistiku muutused, kes juhib, märguanded bändile…</string>
+    <string name="song_notes_tag">Laul</string>
+    <string name="song_notes_edit">Muuda laulus</string>
+    <string name="song_section_cue">Osa märguanne</string>
+    <string name="song_section_cue_placeholder">Lisa meeskonnale märguanne…</string>
     <string name="show_song_number_before_title">Kuva laulu number enne pealkirja</string>
 
     <!-- Stage Monitor Settings -->
@@ -2388,6 +2410,21 @@
     <string name="song_background_whole_song">Terve laul</string>
     <string name="song_background_untitled_section">Pealkirjata osa</string>
     <string name="song_insert_slide_break">Slaidivahetus</string>
+    <string name="song_insert_second_voice">Hääl 2</string>
+    <string name="song_pane_output">Väljund</string>
+    <string name="song_output_full_screen">Täisekraan</string>
+    <string name="song_output_lower_third">Alumine kolmandik</string>
+    <string name="song_output_nothing">Sisesta laulusõnu, et näha kursori all olevat slaidi nii, nagu väljundid seda näitavad.</string>
+    <string name="song_look_title">Selle laulu välimus</string>
+    <string name="song_look_sub">Profiili seadete peal, ainult selle laulu jaoks, salvestatakse laulufaili.</string>
+    <string name="song_look_font">Font</string>
+    <string name="song_look_size">Suurus</string>
+    <string name="song_look_size_down">Väiksem</string>
+    <string name="song_look_size_up">Suurem</string>
+    <string name="song_look_color">Teksti värv</string>
+    <string name="song_look_voice2">Hääle 2 värv</string>
+    <string name="song_look_use_profile">Kasuta profiili oma</string>
+    <string name="song_insert_second_voice_hint">Märgib valitud sõnad või kursoriga read teiseks hääleks. Uuesti märgitud ridadel eemaldab märgi.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI väljundid</string>
     <string name="ndi_outputs_help">Virtuaalsed väljundid, mis saadetakse võrku NDI® allikatena — vali need OBS-is, vMixis või pildimikseris. Alfa-režiim kannab tõelist läbipaistvust, nii et alumine kolmandik saabub juba võtmestatuna.</string>

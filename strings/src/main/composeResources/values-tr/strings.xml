@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">İlahi başlığı slaytı</string>
+    <string name="song_order">Sıra</string>
+    <string name="song_order_default">Varsayılan</string>
+    <string name="song_order_custom">Özel</string>
+    <string name="song_order_as_written">Yazıldığı gibi</string>
+    <string name="song_order_presets">Hazır sıralar</string>
+    <string name="song_order_add_section">Bölüm ekle</string>
+    <string name="song_order_unused">kullanılmıyor</string>
+    <string name="song_order_slides">%1$d slayt</string>
+    <string name="song_order_remove">%1$s kaldır</string>
+    <string name="song_order_not_in_lyrics">Sözlerde yok</string>
+    <string name="song_order_repeat">Tekrar</string>
+    <string name="song_order_preset_chorus_each">Her kıtadan sonra nakarat</string>
+    <string name="song_order_preset_start_chorus">Nakaratla başla</string>
+    <string name="song_order_preset_double_chorus">Çift nakaratla bitir</string>
+    <string name="song_order_preset_bridge">Son nakarattan önce köprü</string>
+    <string name="song_pane_in_order">Sırayla</string>
+    <string name="song_comments">Yorumlar</string>
+    <string name="song_comments_placeholder">Ton değişiklikleri, kim yönetiyor, grup için işaretler…</string>
+    <string name="song_notes_tag">İlahi</string>
+    <string name="song_notes_edit">İlahide düzenle</string>
+    <string name="song_section_cue">Bölüm işareti</string>
+    <string name="song_section_cue_placeholder">Ekip için bir işaret ekle…</string>
     <string name="show_song_number_before_title">İlahi numarasını başlıktan önce göster</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Tüm şarkı</string>
     <string name="song_background_untitled_section">Başlıksız bölüm</string>
     <string name="song_insert_slide_break">Slayt sonu</string>
+    <string name="song_insert_second_voice">2. ses</string>
+    <string name="song_pane_output">Çıkış</string>
+    <string name="song_output_full_screen">Tam ekran</string>
+    <string name="song_output_lower_third">Alt bant</string>
+    <string name="song_output_nothing">İmlecin altındaki slaytı çıkışların göstereceği gibi görmek için söz yazın.</string>
+    <string name="song_look_title">Bu ilahinin görünümü</string>
+    <string name="song_look_sub">Profilin üzerine, yalnızca bu ilahi için, ilahi dosyasına kaydedilir.</string>
+    <string name="song_look_font">Yazı tipi</string>
+    <string name="song_look_size">Boyut</string>
+    <string name="song_look_size_down">Küçült</string>
+    <string name="song_look_size_up">Büyüt</string>
+    <string name="song_look_color">Metin rengi</string>
+    <string name="song_look_voice2">2. ses rengi</string>
+    <string name="song_look_use_profile">Profildekini kullan</string>
+    <string name="song_insert_second_voice_hint">Seçili sözcükleri veya imlecin bulunduğu satırları ikinci ses olarak işaretler. İşaretli satırlarda tekrar kullanmak işareti kaldırır.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI Çıkışları</string>
     <string name="ndi_outputs_help">Ağ üzerinden NDI® kaynağı olarak gönderilen sanal çıkışlar — OBS, vMix veya bir mikserde seçin. Alfa modu gerçek saydamlık taşır, böylece bir alt bant zaten anahtarlanmış olarak gelir.</string>

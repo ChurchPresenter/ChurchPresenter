@@ -144,8 +144,12 @@ data class AppSettings(
     val songBpm: Map<String, Int> = emptyMap(), // songId -> metronome BPM (0 = off), not stored in the .song file
     val songCapo: Map<String, Int> = emptyMap(), // songId -> capo fret (0 = none), not stored in the .song file
     val songColOrder: List<String> = emptyList(),
+    // The song list's Order column width, in dp. Here rather than in SongSettings, which is at the
+    // JVM's limit on constructor parameters.
+    val songColWidthOrder: Int = 150,
     val songHiddenCols: Set<String> = setOf(
         SongColumnId.TUNE, SongColumnId.PLAY_COUNT, SongColumnId.AUTHOR, SongColumnId.COMPOSER,
+        SongColumnId.ORDER,
     ),
     val setupWizardShown: Boolean = false,
     val analyticsReportingEnabled: Boolean = true,

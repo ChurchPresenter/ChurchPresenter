@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">曲名スライド</string>
+    <string name="song_order">順序</string>
+    <string name="song_order_default">デフォルト</string>
+    <string name="song_order_custom">カスタム</string>
+    <string name="song_order_as_written">記載順</string>
+    <string name="song_order_presets">プリセット</string>
+    <string name="song_order_add_section">セクションを追加</string>
+    <string name="song_order_unused">未使用</string>
+    <string name="song_order_slides">%1$d 枚のスライド</string>
+    <string name="song_order_remove">%1$s を削除</string>
+    <string name="song_order_not_in_lyrics">歌詞にありません</string>
+    <string name="song_order_repeat">繰り返し</string>
+    <string name="song_order_preset_chorus_each">各節の後にサビ</string>
+    <string name="song_order_preset_start_chorus">サビから始める</string>
+    <string name="song_order_preset_double_chorus">サビ2回で終わる</string>
+    <string name="song_order_preset_bridge">最後のサビの前にブリッジ</string>
+    <string name="song_pane_in_order">順序どおり</string>
+    <string name="song_comments">コメント</string>
+    <string name="song_comments_placeholder">転調、リード担当、バンドへの合図…</string>
+    <string name="song_notes_tag">曲</string>
+    <string name="song_notes_edit">曲で編集</string>
+    <string name="song_section_cue">セクションの合図</string>
+    <string name="song_section_cue_placeholder">チームへの合図を追加…</string>
     <string name="show_song_number_before_title">曲番号をタイトルの前に表示</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">曲全体</string>
     <string name="song_background_untitled_section">無題のセクション</string>
     <string name="song_insert_slide_break">スライド区切り</string>
+    <string name="song_insert_second_voice">第2声部</string>
+    <string name="song_pane_output">出力</string>
+    <string name="song_output_full_screen">全画面</string>
+    <string name="song_output_lower_third">ロワーサード</string>
+    <string name="song_output_nothing">歌詞を入力すると、カーソル位置のスライドが出力での表示どおりに表示されます。</string>
+    <string name="song_look_title">この曲の見た目</string>
+    <string name="song_look_sub">プロファイルの設定より優先され、この曲だけに適用されて曲ファイルに保存されます。</string>
+    <string name="song_look_font">フォント</string>
+    <string name="song_look_size">サイズ</string>
+    <string name="song_look_size_down">小さく</string>
+    <string name="song_look_size_up">大きく</string>
+    <string name="song_look_color">文字色</string>
+    <string name="song_look_voice2">第2声部の色</string>
+    <string name="song_look_use_profile">プロファイルの設定を使用</string>
+    <string name="song_insert_second_voice_hint">選択した語句またはカーソルのある行を第2声部としてマークします。マーク済みの行でもう一度押すと解除されます。</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI 出力</string>
     <string name="ndi_outputs_help">ネットワーク上に NDI® ソースとして送出される仮想出力です。OBS、vMix、スイッチャーで選択できます。Alpha モードは本物の透明度を持つため、下部テロップはキー処理済みの状態で届きます。</string>

@@ -53,14 +53,24 @@ fun SongsViewModel.navigateNextSong(): Boolean {
     return false
 }
 
+/**
+ * Where the arrows stop among [sections]: a section with words that the song does not leave out.
+ * A song that leaves out every one is walked as written, rather than not at all.
+ */
+private fun stopsIn(sections: List<LyricSection>): (LyricSection) -> Boolean {
+    val singsAny = sections.any { it.lines.isNotEmpty() && !it.skipped }
+    return { it.lines.isNotEmpty() && (!it.skipped || !singsAny) }
+}
+
 fun SongsViewModel.navigatePreviousSection(): Boolean {
     selectedLineIndexState.value = 0
     val sections = getLyricSections()
+    val stopsAt = stopsIn(sections)
     // Start from the end of what actually exists: the selection can outlive the list it indexes
     // (see [clampSectionSelection]), and this walk only guards its lower bound.
     var prevIdx = (selectedSectionIndexState.value - 1).coerceAtMost(sections.lastIndex)
     while (prevIdx >= 0) {
-        if (sections[prevIdx].lines.isNotEmpty()) {
+        if (stopsAt(sections[prevIdx])) {
             selectedSectionIndexState.value = prevIdx
             return true
         }
@@ -72,9 +82,10 @@ fun SongsViewModel.navigatePreviousSection(): Boolean {
 fun SongsViewModel.navigateNextSection(): Boolean {
     selectedLineIndexState.value = 0
     val sections = getLyricSections()
+    val stopsAt = stopsIn(sections)
     var nextIdx = selectedSectionIndexState.value + 1
     while (nextIdx < sections.size) {
-        if (sections[nextIdx].lines.isNotEmpty()) {
+        if (stopsAt(sections[nextIdx])) {
             selectedSectionIndexState.value = nextIdx
             return true
         }
@@ -94,9 +105,10 @@ fun SongsViewModel.navigateNextLine(): Boolean {
     }
     // Move to next section with content lines (skip empty sections)
     val sections = getLyricSections()
+    val stopsAt = stopsIn(sections)
     var nextIdx = selectedSectionIndexState.value + 1
     while (nextIdx < sections.size) {
-        if (sections[nextIdx].lines.isNotEmpty()) {
+        if (stopsAt(sections[nextIdx])) {
             selectedSectionIndexState.value = nextIdx
             selectedLineIndexState.value = 0
             return true
@@ -115,11 +127,12 @@ fun SongsViewModel.navigatePreviousLine(): Boolean {
     }
     // Move to previous section with content lines (skip empty sections)
     val sections = getLyricSections()
+    val stopsAt = stopsIn(sections)
     // Clamped for the same reason as [navigatePreviousSection] — a stale index would index past
     // the end on the very first step.
     var prevIdx = (selectedSectionIndexState.value - 1).coerceAtMost(sections.lastIndex)
     while (prevIdx >= 0) {
-        if (sections[prevIdx].lines.isNotEmpty()) {
+        if (stopsAt(sections[prevIdx])) {
             selectedSectionIndexState.value = prevIdx
             val prevLines = sections[prevIdx].lines
             selectedLineIndexState.value =

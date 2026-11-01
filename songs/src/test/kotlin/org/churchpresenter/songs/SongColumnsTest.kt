@@ -20,7 +20,7 @@ class SongColumnsTest {
         val cols = availableSongColumns(songbookCount = 1, hasAddToSchedule = false)
         assertFalse("songbook" in cols, "one songbook needs no songbook column")
         assertFalse("add_to_schedule" in cols, "no callback means no add column")
-        assertEquals(listOf("number", "title", "tune", "play_count", "author", "composer", "favorites"), cols)
+        assertEquals(listOf("number", "title", "tune", "play_count", "author", "composer", "order", "favorites"), cols)
     }
 
     @Test
@@ -35,6 +35,7 @@ class SongColumnsTest {
                 "play_count",
                 "author",
                 "composer",
+                "order",
                 "add_to_schedule",
                 "favorites",
             ),
@@ -51,18 +52,45 @@ class SongColumnsTest {
         assertSame(available, mergeColumnOrder(emptyList(), available))
 
     @Test
-    fun `a saved order is honoured and newly-available columns are appended`() =
+    fun `a saved order is honoured and a new column lands after the one it follows by default`() =
         assertEquals(
-            listOf("title", "number", "tune", "favorites"),
+            listOf("title", "tune", "favorites", "number"),
             mergeColumnOrder(listOf("title", "number"), available),
         )
+
+    @Test
+    fun `a new column that comes first by default lands first`() =
+        assertEquals(
+            listOf("number", "favorites", "title"),
+            mergeColumnOrder(listOf("favorites", "title"), listOf("number", "title", "favorites")),
+        )
+
+    @Test
+    fun `the order column joins a saved layout after composer and before the buttons`() {
+        val saved = listOf("number", "title", "composer", "add_to_schedule", "favorites")
+        val available = listOf("number", "title", "composer", "order", "add_to_schedule", "favorites")
+        assertEquals(
+            listOf("number", "title", "composer", "order", "add_to_schedule", "favorites"),
+            mergeColumnOrder(saved, available),
+        )
+    }
 
     @Test
     fun `columns that no longer exist are dropped from the saved order`() =
         assertEquals(
             listOf("title", "number", "tune", "favorites"),
-            mergeColumnOrder(listOf("title", "gone", "number"), available),
+            mergeColumnOrder(listOf("title", "gone", "number", "tune", "favorites"), available),
         )
+
+    // ── hiddenWithNewColumns ──────────────────────────────────────────────────
+
+    @Test
+    fun `the order column starts hidden while the saved layout has never listed it`() =
+        assertEquals(setOf("tune", "order"), hiddenWithNewColumns(setOf("tune"), listOf("number", "title")))
+
+    @Test
+    fun `the order column keeps the operator's choice once the saved layout lists it`() =
+        assertEquals(setOf("tune"), hiddenWithNewColumns(setOf("tune"), listOf("number", "order")))
 
     // ── moveColumn ────────────────────────────────────────────────────────────
 

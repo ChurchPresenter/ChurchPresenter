@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slide ng Pamagat ng Awit</string>
+    <string name="song_order">Pagkakasunod</string>
+    <string name="song_order_default">Default</string>
+    <string name="song_order_custom">Custom</string>
+    <string name="song_order_as_written">Gaya ng pagkakasulat</string>
+    <string name="song_order_presets">Mga preset</string>
+    <string name="song_order_add_section">Magdagdag ng bahagi</string>
+    <string name="song_order_unused">hindi ginamit</string>
+    <string name="song_order_slides">%1$d slide</string>
+    <string name="song_order_remove">Alisin ang %1$s</string>
+    <string name="song_order_not_in_lyrics">Wala sa liriko</string>
+    <string name="song_order_repeat">Ulit</string>
+    <string name="song_order_preset_chorus_each">Koro pagkatapos ng bawat berso</string>
+    <string name="song_order_preset_start_chorus">Magsimula sa koro</string>
+    <string name="song_order_preset_double_chorus">Magtapos sa dobleng koro</string>
+    <string name="song_order_preset_bridge">Bridge bago ang huling koro</string>
+    <string name="song_pane_in_order">Ayon sa pagkakasunod</string>
+    <string name="song_comments">Mga komento</string>
+    <string name="song_comments_placeholder">Pagpalit ng key, sino ang mangunguna, hudyat para sa banda…</string>
+    <string name="song_notes_tag">Awit</string>
+    <string name="song_notes_edit">I-edit sa awit</string>
+    <string name="song_section_cue">Hudyat ng bahagi</string>
+    <string name="song_section_cue_placeholder">Magdagdag ng hudyat para sa team…</string>
     <string name="show_song_number_before_title">Ipakita ang numero ng awit bago ang pamagat</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Buong awit</string>
     <string name="song_background_untitled_section">Bahaging walang pamagat</string>
     <string name="song_insert_slide_break">Slide Break</string>
+    <string name="song_insert_second_voice">Ikalawang boses</string>
+    <string name="song_pane_output">Output</string>
+    <string name="song_output_full_screen">Buong screen</string>
+    <string name="song_output_lower_third">Lower third</string>
+    <string name="song_output_nothing">Mag-type ng liriko para makita ang slide sa cursor gaya ng ipinapakita ng mga output.</string>
+    <string name="song_look_title">Itsura ng awit na ito</string>
+    <string name="song_look_sub">Nakapatong sa setting ng profile, para sa awit na ito lang, at naka-save sa file ng awit.</string>
+    <string name="song_look_font">Font</string>
+    <string name="song_look_size">Laki</string>
+    <string name="song_look_size_down">Mas maliit</string>
+    <string name="song_look_size_up">Mas malaki</string>
+    <string name="song_look_color">Kulay ng teksto</string>
+    <string name="song_look_voice2">Kulay ng ikalawang boses</string>
+    <string name="song_look_use_profile">Gamitin ang sa profile</string>
+    <string name="song_insert_second_voice_hint">Minamarkahan ang mga napiling salita, o ang mga linya kung nasaan ang cursor, bilang ikalawang boses. Kapag inulit sa mga markadong linya, aalisin ang marka.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Mga NDI Output</string>
     <string name="ndi_outputs_help">Mga virtual output na ipinapadala sa network bilang mga NDI® source — piliin ang isa sa OBS, vMix o switcher. May tunay na transparency ang Alpha mode, kaya dumarating ang lower third na naka-key na.</string>

@@ -82,7 +82,8 @@ internal fun SongTable(
     // whole library per visible row per frame.
     val songbooks = state.songbooks
     val columnWidth = state.visibleColumns.fold(0.dp) { total, field -> total + field.width() + 1.dp }
-    val width = TICK_WIDTH + PROBLEM_WIDTH + columnWidth + durationColumnWidth(state.showDuration) + ACTIONS_WIDTH
+    val width = TICK_WIDTH + PROBLEM_WIDTH + columnWidth + durationColumnWidth(state.showDuration) +
+        orderColumnWidth(state.showOrder) + ACTIONS_WIDTH
 
     // The scrollbars sit OUTSIDE the horizontally scrolled column, so they stay pinned to the edges
     // of the table rather than sliding away with the columns they are there to move.
@@ -149,6 +150,7 @@ private fun TableHeader(state: SongLibraryState, width: Dp) {
                     width = DURATION_WIDTH,
                 )
             }
+            if (state.showOrder) OrderHeadCell()
             Spacer(Modifier.width(ACTIONS_WIDTH))
         }
         Hairline()
@@ -246,6 +248,14 @@ private fun SongRow(
                 // the number comes from the services it was sung in, and there is nothing to
                 // correct by hand.
                 DurationCell(seconds = state.durations[song.sourceFile])
+                Box(
+                    Modifier.width(1.dp)
+                        .height(LibraryMetrics.rowHeight)
+                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
+                )
+            }
+            if (state.showOrder) {
+                OrderCell(song.sectionOrder)
                 Box(
                     Modifier.width(1.dp)
                         .height(LibraryMetrics.rowHeight)

@@ -24,6 +24,8 @@
     <string name="column_composer">Кампазітар</string>
     <string name="column_tune">Мелодыя</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Парадак</string>
+    <string name="order_as_written">Як напісана</string>
     <string name="edit_song">Рэдагаваць песню</string>
     <string name="delete_song">Выдаліць песню</string>
     <string name="empty_title">Няма песень, якія адпавядаюць фільтрам</string>

@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">गीत शीर्षक स्लाइड</string>
+    <string name="song_order">क्रम</string>
+    <string name="song_order_default">पूर्वनिर्धारित</string>
+    <string name="song_order_custom">आफ्नै</string>
+    <string name="song_order_as_written">लेखिए अनुसार</string>
+    <string name="song_order_presets">तयारी क्रमहरू</string>
+    <string name="song_order_add_section">खण्ड थप्नुहोस्</string>
+    <string name="song_order_unused">प्रयोग नगरिएको</string>
+    <string name="song_order_slides">%1$d स्लाइड</string>
+    <string name="song_order_remove">%1$s हटाउनुहोस्</string>
+    <string name="song_order_not_in_lyrics">गीतका शब्दमा छैन</string>
+    <string name="song_order_repeat">दोहोरो</string>
+    <string name="song_order_preset_chorus_each">हरेक अन्तरापछि कोरस</string>
+    <string name="song_order_preset_start_chorus">कोरसबाट सुरु गर्नुहोस्</string>
+    <string name="song_order_preset_double_chorus">दोहोरो कोरसले अन्त्य गर्नुहोस्</string>
+    <string name="song_order_preset_bridge">अन्तिम कोरसअघि ब्रिज</string>
+    <string name="song_pane_in_order">क्रममा</string>
+    <string name="song_comments">टिप्पणीहरू</string>
+    <string name="song_comments_placeholder">स्वर परिवर्तन, कसले अगुवाइ गर्ने, ब्यान्डका लागि संकेत…</string>
+    <string name="song_notes_tag">गीत</string>
+    <string name="song_notes_edit">गीतमा सम्पादन गर्नुहोस्</string>
+    <string name="song_section_cue">खण्ड संकेत</string>
+    <string name="song_section_cue_placeholder">टोलीका लागि संकेत थप्नुहोस्…</string>
     <string name="show_song_number_before_title">शीर्षकभन्दा अघि गीत नम्बर देखाउनुहोस्</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">पूरै गीत</string>
     <string name="song_background_untitled_section">शीर्षकविहीन खण्ड</string>
     <string name="song_insert_slide_break">स्लाइड ब्रेक</string>
+    <string name="song_insert_second_voice">दोस्रो स्वर</string>
+    <string name="song_pane_output">आउटपुट</string>
+    <string name="song_output_full_screen">पूरा स्क्रिन</string>
+    <string name="song_output_lower_third">लोअर थर्ड</string>
+    <string name="song_output_nothing">कर्सरमुनिको स्लाइड आउटपुटले देखाएजस्तै हेर्न गीतका शब्द टाइप गर्नुहोस्।</string>
+    <string name="song_look_title">यो गीतको रूप</string>
+    <string name="song_look_sub">प्रोफाइलमाथि, यो गीतका लागि मात्र, र गीत फाइलमा सुरक्षित हुन्छ।</string>
+    <string name="song_look_font">फन्ट</string>
+    <string name="song_look_size">आकार</string>
+    <string name="song_look_size_down">सानो</string>
+    <string name="song_look_size_up">ठूलो</string>
+    <string name="song_look_color">पाठको रङ</string>
+    <string name="song_look_voice2">दोस्रो स्वरको रङ</string>
+    <string name="song_look_use_profile">प्रोफाइलकै प्रयोग गर्नुहोस्</string>
+    <string name="song_insert_second_voice_hint">छानिएका शब्द वा कर्सर भएका पङ्क्तिलाई दोस्रो स्वरको रूपमा चिनो लगाउँछ। चिनो लागेका पङ्क्तिमा फेरि थिच्दा चिनो हट्छ।</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI आउटपुटहरू</string>
     <string name="ndi_outputs_help">नेटवर्कमा NDI® स्रोतका रूपमा पठाइने भर्चुअल आउटपुटहरू — OBS, vMix वा स्विचरमा एउटा रोज्नुहोस्। Alpha मोडले वास्तविक पारदर्शिता बोक्छ, त्यसैले लोअर थर्ड पहिले नै की गरिएको अवस्थामा पुग्छ।</string>

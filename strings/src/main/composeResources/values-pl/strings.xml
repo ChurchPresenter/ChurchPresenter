@@ -978,6 +978,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slajd tytułu pieśni</string>
+    <string name="song_order">Kolejność</string>
+    <string name="song_order_default">Domyślna</string>
+    <string name="song_order_custom">Własna</string>
+    <string name="song_order_as_written">Tak jak zapisano</string>
+    <string name="song_order_presets">Gotowe układy</string>
+    <string name="song_order_add_section">Dodaj część</string>
+    <string name="song_order_unused">nieużywana</string>
+    <string name="song_order_slides">Slajdy: %1$d</string>
+    <string name="song_order_remove">Usuń %1$s</string>
+    <string name="song_order_not_in_lyrics">Brak w tekście</string>
+    <string name="song_order_repeat">Powtórzenie</string>
+    <string name="song_order_preset_chorus_each">Refren po każdej zwrotce</string>
+    <string name="song_order_preset_start_chorus">Zacznij od refrenu</string>
+    <string name="song_order_preset_double_chorus">Zakończ podwójnym refrenem</string>
+    <string name="song_order_preset_bridge">Bridge przed ostatnim refrenem</string>
+    <string name="song_pane_in_order">W kolejności</string>
+    <string name="song_comments">Komentarze</string>
+    <string name="song_comments_placeholder">Zmiany tonacji, kto prowadzi, wskazówki dla zespołu…</string>
+    <string name="song_notes_tag">Pieśń</string>
+    <string name="song_notes_edit">Edytuj w pieśni</string>
+    <string name="song_section_cue">Wskazówka do części</string>
+    <string name="song_section_cue_placeholder">Dodaj wskazówkę dla zespołu…</string>
     <string name="show_song_number_before_title">Pokaż numer pieśni przed tytułem</string>
 
     <!-- Canvas Tab -->
@@ -2355,6 +2377,21 @@
     <string name="song_background_whole_song">Cała pieśń</string>
     <string name="song_background_untitled_section">Sekcja bez tytułu</string>
     <string name="song_insert_slide_break">Podział slajdu</string>
+    <string name="song_insert_second_voice">Głos 2</string>
+    <string name="song_pane_output">Wyjście</string>
+    <string name="song_output_full_screen">Pełny ekran</string>
+    <string name="song_output_lower_third">Dolna belka</string>
+    <string name="song_output_nothing">Wpisz tekst, aby zobaczyć slajd pod kursorem tak, jak pokażą go wyjścia.</string>
+    <string name="song_look_title">Wygląd tej pieśni</string>
+    <string name="song_look_sub">Ponad ustawieniami profilu, tylko dla tej pieśni, zapisywany w pliku pieśni.</string>
+    <string name="song_look_font">Czcionka</string>
+    <string name="song_look_size">Rozmiar</string>
+    <string name="song_look_size_down">Mniejsza</string>
+    <string name="song_look_size_up">Większa</string>
+    <string name="song_look_color">Kolor tekstu</string>
+    <string name="song_look_voice2">Kolor głosu 2</string>
+    <string name="song_look_use_profile">Jak w profilu</string>
+    <string name="song_insert_second_voice_hint">Oznacza zaznaczone słowa lub wiersze z kursorem jako drugi głos. Ponowne użycie na oznaczonych wierszach usuwa oznaczenie.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Wyjścia NDI</string>
     <string name="ndi_outputs_help">Wirtualne wyjścia wysyłane przez sieć jako źródła NDI® — wybierz je w OBS, vMix lub mikserze. Tryb Alfa niesie prawdziwą przezroczystość, więc dolna tercja dociera już skluczowana.</string>

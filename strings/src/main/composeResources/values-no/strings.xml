@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Tittelbilde for sang</string>
+    <string name="song_order">Rekkefølge</string>
+    <string name="song_order_default">Standard</string>
+    <string name="song_order_custom">Egendefinert</string>
+    <string name="song_order_as_written">Slik det er skrevet</string>
+    <string name="song_order_presets">Forhåndsvalg</string>
+    <string name="song_order_add_section">Legg til del</string>
+    <string name="song_order_unused">ubrukt</string>
+    <string name="song_order_slides">%1$d lysbilder</string>
+    <string name="song_order_remove">Fjern %1$s</string>
+    <string name="song_order_not_in_lyrics">Ikke i teksten</string>
+    <string name="song_order_repeat">Gjentakelse</string>
+    <string name="song_order_preset_chorus_each">Refreng etter hvert vers</string>
+    <string name="song_order_preset_start_chorus">Start med refreng</string>
+    <string name="song_order_preset_double_chorus">Avslutt med dobbelt refreng</string>
+    <string name="song_order_preset_bridge">Bro før siste refreng</string>
+    <string name="song_pane_in_order">I rekkefølge</string>
+    <string name="song_comments">Kommentarer</string>
+    <string name="song_comments_placeholder">Toneartskifter, hvem leder, signaler til bandet…</string>
+    <string name="song_notes_tag">Sang</string>
+    <string name="song_notes_edit">Rediger i sangen</string>
+    <string name="song_section_cue">Signal for del</string>
+    <string name="song_section_cue_placeholder">Legg til et signal for teamet…</string>
     <string name="show_song_number_before_title">Vis sangnummer før tittelen</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Hele sangen</string>
     <string name="song_background_untitled_section">Del uten tittel</string>
     <string name="song_insert_slide_break">Lysbildeskift</string>
+    <string name="song_insert_second_voice">Stemme 2</string>
+    <string name="song_pane_output">Utgang</string>
+    <string name="song_output_full_screen">Fullskjerm</string>
+    <string name="song_output_lower_third">Nedre tredjedel</string>
+    <string name="song_output_nothing">Skriv inn tekst for å se lysbildet under markøren slik utgangene viser det.</string>
+    <string name="song_look_title">Utseendet til denne sangen</string>
+    <string name="song_look_sub">Over profilens, bare for denne sangen, og lagret i sangfilen.</string>
+    <string name="song_look_font">Skrift</string>
+    <string name="song_look_size">Størrelse</string>
+    <string name="song_look_size_down">Mindre</string>
+    <string name="song_look_size_up">Større</string>
+    <string name="song_look_color">Tekstfarge</string>
+    <string name="song_look_voice2">Farge for stemme 2</string>
+    <string name="song_look_use_profile">Bruk profilens</string>
+    <string name="song_insert_second_voice_hint">Merker de valgte ordene, eller linjene markøren står på, som andre stemme. Gjentatt på merkede linjer fjerner merkingen.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI-utganger</string>
     <string name="ndi_outputs_help">Virtuelle utganger sendt over nettverket som NDI®-kilder — velg en i OBS, vMix eller en mikser. Alfamodus bærer ekte gjennomsiktighet, så et navneskilt kommer allerede keyet.</string>

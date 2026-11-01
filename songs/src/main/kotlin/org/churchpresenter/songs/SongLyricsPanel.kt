@@ -89,6 +89,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
+import androidx.compose.ui.draw.alpha
 import org.churchpresenter.sharedui.models.Presenting
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -230,6 +231,9 @@ internal fun RowScope.SongLyricsPanel(
         if (noSongsLoaded) {
             NoSongDatabaseCard()
         } else {
+            currentSong?.notes?.takeIf { it.isNotBlank() }?.let { notes ->
+                SongNotesCard(notes, onEdit = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() })
+            }
             LyricsList(
                 appSettings = appSettings,
                 currentSong = currentSong,
@@ -450,6 +454,8 @@ private fun LyricsList(
                 itemsIndexed(sections) { sectionIndex, section ->
                     LyricSectionEntry(
                         section = section,
+                        cue = currentSong?.sectionNotes?.get(section.sectionKey)
+                            ?.takeIf { section.slideIndex == 0 }.orEmpty(),
                         sectionIndex = sectionIndex,
                         isPerLineMode = isSongLineMode(appSettings.operatorSongSettings()),
                         selectedSectionIndex = selectedSectionIndex,
@@ -555,6 +561,7 @@ private fun TitleSlideEntry(
 @Composable
 private fun LyricSectionEntry(
     section: LyricSection,
+    cue: String,
     sectionIndex: Int,
     isPerLineMode: Boolean,
     selectedSectionIndex: Int,
@@ -593,7 +600,14 @@ private fun LyricSectionEntry(
             )
             .padding(start = rowPad(14.dp), top = rowPad(10.dp), end = rowPad(14.dp), bottom = rowPad(12.dp))
     ) {
-        val textColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
+        // A section the song's order leaves out stays in the list, faded, so it can still be
+        // clicked onto the screen when the pastor calls for it after all.
+        val baseColor = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface
+        val textColor = when {
+            !section.skipped -> baseColor
+            isSelected -> baseColor.copy(alpha = SKIPPED_SELECTED_ALPHA)
+            else -> baseColor.copy(alpha = SKIPPED_ALPHA)
+        }
 
         val activeLineIndex = if (isPerLineMode && sectionIndex == selectedSectionIndex)
             selectedLineIndex else -1
@@ -601,12 +615,20 @@ private fun LyricSectionEntry(
         // Render section header if present — the same chip the editor's
         // preview uses, so a verse is recognised the same way in both.
         section.header?.let { header ->
-            SectionLabelRow(
-                label = sectionLabelOf(header),
-                modifier = Modifier.padding(vertical = 4.dp),
-                slideIndex = section.slideIndex,
-                slideCount = section.slideCount,
-            )
+            Row(
+                modifier = Modifier.padding(vertical = 4.dp)
+                    .alpha(if (section.skipped && !isSelected) SKIPPED_ALPHA else 1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                SectionLabelRow(
+                    label = sectionLabelOf(header),
+                    modifier = Modifier.weight(1f),
+                    slideIndex = section.slideIndex,
+                    slideCount = section.slideCount,
+                )
+                if (cue.isNotBlank()) SectionCueChip(section.sectionKey, cue)
+            }
         }
 
         // The panel always shows every language the song carries — what an output shows is that

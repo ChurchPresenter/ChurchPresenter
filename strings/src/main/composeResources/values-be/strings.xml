@@ -979,6 +979,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Слайд з назвай песні</string>
+    <string name="song_order">Парадак</string>
+    <string name="song_order_default">Па змаўчанні</string>
+    <string name="song_order_custom">Свой</string>
+    <string name="song_order_as_written">Як напісана</string>
+    <string name="song_order_presets">Шаблоны</string>
+    <string name="song_order_add_section">Дадаць частку</string>
+    <string name="song_order_unused">не выкарыстоўваецца</string>
+    <string name="song_order_slides">Слайдаў: %1$d</string>
+    <string name="song_order_remove">Выдаліць %1$s</string>
+    <string name="song_order_not_in_lyrics">Няма ў тэксце</string>
+    <string name="song_order_repeat">Паўтор</string>
+    <string name="song_order_preset_chorus_each">Прыпеў пасля кожнага куплета</string>
+    <string name="song_order_preset_start_chorus">Пачаць з прыпеву</string>
+    <string name="song_order_preset_double_chorus">Скончыць двайным прыпевам</string>
+    <string name="song_order_preset_bridge">Брыдж перад апошнім прыпевам</string>
+    <string name="song_pane_in_order">Па парадку</string>
+    <string name="song_comments">Каментарыі</string>
+    <string name="song_comments_placeholder">Змена танальнасці, хто вядзе, падказкі для гурта…</string>
+    <string name="song_notes_tag">Песня</string>
+    <string name="song_notes_edit">Рэдагаваць у песні</string>
+    <string name="song_section_cue">Падказка да часткі</string>
+    <string name="song_section_cue_placeholder">Дадайце падказку для каманды…</string>
     <string name="show_song_number_before_title">Паказваць нумар песні перад назвай</string>
 
     <!-- Canvas Tab -->
@@ -2355,6 +2377,21 @@
     <string name="song_background_whole_song">Уся песня</string>
     <string name="song_background_untitled_section">Раздзел без назвы</string>
     <string name="song_insert_slide_break">Разрыў слайда</string>
+    <string name="song_insert_second_voice">Голас 2</string>
+    <string name="song_pane_output">Вывад</string>
+    <string name="song_output_full_screen">На ўвесь экран</string>
+    <string name="song_output_lower_third">Ніжняя траціна</string>
+    <string name="song_output_nothing">Увядзіце тэкст, каб убачыць слайд пад курсорам так, як яго пакажуць вывады.</string>
+    <string name="song_look_title">Выгляд гэтай песні</string>
+    <string name="song_look_sub">Па-над профілем, толькі для гэтай песні, захоўваецца ў файле песні.</string>
+    <string name="song_look_font">Шрыфт</string>
+    <string name="song_look_size">Памер</string>
+    <string name="song_look_size_down">Меншы</string>
+    <string name="song_look_size_up">Большы</string>
+    <string name="song_look_color">Колер тэксту</string>
+    <string name="song_look_voice2">Колер голасу 2</string>
+    <string name="song_look_use_profile">Як у профілі</string>
+    <string name="song_insert_second_voice_hint">Пазначае выбраныя словы або радкі з курсорам як другі голас. Паўторнае націсканне на пазначаных радках здымае пазнаку.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Выхады NDI</string>
     <string name="ndi_outputs_help">Віртуальныя выхады, якія перадаюцца па сетцы як крыніцы NDI® — абярыце іх у OBS, vMix або на мікшары. Рэжым Alpha перадае сапраўдную празрыстасць, таму ніжняя трэць прыходзіць ужо з ключом.</string>

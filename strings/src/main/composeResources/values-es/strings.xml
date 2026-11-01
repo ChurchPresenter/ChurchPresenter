@@ -1199,6 +1199,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Diapositiva de título del canto</string>
+    <string name="song_order">Orden</string>
+    <string name="song_order_default">Predeterminado</string>
+    <string name="song_order_custom">Personalizado</string>
+    <string name="song_order_as_written">Como está escrito</string>
+    <string name="song_order_presets">Plantillas</string>
+    <string name="song_order_add_section">Añadir sección</string>
+    <string name="song_order_unused">sin usar</string>
+    <string name="song_order_slides">%1$d diapositivas</string>
+    <string name="song_order_remove">Quitar %1$s</string>
+    <string name="song_order_not_in_lyrics">No está en la letra</string>
+    <string name="song_order_repeat">Repetición</string>
+    <string name="song_order_preset_chorus_each">Coro después de cada estrofa</string>
+    <string name="song_order_preset_start_chorus">Empezar con el coro</string>
+    <string name="song_order_preset_double_chorus">Terminar con coro doble</string>
+    <string name="song_order_preset_bridge">Puente antes del último coro</string>
+    <string name="song_pane_in_order">En orden</string>
+    <string name="song_comments">Comentarios</string>
+    <string name="song_comments_placeholder">Cambios de tono, quién dirige, indicaciones para la banda…</string>
+    <string name="song_notes_tag">Canción</string>
+    <string name="song_notes_edit">Editar en la canción</string>
+    <string name="song_section_cue">Indicación de sección</string>
+    <string name="song_section_cue_placeholder">Añade una indicación para el equipo…</string>
     <string name="show_song_number_before_title">Mostrar el número del canto antes del título</string>
 
     <!-- Stage Monitor Settings -->
@@ -2383,6 +2405,21 @@
     <string name="song_background_whole_song">Toda la canción</string>
     <string name="song_background_untitled_section">Sección sin título</string>
     <string name="song_insert_slide_break">Salto de diapositiva</string>
+    <string name="song_insert_second_voice">Voz 2</string>
+    <string name="song_pane_output">Salida</string>
+    <string name="song_output_full_screen">Pantalla completa</string>
+    <string name="song_output_lower_third">Tercio inferior</string>
+    <string name="song_output_nothing">Escribe algo de letra para ver la diapositiva bajo el cursor tal como la muestran las salidas.</string>
+    <string name="song_look_title">Aspecto de esta canción</string>
+    <string name="song_look_sub">Sobre el del perfil, solo para esta canción, y guardado en el archivo de la canción.</string>
+    <string name="song_look_font">Fuente</string>
+    <string name="song_look_size">Tamaño</string>
+    <string name="song_look_size_down">Más pequeño</string>
+    <string name="song_look_size_up">Más grande</string>
+    <string name="song_look_color">Color del texto</string>
+    <string name="song_look_voice2">Color de la voz 2</string>
+    <string name="song_look_use_profile">Usar el del perfil</string>
+    <string name="song_insert_second_voice_hint">Marca las palabras seleccionadas, o las líneas donde está el cursor, como segunda voz. Repetirlo en líneas marcadas quita la marca.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Salidas NDI</string>
     <string name="ndi_outputs_help">Salidas virtuales enviadas por la red como fuentes NDI® — elígelas en OBS, vMix o un mezclador. El modo Alfa lleva transparencia real, así que un tercio inferior llega ya con su clave.</string>
