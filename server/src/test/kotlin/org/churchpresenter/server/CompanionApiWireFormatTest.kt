@@ -137,6 +137,57 @@ class CompanionApiWireFormatTest {
     }
 
     @Test
+    fun `a song detail plays its order, then the sections the order leaves out`() {
+        val song = SongItem(
+            number = "3",
+            title = "Ordered",
+            lyrics = listOf("[Verse 1]", "a", "{Chorus}", "b", "[Verse 2]", "c", "[Bridge]", "d"),
+            sectionOrder = listOf("{Chorus}", "[Verse 1]", "{Chorus}"),
+        )
+
+        assertEquals(
+            listOf("{Chorus}", "[Verse 1]", "{Chorus}", "[Verse 2]", "[Bridge]"),
+            buildSongDetail(song).playOrder,
+        )
+    }
+
+    @Test
+    fun `a song with no order plays as written, the chorus repeated as Settings say`() {
+        val song = SongItem(
+            number = "4",
+            title = "Hymn",
+            lyrics = listOf("[Verse 1]", "a", "{Chorus}", "b", "[Verse 2]", "c"),
+        )
+
+        assertEquals(listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}"), buildSongDetail(song).playOrder)
+        assertEquals(
+            listOf("[Verse 1]", "{Chorus}", "[Verse 2]"),
+            buildSongDetail(song, repeatChorus = false).playOrder,
+        )
+    }
+
+    @Test
+    fun `every key the desktop plays names a section the detail sends`() {
+        val song = SongItem(
+            number = "5",
+            title = "Awkward",
+            lyrics = listOf(
+                "a line before any header",
+                "[Intro]", "[G] [C] [D]",
+                "[Verse 1]", "[G]first line", "[---]", "second slide",
+                "{Chorus}", "chorus",
+                "[Verse 1]", "the same name again",
+            ),
+        )
+
+        val detail = buildSongDetail(song)
+        val keys = detail.sections.map { it.key }.toSet()
+
+        assertTrue(detail.playOrder.isNotEmpty())
+        assertTrue(detail.playOrder.all { it in keys }, "played ${detail.playOrder}, sent $keys")
+    }
+
+    @Test
     fun `a song detail from a server without arrangement fields still decodes`() {
         val detail = json.decodeFromString(
             SongDetailDto.serializer(),

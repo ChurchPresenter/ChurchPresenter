@@ -393,7 +393,8 @@ curl -k "https://192.168.1.10:8765/api/songs/42?songbook=Hymns"
   ],
   "order": ["[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}"],
   "notes": "Capo 2. Piano intro, 4 bars.",
-  "cues": { "[Verse 1]": "Piano only" }
+  "cues": { "[Verse 1]": "Piano only" },
+  "playOrder": ["[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}"]
 }
 ```
 
@@ -401,6 +402,11 @@ curl -k "https://192.168.1.10:8765/api/songs/42?songbook=Hymns"
 empty list means the song is sung as written. `key` is the header as the song writes it, brackets
 included, with `#2`, `#3` on a header written again and `#n` (its position) for a section with no
 header. `notes` and `cues` (a short cue per section, by `key`) are for the team and never presented.
+`playOrder` is the order the desktop steps through the song: `order` with the sections it leaves out
+after it, or, with no order, as written with the chorus repeated after each verse when Settings say
+so. **The `section` index `POST /api/songs/{number}/select` takes is a position in `playOrder`**,
+counted slide by slide (a section split with `[---]` is several slides), not a position in
+`sections`.
 In `/api/songs`, each song carries the same `order` when it has one; the field is left out otherwise.
 
 Section `type` values: `"verse"` · `"chorus"` · `"other"`. `type` follows the song file's brackets:
