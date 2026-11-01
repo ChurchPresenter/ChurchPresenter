@@ -19,6 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.math.abs
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.captureToImage
 
@@ -105,14 +106,14 @@ class RowNumberControlsTest {
         val field = onNodeWithTag("field").captureToImage().toPixelMap()
         var inked = 0
         for (y in 0 until field.height) for (x in 0 until field.width) {
-            val c = field[x, y]
-            if (abs(c.red - ink.red) < INK_TOLERANCE && abs(c.green - ink.green) < INK_TOLERANCE &&
-                abs(c.blue - ink.blue) < INK_TOLERANCE && c.alpha > 0.5f
-            ) {
-                inked++
-            }
+            if (isInk(field[x, y], ink)) inked++
         }
         assertTrue(inked > field.width, "the digits must be drawn inside the field; $inked inked pixels")
+    }
+
+    private fun isInk(c: Color, ink: Color): Boolean {
+        val near = abs(c.red - ink.red) < INK_TOLERANCE && abs(c.green - ink.green) < INK_TOLERANCE
+        return near && abs(c.blue - ink.blue) < INK_TOLERANCE && c.alpha > 0.5f
     }
 
     private companion object {
