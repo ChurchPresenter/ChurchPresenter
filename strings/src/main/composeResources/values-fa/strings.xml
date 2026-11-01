@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">اسلاید عنوان سرود</string>
+    <string name="song_order">ترتیب</string>
+    <string name="song_order_default">پیش‌فرض</string>
+    <string name="song_order_custom">سفارشی</string>
+    <string name="song_order_as_written">به ترتیب نوشته‌شده</string>
+    <string name="song_order_presets">الگوها</string>
+    <string name="song_order_add_section">افزودن بخش</string>
+    <string name="song_order_unused">استفاده‌نشده</string>
+    <string name="song_order_slides">%1$d اسلاید</string>
+    <string name="song_order_remove">حذف %1$s</string>
+    <string name="song_order_not_in_lyrics">در متن ترانه نیست</string>
+    <string name="song_order_repeat">تکرار</string>
+    <string name="song_order_preset_chorus_each">کُر بعد از هر بند</string>
+    <string name="song_order_preset_start_chorus">شروع با کُر</string>
+    <string name="song_order_preset_double_chorus">پایان با کُر دوبل</string>
+    <string name="song_order_preset_bridge">بریج پیش از آخرین کُر</string>
+    <string name="song_pane_in_order">به ترتیب</string>
+    <string name="song_comments">یادداشت‌ها</string>
+    <string name="song_comments_placeholder">تغییر گام، رهبر سرود، نشانه‌ها برای گروه…</string>
+    <string name="song_notes_tag">سرود</string>
+    <string name="song_notes_edit">ویرایش در سرود</string>
+    <string name="song_section_cue">نشانه بخش</string>
+    <string name="song_section_cue_placeholder">یک نشانه برای تیم بنویسید…</string>
     <string name="show_song_number_before_title">نمایش شمارهٔ سرود پیش از عنوان</string>
 
     <!-- Stage Monitor Settings -->

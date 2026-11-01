@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Titelbild för sång</string>
+    <string name="song_order">Ordning</string>
+    <string name="song_order_default">Standard</string>
+    <string name="song_order_custom">Anpassad</string>
+    <string name="song_order_as_written">Som skriven</string>
+    <string name="song_order_presets">Förval</string>
+    <string name="song_order_add_section">Lägg till del</string>
+    <string name="song_order_unused">oanvänd</string>
+    <string name="song_order_slides">%1$d bilder</string>
+    <string name="song_order_remove">Ta bort %1$s</string>
+    <string name="song_order_not_in_lyrics">Finns inte i texten</string>
+    <string name="song_order_repeat">Upprepning</string>
+    <string name="song_order_preset_chorus_each">Refräng efter varje vers</string>
+    <string name="song_order_preset_start_chorus">Börja med refräng</string>
+    <string name="song_order_preset_double_chorus">Avsluta med dubbel refräng</string>
+    <string name="song_order_preset_bridge">Brygga före sista refrängen</string>
+    <string name="song_pane_in_order">I ordning</string>
+    <string name="song_comments">Kommentarer</string>
+    <string name="song_comments_placeholder">Tonartsbyten, vem som leder, signaler till bandet…</string>
+    <string name="song_notes_tag">Sång</string>
+    <string name="song_notes_edit">Redigera i sången</string>
+    <string name="song_section_cue">Signal för del</string>
+    <string name="song_section_cue_placeholder">Lägg till en signal för teamet…</string>
     <string name="show_song_number_before_title">Visa sångnummer före titeln</string>
 
     <!-- Stage Monitor Settings -->

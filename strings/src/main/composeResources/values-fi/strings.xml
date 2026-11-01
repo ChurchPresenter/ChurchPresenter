@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Laulun otsikkodia</string>
+    <string name="song_order">Järjestys</string>
+    <string name="song_order_default">Oletus</string>
+    <string name="song_order_custom">Mukautettu</string>
+    <string name="song_order_as_written">Kirjoitetussa järjestyksessä</string>
+    <string name="song_order_presets">Valmiit järjestykset</string>
+    <string name="song_order_add_section">Lisää osa</string>
+    <string name="song_order_unused">käyttämätön</string>
+    <string name="song_order_slides">%1$d diaa</string>
+    <string name="song_order_remove">Poista %1$s</string>
+    <string name="song_order_not_in_lyrics">Ei sanoissa</string>
+    <string name="song_order_repeat">Toisto</string>
+    <string name="song_order_preset_chorus_each">Kertosäe jokaisen säkeistön jälkeen</string>
+    <string name="song_order_preset_start_chorus">Aloita kertosäkeellä</string>
+    <string name="song_order_preset_double_chorus">Lopeta tuplakertosäkeeseen</string>
+    <string name="song_order_preset_bridge">Silta ennen viimeistä kertosäettä</string>
+    <string name="song_pane_in_order">Järjestyksessä</string>
+    <string name="song_comments">Kommentit</string>
+    <string name="song_comments_placeholder">Sävellajin vaihdot, kuka johtaa, vihjeet bändille…</string>
+    <string name="song_notes_tag">Laulu</string>
+    <string name="song_notes_edit">Muokkaa laulussa</string>
+    <string name="song_section_cue">Osan vihje</string>
+    <string name="song_section_cue_placeholder">Lisää vihje tiimille…</string>
     <string name="show_song_number_before_title">Näytä laulun numero ennen otsikkoa</string>
 
     <!-- Stage Monitor Settings -->

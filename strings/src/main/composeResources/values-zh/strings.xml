@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">诗歌标题幻灯片</string>
+    <string name="song_order">顺序</string>
+    <string name="song_order_default">默认</string>
+    <string name="song_order_custom">自定义</string>
+    <string name="song_order_as_written">按原文顺序</string>
+    <string name="song_order_presets">预设</string>
+    <string name="song_order_add_section">添加段落</string>
+    <string name="song_order_unused">未使用</string>
+    <string name="song_order_slides">%1$d 张幻灯片</string>
+    <string name="song_order_remove">移除 %1$s</string>
+    <string name="song_order_not_in_lyrics">歌词中没有</string>
+    <string name="song_order_repeat">重复</string>
+    <string name="song_order_preset_chorus_each">每段主歌后接副歌</string>
+    <string name="song_order_preset_start_chorus">以副歌开始</string>
+    <string name="song_order_preset_double_chorus">以两遍副歌结束</string>
+    <string name="song_order_preset_bridge">最后一遍副歌前加桥段</string>
+    <string name="song_pane_in_order">按顺序</string>
+    <string name="song_comments">备注</string>
+    <string name="song_comments_placeholder">转调、领唱、给乐队的提示…</string>
+    <string name="song_notes_tag">歌曲</string>
+    <string name="song_notes_edit">在歌曲中编辑</string>
+    <string name="song_section_cue">段落提示</string>
+    <string name="song_section_cue_placeholder">为团队添加提示…</string>
     <string name="show_song_number_before_title">在标题前显示诗歌编号</string>
 
     <!-- Stage Monitor Settings -->

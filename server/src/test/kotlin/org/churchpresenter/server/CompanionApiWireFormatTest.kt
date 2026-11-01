@@ -108,6 +108,60 @@ class CompanionApiWireFormatTest {
         assertEquals(listOf("chorus line"), sections[2].lines)
     }
 
+    @Test
+    fun `a song detail keys its sections and carries the order notes and cues`() {
+        val song = SongItem(
+            number = "9",
+            title = "Arranged",
+            songbook = "Hymns",
+            lyrics = listOf(
+                "before any header",
+                "[Verse 1]", "verse line",
+                "[Empty]",
+                "{Chorus}", "chorus line",
+                "{Chorus}", "chorus again",
+            ),
+            sectionOrder = listOf("[Verse 1]", "{Chorus}", "{Chorus}#2"),
+            notes = "Capo 2",
+            sectionNotes = mapOf("[Verse 1]" to "Piano only"),
+        )
+
+        val detail = buildSongDetail(song)
+
+        assertEquals(listOf("#1", "[Verse 1]", "{Chorus}", "{Chorus}#2"), detail.sections.map { it.key })
+        assertEquals(4, detail.sectionTotal)
+        assertEquals(song.sectionOrder, detail.order)
+        assertEquals("Capo 2", detail.notes)
+        assertEquals(mapOf("[Verse 1]" to "Piano only"), detail.cues)
+        assertEquals(detail, roundTrip(SongDetailDto.serializer(), detail))
+    }
+
+    @Test
+    fun `a song detail from a server without arrangement fields still decodes`() {
+        val detail = json.decodeFromString(
+            SongDetailDto.serializer(),
+            """{"number":"1","title":"T","songbook":"","tune":"","author":"","composer":"","section-total":0,"sections":[]}""",
+        )
+
+        assertEquals(emptyList(), detail.order)
+        assertEquals("", detail.notes)
+        assertEquals(emptyMap(), detail.cues)
+    }
+
+    @Test
+    fun `a catalog song carries its order only when it has one`() {
+        val catalog = buildCatalog(
+            listOf(
+                SongItem(number = "1", title = "Written", songbook = "Hymns"),
+                SongItem(number = "2", title = "Ordered", songbook = "Hymns", sectionOrder = listOf("[Verse 1]", "{Chorus}")),
+            ),
+        )
+        val (written, ordered) = catalog.songBook.single().songs
+
+        assertFalse("order" in keysOf(SongDto.serializer(), written))
+        assertEquals(listOf("[Verse 1]", "{Chorus}"), roundTrip(SongDto.serializer(), ordered).order)
+    }
+
     private val voiced = SongItem(
         number = "8",
         title = "Voices",

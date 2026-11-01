@@ -24,6 +24,8 @@
     <string name="column_composer">Komponist</string>
     <string name="column_tune">Melodi</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Rekkefølge</string>
+    <string name="order_as_written">Slik det er skrevet</string>
     <string name="edit_song">Rediger sang</string>
     <string name="delete_song">Slett sang</string>
     <string name="empty_title">Ingen sanger passer med filtrene</string>

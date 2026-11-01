@@ -1199,6 +1199,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slide de Título da Música</string>
+    <string name="song_order">Ordem</string>
+    <string name="song_order_default">Padrão</string>
+    <string name="song_order_custom">Personalizada</string>
+    <string name="song_order_as_written">Como está escrito</string>
+    <string name="song_order_presets">Predefinições</string>
+    <string name="song_order_add_section">Adicionar seção</string>
+    <string name="song_order_unused">não usada</string>
+    <string name="song_order_slides">%1$d slides</string>
+    <string name="song_order_remove">Remover %1$s</string>
+    <string name="song_order_not_in_lyrics">Não está na letra</string>
+    <string name="song_order_repeat">Repetição</string>
+    <string name="song_order_preset_chorus_each">Refrão após cada estrofe</string>
+    <string name="song_order_preset_start_chorus">Começar com o refrão</string>
+    <string name="song_order_preset_double_chorus">Terminar com refrão duplo</string>
+    <string name="song_order_preset_bridge">Ponte antes do último refrão</string>
+    <string name="song_pane_in_order">Em ordem</string>
+    <string name="song_comments">Comentários</string>
+    <string name="song_comments_placeholder">Mudanças de tom, quem dirige, deixas para a banda…</string>
+    <string name="song_notes_tag">Música</string>
+    <string name="song_notes_edit">Editar na música</string>
+    <string name="song_section_cue">Deixa da seção</string>
+    <string name="song_section_cue_placeholder">Adicione uma deixa para a equipe…</string>
     <string name="show_song_number_before_title">Mostrar o número da música antes do título</string>
 
     <!-- Stage Monitor Settings -->

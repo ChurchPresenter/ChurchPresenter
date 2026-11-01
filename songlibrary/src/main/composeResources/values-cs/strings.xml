@@ -24,6 +24,8 @@
     <string name="column_composer">Skladatel</string>
     <string name="column_tune">Melodie</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Pořadí</string>
+    <string name="order_as_written">Jak je napsáno</string>
     <string name="edit_song">Upravit píseň</string>
     <string name="delete_song">Smazat píseň</string>
     <string name="empty_title">Filtrům neodpovídá žádná píseň</string>

@@ -2,6 +2,7 @@
 
 package org.churchpresenter.songs
 
+import androidx.compose.ui.test.performSemanticsAction
 import org.churchpresenter.core.models.songs.SongBackground
 import kotlin.test.assertTrue
 import androidx.compose.ui.test.pressKey
@@ -73,15 +74,15 @@ class EditSongContentTest {
         const val COMPOSER = 4
         const val CCLI = 5
         const val TUNE = 6
-        const val NOTES = 7
-        const val LYRICS = 8
+        const val LYRICS = 7
+        const val NOTES = 8
         const val COUNT = 9
 
         /** Where the songbook lands once Add New turns it into a typed field. */
         const val SONGBOOK_TYPED = 2
 
         // With a stage monitor configured, capo and tempo are inserted after Tune and before the
-        // notes and the lyrics box, which move down to 9 and 10. Verified against the rendered tree, not assumed — the
+        // lyrics box and the comments under the editor, which move down to 9 and 10. Verified against the rendered tree, not assumed — the
         // constant that used to live here put TEMPO at 7, which is where capo actually is.
         const val CAPO = 7
         const val TEMPO = 8
@@ -655,8 +656,12 @@ class EditSongContentTest {
 
     @Test
     fun `the chords switch flips, and says so each time`() = editor { saved ->
-        tap("Chords")
-        tap("Chords")
+        // By its click action rather than a pointer press: with the Order column in, the switch sits
+        // past the right edge of the test's window, where a press lands on nothing.
+        repeat(2) {
+            onNodeWithText("Chords").performSemanticsAction(SemanticsActions.OnClick)
+            waitForIdle()
+        }
         assertEquals(2, saved.chordsVisible.size)
         assertEquals(saved.chordsVisible[0], !saved.chordsVisible[1])
     }

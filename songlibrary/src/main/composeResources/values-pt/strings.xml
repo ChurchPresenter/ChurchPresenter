@@ -24,6 +24,8 @@
     <string name="column_composer">Compositor</string>
     <string name="column_tune">Melodia</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Ordem</string>
+    <string name="order_as_written">Como está escrito</string>
     <string name="edit_song">Editar música</string>
     <string name="delete_song">Excluir música</string>
     <string name="empty_title">Nenhuma música corresponde aos filtros</string>

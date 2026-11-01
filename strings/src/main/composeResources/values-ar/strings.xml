@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">شريحة عنوان الترنيمة</string>
+    <string name="song_order">الترتيب</string>
+    <string name="song_order_default">افتراضي</string>
+    <string name="song_order_custom">مخصص</string>
+    <string name="song_order_as_written">كما هو مكتوب</string>
+    <string name="song_order_presets">قوالب جاهزة</string>
+    <string name="song_order_add_section">إضافة مقطع</string>
+    <string name="song_order_unused">غير مستخدم</string>
+    <string name="song_order_slides">%1$d شرائح</string>
+    <string name="song_order_remove">إزالة %1$s</string>
+    <string name="song_order_not_in_lyrics">غير موجود في الكلمات</string>
+    <string name="song_order_repeat">تكرار</string>
+    <string name="song_order_preset_chorus_each">القرار بعد كل مقطع</string>
+    <string name="song_order_preset_start_chorus">البدء بالقرار</string>
+    <string name="song_order_preset_double_chorus">الختام بقرار مزدوج</string>
+    <string name="song_order_preset_bridge">الجسر قبل القرار الأخير</string>
+    <string name="song_pane_in_order">بالترتيب</string>
+    <string name="song_comments">ملاحظات</string>
+    <string name="song_comments_placeholder">تغييرات المقام، من يقود، إشارات للفرقة…</string>
+    <string name="song_notes_tag">ترنيمة</string>
+    <string name="song_notes_edit">تعديل في الترنيمة</string>
+    <string name="song_section_cue">إشارة المقطع</string>
+    <string name="song_section_cue_placeholder">أضف إشارة للفريق…</string>
     <string name="show_song_number_before_title">إظهار رقم الترنيمة قبل العنوان</string>
 
     <!-- Stage Monitor Settings -->

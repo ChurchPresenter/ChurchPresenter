@@ -1283,6 +1283,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Laulu pealkirja slaid</string>
+    <string name="song_order">Järjekord</string>
+    <string name="song_order_default">Vaikimisi</string>
+    <string name="song_order_custom">Kohandatud</string>
+    <string name="song_order_as_written">Nagu kirjutatud</string>
+    <string name="song_order_presets">Mallid</string>
+    <string name="song_order_add_section">Lisa osa</string>
+    <string name="song_order_unused">kasutamata</string>
+    <string name="song_order_slides">%1$d slaidi</string>
+    <string name="song_order_remove">Eemalda %1$s</string>
+    <string name="song_order_not_in_lyrics">Pole sõnades</string>
+    <string name="song_order_repeat">Kordus</string>
+    <string name="song_order_preset_chorus_each">Refrään iga salmi järel</string>
+    <string name="song_order_preset_start_chorus">Alusta refrääniga</string>
+    <string name="song_order_preset_double_chorus">Lõpeta topeltrefrääniga</string>
+    <string name="song_order_preset_bridge">Vahemäng enne viimast refrääni</string>
+    <string name="song_pane_in_order">Järjekorras</string>
+    <string name="song_comments">Kommentaarid</string>
+    <string name="song_comments_placeholder">Helistiku muutused, kes juhib, märguanded bändile…</string>
+    <string name="song_notes_tag">Laul</string>
+    <string name="song_notes_edit">Muuda laulus</string>
+    <string name="song_section_cue">Osa märguanne</string>
+    <string name="song_section_cue_placeholder">Lisa meeskonnale märguanne…</string>
     <string name="show_song_number_before_title">Kuva laulu number enne pealkirja</string>
 
     <!-- Stage Monitor Settings -->

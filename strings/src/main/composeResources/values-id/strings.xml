@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slide Judul Lagu</string>
+    <string name="song_order">Urutan</string>
+    <string name="song_order_default">Bawaan</string>
+    <string name="song_order_custom">Kustom</string>
+    <string name="song_order_as_written">Sesuai tertulis</string>
+    <string name="song_order_presets">Preset</string>
+    <string name="song_order_add_section">Tambah bagian</string>
+    <string name="song_order_unused">tidak dipakai</string>
+    <string name="song_order_slides">%1$d slide</string>
+    <string name="song_order_remove">Hapus %1$s</string>
+    <string name="song_order_not_in_lyrics">Tidak ada di lirik</string>
+    <string name="song_order_repeat">Ulangan</string>
+    <string name="song_order_preset_chorus_each">Reff setelah tiap bait</string>
+    <string name="song_order_preset_start_chorus">Mulai dengan reff</string>
+    <string name="song_order_preset_double_chorus">Akhiri dengan reff ganda</string>
+    <string name="song_order_preset_bridge">Bridge sebelum reff terakhir</string>
+    <string name="song_pane_in_order">Sesuai urutan</string>
+    <string name="song_comments">Komentar</string>
+    <string name="song_comments_placeholder">Perubahan nada dasar, siapa yang memimpin, aba-aba untuk band…</string>
+    <string name="song_notes_tag">Lagu</string>
+    <string name="song_notes_edit">Edit di lagu</string>
+    <string name="song_section_cue">Aba-aba bagian</string>
+    <string name="song_section_cue_placeholder">Tambahkan aba-aba untuk tim…</string>
     <string name="show_song_number_before_title">Tampilkan nomor lagu sebelum judul</string>
 
     <!-- Stage Monitor Settings -->

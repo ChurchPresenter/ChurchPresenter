@@ -1199,6 +1199,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Liedtitel-dia</string>
+    <string name="song_order">Volgorde</string>
+    <string name="song_order_default">Standaard</string>
+    <string name="song_order_custom">Aangepast</string>
+    <string name="song_order_as_written">Zoals geschreven</string>
+    <string name="song_order_presets">Voorinstellingen</string>
+    <string name="song_order_add_section">Deel toevoegen</string>
+    <string name="song_order_unused">niet gebruikt</string>
+    <string name="song_order_slides">%1$d dia’s</string>
+    <string name="song_order_remove">%1$s verwijderen</string>
+    <string name="song_order_not_in_lyrics">Niet in de tekst</string>
+    <string name="song_order_repeat">Herhaling</string>
+    <string name="song_order_preset_chorus_each">Refrein na elk couplet</string>
+    <string name="song_order_preset_start_chorus">Beginnen met refrein</string>
+    <string name="song_order_preset_double_chorus">Eindigen met dubbel refrein</string>
+    <string name="song_order_preset_bridge">Bridge voor laatste refrein</string>
+    <string name="song_pane_in_order">In volgorde</string>
+    <string name="song_comments">Opmerkingen</string>
+    <string name="song_comments_placeholder">Toonsoortwisselingen, wie leidt, aanwijzingen voor de band…</string>
+    <string name="song_notes_tag">Lied</string>
+    <string name="song_notes_edit">Bewerken in lied</string>
+    <string name="song_section_cue">Aanwijzing bij deel</string>
+    <string name="song_section_cue_placeholder">Voeg een aanwijzing voor het team toe…</string>
     <string name="show_song_number_before_title">Liednummer vóór de titel weergeven</string>
 
     <!-- Stage Monitor Settings -->

@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">ສະໄລ້ຊື່ເພງ</string>
+    <string name="song_order">ລຳດັບ</string>
+    <string name="song_order_default">ຄ່າເລີ່ມຕົ້ນ</string>
+    <string name="song_order_custom">ກຳນົດເອງ</string>
+    <string name="song_order_as_written">ຕາມທີ່ຂຽນໄວ້</string>
+    <string name="song_order_presets">ແບບສຳເລັດຮູບ</string>
+    <string name="song_order_add_section">ເພີ່ມທ່ອນ</string>
+    <string name="song_order_unused">ບໍ່ໄດ້ໃຊ້</string>
+    <string name="song_order_slides">%1$d ສະໄລ້</string>
+    <string name="song_order_remove">ລຶບ %1$s</string>
+    <string name="song_order_not_in_lyrics">ບໍ່ມີໃນເນື້ອເພງ</string>
+    <string name="song_order_repeat">ຊ້ຳ</string>
+    <string name="song_order_preset_chorus_each">ຮັບຫຼັງທຸກທ່ອນ</string>
+    <string name="song_order_preset_start_chorus">ເລີ່ມດ້ວຍທ່ອນຮັບ</string>
+    <string name="song_order_preset_double_chorus">ຈົບດ້ວຍທ່ອນຮັບສອງເທື່ອ</string>
+    <string name="song_order_preset_bridge">ບຣິດກ່ອນທ່ອນຮັບສຸດທ້າຍ</string>
+    <string name="song_pane_in_order">ຕາມລຳດັບ</string>
+    <string name="song_comments">ຄຳເຫັນ</string>
+    <string name="song_comments_placeholder">ການປ່ຽນຄີ, ໃຜນຳ, ສັນຍານສຳລັບວົງ…</string>
+    <string name="song_notes_tag">ເພງ</string>
+    <string name="song_notes_edit">ແກ້ໄຂໃນເພງ</string>
+    <string name="song_section_cue">ສັນຍານທ່ອນ</string>
+    <string name="song_section_cue_placeholder">ເພີ່ມສັນຍານສຳລັບທີມ…</string>
     <string name="show_song_number_before_title">ສະແດງໝາຍເລກເພງກ່ອນຊື່</string>
 
     <!-- Stage Monitor Settings -->

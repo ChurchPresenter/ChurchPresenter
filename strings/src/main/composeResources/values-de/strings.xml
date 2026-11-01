@@ -979,6 +979,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Liedtitel-Folie</string>
+    <string name="song_order">Reihenfolge</string>
+    <string name="song_order_default">Standard</string>
+    <string name="song_order_custom">Benutzerdefiniert</string>
+    <string name="song_order_as_written">Wie geschrieben</string>
+    <string name="song_order_presets">Vorlagen</string>
+    <string name="song_order_add_section">Teil hinzufügen</string>
+    <string name="song_order_unused">nicht verwendet</string>
+    <string name="song_order_slides">%1$d Folien</string>
+    <string name="song_order_remove">%1$s entfernen</string>
+    <string name="song_order_not_in_lyrics">Nicht im Liedtext</string>
+    <string name="song_order_repeat">Wiederholung</string>
+    <string name="song_order_preset_chorus_each">Refrain nach jeder Strophe</string>
+    <string name="song_order_preset_start_chorus">Mit Refrain beginnen</string>
+    <string name="song_order_preset_double_chorus">Mit doppeltem Refrain enden</string>
+    <string name="song_order_preset_bridge">Bridge vor dem letzten Refrain</string>
+    <string name="song_pane_in_order">In Reihenfolge</string>
+    <string name="song_comments">Kommentare</string>
+    <string name="song_comments_placeholder">Tonartwechsel, wer leitet, Hinweise für die Band…</string>
+    <string name="song_notes_tag">Lied</string>
+    <string name="song_notes_edit">Im Lied bearbeiten</string>
+    <string name="song_section_cue">Hinweis zum Teil</string>
+    <string name="song_section_cue_placeholder">Hinweis für das Team hinzufügen…</string>
     <string name="show_song_number_before_title">Liednummer vor dem Titel anzeigen</string>
 
     <!-- Canvas Tab -->

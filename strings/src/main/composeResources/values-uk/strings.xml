@@ -979,6 +979,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Слайд із назвою пісні</string>
+    <string name="song_order">Порядок</string>
+    <string name="song_order_default">За замовчуванням</string>
+    <string name="song_order_custom">Власний</string>
+    <string name="song_order_as_written">Як написано</string>
+    <string name="song_order_presets">Шаблони</string>
+    <string name="song_order_add_section">Додати частину</string>
+    <string name="song_order_unused">не використовується</string>
+    <string name="song_order_slides">Слайдів: %1$d</string>
+    <string name="song_order_remove">Видалити %1$s</string>
+    <string name="song_order_not_in_lyrics">Немає в тексті</string>
+    <string name="song_order_repeat">Повтор</string>
+    <string name="song_order_preset_chorus_each">Приспів після кожного куплета</string>
+    <string name="song_order_preset_start_chorus">Почати з приспіву</string>
+    <string name="song_order_preset_double_chorus">Закінчити подвійним приспівом</string>
+    <string name="song_order_preset_bridge">Брідж перед останнім приспівом</string>
+    <string name="song_pane_in_order">За порядком</string>
+    <string name="song_comments">Коментарі</string>
+    <string name="song_comments_placeholder">Зміна тональності, хто веде, підказки для гурту…</string>
+    <string name="song_notes_tag">Пісня</string>
+    <string name="song_notes_edit">Редагувати в пісні</string>
+    <string name="song_section_cue">Підказка до частини</string>
+    <string name="song_section_cue_placeholder">Додайте підказку для команди…</string>
     <string name="show_song_number_before_title">Показувати номер пісні перед назвою</string>
 
     <!-- Canvas Tab -->

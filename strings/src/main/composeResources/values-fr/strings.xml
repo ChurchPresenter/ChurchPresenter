@@ -1199,6 +1199,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Diapositive de titre du cantique</string>
+    <string name="song_order">Ordre</string>
+    <string name="song_order_default">Par défaut</string>
+    <string name="song_order_custom">Personnalisé</string>
+    <string name="song_order_as_written">Tel qu’écrit</string>
+    <string name="song_order_presets">Modèles</string>
+    <string name="song_order_add_section">Ajouter une section</string>
+    <string name="song_order_unused">non utilisée</string>
+    <string name="song_order_slides">%1$d diapositives</string>
+    <string name="song_order_remove">Retirer %1$s</string>
+    <string name="song_order_not_in_lyrics">Absent des paroles</string>
+    <string name="song_order_repeat">Reprise</string>
+    <string name="song_order_preset_chorus_each">Refrain après chaque couplet</string>
+    <string name="song_order_preset_start_chorus">Commencer par le refrain</string>
+    <string name="song_order_preset_double_chorus">Finir par un double refrain</string>
+    <string name="song_order_preset_bridge">Pont avant le dernier refrain</string>
+    <string name="song_pane_in_order">Dans l’ordre</string>
+    <string name="song_comments">Commentaires</string>
+    <string name="song_comments_placeholder">Changements de tonalité, qui dirige, repères pour les musiciens…</string>
+    <string name="song_notes_tag">Chant</string>
+    <string name="song_notes_edit">Modifier dans le chant</string>
+    <string name="song_section_cue">Repère de section</string>
+    <string name="song_section_cue_placeholder">Ajouter un repère pour l’équipe…</string>
     <string name="show_song_number_before_title">Afficher le numéro du cantique avant le titre</string>
 
     <!-- Stage Monitor Settings -->

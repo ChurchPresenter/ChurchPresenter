@@ -24,6 +24,8 @@
     <string name="column_composer">ผู้ประพันธ์ทำนอง</string>
     <string name="column_tune">ทำนอง</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">ลำดับ</string>
+    <string name="order_as_written">ตามที่เขียนไว้</string>
     <string name="edit_song">แก้ไขเพลง</string>
     <string name="delete_song">ลบเพลง</string>
     <string name="empty_title">ไม่มีเพลงที่ตรงกับตัวกรอง</string>

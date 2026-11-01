@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">曲名スライド</string>
+    <string name="song_order">順序</string>
+    <string name="song_order_default">デフォルト</string>
+    <string name="song_order_custom">カスタム</string>
+    <string name="song_order_as_written">記載順</string>
+    <string name="song_order_presets">プリセット</string>
+    <string name="song_order_add_section">セクションを追加</string>
+    <string name="song_order_unused">未使用</string>
+    <string name="song_order_slides">%1$d 枚のスライド</string>
+    <string name="song_order_remove">%1$s を削除</string>
+    <string name="song_order_not_in_lyrics">歌詞にありません</string>
+    <string name="song_order_repeat">繰り返し</string>
+    <string name="song_order_preset_chorus_each">各節の後にサビ</string>
+    <string name="song_order_preset_start_chorus">サビから始める</string>
+    <string name="song_order_preset_double_chorus">サビ2回で終わる</string>
+    <string name="song_order_preset_bridge">最後のサビの前にブリッジ</string>
+    <string name="song_pane_in_order">順序どおり</string>
+    <string name="song_comments">コメント</string>
+    <string name="song_comments_placeholder">転調、リード担当、バンドへの合図…</string>
+    <string name="song_notes_tag">曲</string>
+    <string name="song_notes_edit">曲で編集</string>
+    <string name="song_section_cue">セクションの合図</string>
+    <string name="song_section_cue_placeholder">チームへの合図を追加…</string>
     <string name="show_song_number_before_title">曲番号をタイトルの前に表示</string>
 
     <!-- Stage Monitor Settings -->

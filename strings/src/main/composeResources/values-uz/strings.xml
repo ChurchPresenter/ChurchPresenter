@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Qoʻshiq sarlavhasi slaydi</string>
+    <string name="song_order">Tartib</string>
+    <string name="song_order_default">Standart</string>
+    <string name="song_order_custom">Maxsus</string>
+    <string name="song_order_as_written">Yozilganidek</string>
+    <string name="song_order_presets">Shablonlar</string>
+    <string name="song_order_add_section">Qism qo‘shish</string>
+    <string name="song_order_unused">ishlatilmagan</string>
+    <string name="song_order_slides">%1$d ta slayd</string>
+    <string name="song_order_remove">%1$s ni olib tashlash</string>
+    <string name="song_order_not_in_lyrics">Matnda yo‘q</string>
+    <string name="song_order_repeat">Takror</string>
+    <string name="song_order_preset_chorus_each">Har bandidan keyin naqarot</string>
+    <string name="song_order_preset_start_chorus">Naqarot bilan boshlash</string>
+    <string name="song_order_preset_double_chorus">Ikki marta naqarot bilan tugatish</string>
+    <string name="song_order_preset_bridge">Oxirgi naqarotdan oldin bridj</string>
+    <string name="song_pane_in_order">Tartib bo‘yicha</string>
+    <string name="song_comments">Izohlar</string>
+    <string name="song_comments_placeholder">Tonallik o‘zgarishi, kim boshqaradi, guruh uchun ishoralar…</string>
+    <string name="song_notes_tag">Qo‘shiq</string>
+    <string name="song_notes_edit">Qo‘shiqda tahrirlash</string>
+    <string name="song_section_cue">Qism ishorasi</string>
+    <string name="song_section_cue_placeholder">Jamoa uchun ishora qo‘shing…</string>
     <string name="show_song_number_before_title">Qoʻshiq raqamini sarlavhadan oldin koʻrsatish</string>
 
     <!-- Stage Monitor Settings -->

@@ -1473,6 +1473,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">பாடல் தலைப்புப் படவில்லை</string>
+    <string name="song_order">வரிசை</string>
+    <string name="song_order_default">இயல்புநிலை</string>
+    <string name="song_order_custom">தனிப்பயன்</string>
+    <string name="song_order_as_written">எழுதியபடி</string>
+    <string name="song_order_presets">முன்னமைவுகள்</string>
+    <string name="song_order_add_section">பகுதியைச் சேர்</string>
+    <string name="song_order_unused">பயன்படுத்தப்படவில்லை</string>
+    <string name="song_order_slides">%1$d ஸ்லைடுகள்</string>
+    <string name="song_order_remove">%1$s ஐ நீக்கு</string>
+    <string name="song_order_not_in_lyrics">பாடல் வரிகளில் இல்லை</string>
+    <string name="song_order_repeat">மீண்டும்</string>
+    <string name="song_order_preset_chorus_each">ஒவ்வொரு சரணத்துக்குப் பின் பல்லவி</string>
+    <string name="song_order_preset_start_chorus">பல்லவியுடன் தொடங்கு</string>
+    <string name="song_order_preset_double_chorus">இரட்டை பல்லவியுடன் முடி</string>
+    <string name="song_order_preset_bridge">கடைசி பல்லவிக்கு முன் பிரிட்ஜ்</string>
+    <string name="song_pane_in_order">வரிசைப்படி</string>
+    <string name="song_comments">கருத்துகள்</string>
+    <string name="song_comments_placeholder">சுருதி மாற்றங்கள், யார் வழிநடத்துகிறார், இசைக்குழுவுக்கான குறிப்புகள்…</string>
+    <string name="song_notes_tag">பாடல்</string>
+    <string name="song_notes_edit">பாடலில் திருத்து</string>
+    <string name="song_section_cue">பகுதிக் குறிப்பு</string>
+    <string name="song_section_cue_placeholder">குழுவுக்கு ஒரு குறிப்பைச் சேர்…</string>
     <string name="show_song_number_before_title">தலைப்புக்கு முன் பாடல் எண்ணைக் காட்டு</string>
 
     <!-- Stage Monitor Settings -->

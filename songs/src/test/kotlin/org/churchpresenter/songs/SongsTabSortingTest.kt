@@ -87,7 +87,7 @@ class SongsTabSortingTest {
             clickColumnItem("Tune")
 
             assertFalse(headerCount("Tune") > 1, "the column has to leave the table: ${rendered()}")
-            assertEquals(setOf("tune"), reports.settingsAfterChange?.songHiddenCols)
+            assertEquals(setOf("order", "tune"), reports.settingsAfterChange?.songHiddenCols)
         }
 
     private fun ComposeUiTest.headerCount(label: String) =

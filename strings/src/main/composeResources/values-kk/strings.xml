@@ -979,6 +979,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Ән атауының слайды</string>
+    <string name="song_order">Реті</string>
+    <string name="song_order_default">Әдепкі</string>
+    <string name="song_order_custom">Өзіндік</string>
+    <string name="song_order_as_written">Жазылғандай</string>
+    <string name="song_order_presets">Үлгілер</string>
+    <string name="song_order_add_section">Бөлім қосу</string>
+    <string name="song_order_unused">қолданылмаған</string>
+    <string name="song_order_slides">%1$d слайд</string>
+    <string name="song_order_remove">%1$s жою</string>
+    <string name="song_order_not_in_lyrics">Мәтінде жоқ</string>
+    <string name="song_order_repeat">Қайталау</string>
+    <string name="song_order_preset_chorus_each">Әр шумақтан кейін қайырма</string>
+    <string name="song_order_preset_start_chorus">Қайырмадан бастау</string>
+    <string name="song_order_preset_double_chorus">Қос қайырмамен аяқтау</string>
+    <string name="song_order_preset_bridge">Соңғы қайырма алдында бридж</string>
+    <string name="song_pane_in_order">Ретімен</string>
+    <string name="song_comments">Түсініктемелер</string>
+    <string name="song_comments_placeholder">Тональділік өзгерісі, кім жүргізеді, топқа белгілер…</string>
+    <string name="song_notes_tag">Ән</string>
+    <string name="song_notes_edit">Әнде өңдеу</string>
+    <string name="song_section_cue">Бөлім белгісі</string>
+    <string name="song_section_cue_placeholder">Командаға белгі қосыңыз…</string>
     <string name="show_song_number_before_title">Ән нөмірін атаудың алдында көрсету</string>
 
     <!-- Canvas Tab -->

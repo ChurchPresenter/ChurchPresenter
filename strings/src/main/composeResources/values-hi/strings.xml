@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">गीत शीर्षक स्लाइड</string>
+    <string name="song_order">क्रम</string>
+    <string name="song_order_default">डिफ़ॉल्ट</string>
+    <string name="song_order_custom">कस्टम</string>
+    <string name="song_order_as_written">जैसा लिखा है</string>
+    <string name="song_order_presets">प्रीसेट</string>
+    <string name="song_order_add_section">भाग जोड़ें</string>
+    <string name="song_order_unused">अप्रयुक्त</string>
+    <string name="song_order_slides">%1$d स्लाइड</string>
+    <string name="song_order_remove">%1$s हटाएँ</string>
+    <string name="song_order_not_in_lyrics">बोल में नहीं है</string>
+    <string name="song_order_repeat">दोहराव</string>
+    <string name="song_order_preset_chorus_each">हर अंतरे के बाद कोरस</string>
+    <string name="song_order_preset_start_chorus">कोरस से शुरू करें</string>
+    <string name="song_order_preset_double_chorus">दोहरे कोरस से समाप्त करें</string>
+    <string name="song_order_preset_bridge">अंतिम कोरस से पहले ब्रिज</string>
+    <string name="song_pane_in_order">क्रम में</string>
+    <string name="song_comments">टिप्पणियाँ</string>
+    <string name="song_comments_placeholder">स्केल बदलाव, कौन अगुवाई करेगा, बैंड के लिए संकेत…</string>
+    <string name="song_notes_tag">गीत</string>
+    <string name="song_notes_edit">गीत में संपादित करें</string>
+    <string name="song_section_cue">भाग संकेत</string>
+    <string name="song_section_cue_placeholder">टीम के लिए संकेत जोड़ें…</string>
     <string name="show_song_number_before_title">शीर्षक से पहले गीत नंबर दिखाएँ</string>
 
     <!-- Stage Monitor Settings -->

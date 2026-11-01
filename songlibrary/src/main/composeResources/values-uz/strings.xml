@@ -24,6 +24,8 @@
     <string name="column_composer">Bastakor</string>
     <string name="column_tune">Kuy</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Tartib</string>
+    <string name="order_as_written">Yozilganidek</string>
     <string name="edit_song">Qoʻshiqni tahrirlash</string>
     <string name="delete_song">Qoʻshiqni oʻchirish</string>
     <string name="empty_title">Filtrlarga mos qoʻshiq yoʻq</string>

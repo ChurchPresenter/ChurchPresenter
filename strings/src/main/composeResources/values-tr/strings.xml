@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">İlahi başlığı slaytı</string>
+    <string name="song_order">Sıra</string>
+    <string name="song_order_default">Varsayılan</string>
+    <string name="song_order_custom">Özel</string>
+    <string name="song_order_as_written">Yazıldığı gibi</string>
+    <string name="song_order_presets">Hazır sıralar</string>
+    <string name="song_order_add_section">Bölüm ekle</string>
+    <string name="song_order_unused">kullanılmıyor</string>
+    <string name="song_order_slides">%1$d slayt</string>
+    <string name="song_order_remove">%1$s kaldır</string>
+    <string name="song_order_not_in_lyrics">Sözlerde yok</string>
+    <string name="song_order_repeat">Tekrar</string>
+    <string name="song_order_preset_chorus_each">Her kıtadan sonra nakarat</string>
+    <string name="song_order_preset_start_chorus">Nakaratla başla</string>
+    <string name="song_order_preset_double_chorus">Çift nakaratla bitir</string>
+    <string name="song_order_preset_bridge">Son nakarattan önce köprü</string>
+    <string name="song_pane_in_order">Sırayla</string>
+    <string name="song_comments">Yorumlar</string>
+    <string name="song_comments_placeholder">Ton değişiklikleri, kim yönetiyor, grup için işaretler…</string>
+    <string name="song_notes_tag">İlahi</string>
+    <string name="song_notes_edit">İlahide düzenle</string>
+    <string name="song_section_cue">Bölüm işareti</string>
+    <string name="song_section_cue_placeholder">Ekip için bir işaret ekle…</string>
     <string name="show_song_number_before_title">İlahi numarasını başlıktan önce göster</string>
 
     <!-- Stage Monitor Settings -->

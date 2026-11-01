@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slaid Tajuk Lagu</string>
+    <string name="song_order">Susunan</string>
+    <string name="song_order_default">Lalai</string>
+    <string name="song_order_custom">Tersuai</string>
+    <string name="song_order_as_written">Seperti ditulis</string>
+    <string name="song_order_presets">Pratetap</string>
+    <string name="song_order_add_section">Tambah bahagian</string>
+    <string name="song_order_unused">tidak digunakan</string>
+    <string name="song_order_slides">%1$d slaid</string>
+    <string name="song_order_remove">Buang %1$s</string>
+    <string name="song_order_not_in_lyrics">Tiada dalam lirik</string>
+    <string name="song_order_repeat">Ulangan</string>
+    <string name="song_order_preset_chorus_each">Korus selepas setiap rangkap</string>
+    <string name="song_order_preset_start_chorus">Mula dengan korus</string>
+    <string name="song_order_preset_double_chorus">Akhiri dengan korus berganda</string>
+    <string name="song_order_preset_bridge">Bridge sebelum korus terakhir</string>
+    <string name="song_pane_in_order">Ikut susunan</string>
+    <string name="song_comments">Komen</string>
+    <string name="song_comments_placeholder">Pertukaran kunci, siapa memimpin, isyarat untuk band…</string>
+    <string name="song_notes_tag">Lagu</string>
+    <string name="song_notes_edit">Edit dalam lagu</string>
+    <string name="song_section_cue">Isyarat bahagian</string>
+    <string name="song_section_cue_placeholder">Tambah isyarat untuk pasukan…</string>
     <string name="show_song_number_before_title">Tunjuk nombor lagu sebelum tajuk</string>
 
     <!-- Stage Monitor Settings -->

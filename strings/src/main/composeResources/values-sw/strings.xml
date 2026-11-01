@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slaidi ya kichwa cha wimbo</string>
+    <string name="song_order">Mpangilio</string>
+    <string name="song_order_default">Chaguo-msingi</string>
+    <string name="song_order_custom">Maalum</string>
+    <string name="song_order_as_written">Kama ilivyoandikwa</string>
+    <string name="song_order_presets">Mipangilio tayari</string>
+    <string name="song_order_add_section">Ongeza sehemu</string>
+    <string name="song_order_unused">haitumiki</string>
+    <string name="song_order_slides">Slaidi %1$d</string>
+    <string name="song_order_remove">Ondoa %1$s</string>
+    <string name="song_order_not_in_lyrics">Haipo kwenye maneno</string>
+    <string name="song_order_repeat">Marudio</string>
+    <string name="song_order_preset_chorus_each">Kiitikio baada ya kila ubeti</string>
+    <string name="song_order_preset_start_chorus">Anza na kiitikio</string>
+    <string name="song_order_preset_double_chorus">Malizia kwa kiitikio mara mbili</string>
+    <string name="song_order_preset_bridge">Daraja kabla ya kiitikio cha mwisho</string>
+    <string name="song_pane_in_order">Kwa mpangilio</string>
+    <string name="song_comments">Maoni</string>
+    <string name="song_comments_placeholder">Mabadiliko ya ufunguo, nani anaongoza, ishara kwa bendi…</string>
+    <string name="song_notes_tag">Wimbo</string>
+    <string name="song_notes_edit">Hariri katika wimbo</string>
+    <string name="song_section_cue">Ishara ya sehemu</string>
+    <string name="song_section_cue_placeholder">Ongeza ishara kwa timu…</string>
     <string name="show_song_number_before_title">Onyesha namba ya wimbo kabla ya kichwa</string>
 
     <!-- Stage Monitor Settings -->

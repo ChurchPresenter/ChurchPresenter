@@ -1238,6 +1238,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slide Titlu Cântare</string>
+    <string name="song_order">Ordine</string>
+    <string name="song_order_default">Implicită</string>
+    <string name="song_order_custom">Personalizată</string>
+    <string name="song_order_as_written">Așa cum e scris</string>
+    <string name="song_order_presets">Șabloane</string>
+    <string name="song_order_add_section">Adaugă secțiune</string>
+    <string name="song_order_unused">nefolosită</string>
+    <string name="song_order_slides">%1$d diapozitive</string>
+    <string name="song_order_remove">Elimină %1$s</string>
+    <string name="song_order_not_in_lyrics">Nu apare în versuri</string>
+    <string name="song_order_repeat">Repetare</string>
+    <string name="song_order_preset_chorus_each">Refren după fiecare strofă</string>
+    <string name="song_order_preset_start_chorus">Începe cu refrenul</string>
+    <string name="song_order_preset_double_chorus">Încheie cu refren dublu</string>
+    <string name="song_order_preset_bridge">Bridge înainte de ultimul refren</string>
+    <string name="song_pane_in_order">În ordine</string>
+    <string name="song_comments">Comentarii</string>
+    <string name="song_comments_placeholder">Schimbări de tonalitate, cine conduce, indicații pentru formație…</string>
+    <string name="song_notes_tag">Cântare</string>
+    <string name="song_notes_edit">Editează în cântare</string>
+    <string name="song_section_cue">Indicație pentru secțiune</string>
+    <string name="song_section_cue_placeholder">Adaugă o indicație pentru echipă…</string>
     <string name="show_song_number_before_title">Afișează numărul cântării înaintea titlului</string>
 
     <!-- Stage Monitor Settings -->

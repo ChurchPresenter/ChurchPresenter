@@ -27,6 +27,8 @@
     <string name="column_composer">Taʻata haʻapapa ʻōtoʻa</string>
     <string name="column_tune">Pehe</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Nahoaraa</string>
+    <string name="order_as_written">Mai tei papaihia</string>
     <string name="column_duration">Maoro</string>
     <string name="edit_song">Taui i te hīmene</string>
     <string name="delete_song">Haʻamoʻe i te hīmene</string>
