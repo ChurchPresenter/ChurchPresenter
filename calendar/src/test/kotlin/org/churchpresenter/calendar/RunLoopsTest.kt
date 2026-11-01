@@ -217,7 +217,7 @@ class RunLoopsTest {
     }
 
     @Test
-    fun `a service with no rows is never seen as loaded`() = runTest {
+    fun `a service with no rows is never loaded`() = runTest {
         val outputs = Outputs()
         val loader = ServiceAutoLoader(
             document = { calendar(planned(rows = emptyList())) }, host = outputs.host(), now = { at(9, 57) },
@@ -226,6 +226,6 @@ class RunLoopsTest {
         loader.tick()
         loader.tick()
 
-        assertEquals(2, outputs.loads, "nothing of it can be found in the schedule, so it is asked for again")
+        assertEquals(0, outputs.loads, "loading nothing would only clear the Schedule")
     }
 }

@@ -350,4 +350,78 @@ class ServiceAutoLoaderTest {
         loader.saveScheduleToService()
         assertEquals(0, saved)
     }
+
+    @Test
+    fun `a planned service with no rows never clears the Schedule a service is running from`() = runTest {
+        val schedule = FakeSchedule()
+        val morning = service("m", "10:00", rows = (1..16).map { song("m-$it") })
+        val empty = service("empty", "10:30", rows = emptyList())
+        var clock = at(9, 56)
+        val loader = loader(document(morning, empty), schedule) { clock }
+        loader.tick()
+        assertEquals(16, schedule.rows.size)
+
+        clock = at(10, 26)
+        repeat(5) { loader.tick(); clock = clock.plusMinutes(1) }
+
+        assertEquals(morning.items, schedule.rows, "an empty service has nothing to load")
+        assertEquals(1, schedule.loads)
+    }
+
+    @Test
+    fun `a planned service with only off-screen rows never clears the Schedule`() = runTest {
+        val schedule = FakeSchedule()
+        val morning = service("m", "10:00")
+        val offScreen = service(
+            "talk", "10:30",
+            rows = listOf(ScheduleItem.MinistryItem(id = "talk-1", title = "Announcements")),
+        )
+        var clock = at(9, 56)
+        val loader = loader(document(morning, offScreen), schedule) { clock }
+        loader.tick()
+
+        clock = at(10, 26)
+        repeat(3) { loader.tick() }
+
+        assertEquals(morning.items, schedule.rows)
+        assertEquals(1, schedule.loads)
+    }
+
+    @Test
+    fun `a plan edited after the service started does not replace the Schedule`() = runTest {
+        val schedule = FakeSchedule()
+        val first = service("m", "10:00")
+        var document = document(first)
+        var clock = at(9, 56)
+        val loader = ServiceAutoLoader(document = { document }, host = schedule.host(), now = { clock })
+        loader.tick()
+        loader.tick()
+
+        document = document(first.copy(items = first.items + song("m-2")))
+        clock = at(10, 5)
+        repeat(3) { loader.tick() }
+
+        assertEquals(1, schedule.loads)
+        assertEquals(listOf("m-1"), schedule.rows.map { it.id })
+    }
+
+    @Test
+    fun `a restart after the service started leaves the Schedule as the operator has it`() = runTest {
+        val service = service("m", "10:00", rows = listOf(song("m-1"), song("m-2")))
+        val schedule = FakeSchedule().apply { rows = listOf(song("m-2")) }
+
+        loader(document(service), schedule) { at(10, 5) }.tick()
+
+        assertEquals(0, schedule.loads, "the operator removed a row mid-service; it stays removed")
+        assertEquals(listOf("m-2"), schedule.rows.map { it.id })
+    }
+
+    @Test
+    fun `a service already under way still loads into an empty Schedule`() = runTest {
+        val schedule = FakeSchedule()
+
+        loader(document(service("m", "10:00")), schedule) { at(10, 5) }.tick()
+
+        assertEquals(listOf("m-1"), schedule.rows.map { it.id })
+    }
 }
