@@ -51,6 +51,7 @@ dependencies {
     testFixturesImplementation(libs.compose.uiTest)
     testFixturesImplementation(kotlin("test"))
     testFixturesImplementation(projects.settings)
+    testFixturesImplementation(projects.mediaEngine)
 
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))

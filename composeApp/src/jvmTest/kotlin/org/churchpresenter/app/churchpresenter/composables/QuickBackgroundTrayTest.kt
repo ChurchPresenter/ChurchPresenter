@@ -16,6 +16,11 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.QuickBackground
+import org.churchpresenter.profiles.SONG_BACKGROUND_VIDEO_BADGE_TAG
+import org.churchpresenter.profiles.SONG_BACKGROUND_VIDEO_STILL_TAG
+import org.churchpresenter.profiles.seedVideoFrame
+import java.io.File
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -174,4 +179,30 @@ class QuickBackgroundTrayTest {
 
         onNodeWithText("Back to normal").assertExists()
     }
+
+    @Test
+    fun `a motion background shows its first frame and the video badge`() {
+        val dir = Files.createTempDirectory("cp-tray-video").toFile()
+        val clip = File(dir, "loop.mp4")
+        val frame = seedVideoFrame(clip)
+        try {
+            val video = QuickBackground(
+                id = "v",
+                background = SongBackground(type = SongBackgroundType.VIDEO, video = clip.absolutePath),
+            )
+            tray(listOf(video, entry("c", "#112233"))) {
+                waitUntil("the first frame must reach the tile") {
+                    hasVideoStill()
+                }
+                val badges = onAllNodesWithTag(SONG_BACKGROUND_VIDEO_BADGE_TAG, useUnmergedTree = true)
+                assertEquals(1, badges.fetchSemanticsNodes().size)
+            }
+        } finally {
+            frame.delete()
+            dir.deleteRecursively()
+        }
+    }
+
+    private fun ComposeUiTest.hasVideoStill() =
+        onAllNodesWithTag(SONG_BACKGROUND_VIDEO_STILL_TAG, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 }

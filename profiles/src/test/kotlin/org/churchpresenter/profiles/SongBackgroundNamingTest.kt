@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -18,9 +19,12 @@ import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import java.awt.image.BufferedImage
+import java.awt.Color as AwtColor
 import java.io.File
+import java.nio.file.Files
 import javax.imageio.ImageIO
 import kotlin.math.abs
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -51,10 +55,23 @@ class SongBackgroundNamingTest {
 
     private fun ComposeUiTest.pixels(): PixelMap = onNodeWithTag("tile").captureToImage().toPixelMap()
 
-    private fun ComposeUiTest.tile(background: SongBackground) = setContent {
+    private fun ComposeUiTest.tile(background: SongBackground, stills: Boolean = false) = setContent {
         MaterialTheme {
-            SongBackgroundFill(background, Modifier.testTag("tile").size(120.dp))
+            SongBackgroundFill(background, Modifier.testTag("tile").size(120.dp), stills = stills)
         }
+    }
+
+    private val dir: File = Files.createTempDirectory("cp-song-bg").toFile()
+    private val seededFrames = mutableListOf<File>()
+
+    @AfterTest
+    fun cleanUp() {
+        dir.deleteRecursively()
+        seededFrames.forEach { it.delete() }
+    }
+
+    private fun seededClip(): File = File(dir, "loop.mp4").also {
+        seededFrames += seedVideoFrame(it, top = AwtColor.RED, bottom = AwtColor.RED)
     }
 
     private fun near(actual: Color, r: Float, g: Float, b: Float, tolerance: Float = 0.06f) =
@@ -210,6 +227,47 @@ class SongBackgroundNamingTest {
         tile(SongBackground(type = SongBackgroundType.VIDEO, video = "/clips/loop.mp4"))
         val map = pixels()
         assertEquals(map.width * map.height, map.count { near(it, 0f, 0f, 0f) })
+    }
+
+    @Test
+    fun `a clip with stills draws its first frame`() = runComposeUiTest {
+        tile(SongBackground(type = SongBackgroundType.VIDEO, video = seededClip().absolutePath), stills = true)
+        waitUntil("the first frame must reach the tile") {
+            onAllNodesWithTag(SONG_BACKGROUND_VIDEO_STILL_TAG).fetchSemanticsNodes().isNotEmpty()
+        }
+        waitForIdle()
+        val map = pixels()
+        assertEquals(map.width * map.height, map.count { near(it, 1f, 0f, 0f) }, "the frame fills the tile")
+    }
+
+    @Test
+    fun `a clip with stills and no frame to show draws black`() = runComposeUiTest {
+        tile(SongBackground(type = SongBackgroundType.VIDEO, video = File(dir, "missing.mp4").path), stills = true)
+        waitForIdle()
+        onNodeWithTag(SONG_BACKGROUND_VIDEO_STILL_TAG).assertDoesNotExist()
+        val map = pixels()
+        assertEquals(map.width * map.height, map.count { near(it, 0f, 0f, 0f) })
+    }
+
+    @Test
+    fun `a clip's tile wears the video badge`() = runComposeUiTest {
+        setContent {
+            MaterialTheme { SongBackgroundVideoBadge(SongBackground(type = SongBackgroundType.VIDEO)) }
+        }
+        onNodeWithTag(SONG_BACKGROUND_VIDEO_BADGE_TAG).assertExists()
+    }
+
+    @Test
+    fun `no other background wears the video badge`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                for (type in SongBackgroundType.ALL - SongBackgroundType.VIDEO) {
+                    SongBackgroundVideoBadge(SongBackground(type = type))
+                }
+                SongBackgroundVideoBadge(SongBackground())
+            }
+        }
+        onNodeWithTag(SONG_BACKGROUND_VIDEO_BADGE_TAG).assertDoesNotExist()
     }
 
     @Test

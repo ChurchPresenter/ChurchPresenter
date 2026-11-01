@@ -26,6 +26,9 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.profiles.SONG_BACKGROUND_PANEL_TAG
+import org.churchpresenter.profiles.SONG_BACKGROUND_VIDEO_STILL_TAG
+import org.churchpresenter.profiles.seedVideoFrame
+import androidx.compose.ui.test.onAllNodesWithTag
 import org.churchpresenter.profiles.BackgroundSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.settings.utils.Constants
@@ -289,6 +292,35 @@ class BackgroundSettingsTabScreenshotTest {
     @Test
     fun `the quick backgrounds shelf`() = shoot("quick_backgrounds", settings = withQuickTray())
 
+    /** A motion background on the shelf: its first frame, with the video badge in the corner. */
+    @Test
+    fun `the quick backgrounds shelf with a motion background`() {
+        val clip = File(FIXTURES, "Welcome Loop.mp4")
+        val frame = seedVideoFrame(clip)
+        try {
+            val settings = withQuickTray().let {
+                it.copy(
+                    quickBackgrounds = listOf(
+                        QuickBackground(
+                            id = "video",
+                            background = SongBackground(
+                                type = SongBackgroundType.VIDEO,
+                                video = clip.absolutePath,
+                            ),
+                        ),
+                    ) + it.quickBackgrounds.take(2),
+                )
+            }
+            shoot("quick_backgrounds_video", settings = settings) {
+                waitUntil("the first frame must reach the tile") {
+                    hasVideoStill()
+                }
+            }
+        } finally {
+            frame.delete()
+        }
+    }
+
     /** A tile's panel open over the tab — the same editor a song's own background gets. */
     @Test
     fun `a quick background panel`() = shoot(
@@ -431,4 +463,7 @@ class BackgroundSettingsTabScreenshotTest {
         const val DEFAULT_LOWER_THIRD = "Default Lower Third"
         const val USE_DEFAULT = "Use Default"
     }
+
+    private fun ComposeUiTest.hasVideoStill() =
+        onAllNodesWithTag(SONG_BACKGROUND_VIDEO_STILL_TAG, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 }
