@@ -60,7 +60,7 @@ private val TagShape = AppShape(5.dp)
  * that opens the song editor. For the operator only — nothing here reaches an output.
  */
 @Composable
-internal fun SongNotesCard(notes: String, onEdit: (() -> Unit)? = null) {
+internal fun SongNotesCard(notes: String, onEdit: () -> Unit) {
     var expanded by rememberSaveable(notes) { mutableStateOf(false) }
     val accent = MaterialTheme.colorScheme.primary
     Row(
@@ -93,22 +93,20 @@ internal fun SongNotesCard(notes: String, onEdit: (() -> Unit)? = null) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        if (onEdit != null) {
-            val editLabel = stringResource(Res.string.song_notes_edit)
-            Box(
-                modifier = Modifier.size(22.dp, 20.dp)
-                    .keyboardFocusRing(TagShape)
-                    .clip(TagShape)
-                    .clickable(onClick = onEdit),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_edit),
-                    contentDescription = editLabel,
-                    tint = accent.copy(alpha = NOTES_EDIT_ALPHA),
-                    modifier = Modifier.size(12.dp),
-                )
-            }
+        val editLabel = stringResource(Res.string.song_notes_edit)
+        Box(
+            modifier = Modifier.size(22.dp, 20.dp)
+                .keyboardFocusRing(TagShape)
+                .clip(TagShape)
+                .clickable(onClick = onEdit),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(IconRes.drawable.ic_edit),
+                contentDescription = editLabel,
+                tint = accent.copy(alpha = NOTES_EDIT_ALPHA),
+                modifier = Modifier.size(12.dp),
+            )
         }
     }
 }

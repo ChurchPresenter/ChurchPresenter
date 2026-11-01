@@ -35,8 +35,9 @@ class SongNotesAndOrderTest {
 
     private val plain = SongFixture(number = "45", title = "Be Thou My Vision")
 
-    // Narrow enough that the Order column fits in the test window beside the lyrics panel.
-    private val narrowTitle = SongSettings(colWidthNumber = 40, colWidthTitle = 90)
+    // The test window leaves the list little room beside the lyrics panel: with the Number column
+    // hidden and the narrowest Title, the Order column is inside it and can be hovered.
+    private val narrowTitle = SongSettings(colWidthTitle = 60)
 
     private val withOrderColumn = listOf(
         SongColumnId.NUMBER, SongColumnId.TITLE, SongColumnId.ORDER, SongColumnId.ADD_TO_SCHEDULE,
@@ -99,7 +100,7 @@ class SongNotesAndOrderTest {
         songsTab(
             songs = listOf(arranged, plain),
             songSettings = narrowTitle,
-            hiddenCols = emptySet(),
+            hiddenCols = setOf(SongColumnId.NUMBER),
             colOrder = withOrderColumn,
         ) { _, _ ->
             onNodeWithText("Order").assertExists()
@@ -114,10 +115,10 @@ class SongNotesAndOrderTest {
         songsTab(
             songs = listOf(arranged),
             songSettings = narrowTitle,
-            hiddenCols = emptySet(),
+            hiddenCols = setOf(SongColumnId.NUMBER),
             colOrder = withOrderColumn,
         ) { _, _ ->
-            onNodeWithText("V1").performMouseInput { moveTo(center) }
+            onAllNodesWithText("V1")[0].performMouseInput { moveTo(center) }
             mainClock.advanceTimeBy(TOOLTIP_WAIT_MS)
             waitForIdle()
 
