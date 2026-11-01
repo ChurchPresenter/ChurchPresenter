@@ -9,6 +9,7 @@ import kotlinx.coroutines.sync.withLock
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.model.UpcomingLoad
+import org.churchpresenter.calendar.model.firstRowStart
 import org.churchpresenter.calendar.model.holdsOnlyPlannedRows
 import org.churchpresenter.calendar.model.isInSchedule
 import org.churchpresenter.calendar.model.nextAutoLoad
@@ -35,7 +36,9 @@ import java.time.LocalDateTime
  * **appended** instead -- see `holdsOnlyPlannedRows`. It happens **once** per plan, either way:
  * once the rows have been seen in the Schedule, an operator who then clears it meant to, and
  * putting the service back a minute later would be no better. Editing the plan makes it a
- * different plan -- see [loadKey] -- and that one loads.
+ * different plan -- see [loadKey] -- and that one loads, but only before the service starts:
+ * once it is under way a Schedule with anything in it is never touched, and a service with no
+ * rows to load never clears one.
  *
  * It also says what it is going to do: [upcoming] is the next planned service still to load, for
  * the Schedule tab to announce, and [loadNow] loads it early -- days early, to rehearse it.
@@ -185,11 +188,17 @@ class ServiceAutoLoader(
         val current = host.currentSchedule()
         when {
             key in landed -> Unit
+            // Nothing to put in the Schedule: loading it would only clear what is there.
+            service.rowsForSchedule().isEmpty() -> landed += key
             // Its rows are in the Schedule, so the load arrived: record it and leave the Schedule
             // alone from here, whatever the operator does to it. Asking whether *these* rows are
             // there, rather than whether the Schedule holds anything, is what tells a load that
             // arrived from one that called into a no-op while last week's schedule sat there.
             service.isInSchedule(current) -> landed += key
+            // Once the service is under way, what the Schedule holds is what is being presented:
+            // an automatic load never replaces or adds to it -- not after a plan edit, a sync or a
+            // restart. Only an empty Schedule still takes the service.
+            current.isNotEmpty() && service.hasStarted(at) -> landed += key
             // Last week's service goes; the operator's own rows stay, and this goes under them.
             else -> load(service, replace = calendar.holdsOnlyPlannedRows(current))
         }
@@ -205,6 +214,9 @@ class ServiceAutoLoader(
  * already been loaded stayed behind the one that was: rows added to the calendar were simply not
  * there when the automation looked for the next item, and the hand-off found nothing.
  */
+private fun PlannedService.hasStarted(at: LocalDateTime): Boolean =
+    firstRowStart()?.let { !at.toLocalTime().isBefore(it) } ?: false
+
 private fun PlannedService.loadKey(): String =
     "$date|$id|$startTime|" + items.joinToString(",") { it.id } + "|" + timing.hashCode()
 
