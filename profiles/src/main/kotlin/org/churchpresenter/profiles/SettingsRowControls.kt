@@ -33,7 +33,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -286,25 +285,29 @@ internal fun RowNumberField(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End,
         ) {
-            BasicTextField(
-                value = text,
-                onValueChange = { typed ->
-                    val digits = typed.filter { it.isDigit() || it == '-' }
-                    text = digits
-                    digits.toIntOrNull()?.takeIf { it in range }?.let(onValueChange)
-                },
-                singleLine = true,
-                interactionSource = remember { MutableInteractionSource() },
-                textStyle = TextStyle(
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.End,
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.width(IntrinsicSize.Min).widthIn(min = NUMBER_MIN_WIDTH)
-                    .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
-            )
+            // Hugging its digits and drawn start-aligned, in a box that keeps the minimum and puts it
+            // at the end: an end-aligned single-line field sized to its own text scrolls the text
+            // out of view once it is three or four digits long.
+            Box(Modifier.widthIn(min = NUMBER_MIN_WIDTH), contentAlignment = Alignment.CenterEnd) {
+                BasicTextField(
+                    value = text,
+                    onValueChange = { typed ->
+                        val digits = typed.filter { it.isDigit() || it == '-' }
+                        text = digits
+                        digits.toIntOrNull()?.takeIf { it in range }?.let(onValueChange)
+                    },
+                    singleLine = true,
+                    interactionSource = remember { MutableInteractionSource() },
+                    textStyle = TextStyle(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.width(IntrinsicSize.Max)
+                        .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
+                )
+            }
             if (unit != null) {
                 Box(Modifier.padding(start = 3.dp)) {
                     Text(unit, fontSize = 11.sp, color = faint, maxLines = 1)

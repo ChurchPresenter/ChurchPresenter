@@ -181,4 +181,77 @@ class ProfileMergeCardInteractionTest {
         assertTrue(onAllNodes(hasTestTag(MERGE_MAP_TAG)).fetchSemanticsNodes().isEmpty())
         assertEquals(merged, profile)
     }
+
+    // ── Putting an output back ─────────────────────────────────────────────────
+
+    private val threeSizes = List(3) { "ndi:$it" to (1920 to 1080) }.toMap()
+    private val threeOrder = List(3) { "ndi:$it" }
+
+    @Test
+    fun `an output put back returns to its own slot and its place in the list`() {
+        val withoutMiddle = OutputMerge(listOf(MergeTile("ndi:0", 0, 0), MergeTile("ndi:2", 3840, 0)))
+        val middle = MergeMember("ndi:1", MergeKind.NDI, 1920, 1080)
+
+        assertEquals(
+            listOf(MergeTile("ndi:0", 0, 0), MergeTile("ndi:1", 1920, 0), MergeTile("ndi:2", 3840, 0)),
+            withoutMiddle.including(middle, on = true, threeSizes, threeOrder).tiles,
+        )
+    }
+
+    @Test
+    fun `an output put back where another now sits goes to the right instead`() {
+        val moved = OutputMerge(listOf(MergeTile("ndi:0", 0, 0), MergeTile("ndi:2", 1920, 0)))
+        val middle = MergeMember("ndi:1", MergeKind.NDI, 1920, 1080)
+
+        assertEquals(
+            listOf(MergeTile("ndi:0", 0, 0), MergeTile("ndi:1", 3840, 0), MergeTile("ndi:2", 1920, 0)),
+            moved.including(middle, on = true, threeSizes, threeOrder).tiles,
+        )
+    }
+
+    @Test
+    fun `an output not in the list's order is added on the right, at the end`() {
+        val member = MergeMember("ndi:9", MergeKind.NDI, 1920, 1080)
+
+        assertEquals(
+            MergeTile("ndi:9", 3840, 0),
+            sideBySide.including(member, on = true, threeSizes, threeOrder).tiles.last(),
+        )
+    }
+
+    @Test
+    fun `ticking an output off and on again puts it back between its neighbours`() = runComposeUiTest {
+        val three = OutputMerge(List(3) { MergeTile("ndi:$it", it * 1920, 0) })
+        val profile = showCard(
+            wall.copy(merge = three),
+            { ProjectionSettings(ndiOutputs = List(3) { ndi() }, outputProfiles = listOf(it)) },
+            List(3) { ndiTile(it) },
+        )
+        val middleTick = onAllNodes(isToggleable())[2]
+
+        middleTick.performScrollTo().performClick()
+        waitForIdle()
+        assertEquals(listOf("ndi:0", "ndi:2"), profile().merge!!.tiles.map { it.output })
+        middleTick.performScrollTo().performClick()
+        waitForIdle()
+
+        assertEquals(three, profile().merge)
+        onNodeWithText("Feed 0  ·  Feed 1  ·  Feed 2").assertExists()
+    }
+
+    @Test
+    fun `the outputs' names sit right under the map, across its width`() = runComposeUiTest {
+        val three = OutputMerge(List(3) { MergeTile("ndi:$it", it * 1920, 0) })
+        showCard(
+            wall.copy(merge = three),
+            { ProjectionSettings(ndiOutputs = List(3) { ndi() }, outputProfiles = listOf(it)) },
+            List(3) { ndiTile(it) },
+        )
+        val map = onNodeWithTag(MERGE_MAP_TAG).fetchSemanticsNode().boundsInRoot
+        val names = onNodeWithText("Feed 0  ·  Feed 1  ·  Feed 2").fetchSemanticsNode().boundsInRoot
+
+        assertTrue(names.top >= map.bottom, "under the map: names at ${names.top}, map ends at ${map.bottom}")
+        assertTrue(names.top - map.bottom < 12f, "and right under it, not ${names.top - map.bottom}px below")
+        assertTrue(names.width >= map.width, "as wide as the map at least, so the names are not squeezed")
+    }
 }
