@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">诗歌标题幻灯片</string>
+    <string name="song_order">顺序</string>
+    <string name="song_order_default">默认</string>
+    <string name="song_order_custom">自定义</string>
+    <string name="song_order_as_written">按原文顺序</string>
+    <string name="song_order_presets">预设</string>
+    <string name="song_order_add_section">添加段落</string>
+    <string name="song_order_unused">未使用</string>
+    <string name="song_order_slides">%1$d 张幻灯片</string>
+    <string name="song_order_remove">移除 %1$s</string>
+    <string name="song_order_not_in_lyrics">歌词中没有</string>
+    <string name="song_order_repeat">重复</string>
+    <string name="song_order_preset_chorus_each">每段主歌后接副歌</string>
+    <string name="song_order_preset_start_chorus">以副歌开始</string>
+    <string name="song_order_preset_double_chorus">以两遍副歌结束</string>
+    <string name="song_order_preset_bridge">最后一遍副歌前加桥段</string>
+    <string name="song_pane_in_order">按顺序</string>
+    <string name="song_comments">备注</string>
+    <string name="song_comments_placeholder">转调、领唱、给乐队的提示…</string>
+    <string name="song_notes_tag">歌曲</string>
+    <string name="song_notes_edit">在歌曲中编辑</string>
+    <string name="song_section_cue">段落提示</string>
+    <string name="song_section_cue_placeholder">为团队添加提示…</string>
     <string name="show_song_number_before_title">在标题前显示诗歌编号</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">整首歌</string>
     <string name="song_background_untitled_section">未命名段落</string>
     <string name="song_insert_slide_break">分页</string>
+    <string name="song_insert_second_voice">第二声部</string>
+    <string name="song_pane_output">输出</string>
+    <string name="song_output_full_screen">全屏</string>
+    <string name="song_output_lower_third">下三分之一</string>
+    <string name="song_output_nothing">输入歌词，即可按输出的显示效果查看光标所在的幻灯片。</string>
+    <string name="song_look_title">此歌曲的外观</string>
+    <string name="song_look_sub">覆盖配置文件的设置，仅用于此歌曲，并保存在歌曲文件中。</string>
+    <string name="song_look_font">字体</string>
+    <string name="song_look_size">大小</string>
+    <string name="song_look_size_down">缩小</string>
+    <string name="song_look_size_up">放大</string>
+    <string name="song_look_color">文字颜色</string>
+    <string name="song_look_voice2">第二声部颜色</string>
+    <string name="song_look_use_profile">使用配置文件的设置</string>
+    <string name="song_insert_second_voice_hint">将所选文字或光标所在的行标记为第二声部。在已标记的行上再次使用可取消标记。</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI 输出</string>
     <string name="ndi_outputs_help">通过网络以 NDI® 源形式发送的虚拟输出 — 可在 OBS、vMix 或切换台中选择。Alpha 模式带有真正的透明度，因此字幕条送达时已完成抠像。</string>

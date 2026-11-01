@@ -22,6 +22,7 @@ import org.churchpresenter.settings.utils.Constants
  * only if it takes that position as a parameter.
  */
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class SongDto(
     /** Position in the server's song list; how a client addresses a song. Not stable across reloads. */
     val id: Int = 0,
@@ -31,6 +32,12 @@ data class SongDto(
     val author: String = "",
     /** The title in the second language of a bilingual song; empty otherwise. */
     val secondaryTitle: String = "",
+    /**
+     * The order the song is sung in, by section key; left out of the JSON when the song is sung as
+     * written, so a catalogue of thousands of songs does not grow by an empty list per song.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val order: List<String> = emptyList(),
 )
 
 /** One songbook entry — contains its songs inline. */
@@ -75,6 +82,8 @@ data class SongSectionDto(
      * chorus. Null for lines that come before the first header.
      */
     val label: String? = null,
+    /** The section's order key, as [SongDetailDto.order] and [SongDetailDto.cues] name it. */
+    val key: String? = null,
 )
 
 /**
@@ -103,7 +112,13 @@ data class SongDetailDto(
     val author: String,
     val composer: String,
     @kotlinx.serialization.SerialName("section-total") val sectionTotal: Int,
-    val sections: List<SongSectionDto>
+    val sections: List<SongSectionDto>,
+    /** The order the song is sung in, by section [SongSectionDto.key]; empty when it is sung as written. */
+    val order: List<String> = emptyList(),
+    /** The operator's notes on the song; never presented. */
+    val notes: String = "",
+    /** A short cue per section, by [SongSectionDto.key]; never presented. */
+    val cues: Map<String, String> = emptyMap(),
 )
 
 @Serializable

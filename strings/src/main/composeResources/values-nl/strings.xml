@@ -1199,6 +1199,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Liedtitel-dia</string>
+    <string name="song_order">Volgorde</string>
+    <string name="song_order_default">Standaard</string>
+    <string name="song_order_custom">Aangepast</string>
+    <string name="song_order_as_written">Zoals geschreven</string>
+    <string name="song_order_presets">Voorinstellingen</string>
+    <string name="song_order_add_section">Deel toevoegen</string>
+    <string name="song_order_unused">niet gebruikt</string>
+    <string name="song_order_slides">%1$d dia’s</string>
+    <string name="song_order_remove">%1$s verwijderen</string>
+    <string name="song_order_not_in_lyrics">Niet in de tekst</string>
+    <string name="song_order_repeat">Herhaling</string>
+    <string name="song_order_preset_chorus_each">Refrein na elk couplet</string>
+    <string name="song_order_preset_start_chorus">Beginnen met refrein</string>
+    <string name="song_order_preset_double_chorus">Eindigen met dubbel refrein</string>
+    <string name="song_order_preset_bridge">Bridge voor laatste refrein</string>
+    <string name="song_pane_in_order">In volgorde</string>
+    <string name="song_comments">Opmerkingen</string>
+    <string name="song_comments_placeholder">Toonsoortwisselingen, wie leidt, aanwijzingen voor de band…</string>
+    <string name="song_notes_tag">Lied</string>
+    <string name="song_notes_edit">Bewerken in lied</string>
+    <string name="song_section_cue">Aanwijzing bij deel</string>
+    <string name="song_section_cue_placeholder">Voeg een aanwijzing voor het team toe…</string>
     <string name="show_song_number_before_title">Liednummer vóór de titel weergeven</string>
 
     <!-- Stage Monitor Settings -->
@@ -2383,6 +2405,21 @@
     <string name="song_background_whole_song">Hele lied</string>
     <string name="song_background_untitled_section">Naamloos gedeelte</string>
     <string name="song_insert_slide_break">Dia-afbreking</string>
+    <string name="song_insert_second_voice">Stem 2</string>
+    <string name="song_pane_output">Uitvoer</string>
+    <string name="song_output_full_screen">Volledig scherm</string>
+    <string name="song_output_lower_third">Onderbalk</string>
+    <string name="song_output_nothing">Typ wat tekst om de dia onder de cursor te zien zoals de uitvoer die toont.</string>
+    <string name="song_look_title">Uiterlijk van dit lied</string>
+    <string name="song_look_sub">Over dat van het profiel heen, alleen voor dit lied, en opgeslagen in het liedbestand.</string>
+    <string name="song_look_font">Lettertype</string>
+    <string name="song_look_size">Grootte</string>
+    <string name="song_look_size_down">Kleiner</string>
+    <string name="song_look_size_up">Groter</string>
+    <string name="song_look_color">Tekstkleur</string>
+    <string name="song_look_voice2">Kleur stem 2</string>
+    <string name="song_look_use_profile">Die van het profiel gebruiken</string>
+    <string name="song_insert_second_voice_hint">Markeert de geselecteerde woorden, of de regels bij de cursor, als tweede stem. Nogmaals op gemarkeerde regels haalt de markering weg.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI-uitgangen</string>
     <string name="ndi_outputs_help">Virtuele uitgangen die via het netwerk als NDI®-bronnen worden verzonden — kies er een in OBS, vMix of een switcher. De alfamodus draagt echte transparantie, zodat een lower third al gekeyed aankomt.</string>

@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">ສະໄລ້ຊື່ເພງ</string>
+    <string name="song_order">ລຳດັບ</string>
+    <string name="song_order_default">ຄ່າເລີ່ມຕົ້ນ</string>
+    <string name="song_order_custom">ກຳນົດເອງ</string>
+    <string name="song_order_as_written">ຕາມທີ່ຂຽນໄວ້</string>
+    <string name="song_order_presets">ແບບສຳເລັດຮູບ</string>
+    <string name="song_order_add_section">ເພີ່ມທ່ອນ</string>
+    <string name="song_order_unused">ບໍ່ໄດ້ໃຊ້</string>
+    <string name="song_order_slides">%1$d ສະໄລ້</string>
+    <string name="song_order_remove">ລຶບ %1$s</string>
+    <string name="song_order_not_in_lyrics">ບໍ່ມີໃນເນື້ອເພງ</string>
+    <string name="song_order_repeat">ຊ້ຳ</string>
+    <string name="song_order_preset_chorus_each">ຮັບຫຼັງທຸກທ່ອນ</string>
+    <string name="song_order_preset_start_chorus">ເລີ່ມດ້ວຍທ່ອນຮັບ</string>
+    <string name="song_order_preset_double_chorus">ຈົບດ້ວຍທ່ອນຮັບສອງເທື່ອ</string>
+    <string name="song_order_preset_bridge">ບຣິດກ່ອນທ່ອນຮັບສຸດທ້າຍ</string>
+    <string name="song_pane_in_order">ຕາມລຳດັບ</string>
+    <string name="song_comments">ຄຳເຫັນ</string>
+    <string name="song_comments_placeholder">ການປ່ຽນຄີ, ໃຜນຳ, ສັນຍານສຳລັບວົງ…</string>
+    <string name="song_notes_tag">ເພງ</string>
+    <string name="song_notes_edit">ແກ້ໄຂໃນເພງ</string>
+    <string name="song_section_cue">ສັນຍານທ່ອນ</string>
+    <string name="song_section_cue_placeholder">ເພີ່ມສັນຍານສຳລັບທີມ…</string>
     <string name="show_song_number_before_title">ສະແດງໝາຍເລກເພງກ່ອນຊື່</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">ທັງເພງ</string>
     <string name="song_background_untitled_section">ທ່ອນທີ່ບໍ່ມີຊື່</string>
     <string name="song_insert_slide_break">ແຍກສະໄລ້</string>
+    <string name="song_insert_second_voice">ສຽງທີ 2</string>
+    <string name="song_pane_output">ຜົນອອກ</string>
+    <string name="song_output_full_screen">ເຕັມຈໍ</string>
+    <string name="song_output_lower_third">ແຖບລຸ່ມ</string>
+    <string name="song_output_nothing">ພິມເນື້ອເພງເພື່ອເບິ່ງສະໄລ້ຢູ່ບ່ອນເຄີເຊີ ຕາມທີ່ຜົນອອກຈະສະແດງ.</string>
+    <string name="song_look_title">ຮູບແບບຂອງເພງນີ້</string>
+    <string name="song_look_sub">ທັບຄ່າຂອງໂປຣໄຟລ໌ ສຳລັບເພງນີ້ເທົ່ານັ້ນ ແລະບັນທຶກໃນໄຟລ໌ເພງ.</string>
+    <string name="song_look_font">ຟອນ</string>
+    <string name="song_look_size">ຂະໜາດ</string>
+    <string name="song_look_size_down">ນ້ອຍລົງ</string>
+    <string name="song_look_size_up">ໃຫຍ່ຂຶ້ນ</string>
+    <string name="song_look_color">ສີຂໍ້ຄວາມ</string>
+    <string name="song_look_voice2">ສີສຽງທີ 2</string>
+    <string name="song_look_use_profile">ໃຊ້ຄ່າຂອງໂປຣໄຟລ໌</string>
+    <string name="song_insert_second_voice_hint">ໝາຍຄຳທີ່ເລືອກ ຫຼືແຖວທີ່ເຄີເຊີຢູ່ ເປັນສຽງທີສອງ. ກົດອີກຄັ້ງໃນແຖວທີ່ໝາຍແລ້ວເພື່ອເອົາອອກ.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">ຊ່ອງອອກ NDI</string>
     <string name="ndi_outputs_help">ຊ່ອງອອກເສມືອນທີ່ສົ່ງຜ່ານເຄືອຂ່າຍເປັນແຫລ່ງ NDI® — ເລືອກໃນ OBS, vMix ຫລື ສະວິດເຊີ. ໂໝດ Alpha ມີຄວາມໂປ່ງໃສແທ້, ສະນັ້ນແຖບລຸ່ມຈໍຈະໄປຮອດແບບຖືກຄີແລ້ວ.</string>

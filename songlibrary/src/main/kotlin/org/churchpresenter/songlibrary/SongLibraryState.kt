@@ -90,6 +90,10 @@ class SongLibraryState(
     var showDuration by mutableStateOf(true)
         private set
 
+    /** Whether the read-only **Order** column is shown; off until asked for. */
+    var showOrder by mutableStateOf(false)
+        private set
+
     /**
      * True until the folder has been read once.
      *
@@ -230,9 +234,14 @@ class SongLibraryState(
         showDuration = !showDuration
     }
 
+    fun toggleOrder() {
+        showOrder = !showOrder
+    }
+
     fun showAllColumns() {
         hiddenColumns = emptySet()
         showDuration = true
+        showOrder = true
     }
 
     // ── Sorting ───────────────────────────────────────────────────────────────

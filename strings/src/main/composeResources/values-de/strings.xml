@@ -979,6 +979,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Liedtitel-Folie</string>
+    <string name="song_order">Reihenfolge</string>
+    <string name="song_order_default">Standard</string>
+    <string name="song_order_custom">Benutzerdefiniert</string>
+    <string name="song_order_as_written">Wie geschrieben</string>
+    <string name="song_order_presets">Vorlagen</string>
+    <string name="song_order_add_section">Teil hinzufügen</string>
+    <string name="song_order_unused">nicht verwendet</string>
+    <string name="song_order_slides">%1$d Folien</string>
+    <string name="song_order_remove">%1$s entfernen</string>
+    <string name="song_order_not_in_lyrics">Nicht im Liedtext</string>
+    <string name="song_order_repeat">Wiederholung</string>
+    <string name="song_order_preset_chorus_each">Refrain nach jeder Strophe</string>
+    <string name="song_order_preset_start_chorus">Mit Refrain beginnen</string>
+    <string name="song_order_preset_double_chorus">Mit doppeltem Refrain enden</string>
+    <string name="song_order_preset_bridge">Bridge vor dem letzten Refrain</string>
+    <string name="song_pane_in_order">In Reihenfolge</string>
+    <string name="song_comments">Kommentare</string>
+    <string name="song_comments_placeholder">Tonartwechsel, wer leitet, Hinweise für die Band…</string>
+    <string name="song_notes_tag">Lied</string>
+    <string name="song_notes_edit">Im Lied bearbeiten</string>
+    <string name="song_section_cue">Hinweis zum Teil</string>
+    <string name="song_section_cue_placeholder">Hinweis für das Team hinzufügen…</string>
     <string name="show_song_number_before_title">Liednummer vor dem Titel anzeigen</string>
 
     <!-- Canvas Tab -->
@@ -2356,6 +2378,21 @@
     <string name="song_background_whole_song">Ganzes Lied</string>
     <string name="song_background_untitled_section">Abschnitt ohne Titel</string>
     <string name="song_insert_slide_break">Folienumbruch</string>
+    <string name="song_insert_second_voice">Stimme 2</string>
+    <string name="song_pane_output">Ausgabe</string>
+    <string name="song_output_full_screen">Vollbild</string>
+    <string name="song_output_lower_third">Bauchbinde</string>
+    <string name="song_output_nothing">Geben Sie Liedtext ein, um die Folie unter dem Cursor so zu sehen, wie die Ausgaben sie zeigen.</string>
+    <string name="song_look_title">Aussehen dieses Lieds</string>
+    <string name="song_look_sub">Über dem Profil, nur für dieses Lied, in der Lieddatei gespeichert.</string>
+    <string name="song_look_font">Schrift</string>
+    <string name="song_look_size">Größe</string>
+    <string name="song_look_size_down">Kleiner</string>
+    <string name="song_look_size_up">Größer</string>
+    <string name="song_look_color">Textfarbe</string>
+    <string name="song_look_voice2">Farbe Stimme 2</string>
+    <string name="song_look_use_profile">Wie im Profil</string>
+    <string name="song_insert_second_voice_hint">Markiert die ausgewählten Wörter oder die Zeilen am Cursor als zweite Stimme. Erneut auf markierten Zeilen entfernt die Markierung.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI-Ausgänge</string>
     <string name="ndi_outputs_help">Virtuelle Ausgänge, die als NDI®-Quellen über das Netzwerk gesendet werden — wähle sie in OBS, vMix oder einem Bildmischer. Der Alpha-Modus überträgt echte Transparenz, sodass eine Bauchbinde bereits gekeyt ankommt.</string>

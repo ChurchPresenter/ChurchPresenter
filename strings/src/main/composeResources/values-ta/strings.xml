@@ -1473,6 +1473,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">பாடல் தலைப்புப் படவில்லை</string>
+    <string name="song_order">வரிசை</string>
+    <string name="song_order_default">இயல்புநிலை</string>
+    <string name="song_order_custom">தனிப்பயன்</string>
+    <string name="song_order_as_written">எழுதியபடி</string>
+    <string name="song_order_presets">முன்னமைவுகள்</string>
+    <string name="song_order_add_section">பகுதியைச் சேர்</string>
+    <string name="song_order_unused">பயன்படுத்தப்படவில்லை</string>
+    <string name="song_order_slides">%1$d ஸ்லைடுகள்</string>
+    <string name="song_order_remove">%1$s ஐ நீக்கு</string>
+    <string name="song_order_not_in_lyrics">பாடல் வரிகளில் இல்லை</string>
+    <string name="song_order_repeat">மீண்டும்</string>
+    <string name="song_order_preset_chorus_each">ஒவ்வொரு சரணத்துக்குப் பின் பல்லவி</string>
+    <string name="song_order_preset_start_chorus">பல்லவியுடன் தொடங்கு</string>
+    <string name="song_order_preset_double_chorus">இரட்டை பல்லவியுடன் முடி</string>
+    <string name="song_order_preset_bridge">கடைசி பல்லவிக்கு முன் பிரிட்ஜ்</string>
+    <string name="song_pane_in_order">வரிசைப்படி</string>
+    <string name="song_comments">கருத்துகள்</string>
+    <string name="song_comments_placeholder">சுருதி மாற்றங்கள், யார் வழிநடத்துகிறார், இசைக்குழுவுக்கான குறிப்புகள்…</string>
+    <string name="song_notes_tag">பாடல்</string>
+    <string name="song_notes_edit">பாடலில் திருத்து</string>
+    <string name="song_section_cue">பகுதிக் குறிப்பு</string>
+    <string name="song_section_cue_placeholder">குழுவுக்கு ஒரு குறிப்பைச் சேர்…</string>
     <string name="show_song_number_before_title">தலைப்புக்கு முன் பாடல் எண்ணைக் காட்டு</string>
 
     <!-- Stage Monitor Settings -->
@@ -2405,6 +2427,21 @@
     <string name="song_background_whole_song">முழுப் பாடல்</string>
     <string name="song_background_untitled_section">தலைப்பில்லாப் பகுதி</string>
     <string name="song_insert_slide_break">ஸ்லைடு பிரிப்பு</string>
+    <string name="song_insert_second_voice">குரல் 2</string>
+    <string name="song_pane_output">வெளியீடு</string>
+    <string name="song_output_full_screen">முழுத் திரை</string>
+    <string name="song_output_lower_third">கீழ் மூன்றில் ஒரு பகுதி</string>
+    <string name="song_output_nothing">வெளியீடுகள் காட்டுவது போல கர்சரின் கீழுள்ள ஸ்லைடைக் காண சில வரிகளைத் தட்டச்சு செய்யவும்.</string>
+    <string name="song_look_title">இந்தப் பாடலின் தோற்றம்</string>
+    <string name="song_look_sub">சுயவிவரத்தின் மேல், இந்தப் பாடலுக்கு மட்டும், பாடல் கோப்பில் சேமிக்கப்படும்.</string>
+    <string name="song_look_font">எழுத்துரு</string>
+    <string name="song_look_size">அளவு</string>
+    <string name="song_look_size_down">சிறியது</string>
+    <string name="song_look_size_up">பெரியது</string>
+    <string name="song_look_color">உரை நிறம்</string>
+    <string name="song_look_voice2">குரல் 2 நிறம்</string>
+    <string name="song_look_use_profile">சுயவிவரத்தினுடையதைப் பயன்படுத்து</string>
+    <string name="song_insert_second_voice_hint">தேர்ந்தெடுத்த சொற்களை அல்லது கர்சர் உள்ள வரிகளை இரண்டாம் குரலாகக் குறிக்கும். குறிக்கப்பட்ட வரிகளில் மீண்டும் அழுத்தினால் குறி நீங்கும்.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI வெளியீடுகள்</string>
     <string name="ndi_outputs_help">பிணையத்தில் NDI® மூலங்களாக அனுப்பப்படும் மெய்நிகர் வெளியீடுகள் — OBS, vMix அல்லது சுவிட்சரில் ஒன்றைத் தேர்ந்தெடுக்கவும். Alpha முறையில் உண்மையான ஒளிபுகுதன்மை செல்வதால், கீழ்ப்பட்டை ஏற்கனவே key செய்யப்பட்டே சேரும்.</string>

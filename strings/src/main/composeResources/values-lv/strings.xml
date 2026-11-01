@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Dziesmas nosaukuma slaids</string>
+    <string name="song_order">Secība</string>
+    <string name="song_order_default">Noklusējuma</string>
+    <string name="song_order_custom">Pielāgota</string>
+    <string name="song_order_as_written">Kā rakstīts</string>
+    <string name="song_order_presets">Sagataves</string>
+    <string name="song_order_add_section">Pievienot daļu</string>
+    <string name="song_order_unused">neizmantota</string>
+    <string name="song_order_slides">Slaidi: %1$d</string>
+    <string name="song_order_remove">Noņemt %1$s</string>
+    <string name="song_order_not_in_lyrics">Nav vārdos</string>
+    <string name="song_order_repeat">Atkārtojums</string>
+    <string name="song_order_preset_chorus_each">Piedziedājums pēc katra panta</string>
+    <string name="song_order_preset_start_chorus">Sākt ar piedziedājumu</string>
+    <string name="song_order_preset_double_chorus">Beigt ar dubultu piedziedājumu</string>
+    <string name="song_order_preset_bridge">Tilts pirms pēdējā piedziedājuma</string>
+    <string name="song_pane_in_order">Pēc secības</string>
+    <string name="song_comments">Komentāri</string>
+    <string name="song_comments_placeholder">Tonalitātes maiņas, kurš vada, norādes grupai…</string>
+    <string name="song_notes_tag">Dziesma</string>
+    <string name="song_notes_edit">Rediģēt dziesmā</string>
+    <string name="song_section_cue">Daļas norāde</string>
+    <string name="song_section_cue_placeholder">Pievienojiet norādi komandai…</string>
     <string name="show_song_number_before_title">Rādīt dziesmas numuru pirms nosaukuma</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Visa dziesma</string>
     <string name="song_background_untitled_section">Sadaļa bez nosaukuma</string>
     <string name="song_insert_slide_break">Slaida pārtraukums</string>
+    <string name="song_insert_second_voice">Balss 2</string>
+    <string name="song_pane_output">Izvade</string>
+    <string name="song_output_full_screen">Pilnekrāns</string>
+    <string name="song_output_lower_third">Apakšējā trešdaļa</string>
+    <string name="song_output_nothing">Ierakstiet vārdus, lai redzētu slaidu pie kursora tā, kā to rāda izvades.</string>
+    <string name="song_look_title">Šīs dziesmas izskats</string>
+    <string name="song_look_sub">Pāri profila iestatījumiem, tikai šai dziesmai, saglabāts dziesmas failā.</string>
+    <string name="song_look_font">Fonts</string>
+    <string name="song_look_size">Izmērs</string>
+    <string name="song_look_size_down">Mazāks</string>
+    <string name="song_look_size_up">Lielāks</string>
+    <string name="song_look_color">Teksta krāsa</string>
+    <string name="song_look_voice2">Balss 2 krāsa</string>
+    <string name="song_look_use_profile">Kā profilā</string>
+    <string name="song_insert_second_voice_hint">Atzīmē atlasītos vārdus vai rindas pie kursora kā otro balsi. Atkārtoti uz atzīmētām rindām atzīmi noņem.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI izejas</string>
     <string name="ndi_outputs_help">Virtuālas izejas, kas tiek sūtītas tīklā kā NDI® avoti — izvēlieties tās OBS, vMix vai video mikserī. Alfa režīms pārnes īstu caurspīdīgumu, tāpēc apakšējā trešdaļa pienāk jau ar atslēgu.</string>

@@ -24,6 +24,8 @@
     <string name="column_composer">ຜູ້ແຕ່ງທຳນອງ</string>
     <string name="column_tune">ທຳນອງ</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">ລຳດັບ</string>
+    <string name="order_as_written">ຕາມທີ່ຂຽນໄວ້</string>
     <string name="edit_song">ແກ້ໄຂເພງ</string>
     <string name="delete_song">ລຶບເພງ</string>
     <string name="empty_title">ບໍ່ມີເພງທີ່ກົງກັບຕົວກັ່ນຕອງ</string>

@@ -24,6 +24,8 @@
     <string name="column_composer">Композитор</string>
     <string name="column_tune">Мелодія</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Порядок</string>
+    <string name="order_as_written">Як написано</string>
     <string name="edit_song">Редагувати пісню</string>
     <string name="delete_song">Видалити пісню</string>
     <string name="empty_title">Немає пісень, що відповідають фільтрам</string>

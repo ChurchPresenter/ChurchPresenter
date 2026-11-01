@@ -24,6 +24,8 @@
     <string name="column_composer">Skladatelj</string>
     <string name="column_tune">Melodija</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Redoslijed</string>
+    <string name="order_as_written">Kako je napisano</string>
     <string name="edit_song">Uredi pjesmu</string>
     <string name="delete_song">Izbriši pjesmu</string>
     <string name="empty_title">Nijedna pjesma ne odgovara filtrima</string>

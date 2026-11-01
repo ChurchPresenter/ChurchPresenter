@@ -24,6 +24,8 @@
     <string name="column_composer">Kompositor</string>
     <string name="column_tune">Tono</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Pagkakasunod</string>
+    <string name="order_as_written">Gaya ng pagkakasulat</string>
     <string name="edit_song">I-edit ang awit</string>
     <string name="delete_song">Burahin ang awit</string>
     <string name="empty_title">Walang awit na tumutugma sa iyong mga filter</string>

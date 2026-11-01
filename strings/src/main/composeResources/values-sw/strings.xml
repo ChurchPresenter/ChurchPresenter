@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slaidi ya kichwa cha wimbo</string>
+    <string name="song_order">Mpangilio</string>
+    <string name="song_order_default">Chaguo-msingi</string>
+    <string name="song_order_custom">Maalum</string>
+    <string name="song_order_as_written">Kama ilivyoandikwa</string>
+    <string name="song_order_presets">Mipangilio tayari</string>
+    <string name="song_order_add_section">Ongeza sehemu</string>
+    <string name="song_order_unused">haitumiki</string>
+    <string name="song_order_slides">Slaidi %1$d</string>
+    <string name="song_order_remove">Ondoa %1$s</string>
+    <string name="song_order_not_in_lyrics">Haipo kwenye maneno</string>
+    <string name="song_order_repeat">Marudio</string>
+    <string name="song_order_preset_chorus_each">Kiitikio baada ya kila ubeti</string>
+    <string name="song_order_preset_start_chorus">Anza na kiitikio</string>
+    <string name="song_order_preset_double_chorus">Malizia kwa kiitikio mara mbili</string>
+    <string name="song_order_preset_bridge">Daraja kabla ya kiitikio cha mwisho</string>
+    <string name="song_pane_in_order">Kwa mpangilio</string>
+    <string name="song_comments">Maoni</string>
+    <string name="song_comments_placeholder">Mabadiliko ya ufunguo, nani anaongoza, ishara kwa bendi…</string>
+    <string name="song_notes_tag">Wimbo</string>
+    <string name="song_notes_edit">Hariri katika wimbo</string>
+    <string name="song_section_cue">Ishara ya sehemu</string>
+    <string name="song_section_cue_placeholder">Ongeza ishara kwa timu…</string>
     <string name="show_song_number_before_title">Onyesha namba ya wimbo kabla ya kichwa</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Wimbo mzima</string>
     <string name="song_background_untitled_section">Sehemu isiyo na jina</string>
     <string name="song_insert_slide_break">Mgawanyo wa Slaidi</string>
+    <string name="song_insert_second_voice">Sauti ya 2</string>
+    <string name="song_pane_output">Matokeo</string>
+    <string name="song_output_full_screen">Skrini nzima</string>
+    <string name="song_output_lower_third">Theluthi ya chini</string>
+    <string name="song_output_nothing">Andika maneno ili kuona slaidi iliyo chini ya kishale jinsi matokeo yanavyoionyesha.</string>
+    <string name="song_look_title">Mwonekano wa wimbo huu</string>
+    <string name="song_look_sub">Juu ya ule wa wasifu, kwa wimbo huu tu, na huhifadhiwa katika faili la wimbo.</string>
+    <string name="song_look_font">Fonti</string>
+    <string name="song_look_size">Ukubwa</string>
+    <string name="song_look_size_down">Ndogo zaidi</string>
+    <string name="song_look_size_up">Kubwa zaidi</string>
+    <string name="song_look_color">Rangi ya maandishi</string>
+    <string name="song_look_voice2">Rangi ya sauti ya 2</string>
+    <string name="song_look_use_profile">Tumia ule wa wasifu</string>
+    <string name="song_insert_second_voice_hint">Huweka alama maneno yaliyochaguliwa, au mistari kilipo kishale, kuwa sauti ya pili. Ukibonyeza tena kwenye mistari yenye alama, alama huondolewa.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Matokeo ya NDI</string>
     <string name="ndi_outputs_help">Matokeo pepe yanayotumwa mtandaoni kama vyanzo vya NDI® — chagua kimoja katika OBS, vMix au swichi. Hali ya Alpha inabeba uwazi halisi, hivyo utepe wa chini unafika ukiwa tayari umewekwa ufunguo.</string>

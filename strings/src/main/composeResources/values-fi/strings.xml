@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Laulun otsikkodia</string>
+    <string name="song_order">Järjestys</string>
+    <string name="song_order_default">Oletus</string>
+    <string name="song_order_custom">Mukautettu</string>
+    <string name="song_order_as_written">Kirjoitetussa järjestyksessä</string>
+    <string name="song_order_presets">Valmiit järjestykset</string>
+    <string name="song_order_add_section">Lisää osa</string>
+    <string name="song_order_unused">käyttämätön</string>
+    <string name="song_order_slides">%1$d diaa</string>
+    <string name="song_order_remove">Poista %1$s</string>
+    <string name="song_order_not_in_lyrics">Ei sanoissa</string>
+    <string name="song_order_repeat">Toisto</string>
+    <string name="song_order_preset_chorus_each">Kertosäe jokaisen säkeistön jälkeen</string>
+    <string name="song_order_preset_start_chorus">Aloita kertosäkeellä</string>
+    <string name="song_order_preset_double_chorus">Lopeta tuplakertosäkeeseen</string>
+    <string name="song_order_preset_bridge">Silta ennen viimeistä kertosäettä</string>
+    <string name="song_pane_in_order">Järjestyksessä</string>
+    <string name="song_comments">Kommentit</string>
+    <string name="song_comments_placeholder">Sävellajin vaihdot, kuka johtaa, vihjeet bändille…</string>
+    <string name="song_notes_tag">Laulu</string>
+    <string name="song_notes_edit">Muokkaa laulussa</string>
+    <string name="song_section_cue">Osan vihje</string>
+    <string name="song_section_cue_placeholder">Lisää vihje tiimille…</string>
     <string name="show_song_number_before_title">Näytä laulun numero ennen otsikkoa</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Koko laulu</string>
     <string name="song_background_untitled_section">Nimetön osa</string>
     <string name="song_insert_slide_break">Diavaihto</string>
+    <string name="song_insert_second_voice">Ääni 2</string>
+    <string name="song_pane_output">Ulostulo</string>
+    <string name="song_output_full_screen">Koko näyttö</string>
+    <string name="song_output_lower_third">Alakolmannes</string>
+    <string name="song_output_nothing">Kirjoita sanoja nähdäksesi kohdistimen kohdalla olevan dian niin kuin ulostulot sen näyttävät.</string>
+    <string name="song_look_title">Tämän laulun ulkoasu</string>
+    <string name="song_look_sub">Profiilin asetusten päällä, vain tälle laululle, tallennetaan laulutiedostoon.</string>
+    <string name="song_look_font">Fontti</string>
+    <string name="song_look_size">Koko</string>
+    <string name="song_look_size_down">Pienempi</string>
+    <string name="song_look_size_up">Suurempi</string>
+    <string name="song_look_color">Tekstin väri</string>
+    <string name="song_look_voice2">Äänen 2 väri</string>
+    <string name="song_look_use_profile">Käytä profiilin arvoa</string>
+    <string name="song_insert_second_voice_hint">Merkitsee valitut sanat tai kohdistimen rivit toiseksi ääneksi. Uudelleen merkityillä riveillä poistaa merkinnän.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI-lähdöt</string>
     <string name="ndi_outputs_help">Virtuaaliset lähdöt, jotka lähetetään verkon yli NDI®-lähteinä — valitse yksi OBS:ssä, vMixissä tai mikserissä. Alfa-tila välittää aidon läpinäkyvyyden, joten nimikyltti saapuu valmiiksi avainnettuna.</string>

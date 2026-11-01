@@ -24,6 +24,8 @@
     <string name="column_composer">Helilooja</string>
     <string name="column_tune">Viis</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Järjekord</string>
+    <string name="order_as_written">Nagu kirjutatud</string>
     <string name="edit_song">Muuda laulu</string>
     <string name="delete_song">Kustuta laul</string>
     <string name="empty_title">Ükski laul ei vasta filtritele</string>

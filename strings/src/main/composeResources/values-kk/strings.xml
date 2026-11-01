@@ -979,6 +979,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Ән атауының слайды</string>
+    <string name="song_order">Реті</string>
+    <string name="song_order_default">Әдепкі</string>
+    <string name="song_order_custom">Өзіндік</string>
+    <string name="song_order_as_written">Жазылғандай</string>
+    <string name="song_order_presets">Үлгілер</string>
+    <string name="song_order_add_section">Бөлім қосу</string>
+    <string name="song_order_unused">қолданылмаған</string>
+    <string name="song_order_slides">%1$d слайд</string>
+    <string name="song_order_remove">%1$s жою</string>
+    <string name="song_order_not_in_lyrics">Мәтінде жоқ</string>
+    <string name="song_order_repeat">Қайталау</string>
+    <string name="song_order_preset_chorus_each">Әр шумақтан кейін қайырма</string>
+    <string name="song_order_preset_start_chorus">Қайырмадан бастау</string>
+    <string name="song_order_preset_double_chorus">Қос қайырмамен аяқтау</string>
+    <string name="song_order_preset_bridge">Соңғы қайырма алдында бридж</string>
+    <string name="song_pane_in_order">Ретімен</string>
+    <string name="song_comments">Түсініктемелер</string>
+    <string name="song_comments_placeholder">Тональділік өзгерісі, кім жүргізеді, топқа белгілер…</string>
+    <string name="song_notes_tag">Ән</string>
+    <string name="song_notes_edit">Әнде өңдеу</string>
+    <string name="song_section_cue">Бөлім белгісі</string>
+    <string name="song_section_cue_placeholder">Командаға белгі қосыңыз…</string>
     <string name="show_song_number_before_title">Ән нөмірін атаудың алдында көрсету</string>
 
     <!-- Canvas Tab -->
@@ -2356,6 +2378,21 @@
     <string name="song_background_whole_song">Бүкіл ән</string>
     <string name="song_background_untitled_section">Атаусыз бөлім</string>
     <string name="song_insert_slide_break">Слайд үзілісі</string>
+    <string name="song_insert_second_voice">2-дауыс</string>
+    <string name="song_pane_output">Шығыс</string>
+    <string name="song_output_full_screen">Толық экран</string>
+    <string name="song_output_lower_third">Төменгі үштік</string>
+    <string name="song_output_nothing">Курсор астындағы слайдты шығыстар көрсететіндей көру үшін мәтін енгізіңіз.</string>
+    <string name="song_look_title">Бұл әннің көрінісі</string>
+    <string name="song_look_sub">Профильдің үстінен, тек осы ән үшін, ән файлында сақталады.</string>
+    <string name="song_look_font">Қаріп</string>
+    <string name="song_look_size">Өлшем</string>
+    <string name="song_look_size_down">Кішірек</string>
+    <string name="song_look_size_up">Үлкенірек</string>
+    <string name="song_look_color">Мәтін түсі</string>
+    <string name="song_look_voice2">2-дауыс түсі</string>
+    <string name="song_look_use_profile">Профильдегідей</string>
+    <string name="song_insert_second_voice_hint">Таңдалған сөздерді немесе курсор тұрған жолдарды екінші дауыс деп белгілейді. Белгіленген жолдарда қайта басу белгіні алады.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI шығыстары</string>
     <string name="ndi_outputs_help">Желі арқылы NDI® көздері ретінде жіберілетін виртуалды шығыстар — оларды OBS, vMix немесе микшерде таңдаңыз. Alpha режимі нақты мөлдірлікті береді, сондықтан төменгі үштік дайын кілтпен келеді.</string>
