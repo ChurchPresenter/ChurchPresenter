@@ -32,7 +32,10 @@ import kotlin.test.Test
 @OptIn(ExperimentalPathApi::class)
 class SignageTabScreenshotTest {
     // The tab shows the signage folder's path, so it is pinned rather than a fresh temp folder.
-    private val world = SignageWorld(Path("/tmp/churchpresenter-signage-screenshot").also { it.deleteRecursively() })
+    private val world = SignageWorld(
+        Path("/tmp/churchpresenter-signage-screenshot").also { it.deleteRecursively() },
+        folders = listOf("", "Events"),
+    )
 
     @AfterTest
     fun cleanUp() = world.close()
@@ -68,7 +71,7 @@ class SignageTabScreenshotTest {
     @Test
     fun `no screens yet`() {
         world.controller.start()
-        shoot("empty", waitFor = arrayOf("No pictures or videos here yet"))
+        shoot("empty", waitFor = arrayOf("0 pictures · 0 videos · 10 s each"))
     }
 
     @Test
@@ -90,7 +93,7 @@ class SignageTabScreenshotTest {
     fun `the companion server is off`() {
         world.controller.start()
         // Once the folder is read, or the shot can catch it still reading.
-        shoot("server_off", serverRunning = false, "No pictures or videos here yet")
+        shoot("server_off", serverRunning = false, "0 pictures · 0 videos · 10 s each")
     }
 
     private companion object {

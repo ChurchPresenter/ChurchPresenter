@@ -14,16 +14,18 @@ import java.nio.file.Files
 import org.churchpresenter.signage.hub.AgentUpdates
 import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.signage.tab.SignageController
+import org.churchpresenter.signage.tab.SignageMedia
 import org.churchpresenter.sharedui.models.Tabs
 import java.io.IOException
 import java.net.InetAddress
 import java.nio.file.Path
-import kotlin.io.path.Path
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.copyToRecursively
 
 /*
  * Signage: lobby screens that keep playing after hours. The tab starts hidden, as STT does, and
  * signage runs while it is shown: the hub of paired screens is made the first time, off the event
- * thread, and shared by the companion server and the Signage tab. Hiding the tab stops the folder
+ * thread, and shared by the companion server and the Signage tab. Hiding the tab stops the playlist
  * sync and the mDNS advert, and the server refuses the players; the screens keep playing what they
  * have.
  */
@@ -59,7 +61,7 @@ internal fun AppRootState.SignageEffect() {
             )
             companionServer.signage = hub
             SignageController(
-                hub, shared, defaultSignageFolder(), coroutineScope,
+                hub, shared, coroutineScope,
                 diagnostics = signageDiagnostics, cacheDir = local,
             )
         }.also {
@@ -94,21 +96,24 @@ private fun computerName(): String = try {
     Constants.SERVER_APP_NAME
 }
 
-private fun defaultSignageFolder(): Path =
-    Path(System.getProperty(Constants.SystemProperties.USER_HOME), "Documents", Constants.SERVER_APP_NAME, "Signage")
-
 private const val PLAYER_BUILDS_DIR = "player-builds"
 
 /**
  * Brings this computer's signage setup into the folder it is moving to, the first time: the paired
- * screens and the tab's settings. A folder that already holds a setup is another computer's, and is
- * joined as it stands — this one's own is left where it was. Blocking: run it on `Dispatchers.IO`.
+ * screens, the tab's settings, and the pictures and videos copied in for its playlists. A folder
+ * that already holds a setup is another computer's, and is joined as it stands — this one's own is
+ * left where it was. Blocking: run it on `Dispatchers.IO`.
  */
+@OptIn(ExperimentalPathApi::class)
 internal fun adoptSignageSetup(from: Path, to: Path) {
     val files = listOf(SignageHub.REGISTRY_FILE, SIGNAGE_SETTINGS_FILE)
     if (files.any { Files.exists(to.resolve(it)) }) return
     try {
         Files.createDirectories(to)
+        // The media first: a setup that names a copy is never there without it.
+        listOf(SignageMedia.FOLDERS, SignageMedia.FILES).map(from::resolve).filter(Files::isDirectory).forEach {
+            it.copyToRecursively(to.resolve(it.fileName.toString()), followLinks = false, overwrite = false)
+        }
         files.map(from::resolve).filter(Files::exists).forEach { Files.copy(it, to.resolve(it.fileName)) }
     } catch (e: IOException) {
         Log.warn("Signage", "Could not copy the signage setup to $to: ${e.message}")

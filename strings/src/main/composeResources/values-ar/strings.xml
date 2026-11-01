@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">إزالة التخطيط العمودي/الأفقي؟ ستُفقد مواضعه.</string>
     <string name="canvas_add_source">إضافة مصدر</string>
+    <string name="canvas_layer_group_content">المحتوى</string>
+    <string name="canvas_layer_group_live">معلومات مباشرة</string>
+    <string name="canvas_layer_group_sources">المصادر</string>
     <string name="canvas_delete_source">حذف المصدر</string>
     <string name="canvas_source_move_forward">تحريك إلى الأمام</string>
     <string name="canvas_source_move_backward">تحريك إلى الخلف</string>

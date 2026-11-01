@@ -21,19 +21,10 @@ import java.util.Base64
 import javax.imageio.ImageIO
 
 /** What the tab asked of the computer, answered without touching it. */
-class FakeDesktop(chosen: Path? = null, var deleted: Boolean = true, var trash: Boolean = true) {
+class FakeDesktop(chosen: Path? = null, var trash: Boolean = true) {
     val chooser = FakeFileChooser(chosen)
     val opened = mutableListOf<Path>()
-    val deletes = mutableListOf<Pair<Path, String>>()
-    val desktop = SignageDesktop(
-        fileChooser = chooser,
-        openFolder = { opened.add(it) },
-        deletePlaylist = { root, id ->
-            deletes.add(root to id)
-            deleted
-        },
-        canTrash = { trash },
-    )
+    val desktop = SignageDesktop(fileChooser = chooser, openFolder = { opened.add(it) }, canTrash = { trash })
 }
 
 /** Composes the Signage tab over [world] and runs [block]. */

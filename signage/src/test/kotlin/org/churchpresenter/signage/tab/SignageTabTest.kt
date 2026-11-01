@@ -44,7 +44,7 @@ import kotlin.test.assertTrue
  * the hub (what the screen is sent) or the tab itself.
  */
 class SignageTabTest {
-    private val world = SignageWorld()
+    private val world = SignageWorld(folders = listOf("", "Events"))
     private val hub = world.hub
 
     @AfterTest
@@ -282,7 +282,10 @@ class SignageTabTest {
     }
 
     @Test
-    fun withAnEmptyFolderAScreenCanStillBeSetToNothing() = signageTab(world) {
+    fun withNoPlaylistsAScreenCanStillBeSetToNothing() = signageTab(world) {
+        world.controller.added.remove("folder:")
+        world.controller.added.remove("folder:Events")
+        waitFor { world.controller.state.value.settings.added.isEmpty() }
         connected()
         waitForText("Lobby")
         onNodeWithText("PLAYS").assertDoesNotExist()
@@ -293,7 +296,7 @@ class SignageTabTest {
 
     @Test
     fun theTabFollowsAnotherController() {
-        val other = SignageWorld()
+        val other = SignageWorld(folders = listOf("", "Events"))
         try {
             runBlocking {
                 other.hub.registry.load()

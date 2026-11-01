@@ -34,7 +34,7 @@ import kotlin.test.assertTrue
  * picture and an update on offer, and playlists.
  */
 class SignageTabAccessibilityTest {
-    private val world = SignageWorld()
+    private val world = SignageWorld(folders = listOf("", "Events"))
 
     @AfterTest
     fun cleanUp() = world.close()

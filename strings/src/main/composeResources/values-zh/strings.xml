@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s：%2$s</string>
     <string name="canvas_dual_layout_off_confirm">移除竖屏/横屏布局？其位置将丢失。</string>
     <string name="canvas_add_source">添加源</string>
+    <string name="canvas_layer_group_content">内容</string>
+    <string name="canvas_layer_group_live">实时信息</string>
+    <string name="canvas_layer_group_sources">源</string>
     <string name="canvas_delete_source">删除源</string>
     <string name="canvas_source_move_forward">上移一层</string>
     <string name="canvas_source_move_backward">下移一层</string>

@@ -43,7 +43,10 @@ class RotationsTest {
         ),
     )
     private val playlists = listOf(
-        HashedPlaylist(FolderPlaylist("folder:", "Signage", listOf(picture, clip)), mapOf(picture to "a", clip to "b")),
+        HashedPlaylist(
+            FolderPlaylist("folder:", "Signage", listOf(picture, clip), "/s", pictureSeconds = 7),
+            mapOf(picture to "a", clip to "b"),
+        ),
         HashedPlaylist(
             FilePlaylist("file:w", "Welcome", welcome.path.toString(), MediaKind.IMAGE),
             mapOf(welcome to "w"),
@@ -55,7 +58,7 @@ class RotationsTest {
     private fun build(features: List<String>, schedule: List<ScheduleBlock> = emptyList()) = buildManifest(
         screen = screen,
         ownerId = "owner",
-        settings = SignageSettings(pictureSeconds = 7, screens = mapOf("p" to ScreenPlan("rotation:1", schedule))),
+        settings = SignageSettings(screens = mapOf("p" to ScreenPlan("rotation:1", schedule))),
         playlists = playlists,
         timeZone = "UTC",
         features = features,

@@ -1,0 +1,35 @@
+# What the narrator says in the output profiles tour, in order. One line per key.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll set up output profiles, so every screen in your building shows the right content, in the right style.
+why = The sanctuary projector, the overflow room, the livestream and the stage monitor all need something different. A profile says what one screen shows, and how it looks.
+open = Profiles live in Settings. Click the Settings button, then choose Profiles.
+list = Your profiles are listed on the left. Each one says which screen uses it, with a badge for full screen, lower third or stage monitor.
+same = Two screens that use the same profile always look the same. Change that profile once, and both screens change together.
+menu = Click the plus button to add a profile. Right-click any profile to rename it, duplicate it, create a linked profile, or move it up or down the list.
+outputs = On the Outputs page, choose which screens use this profile: a projector or TV, the Browser Source, NDI or OMT.
+content = On Content and sources, choose what this screen shows, and which Bible translations it uses, in its own order.
+linked-intro = Now, linked profiles. The overflow room should look just like the sanctuary, only with a smaller font. Instead of copying every setting, you link it.
+master = Sanctuary is the master profile. Its General page lists the profiles that follow it. Change Sanctuary, and every linked profile changes with it.
+linked = Click the Overflow room. It's linked to Sanctuary, so it follows Sanctuary in everything, and keeps only what it changes.
+differ = Different from Sanctuary lists every value the Overflow room keeps for itself, with Sanctuary's value beside it. Click Revert on any of them to follow Sanctuary again.
+only-changes = On any page, switch on Only changes to see just the settings this profile changes.
+unlink = Unlink turns it into a standalone copy, with its current values. You can link it back at any time, keeping your values or matching the master.
+sections = Each section can even follow a master of its own. The Bible could follow one profile, while everything else follows Sanctuary.
+applies-page = Next, styling one translation. Open the Bible page.
+applies = Applies to starts at All, so the font, size and color you set here apply to every translation.
+one = Pick one translation, like KJV, and give it a size or color of its own. The others keep the look you set for all of them.
+songs-page = Songs work the same way. Open the Songs page.
+songs-language = Under Applies to, pick one song language, and style it on its own.
+adjust = You can also adjust right on the preview. Switch on Adjust on preview, then drag the margins, the position, the width and the text size, straight on the picture.
+element = Click a translation or its reference on the preview to point the settings at it, and drag it on its own. Reset positions puts everything back.
+larger = Click Larger to open the preview across the window, for finer steps.
+boxes = Any piece of text can have a text box of its own, like a song's title, one language of its lyrics, a translation, or its reference. Drag and resize the box on the preview, and the text shrinks to fit it.
+box-options = Boxes can keep clear of each other, and snap to guides as you move them.
+defaults = And Different from defaults lists everything this profile sets differently from the defaults, with a Revert for each one.
+sets-intro = Finally, profile sets. A set remembers which profile every output uses, so you can switch the whole building in one click.
+sets-menu = To show the button, open the preview settings menu.
+sets-switch = Then switch on Show profile sets button.
+sets-open = Now click the profile sets button in the preview header.
+sets-save = Choose Save current as a set, to keep which profile every output uses right now.
+sets-apply = Later, click any set to put every output back the way it was, like Sunday service or Youth night.
+outro = And that's output profiles: one look for each screen, linked where they're the same, and switched together in one click.

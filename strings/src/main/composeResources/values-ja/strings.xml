@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">縦向き/横向きのレイアウトを削除しますか？その配置は失われます。</string>
     <string name="canvas_add_source">ソースを追加</string>
+    <string name="canvas_layer_group_content">内容</string>
+    <string name="canvas_layer_group_live">ライブ情報</string>
+    <string name="canvas_layer_group_sources">ソース</string>
     <string name="canvas_delete_source">ソースを削除</string>
     <string name="canvas_source_move_forward">前面へ移動</string>
     <string name="canvas_source_move_backward">背面へ移動</string>

@@ -1086,6 +1086,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Кітаптық/альбомдық орналасу алынып тасталсын ба? Оның орындары жоғалады.</string>
     <string name="canvas_add_source">Дерек көзін қосу</string>
+    <string name="canvas_layer_group_content">Мазмұн</string>
+    <string name="canvas_layer_group_live">Тікелей ақпарат</string>
+    <string name="canvas_layer_group_sources">Дерек көздері</string>
     <string name="canvas_delete_source">Дерек көзін жою</string>
     <string name="canvas_source_move_forward">Алға жылжыту</string>
     <string name="canvas_toggle_visibility">Көрінуді ауыстыру</string>

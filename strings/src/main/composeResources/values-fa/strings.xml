@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">چیدمان عمودی/افقی حذف شود؟ موقعیت‌های آن از دست می‌روند.</string>
     <string name="canvas_add_source">افزودن منبع</string>
+    <string name="canvas_layer_group_content">محتوا</string>
+    <string name="canvas_layer_group_live">اطلاعات زنده</string>
+    <string name="canvas_layer_group_sources">منابع</string>
     <string name="canvas_delete_source">حذف منبع</string>
     <string name="canvas_source_move_forward">انتقال به جلو</string>
     <string name="canvas_source_move_backward">انتقال به عقب</string>

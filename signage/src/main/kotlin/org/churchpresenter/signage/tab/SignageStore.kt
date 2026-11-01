@@ -16,13 +16,9 @@ import java.security.MessageDigest
 /** What the Signage tab keeps between runs, apart from the paired screens themselves. */
 @Serializable
 data class SignageSettings(
-    /** The signage folder; blank for the default. */
-    val folder: String = "",
-    /** How long each picture stays up. */
-    val pictureSeconds: Int = DEFAULT_PICTURE_SECONDS,
     /** What each screen plays, by screen id. */
     val screens: Map<String, ScreenPlan> = emptyMap(),
-    /** The playlists added in the tab, in the order they were added; folders are read from disk. */
+    /** The playlists added in the tab, in the order they were added. */
     val added: List<AddedPlaylist> = emptyList(),
 ) {
     fun plan(id: String): ScreenPlan = screens[id] ?: ScreenPlan()
@@ -38,10 +34,6 @@ data class SignageSettings(
         // Only what the screen plays goes back to the first playlist: its schedule stays.
         screens = screens.mapValues { (_, plan) -> if (plan.playlistId == id) plan.copy(playlistId = null) else plan },
     )
-
-    companion object {
-        const val DEFAULT_PICTURE_SECONDS = 10
-    }
 }
 
 /**
@@ -125,14 +117,13 @@ class SignageStore(private val dir: Path, private val cacheDir: Path = dir) {
     }
 
     /**
-     * The playlists added in the tab, each with its file's hash: an added picture or video is hashed
-     * again only when it changed, and a missing one has none.
+     * An added playlist with its files' hashes: a picture or video is hashed again only when it
+     * changed, and a missing one has none; a folder is read as it stands now.
      */
-    fun hashAdded(added: List<AddedPlaylist>): List<HashedPlaylist> = added.map { entry ->
-        when (entry) {
-            is FilePlaylist -> HashedPlaylist(entry, entry.currentFile()?.let { mapOf(it to hashOf(it)) }.orEmpty())
-            is LinkPlaylist, is RotationPlaylist -> HashedPlaylist(entry)
-        }
+    fun hashAdded(entry: AddedPlaylist): HashedPlaylist = when (entry) {
+        is FilePlaylist -> HashedPlaylist(entry, entry.currentFile(dir)?.let { mapOf(it to hashOf(it)) }.orEmpty())
+        is PickedFolderPlaylist -> hashFolder(SignageFolder.read(entry, dir))
+        is LinkPlaylist, is RotationPlaylist -> HashedPlaylist(entry)
     }
 
     /** Forgets every file not in [keep] and saves the rest. */

@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Fjerne oppsettet for stående/liggende? Plasseringene i det går tapt.</string>
     <string name="canvas_add_source">Legg til kilde</string>
+    <string name="canvas_layer_group_content">Innhold</string>
+    <string name="canvas_layer_group_live">Live-info</string>
+    <string name="canvas_layer_group_sources">Kilder</string>
     <string name="canvas_delete_source">Slett kilde</string>
     <string name="canvas_source_move_forward">Flytt fram</string>
     <string name="canvas_source_move_backward">Flytt bakover</string>

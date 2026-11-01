@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Ukloniti okomiti/vodoravni raspored? Njegovi položaji bit će izgubljeni.</string>
     <string name="canvas_add_source">Dodaj izvor</string>
+    <string name="canvas_layer_group_content">Sadržaj</string>
+    <string name="canvas_layer_group_live">Informacije uživo</string>
+    <string name="canvas_layer_group_sources">Izvori</string>
     <string name="canvas_delete_source">Izbriši izvor</string>
     <string name="canvas_source_move_forward">Pomakni naprijed</string>
     <string name="canvas_source_move_backward">Pomakni nazad</string>

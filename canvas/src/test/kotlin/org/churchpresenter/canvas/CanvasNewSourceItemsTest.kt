@@ -19,8 +19,8 @@ class CanvasNewSourceItemsTest {
     fun `the menu offers every kind of source, in order`() {
         assertEquals(
             listOf(
-                "Image", "Text", "Color", "Video", "Timer", "QR Code",
-                "Camera", "Screen Capture", "NDI", "OMT", "Browser", "Bible",
+                "Image", "Text", "Color", "Video", "Timer", "QR Code", "Bible", "Browser",
+                "Camera", "Screen Capture", "NDI", "OMT",
             ),
             items.map { it.first },
         )

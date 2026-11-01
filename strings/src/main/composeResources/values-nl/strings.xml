@@ -802,6 +802,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">De staande/liggende indeling verwijderen? De posities ervan gaan verloren.</string>
     <string name="canvas_add_source">Bron toevoegen</string>
+    <string name="canvas_layer_group_content">Inhoud</string>
+    <string name="canvas_layer_group_live">Live-informatie</string>
+    <string name="canvas_layer_group_sources">Bronnen</string>
     <string name="canvas_delete_source">Bron verwijderen</string>
     <string name="canvas_source_move_forward">Naar voren brengen</string>
     <string name="canvas_source_move_backward">Naar achteren sturen</string>

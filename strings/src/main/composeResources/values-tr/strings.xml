@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Dikey/yatay düzen kaldırılsın mı? Konumları kaybolacak.</string>
     <string name="canvas_add_source">Kaynak ekle</string>
+    <string name="canvas_layer_group_content">İçerik</string>
+    <string name="canvas_layer_group_live">Canlı bilgiler</string>
+    <string name="canvas_layer_group_sources">Kaynaklar</string>
     <string name="canvas_delete_source">Kaynağı sil</string>
     <string name="canvas_source_move_forward">Öne getir</string>
     <string name="canvas_source_move_backward">Arkaya gönder</string>

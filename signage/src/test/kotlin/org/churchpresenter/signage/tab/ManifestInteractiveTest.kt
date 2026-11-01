@@ -77,7 +77,6 @@ class ManifestInteractiveTest {
             InteractiveLink.hostsFrom(" pay.example.com, maps.example.org\nx.example ,, "),
         )
         val folder = SignageFolderState(
-            kotlin.io.path.Path("/s"),
             listOf(
                 PlaylistSummary("link:s", "Sign-up", kind = SourceKind.WEB),
                 PlaylistSummary("rotation:r", "Mornings", kind = SourceKind.ROTATION),

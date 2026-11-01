@@ -1019,6 +1019,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Poistetaanko pysty-/vaaka-asettelu? Sen sijainnit menetetään.</string>
     <string name="canvas_add_source">Lisää lähde</string>
+    <string name="canvas_layer_group_content">Sisältö</string>
+    <string name="canvas_layer_group_live">Ajantasaiset tiedot</string>
+    <string name="canvas_layer_group_sources">Lähteet</string>
     <string name="canvas_delete_source">Poista lähde</string>
     <string name="canvas_source_move_forward">Siirrä eteen</string>
     <string name="canvas_source_move_backward">Siirrä taakse</string>

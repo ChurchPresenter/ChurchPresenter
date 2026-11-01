@@ -1086,6 +1086,9 @@
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Видалити книжковий/альбомний макет? Його позиції буде втрачено.</string>
     <string name="canvas_add_source">Додати джерело</string>
+    <string name="canvas_layer_group_content">Вміст</string>
+    <string name="canvas_layer_group_live">Живі дані</string>
+    <string name="canvas_layer_group_sources">Джерела</string>
     <string name="canvas_delete_source">Видалити джерело</string>
     <string name="canvas_source_move_forward">На передній план</string>
     <string name="canvas_toggle_visibility">Перемкнути видимість</string>

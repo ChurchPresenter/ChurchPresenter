@@ -802,6 +802,9 @@
     <string name="canvas_layer_placement_in">%1$s : %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Supprimer la disposition portrait/paysage ? Ses positions seront perdues.</string>
     <string name="canvas_add_source">Ajouter une source</string>
+    <string name="canvas_layer_group_content">Contenu</string>
+    <string name="canvas_layer_group_live">Infos en direct</string>
+    <string name="canvas_layer_group_sources">Sources</string>
     <string name="canvas_delete_source">Supprimer la source</string>
     <string name="canvas_source_move_forward">Avancer</string>
     <string name="canvas_source_move_backward">Reculer</string>

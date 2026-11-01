@@ -52,6 +52,11 @@ sealed interface PlayerMessage {
          * whatever someone is typing, so the church can see it works.
          */
         val interactive: Boolean = false,
+        /**
+         * How many of the machine's packages have an update waiting, as its daily check last counted;
+         * null where the player cannot tell (no check yet, or a machine install.sh does not update).
+         */
+        val systemUpdates: Int? = null,
     ) : PlayerMessage
 
     /** The answer to [ServerMessage.PreviewRequest]: what the screen shows, as a small JPEG. */
