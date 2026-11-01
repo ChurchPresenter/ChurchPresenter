@@ -24,6 +24,8 @@
     <string name="column_composer">آهنگساز</string>
     <string name="column_tune">آهنگ</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">ترتیب</string>
+    <string name="order_as_written">به ترتیب نوشته‌شده</string>
     <string name="edit_song">ویرایش سرود</string>
     <string name="delete_song">حذف سرود</string>
     <string name="empty_title">هیچ سرودی با فیلترهای شما مطابقت ندارد</string>

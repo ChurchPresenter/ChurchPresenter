@@ -24,6 +24,8 @@
     <string name="column_composer">संगीतकार</string>
     <string name="column_tune">धुन</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">क्रम</string>
+    <string name="order_as_written">जैसा लिखा है</string>
     <string name="edit_song">गीत संपादित करें</string>
     <string name="delete_song">गीत हटाएँ</string>
     <string name="empty_title">आपके फ़िल्टर से कोई गीत मेल नहीं खाता</string>

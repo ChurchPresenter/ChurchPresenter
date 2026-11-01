@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">اسلاید عنوان سرود</string>
+    <string name="song_order">ترتیب</string>
+    <string name="song_order_default">پیش‌فرض</string>
+    <string name="song_order_custom">سفارشی</string>
+    <string name="song_order_as_written">به ترتیب نوشته‌شده</string>
+    <string name="song_order_presets">الگوها</string>
+    <string name="song_order_add_section">افزودن بخش</string>
+    <string name="song_order_unused">استفاده‌نشده</string>
+    <string name="song_order_slides">%1$d اسلاید</string>
+    <string name="song_order_remove">حذف %1$s</string>
+    <string name="song_order_not_in_lyrics">در متن ترانه نیست</string>
+    <string name="song_order_repeat">تکرار</string>
+    <string name="song_order_preset_chorus_each">کُر بعد از هر بند</string>
+    <string name="song_order_preset_start_chorus">شروع با کُر</string>
+    <string name="song_order_preset_double_chorus">پایان با کُر دوبل</string>
+    <string name="song_order_preset_bridge">بریج پیش از آخرین کُر</string>
+    <string name="song_pane_in_order">به ترتیب</string>
+    <string name="song_comments">یادداشت‌ها</string>
+    <string name="song_comments_placeholder">تغییر گام، رهبر سرود، نشانه‌ها برای گروه…</string>
+    <string name="song_notes_tag">سرود</string>
+    <string name="song_notes_edit">ویرایش در سرود</string>
+    <string name="song_section_cue">نشانه بخش</string>
+    <string name="song_section_cue_placeholder">یک نشانه برای تیم بنویسید…</string>
     <string name="show_song_number_before_title">نمایش شمارهٔ سرود پیش از عنوان</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">کل سرود</string>
     <string name="song_background_untitled_section">بخش بدون عنوان</string>
     <string name="song_insert_slide_break">شکست اسلاید</string>
+    <string name="song_insert_second_voice">صدای ۲</string>
+    <string name="song_pane_output">خروجی</string>
+    <string name="song_output_full_screen">تمام‌صفحه</string>
+    <string name="song_output_lower_third">یک‌سوم پایینی</string>
+    <string name="song_output_nothing">متن ترانه را بنویسید تا اسلاید زیر مکان‌نما را همان‌طور که خروجی‌ها نشان می‌دهند ببینید.</string>
+    <string name="song_look_title">ظاهر این سرود</string>
+    <string name="song_look_sub">روی تنظیمات نمایه، فقط برای این سرود، و در فایل سرود ذخیره می‌شود.</string>
+    <string name="song_look_font">قلم</string>
+    <string name="song_look_size">اندازه</string>
+    <string name="song_look_size_down">کوچک‌تر</string>
+    <string name="song_look_size_up">بزرگ‌تر</string>
+    <string name="song_look_color">رنگ متن</string>
+    <string name="song_look_voice2">رنگ صدای ۲</string>
+    <string name="song_look_use_profile">استفاده از مقدار نمایه</string>
+    <string name="song_insert_second_voice_hint">کلمات انتخاب‌شده یا خطوطی که مکان‌نما روی آن‌هاست را صدای دوم علامت می‌زند. زدن دوباره روی خطوط علامت‌دار، علامت را برمی‌دارد.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">خروجی‌های NDI</string>
     <string name="ndi_outputs_help">خروجی‌های مجازی که از طریق شبکه به‌عنوان منابع NDI® ارسال می‌شوند — آن‌ها را در OBS، vMix یا میکسر انتخاب کنید. حالت آلفا شفافیت واقعی را منتقل می‌کند، پس یک‌سوم پایین از قبل کلیدخورده می‌رسد.</string>

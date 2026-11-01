@@ -24,6 +24,8 @@
     <string name="column_composer">Komposer</string>
     <string name="column_tune">Melodi</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Urutan</string>
+    <string name="order_as_written">Sesuai tertulis</string>
     <string name="edit_song">Edit lagu</string>
     <string name="delete_song">Hapus lagu</string>
     <string name="empty_title">Tidak ada lagu yang cocok dengan filter Anda</string>

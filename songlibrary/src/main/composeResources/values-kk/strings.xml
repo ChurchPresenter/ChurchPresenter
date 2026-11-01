@@ -24,6 +24,8 @@
     <string name="column_composer">Композитор</string>
     <string name="column_tune">Әуен</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Реті</string>
+    <string name="order_as_written">Жазылғандай</string>
     <string name="edit_song">Әнді өңдеу</string>
     <string name="delete_song">Әнді жою</string>
     <string name="empty_title">Сүзгілерге сәйкес ән жоқ</string>

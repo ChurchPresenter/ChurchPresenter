@@ -24,6 +24,8 @@
     <string name="column_composer">作曲者</string>
     <string name="column_tune">旋律名</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">順序</string>
+    <string name="order_as_written">記載順</string>
     <string name="edit_song">賛美歌を編集</string>
     <string name="delete_song">賛美歌を削除</string>
     <string name="empty_title">条件に一致する賛美歌はありません</string>

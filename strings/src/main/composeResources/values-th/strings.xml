@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">สไลด์ชื่อเพลง</string>
+    <string name="song_order">ลำดับ</string>
+    <string name="song_order_default">ค่าเริ่มต้น</string>
+    <string name="song_order_custom">กำหนดเอง</string>
+    <string name="song_order_as_written">ตามที่เขียนไว้</string>
+    <string name="song_order_presets">แบบสำเร็จรูป</string>
+    <string name="song_order_add_section">เพิ่มท่อน</string>
+    <string name="song_order_unused">ไม่ได้ใช้</string>
+    <string name="song_order_slides">%1$d สไลด์</string>
+    <string name="song_order_remove">ลบ %1$s</string>
+    <string name="song_order_not_in_lyrics">ไม่มีในเนื้อเพลง</string>
+    <string name="song_order_repeat">ซ้ำ</string>
+    <string name="song_order_preset_chorus_each">ท่อนร้องรับหลังทุกท่อน</string>
+    <string name="song_order_preset_start_chorus">เริ่มด้วยท่อนร้องรับ</string>
+    <string name="song_order_preset_double_chorus">จบด้วยท่อนร้องรับสองรอบ</string>
+    <string name="song_order_preset_bridge">บริดจ์ก่อนท่อนร้องรับสุดท้าย</string>
+    <string name="song_pane_in_order">ตามลำดับ</string>
+    <string name="song_comments">ความคิดเห็น</string>
+    <string name="song_comments_placeholder">การเปลี่ยนคีย์ ใครนำ สัญญาณสำหรับวง…</string>
+    <string name="song_notes_tag">เพลง</string>
+    <string name="song_notes_edit">แก้ไขในเพลง</string>
+    <string name="song_section_cue">สัญญาณท่อน</string>
+    <string name="song_section_cue_placeholder">เพิ่มสัญญาณสำหรับทีม…</string>
     <string name="show_song_number_before_title">แสดงหมายเลขเพลงก่อนชื่อ</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">ทั้งเพลง</string>
     <string name="song_background_untitled_section">ท่อนไม่มีชื่อ</string>
     <string name="song_insert_slide_break">แบ่งสไลด์</string>
+    <string name="song_insert_second_voice">เสียงที่ 2</string>
+    <string name="song_pane_output">เอาต์พุต</string>
+    <string name="song_output_full_screen">เต็มจอ</string>
+    <string name="song_output_lower_third">แถบล่าง</string>
+    <string name="song_output_nothing">พิมพ์เนื้อเพลงเพื่อดูสไลด์ที่เคอร์เซอร์อยู่ตามที่เอาต์พุตแสดง</string>
+    <string name="song_look_title">รูปลักษณ์ของเพลงนี้</string>
+    <string name="song_look_sub">ทับค่าของโปรไฟล์ สำหรับเพลงนี้เท่านั้น และบันทึกในไฟล์เพลง</string>
+    <string name="song_look_font">ฟอนต์</string>
+    <string name="song_look_size">ขนาด</string>
+    <string name="song_look_size_down">เล็กลง</string>
+    <string name="song_look_size_up">ใหญ่ขึ้น</string>
+    <string name="song_look_color">สีข้อความ</string>
+    <string name="song_look_voice2">สีเสียงที่ 2</string>
+    <string name="song_look_use_profile">ใช้ค่าของโปรไฟล์</string>
+    <string name="song_insert_second_voice_hint">ทำเครื่องหมายคำที่เลือก หรือบรรทัดที่เคอร์เซอร์อยู่ ให้เป็นเสียงที่สอง กดอีกครั้งบนบรรทัดที่ทำเครื่องหมายแล้วเพื่อเอาออก</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">เอาต์พุต NDI</string>
     <string name="ndi_outputs_help">เอาต์พุตเสมือนที่ส่งผ่านเครือข่ายเป็นแหล่งสัญญาณ NDI® — เลือกใช้ได้ใน OBS, vMix หรือสวิตเชอร์ โหมด Alpha มีความโปร่งใสจริง แถบล่างจึงมาถึงพร้อมคีย์แล้ว</string>

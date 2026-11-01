@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slajd s naslovom pjesme</string>
+    <string name="song_order">Redoslijed</string>
+    <string name="song_order_default">Zadano</string>
+    <string name="song_order_custom">Prilagođeno</string>
+    <string name="song_order_as_written">Kako je napisano</string>
+    <string name="song_order_presets">Predlošci</string>
+    <string name="song_order_add_section">Dodaj dio</string>
+    <string name="song_order_unused">nekorišteno</string>
+    <string name="song_order_slides">Slajdova: %1$d</string>
+    <string name="song_order_remove">Ukloni %1$s</string>
+    <string name="song_order_not_in_lyrics">Nije u tekstu</string>
+    <string name="song_order_repeat">Ponavljanje</string>
+    <string name="song_order_preset_chorus_each">Refren nakon svake kitice</string>
+    <string name="song_order_preset_start_chorus">Počni refrenom</string>
+    <string name="song_order_preset_double_chorus">Završi dvostrukim refrenom</string>
+    <string name="song_order_preset_bridge">Bridge prije zadnjeg refrena</string>
+    <string name="song_pane_in_order">Redoslijedom</string>
+    <string name="song_comments">Komentari</string>
+    <string name="song_comments_placeholder">Promjene tonaliteta, tko vodi, upute za bend…</string>
+    <string name="song_notes_tag">Pjesma</string>
+    <string name="song_notes_edit">Uredi u pjesmi</string>
+    <string name="song_section_cue">Uputa za dio</string>
+    <string name="song_section_cue_placeholder">Dodaj uputu za tim…</string>
     <string name="show_song_number_before_title">Prikaži broj pjesme prije naslova</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Cijela pjesma</string>
     <string name="song_background_untitled_section">Odjeljak bez naslova</string>
     <string name="song_insert_slide_break">Prijelom slajda</string>
+    <string name="song_insert_second_voice">Glas 2</string>
+    <string name="song_pane_output">Izlaz</string>
+    <string name="song_output_full_screen">Cijeli zaslon</string>
+    <string name="song_output_lower_third">Donja trećina</string>
+    <string name="song_output_nothing">Upišite tekst da biste vidjeli slajd pod kursorom onako kako ga prikazuju izlazi.</string>
+    <string name="song_look_title">Izgled ove pjesme</string>
+    <string name="song_look_sub">Iznad postavki profila, samo za ovu pjesmu, sprema se u datoteku pjesme.</string>
+    <string name="song_look_font">Font</string>
+    <string name="song_look_size">Veličina</string>
+    <string name="song_look_size_down">Manje</string>
+    <string name="song_look_size_up">Veće</string>
+    <string name="song_look_color">Boja teksta</string>
+    <string name="song_look_voice2">Boja glasa 2</string>
+    <string name="song_look_use_profile">Prema profilu</string>
+    <string name="song_insert_second_voice_hint">Označava odabrane riječi ili retke s kursorom kao drugi glas. Ponovno na označenim recima uklanja oznaku.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">NDI izlazi</string>
     <string name="ndi_outputs_help">Virtualni izlazi koji se šalju mrežom kao NDI® izvori — odaberite ih u OBS-u, vMixu ili mikseti. Alfa način nosi pravu prozirnost, pa donja trećina stiže već s ključem.</string>

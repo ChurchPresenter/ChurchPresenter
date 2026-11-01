@@ -25,6 +25,7 @@ class SongTableHeaderSortResizeTest {
 
     private val optional = setOf(
         SongColumnId.SONGBOOK, SongColumnId.TUNE, SongColumnId.PLAY_COUNT, SongColumnId.AUTHOR, SongColumnId.COMPOSER,
+        SongColumnId.ORDER,
     )
 
     private fun showing(colId: String) = optional - colId

@@ -24,6 +24,8 @@
     <string name="column_composer">Componist</string>
     <string name="column_tune">Melodie</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Volgorde</string>
+    <string name="order_as_written">Zoals geschreven</string>
     <string name="edit_song">Lied bewerken</string>
     <string name="delete_song">Lied verwijderen</string>
     <string name="empty_title">Geen liederen voldoen aan je filters</string>

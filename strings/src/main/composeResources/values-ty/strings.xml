@@ -853,6 +853,21 @@
     <string name="song_background_whole_song">Te hīmene tāatoʻa</string>
     <string name="song_background_untitled_section">Tuhaʻa ʻaita e iʻoa</string>
     <string name="song_insert_slide_break">Taʻa hōhoʻa</string>
+    <string name="song_insert_second_voice">Reo 2</string>
+    <string name="song_pane_output">Faaiteraa</string>
+    <string name="song_output_full_screen">Tapo’i taatoa</string>
+    <string name="song_output_lower_third">Tuhaa raro</string>
+    <string name="song_output_nothing">Papai i te tahi mau parau no te hi’o i te hoho’a i raro a’e i te tapa’o mai ta te mau faaiteraa e faaite.</string>
+    <string name="song_look_title">Te huru o teie himene</string>
+    <string name="song_look_sub">I ni’a i to te tōtōra’a, no teie noa himene, e vaiihohia i roto i te faito himene.</string>
+    <string name="song_look_font">Huru papa’i</string>
+    <string name="song_look_size">Rahi</string>
+    <string name="song_look_size_down">Iti a’e</string>
+    <string name="song_look_size_up">Rahi a’e</string>
+    <string name="song_look_color">Ū o te papa’i</string>
+    <string name="song_look_voice2">Ū o te reo 2</string>
+    <string name="song_look_use_profile">Faaohipa i to te tōtōra’a</string>
+    <string name="song_insert_second_voice_hint">E tapa’o i te mau parau i ma’itihia, aore ra te mau reni i reira te tapa’o, ei reo piti. E iriti te tapa’o ia pūto’ohia faahou i ni’a i te mau reni tapa’ohia.</string>
     <string name="song_element_number">Numera</string>
     <string name="song_element_lyrics">Parau</string>
     <string name="song_element_look_ahead">Rēni i muri</string>
@@ -1914,6 +1929,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Diapositive Upoʻo Parau Hīmene</string>
+    <string name="song_order">Nahoaraa</string>
+    <string name="song_order_default">Matamua</string>
+    <string name="song_order_custom">Iho nei</string>
+    <string name="song_order_as_written">Mai tei papaihia</string>
+    <string name="song_order_presets">Mau hoho’a</string>
+    <string name="song_order_add_section">Ahiri i te tuhaa</string>
+    <string name="song_order_unused">aita i faaohipahia</string>
+    <string name="song_order_slides">%1$d hoho’a</string>
+    <string name="song_order_remove">Iriti i te %1$s</string>
+    <string name="song_order_not_in_lyrics">Aita i roto i te mau parau</string>
+    <string name="song_order_repeat">Faahou</string>
+    <string name="song_order_preset_chorus_each">Pehe tamau i muri i te mau irava</string>
+    <string name="song_order_preset_start_chorus">Haamata na roto i te pehe tamau</string>
+    <string name="song_order_preset_double_chorus">Faaoti na roto i te pehe tamau piti</string>
+    <string name="song_order_preset_bridge">Bridge na mua i te pehe tamau hopea</string>
+    <string name="song_pane_in_order">Ia au i te nahoaraa</string>
+    <string name="song_comments">Mau mana’o</string>
+    <string name="song_comments_placeholder">Taui o te reo, o vai te arata’i, tapa’o no te pupu upa’ina…</string>
+    <string name="song_notes_tag">Himene</string>
+    <string name="song_notes_edit">Faatitiaifaro i roto i te himene</string>
+    <string name="song_section_cue">Tapa’o o te tuhaa</string>
+    <string name="song_section_cue_placeholder">Ahiri i te tapa’o no te pupu…</string>
     <string name="show_song_number_before_title">Faʻaʻite i te numera hīmene hou te upoʻo parau</string>
 
     <!-- Stage Monitor Settings -->

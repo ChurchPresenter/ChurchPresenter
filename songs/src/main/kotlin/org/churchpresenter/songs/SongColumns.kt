@@ -20,20 +20,26 @@ internal fun availableSongColumns(songbookCount: Int, hasAddToSchedule: Boolean)
     add(SongColumnId.PLAY_COUNT)
     add(SongColumnId.AUTHOR)
     add(SongColumnId.COMPOSER)
+    add(SongColumnId.ORDER)
     if (hasAddToSchedule) add(SongColumnId.ADD_TO_SCHEDULE)
     add(SongColumnId.FAVORITES)
 }
 
 /**
  * Reconciles a [saved] column order against the currently [available] columns: keeps the saved order
- * for columns that still exist, drops ones that no longer do, and appends any newly-available columns
- * at the end. Falls back to [available] as-is when nothing was saved.
+ * for columns that still exist, drops ones that no longer do, and puts each newly-available column
+ * where it sits by default — straight after the column it follows in [available], or first when it
+ * follows none. Falls back to [available] as-is when nothing was saved.
  */
 internal fun mergeColumnOrder(saved: List<String>, available: List<String>): List<String> {
     if (saved.isEmpty()) return available
-    val filtered = saved.filter { it in available }
-    val missing = available.filter { it !in filtered }
-    return filtered + missing
+    val merged = saved.filter { it in available }.toMutableList()
+    available.forEachIndexed { index, id ->
+        if (id in merged) return@forEachIndexed
+        val after = available.subList(0, index).lastOrNull { it in merged }
+        merged.add(if (after == null) 0 else merged.indexOf(after) + 1, id)
+    }
+    return merged
 }
 
 /**

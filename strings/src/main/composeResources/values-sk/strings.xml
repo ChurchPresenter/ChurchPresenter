@@ -1199,6 +1199,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Snímka s názvom piesne</string>
+    <string name="song_order">Poradie</string>
+    <string name="song_order_default">Predvolené</string>
+    <string name="song_order_custom">Vlastné</string>
+    <string name="song_order_as_written">Ako je napísané</string>
+    <string name="song_order_presets">Predvoľby</string>
+    <string name="song_order_add_section">Pridať časť</string>
+    <string name="song_order_unused">nepoužité</string>
+    <string name="song_order_slides">Snímky: %1$d</string>
+    <string name="song_order_remove">Odstrániť %1$s</string>
+    <string name="song_order_not_in_lyrics">Nie je v texte</string>
+    <string name="song_order_repeat">Opakovanie</string>
+    <string name="song_order_preset_chorus_each">Refrén po každej slohe</string>
+    <string name="song_order_preset_start_chorus">Začať refrénom</string>
+    <string name="song_order_preset_double_chorus">Skončiť dvojitým refrénom</string>
+    <string name="song_order_preset_bridge">Bridge pred posledným refrénom</string>
+    <string name="song_pane_in_order">V poradí</string>
+    <string name="song_comments">Komentáre</string>
+    <string name="song_comments_placeholder">Zmeny tóniny, kto vedie, pokyny pre kapelu…</string>
+    <string name="song_notes_tag">Pieseň</string>
+    <string name="song_notes_edit">Upraviť v piesni</string>
+    <string name="song_section_cue">Pokyn k časti</string>
+    <string name="song_section_cue_placeholder">Pridajte pokyn pre tím…</string>
     <string name="show_song_number_before_title">Zobraziť číslo piesne pred názvom</string>
 
     <!-- Stage Monitor Settings -->
@@ -2385,6 +2407,21 @@
     <string name="song_background_whole_song">Celá pieseň</string>
     <string name="song_background_untitled_section">Časť bez názvu</string>
     <string name="song_insert_slide_break">Zalomenie snímky</string>
+    <string name="song_insert_second_voice">Hlas 2</string>
+    <string name="song_pane_output">Výstup</string>
+    <string name="song_output_full_screen">Celá obrazovka</string>
+    <string name="song_output_lower_third">Spodná tretina</string>
+    <string name="song_output_nothing">Napíšte text a uvidíte snímku pod kurzorom tak, ako ju ukážu výstupy.</string>
+    <string name="song_look_title">Vzhľad tejto piesne</string>
+    <string name="song_look_sub">Nad nastavením profilu, len pre túto pieseň, uložené v súbore piesne.</string>
+    <string name="song_look_font">Písmo</string>
+    <string name="song_look_size">Veľkosť</string>
+    <string name="song_look_size_down">Menšie</string>
+    <string name="song_look_size_up">Väčšie</string>
+    <string name="song_look_color">Farba textu</string>
+    <string name="song_look_voice2">Farba hlasu 2</string>
+    <string name="song_look_use_profile">Podľa profilu</string>
+    <string name="song_insert_second_voice_hint">Označí vybrané slová alebo riadky s kurzorom ako druhý hlas. Ďalším stlačením na označených riadkoch sa označenie zruší.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Výstupy NDI</string>
     <string name="ndi_outputs_help">Virtuálne výstupy odosielané po sieti ako zdroje NDI® — vyberte ich v OBS, vMixe alebo strihovom pulte. Režim Alfa prenáša skutočnú priehľadnosť, takže dolná tretina príde už kľúčovaná.</string>

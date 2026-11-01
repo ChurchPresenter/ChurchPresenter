@@ -1238,6 +1238,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slide Titlu Cântare</string>
+    <string name="song_order">Ordine</string>
+    <string name="song_order_default">Implicită</string>
+    <string name="song_order_custom">Personalizată</string>
+    <string name="song_order_as_written">Așa cum e scris</string>
+    <string name="song_order_presets">Șabloane</string>
+    <string name="song_order_add_section">Adaugă secțiune</string>
+    <string name="song_order_unused">nefolosită</string>
+    <string name="song_order_slides">%1$d diapozitive</string>
+    <string name="song_order_remove">Elimină %1$s</string>
+    <string name="song_order_not_in_lyrics">Nu apare în versuri</string>
+    <string name="song_order_repeat">Repetare</string>
+    <string name="song_order_preset_chorus_each">Refren după fiecare strofă</string>
+    <string name="song_order_preset_start_chorus">Începe cu refrenul</string>
+    <string name="song_order_preset_double_chorus">Încheie cu refren dublu</string>
+    <string name="song_order_preset_bridge">Bridge înainte de ultimul refren</string>
+    <string name="song_pane_in_order">În ordine</string>
+    <string name="song_comments">Comentarii</string>
+    <string name="song_comments_placeholder">Schimbări de tonalitate, cine conduce, indicații pentru formație…</string>
+    <string name="song_notes_tag">Cântare</string>
+    <string name="song_notes_edit">Editează în cântare</string>
+    <string name="song_section_cue">Indicație pentru secțiune</string>
+    <string name="song_section_cue_placeholder">Adaugă o indicație pentru echipă…</string>
     <string name="show_song_number_before_title">Afișează numărul cântării înaintea titlului</string>
 
     <!-- Stage Monitor Settings -->
@@ -2385,6 +2407,21 @@
     <string name="song_background_whole_song">Toată cântarea</string>
     <string name="song_background_untitled_section">Secțiune fără titlu</string>
     <string name="song_insert_slide_break">Întrerupere de slide</string>
+    <string name="song_insert_second_voice">Vocea 2</string>
+    <string name="song_pane_output">Ieșire</string>
+    <string name="song_output_full_screen">Ecran complet</string>
+    <string name="song_output_lower_third">Treime inferioară</string>
+    <string name="song_output_nothing">Scrieți versuri pentru a vedea diapozitivul de sub cursor așa cum îl arată ieșirile.</string>
+    <string name="song_look_title">Aspectul acestei cântări</string>
+    <string name="song_look_sub">Peste cel al profilului, doar pentru această cântare, salvat în fișierul cântării.</string>
+    <string name="song_look_font">Font</string>
+    <string name="song_look_size">Mărime</string>
+    <string name="song_look_size_down">Mai mic</string>
+    <string name="song_look_size_up">Mai mare</string>
+    <string name="song_look_color">Culoarea textului</string>
+    <string name="song_look_voice2">Culoarea vocii 2</string>
+    <string name="song_look_use_profile">Folosește-l pe cel din profil</string>
+    <string name="song_insert_second_voice_hint">Marchează cuvintele selectate sau rândurile cu cursorul ca a doua voce. Încă o dată pe rândurile marcate elimină marcajul.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Ieșiri NDI</string>
     <string name="ndi_outputs_help">Ieșiri virtuale trimise prin rețea ca surse NDI® — alege-le în OBS, vMix sau un mixer. Modul Alfa transportă transparență reală, așa că un lower third sosește deja cu cheie.</string>

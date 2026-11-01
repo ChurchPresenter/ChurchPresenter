@@ -24,6 +24,8 @@
     <string name="column_composer">Komponists</string>
     <string name="column_tune">Melodija</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Secība</string>
+    <string name="order_as_written">Kā rakstīts</string>
     <string name="edit_song">Rediģēt dziesmu</string>
     <string name="delete_song">Dzēst dziesmu</string>
     <string name="empty_title">Neviena dziesma neatbilst filtriem</string>

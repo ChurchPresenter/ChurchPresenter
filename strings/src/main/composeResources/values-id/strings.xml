@@ -1468,6 +1468,28 @@
 
     <!-- Song Title Slide -->
     <string name="song_title_slide">Slide Judul Lagu</string>
+    <string name="song_order">Urutan</string>
+    <string name="song_order_default">Bawaan</string>
+    <string name="song_order_custom">Kustom</string>
+    <string name="song_order_as_written">Sesuai tertulis</string>
+    <string name="song_order_presets">Preset</string>
+    <string name="song_order_add_section">Tambah bagian</string>
+    <string name="song_order_unused">tidak dipakai</string>
+    <string name="song_order_slides">%1$d slide</string>
+    <string name="song_order_remove">Hapus %1$s</string>
+    <string name="song_order_not_in_lyrics">Tidak ada di lirik</string>
+    <string name="song_order_repeat">Ulangan</string>
+    <string name="song_order_preset_chorus_each">Reff setelah tiap bait</string>
+    <string name="song_order_preset_start_chorus">Mulai dengan reff</string>
+    <string name="song_order_preset_double_chorus">Akhiri dengan reff ganda</string>
+    <string name="song_order_preset_bridge">Bridge sebelum reff terakhir</string>
+    <string name="song_pane_in_order">Sesuai urutan</string>
+    <string name="song_comments">Komentar</string>
+    <string name="song_comments_placeholder">Perubahan nada dasar, siapa yang memimpin, aba-aba untuk band…</string>
+    <string name="song_notes_tag">Lagu</string>
+    <string name="song_notes_edit">Edit di lagu</string>
+    <string name="song_section_cue">Aba-aba bagian</string>
+    <string name="song_section_cue_placeholder">Tambahkan aba-aba untuk tim…</string>
     <string name="show_song_number_before_title">Tampilkan nomor lagu sebelum judul</string>
 
     <!-- Stage Monitor Settings -->
@@ -2400,6 +2422,21 @@
     <string name="song_background_whole_song">Seluruh lagu</string>
     <string name="song_background_untitled_section">Bagian tanpa judul</string>
     <string name="song_insert_slide_break">Pemisah Slide</string>
+    <string name="song_insert_second_voice">Suara 2</string>
+    <string name="song_pane_output">Output</string>
+    <string name="song_output_full_screen">Layar penuh</string>
+    <string name="song_output_lower_third">Lower third</string>
+    <string name="song_output_nothing">Ketik lirik untuk melihat slide di bawah kursor seperti yang ditampilkan output.</string>
+    <string name="song_look_title">Tampilan lagu ini</string>
+    <string name="song_look_sub">Di atas pengaturan profil, hanya untuk lagu ini, dan disimpan di file lagu.</string>
+    <string name="song_look_font">Font</string>
+    <string name="song_look_size">Ukuran</string>
+    <string name="song_look_size_down">Lebih kecil</string>
+    <string name="song_look_size_up">Lebih besar</string>
+    <string name="song_look_color">Warna teks</string>
+    <string name="song_look_voice2">Warna suara 2</string>
+    <string name="song_look_use_profile">Pakai milik profil</string>
+    <string name="song_insert_second_voice_hint">Menandai kata yang dipilih, atau baris tempat kursor berada, sebagai suara kedua. Menekan lagi pada baris yang ditandai akan menghapus tandanya.</string>
     <string name="percent_suffix">%</string>
     <string name="ndi_outputs">Output NDI</string>
     <string name="ndi_outputs_help">Output virtual yang dikirim lewat jaringan sebagai sumber NDI® — pilih di OBS, vMix, atau switcher. Mode Alpha membawa transparansi asli, sehingga lower third tiba sudah ter-key.</string>
