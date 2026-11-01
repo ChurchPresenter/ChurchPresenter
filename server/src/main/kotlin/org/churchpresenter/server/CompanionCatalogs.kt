@@ -3,6 +3,7 @@ package org.churchpresenter.server
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.sectionKeysOf
+import org.churchpresenter.songs.songPlayOrder
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
@@ -20,7 +21,11 @@ import org.churchpresenter.sharedui.utils.sectionLabelOf
  * markup and the directives taken out; an Instance Link follower asks for [keepMarkup], since it
  * rebuilds the song from these lines and draws the second voice itself.
  */
-internal fun buildSongDetail(song: SongItem, keepMarkup: Boolean = false): SongDetailDto {
+internal fun buildSongDetail(
+    song: SongItem,
+    keepMarkup: Boolean = false,
+    repeatChorus: Boolean = true,
+): SongDetailDto {
     val raw = mutableListOf<RawSection>()
     var current = RawSection(header = null, type = Constants.SECTION_TYPE_VERSE)
     for (line in song.lyrics) {
@@ -59,6 +64,7 @@ internal fun buildSongDetail(song: SongItem, keepMarkup: Boolean = false): SongD
         order        = song.sectionOrder,
         notes        = song.notes,
         cues         = song.sectionNotes,
+        playOrder    = songPlayOrder(song, repeatChorus),
     )
 }
 

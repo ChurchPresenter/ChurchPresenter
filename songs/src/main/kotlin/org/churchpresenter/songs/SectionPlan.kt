@@ -17,13 +17,29 @@ internal data class SectionPlan(
 )
 
 /** [song]'s [SectionPlan], its order matched against the groups of its own [primarySlides]. */
-internal fun SongsViewModel.sectionPlanOf(song: SongItem, primarySlides: List<LyricSection>): SectionPlan {
+internal fun SongsViewModel.sectionPlanOf(song: SongItem, primarySlides: List<LyricSection>): SectionPlan =
+    sectionPlanOf(song, primarySlides, appSettings.operatorSongSettings().autoRepeatChorus)
+
+/** The same, with the chorus repeat given rather than read from Settings. */
+internal fun sectionPlanOf(song: SongItem, primarySlides: List<LyricSection>, repeatChorus: Boolean): SectionPlan {
     val keys = sectionKeysOf(slideGroupsOf(primarySlides).map { it.first().header })
     return SectionPlan(
         keys = keys,
         order = song.sectionOrder.map { keys.indexOf(it) }.filter { it >= 0 },
-        repeatChorus = appSettings.operatorSongSettings().autoRepeatChorus,
+        repeatChorus = repeatChorus,
     )
+}
+
+/**
+ * The sections of [song] in the order the Songs tab plays them, one key per played section: its
+ * order, or as written with the chorus repeated when [repeatChorus], then any written section the
+ * order leaves out. Built the way [getLyricSections] builds the live song, so position `n` here is
+ * the `n`th section a remote steps through.
+ */
+fun songPlayOrder(song: SongItem, repeatChorus: Boolean): List<String> {
+    val slides = lyricSlidesOf(song.lyrics, song.title, song.number)
+    val played = arrangeSections(slides, sectionPlanOf(song, slides, repeatChorus))
+    return slideGroupsOf(played).map { it.first().sectionKey }
 }
 
 /**

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.liveoutput.clearFromOperator
 import org.churchpresenter.liveoutput.toggleProp
 import org.churchpresenter.liveoutput.setPropOn
@@ -161,6 +162,7 @@ internal fun MainWindowScope.ServerCommandWiring() {
             companionServer.props = appSettings.props
             companionServer.clearGroups = appSettings.clearGroups
             companionServer.macros = appSettings.macros
+            companionServer.repeatChorus = appSettings.operatorSongSettings().autoRepeatChorus
         }
         LaunchedEffect(Unit) {
             companionServer.onMacro.collect { id ->

@@ -476,6 +476,9 @@ class CompanionServer(
      */
     @Volatile var devMode: Boolean = false
 
+    /** Whether a song with no order of its own repeats its chorus after each verse; the app's setting. */
+    @Volatile var repeatChorus: Boolean = true
+
     /** Whether signage is on -- kept current by the app: on while the Signage tab is shown. */
     @Volatile var signageEnabled: Boolean = false
         set(value) {

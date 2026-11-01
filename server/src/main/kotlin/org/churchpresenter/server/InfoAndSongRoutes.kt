@@ -131,7 +131,7 @@ private fun Route.songRoutes(
                     }
                     server.logRest("/api/songs/{identifier}", HttpStatusCode.OK.value)
                     val keepMarkup = call.request.queryParameters[Constants.QUERY_PARAM_MARKUP].toBoolean()
-                    call.respond(buildSongDetail(song, keepMarkup))
+                    call.respond(buildSongDetail(song, keepMarkup, server.repeatChorus))
                 }
 
                 /**
