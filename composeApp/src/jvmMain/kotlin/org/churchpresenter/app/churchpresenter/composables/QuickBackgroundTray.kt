@@ -45,6 +45,7 @@ import org.churchpresenter.strings.generated.resources.quick_background_hint
 import org.churchpresenter.strings.generated.resources.quick_background_reset
 import org.churchpresenter.strings.generated.resources.background_scope_title
 import org.churchpresenter.profiles.SongBackgroundFill
+import org.churchpresenter.profiles.SongBackgroundVideoBadge
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.settings.QuickBackground
@@ -263,8 +264,9 @@ private fun QuickBackgroundTile(
                         shape = AppShape(7.dp),
                     ),
             ) {
-                SongBackgroundFill(entry.background, Modifier.fillMaxSize())
+                SongBackgroundFill(entry.background, Modifier.fillMaxSize(), stills = true)
                 SlotBadge(slot, Modifier.align(Alignment.TopStart).padding(2.dp))
+                SongBackgroundVideoBadge(entry.background, Modifier.align(Alignment.BottomEnd).padding(2.dp))
             }
             Text(
                 text = name,

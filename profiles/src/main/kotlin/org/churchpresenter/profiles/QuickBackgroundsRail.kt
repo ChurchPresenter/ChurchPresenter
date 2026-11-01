@@ -256,8 +256,9 @@ private fun QuickBackgroundStripTile(
                         shape = AppShape(7.dp)
                     )
             ) {
-                SongBackgroundFill(shown.background, Modifier.fillMaxSize())
+                SongBackgroundFill(shown.background, Modifier.fillMaxSize(), stills = true)
                 SlotChip(slot, Modifier.align(Alignment.TopStart).padding(3.dp))
+                SongBackgroundVideoBadge(shown.background, Modifier.align(Alignment.BottomEnd).padding(3.dp))
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

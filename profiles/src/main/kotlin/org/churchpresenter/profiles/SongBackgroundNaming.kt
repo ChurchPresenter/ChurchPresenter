@@ -7,6 +7,17 @@ package org.churchpresenter.profiles
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.theme.AppShape
 import org.churchpresenter.presenter.backgroundBlurRadius
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -90,10 +101,11 @@ private fun songBackgroundCategoryLabel(type: String) = when (type) {
 /**
  * Draws whatever [background] points at, blurred and overscanned the way the presenter does it, so
  * the preview and the screen agree. A clip and a camera show as black — spinning up VLC, or opening
- * a capture device, for a thumbnail inside the editor is not worth what it costs.
+ * a capture device, for a thumbnail inside the editor is not worth what it costs — unless [stills]
+ * is set, when a clip shows its first frame instead (one cached ffmpeg run, see [PreviewStills]).
  */
 @Composable
-fun SongBackgroundFill(background: SongBackground, modifier: Modifier) {
+fun SongBackgroundFill(background: SongBackground, modifier: Modifier, stills: Boolean = false) {
     // Measured, because a blur is stored against a 1920-wide output and this draws a tile a
     // fraction of that. Passing the stored radius straight to Modifier.blur made a tile roughly
     // twelve times softer than the screen it stands for.
@@ -120,6 +132,12 @@ fun SongBackgroundFill(background: SongBackground, modifier: Modifier) {
                 )
             )
             background.type == SongBackgroundType.IMAGE -> ImageFill(background.image, shaped)
+            background.type == SongBackgroundType.VIDEO && stills -> {
+                val density = LocalDensity.current
+                val width = with(density) { maxWidth.roundToPx() }.coerceAtLeast(1)
+                val height = with(density) { maxHeight.roundToPx() }.coerceAtLeast(1)
+                VideoStillFill(background.video, width, height, shaped)
+            }
             // A camera is black here for the reason a clip is, and more so: this tile is drawn by
             // every quick-tray button and every settings strip at once, so a live preview would
             // hold the device open for as long as any of them is on screen.
@@ -150,6 +168,52 @@ private fun ImageFill(path: String, modifier: Modifier) {
         Image(bitmap = shot, contentDescription = null, contentScale = ContentScale.Crop, modifier = modifier)
     }
 }
+
+@Composable
+private fun VideoStillFill(path: String, width: Int, height: Int, modifier: Modifier) {
+    var bitmap by remember(path, width, height) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(path, width, height) {
+        bitmap = withContext(Dispatchers.IO) { PreviewStills.videoFrame(File(path), width, height) }
+    }
+    val shot = bitmap
+    if (shot == null) {
+        Box(modifier.background(Color.Black))
+    } else {
+        Image(
+            bitmap = shot,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = modifier.testTag(SONG_BACKGROUND_VIDEO_STILL_TAG),
+        )
+    }
+}
+
+const val SONG_BACKGROUND_VIDEO_STILL_TAG = "song_background_video_still"
+const val SONG_BACKGROUND_VIDEO_BADGE_TAG = "song_background_video_badge"
+
+/** The small video glyph a tile wears in a corner when its background is a clip; nothing otherwise. */
+@Composable
+fun SongBackgroundVideoBadge(background: SongBackground, modifier: Modifier = Modifier) {
+    if (background.type != SongBackgroundType.VIDEO) return
+    Box(
+        modifier = modifier
+            .testTag(SONG_BACKGROUND_VIDEO_BADGE_TAG)
+            .clip(AppShape(3.dp))
+            .background(Color.Black.copy(alpha = VIDEO_BADGE_SCRIM_ALPHA))
+            .padding(horizontal = 2.dp, vertical = 1.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.Movie,
+            contentDescription = null,
+            modifier = Modifier.size(10.dp),
+            tint = Color.White.copy(alpha = VIDEO_BADGE_INK_ALPHA),
+        )
+    }
+}
+
+private const val VIDEO_BADGE_SCRIM_ALPHA = 0.4f
+private const val VIDEO_BADGE_INK_ALPHA = 0.85f
 
 /** The presenter overscans a blurred background by the same amount; the preview must match. */
 private const val BLUR_OVERSCAN = 1.08f
