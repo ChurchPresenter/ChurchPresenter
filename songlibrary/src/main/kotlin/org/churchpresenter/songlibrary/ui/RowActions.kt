@@ -158,7 +158,7 @@ internal fun RowAction(icon: ImageVector, description: String, tint: Color, onCl
 /** [content] with the app's control tooltip under it on hover. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun WithTooltip(text: String, content: @Composable () -> Unit) {
+internal fun WithTooltip(text: String, content: @Composable () -> Unit) {
     TooltipArea(
         tooltip = { ControlTooltip(text) },
         tooltipPlacement = TooltipPlacement.ComponentRect(

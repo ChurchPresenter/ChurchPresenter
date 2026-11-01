@@ -64,6 +64,12 @@ data class SongFixture(
     /** The second language, for the bilingual layouts. Empty for a single-language song. */
     val secondaryLyrics: List<String> = emptyList(),
     val secondaryTitle: String = "",
+    /** The order the sections are sung in, by section key; empty for as written. */
+    val sectionOrder: List<String> = emptyList(),
+    /** The operator's notes on the song, shown above its lyrics. */
+    val notes: String = "",
+    /** A cue per section, by section key, shown beside its label. */
+    val sectionNotes: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -130,6 +136,8 @@ fun songsTab(
      * composer). Lives on [AppSettings] rather than [SongSettings], so it is its own parameter.
      */
     hiddenCols: Set<String>? = null,
+    /** The saved column order, or null for none saved. Lists `order` to keep the Order column's own choice. */
+    colOrder: List<String>? = null,
     /** Metronome tempo per song id, which lives on [AppSettings] rather than [SongSettings]. */
     songBpm: Map<String, Int>? = null,
     /**
@@ -203,6 +211,9 @@ fun songsTab(
                     lyrics = s.lyrics,
                     secondaryTitle = s.secondaryTitle,
                     secondaryLyrics = s.secondaryLyrics,
+                    sectionOrder = s.sectionOrder,
+                    notes = s.notes,
+                    sectionNotes = s.sectionNotes,
                 ),
                 File(book, "${s.number} - ${s.title}.song").absolutePath,
             )
@@ -211,6 +222,7 @@ fun songsTab(
             keyboardShortcutSettings = KeyboardShortcutSettings(focusSearchOnTabOpen = focusSearchOnOpen),
         ).withSongsEverywhere(songSettings.copy(storageDirectory = dir.absolutePath))
             .let { if (hiddenCols != null) it.copy(songHiddenCols = hiddenCols) else it }
+            .let { if (colOrder != null) it.copy(songColOrder = colOrder) else it }
             .let { if (songBpm != null) it.copy(songBpm = songBpm) else it }
             .let {
                 if (!stageMonitor) it

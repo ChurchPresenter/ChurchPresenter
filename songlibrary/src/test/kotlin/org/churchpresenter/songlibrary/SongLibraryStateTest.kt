@@ -413,6 +413,17 @@ class SongLibraryStateTest {
     }
 
     @Test
+    fun `the order column starts off, can be shown, and Show all shows it`() {
+        assertFalse(state.showOrder)
+        state.toggleOrder()
+        assertTrue(state.showOrder)
+        state.toggleOrder()
+        assertFalse(state.showOrder)
+        state.showAllColumns()
+        assertTrue(state.showOrder)
+    }
+
+    @Test
     fun `the duration column is shown, can be hidden, and Show all brings it back`() {
         assertTrue(state.showDuration)
         state.toggleDuration()

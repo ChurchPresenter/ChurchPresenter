@@ -113,7 +113,7 @@ class SongsTabColumnsTest {
 
             assertFalse(tableShowsColumn(Col.TUNE), "the column has to leave the table: ${rendered()}")
             assertEquals(
-                setOf("tune"),
+                setOf("order", "tune"),
                 reports.settingsAfterChange?.songHiddenCols,
                 "and the choice has to survive a restart",
             )
@@ -148,7 +148,7 @@ class SongsTabColumnsTest {
 
             assertFalse(tableShowsColumn(Col.TUNE), rendered().toString())
             assertFalse(tableShowsColumn(Col.COMPOSER))
-            assertEquals(setOf("tune", "composer"), reports.settingsAfterChange?.songHiddenCols)
+            assertEquals(setOf("order", "tune", "composer"), reports.settingsAfterChange?.songHiddenCols)
         }
     }
 

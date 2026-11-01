@@ -75,6 +75,16 @@ data class LyricSection(
     val lowerThirdBackground: SongBackground = SongBackground(),
     /** The song's own font, size and colours, carried here for the same reason [background] is. */
     val textOverrides: SongTextOverrides = SongTextOverrides(),
+    /**
+     * True for a written section the song's order leaves out ([SongItem.sectionOrder]). It is still
+     * listed and still shows when clicked, but navigation and a stage monitor's "next" step over it.
+     */
+    val skipped: Boolean = false,
+    /**
+     * The key ([sectionKeysOf]) of the written section this slide belongs to — what a song's order
+     * names it by. Blank on every section not built from a song.
+     */
+    val sectionKey: String = "",
 ) {
     /**
      * The second language's title and lines.

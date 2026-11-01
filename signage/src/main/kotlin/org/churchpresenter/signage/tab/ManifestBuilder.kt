@@ -41,12 +41,13 @@ fun buildManifest(
     val items = playlists.associate { hashed ->
         hashed.playlist.id to when (val source = hashed.playlist) {
             is FolderPlaylist -> fileItems(source.files.map { it to hashed.hashes[it] }) { kind ->
-                if (kind == MediaKind.IMAGE) settings.pictureSeconds * MS_PER_SECOND else null
+                if (kind == MediaKind.IMAGE) source.pictureSeconds * MS_PER_SECOND else null
             }
             // A lone picture stays up and a lone video loops, for as long as the playlist plays.
             is FilePlaylist -> fileItems(hashed.hashes.toList()) { null }
             is LinkPlaylist -> listOfNotNull(linkItem(source, features))
-            is RotationPlaylist -> emptyList()
+            // Sent only once it has been read into a FolderPlaylist.
+            is RotationPlaylist, is PickedFolderPlaylist -> emptyList()
         }
     }
     val sources = playlists.associate { it.playlist.id to it.playlist }
@@ -99,7 +100,7 @@ private fun rotationItems(
     val stepItems = items[step.sourceId].orEmpty()
     val stepMs = step.seconds?.let { it * MS_PER_SECOND }
     when (sources[step.sourceId]) {
-        is FolderPlaylist -> stepItems
+        is FolderPlaylist, is PickedFolderPlaylist -> stepItems
         is FilePlaylist -> stepItems.map { item ->
             item.copy(durationMs = stepMs ?: DEFAULT_PICTURE_STEP_MS.takeIf { item.kind == MediaKind.IMAGE })
         }

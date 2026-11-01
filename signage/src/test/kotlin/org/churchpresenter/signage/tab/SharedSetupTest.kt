@@ -34,8 +34,9 @@ class SharedSetupTest {
         world.startAndPairScreen()
         val sent = with(world) { scope.expect { it as? ServerMessage.ManifestChanged } }
         // The other computer, sharing the folder, saves its own settings.
-        SignageStore(world.root.resolve("store")).saveSettings(SignageSettings(pictureSeconds = 33))
-        assertEquals(33, settled { it.settings.pictureSeconds == 33 }.settings.pictureSeconds)
+        val theirs = PickedFolderPlaylist("folder:", "Signage", "Folders/Signage", pictureSeconds = 33)
+        SignageStore(world.signage).saveSettings(SignageSettings(added = listOf(theirs)))
+        assertEquals(listOf(theirs), settled { it.settings.added == listOf(theirs) }.settings.added)
         sent.await()
     }
 

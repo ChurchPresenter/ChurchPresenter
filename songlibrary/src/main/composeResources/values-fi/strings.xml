@@ -24,6 +24,8 @@
     <string name="column_composer">Säveltäjä</string>
     <string name="column_tune">Sävel</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Järjestys</string>
+    <string name="order_as_written">Kirjoitetussa järjestyksessä</string>
     <string name="edit_song">Muokkaa laulua</string>
     <string name="delete_song">Poista laulu</string>
     <string name="empty_title">Mikään laulu ei vastaa suodattimia</string>

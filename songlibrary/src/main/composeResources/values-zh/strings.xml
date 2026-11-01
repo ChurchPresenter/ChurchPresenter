@@ -24,6 +24,8 @@
     <string name="column_composer">作曲</string>
     <string name="column_tune">曲调</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">顺序</string>
+    <string name="order_as_written">按原文顺序</string>
     <string name="edit_song">编辑歌曲</string>
     <string name="delete_song">删除歌曲</string>
     <string name="empty_title">没有符合筛选条件的歌曲</string>

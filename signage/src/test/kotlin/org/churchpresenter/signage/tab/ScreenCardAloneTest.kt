@@ -30,7 +30,6 @@ import org.churchpresenter.signage.hub.PendingScreen
 import org.churchpresenter.signage.hub.ScreenLink
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -54,7 +53,6 @@ class ScreenCardAloneTest {
 
     private val screen = PairedScreen("p", "Lobby", "h", Platform.LINUX_X64, "26.0.8", 1920, 1080, 0)
     private val folder = SignageFolderState(
-        folder = Path("/s"),
         playlists = listOf(
             PlaylistSummary("folder:", "Signage", 2, 1),
             PlaylistSummary("folder:Events", "Events", 1, 0),
@@ -129,6 +127,26 @@ class ScreenCardAloneTest {
             ),
             calls,
         )
+    }
+
+    @Test
+    fun theMachinesUpdateShowsOnlyWhenSomethingIsWaiting() {
+        fun waiting(count: Int?) = row(
+            link.copy(
+                features = link.features + Features.SYSTEM_UPDATE,
+                status = link.status?.copy(systemUpdates = count),
+            ),
+        )
+        card(waiting(12)) { swap ->
+            onNodeWithText("Update (12)").performClick()
+            swap(waiting(0), actions())
+            onNodeWithText("Update").assertDoesNotExist()
+            onNodeWithText("Update (0)").assertDoesNotExist()
+            // A player that cannot count keeps the button it always had.
+            swap(waiting(null), actions())
+            onNodeWithText("Update").performClick()
+        }
+        assertEquals(listOf(" update p", " update p"), calls)
     }
 
     @Test

@@ -24,6 +24,8 @@
     <string name="column_composer">Compozitor</string>
     <string name="column_tune">Melodie</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Ordine</string>
+    <string name="order_as_written">Așa cum e scris</string>
     <string name="edit_song">Editează cântarea</string>
     <string name="delete_song">Șterge cântarea</string>
     <string name="empty_title">Nicio cântare nu corespunde filtrelor</string>

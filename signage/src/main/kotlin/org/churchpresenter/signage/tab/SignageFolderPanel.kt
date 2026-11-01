@@ -1,7 +1,5 @@
 package org.churchpresenter.signage.tab
 
-import org.churchpresenter.theme.components.KeyButton
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,10 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.composables.ZoneLabel
 import org.churchpresenter.sharedui.composables.bibleListCard
@@ -53,7 +48,16 @@ import org.churchpresenter.strings.generated.resources.signage_add_file
 import org.churchpresenter.strings.generated.resources.signage_add_folder
 import org.churchpresenter.strings.generated.resources.signage_add_link
 import org.churchpresenter.strings.generated.resources.signage_choose_file
+import org.churchpresenter.strings.generated.resources.signage_choose_playlist_folder
+import org.churchpresenter.strings.generated.resources.signage_copy_failed
+import org.churchpresenter.strings.generated.resources.signage_copying
+import org.churchpresenter.strings.generated.resources.signage_remove_copy_for_good
+import org.churchpresenter.strings.generated.resources.signage_remove_copy_trash
 import org.churchpresenter.strings.generated.resources.signage_file_missing
+import org.churchpresenter.strings.generated.resources.signage_folder_missing
+import org.churchpresenter.strings.generated.resources.signage_folder_title_edit
+import org.churchpresenter.strings.generated.resources.signage_no_playlists
+import org.churchpresenter.strings.generated.resources.signage_reading_playlists
 import org.churchpresenter.strings.generated.resources.signage_pictures_and_videos
 import org.churchpresenter.strings.generated.resources.signage_remove
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist
@@ -66,78 +70,43 @@ import org.churchpresenter.strings.generated.resources.signage_add_rotation
 import org.churchpresenter.strings.generated.resources.signage_rotation_summary
 import org.churchpresenter.strings.generated.resources.signage_rotation_minutes
 import org.churchpresenter.strings.generated.resources.signage_rotation_seconds_short
-import org.churchpresenter.strings.generated.resources.signage_change_folder
-import org.churchpresenter.strings.generated.resources.signage_choose_folder
-import org.churchpresenter.strings.generated.resources.signage_delete
-import org.churchpresenter.strings.generated.resources.signage_delete_failed
-import org.churchpresenter.strings.generated.resources.signage_delete_folder_trash
-import org.churchpresenter.strings.generated.resources.signage_delete_for_good
-import org.churchpresenter.strings.generated.resources.signage_delete_playlist
-import org.churchpresenter.strings.generated.resources.signage_delete_playlist_title
-import org.churchpresenter.strings.generated.resources.signage_delete_root_trash
-import org.churchpresenter.strings.generated.resources.signage_folder
-import org.churchpresenter.strings.generated.resources.signage_folder_empty
-import org.churchpresenter.strings.generated.resources.signage_folder_hint
-import org.churchpresenter.strings.generated.resources.signage_open_folder
-import org.churchpresenter.strings.generated.resources.signage_picture_seconds
-import org.churchpresenter.strings.generated.resources.signage_playlist_counts
+import org.churchpresenter.strings.generated.resources.signage_folder_counts
 import org.churchpresenter.strings.generated.resources.signage_playlists
-import org.churchpresenter.strings.generated.resources.signage_reading_folder
 import org.jetbrains.compose.resources.stringResource
 
-/** The signage folder: where it is, how long a picture stays up, and the playlists it makes. */
+/** The playlists screens can play, and the Add menu that makes them. */
 @Composable
 internal fun SignageFolderPanel(state: SignageFolderState, actions: FolderActions, modifier: Modifier) {
-    val scope = rememberCoroutineScope()
-    val chooseTitle = stringResource(Res.string.signage_choose_folder)
     Column(modifier = modifier) {
-        ZoneLabel(stringResource(Res.string.signage_folder), modifier = Modifier.padding(start = 8.dp, bottom = 6.dp))
-        Column(
-            modifier = Modifier.fillMaxWidth().bibleListCard().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                state.folder.toString(),
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                KeyButton(onClick = {
-                    scope.launch(Dispatchers.IO) { actions.desktop.openFolder(state.folder) }
-                }) { Text(stringResource(Res.string.signage_open_folder)) }
-                KeyButton(onClick = {
-                    scope.launch {
-                        actions.desktop.fileChooser
-                            .chooseSingle(state.folder, emptyList(), chooseTitle, selectDirectory = true)
-                            ?.let(actions.onChangeFolder)
-                    }
-                }) { Text(stringResource(Res.string.signage_change_folder)) }
-            }
-            NumberSettingsTextField(
-                label = stringResource(Res.string.signage_picture_seconds),
-                initialText = state.settings.pictureSeconds,
-                range = PICTURE_SECONDS,
-                onValueChange = actions.onPictureSeconds,
-            )
-            Text(
-                stringResource(Res.string.signage_folder_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(start = 8.dp, top = 14.dp, bottom = 6.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 8.dp, bottom = 6.dp),
         ) {
             ZoneLabel(stringResource(Res.string.signage_playlists), modifier = Modifier.weight(1f))
+            SignageHelpButton()
             AddPlaylistMenu(state, actions)
         }
         PlaylistList(state, actions, Modifier.fillMaxWidth().weight(1f, fill = false))
+        state.copying.forEach { name ->
+            Text(
+                stringResource(Res.string.signage_copying, name),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 8.dp, top = 8.dp),
+            )
+        }
+        state.copyFailed?.let { name ->
+            Text(
+                stringResource(Res.string.signage_copy_failed, name),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 8.dp, top = 8.dp),
+            )
+        }
     }
 }
 
-/** Add a link, a single picture or video from anywhere, or a folder (in the file manager). */
+/** Add a link, a single picture or video, a rotation, or a folder, the file and folder from anywhere. */
 @Composable
 private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
     val scope = rememberCoroutineScope()
@@ -145,6 +114,7 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
     var addingLink by remember { mutableStateOf(false) }
     var addingRotation by remember { mutableStateOf(false) }
     val chooseTitle = stringResource(Res.string.signage_choose_file)
+    val chooseFolderTitle = stringResource(Res.string.signage_choose_playlist_folder)
     val filterName = stringResource(Res.string.signage_pictures_and_videos)
     Box {
         RingedGhostButton(onClick = { open = true }) {
@@ -187,7 +157,11 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
                 leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },
                 onClick = {
                     open = false
-                    scope.launch(Dispatchers.IO) { actions.desktop.openFolder(state.folder) }
+                    scope.launch {
+                        actions.desktop.fileChooser
+                            .chooseSingle(null, emptyList(), chooseFolderTitle, selectDirectory = true)
+                            ?.let(actions.onAddFolder)
+                    }
                 },
             )
         }
@@ -206,14 +180,12 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
 @Composable
 private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modifier: Modifier) {
     val desktop = actions.desktop
-    val scope = rememberCoroutineScope()
     var deleting by remember { mutableStateOf<PlaylistSummary?>(null) }
     var renaming by remember { mutableStateOf<PlaylistSummary?>(null) }
-    var failed by remember { mutableStateOf(false) }
     Column(modifier = modifier.bibleListCard()) {
         val message = when {
-            !state.ready -> stringResource(Res.string.signage_reading_folder)
-            state.playlists.isEmpty() -> stringResource(Res.string.signage_folder_empty)
+            !state.ready -> stringResource(Res.string.signage_reading_playlists)
+            state.playlists.isEmpty() -> stringResource(Res.string.signage_no_playlists)
             else -> null
         }
         if (message != null) {
@@ -224,14 +196,6 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
                 modifier = Modifier.padding(16.dp),
             )
             return@Column
-        }
-        if (failed) {
-            Text(
-                stringResource(Res.string.signage_delete_failed),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
-            )
         }
         LazyColumn {
             items(state.playlists, key = { it.id }) { playlist ->
@@ -262,38 +226,34 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
             onSave = { name, file -> actions.onEditFile(editing.id, name, file) },
             onDismiss = { renaming = null },
         )
+        is PickedFolderPlaylist -> FolderDialog(
+            initial = editing,
+            location = actions.onLocate(editing.id),
+            desktop = desktop,
+            onSave = { name, seconds -> actions.onEditFolder(editing.id, name, seconds) },
+            onDismiss = { renaming = null },
+        )
         is RotationPlaylist, null -> Unit
     }
-    deleting?.takeIf { it.added }?.let { playlist ->
+    deleting?.let { playlist ->
+        val copy = state.settings.added.firstOrNull { it.id == playlist.id }?.copyPath()?.let(SignageMedia::isCopy)
         ConfirmDialog(
             title = stringResource(Res.string.signage_remove_playlist_title, playlist.name),
-            text = stringResource(Res.string.signage_remove_playlist_text),
+            text = stringResource(
+                when {
+                    copy != true -> Res.string.signage_remove_playlist_text
+                    desktop.canTrash() -> Res.string.signage_remove_copy_trash
+                    else -> Res.string.signage_remove_copy_for_good
+                },
+            ),
             confirm = stringResource(Res.string.signage_remove),
             onConfirm = { actions.onRemove(playlist.id) },
             onDismiss = { deleting = null },
         )
     }
-    deleting?.takeUnless { it.added }?.let { playlist ->
-        val text = when {
-            !desktop.canTrash() -> stringResource(Res.string.signage_delete_for_good)
-            playlist.id == SignageFolder.ROOT_ID -> stringResource(Res.string.signage_delete_root_trash)
-            else -> stringResource(Res.string.signage_delete_folder_trash, playlist.name)
-        }
-        ConfirmDialog(
-            title = stringResource(Res.string.signage_delete_playlist_title, playlist.name),
-            text = text,
-            confirm = stringResource(Res.string.signage_delete),
-            onConfirm = {
-                scope.launch {
-                    failed = !withContext(Dispatchers.IO) { desktop.deletePlaylist(state.folder, playlist.id) }
-                }
-            },
-            onDismiss = { deleting = null },
-        )
-    }
 }
 
-/** One playlist: its kind's icon and name, a folder's counts beside it, an added one's file or address under it. */
+/** One playlist: its kind's icon and name, its folder, file or address under it, and a folder's counts beside it. */
 @Composable
 private fun PlaylistRow(playlist: PlaylistSummary, onRename: () -> Unit, onDelete: () -> Unit) {
     Row(
@@ -307,46 +267,43 @@ private fun PlaylistRow(playlist: PlaylistSummary, onRename: () -> Unit, onDelet
             modifier = Modifier.size(20.dp),
         )
         Spacer(Modifier.width(12.dp))
-        if (playlist.added) {
-            AddedPlaylistText(playlist, Modifier.weight(1f))
-        } else {
-            Text(playlist.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        PlaylistText(playlist, Modifier.weight(1f))
+        if (playlist.kind == SourceKind.FOLDER && !playlist.missing) {
             Text(
-                stringResource(Res.string.signage_playlist_counts, playlist.pictures, playlist.videos),
+                stringResource(Res.string.signage_folder_counts, playlist.pictures, playlist.videos, playlist.seconds),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (playlist.added) {
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Edit),
-                text = stringResource(
-                    when (playlist.kind) {
-                        SourceKind.WEB, SourceKind.STREAM -> Res.string.signage_link_title_edit
-                        SourceKind.ROTATION -> Res.string.signage_rotation_title_edit
-                        else -> Res.string.signage_file_title_edit
-                    },
-                ),
-                onClick = onRename,
-            )
-        }
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Filled.Edit),
+            text = stringResource(
+                when (playlist.kind) {
+                    SourceKind.WEB, SourceKind.STREAM -> Res.string.signage_link_title_edit
+                    SourceKind.ROTATION -> Res.string.signage_rotation_title_edit
+                    SourceKind.FOLDER -> Res.string.signage_folder_title_edit
+                    SourceKind.PICTURE, SourceKind.VIDEO -> Res.string.signage_file_title_edit
+                },
+            ),
+            onClick = onRename,
+        )
         TooltipIconButton(
             painter = rememberVectorPainter(Icons.Filled.Delete),
-            text = stringResource(
-                if (playlist.added) Res.string.signage_remove_playlist else Res.string.signage_delete_playlist,
-            ),
+            text = stringResource(Res.string.signage_remove_playlist),
             onClick = onDelete,
         )
     }
 }
 
-/** An added playlist's name, with its file or address under it (in red when the file is gone). */
+/** A playlist's name, with its folder, file or address under it (in red when the file or folder is gone). */
 @Composable
-private fun AddedPlaylistText(playlist: PlaylistSummary, modifier: Modifier) {
+private fun PlaylistText(playlist: PlaylistSummary, modifier: Modifier) {
     Column(modifier = modifier) {
         Text(playlist.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(
             when {
+                playlist.missing && playlist.kind == SourceKind.FOLDER ->
+                    stringResource(Res.string.signage_folder_missing, playlist.detail.orEmpty())
                 playlist.missing -> stringResource(Res.string.signage_file_missing, playlist.detail.orEmpty())
                 playlist.kind == SourceKind.ROTATION -> stringResource(
                     Res.string.signage_rotation_summary,
@@ -375,7 +332,5 @@ private fun iconOf(kind: SourceKind): ImageVector = when (kind) {
     SourceKind.STREAM -> Icons.Filled.LiveTv
     SourceKind.ROTATION -> Icons.Filled.Repeat
 }
-
-private val PICTURE_SECONDS = 1..600
 
 private const val SECONDS_PER_MINUTE = 60

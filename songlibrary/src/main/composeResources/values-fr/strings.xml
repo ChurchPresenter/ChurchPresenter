@@ -24,6 +24,8 @@
     <string name="column_composer">Compositeur</string>
     <string name="column_tune">Mélodie</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Ordre</string>
+    <string name="order_as_written">Tel qu’écrit</string>
     <string name="edit_song">Modifier le cantique</string>
     <string name="delete_song">Supprimer le cantique</string>
     <string name="empty_title">Aucun cantique ne correspond aux filtres</string>

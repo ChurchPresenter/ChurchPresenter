@@ -22,7 +22,6 @@ import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.ScreenLink
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,7 +29,7 @@ import kotlin.test.assertEquals
 class WebTestLineTest {
     private val screen = PairedScreen("p", "Lobby", "h", Platform.LINUX_ARM64, "26.0.31", 1920, 1080, 0)
     private val folder =
-        SignageFolderState(Path("/s"), listOf(PlaylistSummary("folder:", "Signage", 1, 0)), ready = true)
+        SignageFolderState(listOf(PlaylistSummary("folder:", "Signage", 1, 0)), ready = true)
     private val link = ScreenLink(
         "10.0.0.5", 0, "v", session = 1,
         features = listOf(Features.WEB, Features.WEB_TEST),

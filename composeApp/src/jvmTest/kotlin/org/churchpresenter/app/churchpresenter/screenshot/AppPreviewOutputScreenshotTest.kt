@@ -154,8 +154,10 @@ class AppPreviewOutputScreenshotTest {
         AnnouncementsPresenter(text = "05:00", appSettings = settings())
     }
 
+    // Waits on the background's content description (the source's name): the scene image decodes
+    // on Dispatchers.IO, so without it the capture lands before the photo and shows only the text.
     @Test
-    fun `canvas scene on screen`() = output("canvas") {
+    fun `canvas scene on screen`() = output("canvas", awaitDescription = "Cross At Sunset") {
         ScenePresenter(scene = previewScenes().first())
     }
 

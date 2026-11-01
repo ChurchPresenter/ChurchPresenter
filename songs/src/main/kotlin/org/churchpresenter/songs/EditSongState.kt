@@ -80,6 +80,13 @@ internal class EditSongState(private val song: SongItem) {
     var author by mutableStateOf(song.author)
     var composer by mutableStateOf(song.composer)
     var ccli by mutableStateOf(song.ccliNumber)
+    var notes by mutableStateOf(song.notes)
+
+    /** A cue per section, by key. */
+    var sectionNotes by mutableStateOf(song.sectionNotes)
+
+    /** The order the sections are sung in, by key; empty for the song's default. */
+    var order by mutableStateOf(song.sectionOrder)
     var lyrics by mutableStateOf(TextFieldValue(song.lyrics.joinToString("\n")))
 
     // One draft per language beside the primary, always [MAX_SONG_EXTRA_TRANSLATIONS] of them so a
@@ -236,6 +243,10 @@ internal class EditSongState(private val song: SongItem) {
         background = background,
         lowerThirdBackground = lowerThirdBackground,
         textOverrides = textOverrides,
+        sectionOrder = orderKeysStillWritten(order, lyrics.text.split("\n"), title, number),
+        notes = notes.trim(),
+        sectionNotes = sectionNotesStillWritten(sectionNotes, lyrics.text.split("\n"), title, number),
+        extraHeader = song.extraHeader,
     ).withTranslations(translations.map { it.toTranslation() })
 }
 

@@ -1,0 +1,23 @@
+# What the narrator says in the preview panel tour, in order. One line per key.
+
+intro = Welcome to ChurchPresenter. In this tour, we'll arrange the live preview panel, so the booth sees every screen the way it wants.
+why = On the right, the preview panel shows what every output is showing right now. With a few screens, a livestream and a stage monitor, it helps to lay them out yourself.
+gear = Everything starts from the Preview Settings button at the top of the panel.
+display = Under Display, choose whether each preview shows the output's name and its display type.
+none = With no layout yet, the panel simply lists every output, one under another.
+templates = To make a layout, pick a template. One, two by two, three across or three down, or a tall preview beside two or three smaller ones.
+two-by-two = Let's choose two by two. The outputs fill the areas in order.
+grid = Now the four screens sit in a grid, two across and two down.
+second = You can keep more than one layout. Open the menu again, and this time pick Tall plus three.
+tall = Now the sanctuary screen is tall on the left, with the other three stacked beside it.
+switch = Your layouts are listed in the menu. Click one to switch to it, and the pencil renames it.
+edit = To change a layout, click Edit layout. The panel itself becomes the editor.
+picker = Each area has a menu at the top that chooses which output it shows.
+place = Top, Middle and Bottom set where the preview sits inside its area.
+split = Split across and Split down divide an area in two, and Remove takes it away.
+divider = Drag the lines between the areas to make one bigger and another smaller.
+done = When it looks right, click Done.
+fill = Back in the menu, switch on Fill the panel, and the layout grows to use all the panel's height.
+unplaced = And List outputs not in the layout shows any output you didn't place, below the layout, so nothing is ever hidden.
+lock = Finally, the lock in the corner of each preview locks that screen to what it's showing now. It's marked Locked until you click the lock again.
+outro = And that's the preview panel: start from a template, shape it the way you like, and keep a layout for every kind of service.

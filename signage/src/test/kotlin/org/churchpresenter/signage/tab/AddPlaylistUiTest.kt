@@ -7,10 +7,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,6 +22,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.signage.core.MediaKind
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -31,38 +35,48 @@ import kotlin.test.assertTrue
 /** The PLAYLISTS list's Add menu, the Link dialog, and renaming and removing what was added. */
 class AddPlaylistUiTest {
     private val state = SignageFolderState(
-        folder = Path("/signage"),
         playlists = listOf(
             PlaylistSummary("folder:", "Signage", 1, 0),
             PlaylistSummary("link:1", "Weather", kind = SourceKind.WEB, detail = "https://weather.example.org"),
             PlaylistSummary("file:1", "Old flyer", kind = SourceKind.PICTURE, detail = "flyer.jpg", missing = true),
             PlaylistSummary("rotation:1", "Evenings", kind = SourceKind.ROTATION, steps = 1, seconds = 60),
+            PlaylistSummary("dir:1", "Lobby", 3, 1, detail = "Folders/Lobby", seconds = 8),
+            PlaylistSummary("dir:2", "Old event", detail = "Folders/Gone", missing = true),
         ),
         settings = SignageSettings(
             added = listOf(
                 LinkPlaylist("link:1", "Weather", "https://weather.example.org", LinkKind.WEB),
                 FilePlaylist("file:1", "Old flyer", "flyer.jpg", MediaKind.IMAGE),
                 RotationPlaylist("rotation:1", "Evenings", listOf(RotationStep("link:1", 60))),
+                PickedFolderPlaylist("dir:1", "Lobby", "Folders/Lobby", pictureSeconds = 8),
+                PickedFolderPlaylist("dir:2", "Old event", "Folders/Gone"),
             ),
         ),
         ready = true,
     )
     private val links = mutableListOf<NewLink>()
     private val files = mutableListOf<String>()
+    private val folders = mutableListOf<String>()
     private val linkEdits = mutableListOf<Pair<String, NewLink>>()
-    private val fileEdits = mutableListOf<Triple<String, String, String>>()
+    private val fileEdits = mutableListOf<Triple<String, String, String?>>()
+    private val folderEdits = mutableListOf<Pair<String, String>>()
     private val removed = mutableListOf<String>()
     private val rotations = mutableListOf<String>()
 
-    private fun panel(desktop: FakeDesktop, block: ComposeUiTest.() -> Unit) = runComposeUiTest {
+    private fun panel(
+        desktop: FakeDesktop,
+        state: SignageFolderState = this.state,
+        block: ComposeUiTest.() -> Unit,
+    ) = runComposeUiTest {
         val actions = FolderActions(
-            onChangeFolder = {},
-            onPictureSeconds = {},
             desktop = desktop.desktop,
             onAddLink = { links += it },
             onAddFile = { files += it.toString() },
+            onAddFolder = { folders += it.toString() },
             onEditLink = { id, link -> linkEdits += id to link },
-            onEditFile = { id, name, file -> fileEdits += Triple(id, name, file.toString()) },
+            onEditFile = { id, name, file -> fileEdits += Triple(id, name, file?.toString()) },
+            onEditFolder = { id, name, seconds -> folderEdits += id to "$name $seconds" },
+            onLocate = { id -> LOCATED.takeIf { id == "dir:1" } },
             onRemove = { removed += it },
             onAddRotation = { name, steps -> rotations += "add $name ${steps.size}" },
             onEditRotation = { id, name, steps -> rotations += "edit $id $name ${steps.size}" },
@@ -86,24 +100,23 @@ class AddPlaylistUiTest {
     private fun ComposeUiTest.dialogAdd() = onAllNodesWithText("Add").onLast()
 
     @Test
-    fun theAddMenuAddsAPictureOrVideoAndOpensTheFolder() = panel(FakeDesktop(chosen = Path("/pictures/welcome.png"))) {
+    fun theAddMenuAddsAPictureOrVideo() = panel(FakeDesktop(chosen = Path("/pictures/welcome.png"))) {
         onNodeWithText("Add").performClick()
         onNodeWithText("Picture or video…").performClick()
         waitUntil { files.isNotEmpty() }
-        assertEquals(listOf("/pictures/welcome.png"), files)
-        onNodeWithText("Add").performClick()
-        onNodeWithText("Folder…").performClick()
+        assertEquals(listOf(Path("/pictures/welcome.png").toString()), files)
     }
 
     @Test
-    fun theFolderEntryOpensTheSignageFolder() {
-        val desktop = FakeDesktop()
+    fun theFolderEntryAddsTheChosenFolder() {
+        val desktop = FakeDesktop(chosen = Path("/pictures/Events"))
         panel(desktop) {
             onNodeWithText("Add").performClick()
             onNodeWithText("Folder…").performClick()
-            waitUntil { desktop.opened.isNotEmpty() }
+            waitUntil { folders.isNotEmpty() }
         }
-        assertEquals(listOf(Path("/signage")), desktop.opened)
+        assertEquals(listOf(Path("/pictures/Events").toString()), folders)
+        assertEquals("Choose a folder of pictures and videos", desktop.chooser.lastTitle)
     }
 
     @Test
@@ -170,16 +183,105 @@ class AddPlaylistUiTest {
         onNodeWithText("Change file…").performClick()
         waitUntil { onAllNodesWithText(NEW_FILE.toString()).fetchSemanticsNodes().isNotEmpty() }
         onNodeWithText("Save").performClick()
-        assertEquals(listOf(Triple("file:1", "Old flyer", NEW_FILE.toString())), fileEdits)
-        onAllNodesWithContentDescription("Remove playlist")[1].performClick()
+        assertEquals(
+            listOf<Triple<String, String, String?>>(Triple("file:1", "Old flyer", NEW_FILE.toString())),
+            fileEdits,
+        )
+        onAllNodesWithContentDescription("Remove playlist")[2].performClick()
         onNodeWithText("Remove Old flyer?").assertExists()
         onNodeWithText("Remove").performClick()
         assertEquals(listOf("file:1"), removed)
-        // A folder is still deleted from disk, not removed from the list.
-        assertEquals(1, onAllNodesWithContentDescription("Delete playlist").fetchSemanticsNodes().size)
     }
 
+    @Test
+    fun aFolderShowsItsPathAndCountsAndAMissingOneSaysSo() = panel(FakeDesktop()) {
+        onNodeWithText("Folders/Lobby").assertExists()
+        onNodeWithText("3 pictures · 1 videos · 8 s each").assertExists()
+        onNodeWithText("Folder not found: Folders/Gone").assertExists()
+        // A missing folder has no counts to show: only Signage's and Lobby's.
+        assertEquals(2, onAllNodesWithText("pictures ·", substring = true).fetchSemanticsNodes().size)
+    }
+
+    @Test
+    fun aFolderIsRenamedAndItsCopyOpens() {
+        val desktop = FakeDesktop()
+        panel(desktop) {
+            onAllNodesWithContentDescription("Edit folder")[1].performClick()
+            onNodeWithText("Edit folder").assertExists()
+            // In the list and in the dialog.
+            onAllNodesWithText("Folders/Lobby").assertCountEquals(2)
+            onNodeWithText("Open folder").performClick()
+            waitUntil { desktop.opened.isNotEmpty() }
+            val name = field(FILE_NAME_TAG)
+            name.performTextClearance()
+            name.performTextInput("Foyer")
+            onNodeWithText("Save").performClick()
+        }
+        assertEquals(listOf(LOCATED), desktop.opened)
+        assertEquals(listOf("dir:1" to "Foyer 8"), folderEdits)
+    }
+
+    @Test
+    fun aFoldersSecondsPerPictureAreSaved() = panel(FakeDesktop()) {
+        onAllNodesWithContentDescription("Edit folder")[1].performClick()
+        onNode(hasSetTextAction() and hasText("8")).performTextReplacement("20")
+        onNodeWithText("Save").performClick()
+        assertEquals(listOf("dir:1" to "Lobby 20"), folderEdits)
+    }
+
+    @Test
+    fun helpExplainsHowSignageWorks() = panel(FakeDesktop()) {
+        onNodeWithText("Help").performClick()
+        onNodeWithText("How signage works").assertExists()
+        onNodeWithText("Folders that stay up to date").assertExists()
+        onNodeWithText("Running the screens from more than one computer").assertExists()
+        onNodeWithText("Close").performClick()
+        onNodeWithText("How signage works").assertDoesNotExist()
+    }
+
+    @Test
+    fun aFolderWhoseCopyCannotBeFoundHasNothingToOpen() = panel(FakeDesktop()) {
+        onAllNodesWithContentDescription("Edit folder")[2].performClick()
+        onNodeWithText("Open folder").assertIsNotEnabled()
+        onNodeWithText("Cancel").performClick()
+        onNodeWithText("Edit folder").assertDoesNotExist()
+        assertEquals(emptyList(), folderEdits)
+    }
+
+    @Test
+    fun aFileRenamedWithoutChoosingKeepsItsCopy() = panel(FakeDesktop(chosen = null)) {
+        onNodeWithContentDescription("Edit picture or video").performClick()
+        onNodeWithText("Change file…").performClick()
+        waitForIdle()
+        onNodeWithText("Save").performClick()
+        assertEquals(listOf<Triple<String, String, String?>>(Triple("file:1", "Old flyer", null)), fileEdits)
+    }
+
+    @Test
+    fun removingACopySaysWhereItGoes() {
+        panel(FakeDesktop()) {
+            onAllNodesWithContentDescription("Remove playlist")[4].performClick()
+            onNodeWithText("Its copy in the signage folder goes to the Trash", substring = true).assertExists()
+            onNodeWithText("Cancel").performClick()
+            // A link has no copy.
+            onAllNodesWithContentDescription("Remove playlist")[1].performClick()
+            onNodeWithText("The file or page itself is not touched", substring = true).assertExists()
+        }
+        panel(FakeDesktop(trash = false)) {
+            onAllNodesWithContentDescription("Remove playlist")[4].performClick()
+            onNodeWithText("deleted for good", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun aCopyRunningAndOneThatFailedAreShown() =
+        panel(FakeDesktop(), state.copy(copying = listOf("Easter"), copyFailed = "Advent")) {
+            onNodeWithText("Copying Easter into the signage folder…").assertExists()
+            onNodeWithText("Could not copy Advent into the signage folder.").assertExists()
+        }
+
     private companion object {
+        val LOCATED = Path("/signage/Folders/Lobby")
         val NEW_FILE = Path("/pictures/new.jpg")
     }
 }

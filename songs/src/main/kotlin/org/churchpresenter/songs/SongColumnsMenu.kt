@@ -1,5 +1,6 @@
 package org.churchpresenter.songs
 
+import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.foundation.background
 import org.churchpresenter.settings.SongColumnId
 import androidx.compose.foundation.layout.Box
@@ -139,6 +140,7 @@ private fun songColumnPainter(colId: String): Painter = when (colId) {
     SongColumnId.PLAY_COUNT -> rememberVectorPainter(Icons.Default.PlayArrow)
     SongColumnId.AUTHOR -> rememberVectorPainter(Icons.Default.Person)
     SongColumnId.COMPOSER -> rememberVectorPainter(Icons.Default.LibraryMusic)
+    SongColumnId.ORDER -> rememberVectorPainter(Icons.Default.Reorder)
     SongColumnId.ADD_TO_SCHEDULE -> painterResource(IconRes.drawable.ic_playlist_add)
     SongColumnId.FAVORITES -> painterResource(IconRes.drawable.ic_star)
     else -> rememberVectorPainter(Icons.Default.Tune)
@@ -155,6 +157,7 @@ private fun songColumnAccent(colId: String): Color {
         SongColumnId.PLAY_COUNT -> semantic.contentLowerThird
         SongColumnId.AUTHOR -> semantic.contentCalendar
         SongColumnId.COMPOSER -> semantic.contentPresentation
+        SongColumnId.ORDER -> semantic.contentSongs
         SongColumnId.ADD_TO_SCHEDULE -> semantic.success
         SongColumnId.FAVORITES -> semantic.favorite
         else -> MaterialTheme.colorScheme.primary

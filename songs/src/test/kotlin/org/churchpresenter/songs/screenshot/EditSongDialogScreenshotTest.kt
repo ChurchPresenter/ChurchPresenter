@@ -2,6 +2,9 @@
 
 package org.churchpresenter.songs.screenshot
 
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
+import org.churchpresenter.songs.RIGHT_PANE_IN_ORDER_TAG
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
@@ -231,6 +234,19 @@ class EditSongDialogScreenshotTest {
         waitForIdle()
     }
 
+    // ── Order, comments and section cues ────────────────────────────────────────────────────────
+
+    /** A custom order in the Order column, with the song's comments filled in under the editor. */
+    @Test
+    fun `a custom order with comments`() = shoot("custom_order", song = arranged())
+
+    /** The In order tab: the song as it plays, a cue typed under each section's label. */
+    @Test
+    fun `the In order tab with section cues`() = shoot("in_order_cues", song = arranged(), appSettings = OUTPUTS) {
+        onNodeWithTag(RIGHT_PANE_IN_ORDER_TAG).performSemanticsAction(SemanticsActions.OnClick)
+        waitForIdle()
+    }
+
     // ── Menus ───────────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -270,6 +286,14 @@ class EditSongDialogScreenshotTest {
             "Let the earth hear His voice",
         ),
         sourceFile = "/songs/hymnal/42.sps",
+    )
+
+    private fun arranged() = amazingGrace().copy(
+        lyrics = amazingGrace().lyrics +
+            listOf("", "[Verse 2]", "'Twas grace that taught my heart to fear", "And grace my fears relieved"),
+        sectionOrder = listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "{Chorus}"),
+        notes = "Capo 2 for the band. Piano intro, 4 bars.",
+        sectionNotes = mapOf("[Verse 1]" to "Piano only", "{Chorus}" to "Full band"),
     )
 
     private fun withChords() = amazingGrace().copy(

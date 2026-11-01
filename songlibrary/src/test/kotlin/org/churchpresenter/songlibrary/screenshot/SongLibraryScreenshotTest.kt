@@ -115,6 +115,19 @@ class SongLibraryScreenshotTest {
         dismissPopup()
     }
 
+    /**
+     * The Order column turned on: each song's order as section chips, `+n` past five, "As written"
+     * for a song without one. The wide columns are turned off to bring it into view.
+     */
+    @Test
+    fun `the order column turned on`() = shoot("order_column", songs = ordered) {
+        onNodeWithText(COLUMNS).performClick()
+        listOf("Song Book", "Author", "Composer", "Tune", "CCLI", "Duration", "Order").forEach {
+            onAllNodesWithText(it).onLast().performClick()
+        }
+        dismissPopup()
+    }
+
     // ── Languages ─────────────────────────────────────────────────────────────────────────────────
 
     /**
@@ -196,6 +209,22 @@ class SongLibraryScreenshotTest {
     }
 
     // ── Getting there ───────────────────────────────────────────────────────────────────────────
+
+    private val ordered = STOCK.mapIndexed { index, song ->
+        when (index) {
+            0 -> song.copy(
+                lyrics = listOf("[Verse 1]", "a", "{Chorus}", "b", "[Verse 2]", "c", "[Bridge]", "d"),
+                sectionOrder = listOf(
+                    "[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Bridge]", "{Chorus}", "{Chorus}",
+                ),
+            )
+            1 -> song.copy(
+                lyrics = listOf("[Verse 1]", "a", "[Verse 2]", "b", "[Verse 3]", "c"),
+                sectionOrder = listOf("[Verse 1]", "[Verse 2]", "[Verse 3]"),
+            )
+            else -> song
+        }
+    }
 
     private fun shoot(
         name: String,

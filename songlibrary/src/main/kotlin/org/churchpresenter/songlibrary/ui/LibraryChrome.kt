@@ -39,6 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.songlibrary.DEFAULT_HIDDEN_COLUMNS
 import org.churchpresenter.songlibrary.SongLibraryState
 import org.churchpresenter.songlibrary.generated.resources.Res
+import org.churchpresenter.songlibrary.generated.resources.column_order
 import org.churchpresenter.songlibrary.generated.resources.all_song_books
 import org.churchpresenter.songlibrary.generated.resources.batch_edit_menu
 import org.churchpresenter.songlibrary.generated.resources.clear
@@ -275,7 +276,7 @@ private fun ColumnsMenu(state: SongLibraryState) {
     val scheme = MaterialTheme.colorScheme
     LibraryDropdown(
         label = stringResource(Res.string.columns),
-        highlighted = state.hiddenColumns != DEFAULT_HIDDEN_COLUMNS || !state.showDuration,
+        highlighted = state.hiddenColumns != DEFAULT_HIDDEN_COLUMNS || !state.showDuration || state.showOrder,
         menuWidth = 224.dp,
         leading = {
             Icon(Icons.Default.ViewColumn, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
@@ -304,6 +305,10 @@ private fun ColumnsMenu(state: SongLibraryState) {
             label = stringResource(Res.string.column_duration),
             leading = { LibraryCheckbox(checked = state.showDuration) },
         ) { state.toggleDuration() }
+        MenuRow(
+            label = stringResource(Res.string.column_order),
+            leading = { LibraryCheckbox(checked = state.showOrder) },
+        ) { state.toggleOrder() }
     }
 }
 

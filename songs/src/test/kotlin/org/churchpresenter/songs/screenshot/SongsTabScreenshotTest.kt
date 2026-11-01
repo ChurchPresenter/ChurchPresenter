@@ -2,6 +2,10 @@
 
 package org.churchpresenter.songs.screenshot
 
+import androidx.compose.ui.test.onNodeWithTag
+import org.churchpresenter.songs.SONG_NOTES_TAG
+import org.churchpresenter.songs.verseMode
+import org.churchpresenter.songs.defaultSongs
 import org.churchpresenter.songs.updateSelectedSongbook
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasContentDescription
@@ -83,18 +87,55 @@ class SongsTabScreenshotTest {
         ),
     )
 
+    private val arranged = listOf(
+        SongFixture(
+            number = "12",
+            title = "Amazing Grace",
+            author = "John Newton",
+            lyrics = listOf(
+                "[Verse 1]", "Amazing grace how sweet the sound", "That saved a wretch like me",
+                "{Chorus}", "Praise the Lord, praise the Lord",
+                "[Verse 2]", "'Twas grace that taught my heart to fear", "And grace my fears relieved",
+            ),
+            sectionOrder = listOf(
+                "[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Verse 1]", "{Chorus}", "{Chorus}",
+            ),
+            notes = "Capo 2 for the band. Piano intro, 4 bars. " +
+                "Last verse a cappella, then full band on the final line.",
+            sectionNotes = mapOf("[Verse 1]" to "Piano only", "[Verse 2]" to "Key change"),
+        ),
+        SongFixture(number = "45", title = "Be Thou My Vision", author = "Dallan Forgaill"),
+        SongFixture(
+            number = "455",
+            title = "It Is Well With My Soul",
+            lyrics = listOf("[Verse 1]", "When peace like a river", "{Chorus}", "It is well"),
+            sectionOrder = listOf("[Verse 1]", "{Chorus}"),
+        ),
+    )
+
+    // The Order column after Composer, with the columns before it hidden so it is in view.
+    private val orderColumnShown = setOf("songbook", "tune", "play_count", "author", "composer")
+    private val orderColumnOrder = listOf(
+        "number", "title", "songbook", "tune", "play_count", "author", "composer", "order", "add_to_schedule",
+        "favorites",
+    )
+
     private fun shoot(
         name: String,
+        songs: List<SongFixture>? = null,
         songSettings: SongSettings = SongSettings(),
         hiddenCols: Set<String>? = null,
+        colOrder: List<String>? = null,
         songBpm: Map<String, Int>? = null,
         stageMonitor: Boolean = false,
         isPresenting: Boolean = false,
         drive: ComposeUiTest.(SongsViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         songsTab(
+            songs = songs ?: defaultSongs,
             songSettings = songSettings,
             hiddenCols = hiddenCols,
+            colOrder = colOrder,
             songBpm = songBpm,
             stageMonitor = stageMonitor,
             isPresenting = isPresenting,
@@ -124,6 +165,23 @@ class SongsTabScreenshotTest {
         onAllNodes(hasContentDescription("Go Live"))[0].performClick()
         waitForIdle()
     }
+
+    @Test
+    fun `a song with notes and section cues`() =
+        shoot("song_notes_and_cues", songs = arranged, songSettings = verseMode()) {
+            clickSong("Amazing Grace")
+        }
+
+    @Test
+    fun `a song's notes opened`() = shoot("song_notes_opened", songs = arranged, songSettings = verseMode()) {
+        clickSong("Amazing Grace")
+        onNodeWithTag(SONG_NOTES_TAG).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `the order column`() =
+        shoot("columns_order", songs = arranged, hiddenCols = orderColumnShown, colOrder = orderColumnOrder)
 
     @Test
     fun `every column shown`() = shoot("columns_all_shown", hiddenCols = allColumns)

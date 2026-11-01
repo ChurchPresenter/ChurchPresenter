@@ -24,6 +24,8 @@
     <string name="column_composer">Besteci</string>
     <string name="column_tune">Ezgi</string>
     <string name="column_ccli">CCLI</string>
+    <string name="column_order">Sıra</string>
+    <string name="order_as_written">Yazıldığı gibi</string>
     <string name="edit_song">Şarkıyı düzenle</string>
     <string name="delete_song">Şarkıyı sil</string>
     <string name="empty_title">Filtrelerinize uyan şarkı yok</string>

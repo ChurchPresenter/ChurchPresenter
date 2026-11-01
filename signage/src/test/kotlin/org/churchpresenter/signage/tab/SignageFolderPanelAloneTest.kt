@@ -20,51 +20,52 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The folder panel on its own, its folder and its actions changing between frames as the tab's do:
- * each control acts on the folder showing when it is pressed.
+ * The playlist panel on its own, its playlists and its actions changing between frames as the tab's
+ * do: each control acts with the actions showing when it is pressed.
  */
 class SignageFolderPanelAloneTest {
     private val first = SignageFolderState(
-        folder = Path("/first"),
         playlists = listOf(
-            PlaylistSummary("folder:", "Signage", 1, 0),
-            PlaylistSummary("folder:Events", "Events", 0, 1),
+            PlaylistSummary("folder:", "Signage", 1, 0, detail = "/s"),
+            PlaylistSummary("folder:Events", "Events", 0, 1, detail = "/s/Events"),
         ),
         ready = true,
     )
-    private val second = first.copy(folder = Path("/second"))
 
     @Test
-    fun eachControlActsOnTheFolderShowingNow() = runComposeUiTest {
-        val earlier = FakeDesktop(chosen = Path("/chosen"))
-        val later = FakeDesktop(chosen = Path("/chosen"))
-        val changes = mutableListOf<String>()
+    fun eachControlActsWithTheActionsShowingNow() = runComposeUiTest {
+        val earlier = FakeDesktop(chosen = Path("/earlier"))
+        val later = FakeDesktop(chosen = Path("/later"))
+        val calls = mutableListOf<String>()
+        fun actions(tag: String, desktop: FakeDesktop) = FolderActions(
+            desktop = desktop.desktop,
+            onAddFolder = { calls += "$tag add $it" },
+            onRemove = { calls += "$tag remove $it" },
+        )
         var state by mutableStateOf(first)
-        var actions by mutableStateOf(FolderActions({ changes += "first $it" }, {}, earlier.desktop))
+        var actions by mutableStateOf(actions("first", earlier))
         setContent {
             ChurchPresenterTheme(ThemeMode.LIGHT) {
                 Surface(color = MaterialTheme.colorScheme.background) { SignageFolderPanel(state, actions, Modifier) }
             }
         }
-        onNodeWithText("Open folder").performClick()
-        waitUntil { earlier.opened.isNotEmpty() }
-        state = first.copy(settings = first.settings.copy(pictureSeconds = 12))
+        onNodeWithText("Add").performClick()
+        onNodeWithText("Folder…").performClick()
+        waitUntil { calls.isNotEmpty() }
+        state = first.copy(copying = listOf("Easter"))
+        actions = actions("later", later)
         waitForIdle()
-        state = second
-        actions = FolderActions({ changes += "later $it" }, {}, later.desktop)
+        onNodeWithText("Add").performClick()
+        onNodeWithText("Folder…").performClick()
+        onAllNodesWithContentDescription("Remove playlist")[1].performClick()
+        state = first.copy(copyFailed = "Easter")
         waitForIdle()
-        onNodeWithText("Open folder").performClick()
-        onNodeWithText("Change…").performClick()
-        waitUntil { later.opened.isNotEmpty() && changes.isNotEmpty() }
-        onAllNodesWithContentDescription("Delete playlist")[1].performClick()
-        state = second.copy(settings = second.settings.copy(pictureSeconds = 15))
-        waitForIdle()
-        onNodeWithText("Delete").performClick()
-        waitUntil { later.deletes.isNotEmpty() }
+        onNodeWithText("Remove").performClick()
+        waitUntil { calls.size == 3 }
 
-        assertEquals(listOf(Path("/first")), earlier.opened)
-        assertEquals(listOf(Path("/second")), later.opened)
-        assertEquals(listOf("later /chosen"), changes)
-        assertEquals(listOf(Path("/second") to "folder:Events"), later.deletes)
+        assertEquals(
+            listOf("first add ${Path("/earlier")}", "later add ${Path("/later")}", "later remove folder:Events"),
+            calls,
+        )
     }
 }

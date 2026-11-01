@@ -6,6 +6,9 @@
 
 package org.churchpresenter.songs
 
+import org.churchpresenter.core.models.songs.sectionOrderAbbreviation
+import org.churchpresenter.sharedui.composables.SectionOrderTokens
+import org.churchpresenter.strings.generated.resources.song_order_as_written
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -258,6 +261,20 @@ private fun SongListScope.SongDataCell(
     match: SongSearchMatch?,
     textColor: Color,
 ) {
+    if (colId == SongColumnId.ORDER) {
+        // The whole order on hover: the cell itself stops at a few sections and a "+n".
+        SongCellTooltip(song.sectionOrder.joinToString(" ", transform = ::sectionOrderAbbreviation)) {
+            SectionOrderTokens(
+                order = song.sectionOrder,
+                asWrittenLabel = stringResource(Res.string.song_order_as_written),
+                modifier = Modifier.width(with(density) { colWidth(colId).toDp() })
+                    .songCellClicks(this, index)
+                    .padding(horizontal = 8.dp),
+            )
+        }
+        Box(modifier = Modifier.width(6.dp))
+        return
+    }
     val cellText = when (colId) {
         SongColumnId.NUMBER     -> song.number
         SongColumnId.TITLE      -> song.title
@@ -271,28 +288,7 @@ private fun SongListScope.SongDataCell(
         SongColumnId.COMPOSER   -> song.composer
         else         -> ""
     }
-    TooltipArea(
-        tooltip = {
-            if (cellText.isNotEmpty()) {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp
-                ) {
-                    Text(
-                        cellText,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomStart,
-            offset = DpOffset(0.dp, 4.dp)
-        )
-    ) {
+    SongCellTooltip(cellText) {
         Text(
             if (colId == SongColumnId.TITLE && match.isOwnTitle()) {
                 highlightedText(cellText, searchQuery)
@@ -304,25 +300,7 @@ private fun SongListScope.SongDataCell(
                         else TextAlign.Start,
             modifier = Modifier
                 .width(with(density) { colWidth(colId).toDp() })
-                .initialPassCombinedClickable(
-                    onClick = {
-                        onSelectSong(index)
-                        if (isPresenting && live.songId != null) {
-                            onSelectSection(-1)
-                        }
-                        tabFocusRequester.requestFocus()
-                    },
-                    // The cell consumes on the Initial pass, so a click
-                    // on the title never reaches the row behind it --
-                    // without this, double-clicking a song's name would
-                    // do nothing.
-                    onDoubleClick = {
-                        onSelectSong(index)
-                        sendToPresenter(true)
-                        onPresenting(Presenting.LYRICS)
-                        tabFocusRequester.requestFocus()
-                    },
-                )
+                .songCellClicks(this, index)
                 .padding(horizontal = 8.dp),
             maxLines = if (colId == SongColumnId.NUMBER) Int.MAX_VALUE else 1,
             overflow = TextOverflow.Ellipsis,
@@ -330,6 +308,58 @@ private fun SongListScope.SongDataCell(
         )
     }
     Box(modifier = Modifier.width(6.dp))
+}
+
+/** A cell's full [text] in a tooltip under it, on hover; nothing when [text] is empty. */
+@Composable
+private fun SongCellTooltip(text: String, content: @Composable () -> Unit) {
+    TooltipArea(
+        tooltip = {
+            if (text.isNotEmpty()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = MaterialTheme.shapes.extraSmall,
+                    tonalElevation = 4.dp
+                ) {
+                    Text(
+                        text,
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomStart,
+            offset = DpOffset(0.dp, 4.dp)
+        ),
+        content = content,
+    )
+}
+
+/** A data cell's clicks: select the song, or double-click to put it on screen. */
+private fun Modifier.songCellClicks(scope: SongListScope, index: Int): Modifier = with(scope) {
+    this@songCellClicks
+        .initialPassCombinedClickable(
+            onClick = {
+                onSelectSong(index)
+                if (isPresenting && live.songId != null) {
+                    onSelectSection(-1)
+                }
+                tabFocusRequester.requestFocus()
+            },
+            // The cell consumes on the Initial pass, so a click
+            // on the title never reaches the row behind it --
+            // without this, double-clicking a song's name would
+            // do nothing.
+            onDoubleClick = {
+                onSelectSong(index)
+                sendToPresenter(true)
+                onPresenting(Presenting.LYRICS)
+                tabFocusRequester.requestFocus()
+            },
+        )
 }
 
 @Composable

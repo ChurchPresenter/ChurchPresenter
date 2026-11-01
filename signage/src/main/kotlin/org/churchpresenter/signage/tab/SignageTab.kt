@@ -52,18 +52,17 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.UrlOpener
-import java.nio.file.Files
 import java.nio.file.Path
 
 /**
  * The Signage tab: the lobby screens this ChurchPresenter owns, the ones asking to
- * join, and the signage folder their playlists come from. Everything it changes is kept by
+ * join, and the playlists they play. Everything it changes is kept by
  * [controller], which goes on running while another tab is selected.
  *
  * @param serverRunning whether the companion server is on; the screens reach ChurchPresenter only
  *   through it.
  * @param onTurnOnServer turns the companion server on.
- * @param desktop the file manager, folder chooser and Trash the tab uses.
+ * @param desktop the file and folder chooser, file manager and Trash the tab uses.
  */
 @Composable
 fun SignageTab(
@@ -139,16 +138,17 @@ fun SignageTab(
                 SignageFolderPanel(
                     state = folder,
                     actions = FolderActions(
-                        onChangeFolder = controller::setFolder,
-                        onPictureSeconds = controller::setPictureSeconds,
                         desktop = desktop,
                         onAddLink = controller.added::addLink,
                         onAddFile = controller.added::addFile,
+                        onAddFolder = controller.added::addFolder,
                         onRemove = controller.added::remove,
                         onAddRotation = controller.added::addRotation,
                         onEditRotation = controller.added::updateRotation,
                         onEditLink = controller.added::updateLink,
                         onEditFile = controller.added::updateFile,
+                        onEditFolder = controller.added::updateFolder,
+                        onLocate = controller.added::locate,
                     ),
                     modifier = Modifier.weight(1f).fillMaxSize(),
                 )
@@ -157,7 +157,7 @@ fun SignageTab(
     }
 }
 
-/** One screen as its card shows it: what it is, its connection, and what the folder offers it. */
+/** One screen as its card shows it: what it is, its connection, and the playlists it can play. */
 internal data class ScreenRowState(
     val screen: PairedScreen,
     val link: ScreenLink?,
@@ -168,32 +168,30 @@ internal data class ScreenRowState(
 
 /** What the folder panel's controls do. */
 internal class FolderActions(
-    val onChangeFolder: (Path) -> Unit,
-    val onPictureSeconds: (Int) -> Unit,
     val desktop: SignageDesktop,
     val onAddLink: (NewLink) -> Unit = {},
     val onAddFile: (Path) -> Unit = {},
+    val onAddFolder: (Path) -> Unit = {},
     val onRemove: (id: String) -> Unit = {},
     val onAddRotation: (name: String, steps: List<RotationStep>) -> Unit = { _, _ -> },
     val onEditRotation: (id: String, name: String, steps: List<RotationStep>) -> Unit = { _, _, _ -> },
     val onEditLink: (id: String, link: NewLink) -> Unit = { _, _ -> },
-    val onEditFile: (id: String, name: String, file: Path) -> Unit = { _, _, _ -> },
+    /** Renames a file playlist, and plays a copy of the file chosen, if one was. */
+    val onEditFile: (id: String, name: String, file: Path?) -> Unit = { _, _, _ -> },
+    val onEditFolder: (id: String, name: String, pictureSeconds: Int) -> Unit = { _, _, _ -> },
+    /** Where a playlist's copy is on this computer, to open it in the file manager. */
+    val onLocate: (id: String) -> Path? = { null },
 )
 
 /**
- * What the tab asks of the computer itself: open a folder in the file manager, choose one, and
- * delete a playlist (to the Trash where there is one). Kept apart so a test can answer instead.
- * Each blocking call is made off the event thread.
+ * What the tab asks of the computer itself: the chooser for a file or a folder, the file manager,
+ * and whether it has a Trash. Kept apart so a test can answer instead. Each blocking call is made
+ * off the event thread.
  */
 class SignageDesktop(
     val fileChooser: FileChooser = FileChooser.platformInstance,
-    val openFolder: (Path) -> Unit = { folder ->
-        Files.createDirectories(folder)
-        UrlOpener.open(folder.toString())
-    },
-    /** Deletes playlist `id` from the signage folder; false when something was left. */
-    val deletePlaylist: (Path, String) -> Boolean = { root, id -> SignageFolder.delete(root, id) },
-    val canTrash: () -> Boolean = SignageFolder::canTrash,
+    val openFolder: (Path) -> Unit = { UrlOpener.open(it.toString()) },
+    val canTrash: () -> Boolean = SignageTrash::canTrash,
 )
 
 /** What a screen card's controls do, each given the screen's id. */

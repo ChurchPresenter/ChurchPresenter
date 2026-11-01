@@ -285,7 +285,9 @@ private fun SongsTabController.SongListSide(row: RowScope) = with(row) {
         onReloadSongs = { viewModel.loadSongs() },
         onSaveColumnWidths = ::saveColWidths,
         onSaveColumnOrder = { onSettingsChange { s -> s.copy(songColOrder = columns.order) } },
-        onSaveHiddenColumns = { onSettingsChange { s -> s.copy(songHiddenCols = columns.hidden) } },
+        onSaveHiddenColumns = {
+            onSettingsChange { s -> s.copy(songColOrder = columns.order, songHiddenCols = columns.hidden) }
+        },
         onSaveFavPanelHeight = {
             onSettingsChange { s ->
                 s.copy(songFavoritesPanelHeightDp = with(density) { favPanelHeightPx.toDp().value.toInt() })

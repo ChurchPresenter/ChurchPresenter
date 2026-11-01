@@ -97,7 +97,7 @@ data class SongStats(val sections: Int, val lines: Int, val words: Int)
  * Splits raw lyric text into the sections the preview draws.
  *
  * A header line starts a section and everything after it belongs to that section until the next
- * header — the same rule `SongsViewModel.splitLyricsIntoSections` presents by, so the preview shows
+ * header — the same rule `lyricSlidesOf` presents by, so the preview shows
  * what will actually go on screen. Blank lines are separators only; they neither start a section nor
  * appear in one, so a song written without blank lines between its verses still reads as verses.
  *

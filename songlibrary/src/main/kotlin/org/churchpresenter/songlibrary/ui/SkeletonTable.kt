@@ -91,6 +91,7 @@ private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>,
                         .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
                 )
             }
+            if (state.showOrder) Spacer(Modifier.width(orderColumnWidth(true)))
             Spacer(Modifier.width(ACTIONS_WIDTH))
         }
         Hairline()
