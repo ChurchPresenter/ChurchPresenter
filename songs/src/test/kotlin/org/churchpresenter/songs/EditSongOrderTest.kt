@@ -270,6 +270,29 @@ class EditSongOrderTest {
     }
 
     @Test
+    fun `a chorus named in square brackets repeats after each verse and is not taken for a verse`() {
+        val text = "[Verse 1]\na\n[Chorus]\nb\n[Verse 2]\nc\n[Verse 3]\nd"
+        val sections = editSongSectionsOf(text, repeatChorus = true)
+        val eachVerse = listOf("[Verse 1]", "[Chorus]", "[Verse 2]", "[Chorus]", "[Verse 3]", "[Chorus]")
+
+        assertEquals(eachVerse, sections.defaultOrder)
+        assertEquals(
+            eachVerse,
+            orderPresetsOf(sections).single { it.kind == OrderPresetKind.CHORUS_AFTER_EACH_VERSE }.keys,
+        )
+        assertEquals(
+            listOf("[Verse 1]", "[Chorus]", "[Verse 2]", "[Verse 3]"),
+            editSongSectionsOf(text, repeatChorus = false).defaultOrder,
+        )
+    }
+
+    @Test
+    fun `a chorus named in another language repeats too`() {
+        val sections = editSongSectionsOf("[Куплет 1]\na\n[Припев]\nb\n[Куплет 2]\nc", repeatChorus = true)
+        assertEquals(listOf("[Куплет 1]", "[Припев]", "[Куплет 2]", "[Припев]"), sections.defaultOrder)
+    }
+
+    @Test
     fun `an order that names no written section sings the song as written`() {
         val slides = lyricSlidesOf(lyrics, title = "", number = "")
         val plan = SectionPlan(keys = listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "[Bridge]"), order = listOf(9))

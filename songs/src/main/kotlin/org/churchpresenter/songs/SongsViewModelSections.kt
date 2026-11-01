@@ -1,5 +1,8 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.sharedui.utils.sectionLabelOf
+import org.churchpresenter.songchords.SongSectionWordGroup
+import org.churchpresenter.songchords.SongSectionWords
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
@@ -254,12 +257,19 @@ internal fun repeatChorusAfterVerses(groups: List<List<LyricSection>>): List<Lyr
     return result
 }
 
+/** A chorus: written in `{}`, or named one in `[]` — `[Chorus]`, `[Refrain]`, `[Припев]`. */
 internal fun isChorusGroup(group: List<LyricSection>): Boolean =
-    group.first().type == Constants.SECTION_TYPE_CHORUS
+    group.first().let { it.type == Constants.SECTION_TYPE_CHORUS || isChorusName(it.header) }
 
-/** A verse is sung with the chorus after it; a bridge, an intro or a tag is not. */
+/** A verse is sung with the chorus after it; a chorus, a bridge, an intro or a tag is not. */
 internal fun singsTheChorusAfterwards(group: List<LyricSection>): Boolean =
-    group.first().let { it.type == Constants.SECTION_TYPE_VERSE && isVerseHeader(it.header) }
+    group.first().let {
+        it.type == Constants.SECTION_TYPE_VERSE && isVerseHeader(it.header) && !isChorusName(it.header)
+    }
+
+/** True for a header whose name is a chorus word in any language the song format knows. */
+private fun isChorusName(header: String?): Boolean =
+    header != null && SongSectionWords.groupOf(sectionLabelOf(header)) == SongSectionWordGroup.CHORUS
 
 /**
  * Folds a section that is nothing but chords into the one it leads into.
