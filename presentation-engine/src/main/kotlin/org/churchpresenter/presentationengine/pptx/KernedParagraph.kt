@@ -123,6 +123,7 @@ internal class KernedParagraph(paragraph: TextParagraph<*, *, *>) : DrawTextPara
             att[TextAttribute.KERNING] = TextAttribute.KERNING_ON
             att[TextAttribute.FONT] = Font(att)
             att.forEach { (key, value) -> ranges += RangeAttribute(key, value, begin, text.length) }
+            textEffectsOf(run)?.let { ranges += RangeAttribute(TextEffectsKey, it, begin, text.length) }
             ranges += partFonts(graphics, fonts, PlacedRun(run, runText, begin), att)
         }
         // A paragraph needs at least one character to be measured at all.

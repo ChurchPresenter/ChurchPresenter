@@ -32,6 +32,7 @@ import java.text.CharacterIterator
  *   a paragraph of its own, so the text grows a fifth taller than PowerPoint's, spills out of its
  *   box, and a bottom-anchored box pushes it up into the title above.
  * - A justified line is drawn justified (see [PowerPointLine.draw]).
+ * - A run's outline, glow and shadow are drawn (see [TextEffects]); POI draws none of them.
  * - A line is 1.2 times its largest font size tall, as PowerPoint draws single spacing whatever the
  *   font. POI takes the height from the font's own metrics, which for Arial and Times New Roman is
  *   1.15 — so a verse slide's lines sit closer together than on the screen it was made on.
@@ -98,8 +99,11 @@ private const val SINGLE_LINE_HEIGHT = 1.2
  * [stackParagraphs] adds no leading of its own above the first line. A line that carries no size
  * (an empty one) keeps POI's leading.
  */
-private class PowerPointLine(layout: TextLayout, str: AttributedString) : DrawTextFragment(layout, str) {
-    private val leading: Float? = largestFontSize(str)?.let { size ->
+private class PowerPointLine(
+    layout: TextLayout,
+    private val text: AttributedString,
+) : DrawTextFragment(layout, text) {
+    private val leading: Float? = largestFontSize(text)?.let { size ->
         (size * SINGLE_LINE_HEIGHT - layout.ascent - layout.descent).toFloat()
     }
 
@@ -117,10 +121,11 @@ private class PowerPointLine(layout: TextLayout, str: AttributedString) : DrawTe
     /**
      * Draws the laid-out line itself. POI draws the line's attributed text with `drawString`,
      * which lays it out afresh and so drops the justification `getJustifiedLayout` gave it — a
-     * justified paragraph came out ragged. Drawing the layout draws exactly what was measured.
+     * justified paragraph came out ragged. Drawing the layout draws exactly what was measured,
+     * with any outline, glow or shadow its runs carry — see [drawWithEffects].
      */
     override fun draw(graphics: Graphics2D) {
-        layout.draw(graphics, drawX.toFloat(), (drawY + layout.ascent).toFloat())
+        drawWithEffects(graphics, layout, text, drawX.toFloat(), (drawY + layout.ascent).toFloat())
     }
 }
 

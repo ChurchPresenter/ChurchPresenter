@@ -23,6 +23,12 @@ dependencies {
     implementation(libs.apache.poi.scratchpad)
     implementation(libs.aircompressor)
 
+    // TextEffectsDeck writes a .pptx with POI; the same single schema jar as main.
+    testFixturesImplementation(libs.apache.poi.ooxml) {
+        exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
+    }
+    testFixturesImplementation(libs.apache.poi.ooxmlFull)
+
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)
 }
