@@ -4,6 +4,7 @@ package org.churchpresenter.profiles
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
@@ -16,6 +17,11 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.math.abs
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.captureToImage
 
 class RowNumberControlsTest {
 
@@ -87,5 +93,30 @@ class RowNumberControlsTest {
             waitForIdle()
         }
         assertEquals(0, value)
+    }
+
+    @Test
+    fun `a four-digit number is drawn, not scrolled out of its field`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                RowNumberField(value = 3840, onValueChange = {}, range = 0..9999, testTag = "field")
+            }
+        }
+        val ink = lightColorScheme().onSurface
+        val field = onNodeWithTag("field").captureToImage().toPixelMap()
+        var inked = 0
+        for (y in 0 until field.height) for (x in 0 until field.width) {
+            if (isInk(field[x, y], ink)) inked++
+        }
+        assertTrue(inked > field.width, "the digits must be drawn inside the field; $inked inked pixels")
+    }
+
+    private fun isInk(c: Color, ink: Color): Boolean {
+        val near = abs(c.red - ink.red) < INK_TOLERANCE && abs(c.green - ink.green) < INK_TOLERANCE
+        return near && abs(c.blue - ink.blue) < INK_TOLERANCE && c.alpha > 0.5f
+    }
+
+    private companion object {
+        const val INK_TOLERANCE = 0.2f
     }
 }

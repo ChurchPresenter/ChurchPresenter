@@ -4,10 +4,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,6 +25,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
@@ -165,7 +168,9 @@ internal fun ProfileMergeCard(
                 leading = {
                     Checkbox(
                         checked = tile != null,
-                        onCheckedChange = { on -> onMergeChange(merge.including(member, on, sizes)) },
+                        onCheckedChange = { on ->
+                            onMergeChange(merge.including(member, on, sizes, candidates.map { it.output }))
+                        },
                     )
                 },
             ) {
@@ -229,12 +234,34 @@ private fun MergeStatus(size: Pair<Int, Int>?, problem: MergeProblem?) {
 internal fun OutputMerge.moved(output: String, x: Int, y: Int): OutputMerge =
     copy(tiles = tiles.map { if (it.output == output) it.copy(x = x, y = y) else it })
 
-/** [this] with [member] added to the right of everything else, or taken out. */
-internal fun OutputMerge.including(member: MergeMember, on: Boolean, sizes: Map<String, Pair<Int, Int>>): OutputMerge {
+/**
+ * [this] with [member] taken out, or put back.
+ *
+ * Put back where it belongs when [order] (every output's key, in the list's order) is given: listed
+ * among the others in that order, and placed where it sits when they are laid side by side in it --
+ * its own slot, if nothing else is there now. Otherwise, or when that space is taken, it goes to the
+ * right of everything else.
+ */
+internal fun OutputMerge.including(
+    member: MergeMember,
+    on: Boolean,
+    sizes: Map<String, Pair<Int, Int>>,
+    order: List<String> = emptyList(),
+): OutputMerge {
     if (!on) return copy(tiles = tiles.filterNot { it.output == member.output })
     if (tiles.any { it.output == member.output }) return this
-    val right = tiles.maxOfOrNull { it.x + (sizes[it.output]?.first ?: 0) } ?: 0
-    return copy(tiles = tiles + MergeTile(member.output, right, 0))
+    val rank = order.indexOf(member.output)
+    val (w, h) = sizes[member.output] ?: (member.width to member.height)
+    val slotX = if (rank < 0) null else order.take(rank).sumOf { sizes[it]?.first ?: 0 }
+    val free = slotX != null && tiles.none { t ->
+        val (tw, th) = sizes[t.output] ?: return@none false
+        slotX < t.x + tw && t.x < slotX + w && 0 < t.y + th && t.y < h
+    }
+    val x = if (free && slotX != null) slotX else tiles.maxOfOrNull { it.x + (sizes[it.output]?.first ?: 0) } ?: 0
+    val added = MergeTile(member.output, x, 0)
+    if (rank < 0) return copy(tiles = tiles + added)
+    val at = tiles.indexOfFirst { order.indexOf(it.output) > rank }.let { if (it < 0) tiles.size else it }
+    return copy(tiles = tiles.take(at) + added + tiles.drop(at))
 }
 
 /**
@@ -259,16 +286,19 @@ private fun MergeMap(
     val line = MaterialTheme.colorScheme.primary
     val latest by rememberUpdatedState(merge)
     val textColor = MaterialTheme.colorScheme.onSurface
-    Row(
+    Column(
         Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         val ratio = spanW.toFloat() / spanH.coerceAtLeast(1)
+        // Shaped like the picture, so the labels sit right under it; no wider than MAP_HEIGHT and
+        // MAP_MAX_RATIO allow, and narrower when the column is.
         Canvas(
             Modifier
-                .width(MAP_HEIGHT * ratio.coerceAtMost(MAP_MAX_RATIO))
-                .height(MAP_HEIGHT)
+                .widthIn(max = MAP_HEIGHT * ratio.coerceAtMost(MAP_MAX_RATIO))
+                .fillMaxWidth()
+                .aspectRatio(ratio)
                 .testTag(MERGE_MAP_TAG)
                 .pointerInput(draggable, spanW, spanH) {
                     if (!draggable) return@pointerInput
@@ -302,12 +332,13 @@ private fun MergeMap(
                 drawRect(line, topLeft, box, style = Stroke(width = 1.dp.toPx()))
             }
         }
-        // Labels in order beside the map; the map itself stays a plain drawing.
+        // Labels in order under the map; the map itself stays a plain drawing.
         Text(
             text = rects.joinToString("  ·  ") { (t, _) -> labels[t.output] ?: t.output },
             fontSize = 11.sp,
             color = textColor,
-            modifier = Modifier.width(160.dp),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
