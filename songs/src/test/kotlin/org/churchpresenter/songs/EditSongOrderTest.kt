@@ -66,7 +66,9 @@ class EditSongOrderTest {
                 }
             }
             // The sections are worked out off the event thread; the chips arrive once they are.
-            waitUntil(timeoutMillis = WAIT_MS) { onAllNodesWithTag(ORDER_CHIP_TAG + "[Verse 1]").fetchSemanticsNodes().isNotEmpty() }
+            waitUntil(timeoutMillis = WAIT_MS) {
+                onAllNodesWithTag(ORDER_CHIP_TAG + "[Verse 1]").fetchSemanticsNodes().isNotEmpty()
+            }
             block(saved)
         }
     }

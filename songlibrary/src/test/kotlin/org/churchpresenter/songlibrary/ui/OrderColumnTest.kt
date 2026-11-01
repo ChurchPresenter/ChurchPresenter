@@ -21,7 +21,8 @@ class OrderColumnTest {
         lyrics = listOf("[Verse 1]", "a", "{Chorus}", "b", "[Verse 2]", "c", "[Bridge]", "d"),
         sectionOrder = listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Bridge]", "{Chorus}", "{Chorus}"),
     )
-    private val written = SongItem(number = "002", title = "Be Thou My Vision", songbook = "Hymnal", lyrics = listOf("a"))
+    private val written =
+        SongItem(number = "002", title = "Be Thou My Vision", songbook = "Hymnal", lyrics = listOf("a"))
 
     private fun ComposeUiTest.showOrder() {
         click(Text.COLUMNS)

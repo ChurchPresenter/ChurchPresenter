@@ -97,8 +97,11 @@ class SongsTabScreenshotTest {
                 "{Chorus}", "Praise the Lord, praise the Lord",
                 "[Verse 2]", "'Twas grace that taught my heart to fear", "And grace my fears relieved",
             ),
-            sectionOrder = listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Verse 1]", "{Chorus}", "{Chorus}"),
-            notes = "Capo 2 for the band. Piano intro, 4 bars. Last verse a cappella, then full band on the final line.",
+            sectionOrder = listOf(
+                "[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Verse 1]", "{Chorus}", "{Chorus}",
+            ),
+            notes = "Capo 2 for the band. Piano intro, 4 bars. " +
+                "Last verse a cappella, then full band on the final line.",
             sectionNotes = mapOf("[Verse 1]" to "Piano only", "[Verse 2]" to "Key change"),
         ),
         SongFixture(number = "45", title = "Be Thou My Vision", author = "Dallan Forgaill"),
@@ -164,9 +167,10 @@ class SongsTabScreenshotTest {
     }
 
     @Test
-    fun `a song with notes and section cues`() = shoot("song_notes_and_cues", songs = arranged, songSettings = verseMode()) {
-        clickSong("Amazing Grace")
-    }
+    fun `a song with notes and section cues`() =
+        shoot("song_notes_and_cues", songs = arranged, songSettings = verseMode()) {
+            clickSong("Amazing Grace")
+        }
 
     @Test
     fun `a song's notes opened`() = shoot("song_notes_opened", songs = arranged, songSettings = verseMode()) {

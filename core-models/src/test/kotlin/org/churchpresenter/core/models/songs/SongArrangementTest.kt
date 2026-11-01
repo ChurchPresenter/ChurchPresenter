@@ -63,7 +63,11 @@ class SongArrangementTest {
 
     @Test
     fun `blank cues are not written and kept ones are trimmed`() {
-        val song = SongItem(number = "1", title = "T", sectionNotes = mapOf("[Verse 1]" to "  Choir in ", "[Verse 2]" to " "))
+        val song = SongItem(
+            number = "1",
+            title = "T",
+            sectionNotes = mapOf("[Verse 1]" to "  Choir in ", "[Verse 2]" to " "),
+        )
         val written = songArrangementFields(song).toMap().getValue(SONG_CUES_KEY)
         assertEquals(mapOf("[Verse 1]" to "Choir in"), decodeCues(written))
     }

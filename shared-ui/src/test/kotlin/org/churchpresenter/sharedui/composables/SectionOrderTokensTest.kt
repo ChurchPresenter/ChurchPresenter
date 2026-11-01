@@ -14,7 +14,9 @@ class SectionOrderTokensTest {
 
     @Test
     fun `no order says the song is sung as written`() = runComposeUiTest {
-        setContent { ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) { SectionOrderTokens(emptyList(), "As written") } }
+        setContent {
+            ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) { SectionOrderTokens(emptyList(), "As written") }
+        }
 
         onNodeWithText("As written").assertExists()
     }

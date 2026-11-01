@@ -214,7 +214,9 @@ class SongLibraryScreenshotTest {
         when (index) {
             0 -> song.copy(
                 lyrics = listOf("[Verse 1]", "a", "{Chorus}", "b", "[Verse 2]", "c", "[Bridge]", "d"),
-                sectionOrder = listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Bridge]", "{Chorus}", "{Chorus}"),
+                sectionOrder = listOf(
+                    "[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "[Bridge]", "{Chorus}", "{Chorus}",
+                ),
             )
             1 -> song.copy(
                 lyrics = listOf("[Verse 1]", "a", "[Verse 2]", "b", "[Verse 3]", "c"),

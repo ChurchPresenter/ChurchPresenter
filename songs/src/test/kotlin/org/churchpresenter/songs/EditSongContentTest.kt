@@ -82,8 +82,9 @@ class EditSongContentTest {
         const val SONGBOOK_TYPED = 2
 
         // With a stage monitor configured, capo and tempo are inserted after Tune and before the
-        // lyrics box and the comments under the editor, which move down to 9 and 10. Verified against the rendered tree, not assumed — the
-        // constant that used to live here put TEMPO at 7, which is where capo actually is.
+        // lyrics box and the comments under the editor, which move down to 9 and 10. Verified
+        // against the rendered tree, not assumed — the constant that used to live here put TEMPO at
+        // 7, which is where capo actually is.
         const val CAPO = 7
         const val TEMPO = 8
         const val COUNT_WITH_TUNING = 11

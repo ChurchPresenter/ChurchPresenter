@@ -289,7 +289,8 @@ class EditSongDialogScreenshotTest {
     )
 
     private fun arranged() = amazingGrace().copy(
-        lyrics = amazingGrace().lyrics + listOf("", "[Verse 2]", "'Twas grace that taught my heart to fear", "And grace my fears relieved"),
+        lyrics = amazingGrace().lyrics +
+            listOf("", "[Verse 2]", "'Twas grace that taught my heart to fear", "And grace my fears relieved"),
         sectionOrder = listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}", "{Chorus}"),
         notes = "Capo 2 for the band. Piano intro, 4 bars.",
         sectionNotes = mapOf("[Verse 1]" to "Piano only", "{Chorus}" to "Full band"),

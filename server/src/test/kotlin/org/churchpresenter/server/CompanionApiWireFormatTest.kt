@@ -140,7 +140,8 @@ class CompanionApiWireFormatTest {
     fun `a song detail from a server without arrangement fields still decodes`() {
         val detail = json.decodeFromString(
             SongDetailDto.serializer(),
-            """{"number":"1","title":"T","songbook":"","tune":"","author":"","composer":"","section-total":0,"sections":[]}""",
+            """{"number":"1","title":"T","songbook":"","tune":"","author":"","composer":"",""" +
+                """"section-total":0,"sections":[]}""",
         )
 
         assertEquals(emptyList(), detail.order)
@@ -153,7 +154,12 @@ class CompanionApiWireFormatTest {
         val catalog = buildCatalog(
             listOf(
                 SongItem(number = "1", title = "Written", songbook = "Hymns"),
-                SongItem(number = "2", title = "Ordered", songbook = "Hymns", sectionOrder = listOf("[Verse 1]", "{Chorus}")),
+                SongItem(
+                    number = "2",
+                    title = "Ordered",
+                    songbook = "Hymns",
+                    sectionOrder = listOf("[Verse 1]", "{Chorus}"),
+                ),
             ),
         )
         val (written, ordered) = catalog.songBook.single().songs

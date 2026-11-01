@@ -13,7 +13,11 @@ class SectionOrderTokensScreenshotTest {
 
     @Test
     fun `a short order`() = captureComponent(SECTION, "short") {
-        SectionOrderTokens(listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}#2"), "As written", Modifier.width(180.dp))
+        SectionOrderTokens(
+            listOf("[Verse 1]", "{Chorus}", "[Verse 2]", "{Chorus}#2"),
+            "As written",
+            Modifier.width(180.dp),
+        )
     }
 
     @Test
