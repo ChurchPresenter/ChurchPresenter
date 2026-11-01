@@ -119,6 +119,12 @@ data class SongDetailDto(
     val notes: String = "",
     /** A short cue per section, by [SongSectionDto.key]; never presented. */
     val cues: Map<String, String> = emptyMap(),
+    /**
+     * The sections in the order the desktop plays them, by [SongSectionDto.key]: [order] with the
+     * sections it leaves out after it, or as written with the chorus repeated as Settings say. The
+     * section index a remote selects is a position in this, slide by slide.
+     */
+    val playOrder: List<String> = emptyList(),
 )
 
 @Serializable
