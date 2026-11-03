@@ -63,7 +63,7 @@ internal fun ScreenAssignmentCard(
     val updateProjection: ((ProjectionSettings) -> ProjectionSettings) -> Unit = { change ->
         onSettingsChange { s -> s.copy(projectionSettings = change(s.projectionSettings)) }
     }
-    val langDropdownWidth = 95.dp
+    val langDropdownWidth = OUTPUT_PROFILE_PICKER_WIDTH
 
 SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     // Detected screens info + simulate stepper + Identify button

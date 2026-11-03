@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.getBrowserSourceOutput
 import org.churchpresenter.settings.getNdiOutput
 import org.churchpresenter.settings.getOmtOutput
@@ -110,3 +112,7 @@ internal fun previewBorderColor(isLive: Boolean, role: BusRole? = null): Color {
     )
     return borderColor
 }
+
+/** Whether [PreviewProfileLabel] draws anything for this output -- nothing when no profile is chosen. */
+internal fun showsProfileLabel(profiles: List<OutputProfile>, activeProfileId: String?): Boolean =
+    activeProfileId == BLANK_OUTPUT_PROFILE_ID || profiles.any { it.id == activeProfileId }

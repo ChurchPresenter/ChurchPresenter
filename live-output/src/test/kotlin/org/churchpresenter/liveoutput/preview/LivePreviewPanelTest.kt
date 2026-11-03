@@ -16,6 +16,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -1074,4 +1077,53 @@ class LivePreviewPanelTest {
 
         onNodeWithContentDescription(SWAP).assertDoesNotExist()
     }
+
+    @Test
+    fun `the profile name shows over the picture only while the pointer is on it`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithText("Auditorium").assertDoesNotExist()
+        onNodeWithContentDescription(LOCK).performMouseInput { moveTo(center) }
+        waitForIdle()
+        onNodeWithText("Auditorium").assertExists()
+
+        onRoot().performMouseInput { moveTo(Offset(1f, 1f)) }
+        waitForIdle()
+        onNodeWithText("Auditorium").assertDoesNotExist()
+    }
+
+    @Test
+    fun `an output with no profile chosen shows no profile label`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles(activeId = null))
+            }
+        }
+
+        onNodeWithContentDescription(LOCK).performMouseInput { moveTo(center) }
+        waitForIdle()
+
+        onNodeWithText("Auditorium").assertDoesNotExist()
+        onNodeWithText("Blank").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the menu heading names the output's mode`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+
+        onNodeWithText("OUTPUT PROFILE · FULL SCREEN", substring = true).assertExists()
+    }
+
+    private val LOCK = "Lock screen to current tab"
 }

@@ -516,7 +516,7 @@ private fun NdiOutputRow(
                 ) {
                     update(output.copy(ndiMode = it))
                 }
-                Column(modifier = Modifier.width(cellWidth)) {
+                Column(modifier = Modifier.width(OUTPUT_PROFILE_PICKER_WIDTH)) {
                     Box(
                         modifier = Modifier.fillMaxWidth().height(labelHeight),
                         contentAlignment = Alignment.BottomStart,
