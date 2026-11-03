@@ -15,6 +15,10 @@ import org.churchpresenter.settings.BackgroundContent
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.composables.BackgroundTarget
 import java.io.File
+import kotlin.test.assertFalse
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.OutputProfile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -104,5 +108,77 @@ class BackgroundTargetsTest {
         waitForIdle()
         assertTrue(confirmed.isEmpty())
         assertNull(pending)
+    }
+
+    @Test
+    fun `every kind of output that draws is named, and the ones that draw nothing are not`() = runComposeUiTest {
+        val proj = ProjectionSettings(
+            screenAssignments = listOf(
+                ScreenAssignment(activeProfileId = "main", screenName = "Sanctuary"),
+                ScreenAssignment(activeProfileId = "main", targetDisplay = Constants.KEY_TARGET_NONE),
+            ),
+            browserSourceOutputs = listOf(ScreenAssignment(activeProfileId = "stream")),
+            ndiOutputs = listOf(
+                ScreenAssignment(activeProfileId = "stream", ndiName = "Livestream"),
+                ScreenAssignment(activeProfileId = "stream", ndiEnabled = false),
+            ),
+            omtOutputs = listOf(
+                ScreenAssignment(activeProfileId = "main"),
+                ScreenAssignment(activeProfileId = "main", omtEnabled = false),
+            ),
+            outputProfiles = listOf(OutputProfile(id = "main"), OutputProfile(id = "stream")),
+        )
+        var targets: List<BackgroundTarget> = emptyList()
+        setContent { targets = backgroundTargets(AppSettings(projectionSettings = proj)) }
+        waitForIdle()
+        assertEquals(
+            listOf(
+                BackgroundTarget("main", "Sanctuary + OMT Output 1"),
+                BackgroundTarget("stream", "Browser Source 1 + Livestream"),
+            ),
+            targets,
+        )
+    }
+
+    private fun state() = MainDesktopState(mutableStateOf(0), showCrashFeedbackInitially = false)
+
+    @Test
+    fun `asking to set a background opens the question, naming the menu's target`() {
+        val state = state()
+        val wiring = SetAsBackgroundWiring(listOf(BackgroundTarget("main", "Screen 1")), AppSettings(), state)
+
+        wiring.request(File("sunrise.jpg"), "main", BackgroundContent.BIBLE)
+
+        val pending = state.pendingBackground
+        assertEquals("sunrise.jpg", pending?.file?.name)
+        assertEquals("Screen 1", pending?.target?.label)
+        assertEquals(BackgroundContent.BIBLE, pending?.content)
+    }
+
+    @Test
+    fun `the wiring knows which background a file already is`() {
+        val file = File("/bg/sunrise.jpg")
+        val settings = AppSettings().withFileAsBackground(file, null, BackgroundContent.SONG)
+        val wiring = SetAsBackgroundWiring(emptyList(), settings, state())
+        assertTrue(wiring.isBackground(file, null, BackgroundContent.SONG))
+        assertFalse(wiring.isBackground(file, null, BackgroundContent.DEFAULT))
+    }
+
+    @Test
+    fun `Set saves the background and closes the question, Cancel only closes it`() {
+        val state = state()
+        var settings = AppSettings()
+        val confirmation = SetAsBackgroundConfirmation(state) { transform -> settings = transform(settings) }
+        val pending = PendingBackground(File("/bg/waves.mp4"), BackgroundContent.DEFAULT, target = null)
+
+        state.pendingBackground = pending
+        confirmation.dismiss()
+        assertNull(state.pendingBackground)
+        assertEquals(Constants.BACKGROUND_COLOR, settings.backgroundSettings.defaultBackgroundType)
+
+        state.pendingBackground = pending
+        confirmation.confirm(pending)
+        assertNull(state.pendingBackground)
+        assertEquals(Constants.BACKGROUND_VIDEO, settings.backgroundSettings.defaultBackgroundType)
     }
 }

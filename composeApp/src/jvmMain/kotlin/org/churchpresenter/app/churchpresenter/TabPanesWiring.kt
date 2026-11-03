@@ -31,7 +31,6 @@ import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
 import java.util.UUID
-import org.churchpresenter.settings.backgroundShows
 import org.churchpresenter.app.churchpresenter.tabs.AppWebTab
 
 /*
@@ -104,6 +103,7 @@ internal fun MainDesktopScope.TabContentPane(tab: Tabs) {
 @Composable
 internal fun MainDesktopScope.PicturesTabPane() {
     val targets = backgroundTargets(appSettings)
+    val background = SetAsBackgroundWiring(targets, appSettings, state)
     PicturesTab(
         modifier = Modifier.fillMaxSize(),
         hostWindow = hostWindow,
@@ -115,12 +115,8 @@ internal fun MainDesktopScope.PicturesTabPane() {
             currentScheduleActions.addSinglePicture(image, folderImageCount)
         },
         backgroundTargets = targets,
-        onSetAsBackground = { image, profileId, content ->
-            state.pendingBackground = targets.pendingBackground(image, profileId, content)
-        },
-        isBackground = { image, profileId, content ->
-            appSettings.backgroundShows(image.absolutePath, content, profileId)
-        },
+        onSetAsBackground = background::request,
+        isBackground = background::isBackground,
         onSavePreset = { folderPath, folderName, imageCount ->
             state.presetToSave = ScheduleItem.PictureItem(
                 UUID.randomUUID().toString(), folderPath, folderName, imageCount,
@@ -190,6 +186,7 @@ internal fun MainDesktopScope.PresentationTabPane() {
 @Composable
 internal fun MainDesktopScope.MediaTabPane() {
     val targets = backgroundTargets(appSettings)
+    val background = SetAsBackgroundWiring(targets, appSettings, state)
     MediaTab(
         modifier = Modifier.fillMaxSize(),
         appSettings = appSettings,
@@ -198,12 +195,8 @@ internal fun MainDesktopScope.MediaTabPane() {
             currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType, subtitleUrl)
         },
         backgroundTargets = targets,
-        onSetAsBackground = { file, profileId, content ->
-            state.pendingBackground = targets.pendingBackground(file, profileId, content)
-        },
-        isBackground = { file, profileId, content ->
-            appSettings.backgroundShows(file.absolutePath, content, profileId)
-        },
+        onSetAsBackground = background::request,
+        isBackground = background::isBackground,
         onSavePreset = { mediaUrl, mediaTitle, mediaType ->
             state.presetToSave = ScheduleItem.MediaItem(
                 UUID.randomUUID().toString(), mediaUrl, mediaTitle, mediaType,

@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.BackgroundContent
+import org.churchpresenter.settings.backgroundShows
 import org.churchpresenter.settings.drivesNothing
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.withBackgroundSet
@@ -97,6 +98,39 @@ internal data class PendingBackground(val file: File, val content: BackgroundCon
 /** [PendingBackground] for [profileId], named the way the menu named it; null [profileId] is every output. */
 internal fun List<BackgroundTarget>.pendingBackground(file: File, profileId: String?, content: BackgroundContent) =
     PendingBackground(file, content, profileId?.let { id -> firstOrNull { it.profileId == id } })
+
+/**
+ * What a tab's Set as Background is wired to: [request] asks first, through [MainDesktopState.pendingBackground],
+ * naming the target the way [targets] does; [isBackground] says which background a file already is, so the
+ * menu can mark it.
+ */
+internal class SetAsBackgroundWiring(
+    private val targets: List<BackgroundTarget>,
+    private val settings: AppSettings,
+    private val state: MainDesktopState,
+) {
+    fun request(file: File, profileId: String?, content: BackgroundContent) {
+        state.pendingBackground = targets.pendingBackground(file, profileId, content)
+    }
+
+    fun isBackground(file: File, profileId: String?, content: BackgroundContent): Boolean =
+        settings.backgroundShows(file.absolutePath, content, profileId)
+}
+
+/** The answer to Set as Background's question: [confirm] saves it, through [onSettingsChange]; either closes it. */
+internal class SetAsBackgroundConfirmation(
+    private val state: MainDesktopState,
+    private val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    fun confirm(pending: PendingBackground) {
+        onSettingsChange { it.withFileAsBackground(pending.file, pending.target?.profileId, pending.content) }
+        state.pendingBackground = null
+    }
+
+    fun dismiss() {
+        state.pendingBackground = null
+    }
+}
 
 /**
  * Asks before a Set as Background is saved: which background, on which outputs, and which file, since
