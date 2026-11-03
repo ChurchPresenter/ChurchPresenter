@@ -9,6 +9,9 @@ import org.churchpresenter.strings.generated.resources.preview_layout_done
 import org.churchpresenter.strings.generated.resources.preview_layout_edit
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.foundation.border
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -264,6 +267,11 @@ internal fun SingleDisplayPreview(
     // needed by the real presenter window, which main.kt drives on its own -- a collapsed preview
     // stops drawing and nothing else changes.
     var expanded by remember { mutableStateOf(true) }
+    val profiles = appSettings.projectionSettings.outputProfiles
+    val pickProfile: (String) -> Unit = { pickedId ->
+        onSettingsChange(withPreviewProfile(outputKind, screenIndex, pickedId))
+    }
+    val showsProfileLabel = showsProfileLabel(profiles, rawAssignment.activeProfileId)
 
     Column(modifier = modifier) {
         PreviewHeader(
@@ -272,16 +280,21 @@ internal fun SingleDisplayPreview(
             expanded = expanded || !collapsible,
             collapsible = collapsible,
             onToggle = { expanded = !expanded },
-            profiles = appSettings.projectionSettings.outputProfiles,
+            profiles = profiles,
             activeProfileId = rawAssignment.activeProfileId,
-            onPickProfile = { pickedId -> onSettingsChange(withPreviewProfile(outputKind, screenIndex, pickedId)) },
+            onPickProfile = pickProfile,
         )
 
         if (expanded || !collapsible) {
+        // The profile's label is shown only while the pointer is over the picture.
+        val pictureHover = remember { MutableInteractionSource() }
+        val pictureHovered by pictureHover.collectIsHoveredAsState()
+        val profileLabelShown = showsProfileLabel && pictureHovered
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(outputSize.aspectRatio)
+                .hoverable(pictureHover)
                 .clip(AppShape(6.dp))
                 .border(if (busRole != null) BUS_BORDER_WIDTH else 1.dp, borderColor, AppShape(6.dp))
                 // Live is the red frame alone; this says so to a test.
@@ -341,7 +354,9 @@ internal fun SingleDisplayPreview(
             label = if (showLabel) label else null,
             mediaAudible = mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying,
             lockable = busRole != BusRole.PREVIEW,
+            bottomInset = if (profileLabelShown) PROFILE_LABEL_CLEARANCE else 0.dp,
         )
+        if (profileLabelShown) PreviewProfileLabel(profiles, rawAssignment.activeProfileId)
         }
         }
     }
