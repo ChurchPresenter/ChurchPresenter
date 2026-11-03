@@ -1,0 +1,31 @@
+# The songs tour's narration in Spanish, key for key with songs.txt; each line fitted to its slot in the video.
+
+the-songs-tab = Bienvenido a ChurchPresenter. En este recorrido veremos la pestaña Canciones, donde encuentra cualquier canción, muestra sus estrofas y dirige la alabanza con el teclado.
+open-tab = Abramos la pestaña Canciones. Aquí está toda su biblioteca.
+search-by-title = Para encontrar una canción, escriba su título. La lista se reduce con cada letra.
+or-by-a-line-of-the-lyrics = ¿No recuerda el título? Escriba una línea de la letra. Cada resultado indica en qué estrofa está.
+clear-the-search = Borre la búsqueda para ver todo.
+pick-a-song-book = Si tiene varios cancioneros, puede mostrar solo uno. Abra la lista Cancionero.
+gospel-songs = Elegimos Gospel Songs, y solo aparecen esas canciones.
+back-to-every-book = Para ver todo otra vez, abra la lista de nuevo.
+all-song-books = Y elija Todos los cancioneros.
+choose-how-the-search-matches = La lista Filtro decide cómo coincide la búsqueda: Contiene, Empieza por o Coincidencia exacta.
+starts-with = Empieza por sirve si sabe cómo empieza el título.
+sort-the-list = Ordene la lista con un clic en cualquier encabezado. Otro clic invierte el orden.
+click-a-song = Ahora elijamos una canción. Pulse Amazing Grace, y sus estrofas aparecen a la derecha.
+click-a-verse = Pulse la primera estrofa. Aparece en la vista previa.
+sends-the-verse-to-the-projector = Luego pulse En vivo para enviarla al proyector.
+verse-1-of-amazing-grace = La primera estrofa ya está en la pantalla grande.
+next-verse = En la alabanza no necesita el ratón. Pulse la flecha abajo para la siguiente estrofa, y arriba para volver.
+verse-2 = La estrofa dos está en vivo, desde el teclado.
+double-click-a-verse = También puede hacer doble clic en una estrofa para ponerla en vivo.
+verse-3-live = Y ahora la estrofa tres está en pantalla.
+star-a-song = Marque con estrella las canciones que más usa. Sus favoritas quedan en su propio panel, siempre a mano.
+right-click-a-song-for-more = Haga clic derecho en una canción para más opciones: ponerla en vivo, añadirla al programa, marcarla favorita, editarla o borrarla.
+add-to-schedule = Añadamos It Is Well With My Soul al programa.
+added-to-your-schedule = Ahí está, al final del culto, a la izquierda.
+back-to-live = Fíjese en la barra roja Volver a en vivo. Aparece cuando se aleja de la canción en pantalla. Púlsela para volver al instante.
+choose-the-columns = También puede elegir las columnas de la lista, como el número, el autor o cuántas veces se ha usado una canción.
+edit-a-song = Para cambiar una canción, pulse Editar. Puede cambiar la letra, añadir y transportar acordes, incluir traducciones y darle su propio estilo.
+write-a-new-song = Y para algo nuevo, pulse el botón más para escribir una canción, o importarla.
+that-s-the-songs-tab = Y esa es la pestaña Canciones. Busque, elija una estrofa, póngala en vivo y dirija el resto desde el teclado.

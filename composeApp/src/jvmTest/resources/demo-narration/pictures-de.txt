@@ -1,0 +1,26 @@
+# The pictures tour's narration in German, key for key with pictures.txt; each line fitted to its slot in the video.
+
+intro = Willkommen bei ChurchPresenter. Wir sehen uns den Tab Bilder an, der Fotos auf die Leinwand bringt, einzeln oder als Diashow.
+open-tab = Öffnen wir den Tab Bilder. Jedes Foto im gewählten Ordner erscheint hier als Vorschaubild.
+folder = Um Fotos zu wählen, klicken Sie auf Ordner auswählen und wählen einen Ordner. Alle Bilder darin erscheinen unten. JPEG, PNG, GIF, BMP, WebP und HEIC werden unterstützt.
+recents = Ihre letzten Ordner stehen gleich hier, so sind die Fotos vom letzten Sonntag nur einen Klick entfernt. Häufige können Sie anheften.
+click-photo = Klicken Sie ein Foto an. Es erscheint zuerst in der Vorschau, damit Sie es prüfen können.
+go-live = Wenn Sie bereit sind, klicken Sie auf Live.
+live-1 = Und da ist es, bildschirmfüllend.
+arrow = Ist ein Foto live, nutzen Sie die Pfeiltasten. Rechts zum nächsten Foto, links wieder zurück.
+live-2 = Das nächste Foto ist da, direkt per Tastatur.
+double-click = Ein Doppelklick auf ein Foto schaltet es auch live.
+live-3 = Und jetzt die Kerzen.
+hide = Soll ein Foto nicht gezeigt werden, klicken Sie das Auge auf der Karte. Es bleibt im Ordner, aber Pfeiltasten und Diashow überspringen es.
+play = Sollen die Fotos von selbst wechseln, drücken Sie Abspielen.
+interval = Wählen Sie, wie lange jedes Foto zu sehen ist.
+transition = Daneben legt die Übergangsdauer fest, wie lange der Wechsel dauert. Eine halbe Sekunde wirkt weich.
+loop = Wiederholen ist an, die Diashow beginnt nach dem letzten Foto neu. Ideal vor dem Gottesdienst.
+animation = Sie wählen auch, wie ein Foto ins nächste wechselt. Öffnen Sie die Übergangsliste.
+fade = Wir wählen Überblenden, ganz sanft.
+scale = Fotos gibt es in allen Formaten. Dieser Knopf wechselt zwischen ganzem Foto und randlos füllend.
+live-4 = Jetzt füllt das Foto den Bildschirm.
+preset = Zeigen Sie diesen Ordner oft, speichern Sie ihn als Vorlage: eine benannte Abkürzung wie Welcome Loop, die Sie mit einem Klick in jeden Gottesdienst holen.
+schedule = Zum Schluss klicken Sie auf Zum Ablauf hinzufügen.
+schedule-row = Die Galerie steht jetzt links im Ablauf.
+outro = Das ist der Tab Bilder. Ordner wählen, Foto klicken, live gehen, und die Diashow macht den Rest.

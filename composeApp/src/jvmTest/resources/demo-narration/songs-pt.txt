@@ -1,0 +1,31 @@
+# The songs tour's narration in Brazilian Portuguese, key for key with songs.txt; each line fitted to its slot in the video.
+
+the-songs-tab = Bem-vindo ao ChurchPresenter. Neste tour, vamos ver a aba Músicas, onde você acha qualquer música, mostra as estrofes e conduz o louvor pelo teclado.
+open-tab = Vamos abrir a aba Músicas. Sua biblioteca toda está aqui.
+search-by-title = Para achar uma música, digite o título. A lista diminui a cada letra.
+or-by-a-line-of-the-lyrics = Esqueceu o título? Digite um trecho da letra. Cada resultado mostra em que estrofe está.
+clear-the-search = Limpe a busca para ver tudo.
+pick-a-song-book = Se tiver vários hinários, mostre só um. Abra a lista Hinário.
+gospel-songs = Escolhemos Gospel Songs, e só essas aparecem.
+back-to-every-book = Para ver tudo, abra a lista de novo.
+all-song-books = E escolha Todos os hinários.
+choose-how-the-search-matches = A lista Filtro define a busca: Contém, Começa com ou Exata.
+starts-with = Começa com ajuda quando sabe o início.
+sort-the-list = Ordene clicando em qualquer cabeçalho. Clique de novo para inverter.
+click-a-song = Escolha uma música. Clique em Amazing Grace, e as estrofes surgem à direita.
+click-a-verse = Clique na primeira estrofe. Ela vai para a prévia.
+sends-the-verse-to-the-projector = Depois clique em Ao vivo.
+verse-1-of-amazing-grace = A primeira estrofe está no telão.
+next-verse = No louvor, nem precisa do mouse. Seta para baixo vai à próxima estrofe, e para cima volta.
+verse-2 = A estrofe dois está ao vivo, pelo teclado.
+double-click-a-verse = Um clique duplo também põe a estrofe ao vivo.
+verse-3-live = E agora a estrofe três está na tela.
+star-a-song = Marque com estrela as músicas mais usadas. As favoritas ficam num painel próprio, sempre à mão.
+right-click-a-song-for-more = Clique com o botão direito para mais opções: ao vivo, à programação, favoritar, editar ou excluir.
+add-to-schedule = Vamos pôr It Is Well With My Soul na programação.
+added-to-your-schedule = Aí está, no fim do culto, à esquerda.
+back-to-live = Veja a barra vermelha Voltar ao vivo. Ela surge quando você sai da música na tela. Clique para voltar.
+choose-the-columns = Você escolhe as colunas da lista, como o número, o autor ou quantas vezes a música foi usada.
+edit-a-song = Para mudar uma música, clique em Editar. Mude a letra, adicione e transponha cifras, inclua traduções e dê um visual próprio.
+write-a-new-song = E para algo novo, clique no mais para escrever uma música, ou importar.
+that-s-the-songs-tab = Essa é a aba Músicas. Busque, escolha a estrofe, vá ao vivo e conduza o resto pelo teclado.

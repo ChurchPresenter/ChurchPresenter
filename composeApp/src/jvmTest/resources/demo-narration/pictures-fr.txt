@@ -1,0 +1,26 @@
+# The pictures tour's narration in French, key for key with pictures.txt; each line fitted to its slot in the video.
+
+intro = Bienvenue dans ChurchPresenter. Voyons l'onglet Images, pour afficher des photos sur le grand écran, une à une ou en diaporama.
+open-tab = Ouvrons l'onglet Images. Chaque photo du dossier choisi s'affiche ici en vignette.
+folder = Pour choisir vos photos, cliquez sur Choisir un dossier, puis prenez-en un. Toutes ses images apparaissent dessous. JPEG, PNG, GIF, BMP, WebP et HEIC sont pris en charge.
+recents = Vos dossiers récents sont listés ici, pour retrouver les photos de dimanche dernier d'un clic. Vous pouvez épingler les plus utilisés.
+click-photo = Cliquez sur une photo. Elle passe d'abord en aperçu, pour la vérifier avant tout le monde.
+go-live = Quand c'est prêt, cliquez sur En direct.
+live-1 = Et la voilà, en plein écran.
+arrow = Photo en direct, utilisez les flèches. Flèche droite pour la suivante, flèche gauche pour revenir.
+live-2 = La photo suivante est à l'écran, au clavier.
+double-click = Un double-clic sur une photo la met aussi en direct.
+live-3 = Et voici les bougies.
+hide = Pour ne pas montrer une photo, cliquez sur l'œil de sa vignette. Elle reste dans le dossier, mais les flèches et le diaporama la sautent.
+play = Pour un défilement auto, cliquez sur Lecture, et les photos changent seules.
+interval = Choisissez combien de temps chaque photo reste affichée.
+transition = À côté, la durée de transition règle le temps du passage d'une photo à l'autre. Une demi-seconde, c'est fluide.
+loop = La boucle est active : le diaporama recommence après la dernière photo. Parfait avant le culte.
+animation = Vous pouvez aussi choisir l'effet entre deux photos. Ouvrez la liste des transitions.
+fade = Prenons Fondu, tout en douceur.
+scale = Les photos ont toutes les formes. Ce bouton passe de la photo entière à l'écran rempli bord à bord.
+live-4 = La photo remplit tout l'écran.
+preset = Si vous montrez souvent ce dossier, enregistrez-le en préréglage : un raccourci nommé, comme Welcome Loop, à ajouter à tout culte d'un clic, sans chercher le dossier.
+schedule = Enfin, cliquez sur Ajouter au programme pour ce dossier.
+schedule-row = La galerie est dans votre programme, à gauche.
+outro = Voilà l'onglet Images. Un dossier, une photo, en direct, et le diaporama fait le reste.

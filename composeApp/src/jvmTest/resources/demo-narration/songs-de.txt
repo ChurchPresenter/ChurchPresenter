@@ -1,0 +1,31 @@
+# The songs tour's narration in German, key for key with songs.txt; each line fitted to its slot in the video.
+
+the-songs-tab = Willkommen bei ChurchPresenter. In dieser Tour sehen wir den Tab Lieder, wo Sie jedes Lied finden, seine Strophen zeigen und den Lobpreis per Tastatur leiten.
+open-tab = Öffnen wir den Tab Lieder. Ihre ganze Sammlung steht hier.
+search-by-title = Um ein Lied zu finden, tippen Sie den Titel. Die Liste wird mit jedem Buchstaben kürzer.
+or-by-a-line-of-the-lyrics = Titel vergessen? Tippen Sie eine Zeile aus dem Text. Jeder Treffer zeigt sogar die Strophe.
+clear-the-search = Leeren Sie die Suche für alle Lieder.
+pick-a-song-book = Haben Sie mehrere Liederbücher, zeigen Sie nur eins. Öffnen Sie die Liste Liederbuch.
+gospel-songs = Wir wählen Gospel Songs, und nur diese Lieder bleiben.
+back-to-every-book = Für alles öffnen Sie die Liste nochmal.
+all-song-books = Und wählen Alle Liederbücher.
+choose-how-the-search-matches = Die Liste Filter regelt die Suche: Enthält, Beginnt mit oder Genaue Übereinstimmung.
+starts-with = Beginnt mit hilft, wenn Sie den Anfang kennen.
+sort-the-list = Sortieren Sie per Klick auf eine Spaltenüberschrift. Nochmal klicken kehrt es um.
+click-a-song = Wählen wir ein Lied. Klicken Sie Amazing Grace, und die Strophen erscheinen rechts.
+click-a-verse = Klicken Sie die erste Strophe. Sie steht in der Vorschau.
+sends-the-verse-to-the-projector = Dann klicken Sie auf Live.
+verse-1-of-amazing-grace = Die erste Strophe ist auf der Leinwand.
+next-verse = Im Lobpreis brauchen Sie keine Maus. Pfeil nach unten für die nächste Strophe, Pfeil nach oben zurück.
+verse-2 = Strophe zwei ist live, direkt per Tastatur.
+double-click-a-verse = Ein Doppelklick auf eine Strophe schaltet sie auch live.
+verse-3-live = Und jetzt ist Strophe drei zu sehen.
+star-a-song = Häufige Lieder markieren Sie mit einem Stern. Favoriten bleiben in einem eigenen Bereich, immer griffbereit.
+right-click-a-song-for-more = Ein Rechtsklick auf ein Lied zeigt mehr: live schalten, zum Ablauf, als Favorit, bearbeiten oder löschen.
+add-to-schedule = Fügen wir It Is Well With My Soul zum Ablauf hinzu.
+added-to-your-schedule = Da ist es, am Ende des Ablaufs links.
+back-to-live = Sehen Sie die rote Leiste Zurück zu Live? Sie erscheint, wenn Sie das Lied auf dem Bildschirm verlassen. Ein Klick bringt Sie zurück.
+choose-the-columns = Sie wählen auch die Spalten der Liste, etwa die Liednummer, den Autor oder wie oft ein Lied gespielt wurde.
+edit-a-song = Um ein Lied zu ändern, klicken Sie Bearbeiten. Ändern Sie den Text, fügen Sie Akkorde hinzu und transponieren Sie, mit Übersetzungen und eigenem Look.
+write-a-new-song = Und für Neues klicken Sie auf Plus, um ein Lied zu schreiben oder zu importieren.
+that-s-the-songs-tab = Das ist der Tab Lieder. Suchen, Strophe wählen, live gehen, und den Rest per Tastatur leiten.

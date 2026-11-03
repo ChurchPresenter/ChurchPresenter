@@ -1,0 +1,29 @@
+# The bible tour's narration in German, key for key with bible.txt (switch-callout is the callout the English take reads aloud); each line fitted to its slot in the video.
+
+the-bible-tab = Willkommen bei ChurchPresenter. In dieser kurzen Tour sehen wir uns den Tab Bibel an, wo Sie jede Stelle in Sekunden finden und auf die Leinwand bringen.
+open-tab = Öffnen wir zuerst den Tab Bibel. Jede installierte Übersetzung ist hier verfügbar.
+pick-a-book = Der erste Weg zu einer Stelle ist einfaches Blättern. Wählen Sie ein Buch. Hier nehmen wir Römer.
+pick-a-chapter = Dann wählen Sie das Kapitel. Wir öffnen Kapitel zwölf.
+click-a-verse = Klicken Sie auf einen Vers. Er erscheint sofort in der Vorschau, damit Sie ihn vorher prüfen.
+shift-click-to-select-a-range = Mehr als ein Vers? Halten Sie Umschalt und klicken Sie einen weiteren, und der Bereich ist gewählt.
+sends-the-verses-to-the-projecto = Wenn Sie bereit sind, klicken Sie auf Live, und es geht an den Beamer.
+romans-12-1-2-in-both-translatio = Und da ist es auf der Leinwand. Weil zwei Übersetzungen aktiv sind, erscheint jeder Vers in beiden Sprachen, untereinander.
+or-type-a-reference = Kennen Sie die Stelle schon, geht es schneller. Klicken Sie ins Suchfeld, tippen Sie etwa Johannes drei sechzehn, und drücken Sie Enter. Kurzformen gehen auch.
+double-click-to-go-live = Um einen Vers sofort zu zeigen, doppelklicken Sie ihn. Das ist im Gottesdienst am schnellsten.
+john-3-16-in-two-languages = Johannes drei sechzehn ist jetzt live, wieder in beiden Übersetzungen.
+swap-which-comes-first = Sie wählen auch, welche Sprache zuerst kommt. Ein Klick auf Tauschen dreht die Reihenfolge.
+flipped = Jetzt führt die zweite Übersetzung, und Englisch folgt darunter.
+click-again-to-flip-back = Klicken Sie nochmal auf Tauschen, um zurückzustellen. Nehmen Sie die Reihenfolge Ihrer Gemeinde.
+right-click-a-verse-for-more = Ein Rechtsklick auf einen Vers zeigt mehr: live schalten, zum Ablauf hinzufügen, kopieren oder die Querverweise öffnen.
+add-to-schedule = Fügen wir diesen Vers zum Ablauf hinzu, damit er später bereit ist.
+added-to-your-schedule = Er steht jetzt unten im Ablauf links, wo Sie den Gottesdienst der Reihe nach führen.
+cross-references = Wenn Sie tiefer gehen möchten, klicken Sie auf Refs für die Querverweise. Das sind verwandte Stellen zum gewählten Vers. Sie zu nutzen ist ganz freiwillig.
+switch-the-search-to-text = Das Suchfeld findet auch Wörter. Standardmäßig steht es auf Auto, das errät, was Sie meinen. Klicken Sie, um zwischen Verweis und Text zu wechseln.
+switch-callout = Stellen Sie die Suche auf Text. Auto rät; Verweis und Text sind eindeutig.
+search-for-a-word = Tippen Sie jetzt ein Wort, zum Beispiel Jesus. Jeder Vers, der es enthält, erscheint beim Tippen.
+every-verse-that-mentions-it = Oben steht die Zahl der Treffer, und jeder Treffer ist markiert, leicht zu überblicken.
+pick-a-verse = Klicken Sie ein Ergebnis, und die Bibel springt direkt zu dem Vers.
+puts-the-verse-you-picked-on-scr = Dann klicken Sie auf Live.
+found-by-searching-a-word = Und er ist live, gefunden mit einem Wort.
+history = Zum Schluss: Der Verlauf hält jeden heute gezeigten Vers. Klicken Sie einen an, um zurückzukehren.
+that-s-the-bible-tab = Das ist der Tab Bibel. Blättern oder suchen, Verse zum Ablauf hinzufügen, und mit einem Klick live gehen.

@@ -1,0 +1,29 @@
+# The bible tour's narration in French, key for key with bible.txt (switch-callout is the callout the English take reads aloud); each line fitted to its slot in the video.
+
+the-bible-tab = Bienvenue dans ChurchPresenter. Dans cette courte visite, voyons l'onglet Bible, où vous trouvez un passage en quelques secondes et l'affichez sur le grand écran.
+open-tab = Commençons par ouvrir l'onglet Bible. Toutes vos traductions installées sont ici.
+pick-a-book = Pour trouver un passage, on peut d'abord parcourir. Choisissez un livre. Ici, Romains.
+pick-a-chapter = Puis choisissez le chapitre. Le douze.
+click-a-verse = Cliquez sur un verset. Il apparaît en aperçu, pour le vérifier avant tout le monde.
+shift-click-to-select-a-range = Plusieurs versets ? Maintenez Maj et cliquez sur un autre : tout le passage est choisi.
+sends-the-verses-to-the-projecto = Quand c'est prêt, cliquez sur En direct, et c'est projeté.
+romans-12-1-2-in-both-translatio = Et le voilà sur le grand écran. Avec deux traductions actives, chaque verset s'affiche dans les deux langues, l'une sous l'autre.
+or-type-a-reference = Si vous connaissez la référence, c'est encore plus rapide. Cliquez sur la recherche, tapez Jean trois seize, et appuyez sur Entrée. Les abréviations marchent aussi.
+double-click-to-go-live = Pour afficher un verset tout de suite, double-cliquez dessus. Le plus rapide en plein culte.
+john-3-16-in-two-languages = Jean trois seize est en direct, dans les deux traductions.
+swap-which-comes-first = Choisissez la langue qui vient d'abord. Cliquez sur Inverser, et l'ordre change.
+flipped = La deuxième traduction passe devant, et l'anglais suit dessous.
+click-again-to-flip-back = Cliquez encore sur Inverser pour revenir. Prenez l'ordre que votre assemblée lit d'abord.
+right-click-a-verse-for-more = Un clic droit sur un verset ouvre d'autres options : passer en direct, l'ajouter au programme, le copier ou voir ses références.
+add-to-schedule = Ajoutons ce verset au programme, pour plus tard dans le culte.
+added-to-your-schedule = Il apparaît en bas du programme, à gauche, pour mener tout le culte dans l'ordre.
+cross-references = Pour aller plus loin, cliquez sur Refs pour ouvrir les références croisées : des passages liés au verset choisi. C'est entièrement facultatif.
+switch-the-search-to-text = La recherche trouve aussi des mots. Par défaut, elle est sur Auto, qui devine ce que vous voulez. Cliquez pour passer à Référence ou Texte.
+switch-callout = Passez la recherche en Texte. Auto devine ; Référence et Texte sont précis.
+search-for-a-word = Tapez maintenant un mot, par exemple Jésus. Chaque verset qui le contient s'affiche aussitôt.
+every-verse-that-mentions-it = Le nombre de résultats est en haut, et chaque mot est surligné, facile à parcourir.
+pick-a-verse = Cliquez sur un résultat, et la Bible va droit au verset.
+puts-the-verse-you-picked-on-scr = Puis cliquez sur En direct.
+found-by-searching-a-word = Et il est en direct, trouvé par un simple mot.
+history = Enfin, l'Historique garde chaque verset affiché aujourd'hui. Cliquez dessus pour y revenir.
+that-s-the-bible-tab = Voilà l'onglet Bible. Parcourez ou cherchez, ajoutez des versets au programme, et passez en direct d'un clic.

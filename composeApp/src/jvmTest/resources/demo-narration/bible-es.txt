@@ -1,0 +1,29 @@
+# The bible tour's narration in Spanish, key for key with bible.txt (switch-callout is the callout the English take reads aloud); each line fitted to its slot in the video.
+
+the-bible-tab = Bienvenido a ChurchPresenter. En este breve recorrido veremos la pestaña Biblia, donde encuentra cualquier pasaje en segundos y lo muestra en la pantalla grande.
+open-tab = Empecemos abriendo la pestaña Biblia. Todas sus traducciones instaladas están aquí.
+pick-a-book = La primera forma de encontrar un pasaje es explorar. Elija un libro. Aquí, Romanos.
+pick-a-chapter = Luego elija el capítulo. Abrimos el doce.
+click-a-verse = Haga clic en un versículo. Aparece en la vista previa, para revisarlo antes que nadie.
+shift-click-to-select-a-range = ¿Más de un versículo? Mantenga Mayús y haga clic en otro, y se elige todo el rango.
+sends-the-verses-to-the-projecto = Cuando esté listo, pulse En vivo, y el pasaje va al proyector.
+romans-12-1-2-in-both-translatio = Y ahí está en la pantalla grande. Con dos traducciones activas, cada versículo aparece en ambos idiomas, uno debajo del otro.
+or-type-a-reference = Si ya sabe la cita, hay una forma más rápida. Haga clic en la búsqueda, escriba algo como Juan tres dieciséis, y pulse Intro. Las abreviaturas también sirven.
+double-click-to-go-live = Para mostrar un versículo al instante, haga doble clic. Es lo más rápido durante el culto.
+john-3-16-in-two-languages = Juan tres dieciséis ya está en vivo, en ambas traducciones.
+swap-which-comes-first = También puede elegir qué idioma va primero. Pulse Intercambiar, y el orden cambia.
+flipped = Ahora la segunda traducción va primero, y el inglés debajo.
+click-again-to-flip-back = Pulse Intercambiar otra vez para volver. Use el orden que su congregación lee primero.
+right-click-a-verse-for-more = Haga clic derecho en un versículo para más opciones: ponerlo en vivo, añadirlo al programa, copiarlo o abrir sus referencias.
+add-to-schedule = Añadamos este versículo al programa, para usarlo más tarde.
+added-to-your-schedule = Ahora aparece al final del programa, a la izquierda, para dirigir el culto en orden.
+cross-references = Si quiere profundizar, pulse Refs para abrir las referencias cruzadas. Son pasajes relacionados con el versículo elegido. Usarlas es totalmente opcional.
+switch-the-search-to-text = La búsqueda también encuentra palabras. Por defecto está en Auto, que adivina lo que busca. Haga clic para cambiar entre Referencia y Texto.
+switch-callout = Cambie la búsqueda a Texto. Auto adivina; Referencia y Texto son exactos.
+search-for-a-word = Ahora escriba una palabra, por ejemplo, Jesús. Cada versículo que la contiene aparece al escribir.
+every-verse-that-mentions-it = Arriba se ve el número de resultados, y cada uno está resaltado, fácil de revisar.
+pick-a-verse = Haga clic en un resultado, y la Biblia salta a ese versículo.
+puts-the-verse-you-picked-on-scr = Luego pulse En vivo para mostrarlo.
+found-by-searching-a-word = Y ya está en vivo, encontrado con una palabra.
+history = Por último, el Historial guarda cada versículo mostrado hoy. Haga clic en uno para volver a él.
+that-s-the-bible-tab = Y esa es la pestaña Biblia. Explore o busque, añada versículos al programa, y póngalos en vivo con un clic.

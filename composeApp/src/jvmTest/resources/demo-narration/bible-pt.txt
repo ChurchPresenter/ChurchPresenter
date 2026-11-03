@@ -1,0 +1,29 @@
+# The bible tour's narration in Brazilian Portuguese, key for key with bible.txt (switch-callout is the callout the English take reads aloud); each line fitted to its slot in the video.
+
+the-bible-tab = Bem-vindo ao ChurchPresenter. Neste tour rápido, vamos ver a aba Bíblia, onde você acha qualquer passagem em segundos e a mostra no telão.
+open-tab = Vamos abrir a aba Bíblia. Todas as traduções instaladas estão aqui.
+pick-a-book = O primeiro jeito de achar uma passagem é navegar. Escolha um livro. Aqui, Romanos.
+pick-a-chapter = Depois escolha o capítulo. O doze.
+click-a-verse = Clique num versículo. Ele aparece na prévia, para você conferir antes de todos.
+shift-click-to-select-a-range = Mais de um versículo? Segure Shift e clique em outro, e o trecho todo é marcado.
+sends-the-verses-to-the-projecto = Quando estiver pronto, clique em Ao vivo, e vai ao projetor.
+romans-12-1-2-in-both-translatio = E aí está no telão. Com duas traduções ligadas, cada versículo aparece nas duas línguas, uma embaixo da outra.
+or-type-a-reference = Se já sabe a referência, é mais rápido. Clique na busca, digite algo como João três dezesseis, e tecle Enter. Abreviações também funcionam.
+double-click-to-go-live = Para mostrar na hora, dê um clique duplo. É o jeito mais rápido no culto.
+john-3-16-in-two-languages = João três dezesseis está ao vivo, nas duas traduções.
+swap-which-comes-first = Você escolhe qual língua vem primeiro. Clique em Inverter, e a ordem muda.
+flipped = Agora a segunda tradução vem antes, e o inglês embaixo.
+click-again-to-flip-back = Clique em Inverter de novo para voltar. Use a ordem que a igreja lê primeiro.
+right-click-a-verse-for-more = Clique com o botão direito num versículo para mais opções: ao vivo, adicionar à programação, copiar ou ver referências.
+add-to-schedule = Vamos adicionar este versículo à programação, para depois.
+added-to-your-schedule = Ele aparece no fim da programação, à esquerda, para conduzir o culto em ordem.
+cross-references = Para ir além, clique em Refs e abra as referências cruzadas: passagens ligadas ao versículo escolhido. Usar é totalmente opcional.
+switch-the-search-to-text = A busca também acha palavras. Por padrão fica em Auto, que adivina o que você quer. Clique para trocar entre Referência e Texto.
+switch-callout = Troque a busca para Texto. Auto adivinha; Referência e Texto são exatos.
+search-for-a-word = Digite uma palavra, por exemplo, Jesus. Cada versículo com ela aparece enquanto digita.
+every-verse-that-mentions-it = O total de resultados fica no topo, e cada um vem destacado, fácil de ver.
+pick-a-verse = Clique num resultado, e a Bíblia vai direto a ele.
+puts-the-verse-you-picked-on-scr = Depois clique em Ao vivo.
+found-by-searching-a-word = E está ao vivo, achado só com uma palavra.
+history = Por fim, o Histórico guarda cada versículo mostrado hoje. Clique num para voltar a ele.
+that-s-the-bible-tab = Essa é a aba Bíblia. Navegue ou busque, adicione versículos à programação, e vá ao vivo com um clique.

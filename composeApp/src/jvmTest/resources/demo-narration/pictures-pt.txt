@@ -1,0 +1,26 @@
+# The pictures tour's narration in Brazilian Portuguese, key for key with pictures.txt; each line fitted to its slot in the video.
+
+intro = Bem-vindo ao ChurchPresenter. Vamos ver a aba Imagens, que põe fotos no telão, uma a uma ou em apresentação.
+open-tab = Vamos abrir a aba Imagens. Cada foto da pasta aparece aqui em miniatura.
+folder = Para escolher as fotos, clique em Selecionar pasta e escolha uma pasta. Todas as imagens aparecem abaixo. Aceita JPEG, PNG, GIF, BMP, WebP e HEIC.
+recents = As pastas recentes ficam aqui, para voltar às fotos do domingo passado com um clique. Você também pode fixar as mais usadas.
+click-photo = Clique numa foto. Ela vai primeiro para a prévia, para você conferir antes.
+go-live = Quando quiser, clique em Ao vivo.
+live-1 = E aí está, no telão inteiro.
+arrow = Com a foto ao vivo, use as setas. A direita vai à próxima foto, e a esquerda volta.
+live-2 = A próxima foto está na tela, pelo teclado.
+double-click = Um clique duplo também põe a foto ao vivo.
+live-3 = E agora, as velas.
+hide = Para não mostrar uma foto, clique no olho do cartão. Ela fica na pasta, mas as setas e a apresentação a pulam.
+play = Para passar sozinhas, clique em Reproduzir, e as fotos mudam sozinhas.
+interval = Escolha quanto tempo cada foto fica na tela.
+transition = Ao lado, a duração da transição define o tempo da troca de foto. Meio segundo fica suave.
+loop = Repetir está ligado, e a apresentação recomeça após a última foto. Ótimo antes do culto.
+animation = Você escolhe como uma foto vira a outra. Abra a lista de transições.
+fade = Escolhemos Esmaecer, bem suave.
+scale = Fotos têm vários formatos. Este botão alterna entre ver a foto inteira e preencher a tela.
+live-4 = Agora a foto preenche a tela.
+preset = Se usa esta pasta sempre, salve como predefinição: um atalho com nome, como Welcome Loop, que entra em qualquer culto com um clique, sem procurar a pasta.
+schedule = Por fim, clique em Adicionar à programação.
+schedule-row = A galeria está na programação, à esquerda.
+outro = Essa é a aba Imagens. Escolha a pasta, a foto, vá ao vivo e deixe a apresentação seguir.

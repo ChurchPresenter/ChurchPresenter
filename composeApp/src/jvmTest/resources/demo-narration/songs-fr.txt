@@ -1,0 +1,31 @@
+# The songs tour's narration in French, key for key with songs.txt; each line fitted to its slot in the video.
+
+the-songs-tab = Bienvenue dans ChurchPresenter. Dans cette visite, voyons l'onglet Chants, où vous trouvez un chant, affichez ses couplets et menez la louange au clavier.
+open-tab = Ouvrons l'onglet Chants. Toute votre bibliothèque est ici.
+search-by-title = Pour trouver un chant, tapez son titre. La liste se réduit à chaque lettre.
+or-by-a-line-of-the-lyrics = Titre oublié ? Tapez une ligne des paroles. Chaque résultat indique même le couplet.
+clear-the-search = Effacez la recherche pour tout revoir.
+pick-a-song-book = Avec plusieurs recueils, vous pouvez n'en montrer qu'un. Ouvrez la liste Recueil.
+gospel-songs = Choisissons Gospel Songs : seuls ces chants restent.
+back-to-every-book = Pour tout revoir, rouvrez la liste.
+all-song-books = Et choisissez Tous les recueils.
+choose-how-the-search-matches = La liste Filtre règle la recherche : Contient, Commence par ou Correspondance exacte.
+starts-with = Commence par aide si vous connaissez le début.
+sort-the-list = Triez la liste en cliquant sur un en-tête. Recliquez pour inverser.
+click-a-song = Choisissons un chant. Cliquez sur Amazing Grace : ses couplets s'affichent à droite.
+click-a-verse = Cliquez le premier couplet. Il passe en aperçu.
+sends-the-verse-to-the-projector = Puis cliquez sur En direct.
+verse-1-of-amazing-grace = Le premier couplet est sur le grand écran.
+next-verse = Pendant la louange, pas besoin de souris. Flèche bas pour le couplet suivant, flèche haut pour revenir.
+verse-2 = Le couplet deux est en direct, au clavier.
+double-click-a-verse = Un double-clic sur un couplet le met aussi en direct.
+verse-3-live = Et voici le couplet trois à l'écran.
+star-a-song = Mettez une étoile aux chants fréquents. Vos favoris restent dans leur propre panneau, toujours à portée.
+right-click-a-song-for-more = Un clic droit sur un chant offre d'autres options : en direct, au programme, en favori, le modifier ou le supprimer.
+add-to-schedule = Ajoutons It Is Well With My Soul au programme.
+added-to-your-schedule = Le voilà, à la fin du culte, à gauche.
+back-to-live = Voyez la barre rouge Retour au direct. Elle apparaît quand vous quittez le chant affiché. Cliquez pour y revenir.
+choose-the-columns = Vous pouvez aussi choisir les colonnes affichées, comme le numéro, l'auteur ou le nombre de passages d'un chant.
+edit-a-song = Pour changer un chant, cliquez sur Modifier. Paroles, accords et transposition, traductions et apparence propre, tout s'y règle.
+write-a-new-song = Et pour du nouveau, cliquez sur plus pour écrire un chant, ou l'importer.
+that-s-the-songs-tab = Voilà l'onglet Chants. Cherchez, choisissez un couplet, passez en direct, et menez la suite au clavier.

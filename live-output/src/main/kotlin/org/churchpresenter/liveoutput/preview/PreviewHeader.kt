@@ -5,11 +5,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -17,7 +21,7 @@ import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -107,7 +111,10 @@ internal fun PreviewHeader(
     }
 }
 
-/** The header's profile picker: an icon button that opens a menu of every saved [OutputProfile]. */
+/**
+ * The header's profile picker: a small key showing the profile this output follows, by name, that
+ * opens a menu of every saved [OutputProfile].
+ */
 @Composable
 private fun OutputProfileSwapMenu(
     profiles: List<OutputProfile>,
@@ -115,10 +122,17 @@ private fun OutputProfileSwapMenu(
     onPick: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val activeName = when (activeProfileId) {
+        null -> null
+        BLANK_OUTPUT_PROFILE_ID -> stringResource(Res.string.output_profile_blank)
+        else -> profiles.firstOrNull { it.id == activeProfileId }?.let { it.name.ifBlank { it.id } }
+    }
     Box {
-        KeyIconButton(
+        KeyButton(
             onClick = { expanded = true },
-            modifier = Modifier.size(18.dp),
+            shape = AppShape(4.dp),
+            contentPadding = PaddingValues(horizontal = 3.dp),
+            modifier = Modifier.height(18.dp).widthIn(max = PROFILE_NAME_MAX_WIDTH),
         ) {
             Icon(
                 imageVector = Icons.Default.SwapHoriz,
@@ -127,6 +141,16 @@ private fun OutputProfileSwapMenu(
                 tint = if (activeProfileId != null) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (activeName != null) {
+                Spacer(Modifier.width(3.dp))
+                Text(
+                    text = activeName,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 9.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
@@ -155,6 +179,9 @@ private fun OutputProfileSwapMenu(
         }
     }
 }
+
+/** The widest the profile key grows before its name is cut short with an ellipsis. */
+private val PROFILE_NAME_MAX_WIDTH = 140.dp
 
 /** How far the caret turns when the preview is folded away; the same quarter turn the tray uses. */
 private const val CARET_CLOSED_DEGREES = -90f

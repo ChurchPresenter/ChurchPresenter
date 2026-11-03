@@ -1,0 +1,26 @@
+# The pictures tour's narration in Spanish, key for key with pictures.txt; each line fitted to its slot in the video.
+
+intro = Bienvenido a ChurchPresenter. Veremos la pestaña Imágenes, donde pone fotos en la pantalla grande, una a una o como presentación.
+open-tab = Abramos la pestaña Imágenes. Cada foto de su carpeta aparece aquí en miniatura.
+folder = Para elegir sus fotos, pulse Seleccionar carpeta y elija cualquier carpeta. Todas sus imágenes aparecen abajo. Admite JPEG, PNG, GIF, BMP, WebP y HEIC.
+recents = Las carpetas recientes están aquí mismo, para volver a las fotos del domingo pasado con un clic. También puede fijar las que más usa.
+click-photo = Haga clic en una foto. Aparece primero en la vista previa, para revisarla antes que nadie.
+go-live = Cuando esté listo, pulse En vivo, y va al proyector.
+live-1 = Y ahí está, en toda la pantalla.
+arrow = Con una foto en vivo, use las flechas. La derecha pasa a la siguiente foto, y la izquierda vuelve atrás.
+live-2 = La siguiente foto ya está, desde el teclado.
+double-click = Un doble clic en una foto también la pone en vivo.
+live-3 = Y ahora, las velas.
+hide = Si no quiere mostrar una foto, pulse el ojo de su tarjeta para ocultarla. Sigue en la carpeta, pero las flechas y la presentación la saltan.
+play = Para que las fotos pasen solas, pulse Reproducir, y cambian como presentación.
+interval = Elija cuánto tiempo queda cada foto en pantalla.
+transition = Al lado, la duración de la transición fija cuánto tarda el cambio de foto. Medio segundo se ve suave sin frenar nada.
+loop = Repetir está activado, así la presentación vuelve a empezar tras la última foto. Ideal antes del culto.
+animation = También puede elegir cómo cambia una foto a otra. Abra la lista de transiciones.
+fade = Elegimos Fundido, para un cambio suave.
+scale = Las fotos tienen todo tipo de formas. Este botón alterna entre ver la foto entera y llenar toda la pantalla.
+live-4 = Ahora la foto llena la pantalla.
+preset = Si usa esta carpeta a menudo, guárdela como preajuste: un atajo con nombre, como Welcome Loop, que añade a cualquier culto futuro con un clic, sin buscar la carpeta.
+schedule = Por último, pulse Añadir al programa para usar toda la carpeta más tarde.
+schedule-row = La galería ya aparece en su programa, a la izquierda.
+outro = Y esa es la pestaña Imágenes. Elija una carpeta, una foto, póngala en vivo y deje que la presentación siga.

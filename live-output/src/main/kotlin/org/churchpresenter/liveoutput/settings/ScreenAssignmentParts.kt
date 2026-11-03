@@ -229,7 +229,7 @@ internal fun ScreenAssignmentColumnHeaders(
     displayDropdownWidth: Dp,
     resolutionCellWidth: Dp,
 ) {
-    val langDropdownWidth = 95.dp
+    val langDropdownWidth = OUTPUT_PROFILE_PICKER_WIDTH
     val contentLabelHeight = 32.dp
     // Header row: Screen label + Display + Key Output + Output profile.
     // Every label sits in a fixed-height, bottom-aligned Box so all labels' bottoms line up
