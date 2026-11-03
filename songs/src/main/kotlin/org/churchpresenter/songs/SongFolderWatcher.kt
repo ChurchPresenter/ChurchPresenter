@@ -29,7 +29,11 @@ class SongFolderWatcher(
 
     fun watchDirectory(rootDir: File) {
         stop()
-        if (!rootDir.exists() || !rootDir.isDirectory) return
+        if (rootDir.isFile) return
+        if (!rootDir.isDirectory) {
+            awaitFolder(rootDir)
+            return
+        }
 
         val watchService = FileSystems.getDefault().newWatchService()
         this.watchService = watchService
@@ -111,6 +115,46 @@ class SongFolderWatcher(
         return true
     }
 
+    /**
+     * Waits for a song folder that is not there yet — made, unzipped or mounted after the app
+     * started — by watching the nearest folder above it that is, and loads the songs once it
+     * appears. Giving up instead left the Songs tab empty until the app was restarted.
+     */
+    private fun awaitFolder(rootDir: File) {
+        val start = nearestExistingFolder(rootDir) ?: return
+        val watchService = FileSystems.getDefault().newWatchService()
+        this.watchService = watchService
+        watchJob = scope.launch(Dispatchers.IO) {
+            try {
+                var watching = start
+                watching.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
+                // Asked once before waiting: the folder may have appeared since the check above.
+                var step = awaitStep(rootDir, watching)
+                while (isActive && step !is AwaitStep.Appeared) {
+                    if (step is AwaitStep.WatchNearer) {
+                        watching = step.folder
+                        watching.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
+                    } else {
+                        val key = watchService.take()
+                        key.pollEvents()
+                        key.reset()
+                    }
+                    step = awaitStep(rootDir, watching)
+                }
+                if (step is AwaitStep.Appeared) {
+                    // Loading the songs watches the folder itself again, through watchDirectory.
+                    withContext(Dispatchers.Main) { onSongsChanged() }
+                }
+            } catch (_: ClosedWatchServiceException) {
+                // Expected on dispose
+            } catch (_: InterruptedException) {
+                // Expected on cancel
+            } finally {
+                watchService.close()
+            }
+        }
+    }
+
     fun dispose() {
         stop()
     }
@@ -122,3 +166,30 @@ class SongFolderWatcher(
         watchService = null
     }
 }
+
+/** What waiting for a missing song folder does next. */
+internal sealed interface AwaitStep {
+    /** The folder is there: load it. */
+    data object Appeared : AwaitStep
+
+    /** A folder on the way to it appeared: watch that one, which is nearer. */
+    data class WatchNearer(val folder: File) : AwaitStep
+
+    /** Nothing nearer yet: keep watching. */
+    data object KeepWaiting : AwaitStep
+}
+
+/** What to do about [root] while [watching] the folder above it. */
+internal fun awaitStep(root: File, watching: File): AwaitStep {
+    if (root.isDirectory) return AwaitStep.Appeared
+    val nearest = nearestExistingFolder(root)
+    return if (nearest != null && nearest.absoluteFile != watching.absoluteFile) {
+        AwaitStep.WatchNearer(nearest)
+    } else {
+        AwaitStep.KeepWaiting
+    }
+}
+
+/** The nearest folder above [root] that exists, or null when none does. */
+internal fun nearestExistingFolder(root: File): File? =
+    generateSequence(root.absoluteFile.parentFile) { it.parentFile }.firstOrNull { it.isDirectory }

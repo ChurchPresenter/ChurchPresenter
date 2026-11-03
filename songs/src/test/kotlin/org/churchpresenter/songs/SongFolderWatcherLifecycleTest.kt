@@ -35,9 +35,13 @@ class SongFolderWatcherLifecycleTest {
     }
 
     @Test
-    fun `a folder that is not there is not watched`() {
-        SongFolderWatcher(scope) {}.watchDirectory(File(dir, "missing"))
-        assertEquals(0, parent.children.count())
+    fun `a folder that is not there yet is waited for`() {
+        val watcher = SongFolderWatcher(scope) {}
+        watcher.watchDirectory(File(dir, "missing"))
+        assertEquals(1, parent.children.count(), "watching the folder above it until it appears")
+        watcher.dispose()
+        awaitChildren()
+        assertTrue(parent.children.none { it.isActive })
     }
 
     @Test
