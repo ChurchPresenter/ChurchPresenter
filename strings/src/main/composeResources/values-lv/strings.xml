@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">%1$d. valodas nosaukums</string>
     <string name="song_named_title">%1$s nosaukums</string>
     <string name="tooltip_preview_settings">Priekšskatījuma iestatījumi</string>
+    <string name="tooltip_clear_text">Notīrīt tekstu, saglabāt fonu</string>
+    <string name="tooltip_restore_text">Rādīt tekstu vēlreiz</string>
     <string name="media_subtitle_settings_hint">Attiecas uz SRT/WebVTT subtitru failiem, kurus lietotne zīmē pati. Iegultais celiņš vai ASS/SSA/SUB fails saglabā VLC pašu izskatu.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Atvērt palīgu Wick</string>

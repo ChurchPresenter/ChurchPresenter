@@ -3096,6 +3096,8 @@
     <string name="song_translation_title">Titel van Taal %1$d</string>
     <string name="song_named_title">Titel %1$s</string>
     <string name="tooltip_preview_settings">Voorbeeldinstellingen</string>
+    <string name="tooltip_clear_text">Tekst wissen, achtergrond behouden</string>
+    <string name="tooltip_restore_text">Tekst weer tonen</string>
     <string name="media_subtitle_settings_hint">Geldt voor SRT/WebVTT-ondertitelbestanden, die de app zelf tekent. Een ingesloten track of een ASS/SSA/SUB-bestand behoudt de eigen weergave van VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Open Wick, de helper</string>

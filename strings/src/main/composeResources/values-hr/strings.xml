@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Naslov za Jezik %1$d</string>
     <string name="song_named_title">Naslov (%1$s)</string>
     <string name="tooltip_preview_settings">Postavke pregleda</string>
+    <string name="tooltip_clear_text">Očisti tekst, zadrži pozadinu</string>
+    <string name="tooltip_restore_text">Ponovno prikaži tekst</string>
     <string name="media_subtitle_settings_hint">Primjenjuje se na SRT/WebVTT datoteke titlova, koje aplikacija sama iscrtava. Ugrađena traka ili ASS/SSA/SUB datoteka zadržavaju vlastiti izgled VLC-a.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Otvori pomoćnika Wick</string>

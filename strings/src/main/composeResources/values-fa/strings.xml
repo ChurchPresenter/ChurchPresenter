@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">عنوان زبان %1$d</string>
     <string name="song_named_title">عنوان %1$s</string>
     <string name="tooltip_preview_settings">تنظیمات پیش‌نمایش</string>
+    <string name="tooltip_clear_text">پاک کردن متن، حفظ پس‌زمینه</string>
+    <string name="tooltip_restore_text">نمایش دوباره متن</string>
     <string name="media_subtitle_settings_hint">برای فایل‌های زیرنویس SRT/WebVTT اعمال می‌شود که برنامه خودش آن‌ها را رسم می‌کند. یک مسیر داخلی یا فایل ASS/SSA/SUB ظاهر خود VLC را حفظ می‌کند.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">باز کردن Wick، دستیار</string>

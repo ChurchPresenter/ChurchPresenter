@@ -3069,6 +3069,8 @@
     <string name="song_translation_title">%1$d-тіл тақырыбы</string>
     <string name="song_named_title">%1$s атауы</string>
     <string name="tooltip_preview_settings">Алдын ала қарау параметрлері</string>
+    <string name="tooltip_clear_text">Мәтінді тазалау, фонды қалдыру</string>
+    <string name="tooltip_restore_text">Мәтінді қайта көрсету</string>
     <string name="media_subtitle_settings_hint">Бағдарлама өзі салатын SRT/WebVTT субтитр файлдарына қолданылады. Ендірілген трек немесе ASS/SSA/SUB файлы VLC-тің өз көрінісін сақтайды.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Көмекші Wick-ті ашу</string>

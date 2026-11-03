@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">भाषा %1$d को शीर्षक</string>
     <string name="song_named_title">%1$s शीर्षक</string>
     <string name="tooltip_preview_settings">पूर्वावलोकन सेटिङहरू</string>
+    <string name="tooltip_clear_text">पाठ खाली गर्नुहोस्, पृष्ठभूमि राख्नुहोस्</string>
+    <string name="tooltip_restore_text">पाठ फेरि देखाउनुहोस्</string>
     <string name="media_subtitle_settings_hint">यो SRT/WebVTT उपशीर्षक फाइलहरूमा लागू हुन्छ, जुन एपले आफैं कोर्छ। कुनै इम्बेडेड ट्र्याक वा ASS/SSA/SUB फाइलले VLC को आफ्नै रूप कायम राख्छ।</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Wick (सहायक) खोल्नुहोस्</string>

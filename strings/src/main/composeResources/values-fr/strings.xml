@@ -3096,6 +3096,8 @@
     <string name="song_translation_title">Titre de la Langue %1$d</string>
     <string name="song_named_title">Titre %1$s</string>
     <string name="tooltip_preview_settings">Réglages de l'aperçu</string>
+    <string name="tooltip_clear_text">Effacer le texte, garder l'arrière-plan</string>
+    <string name="tooltip_restore_text">Réafficher le texte</string>
     <string name="media_subtitle_settings_hint">S'applique aux fichiers de sous-titres SRT/WebVTT, que l'application dessine elle-même. Une piste intégrée ou un fichier ASS/SSA/SUB conserve l'apparence propre de VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Ouvrir Wick, l'assistant</string>

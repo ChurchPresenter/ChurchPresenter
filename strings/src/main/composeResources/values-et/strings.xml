@@ -3101,6 +3101,8 @@
     <string name="song_translation_title">Keele %1$d pealkiri</string>
     <string name="song_named_title">%1$s pealkiri</string>
     <string name="tooltip_preview_settings">Eelvaate seaded</string>
+    <string name="tooltip_clear_text">Tühjenda tekst, jäta taust</string>
+    <string name="tooltip_restore_text">Näita teksti uuesti</string>
     <string name="media_subtitle_settings_hint">Kehtib SRT/WebVTT subtiitrifailide kohta, mida rakendus joonistab ise. Manustatud rada või ASS/SSA/SUB-fail säilitab VLC enda välimuse.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Ava abiline Wick</string>
