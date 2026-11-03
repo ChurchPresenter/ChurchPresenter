@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
@@ -189,6 +190,8 @@ internal fun BoxScope.PreviewBadges(
     mediaAudible: Boolean,
     /** Whether the tile is an output's, which can be locked; Preview's is none. */
     lockable: Boolean = true,
+    /** Room left at the bottom edge for the profile pill, which the bottom-left badges stack above. */
+    bottomInset: Dp = 0.dp,
 ) {
     // FILL badge when key output is configured
     if (rawAssignment.hasKeyOutput) {
@@ -198,7 +201,7 @@ internal fun BoxScope.PreviewBadges(
             fontSize = 9.sp,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(4.dp)
+                .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 4.dp + bottomInset)
                 .background(Color(LIVE_BADGE_COLOR), AppShape(3.dp))
                 .padding(horizontal = 5.dp, vertical = 2.dp)
         )
@@ -215,7 +218,7 @@ internal fun BoxScope.PreviewBadges(
                 fontSize = 9.sp,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = 4.dp, bottom = if (rawAssignment.hasKeyOutput) 24.dp else 4.dp)
+                    .padding(start = 4.dp, bottom = bottomInset + if (rawAssignment.hasKeyOutput) 24.dp else 4.dp)
                     .background(Color(LOCK_BADGE_COLOR), AppShape(3.dp))
                     .padding(horizontal = 5.dp, vertical = 2.dp)
             )

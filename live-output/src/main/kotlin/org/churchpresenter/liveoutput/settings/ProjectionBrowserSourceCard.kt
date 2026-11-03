@@ -339,7 +339,7 @@ private fun BrowserSourceOptions(
         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             @OptIn(ExperimentalMaterial3Api::class)
             Column(
-                modifier = Modifier.width(langDropdownWidth),
+                modifier = Modifier.width(OUTPUT_PROFILE_PICKER_WIDTH),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
