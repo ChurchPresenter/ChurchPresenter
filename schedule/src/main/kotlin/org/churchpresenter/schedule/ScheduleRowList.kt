@@ -66,6 +66,13 @@ import org.churchpresenter.theme.AppShape
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 
 /** How every row is drawn: its density and layout, when it is due, and the live row's drift. */
 internal class ScheduleRowLook(
@@ -110,6 +117,10 @@ internal fun ScheduleRowList(
             )
         }
 
+        // Where the list's viewport sits in the window, so a drop's window position finds its slot.
+        val viewportOrigin = remember { mutableStateOf(Offset.Zero) }
+        LocateDrops(fileDrop, listState, viewportOrigin)
+
         if (viewModel.scheduleItems.isEmpty() && !fileDrop.dragOver) {
             Text(
                 text = stringResource(Res.string.schedule_drop_hint),
@@ -125,7 +136,8 @@ internal fun ScheduleRowList(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize()
-                .padding(start = 4.dp, top = 6.dp, bottom = 10.dp)
+                .padding(start = 4.dp, top = LIST_TOP_PADDING, bottom = 10.dp)
+                .onGloballyPositioned { viewportOrigin.value = it.positionInRoot() }
         ) {
             itemsIndexed(rows, key = { _, item -> item.id }) { index, item ->
                 val isDraggingThis = drag.isActive && drag.fromIndex == index
@@ -181,7 +193,12 @@ internal fun ScheduleRowList(
         // Drawn over the rows rather than instead of them, which is what makes this work on a
         // schedule that already has content — the hint below only ever appeared on an empty one,
         // so by the time anyone had a service to add to there was no affordance at all.
-        if (fileDrop.dragOver) ScheduleFileDropOverlay()
+        if (fileDrop.dragOver) {
+            // On a list with rows the insertion mark says where the drop goes, so the callout,
+            // which would sit over the rows it is pointing between, is left off.
+            ScheduleFileDropOverlay(showCallout = rows.isEmpty())
+            fileDrop.slot?.takeIf { rows.isNotEmpty() }?.let { ScheduleDropMark(it.lineY) }
+        }
         // What the drop could not take. Sits in the panel the file was aimed at rather than in
         // an app-level toast: the operator is looking here, and the answer is about this list.
         if (fileDrop.skippedFiles.isNotEmpty()) ScheduleSkippedFiles(fileDrop.skippedFiles)
@@ -358,7 +375,7 @@ private fun BoxScope.ScheduleDeleteZone(isOverDeleteZone: Boolean) {
 }
 
 @Composable
-private fun BoxScope.ScheduleFileDropOverlay() {
+private fun BoxScope.ScheduleFileDropOverlay(showCallout: Boolean) {
     Box(
         modifier = Modifier
             .matchParentSize()
@@ -370,10 +387,9 @@ private fun BoxScope.ScheduleFileDropOverlay() {
             .border(FILE_DROP_BORDER, MaterialTheme.colorScheme.primary, CARD_SHAPE),
         contentAlignment = Alignment.Center,
     ) {
-        // A solid callout rather than text straight onto the scrim: over a schedule that
-        // already has rows, translucent text on translucent wash is unreadable exactly
-        // when it matters most.
-        Surface(
+        // A solid callout rather than text straight onto the scrim: translucent text on a
+        // translucent wash is unreadable.
+        if (showCallout) Surface(
             color = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             shape = CARD_SHAPE,
@@ -390,6 +406,38 @@ private fun BoxScope.ScheduleFileDropOverlay() {
             )
         }
     }
+}
+
+/** Points [fileDrop] at the slots of [listState]'s rows, whose viewport is at [viewportOrigin] in the window. */
+@Composable
+private fun LocateDrops(fileDrop: ScheduleFileDrop, listState: LazyListState, viewportOrigin: State<Offset>) {
+    SideEffect {
+        fileDrop.locate = { pos ->
+            dropSlot(
+                cursorY = pos.y - viewportOrigin.value.y,
+                visibleItems = listState.layoutInfo.visibleItemsInfo.map {
+                    DragItemGeometry(it.index, it.offset, it.size)
+                },
+            )
+        }
+    }
+}
+
+/** The line between two rows that a drop will land on, [lineY] px down the list's viewport. */
+@Composable
+private fun ScheduleDropMark(lineY: Float) {
+    val density = LocalDensity.current
+    val topPx = with(density) { (LIST_TOP_PADDING - DROP_MARK_HEIGHT / 2).toPx() }
+    Box(
+        modifier = Modifier
+            .offset { IntOffset(0, (topPx + lineY).roundToInt()) }
+            .zIndex(DROP_MARK_Z_INDEX)
+            .padding(horizontal = DROP_MARK_INSET)
+            .fillMaxWidth()
+            .height(DROP_MARK_HEIGHT)
+            .background(MaterialTheme.colorScheme.primary, AppShape(DROP_MARK_HEIGHT / 2))
+            .testTag(SCHEDULE_DROP_MARK_TAG)
+    )
 }
 
 @Composable
@@ -472,6 +520,19 @@ private const val FILE_DROP_OVERLAY_Z_INDEX = 5f
 private const val FILE_DROP_SCRIM_ALPHA = 0.16f
 
 private val FILE_DROP_BORDER = 3.dp
+
+/** The list's inset above its first row, which the insertion mark is measured from. */
+private val LIST_TOP_PADDING = 6.dp
+
+/** The insertion mark: over the drop scrim, so it reads as where the drop lands. */
+private const val DROP_MARK_Z_INDEX = 6f
+
+private val DROP_MARK_HEIGHT = 3.dp
+
+private val DROP_MARK_INSET = 8.dp
+
+/** Test handle for the line a drop will land on. */
+internal const val SCHEDULE_DROP_MARK_TAG = "schedule_drop_mark"
 
 private val FILE_DROP_CALLOUT_ELEVATION = 6.dp
 

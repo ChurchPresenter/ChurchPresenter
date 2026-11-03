@@ -136,6 +136,7 @@ data class ScheduleSongDto(
 )
 
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class ScheduleItemDto(
     val id: String,
     // "song", "bible", "label", "picture", "presentation", "media", "lower_third", "announcement", "website"
@@ -172,6 +173,12 @@ data class ScheduleItemDto(
     val folderPath: String? = null,
     val folderName: String? = null,
     val imageCount: Int? = null,
+    /**
+     * The one picture a single-picture row is for; null for a whole folder. NEVER-encoded when
+     * null, so a folder row's wire form is what it always was; an older follower ignores it.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val imagePath: String? = null,
     // presentation
     val filePath: String? = null,
     val fileName: String? = null,
@@ -564,6 +571,8 @@ data class RemoteItemDto(
     val folderPath: String? = null,
     val folderName: String? = null,
     val imageCount: Int? = null,
+    /** The one picture of [folderPath] a single-picture row is for; absent for the whole folder. */
+    val imagePath: String? = null,
     // presentation
     val filePath: String? = null,
     val fileName: String? = null,
@@ -620,8 +629,12 @@ data class RemoteItemRequest(val item: RemoteItemDto)
 data class RemoteItemsRequest(val items: List<RemoteItemDto>)
 
 // Keep old wrappers for WS payloads that still use the sealed class discriminator
+/**
+ * [index] is where the row goes, 0 for the top: an Instance Link follower's drop between two rows.
+ * Null — and absent from a client that predates it — adds at the end. Old servers ignore it.
+ */
 @Serializable
-data class AddToScheduleRequest(val item: ScheduleItem)
+data class AddToScheduleRequest(val item: ScheduleItem, val index: Int? = null)
 
 @Serializable
 data class ProjectRequest(val item: ScheduleItem)

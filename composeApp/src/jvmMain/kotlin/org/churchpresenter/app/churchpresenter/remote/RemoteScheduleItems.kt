@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import java.io.File
 import org.churchpresenter.core.models.songs.SongItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.churchpresenter.app.churchpresenter.ScheduleActions
@@ -224,11 +225,11 @@ internal fun addScheduleItem(
             item.fileType
         )
 
-        is ScheduleItem.PictureItem -> scheduleActions.addPicture(
-            item.folderPath,
-            item.folderName,
-            item.imageCount
-        )
+        is ScheduleItem.PictureItem -> if (item.imagePath.isEmpty()) {
+            scheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+        } else {
+            scheduleActions.addSinglePicture(File(item.imagePath), item.imageCount)
+        }
 
         is ScheduleItem.MediaItem -> scheduleActions.addMedia(
             item.mediaUrl,

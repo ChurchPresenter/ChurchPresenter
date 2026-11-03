@@ -48,7 +48,7 @@ class InstanceLinkViewModelTest {
         every { anyConstructed<InstanceLinkClient>().connect(any(), any(), any(), any(), any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().disconnect() } returns Unit
         every { anyConstructed<InstanceLinkClient>().dispose() } returns Unit
-        every { anyConstructed<InstanceLinkClient>().sendAddToSchedule(any()) } returns Unit
+        every { anyConstructed<InstanceLinkClient>().sendAddToSchedule(any(), any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendRemoveFromSchedule(any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendProject(any()) } returns Unit
         every { anyConstructed<InstanceLinkClient>().sendSelectBibleVerse(
@@ -458,7 +458,7 @@ class InstanceLinkViewModelTest {
         vm.sendAddToSchedule(item)
         vm.sendRemoveFromSchedule("s1")
 
-        verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendAddToSchedule(item) }
+        verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendAddToSchedule(item, null) }
         verify(exactly = 1) { anyConstructed<InstanceLinkClient>().sendRemoveFromSchedule("s1") }
     }
 

@@ -5,6 +5,16 @@
 
 package org.churchpresenter.media.tabs
 
+import org.churchpresenter.settings.BackgroundContent
+import java.io.File
+import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.ContextMenu
+import org.churchpresenter.sharedui.composables.SetAsBackgroundItems
+import org.churchpresenter.strings.generated.resources.set_as_background
+import org.churchpresenter.icons.generated.resources.ic_layer_image
+import androidx.compose.ui.platform.testTag
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
@@ -289,6 +299,7 @@ private fun MediaTabScope.MediaSourceActions(viewModel: MediaViewModel) {
                 tooltipText = stringResource(Res.string.save_preset)
             )
         }
+        onSetAsBackground?.let { set -> SetAsBackgroundButton(viewModel, set) }
         if (onAddToSchedule != null) {
             AddToScheduleButton(
                 onClick = {
@@ -312,6 +323,44 @@ private fun MediaTabScope.MediaSourceActions(viewModel: MediaViewModel) {
         }
     }
 }
+
+/**
+ * Set as Background, beside Add to Schedule: for a clip on this computer, not a stream or a sound,
+ * since neither can be drawn behind the text.
+ */
+@Composable
+private fun MediaTabScope.SetAsBackgroundButton(
+    viewModel: MediaViewModel,
+    set: (file: File, profileId: String?, content: BackgroundContent) -> Unit,
+) {
+    val canBeBackground = viewModel.isLoaded && viewModel.mediaType == Constants.MEDIA_TYPE_LOCAL &&
+        File(viewModel.mediaUrl).extension.lowercase() !in Constants.AUDIO_EXTENSIONS
+    var menuOpen by remember { mutableStateOf(false) }
+    Box {
+        ActionIconButton(
+            onClick = { menuOpen = true },
+            tooltipText = stringResource(Res.string.set_as_background),
+            painter = painterResource(IconRes.drawable.ic_layer_image),
+            enabled = canBeBackground,
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            modifier = Modifier.testTag(MEDIA_SET_AS_BACKGROUND_TAG),
+        )
+        ContextMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            SetAsBackgroundItems(
+                backgroundTargets,
+                startOpen = true,
+                isCurrent = { profileId, content -> isBackground(File(viewModel.mediaUrl), profileId, content) },
+            ) { profileId, content ->
+                menuOpen = false
+                set(File(viewModel.mediaUrl), profileId, content)
+            }
+        }
+    }
+}
+
+/** Test handle for the Media tab's Set as Background button. */
+internal const val MEDIA_SET_AS_BACKGROUND_TAG = "media_set_as_background"
 
 @Composable
 private fun MediaTabScope.MediaRecentBar(viewModel: MediaViewModel) {

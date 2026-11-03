@@ -1,5 +1,7 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.settings.BackgroundContent
+import org.churchpresenter.sharedui.composables.BackgroundTarget
 import java.io.File
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +25,10 @@ import androidx.compose.ui.input.key.KeyEvent
 internal class PicturesTabScope(
     val appSettings: AppSettings?,
     val onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)?,
+    val onAddPictureToSchedule: ((image: File, folderImageCount: Int) -> Unit)?,
+    val backgroundTargets: List<BackgroundTarget>,
+    val onSetAsBackground: ((image: File, profileId: String?, content: BackgroundContent) -> Unit)?,
+    val isBackground: (image: File, profileId: String?, content: BackgroundContent) -> Boolean,
     val onSavePreset: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)?,
     val onInstanceLinkSendProject: ((ScheduleItem) -> Unit)?,
     val onInstanceLinkSendNextPicture: (() -> Unit)?,

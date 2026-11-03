@@ -1732,7 +1732,7 @@ Send a command with `ws.send(JSON.stringify({ type, payload }))`.
 | `message` | as `POST /api/message` | Puts a message up — **dev mode only** | No |
 | `prop` | `{"id": "...", "on": true}` (`on` absent toggles) | Switches a prop — **dev mode only** | No |
 | `macro` | `{"name": "..."}` | Runs a macro — **dev mode only** | No |
-| `add_to_schedule` | `{item: {...}}` | Add a single item to the schedule | ✅ Yes |
+| `add_to_schedule` | `{item: {...}, index?: n}` | Add a single item to the schedule, at `index` when given | ✅ Yes |
 | `add_batch_to_schedule` | `{items: [...]}` | Add multiple items to the schedule | ✅ Yes |
 | `remove_from_schedule` | `{"id": "<schedule item id>"}` | Remove an item from the schedule | ✅ Yes |
 | `project` | `{item: {...}}` | Project an item immediately | ✅ Yes |
@@ -1761,6 +1761,9 @@ ws.send(JSON.stringify({
 #### `add_to_schedule`
 
 Add a single item (triggers the desktop permission dialog).
+
+`index` is optional: where the row goes once approved, `0` for the top. Without it the row goes at the
+end; one past the end is clamped. Instance Link followers send it for a row dropped between two others.
 
 ```javascript
 // Bible verse — single
@@ -1795,6 +1798,15 @@ ws.send(JSON.stringify({
   type: 'add_to_schedule',
   payload: JSON.stringify({
     item: { songNumber: 42, title: 'Great Is Thy Faithfulness', songbook: 'Hymns' }
+  })
+}));
+
+// Song, as the third row
+ws.send(JSON.stringify({
+  type: 'add_to_schedule',
+  payload: JSON.stringify({
+    item: { songNumber: 42, title: 'Great Is Thy Faithfulness', songbook: 'Hymns' },
+    index: 2
   })
 }));
 ```

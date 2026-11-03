@@ -20,7 +20,8 @@ interface InstanceLinkCommands : InstanceLinkScheduleCommands, InstanceLinkNavig
 
 /** Changes to the primary's schedule, each still waiting on its own operator's approval. */
 interface InstanceLinkScheduleCommands {
-    fun sendAddToSchedule(item: ScheduleItem)
+    /** [index] is where the row goes in the primary's schedule; null adds it at the end. */
+    fun sendAddToSchedule(item: ScheduleItem, index: Int? = null)
     fun sendRemoveFromSchedule(id: String)
 }
 

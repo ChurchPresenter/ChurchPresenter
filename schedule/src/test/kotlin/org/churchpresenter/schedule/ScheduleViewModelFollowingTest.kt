@@ -80,7 +80,7 @@ class ScheduleViewModelFollowingTest {
     fun `every add type is forwarded to the primary instead of applied locally`() {
         val vm = newViewModel()
         val pushed = mutableListOf<ScheduleItem>()
-        vm.onPushToRemoteSchedule = { pushed.add(it) }
+        vm.onPushToRemoteSchedule = { item, _ -> pushed.add(item) }
         vm.followRemoteSchedule(emptyList())
 
         vm.addSong(1, "Song", "Hymnal")

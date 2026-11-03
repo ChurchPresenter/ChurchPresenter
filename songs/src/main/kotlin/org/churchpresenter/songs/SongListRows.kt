@@ -6,6 +6,8 @@
 
 package org.churchpresenter.songs
 
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import org.churchpresenter.sharedui.utils.scheduleItemDragData
 import org.churchpresenter.core.models.songs.sectionOrderAbbreviation
 import org.churchpresenter.sharedui.composables.SectionOrderTokens
 import org.churchpresenter.strings.generated.resources.song_order_as_written
@@ -193,6 +195,15 @@ private fun SongListScope.SongRow(index: Int, song: SongItem) {
             .clip(BibleListRowShape)
             .background(rowColors.background)
             .hoverable(rowHover)
+            // Dragged onto the schedule, the song lands where it is let go. Only when the tab can
+            // add to the schedule at all.
+            .then(
+                if (onAddToSchedule != null) {
+                    Modifier.dragAndDropSource { _ -> scheduleItemDragData(song.toScheduleItem()) }
+                } else {
+                    Modifier
+                }
+            )
             .finalPassCombinedClickable(
                 onClick = {
                     onSelectSong(index)

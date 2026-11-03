@@ -58,7 +58,7 @@ fun ScheduleViewModel.setServiceStart(startTime: String?) {
 /** Adds a planned row whole -- its id kept, so [timing] and any cue payload still point at it. */
 fun ScheduleViewModel.addRow(item: ScheduleItem, timing: RowTiming?) {
     if (_isFollowingRemote.value) {
-        onPushToRemoteSchedule?.invoke(item)
+        onPushToRemoteSchedule?.invoke(item, null)
         return
     }
     pushUndoSnapshot()

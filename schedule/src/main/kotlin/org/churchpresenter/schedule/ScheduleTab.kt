@@ -25,10 +25,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.draganddrop.DragAndDropEvent
-import androidx.compose.ui.draganddrop.DragAndDropTarget
-import androidx.compose.ui.draganddrop.awtTransferable
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.jetbrains.compose.resources.getString
@@ -50,35 +46,11 @@ import org.churchpresenter.calendar.model.scheduleClocks
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
 import org.churchpresenter.calendar.model.RowClock
 import org.churchpresenter.calendar.model.PlanDrift
-import androidx.compose.runtime.Stable
-
-/**
- * `awtTransferable` is the one part of a drop a test cannot reach, so it is all these two do — the
- * reading itself is `carriesFileList`/`fileListOrNull`, which a test drives with a stand-in
- * `Transferable`. Both swallow: a drag whose data cannot be read is simply a drag this panel does
- * not take, and there is nothing to tell the operator at that point.
- */
-@OptIn(ExperimentalComposeUiApi::class)
-@Suppress("SwallowedException")
-private fun DragAndDropEvent.carriesFiles(): Boolean = try {
-    awtTransferable.carriesFileList()
-} catch (_: Exception) {
-    false
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Suppress("SwallowedException")
-private fun DragAndDropEvent.droppedFiles(): List<File>? = try {
-    awtTransferable.fileListOrNull()
-} catch (_: Exception) {
-    null
-}
 
 /** How often the live row's behind/ahead badge is re-reckoned. */
 private const val DRIFT_TICK_MS = 1_000L
@@ -422,29 +394,6 @@ private fun rememberScheduleFileDrop(viewModel: ScheduleViewModel): ScheduleFile
         }
     }
     return drop
-}
-
-/** Compose's own drop target, attached to the panel's node so it cannot aim at the wrong window. */
-@Stable
-internal class ScheduleFileDrop(private val viewModel: () -> ScheduleViewModel) : DragAndDropTarget {
-    /** True while a file from outside the app is being dragged over this panel. */
-    var dragOver by mutableStateOf(false)
-
-    /** The files the last drop could not use, named so the message can say which. */
-    var skippedFiles by mutableStateOf(emptyList<String>())
-
-    override fun onEntered(event: DragAndDropEvent) { dragOver = true }
-    override fun onExited(event: DragAndDropEvent) { dragOver = false }
-    override fun onEnded(event: DragAndDropEvent) { dragOver = false }
-
-    override fun onDrop(event: DragAndDropEvent): Boolean {
-        dragOver = false
-        val files = event.droppedFiles() ?: return false
-        skippedFiles = handleDroppedFiles(files, viewModel())
-        return true
-    }
-
-    fun accepts(event: DragAndDropEvent): Boolean = event.carriesFiles()
 }
 
 internal val ACTION_BUTTON_SIZE = 30.dp

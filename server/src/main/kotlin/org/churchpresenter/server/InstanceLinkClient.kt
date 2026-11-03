@@ -300,10 +300,10 @@ class InstanceLinkClient(
      * The primary acks "pending_approval" when queued; the operator's eventual decision is
      * observed via the next schedule_updated broadcast (a denial is the absence of one).
      */
-    override fun sendAddToSchedule(item: ScheduleItem) {
+    override fun sendAddToSchedule(item: ScheduleItem, index: Int?) {
         sendCommand(
             Constants.WS_CMD_ADD_TO_SCHEDULE,
-            json.encodeToString(AddToScheduleRequest.serializer(), AddToScheduleRequest(item))
+            json.encodeToString(AddToScheduleRequest.serializer(), AddToScheduleRequest(item, index))
         )
     }
 

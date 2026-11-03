@@ -24,6 +24,15 @@ internal fun MainDesktopScope.MainDesktopDialogs() {
         onDismiss = { state.presetToSave = null },
     )
 
+    SetBackgroundConfirmDialog(
+        pending = state.pendingBackground,
+        onConfirm = { p ->
+            onSettingsChange { it.withFileAsBackground(p.file, p.target?.profileId, p.content) }
+            state.pendingBackground = null
+        },
+        onDismiss = { state.pendingBackground = null },
+    )
+
     val editingLabelItem = state.editingLabelItem
     AddLabelDialog(
         isVisible = state.showAddLabelDialog,

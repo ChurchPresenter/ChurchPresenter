@@ -570,6 +570,10 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Default</string>
+    <string name="set_as_background">Set as Background</string>
+    <string name="set_as_background_all_outputs">All outputs</string>
+    <string name="set_as_background_confirm">Set the %1$s background on %2$s to “%3$s”?</string>
+    <string name="set_as_background_set">Set</string>
     <string name="background_video_option">Video Loop</string>
     <string name="background_camera_option">Camera</string>
     <string name="background_transparent_option">Transparent</string>

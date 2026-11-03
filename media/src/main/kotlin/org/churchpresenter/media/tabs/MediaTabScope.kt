@@ -1,5 +1,8 @@
 package org.churchpresenter.media.tabs
 
+import org.churchpresenter.settings.BackgroundContent
+import org.churchpresenter.sharedui.composables.BackgroundTarget
+import java.io.File
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +42,9 @@ internal class MediaTabScope(
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     val onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit)?,
     val onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)?,
+    val backgroundTargets: List<BackgroundTarget> = emptyList(),
+    val onSetAsBackground: ((file: File, profileId: String?, content: BackgroundContent) -> Unit)? = null,
+    val isBackground: (file: File, profileId: String?, content: BackgroundContent) -> Boolean = { _, _, _ -> false },
     val presenterManager: MediaOutput?,
     val onInstanceLinkSendProject: ((ScheduleItem) -> Unit)?,
     val state: MediaTabState,

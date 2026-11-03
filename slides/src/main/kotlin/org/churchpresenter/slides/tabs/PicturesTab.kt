@@ -1,5 +1,7 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.settings.BackgroundContent
+import org.churchpresenter.sharedui.composables.BackgroundTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.draw.alpha
 import org.churchpresenter.sharedui.composables.FocusLostBanner
@@ -77,6 +79,14 @@ fun PicturesTab(
     hostWindow: AwtWindow? = null,
     appSettings: AppSettings? = null,
     onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
+    /** One picture as its own schedule row, from a thumbnail's right-click menu; [folderImageCount] is its folder's. */
+    onAddPictureToSchedule: ((image: File, folderImageCount: Int) -> Unit)? = null,
+    /** Where a thumbnail's Set as Background can put it, besides every output. */
+    backgroundTargets: List<BackgroundTarget> = emptyList(),
+    /** Saves [image] as a background: on the profile named, or every output for null. */
+    onSetAsBackground: ((image: File, profileId: String?, content: BackgroundContent) -> Unit)? = null,
+    /** Whether [image] is that background already, so its button in the menu is outlined. */
+    isBackground: (image: File, profileId: String?, content: BackgroundContent) -> Boolean = { _, _, _ -> false },
     /** Save preset, to the left of Add to Schedule: the same folder, kept for the Calendar Manager. */
     onSavePreset: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. See
@@ -124,13 +134,20 @@ fun PicturesTab(
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tabScope = remember(
-        appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextPicture,
+        appSettings, onAddToSchedule, onAddPictureToSchedule, backgroundTargets, onSetAsBackground, isBackground,
+        onSavePreset,
+        onInstanceLinkSendProject,
+        onInstanceLinkSendNextPicture,
         onInstanceLinkSendPreviousPicture, presenterManager, onSettingsChange, folderDialogTitle, gridState,
         shortcuts, wentLive
     ) {
         PicturesTabScope(
             appSettings = appSettings,
             onAddToSchedule = onAddToSchedule,
+            onAddPictureToSchedule = onAddPictureToSchedule,
+            backgroundTargets = backgroundTargets,
+            onSetAsBackground = onSetAsBackground,
+            isBackground = isBackground,
             onSavePreset = onSavePreset,
             onInstanceLinkSendProject = onInstanceLinkSendProject,
             onInstanceLinkSendNextPicture = onInstanceLinkSendNextPicture,

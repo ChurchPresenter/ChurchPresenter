@@ -64,19 +64,30 @@ class ScheduleViewModel(
     /** Wired to InstanceLinkViewModel.sendAddToSchedule when the operator has enabled pushing items
      *  to the primary's schedule; left null otherwise, in which case [addOrPush] below is a no-op
      *  while following — same behavior as before this existed. */
-    var onPushToRemoteSchedule: ((ScheduleItem) -> Unit)? = null
+    var onPushToRemoteSchedule: ((item: ScheduleItem, index: Int?) -> Unit)? = null
 
     /** Adds [item] locally, or pushes it to the primary (subject to its own approval dialog) while
      *  following a remote schedule — the single entry point every add* method below funnels through. */
     internal fun addOrPush(item: ScheduleItem) {
+        val at = insertionIndex?.coerceIn(0, _scheduleItems.size)
         if (_isFollowingRemote.value) {
-            onPushToRemoteSchedule?.invoke(item)
+            // The mirror is the primary's schedule, so the slot means the same row there.
+            onPushToRemoteSchedule?.invoke(item, at)
+            if (at != null) insertionIndex = at + 1
             return
         }
         pushUndoSnapshot()
-        _scheduleItems.add(item)
+        if (at != null) {
+            _scheduleItems.add(at, item)
+            insertionIndex = at + 1
+        } else {
+            _scheduleItems.add(item)
+        }
         notifyChanged()
     }
+
+    /** Where the next [addOrPush] puts its row while `insertingAt` runs; null adds at the end. */
+    internal var insertionIndex: Int? = null
 
     // ── Auto-save ─────────────────────────────────────────────────────────────
 

@@ -1,5 +1,7 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.sharedui.composables.ContextMenuDivider
+import org.churchpresenter.sharedui.composables.SetAsBackgroundItems
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.Image
@@ -57,6 +59,27 @@ import org.churchpresenter.strings.generated.resources.loading
 import org.churchpresenter.strings.generated.resources.picture_thumbnail_unreadable
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.input.pointer.isSecondary
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.icons.generated.resources.ic_go_live
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
+import org.churchpresenter.sharedui.composables.ContextMenu
+import org.churchpresenter.sharedui.composables.ContextMenuHeader
+import org.churchpresenter.sharedui.composables.ContextMenuItem
+import org.churchpresenter.sharedui.composables.contextMenuShortcut
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.fileDragData
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.go_live
+import org.churchpresenter.theme.semantic
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.hoverLift
@@ -129,6 +152,9 @@ private fun PicturesTabScope.PictureThumbnail(
             else -> MaterialTheme.colorScheme.outlineVariant
         }
 
+        val menuOpen = remember { mutableStateOf(false) }
+        var menuAt by remember { mutableStateOf(IntOffset.Zero) }
+        Box {
         Column(
             modifier = modifier
                 .alpha(if (isDraggingThis) PICTURES_DRAGGED_ITEM_ALPHA else 1f)
@@ -136,6 +162,13 @@ private fun PicturesTabScope.PictureThumbnail(
                 .border(2.dp, borderColor, AppShape(8.dp))
                 .clip(AppShape(8.dp))
                 .then(reorderDrag(viewModel, imageFile, drag))
+                // A plain drag carries the picture out as a file, which the schedule takes as one
+                // row; Shift+drag is still the reorder above, which takes the press first.
+                .dragAndDropSource { _ -> if (isDragActive) null else fileDragData(listOf(imageFile)) }
+                .onSecondaryPress { pos ->
+                    menuAt = IntOffset(pos.x.roundToInt(), pos.y.roundToInt())
+                    menuOpen.value = true
+                }
                 // Final pass, so the hide eye in the nameplate gets its own click
                 // first: taken in the initial pass, a click on the eye selected the
                 // picture instead, and put it on screen when live.
@@ -155,6 +188,84 @@ private fun PicturesTabScope.PictureThumbnail(
         ) {
             PictureTileImage(viewModel, imageFile, isHidden)
             PictureNameplate(viewModel, imageFile, index, isSelected, isHidden)
+        }
+        // A menu opens below what it is anchored to, so it is anchored to the point that was
+        // pressed: anchored to the whole tile, it opened a tile's height below the cursor.
+        Box(Modifier.offset { menuAt }.size(0.dp)) {
+            PictureContextMenu(viewModel, imageFile, index, menuOpen)
+        }
+        }
+    }
+}
+
+/** Calls [onPress] with the position of each right-button press, leaving the press to the others. */
+@OptIn(ExperimentalComposeUiApi::class)
+private fun Modifier.onSecondaryPress(onPress: (Offset) -> Unit): Modifier =
+    pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Main)
+                if (event.type == PointerEventType.Press && event.button?.isSecondary == true) {
+                    onPress(event.changes.first().position)
+                }
+            }
+        }
+    }
+
+/** Go Live and Add to Schedule for one thumbnail, from a right-click on it. */
+@Composable
+private fun PicturesTabScope.PictureContextMenu(
+    viewModel: PicturesViewModel,
+    imageFile: File,
+    index: Int,
+    menuOpen: MutableState<Boolean>,
+) {
+    ContextMenu(
+        expanded = menuOpen.value,
+        onDismissRequest = { menuOpen.value = false },
+        header = {
+            ContextMenuHeader(
+                badge = (index + 1).toString(),
+                title = imageFile.nameWithoutExtension,
+                subtitle = imageFile.parentFile?.name.orEmpty(),
+                accent = MaterialTheme.semantic.contentPictures,
+            )
+        },
+    ) {
+        if (presenterManager != null) {
+            ContextMenuItem(
+                label = stringResource(Res.string.go_live),
+                icon = painterResource(IconRes.drawable.ic_go_live),
+                accent = MaterialTheme.colorScheme.primary,
+                shortcut = contextMenuShortcut(ShortcutAction.GO_LIVE),
+                emphasized = true,
+                onClick = {
+                    menuOpen.value = false
+                    viewModel.selectImage(viewModel.images.indexOf(imageFile))
+                    viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive)
+                },
+            )
+        }
+        onAddPictureToSchedule?.let { add ->
+            ContextMenuItem(
+                label = stringResource(Res.string.add_to_schedule),
+                icon = painterResource(IconRes.drawable.ic_playlist_add),
+                accent = MaterialTheme.semantic.success,
+                onClick = {
+                    menuOpen.value = false
+                    add(imageFile, viewModel.images.size)
+                },
+            )
+        }
+        onSetAsBackground?.let { set ->
+            ContextMenuDivider()
+            SetAsBackgroundItems(
+                backgroundTargets,
+                isCurrent = { profileId, content -> isBackground(imageFile, profileId, content) },
+            ) { profileId, content ->
+                menuOpen.value = false
+                set(imageFile, profileId, content)
+            }
         }
     }
 }

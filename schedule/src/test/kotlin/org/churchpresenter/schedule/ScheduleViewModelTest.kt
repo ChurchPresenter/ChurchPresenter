@@ -448,7 +448,7 @@ class ScheduleViewModelTest {
     fun `while following a remote schedule local mutations are redirected, not applied`() {
         val vm = newViewModel()
         val pushed = mutableListOf<ScheduleItem>()
-        vm.onPushToRemoteSchedule = { pushed.add(it) }
+        vm.onPushToRemoteSchedule = { item, _ -> pushed.add(item) }
 
         vm.followRemoteSchedule(emptyList())
         assertTrue(vm.isFollowingRemote)
@@ -518,7 +518,7 @@ class ScheduleViewModelTest {
     fun `a planned row is pushed to the primary while following one`() {
         val vm = newViewModel()
         val pushed = mutableListOf<ScheduleItem>()
-        vm.onPushToRemoteSchedule = { pushed.add(it) }
+        vm.onPushToRemoteSchedule = { item, _ -> pushed.add(item) }
         vm.followRemoteSchedule(emptyList())
 
         vm.addRow(plannedSong(), RowTiming(startAt = "09:45"))
