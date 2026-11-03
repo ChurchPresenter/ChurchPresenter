@@ -3078,6 +3078,8 @@
     <string name="song_translation_title">Název pro Jazyk %1$d</string>
     <string name="song_named_title">Název %1$s</string>
     <string name="tooltip_preview_settings">Nastavení náhledu</string>
+    <string name="tooltip_clear_text">Vymazat text, ponechat pozadí</string>
+    <string name="tooltip_restore_text">Znovu zobrazit text</string>
     <string name="media_subtitle_settings_hint">Platí pro soubory titulků SRT/WebVTT, které aplikace vykresluje sama. Vložená stopa nebo soubor ASS/SSA/SUB si ponechají vlastní vzhled VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Otevřít pomocníka Wick</string>

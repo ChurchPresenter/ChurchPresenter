@@ -18,6 +18,7 @@ import org.churchpresenter.app.churchpresenter.composables.QUICK_BACKGROUND_RESE
 import org.churchpresenter.dialogs.clearGroupItemTag
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.textCleared
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.ProfileSet
@@ -29,6 +30,7 @@ import org.churchpresenter.settings.QuickBackground
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -267,6 +269,21 @@ class PreviewSidebarControlsTest {
         sidebar(settings) { seen ->
             onNodeWithText("surface Front").assertExists()
             assertEquals(listOf("Front" to CompanionSurfacePlacement.RIGHT_SIDEBAR), seen.surfaces.distinct())
+        }
+    }
+
+    @Test
+    fun `the clear text key clears the text and then shows it again`() {
+        val manager = PresenterManager()
+        sidebar(AppSettings(), manager) { _ ->
+            onNodeWithContentDescription("Clear Text, Keep Background").performClick()
+            waitForIdle()
+            assertTrue(manager.textCleared)
+
+            onNodeWithContentDescription("Show Text Again").performClick()
+            waitForIdle()
+            assertFalse(manager.textCleared)
+            onNodeWithContentDescription("Clear Text, Keep Background").assertExists()
         }
     }
 }

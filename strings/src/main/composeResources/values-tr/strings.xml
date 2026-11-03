@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Dil %1$d Başlığı</string>
     <string name="song_named_title">%1$s Başlık</string>
     <string name="tooltip_preview_settings">Önizleme Ayarları</string>
+    <string name="tooltip_clear_text">Metni Temizle, Arka Planı Koru</string>
+    <string name="tooltip_restore_text">Metni Yeniden Göster</string>
     <string name="media_subtitle_settings_hint">Uygulamanın kendisinin çizdiği SRT/WebVTT altyazı dosyaları için geçerlidir. Gömülü bir iz veya ASS/SSA/SUB dosyası VLC'nin kendi görünümünü korur.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Yardımcı Wick'i aç</string>

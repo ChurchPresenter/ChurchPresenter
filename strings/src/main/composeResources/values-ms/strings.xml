@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Tajuk Bahasa %1$d</string>
     <string name="song_named_title">Tajuk %1$s</string>
     <string name="tooltip_preview_settings">Tetapan pratonton</string>
+    <string name="tooltip_clear_text">Kosongkan Teks, Kekalkan Latar</string>
+    <string name="tooltip_restore_text">Tunjukkan Teks Semula</string>
     <string name="media_subtitle_settings_hint">Digunakan untuk fail sari kata SRT/WebVTT, yang dilukis sendiri oleh aplikasi. Trek terbenam atau fail ASS/SSA/SUB mengekalkan rupa VLC sendiri.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Buka Wick, pembantu anda</string>

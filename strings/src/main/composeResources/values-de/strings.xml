@@ -3069,6 +3069,8 @@
     <string name="song_translation_title">Titel für Sprache %1$d</string>
     <string name="song_named_title">%1$s Titel</string>
     <string name="tooltip_preview_settings">Vorschau-Einstellungen</string>
+    <string name="tooltip_clear_text">Text löschen, Hintergrund behalten</string>
+    <string name="tooltip_restore_text">Text wieder anzeigen</string>
     <string name="media_subtitle_settings_hint">Gilt für SRT/WebVTT-Untertiteldateien, die die App selbst zeichnet. Eine eingebettete Spur oder eine ASS/SSA/SUB-Datei behält das eigene Erscheinungsbild von VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Wick öffnen, den Helfer</string>

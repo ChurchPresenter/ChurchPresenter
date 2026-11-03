@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">หัวข้อของภาษา %1$d</string>
     <string name="song_named_title">ชื่อเพลง (%1$s)</string>
     <string name="tooltip_preview_settings">การตั้งค่าการแสดงตัวอย่าง</string>
+    <string name="tooltip_clear_text">ล้างข้อความ คงพื้นหลังไว้</string>
+    <string name="tooltip_restore_text">แสดงข้อความอีกครั้ง</string>
     <string name="media_subtitle_settings_hint">ใช้กับไฟล์คำบรรยาย SRT/WebVTT ซึ่งแอปวาดเอง แทร็กที่ฝังไว้หรือไฟล์ ASS/SSA/SUB จะคงรูปลักษณ์ของ VLC เอง</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">เปิด Wick ผู้ช่วย</string>

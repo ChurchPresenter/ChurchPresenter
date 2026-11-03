@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">言語%1$dのタイトル</string>
     <string name="song_named_title">%1$s のタイトル</string>
     <string name="tooltip_preview_settings">プレビュー設定</string>
+    <string name="tooltip_clear_text">テキストのみクリア(背景は保持)</string>
+    <string name="tooltip_restore_text">テキストを再表示</string>
     <string name="media_subtitle_settings_hint">アプリ自身が描画するSRT/WebVTT字幕ファイルに適用されます。埋め込みトラックやASS/SSA/SUBファイルはVLC独自の見た目のままになります。</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">ヘルパーの Wick を開く</string>

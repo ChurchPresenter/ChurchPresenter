@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Tittel for Språk %1$d</string>
     <string name="song_named_title">%1$s-tittel</string>
     <string name="tooltip_preview_settings">Forhåndsvisningsinnstillinger</string>
+    <string name="tooltip_clear_text">Tøm tekst, behold bakgrunn</string>
+    <string name="tooltip_restore_text">Vis teksten igjen</string>
     <string name="media_subtitle_settings_hint">Gjelder for SRT/WebVTT-undertekstfiler, som appen tegner selv. Et innebygd spor eller en ASS/SSA/SUB-fil beholder VLCs eget utseende.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Åpne Wick, hjelperen</string>
