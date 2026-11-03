@@ -88,12 +88,18 @@ data class LinkPlaylist(
 
 /**
  * How a web page people use on a touchscreen behaves: it starts over, keeping nothing anyone typed,
- * after [idleResetSeconds] without a touch, and may go only to its own site and [allowedHosts].
+ * after [idleResetSeconds] without a touch, and may go only to its own site and [allowedHosts]. While
+ * nobody uses it the screen can play the playlist [idlePlaylistId] or show the page [idleUrl] instead
+ * (at most one is set), with [idlePrompt] written over it; a touch opens the page, and its idle reset
+ * goes back.
  */
 @Serializable
 data class InteractiveLink(
     val idleResetSeconds: Int = DEFAULT_IDLE_RESET_SECONDS,
     val allowedHosts: List<String> = emptyList(),
+    val idlePlaylistId: String? = null,
+    val idleUrl: String? = null,
+    val idlePrompt: String? = null,
 ) {
     companion object {
         const val DEFAULT_IDLE_RESET_SECONDS = 90

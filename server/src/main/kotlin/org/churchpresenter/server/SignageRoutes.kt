@@ -186,7 +186,7 @@ private suspend fun DefaultWebSocketServerSession.runPairedSession(
     hello: PlayerMessage.Hello,
     address: String,
 ) {
-    hub.registry.refreshFrom(hello)
+    hub.registry.refreshFrom(hello, address)
     val outgoing = launch(start = CoroutineStart.UNDISPATCHED) {
         hub.links.messagesFor(hello.playerId).collect { sendSignage(it) }
     }
@@ -204,5 +204,6 @@ private suspend fun DefaultWebSocketServerSession.runPairedSession(
     } finally {
         outgoing.cancel()
         hub.links.closed(hello.playerId, session)
+        hub.registry.refreshFrom(hello)
     }
 }

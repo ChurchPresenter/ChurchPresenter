@@ -115,13 +115,14 @@ fun SignageTab(
     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
         Column(modifier = modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 8.dp)) {
             if (!serverRunning) ServerOffBanner(onTurnOnServer)
+            val lookingSinceMs = remember(serverRunning) { System.currentTimeMillis() }
             Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val defaultName = stringResource(Res.string.signage_default_name, screens.size + 1)
                 ScreensColumn(
                     screens = screens.map { screen ->
                         val link = links[screen.id]
                         val offer = latest?.let { controller.controls.offerFor(screen, link) }
-                        ScreenRowState(screen, link, folder, offer)
+                        ScreenRowState(screen, link, folder, offer, lookingSinceMs)
                     },
                     pendingCards = {
                         pending.forEach { player ->
@@ -164,6 +165,8 @@ internal data class ScreenRowState(
     val folder: SignageFolderState,
     /** The player release this screen can be updated to now, if any. */
     val offer: LatestRelease? = null,
+    /** When ChurchPresenter began looking for its screens: the server started, or the tab opened. */
+    val lookingSinceMs: Long = 0L,
 )
 
 /** What the folder panel's controls do. */

@@ -28,8 +28,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import org.churchpresenter.settings.STTSettings
-import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.settings.STTTabView
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +40,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.clear
 import org.churchpresenter.strings.generated.resources.stt_connect
@@ -182,9 +183,13 @@ internal fun ConnectionStatus(sttManager: STTManager) {
     )
 }
 
-/** The transcript and its translation as they arrive, side by side, as the captions show them. */
+/**
+ * The transcript and its translation as they arrive, read the tab's own way ([STTTabView]): which of
+ * them, how many lines, the text still being spoken, highlighting, size, and side by side or one
+ * under the other. Each output picks its own captions in its profile, so the tab follows none of them.
+ */
 @Composable
-internal fun LivePreview(sttManager: STTManager, sttSettings: STTSettings) {
+internal fun LivePreview(sttManager: STTManager, view: STTTabView) {
     val connected by sttManager.connected
     val inProgressText by sttManager.inProgressText
     val inProgressTranslation by sttManager.inProgressTranslation
@@ -196,43 +201,55 @@ internal fun LivePreview(sttManager: STTManager, sttSettings: STTSettings) {
         color = MaterialTheme.colorScheme.onSurface
     )
 
-    val maxSeg = sttSettings.maxSegments
+    val maxSeg = view.maxSegments
     val displaySegments = sttManager.segments.let { if (maxSeg > 0) it.takeLast(maxSeg) else it }
     val displayTranslation = sttManager.translationSegments.let { if (maxSeg > 0) it.takeLast(maxSeg) else it }
 
-    val showTranscription = sttSettings.displayMode == "transcribe" || sttSettings.displayMode == "both"
-    val showTranslation = sttSettings.displayMode == "translate" || sttSettings.displayMode == "both"
+    val showTranscription = view.shows != STTTabView.SHOWS_TRANSLATION
+    val showTranslation = view.shows != STTTabView.SHOWS_TRANSCRIPTION
+    val hasContent = (showTranscription && (displaySegments.isNotEmpty() || inProgressText.isNotBlank())) ||
+        (showTranslation && (displayTranslation.isNotEmpty() || inProgressTranslation.isNotBlank()))
 
-    val hasTranscriptionContent = displaySegments.isNotEmpty() || inProgressText.isNotBlank()
-    val hasTranslationContent = displayTranslation.isNotEmpty() || inProgressTranslation.isNotBlank()
-    val hasContent = (showTranscription && hasTranscriptionContent) || (showTranslation && hasTranslationContent)
-
-    Row(modifier = Modifier.fillMaxSize().padding(top = 4.dp)) {
-        when {
-            !connected -> PreviewNotice(stringResource(Res.string.stt_not_connected))
-            !hasContent -> PreviewNotice(stringResource(Res.string.stt_waiting_for_transcription))
-            else -> {
-                val highlighting = Highlighting(
-                    words = sttManager.highlightedWords,
-                    enabled = sttSettings.showWordHighlighting && sttManager.wordHighlightingEnabled.value,
+    when {
+        !connected -> PreviewNotice(stringResource(Res.string.stt_not_connected))
+        !hasContent -> PreviewNotice(stringResource(Res.string.stt_waiting_for_transcription))
+        else -> {
+            val highlighting = Highlighting(
+                words = sttManager.highlightedWords,
+                enabled = view.wordHighlighting && sttManager.wordHighlightingEnabled.value,
+            )
+            val style = MaterialTheme.typography.bodyMedium.copy(fontSize = view.fontSize.sp)
+            val transcription: @Composable (Modifier) -> Unit = { modifier ->
+                TranscriptColumn(
+                    title = stringResource(Res.string.obs_mode_stt),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    segments = displaySegments,
+                    inProgress = inProgressText.takeIf { view.showInProgress }.orEmpty(),
+                    highlighting = highlighting,
+                    style = style,
+                    modifier = modifier,
                 )
-                if (showTranscription) {
-                    TranscriptColumn(
-                        title = stringResource(Res.string.obs_mode_stt),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        segments = displaySegments,
-                        inProgress = inProgressText.takeIf { sttSettings.showInProgress }.orEmpty(),
-                        highlighting = highlighting,
-                    )
+            }
+            val translation: @Composable (Modifier) -> Unit = { modifier ->
+                TranscriptColumn(
+                    title = stringResource(Res.string.stt_translation_label),
+                    color = MaterialTheme.colorScheme.primary,
+                    segments = displayTranslation,
+                    inProgress = inProgressTranslation.takeIf { view.showTranslationInProgress }.orEmpty(),
+                    highlighting = highlighting,
+                    style = style,
+                    modifier = modifier,
+                )
+            }
+            if (view.layout == STTTabView.LAYOUT_STACKED) {
+                Column(Modifier.fillMaxSize().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (showTranscription) transcription(Modifier.weight(1f).fillMaxWidth())
+                    if (showTranslation) translation(Modifier.weight(1f).fillMaxWidth())
                 }
-                if (showTranslation) {
-                    TranscriptColumn(
-                        title = stringResource(Res.string.stt_translation_label),
-                        color = MaterialTheme.colorScheme.primary,
-                        segments = displayTranslation,
-                        inProgress = inProgressTranslation.takeIf { sttSettings.showTranslationInProgress }.orEmpty(),
-                        highlighting = highlighting,
-                    )
+            } else {
+                Row(Modifier.fillMaxSize().padding(top = 4.dp)) {
+                    if (showTranscription) transcription(Modifier.weight(1f).fillMaxHeight())
+                    if (showTranslation) translation(Modifier.weight(1f).fillMaxHeight())
                 }
             }
         }
@@ -245,7 +262,8 @@ private fun PreviewNotice(text: String) {
         text,
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(16.dp)
+        // The 4 dp the columns also sit below the title, then the notice's own margin.
+        modifier = Modifier.padding(top = 4.dp).padding(16.dp)
     )
 }
 
@@ -254,18 +272,20 @@ internal class Highlighting(val words: List<HighlightedWord>, val enabled: Boole
 
 /** One language's column: its title, the finished segments, then what is still being said. */
 @Composable
-private fun RowScope.TranscriptColumn(
+private fun TranscriptColumn(
     title: String,
     color: Color,
     segments: List<STTSegment>,
     inProgress: String,
     highlighting: Highlighting,
+    style: TextStyle,
+    modifier: Modifier,
 ) {
     val scrollState = rememberScrollState()
     LaunchedEffect(segments.size, inProgress) {
         scrollState.animateScrollTo(scrollState.maxValue)
     }
-    Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+    Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(4.dp)) {
             Text(
                 title,
@@ -277,14 +297,14 @@ private fun RowScope.TranscriptColumn(
             segments.forEach { segment ->
                 Text(
                     text = applyHighlighting(segment.text, highlighting.words, highlighting.enabled, color),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = style,
                     modifier = Modifier.padding(vertical = 1.dp)
                 )
             }
             if (inProgress.isNotBlank()) {
                 Text(
                     text = inProgress,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = style,
                     color = color.copy(alpha = IN_PROGRESS_ALPHA),
                     modifier = Modifier.padding(vertical = 1.dp)
                 )

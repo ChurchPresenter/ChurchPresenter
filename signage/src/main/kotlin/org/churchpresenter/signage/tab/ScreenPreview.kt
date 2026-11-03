@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +25,6 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.signage.hub.ScreenLink
 import org.churchpresenter.strings.generated.resources.Res
@@ -40,11 +38,16 @@ import org.jetbrains.skia.Image as SkiaImage
 import java.util.Base64
 
 /**
- * A small picture of what a screen shows, as it last sent one; black with a line of text until the
- * first arrives. Clicking it opens it larger.
+ * A small picture of what a screen shows, as it last sent one; black with [placeholder] until the
+ * first arrives. Clicking it opens it larger. The box is always there, so the card's text keeps its
+ * place whether the screen is connected or not.
  */
 @Composable
-internal fun PreviewThumbnail(preview: PlayerMessage.Preview?, onOpen: () -> Unit) {
+internal fun PreviewThumbnail(
+    preview: PlayerMessage.Preview?,
+    placeholder: String = stringResource(Res.string.signage_no_preview),
+    onOpen: () -> Unit,
+) {
     val shape = RoundedCornerShape(6.dp)
     val bitmap = rememberPreview(preview)
     val description = stringResource(Res.string.signage_preview)
@@ -66,7 +69,7 @@ internal fun PreviewThumbnail(preview: PlayerMessage.Preview?, onOpen: () -> Uni
             )
         } else {
             Text(
-                stringResource(Res.string.signage_no_preview),
+                placeholder,
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = NO_PREVIEW_ALPHA),
                 textAlign = TextAlign.Center,
@@ -82,12 +85,7 @@ internal fun PreviewThumbnail(preview: PlayerMessage.Preview?, onOpen: () -> Uni
  */
 @Composable
 internal fun currentPreview(link: ScreenLink?): PlayerMessage.Preview? {
-    val now by produceState(System.currentTimeMillis()) {
-        while (true) {
-            delay(TICK_MS)
-            value = System.currentTimeMillis()
-        }
-    }
+    val now = rememberNow()
     val at = link?.previewAtMs ?: return null
     return link.preview?.takeIf { now - at <= STALE_MS }
 }
@@ -132,7 +130,6 @@ private fun rememberPreview(preview: PlayerMessage.Preview?): ImageBitmap? =
 
 private const val THUMBNAIL_WIDTH = 176
 private const val STALE_MS = 20_000L
-private const val TICK_MS = 5_000L
 private const val LARGE_WIDTH = 720
 private const val TV_ASPECT = 16f / 9f
 private const val NO_PREVIEW_ALPHA = 0.7f

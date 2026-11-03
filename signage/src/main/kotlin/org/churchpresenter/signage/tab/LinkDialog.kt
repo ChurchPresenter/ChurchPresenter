@@ -2,9 +2,12 @@ package org.churchpresenter.signage.tab
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,11 +17,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.sharedui.composables.DropdownSettingsField
 import org.churchpresenter.sharedui.composables.LabeledRadioButton
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
@@ -32,7 +38,18 @@ import org.churchpresenter.strings.generated.resources.signage_link_allowed_site
 import org.churchpresenter.strings.generated.resources.signage_link_allowed_sites_hint
 import org.churchpresenter.strings.generated.resources.signage_link_any_site
 import org.churchpresenter.strings.generated.resources.signage_link_any_site_hint
+import org.churchpresenter.strings.generated.resources.signage_link_idle_hint
+import org.churchpresenter.strings.generated.resources.signage_link_idle_no_playlists
+import org.churchpresenter.strings.generated.resources.signage_link_idle_playlist
+import org.churchpresenter.strings.generated.resources.signage_link_idle_playlist_pick
+import org.churchpresenter.strings.generated.resources.signage_link_idle_prompt
+import org.churchpresenter.strings.generated.resources.signage_link_idle_prompt_default
+import org.churchpresenter.strings.generated.resources.signage_link_idle_prompt_hint
 import org.churchpresenter.strings.generated.resources.signage_link_idle_reset
+import org.churchpresenter.strings.generated.resources.signage_link_idle_screen
+import org.churchpresenter.strings.generated.resources.signage_link_idle_show_page
+import org.churchpresenter.strings.generated.resources.signage_link_idle_url
+import org.churchpresenter.strings.generated.resources.signage_link_idle_web
 import org.churchpresenter.strings.generated.resources.signage_link_interactive
 import org.churchpresenter.strings.generated.resources.signage_link_interactive_hint
 import org.churchpresenter.strings.generated.resources.signage_link_internet
@@ -54,13 +71,16 @@ import java.net.URISyntaxException
 /**
  * Adds a link playlist, or edits [initial]: its address, a name, and whether it is a web page or a
  * stream, guessed from the address until it is chosen by hand. A web page can reload every few minutes,
- * or be one people use on the touchscreen, which starts over after a time without a touch.
+ * or be one people use on the touchscreen, which starts over after a time without a touch, and can
+ * have one of [idlePlaylists] or another page on screen until someone taps.
  */
 @Composable
 internal fun LinkDialog(
     onAdd: (NewLink) -> Unit,
     onDismiss: () -> Unit,
     initial: LinkPlaylist? = null,
+    /** The playlists the screen may play while nobody uses a touchscreen page. */
+    idlePlaylists: List<PlaylistSummary> = emptyList(),
 ) {
     // The cursor starts after the address, so typing carries on from the prefilled start.
     var field by remember {
@@ -70,7 +90,8 @@ internal fun LinkDialog(
     val url = field.text
     var name by remember { mutableStateOf(initial?.name.orEmpty()) }
     var chosenKind by remember { mutableStateOf(initial?.kind) }
-    val page = remember { WebOptions(initial) }
+    val defaultPrompt = stringResource(Res.string.signage_link_idle_prompt_default)
+    val page = remember { WebOptions(initial, idlePlaylists, defaultPrompt) }
     val kind = chosenKind ?: LinkKind.guess(url)
     val valid = isLinkAddress(url)
     AlertDialog(
@@ -80,7 +101,18 @@ internal fun LinkDialog(
             Text(stringResource(title))
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.width(DIALOG_WIDTH)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.width(DIALOG_WIDTH).verticalScroll(rememberScrollState()),
+            ) {
+                SettingsTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = stringResource(Res.string.signage_link_name),
+                    placeholder = { Text(hostOf(url).orEmpty(), style = MaterialTheme.typography.bodySmall) },
+                    fillWidth = true,
+                    modifier = Modifier.fillMaxWidth().testTag(LINK_NAME_TAG),
+                )
                 SettingsTextField(
                     value = field,
                     onValueChange = { typed ->
@@ -91,14 +123,6 @@ internal fun LinkDialog(
                     supportingText = { FieldHint(stringResource(Res.string.signage_link_address_hint)) },
                     fillWidth = true,
                     modifier = Modifier.fillMaxWidth().testTag(LINK_ADDRESS_TAG),
-                )
-                SettingsTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = stringResource(Res.string.signage_link_name),
-                    placeholder = { Text(hostOf(url).orEmpty(), style = MaterialTheme.typography.bodySmall) },
-                    fillWidth = true,
-                    modifier = Modifier.fillMaxWidth().testTag(LINK_NAME_TAG),
                 )
                 Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     LabeledRadioButton(
@@ -112,7 +136,7 @@ internal fun LinkDialog(
                         label = stringResource(Res.string.signage_link_stream),
                     )
                 }
-                if (kind == LinkKind.WEB) WebOptionFields(page)
+                if (kind == LinkKind.WEB) WebOptionFields(page, idlePlaylists)
                 Text(
                     stringResource(Res.string.signage_link_internet) + " " +
                         stringResource(Res.string.signage_link_older_player),
@@ -139,15 +163,18 @@ internal fun LinkDialog(
                     )
                     onDismiss()
                 },
-                enabled = valid,
+                enabled = valid && (kind != LinkKind.WEB || page.idleValid()),
             ) { Text(stringResource(if (initial == null) Res.string.signage_add else Res.string.save)) }
         },
         dismissButton = { RingedGhostButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
+/** What a touchscreen page's screen shows while nobody uses it. */
+private enum class IdleChoice { PAGE, PLAYLIST, WEB }
+
 /** A web page's own settings while the dialog is open: drawn on the TV, or used on the touchscreen. */
-private class WebOptions(initial: LinkPlaylist?) {
+private class WebOptions(initial: LinkPlaylist?, idlePlaylists: List<PlaylistSummary>, defaultPrompt: String) {
     var refreshMinutes by mutableIntStateOf(initial?.refreshMinutes ?: 0)
     var smooth by mutableStateOf(initial?.smooth == true)
     var touch by mutableStateOf(initial?.interactive != null)
@@ -161,10 +188,47 @@ private class WebOptions(initial: LinkPlaylist?) {
         initial?.interactive?.allowedHosts.orEmpty().filterNot { it == InteractiveLink.ANY_HOST }.joinToString(", "),
     )
 
+    private val savedIdle = initial?.interactive
+
+    /** A playlist that has gone since counts as none: the page itself shows. */
+    var idlePlaylistId by mutableStateOf(savedIdle?.idlePlaylistId?.takeIf { id -> idlePlaylists.any { it.id == id } })
+    var idleChoice by mutableStateOf(
+        when {
+            idlePlaylistId != null -> IdleChoice.PLAYLIST
+            savedIdle?.idleUrl != null -> IdleChoice.WEB
+            else -> IdleChoice.PAGE
+        },
+    )
+
+    /** What the idle screen says: the saved text, or the default for a link that had no idle screen yet. */
+    var idlePrompt by mutableStateOf(
+        if (savedIdle?.idlePlaylistId != null || savedIdle?.idleUrl != null) {
+            savedIdle.idlePrompt.orEmpty()
+        } else {
+            defaultPrompt
+        },
+    )
+    var idleField by mutableStateOf(
+        (savedIdle?.idleUrl ?: ADDRESS_PREFIX).let { TextFieldValue(it, TextRange(it.length)) },
+    )
+
+    /** Whether what was chosen for the idle screen can be saved: a playlist picked, or a whole address. */
+    fun idleValid(): Boolean = !touch || when (idleChoice) {
+        IdleChoice.PAGE -> true
+        IdleChoice.PLAYLIST -> idlePlaylistId != null
+        IdleChoice.WEB -> isLinkAddress(idleField.text)
+    }
+
     /** What the page is on a touchscreen; null for one drawn on the TV. */
     fun interactive(): InteractiveLink? {
         val hosts = if (anySite) listOf(InteractiveLink.ANY_HOST) else InteractiveLink.hostsFrom(sites)
-        return InteractiveLink(idleSeconds, hosts).takeIf { touch }
+        return InteractiveLink(
+            idleSeconds,
+            hosts,
+            idlePlaylistId = idlePlaylistId.takeIf { idleChoice == IdleChoice.PLAYLIST },
+            idleUrl = idleField.text.trim().takeIf { idleChoice == IdleChoice.WEB },
+            idlePrompt = idlePrompt.trim().takeIf { idleChoice != IdleChoice.PAGE && it.isNotEmpty() },
+        ).takeIf { touch }
     }
 }
 
@@ -173,19 +237,14 @@ private class WebOptions(initial: LinkPlaylist?) {
  * the TV, smoothness and reloads.
  */
 @Composable
-private fun WebOptionFields(page: WebOptions) {
+private fun WebOptionFields(page: WebOptions, idlePlaylists: List<PlaylistSummary>) {
     SwitchRow(
         title = stringResource(Res.string.signage_link_interactive),
         hint = stringResource(Res.string.signage_link_interactive_hint),
         checked = page.touch,
     ) { page.touch = it }
     if (page.touch) {
-        NumberSettingsTextField(
-            label = stringResource(Res.string.signage_link_idle_reset),
-            initialText = page.idleSeconds,
-            range = InteractiveLink.IDLE_RESET_SECONDS,
-            onValueChange = { page.idleSeconds = it },
-        )
+        IdleScreenFields(page, idlePlaylists)
         SwitchRow(
             title = stringResource(Res.string.signage_link_any_site),
             hint = stringResource(Res.string.signage_link_any_site_hint),
@@ -213,6 +272,83 @@ private fun WebOptionFields(page: WebOptions) {
             range = REFRESH_MINUTES,
             onValueChange = { page.refreshMinutes = it },
         )
+    }
+}
+
+/**
+ * How a touchscreen page starts over, and what its screen shows until someone taps: the page, a
+ * playlist, or another page. The playlist, the choice and the time share one line.
+ */
+@Composable
+private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSummary>) {
+    val labels = mapOf(
+        IdleChoice.PAGE to stringResource(Res.string.signage_link_idle_show_page),
+        IdleChoice.PLAYLIST to stringResource(Res.string.signage_link_idle_playlist),
+        IdleChoice.WEB to stringResource(Res.string.signage_link_idle_web),
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (page.idleChoice == IdleChoice.PLAYLIST && idlePlaylists.isNotEmpty()) {
+                val current = idlePlaylists.firstOrNull { it.id == page.idlePlaylistId }
+                DropdownSettingsField(
+                    value = current?.name.orEmpty(),
+                    options = idlePlaylists.map { it.name },
+                    onValueChange = { name ->
+                        page.idlePlaylistId = idlePlaylists[idlePlaylists.indexOfFirst { it.name == name }].id
+                    },
+                    label = stringResource(Res.string.signage_link_idle_playlist_pick),
+                    // The rest of the line: a long name ends in an ellipsis before the chevron. An unset
+                    // width still makes the field lay out to the width it is given.
+                    modifier = Modifier.weight(1f),
+                    width = Dp.Unspecified,
+                )
+            }
+            DropdownSettingsField(
+                value = labels.getValue(page.idleChoice),
+                options = IdleChoice.entries.map(labels::getValue),
+                onValueChange = { picked ->
+                    page.idleChoice = IdleChoice.entries[labels.values.indexOf(picked)]
+                    // A playlist chosen starts on the first one, so the dialog can save straight away.
+                    if (page.idleChoice == IdleChoice.PLAYLIST && page.idlePlaylistId == null) {
+                        page.idlePlaylistId = idlePlaylists.firstOrNull()?.id
+                    }
+                },
+                label = stringResource(Res.string.signage_link_idle_screen),
+            )
+            NumberSettingsTextField(
+                label = stringResource(Res.string.signage_link_idle_reset),
+                initialText = page.idleSeconds,
+                range = InteractiveLink.IDLE_RESET_SECONDS,
+                onValueChange = { page.idleSeconds = it },
+            )
+        }
+        when (page.idleChoice) {
+            IdleChoice.PAGE -> Unit
+            IdleChoice.PLAYLIST -> if (idlePlaylists.isEmpty()) {
+                FieldHint(stringResource(Res.string.signage_link_idle_no_playlists))
+            }
+            IdleChoice.WEB -> SettingsTextField(
+                value = page.idleField,
+                onValueChange = { typed ->
+                    val text = withoutPrefixTwice(typed.text)
+                    page.idleField = if (text == typed.text) typed else TextFieldValue(text, TextRange(text.length))
+                },
+                label = stringResource(Res.string.signage_link_idle_url),
+                fillWidth = true,
+                modifier = Modifier.fillMaxWidth().testTag(LINK_IDLE_URL_TAG),
+            )
+        }
+        if (page.idleChoice != IdleChoice.PAGE) {
+            SettingsTextField(
+                value = page.idlePrompt,
+                onValueChange = { page.idlePrompt = it },
+                label = stringResource(Res.string.signage_link_idle_prompt),
+                supportingText = { FieldHint(stringResource(Res.string.signage_link_idle_prompt_hint)) },
+                fillWidth = true,
+                modifier = Modifier.fillMaxWidth().testTag(LINK_IDLE_PROMPT_TAG),
+            )
+            FieldHint(stringResource(Res.string.signage_link_idle_hint))
+        }
     }
 }
 
@@ -264,6 +400,8 @@ internal fun withoutPrefixTwice(typed: String): String {
 internal const val LINK_ADDRESS_TAG = "signage-link-address"
 internal const val LINK_NAME_TAG = "signage-link-name"
 internal const val LINK_SITES_TAG = "signage-link-sites"
+internal const val LINK_IDLE_URL_TAG = "signage-link-idle-url"
+internal const val LINK_IDLE_PROMPT_TAG = "signage-link-idle-prompt"
 
 /** What a new link's address starts as, so only the rest is typed: the same in every language. */
 private const val ADDRESS_PREFIX = "https://www."

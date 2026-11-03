@@ -166,7 +166,13 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
             )
         }
     }
-    if (addingLink) LinkDialog(onAdd = actions.onAddLink, onDismiss = { addingLink = false })
+    if (addingLink) {
+        LinkDialog(
+            onAdd = actions.onAddLink,
+            onDismiss = { addingLink = false },
+            idlePlaylists = idlePlaylists(state, editing = null),
+        )
+    }
     if (addingRotation) {
         RotationDialog(
             entries = state.playlists.filter { it.kind != SourceKind.ROTATION },
@@ -219,6 +225,7 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
             initial = editing,
             onAdd = { actions.onEditLink(editing.id, it) },
             onDismiss = { renaming = null },
+            idlePlaylists = idlePlaylists(state, editing = editing.id),
         )
         is FilePlaylist -> FileDialog(
             initial = editing,
@@ -334,3 +341,13 @@ private fun iconOf(kind: SourceKind): ImageVector = when (kind) {
 }
 
 private const val SECONDS_PER_MINUTE = 60
+
+/**
+ * What a touchscreen page's screen may play while nobody uses it: any entry but a rotation, another
+ * touchscreen page, or the link being edited ([editing]).
+ */
+internal fun idlePlaylists(state: SignageFolderState, editing: String?): List<PlaylistSummary> {
+    val touchPages = state.settings.added.filterIsInstance<LinkPlaylist>()
+        .filter { it.interactive != null }.map { it.id }.toSet()
+    return state.playlists.filter { it.kind != SourceKind.ROTATION && it.id != editing && it.id !in touchPages }
+}

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import org.churchpresenter.settings.STTSettings
+import org.churchpresenter.settings.STTTabView
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,7 +22,7 @@ import org.churchpresenter.sharedui.testing.showsExactly
  * What the STT tab shows and what its controls do.
  *
  * The tab is a connection row over a live-caption preview, and almost everything it draws is decided
- * by the four connection flags plus `displayMode`. Those states are reached through [STTManager]'s
+ * by the four connection flags plus the tab's own view, `STTTabView`. Those states are reached through [STTManager]'s
  * own socket transitions (`applyConnected` and friends) rather than through a socket — see
  * `STTTabTestSupport.kt`.
  *
@@ -189,7 +190,7 @@ class STTTabTest {
     @Test
     fun `an in-progress phrase alone counts as content`() {
         sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, showInProgress = true),
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(showInProgress = true)),
             seed = { applyConnected(); transcribeInProgress("half a sen") },
         ) { _, _, _ ->
             assertFalse(showsExactly(STTLabel.WAITING), renderedText().toString())
@@ -200,7 +201,7 @@ class STTTabTest {
     @Test
     fun `the in-progress phrase is hidden when the setting is off`() {
         sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, showInProgress = false),
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(showInProgress = false)),
             seed = { live("said already"); transcribeInProgress("half a sen") },
         ) { _, _, _ ->
             assertTrue(showsExactly("said already"))
@@ -235,53 +236,32 @@ class STTTabTest {
 
     // ── Display modes ───────────────────────────────────────────────────────────────────────────
 
+    // Each output picks transcription, translation or both on its own, so the tab always shows both.
+
     @Test
-    fun `transcribe mode draws only the transcription column`() {
-        sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, displayMode = "transcribe"),
-            seed = { live("spoken"); translate("translated") },
-        ) { _, _, _ ->
-            assertTrue(showsExactly(STTLabel.TRANSCRIPTION), renderedText().toString())
-            assertFalse(showsExactly(STTLabel.TRANSLATION))
-            assertTrue(showsExactly("spoken"))
-            assertFalse(showsExactly("translated"))
+    fun `every display mode draws both columns side by side`() {
+        listOf("transcribe", "translate", "both").forEach { mode ->
+            sttTab(
+                settings = STTSettings(serverUrl = SILENT_STT_URL, displayMode = mode),
+                seed = { live("spoken"); translate("translated") },
+            ) { _, _, _ ->
+                assertTrue(showsExactly(STTLabel.TRANSCRIPTION), "$mode: ${renderedText()}")
+                assertTrue(showsExactly(STTLabel.TRANSLATION), mode)
+                assertTrue(showsExactly("spoken"), mode)
+                assertTrue(showsExactly("translated"), mode)
+            }
         }
     }
 
     @Test
-    fun `translate mode draws only the translation column`() {
-        sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, displayMode = "translate"),
-            seed = { live("spoken"); translate("translated") },
-        ) { _, _, _ ->
-            assertTrue(showsExactly(STTLabel.TRANSLATION), renderedText().toString())
-            assertFalse(showsExactly(STTLabel.TRANSCRIPTION))
-            assertTrue(showsExactly("translated"))
-            assertFalse(showsExactly("spoken"))
-        }
-    }
-
-    @Test
-    fun `both mode draws the two columns side by side`() {
-        sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, displayMode = "both"),
-            seed = { live("spoken"); translate("translated") },
-        ) { _, _, _ ->
-            assertTrue(showsExactly(STTLabel.TRANSCRIPTION), renderedText().toString())
-            assertTrue(showsExactly(STTLabel.TRANSLATION))
-            assertTrue(showsExactly("spoken"))
-            assertTrue(showsExactly("translated"))
-        }
-    }
-
-    @Test
-    fun `translate mode still waits when only a transcription has arrived`() {
+    fun `a transcription alone is shown before any translation arrives`() {
         sttTab(
             settings = STTSettings(serverUrl = SILENT_STT_URL, displayMode = "translate"),
             seed = { live("spoken but not translated") },
         ) { _, _, _ ->
-            assertTrue(showsExactly(STTLabel.WAITING), renderedText().toString())
-            assertFalse(showsExactly("spoken but not translated"))
+            assertFalse(showsExactly(STTLabel.WAITING), renderedText().toString())
+            assertTrue(showsExactly("spoken but not translated"))
+            assertTrue(showsExactly(STTLabel.TRANSLATION))
         }
     }
 
@@ -290,8 +270,7 @@ class STTTabTest {
         sttTab(
             settings = STTSettings(
                 serverUrl = SILENT_STT_URL,
-                displayMode = "translate",
-                showTranslationInProgress = true,
+                tab = STTTabView(shows = "translate", showTranslationInProgress = true),
             ),
             seed = { applyConnected(); translateInProgress("halfway trans") },
         ) { _, _, _ ->
@@ -301,8 +280,7 @@ class STTTabTest {
         sttTab(
             settings = STTSettings(
                 serverUrl = SILENT_STT_URL,
-                displayMode = "translate",
-                showTranslationInProgress = false,
+                tab = STTTabView(shows = "translate", showTranslationInProgress = false),
             ),
             seed = { applyConnected(); translate("done"); translateInProgress("halfway trans") },
         ) { _, _, _ ->
@@ -316,7 +294,7 @@ class STTTabTest {
     @Test
     fun `only the last maxSegments captions are previewed`() {
         sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, maxSegments = 2),
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(maxSegments = 2)),
             seed = { live("oldest", "middle", "newest") },
         ) { _, _, _ ->
             assertFalse(showsExactly("oldest"), renderedText().toString())
@@ -328,7 +306,7 @@ class STTTabTest {
     @Test
     fun `a zero cap means show everything`() {
         sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, maxSegments = 0),
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(maxSegments = 0)),
             seed = { live("oldest", "middle", "newest") },
         ) { _, _, _ ->
             assertTrue(showsExactly("oldest"), renderedText().toString())
@@ -342,8 +320,7 @@ class STTTabTest {
         sttTab(
             settings = STTSettings(
                 serverUrl = SILENT_STT_URL,
-                displayMode = "translate",
-                maxSegments = 1,
+                tab = STTTabView(shows = "translate", maxSegments = 1),
             ),
             seed = { applyConnected(); translate("older line", "newest line") },
         ) { _, _, _ ->
@@ -359,7 +336,7 @@ class STTTabTest {
         // The colouring itself is asserted in STTHighlightingTest; what matters here is that turning
         // it on doesn't change, split or drop the caption the tab draws.
         sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, showWordHighlighting = true),
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(wordHighlighting = true)),
             seed = { live("praise the Lord"); highlight("Lord" to "#ff0000") },
         ) { _, _, _ ->
             assertTrue(showsExactly("praise the Lord"), renderedText().toString())
@@ -369,12 +346,93 @@ class STTTabTest {
     @Test
     fun `a caption with a highlight and the label both render`() {
         sttTab(
-            settings = STTSettings(serverUrl = SILENT_STT_URL, showWordHighlighting = true),
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(wordHighlighting = true)),
             seed = { live("grace"); highlight("grace" to "#00ff00") },
         ) { _, _, _ ->
             // The column header and the caption are separate nodes, not one merged string.
             onNode(hasText(STTLabel.TRANSCRIPTION)).assertExists()
             onNode(hasText("grace")).assertExists()
+        }
+    }
+
+    // ── The tab's own view ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the tab can show only the transcription`() {
+        sttTab(
+            settings = STTSettings(
+                serverUrl = SILENT_STT_URL,
+                tab = STTTabView(shows = STTTabView.SHOWS_TRANSCRIPTION),
+            ),
+            seed = { live("spoken"); translate("translated") },
+        ) { _, _, _ ->
+            assertTrue(showsExactly("spoken"), renderedText().toString())
+            assertFalse(showsExactly(STTLabel.TRANSLATION))
+            assertFalse(showsExactly("translated"))
+        }
+    }
+
+    @Test
+    fun `a tab showing only the translation waits while only a transcription has arrived`() {
+        sttTab(
+            settings = STTSettings(
+                serverUrl = SILENT_STT_URL,
+                tab = STTTabView(shows = STTTabView.SHOWS_TRANSLATION),
+            ),
+            seed = { live("spoken but not translated") },
+        ) { _, _, _ ->
+            assertTrue(showsExactly(STTLabel.WAITING), renderedText().toString())
+            assertFalse(showsExactly("spoken but not translated"))
+        }
+    }
+
+    @Test
+    fun `one under the other puts the translation below the transcription`() {
+        sttTab(
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(layout = STTTabView.LAYOUT_STACKED)),
+            seed = { live("spoken"); translate("translated") },
+        ) { _, _, _ ->
+            val spoken = onNode(hasText("spoken")).fetchSemanticsNode().boundsInRoot
+            val translated = onNode(hasText("translated")).fetchSemanticsNode().boundsInRoot
+            assertTrue(translated.top >= spoken.bottom, "translation below: $spoken / $translated")
+            assertEquals(spoken.left, translated.left, "and in the same column")
+        }
+    }
+
+    @Test
+    fun `side by side puts the translation beside the transcription`() {
+        sttTab(
+            settings = STTSettings(serverUrl = SILENT_STT_URL),
+            seed = { live("spoken"); translate("translated") },
+        ) { _, _, _ ->
+            val spoken = onNode(hasText("spoken")).fetchSemanticsNode().boundsInRoot
+            val translated = onNode(hasText("translated")).fetchSemanticsNode().boundsInRoot
+            assertTrue(translated.left >= spoken.right, "translation to the right: $spoken / $translated")
+        }
+    }
+
+    @Test
+    fun `a larger text size draws taller lines`() {
+        fun lineHeight(size: Int): Float {
+            var height = 0f
+            sttTab(
+                settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(fontSize = size)),
+                seed = { live("spoken") },
+            ) { _, _, _ ->
+                height = onNode(hasText("spoken")).fetchSemanticsNode().boundsInRoot.height
+            }
+            return height
+        }
+        assertTrue(lineHeight(30) > lineHeight(12))
+    }
+
+    @Test
+    fun `with highlighting off a highlighted caption still renders`() {
+        sttTab(
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(wordHighlighting = false)),
+            seed = { live("praise the Lord"); highlight("Lord" to "#ff0000") },
+        ) { _, _, _ ->
+            assertTrue(showsExactly("praise the Lord"), renderedText().toString())
         }
     }
 }

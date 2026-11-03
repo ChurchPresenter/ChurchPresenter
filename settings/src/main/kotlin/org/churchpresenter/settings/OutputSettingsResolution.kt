@@ -23,7 +23,7 @@ val SONG_GLOBAL_KEYS = setOf(
  * captions show and how they look on an output -- down to how many segments it keeps -- is the
  * profile's.
  */
-val STT_GLOBAL_KEYS = setOf("serverUrl", "lastConnectedUrl")
+val STT_GLOBAL_KEYS = setOf("serverUrl", "lastConnectedUrl", "tab")
 
 /**
  * The Q&A settings a profile never carries: how the audience submits questions, and what the QR

@@ -120,18 +120,30 @@ private fun linkItem(link: LinkPlaylist, features: Collection<String>): Playlist
     val web = kind == MediaKind.WEB
     val touch = link.interactive?.takeIf { web }
     // Drawn as a picture nobody can use by a screen that cannot show it in a browser: not sent there.
-    if (touch != null) return interactiveItem(link.url, touch).takeIf { Features.INTERACTIVE in features }
+    if (touch != null) {
+        return interactiveItem(link.url, touch, Features.IDLE_SCREEN in features)
+            .takeIf { Features.INTERACTIVE in features }
+    }
     val refreshMs = (link.refreshMinutes * MS_PER_MINUTE).takeIf { web && it > 0 }
     val maxFps = LinkPlaylist.SMOOTH_FPS.takeIf { web && link.smooth }
     return PlaylistItem(kind = kind, url = link.url, refreshMs = refreshMs, maxFps = maxFps)
 }
 
-private fun interactiveItem(url: String, touch: InteractiveLink) = PlaylistItem(
+/**
+ * An interactive page, with what its screen shows while nobody uses it only where the player can
+ * ([idleScreen]); an older one shows the page itself throughout.
+ */
+private fun interactiveItem(url: String, touch: InteractiveLink, idleScreen: Boolean) = PlaylistItem(
     kind = MediaKind.WEB,
     url = url,
     interactive = true,
     idleResetMs = touch.idleResetSeconds.coerceIn(InteractiveLink.IDLE_RESET_SECONDS) * MS_PER_SECOND,
     allowedHosts = touch.allowedHosts,
+    idlePlaylistId = touch.idlePlaylistId?.takeIf { idleScreen },
+    idleUrl = touch.idleUrl?.takeIf { idleScreen && touch.idlePlaylistId == null },
+    idlePrompt = touch.idlePrompt?.trim()?.takeIf {
+        idleScreen && it.isNotEmpty() && (touch.idlePlaylistId != null || touch.idleUrl != null)
+    },
 )
 
 private const val MS_PER_SECOND = 1_000L

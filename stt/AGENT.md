@@ -5,7 +5,8 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 **The STT tab** (`STTTab`), with its connection bar, status line and live preview in
-`STTTabParts.kt`, and `captionSettingsOnScreen`, the caption look the preview draws with.
+`STTTabParts.kt`. The preview reads the tab's own `STTTabView` (`sttSettings.tab`, one per
+install), never an output's caption profile.
 
 - `STTManager`, the caption server's client the tab drives, is `:stt-engine`, which this module
   takes with `api`; the Bible tab and the outputs read the same manager from there.
