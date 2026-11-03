@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Judul Bahasa %1$d</string>
     <string name="song_named_title">Judul %1$s</string>
     <string name="tooltip_preview_settings">Pengaturan pratinjau</string>
+    <string name="tooltip_clear_text">Hapus Teks, Pertahankan Latar</string>
+    <string name="tooltip_restore_text">Tampilkan Teks Lagi</string>
     <string name="media_subtitle_settings_hint">Berlaku untuk file subtitel SRT/WebVTT, yang digambar sendiri oleh aplikasi. Trek tersemat atau file ASS/SSA/SUB mempertahankan tampilan VLC sendiri.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Buka Wick, si pembantu</string>

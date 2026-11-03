@@ -3098,6 +3098,8 @@
     <string name="song_translation_title">Titlu pentru Limba %1$d</string>
     <string name="song_named_title">Titlu %1$s</string>
     <string name="tooltip_preview_settings">Setări de previzualizare</string>
+    <string name="tooltip_clear_text">Șterge Textul, Păstrează Fundalul</string>
+    <string name="tooltip_restore_text">Afișează Din Nou Textul</string>
     <string name="media_subtitle_settings_hint">Se aplică fișierelor de subtitrare SRT/WebVTT, pe care aplicația le desenează singură. O pistă încorporată sau un fișier ASS/SSA/SUB păstrează aspectul propriu al VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Deschide Wick, asistentul</string>

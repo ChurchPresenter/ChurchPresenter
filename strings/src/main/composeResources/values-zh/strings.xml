@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">语言 %1$d 标题</string>
     <string name="song_named_title">%1$s 标题</string>
     <string name="tooltip_preview_settings">预览设置</string>
+    <string name="tooltip_clear_text">清除文字,保留背景</string>
+    <string name="tooltip_restore_text">重新显示文字</string>
     <string name="media_subtitle_settings_hint">适用于应用自行绘制的 SRT/WebVTT 字幕文件。内嵌轨道或 ASS/SSA/SUB 文件将保留 VLC 自身的外观。</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">打开助手 Wick</string>

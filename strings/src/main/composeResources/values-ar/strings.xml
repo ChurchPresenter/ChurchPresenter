@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">عنوان اللغة %1$d</string>
     <string name="song_named_title">عنوان %1$s</string>
     <string name="tooltip_preview_settings">إعدادات المعاينة</string>
+    <string name="tooltip_clear_text">مسح النص مع إبقاء الخلفية</string>
+    <string name="tooltip_restore_text">إظهار النص مجددًا</string>
     <string name="media_subtitle_settings_hint">تُطبَّق على ملفات الترجمة بصيغة SRT/WebVTT، التي يرسمها التطبيق بنفسه. المسار المضمّن أو ملف ASS/SSA/SUB يحتفظ بمظهر VLC الخاص به.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">افتح Wick، المساعد</string>

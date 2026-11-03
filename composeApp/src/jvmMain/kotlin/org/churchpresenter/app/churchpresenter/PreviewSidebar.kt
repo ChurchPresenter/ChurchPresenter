@@ -12,8 +12,13 @@ import org.churchpresenter.dialogs.ClearGroupsDialog
 import org.churchpresenter.dialogs.ClearLayersMenuItems
 import org.churchpresenter.liveoutput.clearGroup
 import org.churchpresenter.liveoutput.clearLayer
+import org.churchpresenter.liveoutput.clearTextOnly
+import org.churchpresenter.liveoutput.restoreText
+import org.churchpresenter.liveoutput.textCleared
 import org.churchpresenter.strings.generated.resources.tooltip_clear_layers
 import androidx.compose.material.icons.outlined.LayersClear
+import androidx.compose.material.icons.outlined.FormatClear
+import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material3.DropdownMenu
 import org.churchpresenter.liveoutput.setPropOn
 import org.churchpresenter.liveoutput.propsOnAir
@@ -59,6 +64,8 @@ import org.churchpresenter.strings.generated.resources.preview_take
 import org.churchpresenter.strings.generated.resources.tooltip_clear_display
 import org.churchpresenter.strings.generated.resources.tooltip_message
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
+import org.churchpresenter.strings.generated.resources.tooltip_clear_text
+import org.churchpresenter.strings.generated.resources.tooltip_restore_text
 import org.churchpresenter.strings.generated.resources.profile_sets
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
@@ -314,7 +321,7 @@ internal val LocalSidebarDialogs = staticCompositionLocalOf<SidebarDialogs> { Wi
 /** The row of buttons over the preview: displays, clear, settings, message, props, macros, clear layers, take. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SidebarButtons(
+internal fun SidebarButtons(
     presenterManager: PresenterManager,
     onClearDisplay: () -> Unit,
     appSettings: AppSettings,
@@ -350,6 +357,7 @@ private fun SidebarButtons(
         PreviewSettingsButton(appSettings.projectionSettings, onEditPreviewLayout) { updated ->
             onSettingsChange { s -> s.copy(projectionSettings = updated) }
         }
+        ClearTextButton(presenterManager)
         if (appSettings.projectionSettings.showsProfileSetsButton()) {
             ProfileSetsButton(appSettings.projectionSettings) { updated ->
                 onSettingsChange { s -> s.copy(projectionSettings = updated) }
@@ -485,6 +493,26 @@ private fun ClearLayersButton(
 }
 
 internal const val CLEAR_LAYERS_BUTTON_TAG = "preview_clear_layers"
+
+/**
+ * Beside the gear: clears the words on air -- a song, Bible verses, a question, a dictionary entry --
+ * and leaves the background up.
+ * While they are off the key stays pressed in, with the accent dot, and turns into a "show text"
+ * key -- pressed again, it puts them back.
+ */
+@Composable
+private fun ClearTextButton(presenterManager: PresenterManager) {
+    val cleared = presenterManager.textCleared
+    ToolbarKey(
+        painter = rememberVectorPainter(if (cleared) Icons.Outlined.TextFields else Icons.Outlined.FormatClear),
+        text = stringResource(if (cleared) Res.string.tooltip_restore_text else Res.string.tooltip_clear_text),
+        onClick = { if (cleared) presenterManager.restoreText() else presenterManager.clearTextOnly() },
+        style = ToolbarKeyStyle.PANEL_TOGGLE,
+        open = cleared,
+        buttonSize = 40.dp,
+        tint = if (cleared) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+    )
+}
 
 /** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
 @Composable

@@ -80,8 +80,8 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
     // the background switches, which the background layer reads itself.
     if (cue !is Cue.Background && !showsContentFor(cue.content, surface.profile)) return
     when (cue) {
-        is Cue.Verses -> BibleCue(surface)
-        is Cue.Song -> SongCue(surface)
+        is Cue.Verses -> if (!surface.presenterManager.textCleared) BibleCue(surface)
+        is Cue.Song -> if (!surface.presenterManager.textCleared) SongCue(surface)
         is Cue.Picture -> PictureCue(surface)
         is Cue.Drawing -> DrawingCue(surface)
         is Cue.PresentationSlide -> PresentationCue(surface)
@@ -92,9 +92,9 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
         is Cue.Announcement -> AnnouncementCue(surface)
         is Cue.Web -> WebCue(surface)
         is Cue.SceneCue -> ScenePresenter(scene = surface.presenterManager.activeScene.value)
-        is Cue.QuestionCue -> QuestionCue(surface)
+        is Cue.QuestionCue -> if (!surface.presenterManager.hidesQuestion()) QuestionCue(surface)
         is Cue.Captions -> CaptionsCue(surface)
-        is Cue.Dictionary -> DictionaryCue(surface)
+        is Cue.Dictionary -> if (!surface.presenterManager.textCleared) DictionaryCue(surface)
         is Cue.Background -> BackgroundCue(cue, surface)
         is Cue.Message -> MessageCue(cue, surface)
         is Cue.Props -> PropsCue(cue, surface)

@@ -678,6 +678,8 @@
     <string name="schedule_add_files_title">Add Files to Schedule</string>
     <string name="tooltip_toggle_displays">Toggle Presenter Displays</string>
     <string name="tooltip_preview_settings">Preview Settings</string>
+    <string name="tooltip_clear_text">Clear Text, Keep Background</string>
+    <string name="tooltip_restore_text">Show Text Again</string>
     <string name="preview_settings_show_labels">Show output labels</string>
     <string name="preview_settings_show_modes">Show display type</string>
     <string name="tooltip_settings">Settings</string>

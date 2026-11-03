@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Kichwa cha Lugha %1$d</string>
     <string name="song_named_title">Kichwa cha %1$s</string>
     <string name="tooltip_preview_settings">Mipangilio ya onyesho la awali</string>
+    <string name="tooltip_clear_text">Futa Maandishi, Acha Mandharinyuma</string>
+    <string name="tooltip_restore_text">Onyesha Maandishi Tena</string>
     <string name="media_subtitle_settings_hint">Inatumika kwa faili za manukuu za SRT/WebVTT, ambazo programu huchora yenyewe. Wimbo uliopachikwa au faili ya ASS/SSA/SUB huhifadhi mwonekano wa VLC wenyewe.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Fungua Wick, msaidizi</string>

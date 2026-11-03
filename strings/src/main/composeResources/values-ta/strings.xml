@@ -3119,6 +3119,8 @@
     <string name="song_translation_title">மொழி %1$d தலைப்பு</string>
     <string name="song_named_title">%1$s தலைப்பு</string>
     <string name="tooltip_preview_settings">முன்னோட்ட அமைப்புகள்</string>
+    <string name="tooltip_clear_text">உரையை அழி, பின்னணியை வை</string>
+    <string name="tooltip_restore_text">உரையை மீண்டும் காட்டு</string>
     <string name="media_subtitle_settings_hint">பயன்பாடே வரையும் SRT/WebVTT வசன கோப்புகளுக்குப் பொருந்தும். உட்பொதிந்த தடம் அல்லது ASS/SSA/SUB கோப்பு VLC-யின் சொந்த தோற்றத்தையே தக்க வைக்கும்.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">உதவியாளர் Wick-ஐத் திற</string>
