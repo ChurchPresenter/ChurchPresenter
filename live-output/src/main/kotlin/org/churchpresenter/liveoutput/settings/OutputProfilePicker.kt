@@ -26,6 +26,9 @@ import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
 
+/** How wide every output profile picker on the Projection tab is: room for a profile's name. */
+internal val OUTPUT_PROFILE_PICKER_WIDTH = 160.dp
+
 /**
  * The one thing left to choose per output: which [OutputProfile] it follows.
  *
