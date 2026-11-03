@@ -116,7 +116,7 @@ class SignageTabTest {
     fun anOfflineScreenCannotBeIdentifiedOrWiped() = signageTab(world) {
         connected()
         hub.links.closed("player-1", hub.links.links.value.getValue("player-1").session)
-        waitForText("Offline", substring = true)
+        waitForText("Looking for it", substring = true)
         onNodeWithContentDescription("Show its name on the screen").assertIsNotEnabled()
         onNodeWithContentDescription("Wipe content").assertIsNotEnabled()
     }
@@ -276,8 +276,8 @@ class SignageTabTest {
             found
         }
         assertEquals(setOf("Linux (ARM)", "Windows PC"), named.toSet())
-        // Neither is connected, so neither offers to wipe, preview or update.
-        onAllNodesWithText("Offline", substring = true).fetchSemanticsNodes().size.let { assertEquals(2, it) }
+        // Neither is connected, so neither offers to wipe, preview or update; both are just being looked for.
+        onAllNodesWithText("Looking for it", substring = true).fetchSemanticsNodes().size.let { assertEquals(2, it) }
         onNodeWithText("No picture right now").assertDoesNotExist()
     }
 

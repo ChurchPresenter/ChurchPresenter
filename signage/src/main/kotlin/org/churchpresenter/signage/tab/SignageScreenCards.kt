@@ -47,7 +47,10 @@ import org.churchpresenter.strings.generated.resources.signage_decline
 import org.churchpresenter.strings.generated.resources.signage_identify
 import org.churchpresenter.strings.generated.resources.signage_new_screen
 import org.churchpresenter.strings.generated.resources.signage_new_screen_hint
-import org.churchpresenter.strings.generated.resources.signage_offline
+import org.churchpresenter.strings.generated.resources.signage_no_preview
+import org.churchpresenter.strings.generated.resources.signage_preview_not_connected
+import org.churchpresenter.strings.generated.resources.signage_preview_unsupported
+import org.churchpresenter.strings.generated.resources.signage_waiting_hint
 import org.churchpresenter.strings.generated.resources.signage_online
 import org.churchpresenter.strings.generated.resources.signage_platform_linux_arm64
 import org.churchpresenter.strings.generated.resources.signage_platform_linux_x64
@@ -124,17 +127,22 @@ internal fun ScreenCard(row: ScreenRowState, actions: ScreenActions) {
     var asking by remember { mutableStateOf<CardQuestion?>(null) }
     var enlarged by remember { mutableStateOf(false) }
     val showsPreview = row.link?.features?.contains(Features.PREVIEW) == true
+    val placeholder = stringResource(
+        when {
+            row.link == null -> Res.string.signage_preview_not_connected
+            !showsPreview -> Res.string.signage_preview_unsupported
+            else -> Res.string.signage_no_preview
+        },
+    )
     Row(
         modifier = Modifier.fillMaxWidth().bibleListCard()
             .padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (showsPreview) {
-            Box(Modifier.padding(top = 6.dp)) {
-                PreviewThumbnail(currentPreview(row.link)) {
-                    enlarged = true
-                    actions.onPreviewOpen(screen.id)
-                }
+        Box(Modifier.padding(top = 6.dp)) {
+            PreviewThumbnail(currentPreview(row.link).takeIf { showsPreview }, placeholder) {
+                enlarged = true
+                actions.onPreviewOpen(screen.id)
             }
         }
         ScreenDetails(row, actions, onRename = { renaming = true }, onAsk = { asking = it })
@@ -253,11 +261,20 @@ private fun RowScope.ScreenDetails(
                 enabled = row.link?.features?.contains(Features.WIPE) == true,
             )
         }
+        val now = rememberNow()
+        val away = awayState(row, now)
         Text(
-            connectionLine(row),
+            connectionLine(row, away, now),
             style = MaterialTheme.typography.bodyMedium,
             color = with(MaterialTheme.colorScheme) { if (row.link != null) onSurface else onSurfaceVariant },
         )
+        if (away == AwayState.WAITING) {
+            Text(
+                stringResource(Res.string.signage_waiting_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         // The rest of its details are in its settings; only a screen under strain says so here.
         ScreenHealthLine(row.link?.status, onlyWhenStrained = true)
         row.link?.status?.errors?.forEach { error ->
@@ -306,8 +323,8 @@ private fun StatusDot(online: Boolean) {
 }
 
 @Composable
-private fun connectionLine(row: ScreenRowState): String {
-    val link = row.link ?: return stringResource(Res.string.signage_offline)
+private fun connectionLine(row: ScreenRowState, away: AwayState?, nowMs: Long): String {
+    val link = row.link ?: return awayLine(row, away ?: AwayState.WAITING, nowMs)
     val showing = link.status?.showingPlaylistId?.let { id -> row.folder.playlists.firstOrNull { it.id == id }?.name }
     val what = if (showing != null) {
         stringResource(Res.string.signage_showing, showing)

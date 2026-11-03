@@ -16,6 +16,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -229,7 +230,8 @@ class ScreenCardAloneTest {
             onNodeWithText("Cancel").performClick()
             swap(row(null), actions())
             onNodeWithContentDescription("Screen settings").performClick()
-            onNodeWithText("Not connected").assertExists()
+            // The settings say so, and so does the card's picture box behind them.
+            onAllNodesWithText("Not connected").assertCountEquals(2)
             onNodeWithText("TV on").assertDoesNotExist()
         }
     }

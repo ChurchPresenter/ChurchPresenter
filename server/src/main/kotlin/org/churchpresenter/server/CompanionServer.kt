@@ -484,6 +484,7 @@ class CompanionServer(
         set(value) {
             field = value
             signageAdvert.refresh()
+            signageNudger.refresh()
         }
 
     /**
@@ -494,12 +495,20 @@ class CompanionServer(
         set(value) {
             field = value
             signageAdvert.refresh()
+            signageNudger.refresh()
         }
 
     /** Advertised while the server runs with signage on and a signage hub. */
     private val signageAdvert = SignageAdvert {
         signage?.takeIf { _isRunning.value && signageEnabled }?.let { SignageAdvert.Wanted(currentPort, it.ownerName) }
     }
+
+    /** Knocks on the away screens' last addresses at the same times. */
+    private val signageNudger = SignageNudger(
+        wanted = {
+            signage?.takeIf { _isRunning.value && signageEnabled }?.let { SignageNudger.Wanted(it, currentPort) }
+        },
+    )
 
     /** The macros a remote client may run -- kept current by the app from its settings. */
     @Volatile var macros: List<Macro> = emptyList()
@@ -653,6 +662,7 @@ class CompanionServer(
             _isRunning.value = true
             _serverUrl.value = "http://$displayHost:$port"
             signageAdvert.refresh()
+            signageNudger.refresh()
             CrashReporter.breadcrumb("Server started on port $port", category = "server")
             scope.launch { pictures.clearDeviceUploads() }
         } catch (_: java.net.BindException) {
@@ -748,6 +758,7 @@ class CompanionServer(
         _isRunning.value = false
         _serverUrl.value = ""
         signageAdvert.refresh()
+        signageNudger.refresh()
         CrashReporter.breadcrumb("Server stopped", category = "server")
     }
 

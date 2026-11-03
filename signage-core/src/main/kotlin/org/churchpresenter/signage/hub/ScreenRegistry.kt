@@ -38,6 +38,10 @@ data class PairedScreen(
     val screenWidth: Int,
     val screenHeight: Int,
     val pairedAtMs: Long,
+    /** The IP address it last connected from, which ChurchPresenter knocks on while it is away. */
+    val lastAddress: String? = null,
+    /** When it was last connected: when it connected, or when it went away. */
+    val lastSeenAtMs: Long? = null,
 )
 
 @Serializable
@@ -137,14 +141,20 @@ class ScreenRegistry(
         return token
     }
 
-    /** Keeps what a paired player says about itself current. */
-    fun refreshFrom(hello: PlayerMessage.Hello) {
+    /**
+     * Keeps what a paired player says about itself current, and when it was last seen: connecting
+     * from [address], kept so ChurchPresenter can knock there while it is away, or going away (no
+     * address), which keeps the one it had.
+     */
+    fun refreshFrom(hello: PlayerMessage.Hello, address: String? = null) {
         val old = screen(hello.playerId) ?: return
         val new = old.copy(
             platform = hello.platform,
             agentVersion = hello.agentVersion,
             screenWidth = hello.screenWidth,
             screenHeight = hello.screenHeight,
+            lastAddress = address ?: old.lastAddress,
+            lastSeenAtMs = clock(),
         )
         if (new != old) replace(new)
     }
