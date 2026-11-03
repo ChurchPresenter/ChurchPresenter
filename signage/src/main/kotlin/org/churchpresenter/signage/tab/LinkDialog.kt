@@ -294,7 +294,7 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
                     value = current?.name.orEmpty(),
                     options = idlePlaylists.map { it.name },
                     onValueChange = { name ->
-                        page.idlePlaylistId = idlePlaylists.firstOrNull { it.name == name }?.id
+                        page.idlePlaylistId = idlePlaylists[idlePlaylists.indexOfFirst { it.name == name }].id
                     },
                     label = stringResource(Res.string.signage_link_idle_playlist_pick),
                     // The rest of the line: a long name ends in an ellipsis before the chevron. An unset
@@ -307,7 +307,11 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
                 value = labels.getValue(page.idleChoice),
                 options = IdleChoice.entries.map(labels::getValue),
                 onValueChange = { picked ->
-                    labels.entries.firstOrNull { it.value == picked }?.let { page.idleChoice = it.key }
+                    page.idleChoice = IdleChoice.entries[labels.values.indexOf(picked)]
+                    // A playlist chosen starts on the first one, so the dialog can save straight away.
+                    if (page.idleChoice == IdleChoice.PLAYLIST && page.idlePlaylistId == null) {
+                        page.idlePlaylistId = idlePlaylists.firstOrNull()?.id
+                    }
                 },
                 label = stringResource(Res.string.signage_link_idle_screen),
             )

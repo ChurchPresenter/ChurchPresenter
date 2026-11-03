@@ -99,13 +99,15 @@ internal fun STTTabViewFields(view: STTTabView, onSettingsChange: ((AppSettings)
     }
 }
 
-/** A dropdown over [labels]' values, saving the key of the one picked. */
+/** A dropdown over [labels]' values, saving the key of the one picked (always one of its own options). */
 @Composable
 private fun Choice(label: String, current: String, labels: Map<String, String>, onPick: (String) -> Unit) {
+    val keys = labels.keys.toList()
+    val options = labels.values.toList()
     DropdownSettingsField(
-        value = labels[current] ?: labels.values.first(),
-        options = labels.values.toList(),
-        onValueChange = { picked -> labels.entries.firstOrNull { it.value == picked }?.let { onPick(it.key) } },
+        value = labels[current] ?: options.first(),
+        options = options,
+        onValueChange = { picked -> onPick(keys[options.indexOf(picked)]) },
         label = label,
     )
 }

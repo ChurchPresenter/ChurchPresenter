@@ -354,4 +354,85 @@ class STTTabTest {
             onNode(hasText("grace")).assertExists()
         }
     }
+
+    // ── The tab's own view ──────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the tab can show only the transcription`() {
+        sttTab(
+            settings = STTSettings(
+                serverUrl = SILENT_STT_URL,
+                tab = STTTabView(shows = STTTabView.SHOWS_TRANSCRIPTION),
+            ),
+            seed = { live("spoken"); translate("translated") },
+        ) { _, _, _ ->
+            assertTrue(showsExactly("spoken"), renderedText().toString())
+            assertFalse(showsExactly(STTLabel.TRANSLATION))
+            assertFalse(showsExactly("translated"))
+        }
+    }
+
+    @Test
+    fun `a tab showing only the translation waits while only a transcription has arrived`() {
+        sttTab(
+            settings = STTSettings(
+                serverUrl = SILENT_STT_URL,
+                tab = STTTabView(shows = STTTabView.SHOWS_TRANSLATION),
+            ),
+            seed = { live("spoken but not translated") },
+        ) { _, _, _ ->
+            assertTrue(showsExactly(STTLabel.WAITING), renderedText().toString())
+            assertFalse(showsExactly("spoken but not translated"))
+        }
+    }
+
+    @Test
+    fun `one under the other puts the translation below the transcription`() {
+        sttTab(
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(layout = STTTabView.LAYOUT_STACKED)),
+            seed = { live("spoken"); translate("translated") },
+        ) { _, _, _ ->
+            val spoken = onNode(hasText("spoken")).fetchSemanticsNode().boundsInRoot
+            val translated = onNode(hasText("translated")).fetchSemanticsNode().boundsInRoot
+            assertTrue(translated.top >= spoken.bottom, "translation below: $spoken / $translated")
+            assertEquals(spoken.left, translated.left, "and in the same column")
+        }
+    }
+
+    @Test
+    fun `side by side puts the translation beside the transcription`() {
+        sttTab(
+            settings = STTSettings(serverUrl = SILENT_STT_URL),
+            seed = { live("spoken"); translate("translated") },
+        ) { _, _, _ ->
+            val spoken = onNode(hasText("spoken")).fetchSemanticsNode().boundsInRoot
+            val translated = onNode(hasText("translated")).fetchSemanticsNode().boundsInRoot
+            assertTrue(translated.left >= spoken.right, "translation to the right: $spoken / $translated")
+        }
+    }
+
+    @Test
+    fun `a larger text size draws taller lines`() {
+        fun lineHeight(size: Int): Float {
+            var height = 0f
+            sttTab(
+                settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(fontSize = size)),
+                seed = { live("spoken") },
+            ) { _, _, _ ->
+                height = onNode(hasText("spoken")).fetchSemanticsNode().boundsInRoot.height
+            }
+            return height
+        }
+        assertTrue(lineHeight(30) > lineHeight(12))
+    }
+
+    @Test
+    fun `with highlighting off a highlighted caption still renders`() {
+        sttTab(
+            settings = STTSettings(serverUrl = SILENT_STT_URL, tab = STTTabView(wordHighlighting = false)),
+            seed = { live("praise the Lord"); highlight("Lord" to "#ff0000") },
+        ) { _, _, _ ->
+            assertTrue(showsExactly("praise the Lord"), renderedText().toString())
+        }
+    }
 }

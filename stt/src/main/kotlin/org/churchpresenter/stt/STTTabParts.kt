@@ -262,7 +262,8 @@ private fun PreviewNotice(text: String) {
         text,
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(16.dp)
+        // The 4 dp the columns also sit below the title, then the notice's own margin.
+        modifier = Modifier.padding(top = 4.dp).padding(16.dp)
     )
 }
 
