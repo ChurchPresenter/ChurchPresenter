@@ -115,6 +115,7 @@ internal fun STTSettingsDialogContent(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                STTTabViewFields(sttSettings.tab, onSettingsChange)
                 BibleEngineFields(engine, onSettingsChange)
                 Spacer(Modifier.height(4.dp))
                 RaisedButton(

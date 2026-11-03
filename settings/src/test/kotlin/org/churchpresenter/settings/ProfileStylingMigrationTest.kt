@@ -156,7 +156,9 @@ class ProfileStylingMigrationTest {
     fun `version 21 leaves the document only its install-wide keys`() {
         val stripped = root(SettingsManager().stripProfileOwnedStyling(v20))
 
-        assertEquals(STT_GLOBAL_KEYS, stripped.getValue("sttSettings").jsonObject.keys)
+        // Of the install-wide keys, the ones this older document has: a key added since is not made up.
+        val sttKeys = root(v20).getValue("sttSettings").jsonObject.keys
+        assertEquals(STT_GLOBAL_KEYS intersect sttKeys, stripped.getValue("sttSettings").jsonObject.keys)
         assertEquals(QA_GLOBAL_KEYS, stripped.getValue("qaSettings").jsonObject.keys)
         assertFalse("dictionarySettings" in stripped)
         assertFalse("mediaSettings" in stripped)

@@ -38,10 +38,8 @@ fun STTTab(
     /** The caption settings dialog, drawn by the app, which owns it; [onDismiss] closes it. */
     settingsDialog: @Composable (onDismiss: () -> Unit) -> Unit = {},
 ) {
-    // The server is the install's; how the transcript below reads -- how many segments, which
-    // languages, in-progress text, highlighting -- follows the captions an output actually shows,
-    // since those are set per profile now and the document's own copy is no longer edited.
-    val sttSettings = remember(appSettings) { appSettings.captionSettingsOnScreen() }
+    // The server and the tab's own view are the install's; the outputs' captions are their profiles'.
+    val sttSettings = appSettings.sttSettings
     var showSettingsDialog by remember { mutableStateOf(false) }
 
     val goLive = { presenting(Presenting.STT) }
@@ -74,7 +72,7 @@ fun STTTab(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            LivePreview(sttManager, sttSettings)
+            LivePreview(sttManager, sttSettings.tab)
         }
     }
 

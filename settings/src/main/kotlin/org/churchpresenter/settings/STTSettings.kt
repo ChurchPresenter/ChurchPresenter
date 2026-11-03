@@ -10,6 +10,8 @@ data class STTSettings(
     val serverUrl: String = "http://localhost:80",
     val lastConnectedUrl: String = "", // URL of the last successful connection; gates the Bible-tab connect button
     val displayMode: String = "transcribe", // "transcribe", "translate", "both"
+    /** How the STT tab's own preview reads: one per install ([STT_GLOBAL_KEYS]), never an output's. */
+    val tab: STTTabView = STTTabView(),
     // "stacked", "side_by_side" or "interleaved" (each line with its translation under it), each with
     // "_inverse" for the translation first
     val layout: String = "stacked",
@@ -150,3 +152,34 @@ const val CAPTION_STYLE_RSVP = "rsvp"
 const val CAPTION_BREAK_NONE = "none"
 const val CAPTION_BREAK_SEGMENT = "segment"
 const val CAPTION_BREAK_SENTENCE = "sentence"
+
+/**
+ * The STT tab's own preview: what it shows and how, set in the tab's settings. Each output picks its
+ * own captions in its profile; none of this reaches one.
+ */
+@Serializable
+data class STTTabView(
+    /** "transcribe", "translate" or "both". */
+    val shows: String = "both",
+    /** Finished lines each column keeps; 0 for all of them. */
+    val maxSegments: Int = 5,
+    /** The line still being spoken, under the transcription's finished ones. */
+    val showInProgress: Boolean = true,
+    /** The translation's line still being made, under its finished ones. */
+    val showTranslationInProgress: Boolean = true,
+    /** Colour the highlighted words, where the caption server sends them. */
+    val wordHighlighting: Boolean = true,
+    val fontSize: Int = 14,
+    /** "side_by_side", or "stacked" for the translation under the transcription. */
+    val layout: String = "side_by_side",
+) {
+    companion object {
+        const val SHOWS_BOTH = "both"
+        const val SHOWS_TRANSCRIPTION = "transcribe"
+        const val SHOWS_TRANSLATION = "translate"
+        const val LAYOUT_SIDE_BY_SIDE = "side_by_side"
+        const val LAYOUT_STACKED = "stacked"
+        val MAX_SEGMENTS = 0..50
+        val FONT_SIZES = 10..40
+    }
+}

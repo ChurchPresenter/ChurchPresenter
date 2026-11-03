@@ -59,12 +59,12 @@ class STTSettingsDialogContentTest {
             assertEquals(true, get().bibleEngineSettings.enabled, "on by default")
             onNodeWithText("Help Dev", substring = true).assertIsDisplayed()
 
-            onAllNodes(isToggleable())[0].performClick()
+            onNode(isToggleable() and hasText("Detect scripture")).performClick()
             waitForIdle()
             assertEquals(false, get().bibleEngineSettings.enabled)
             onNodeWithText("Help Dev", substring = true).assertDoesNotExist()
 
-            onAllNodes(isToggleable())[0].performClick()
+            onNode(isToggleable() and hasText("Detect scripture")).performClick()
             waitForIdle()
             assertEquals(true, get().bibleEngineSettings.enabled)
             onNodeWithText("Help Dev", substring = true).assertIsDisplayed()
@@ -72,7 +72,7 @@ class STTSettingsDialogContentTest {
 
     @Test
     fun `the help-dev checkbox toggles independently while the engine stays enabled`() = sttDialog { get, _ ->
-        onAllNodes(isToggleable())[1].performClick()
+        onNode(isToggleable() and hasText("Help Dev", substring = true)).performClick()
         waitForIdle()
         assertEquals(true, get().bibleEngineSettings.helpDevMode)
         assertEquals(true, get().bibleEngineSettings.enabled, "the engine checkbox must be untouched")

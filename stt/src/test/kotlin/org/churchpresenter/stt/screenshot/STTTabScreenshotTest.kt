@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.STTSettings
+import org.churchpresenter.settings.STTTabView
 import org.churchpresenter.stt.STTLabel
 import org.churchpresenter.stt.highlight
 import org.churchpresenter.stt.live
@@ -80,7 +81,7 @@ class STTTabScreenshotTest {
     @Test
     fun `a phrase still being spoken`() = shoot(
         "in_progress",
-        settings = STTSettings(serverUrl = URL, showInProgress = true),
+        settings = STTSettings(serverUrl = URL, tab = STTTabView(showInProgress = true)),
         seed = { live(*SERMON); transcribeInProgress("and he said to them") },
     )
 
@@ -90,14 +91,14 @@ class STTTabScreenshotTest {
     @Test
     fun `no cap, so every caption stays`() = shoot(
         "no_segment_cap",
-        settings = STTSettings(serverUrl = URL, maxSegments = 0),
+        settings = STTSettings(serverUrl = URL, tab = STTTabView(maxSegments = 0)),
         seed = { live(*LONG_SERMON) },
     )
 
     @Test
     fun `words the server asked to be coloured`() = shoot(
         "word_highlighting",
-        settings = STTSettings(serverUrl = URL, showWordHighlighting = true),
+        settings = STTSettings(serverUrl = URL, tab = STTTabView(wordHighlighting = true)),
         seed = {
             live(*SERMON)
             highlight("grace" to "#43A047", "faith" to "#1E88E5", "Lord" to "#E53935")
@@ -109,7 +110,7 @@ class STTTabScreenshotTest {
     @Test
     fun `translation only`() = shoot(
         "translate_only",
-        settings = STTSettings(serverUrl = URL, displayMode = "translate"),
+        settings = STTSettings(serverUrl = URL, tab = STTTabView(shows = "translate")),
         seed = { applyConnected(); transcribe(*SERMON); translate(*SERMON_ES) },
     )
 
@@ -120,7 +121,7 @@ class STTTabScreenshotTest {
     @Test
     fun `both columns`() = shoot(
         "both_columns",
-        settings = STTSettings(serverUrl = URL, displayMode = "both"),
+        settings = STTSettings(serverUrl = URL, tab = STTTabView(shows = "both")),
         seed = { applyConnected(); transcribe(*SERMON); translate(*SERMON_ES) },
     )
 
@@ -129,9 +130,7 @@ class STTTabScreenshotTest {
         "both_in_progress",
         settings = STTSettings(
             serverUrl = URL,
-            displayMode = "both",
-            showInProgress = true,
-            showTranslationInProgress = true,
+            tab = STTTabView(shows = "both", showInProgress = true, showTranslationInProgress = true),
         ),
         seed = {
             applyConnected()
@@ -158,7 +157,7 @@ class STTTabScreenshotTest {
     @Test
     fun `both columns in a narrow panel`() = shoot(
         "narrow_both_columns",
-        settings = STTSettings(serverUrl = URL, displayMode = "both"),
+        settings = STTSettings(serverUrl = URL, tab = STTTabView(shows = "both")),
         seed = { applyConnected(); transcribe(*SERMON); translate(*SERMON_ES) },
         width = 620.dp,
     )
