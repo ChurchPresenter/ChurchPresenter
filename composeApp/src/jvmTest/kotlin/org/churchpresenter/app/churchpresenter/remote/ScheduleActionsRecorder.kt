@@ -31,6 +31,7 @@ internal class ScheduleActionsRecorder {
             added += "bible:$book:$chapter:$verse:$text:$range:$bookId"
         },
         addPicture = { path, name, count -> added += "picture:$path:$name:$count" },
+        addSinglePicture = { image, count -> added += "singlePicture:${image.path}:$count" },
         addPresentation = { path, name, slides, type -> added += "presentation:$path:$name:$slides:$type" },
         addMedia = { url, title, type, _ -> added += "media:$url:$title:$type" },
         addScene = { id, name -> added += "scene:$id:$name" },

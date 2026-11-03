@@ -1,5 +1,6 @@
 package org.churchpresenter.schedule
 
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import org.churchpresenter.core.models.schedule.CueAction
@@ -35,6 +36,10 @@ class ScheduleTabActionsDefaultsTest {
         actions.addBibleVerse("John", 3, 16, "text", "16-17", 43)
         actions.addSong(1, "title", "songbook", "songId")
         actions.addPicture("path", "name", 1)
+        actions.addSinglePicture(File("picture.jpg"), 1)
+        var ran = false
+        actions.insertingAt(0) { ran = true }
+        assertTrue(ran, "the default still runs the adds it is given")
         actions.addPresentation("path", "name", 1, "pptx")
         actions.addMedia("url", "title", "local", "")
         actions.addLowerThird("presetId", "label", true, 1_000L)

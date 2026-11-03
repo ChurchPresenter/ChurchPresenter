@@ -81,6 +81,15 @@ class AddScheduleItemTest {
     }
 
     @Test
+    fun `a single picture is added as that picture, not its folder`() {
+        val one = ScheduleItem.PictureItem(
+            id = "pic", folderPath = "/photos/advent", folderName = "advent", imageCount = 12,
+            displayText = "candle.jpg", imagePath = "/photos/advent/candle.jpg",
+        )
+        assertEquals(listOf("singlePicture:/photos/advent/candle.jpg:12"), add(one).first.added)
+    }
+
+    @Test
     fun `every kind of content reports that it was added`() {
         listOf(song(), bibleVerse(), presentation(), picture(), media(), dictionary(), announcement(), website())
             .forEach { assertTrue(add(it).second, "${it::class.simpleName} is schedule content") }

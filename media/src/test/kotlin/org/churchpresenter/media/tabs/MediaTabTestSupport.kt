@@ -2,6 +2,9 @@
 
 package org.churchpresenter.media.tabs
 
+import org.churchpresenter.settings.BackgroundContent
+import org.churchpresenter.sharedui.composables.BackgroundTarget
+import java.io.File
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +54,9 @@ internal class MediaReports {
     /** The subtitle file each of those schedule calls carried, in the same order. */
     val scheduledSubtitles = mutableListOf<String>()
 
+    /** Each Set as Background the tab asked for: the file, the profile (null for every output), which background. */
+    val backgrounds = mutableListOf<Triple<File, String?, BackgroundContent>>()
+
     /** The settings the tab's last write would produce, applied to the ones it was composed with. */
     var settingsAfterChange: AppSettings? = null
 }
@@ -72,6 +78,9 @@ internal fun mediaTab(
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     fileChooser: FileChooser = FakeFileChooser(answer = null),
     onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
+    /** Where Set as Background can put a clip; the button is left off unless a test gives some. */
+    backgroundTargets: List<BackgroundTarget>? = null,
+    isBackground: (File, String?, BackgroundContent) -> Boolean = { _, _, _ -> false },
     block: ComposeUiTest.(vm: MediaViewModel, reports: MediaReports) -> Unit,
 ) {
     val appSettings = settings(AppSettings())
@@ -103,6 +112,11 @@ internal fun mediaTab(
                         onSettingsChange = { transform -> reports.settingsAfterChange = transform(appSettings) },
                         fileChooser = fileChooser,
                         onSavePreset = onSavePreset,
+                        backgroundTargets = backgroundTargets.orEmpty(),
+                        onSetAsBackground = backgroundTargets?.let {
+                            { file, id, content -> reports.backgrounds += Triple(file, id, content) }
+                        },
+                        isBackground = isBackground,
                     )
                     }
                     }

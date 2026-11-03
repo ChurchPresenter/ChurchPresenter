@@ -68,6 +68,33 @@ class ScheduleAutomationActionsTest {
     }
 
     @Test
+    fun `one picture is its own row, opening on that picture`() {
+        val vm = newViewModel()
+        val folder = File(tempHome, "Welcome").apply { mkdirs() }
+        val picture = File(folder, "sunrise.jpg").apply { writeText("") }
+
+        vm.tabActions(noFiles).addSinglePicture(picture, 4)
+
+        val row = vm.scheduleItems.single() as ScheduleItem.PictureItem
+        assertEquals(picture.absolutePath, row.imagePath)
+        assertEquals(folder.absolutePath, row.folderPath)
+        assertEquals(4, row.imageCount)
+        assertEquals("sunrise.jpg", row.displayText)
+    }
+
+    @Test
+    fun `adds made while inserting land at the slot`() {
+        val vm = newViewModel()
+        val actions = vm.tabActions(noFiles)
+        actions.addSong(1, "First", "Hymnal", "")
+        actions.addSong(2, "Last", "Hymnal", "")
+
+        actions.insertingAt(1) { actions.addSong(3, "Middle", "Hymnal", "") }
+
+        assertEquals(listOf("First", "Middle", "Last"), vm.scheduleItems.map { (it as ScheduleItem.SongItem).title })
+    }
+
+    @Test
     fun `a cue arrives under a fresh id with its payload`() {
         val vm = newViewModel()
         val cue = ScheduleItem.CueItem("template", CueAction.BLANK, label = "Blank", absoluteTime = "10:10")
