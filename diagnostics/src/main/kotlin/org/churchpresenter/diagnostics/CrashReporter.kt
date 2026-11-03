@@ -248,10 +248,16 @@ object CrashReporter {
 
         cleanOldLogs()
 
-        // Check if previous run crashed (lock file still exists)
-        didCrashLastRun = runningFile.exists()
+        // Check if previous run crashed (lock file still exists); the file's time is when that run began.
+        val previousStartMs = runningFile.takeIf { it.exists() }?.lastModified()
+        didCrashLastRun = previousStartMs != null
         // Consumed and cleared here, so a kind is judged once and never carried into a later run.
-        val (count, disable) = evaluateCrashEscalation(didCrashLastRun, readCrashCount(), takeLastCrashKind())
+        val lastKind = takeLastCrashKind()
+        val (count, disable) = evaluateCrashEscalation(didCrashLastRun, readCrashCount(), lastKind)
+        // A Java crash was reported as it happened (it left a kind); anything else ended under the app.
+        if (previousStartMs != null && lastKind == null && analyticsReportingEnabled) {
+            reportUncleanExit(previousStartMs)
+        }
         consecutiveCrashes = count
         writeCrashCount(count)
         if (disable) videoBackgroundsDisabled = true
@@ -322,6 +328,31 @@ object CrashReporter {
             }
             Sentry.captureEvent(event)
         } catch (_: Exception) {}
+    }
+
+    /**
+     * Reports, once, that the run begun at [previousStartMs] ended without closing and without a Java
+     * crash: with what the JVM's crash file says when it left one in [crashFileFolders], which is kept
+     * beside the app's own crash logs.
+     */
+    internal fun reportUncleanExit(
+        previousStartMs: Long,
+        crashFileFolders: List<File> = listOfNotNull(
+            crashDir,
+            System.getProperty("user.dir")?.let(::File),
+            System.getProperty("java.io.tmpdir")?.let(::File),
+        ),
+    ) {
+        val file = UncleanExit.newestCrashFile(crashFileFolders, previousStartMs)
+        val summary = file?.let(UncleanExit::read)?.let(UncleanExit::summary).orEmpty()
+        if (file != null && file.parentFile != crashDir) {
+            try { file.copyTo(File(crashDir, file.name), overwrite = true) } catch (_: Exception) {}
+        }
+        val tags = buildMap {
+            put("exit.kind", if (file != null) UncleanExit.NATIVE_CRASH else UncleanExit.NO_CRASH_FILE)
+            UncleanExit.module(summary["crash.problematic_frame"])?.let { put("exit.module", it) }
+        }
+        reportWarning(UncleanExit.TITLE, tags = tags, extras = summary)
     }
 
     /** Re-enable video backgrounds (user override from the warning banner). */
@@ -888,7 +919,8 @@ object CrashReporter {
         try {
             val cutoff = System.currentTimeMillis() - (MAX_AGE_DAYS * 24 * 60 * 60 * 1000)
             crashDir.listFiles()?.forEach { file ->
-                if (file.isFile && file.name.startsWith("crash_") && file.lastModified() < cutoff) {
+                val ours = file.name.startsWith("crash_") || file.name.startsWith("hs_err_pid")
+                if (file.isFile && ours && file.lastModified() < cutoff) {
                     file.delete()
                 }
             }
