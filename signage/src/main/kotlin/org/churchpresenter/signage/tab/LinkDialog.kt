@@ -28,6 +28,7 @@ import org.churchpresenter.sharedui.composables.DropdownSettingsField
 import org.churchpresenter.sharedui.composables.LabeledRadioButton
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.save
@@ -55,6 +56,12 @@ import org.churchpresenter.strings.generated.resources.signage_link_interactive_
 import org.churchpresenter.strings.generated.resources.signage_link_internet
 import org.churchpresenter.strings.generated.resources.signage_link_name
 import org.churchpresenter.strings.generated.resources.signage_link_older_player
+import org.churchpresenter.strings.generated.resources.signage_link_page_code
+import org.churchpresenter.strings.generated.resources.signage_link_page_code_hint
+import org.churchpresenter.strings.generated.resources.signage_link_page_code_idle
+import org.churchpresenter.strings.generated.resources.signage_link_page_css
+import org.churchpresenter.strings.generated.resources.signage_link_page_script
+import org.churchpresenter.strings.generated.resources.signage_link_page_script_hint
 import org.churchpresenter.strings.generated.resources.signage_link_refresh
 import org.churchpresenter.strings.generated.resources.signage_link_smooth
 import org.churchpresenter.strings.generated.resources.signage_link_smooth_hint
@@ -72,7 +79,8 @@ import java.net.URISyntaxException
  * Adds a link playlist, or edits [initial]: its address, a name, and whether it is a web page or a
  * stream, guessed from the address until it is chosen by hand. A web page can reload every few minutes,
  * or be one people use on the touchscreen, which starts over after a time without a touch, and can
- * have one of [idlePlaylists] or another page on screen until someone taps.
+ * have one of [idlePlaylists] or another page on screen until someone taps. Any web page can carry the
+ * church's own CSS and JavaScript.
  */
 @Composable
 internal fun LinkDialog(
@@ -159,6 +167,7 @@ internal fun LinkDialog(
                             refreshMinutes = if (drawn) page.refreshMinutes else 0,
                             smooth = drawn && page.smooth,
                             interactive = interactive,
+                            pageCode = page.pageCode().takeIf { web },
                         ),
                     )
                     onDismiss()
@@ -189,6 +198,14 @@ private class WebOptions(initial: LinkPlaylist?, idlePlaylists: List<PlaylistSum
     )
 
     private val savedIdle = initial?.interactive
+
+    /** The church's own CSS and JavaScript: shown open when the link has some. */
+    var codeOn by mutableStateOf(initial?.pageCode != null)
+    var css by mutableStateOf(initial?.pageCode?.css.orEmpty())
+    var script by mutableStateOf(initial?.pageCode?.script.orEmpty())
+
+    /** What was written, while the switch is on; null with nothing written. */
+    fun pageCode(): PageCode? = if (codeOn) PageCode.of(css, script) else null
 
     /** A playlist that has gone since counts as none: the page itself shows. */
     var idlePlaylistId by mutableStateOf(savedIdle?.idlePlaylistId?.takeIf { id -> idlePlaylists.any { it.id == id } })
@@ -273,11 +290,49 @@ private fun WebOptionFields(page: WebOptions, idlePlaylists: List<PlaylistSummar
             onValueChange = { page.refreshMinutes = it },
         )
     }
+    PageCodeFields(page)
+}
+
+/** The church's own CSS and JavaScript for the page, behind a switch: for someone who knows web pages. */
+@Composable
+private fun PageCodeFields(page: WebOptions) {
+    SwitchRow(
+        title = stringResource(Res.string.signage_link_page_code),
+        hint = stringResource(Res.string.signage_link_page_code_hint),
+        checked = page.codeOn,
+    ) { page.codeOn = it }
+    if (!page.codeOn) return
+    CodeField(page.css, { page.css = it }, stringResource(Res.string.signage_link_page_css), CSS_EXAMPLE, LINK_CSS_TAG)
+    CodeField(
+        page.script, { page.script = it }, stringResource(Res.string.signage_link_page_script), SCRIPT_EXAMPLE,
+        LINK_SCRIPT_TAG,
+    )
+    val idlePage = page.touch && page.idleChoice == IdleChoice.WEB
+    FieldHint(
+        stringResource(Res.string.signage_link_page_script_hint) +
+            if (idlePage) " " + stringResource(Res.string.signage_link_page_code_idle) else "",
+    )
+}
+
+/** A few lines of code, with an example in the empty field; Tab leaves it rather than typing a tab. */
+@Composable
+private fun CodeField(value: String, onChange: (String) -> Unit, label: String, example: String, tag: String) {
+    SettingsTextField(
+        value = value,
+        onValueChange = onChange,
+        label = label,
+        singleLine = false,
+        maxLines = CODE_MAX_LINES,
+        placeholder = { Text(example, style = MaterialTheme.typography.bodySmall) },
+        fillWidth = true,
+        modifier = Modifier.fillMaxWidth().tabMovesFocus().testTag(tag),
+    )
 }
 
 /**
  * How a touchscreen page starts over, and what its screen shows until someone taps: the page, a
- * playlist, or another page. The playlist, the choice and the time share one line.
+ * playlist, or another page. The playlist, the choice and the time share one line, each a share of
+ * it, so a wider font or a longer choice shortens them rather than pushing the time off the dialog.
  */
 @Composable
 private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSummary>) {
@@ -297,9 +352,9 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
                         page.idlePlaylistId = idlePlaylists[idlePlaylists.indexOfFirst { it.name == name }].id
                     },
                     label = stringResource(Res.string.signage_link_idle_playlist_pick),
-                    // The rest of the line: a long name ends in an ellipsis before the chevron. An unset
-                    // width still makes the field lay out to the width it is given.
-                    modifier = Modifier.weight(1f),
+                    // A long name ends in an ellipsis before the chevron. An unset width makes the field
+                    // lay out to the width it is given.
+                    modifier = Modifier.weight(PLAYLIST_SHARE),
                     width = Dp.Unspecified,
                 )
             }
@@ -314,12 +369,15 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
                     }
                 },
                 label = stringResource(Res.string.signage_link_idle_screen),
+                modifier = Modifier.weight(CHOICE_SHARE),
+                width = Dp.Unspecified,
             )
             NumberSettingsTextField(
                 label = stringResource(Res.string.signage_link_idle_reset),
                 initialText = page.idleSeconds,
                 range = InteractiveLink.IDLE_RESET_SECONDS,
                 onValueChange = { page.idleSeconds = it },
+                modifier = Modifier.weight(RESET_SHARE),
             )
         }
         when (page.idleChoice) {
@@ -402,8 +460,20 @@ internal const val LINK_NAME_TAG = "signage-link-name"
 internal const val LINK_SITES_TAG = "signage-link-sites"
 internal const val LINK_IDLE_URL_TAG = "signage-link-idle-url"
 internal const val LINK_IDLE_PROMPT_TAG = "signage-link-idle-prompt"
+internal const val LINK_CSS_TAG = "signage-link-css"
+internal const val LINK_SCRIPT_TAG = "signage-link-script"
+
+/** What the empty code fields show: code, the same in every language. */
+private const val CSS_EXAMPLE = "header, footer { display: none !important; }"
+private const val SCRIPT_EXAMPLE = "document.querySelector('a.home').href = location.origin;"
+private const val CODE_MAX_LINES = 8
+
+/** How the touchscreen line is shared: the playlist, what shows while nobody uses it, the reset time. */
+private const val PLAYLIST_SHARE = 0.8f
+private const val CHOICE_SHARE = 1.1f
+private const val RESET_SHARE = 1.1f
 
 /** What a new link's address starts as, so only the rest is typed: the same in every language. */
 private const val ADDRESS_PREFIX = "https://www."
-private val DIALOG_WIDTH = 440.dp
+private val DIALOG_WIDTH = 480.dp
 private val REFRESH_MINUTES = 0..1440

@@ -4102,6 +4102,12 @@
     <string name="signage_link_idle_prompt_hint">Written at the bottom so people know they can touch it. Leave empty for none.</string>
     <string name="signage_link_idle_hint">A tap on the screen opens this page. After it starts over, the screen goes back to what it showed before.</string>
     <string name="signage_link_idle_no_playlists">Add a folder, picture or video to the list first.</string>
+    <string name="signage_link_page_code">Change how the page looks</string>
+    <string name="signage_link_page_code_hint">Your own CSS and JavaScript, added to every page this link shows: to hide a site's menu or footer, say, or point its Home link back here.</string>
+    <string name="signage_link_page_css">CSS</string>
+    <string name="signage_link_page_script">JavaScript</string>
+    <string name="signage_link_page_script_hint">Runs on each page once it has loaded. A screen with an older player shows the page as its site made it.</string>
+    <string name="signage_link_page_code_idle">Not added to the page shown while nobody is using the screen.</string>
     <string name="signage_remove_playlist">Remove playlist</string>
     <string name="signage_remove_playlist_title">Remove %1$s?</string>
     <string name="signage_remove_playlist_text">Screens playing it go back to the first playlist. The file or page itself is not touched.</string>
