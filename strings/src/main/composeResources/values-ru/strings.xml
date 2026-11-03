@@ -3071,6 +3071,8 @@
     <string name="song_translation_title">Заголовок для Языка %1$d</string>
     <string name="song_named_title">Название: %1$s</string>
     <string name="tooltip_preview_settings">Настройки предпросмотра</string>
+    <string name="tooltip_clear_text">Очистить текст, оставить фон</string>
+    <string name="tooltip_restore_text">Показать текст снова</string>
     <string name="media_subtitle_settings_hint">Применяется к файлам субтитров SRT/WebVTT, которые приложение отрисовывает само. Встроенная дорожка или файл ASS/SSA/SUB сохраняют собственный вид VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Открыть Wick, помощника</string>

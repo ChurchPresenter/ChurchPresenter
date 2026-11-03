@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Pamagat ng Wika %1$d</string>
     <string name="song_named_title">Pamagat sa %1$s</string>
     <string name="tooltip_preview_settings">Mga setting ng preview</string>
+    <string name="tooltip_clear_text">I-clear ang Teksto, Panatilihin ang Background</string>
+    <string name="tooltip_restore_text">Ipakita Muli ang Teksto</string>
     <string name="media_subtitle_settings_hint">Nalalapat sa mga SRT/WebVTT subtitle file, na iginuhit mismo ng app. Ang naka-embed na track o isang ASS/SSA/SUB file ay pinapanatili ang sariling itsura ng VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Buksan si Wick, ang helper</string>

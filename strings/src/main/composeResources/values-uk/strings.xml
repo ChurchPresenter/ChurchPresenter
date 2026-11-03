@@ -3068,6 +3068,8 @@
     <string name="song_translation_title">Заголовок для Мови %1$d</string>
     <string name="song_named_title">Назва (%1$s)</string>
     <string name="tooltip_preview_settings">Налаштування перегляду</string>
+    <string name="tooltip_clear_text">Очистити текст, залишити фон</string>
+    <string name="tooltip_restore_text">Показати текст знову</string>
     <string name="media_subtitle_settings_hint">Застосовується до файлів субтитрів SRT/WebVTT, які застосунок малює сам. Вбудована доріжка або файл ASS/SSA/SUB зберігають власний вигляд VLC.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Відкрити Wick, помічника</string>

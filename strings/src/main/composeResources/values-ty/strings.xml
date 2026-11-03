@@ -672,6 +672,8 @@
     <string name="schedule_add_files_title">Tuʻu i te mau fichier i te fāʻanahoraʻa</string>
     <string name="tooltip_toggle_displays">Faʻaʻite / Huna i te mau paruru faʻaʻiteraʻa</string>
     <string name="tooltip_preview_settings">Paramètre o te hiʻoraʻa mātāmua</string>
+    <string name="tooltip_clear_text">Tāmā i te pāpaʻi, vaiiho i te tāpoʻi</string>
+    <string name="tooltip_restore_text">Faaʻite faahou i te pāpaʻi</string>
     <string name="preview_settings_show_labels">Faʻaʻite i te mau iʻoa o te sortie</string>
     <string name="preview_settings_show_modes">Faʻaʻite i te huru paruru</string>
     <string name="tooltip_settings">Te mau paramètre</string>

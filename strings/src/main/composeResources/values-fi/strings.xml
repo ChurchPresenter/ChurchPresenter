@@ -3113,6 +3113,8 @@
     <string name="song_translation_title">Kielen %1$d otsikko</string>
     <string name="song_named_title">%1$s – otsikko</string>
     <string name="tooltip_preview_settings">Esikatseluasetukset</string>
+    <string name="tooltip_clear_text">Tyhjennä teksti, säilytä tausta</string>
+    <string name="tooltip_restore_text">Näytä teksti uudelleen</string>
     <string name="media_subtitle_settings_hint">Koskee SRT/WebVTT-tekstitystiedostoja, jotka sovellus piirtää itse. Upotettu raita tai ASS/SSA/SUB-tiedosto säilyttää VLC:n oman ulkoasun.</string>
     <string name="helper_name">Wick</string>
     <string name="helper_open">Avaa Wick-avustaja</string>

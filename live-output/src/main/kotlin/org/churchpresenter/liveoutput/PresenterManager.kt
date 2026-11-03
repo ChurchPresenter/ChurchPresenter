@@ -149,6 +149,9 @@ class PresenterManager private constructor(
 
     internal val operatorClearCount = mutableIntStateOf(0)
 
+    /** The song or Bible text whose words were cleared with its background left up -- see [clearTextOnly]. */
+    internal val textClearedFor = mutableStateOf<Any?>(null)
+
     /** How many times a message has been put up, so the same message sent again restarts its timer. */
     internal val messagesShown = mutableIntStateOf(0)
 
