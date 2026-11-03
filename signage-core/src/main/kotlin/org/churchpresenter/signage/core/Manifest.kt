@@ -150,6 +150,17 @@ data class PlaylistItem(
      * such as "Tap to sign up"; nothing is written when null or blank.
      */
     @EncodeDefault(EncodeDefault.Mode.NEVER) val idlePrompt: String? = null,
+    /**
+     * CSS added after a [MediaKind.WEB] page's own on every page it shows, to restyle a site (hide its
+     * menu, say); none when null or blank. On an [interactive] page it is not added to [idleUrl].
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val pageCss: String? = null,
+    /**
+     * JavaScript run on every page a [MediaKind.WEB] item shows, once the page's document is parsed
+     * (to point a site's Home link back at the page, say); none when null or blank. On an [interactive]
+     * page it is not run on [idleUrl].
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val pageScript: String? = null,
 ) {
     companion object {
         const val DEFAULT_TRANSITION_MS = 800L

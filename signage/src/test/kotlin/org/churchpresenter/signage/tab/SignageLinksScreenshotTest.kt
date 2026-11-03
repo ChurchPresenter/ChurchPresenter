@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.screenshot.captureComponent
@@ -89,6 +90,25 @@ class SignageLinksScreenshotTest {
             initial = LinkPlaylist(
                 "link:2", "Fall retreat sign-up", "https://www.churchcenter.com/registrations/events/123",
                 LinkKind.WEB, interactive = InteractiveLink(120, listOf("pay.churchcenter.com")),
+            ),
+        )
+    }
+
+    /** Scrolled down to the code, which fills the end of the dialog. */
+    @Test
+    fun `a page restyled with the church's own code`() = captureComponent(SECTION, "link_code", rootIndex = 1, drive = {
+        field(LINK_SCRIPT_TAG).performScrollTo()
+        waitForIdle()
+    }) {
+        LinkDialog(
+            onAdd = {},
+            onDismiss = {},
+            initial = LinkPlaylist(
+                "link:3", "Events", "https://www.churchcenter.com/events", LinkKind.WEB,
+                pageCode = PageCode(
+                    "header, .site-nav, footer {\n  display: none !important;\n}",
+                    "document.querySelectorAll('a[href=\"/\"]')\n  .forEach(a => a.href = location.href);",
+                ),
             ),
         )
     }

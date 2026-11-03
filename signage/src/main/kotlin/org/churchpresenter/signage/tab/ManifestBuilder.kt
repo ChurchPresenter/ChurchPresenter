@@ -120,14 +120,20 @@ private fun linkItem(link: LinkPlaylist, features: Collection<String>): Playlist
     val web = kind == MediaKind.WEB
     val touch = link.interactive?.takeIf { web }
     // Drawn as a picture nobody can use by a screen that cannot show it in a browser: not sent there.
-    if (touch != null) {
-        return interactiveItem(link.url, touch, Features.IDLE_SCREEN in features)
-            .takeIf { Features.INTERACTIVE in features }
+    val item = if (touch != null) {
+        interactiveItem(link.url, touch, Features.IDLE_SCREEN in features)
+            .takeIf { Features.INTERACTIVE in features } ?: return null
+    } else {
+        val refreshMs = (link.refreshMinutes * MS_PER_MINUTE).takeIf { web && it > 0 }
+        val maxFps = LinkPlaylist.SMOOTH_FPS.takeIf { web && link.smooth }
+        PlaylistItem(kind = kind, url = link.url, refreshMs = refreshMs, maxFps = maxFps)
     }
-    val refreshMs = (link.refreshMinutes * MS_PER_MINUTE).takeIf { web && it > 0 }
-    val maxFps = LinkPlaylist.SMOOTH_FPS.takeIf { web && link.smooth }
-    return PlaylistItem(kind = kind, url = link.url, refreshMs = refreshMs, maxFps = maxFps)
+    return item.withCode(link.pageCode?.takeIf { web && Features.PAGE_CODE in features })
 }
+
+/** [code] on the item; an older player, given none, shows the page as its site made it. */
+private fun PlaylistItem.withCode(code: PageCode?) =
+    if (code == null) this else copy(pageCss = code.css.ifEmpty { null }, pageScript = code.script.ifEmpty { null })
 
 /**
  * An interactive page, with what its screen shows while nobody uses it only where the player can

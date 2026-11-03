@@ -79,6 +79,10 @@ class AddedPlaylistsTest {
         controller.added.updateLink(id, NewLink("Camera", "rtsp://camera-2", LinkKind.STREAM))
         val edited = listed { list -> list.any { it.name == "Camera" } }[1]
         assertEquals(id to "rtsp://camera-2", edited.id to edited.detail)
+        val code = PageCode("footer { display: none }")
+        controller.added.updateLink(id, NewLink("Page", "https://example.org", LinkKind.WEB, pageCode = code))
+        listed { list -> list.any { it.name == "Page" } }
+        assertEquals(code, controller.state.value.settings.added.filterIsInstance<LinkPlaylist>().single().pageCode)
         controller.added.remove(id)
         listed { it.size == 1 }
         assertEquals(ScreenPlan(), controller.state.value.settings.plan("player-1"))

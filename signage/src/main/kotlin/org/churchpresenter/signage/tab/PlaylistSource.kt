@@ -62,7 +62,8 @@ data class FilePlaylist(
  * A web page or a stream, opened by the screen itself; it needs the internet there, and shows the
  * idle card when it cannot load. A web page reloads every [refreshMinutes], never when 0, and is shown
  * at 30 frames a second rather than 15 when [smooth]. An [interactive] page is used on a touchscreen
- * instead, such as an event sign-up: it neither reloads nor counts frames.
+ * instead, such as an event sign-up: it neither reloads nor counts frames. A web page's [pageCode] is
+ * the church's own CSS and JavaScript for it, to restyle a site it does not own.
  */
 @Serializable
 @SerialName("link")
@@ -74,6 +75,7 @@ data class LinkPlaylist(
     val refreshMinutes: Int = 0,
     val smooth: Boolean = false,
     val interactive: InteractiveLink? = null,
+    val pageCode: PageCode? = null,
 ) : AddedPlaylist {
     companion object {
         /** Frames a second for a page that moves smoothly; the screen's own default is 15. */
@@ -81,7 +83,7 @@ data class LinkPlaylist(
 
         fun create(link: NewLink) = with(link) {
             val id = "link:${UUID.randomUUID()}"
-            LinkPlaylist(id, name.trim(), url.trim(), kind, refreshMinutes, smooth, interactive)
+            LinkPlaylist(id, name.trim(), url.trim(), kind, refreshMinutes, smooth, interactive, pageCode)
         }
     }
 }
@@ -111,6 +113,19 @@ data class InteractiveLink(
         /** Sites typed one after another, split at commas, spaces or new lines. */
         fun hostsFrom(typed: String): List<String> =
             typed.split(',', ' ', '\n').map(String::trim).filter(String::isNotEmpty)
+    }
+}
+
+/**
+ * The church's own [css] and [script] for a web page, added to every page it shows: to hide a site's
+ * menu, say, or point its Home link back at the page. A touchscreen page's idle page is left as it is.
+ */
+@Serializable
+data class PageCode(val css: String = "", val script: String = "") {
+    companion object {
+        /** What was written, or null when both are blank. */
+        fun of(css: String, script: String): PageCode? =
+            PageCode(css.trim(), script.trim()).takeIf { it.css.isNotEmpty() || it.script.isNotEmpty() }
     }
 }
 
@@ -147,6 +162,7 @@ data class NewLink(
     val refreshMinutes: Int = 0,
     val smooth: Boolean = false,
     val interactive: InteractiveLink? = null,
+    val pageCode: PageCode? = null,
 )
 
 /** What a link is: a page the screen draws, or a video stream it plays. */

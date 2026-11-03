@@ -36,6 +36,7 @@ class AddedPlaylistEdits internal constructor(
                         refreshMinutes = link.refreshMinutes,
                         smooth = link.smooth,
                         interactive = link.interactive,
+                        pageCode = link.pageCode,
                     )
                 } else {
                     entry
