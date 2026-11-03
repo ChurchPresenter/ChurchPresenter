@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import java.io.File
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -21,6 +22,10 @@ data class ScheduleActions(
         bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int,
     ) -> Unit = { _, _, _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
+    /** One picture as its own row; [folderImageCount] is how many its folder holds. */
+    val addSinglePicture: (image: File, folderImageCount: Int) -> Unit = { _, _ -> },
+    /** Runs the block with every row it adds landing at index and on, rather than at the end. */
+    val insertingAt: (index: Int?, block: () -> Unit) -> Unit = { _, block -> block() },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit =
         { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit =
@@ -93,6 +98,8 @@ internal fun scheduleActionsFrom(
     addSong = actions.addSong,
     addBibleVerse = actions.addBibleVerse,
     addPicture = actions.addPicture,
+    insertingAt = actions.insertingAt,
+    addSinglePicture = actions.addSinglePicture,
     addPresentation = actions.addPresentation,
     addMedia = actions.addMedia,
     addScene = actions.addScene,
@@ -135,6 +142,7 @@ fun ScheduleActions.withoutAdds(): ScheduleActions {
         addSong = none.addSong,
         addBibleVerse = none.addBibleVerse,
         addPicture = none.addPicture,
+        addSinglePicture = none.addSinglePicture,
         addPresentation = none.addPresentation,
         addMedia = none.addMedia,
         addScene = none.addScene,

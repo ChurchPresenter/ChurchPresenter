@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.schedule.ScheduleTabActions
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -109,6 +111,34 @@ class ScheduleActionsTest {
         actions.addPicture("/photos/advent", "Advent", 12)
 
         assertEquals(listOf("/photos/advent", "Advent", 12), received)
+    }
+
+    @Test
+    fun `addSinglePicture passes the picture and its folder's count`() {
+        val got = mutableListOf<Pair<File, Int>>()
+        ScheduleActions(addSinglePicture = { image, count -> got += image to count })
+            .addSinglePicture(File("candle.jpg"), 12)
+        assertEquals(listOf(File("candle.jpg") to 12), got)
+    }
+
+    @Test
+    fun `insertingAt runs its adds by default, and the tab's own puts them at the slot`() {
+        var ran = false
+        ScheduleActions().insertingAt(2) { ran = true }
+        assertTrue(ran, "the default still adds, at the end")
+
+        val slots = mutableListOf<Int?>()
+        val tab = ScheduleTabActions(insertingAt = { index, block -> slots += index; block() })
+        val actions = scheduleActionsFrom(tab, presentScene = {}, playSlideshow = { _, _ -> })
+        actions.insertingAt(1) {}
+        assertEquals(listOf<Int?>(1), slots)
+        val singles = mutableListOf<String>()
+        scheduleActionsFrom(
+            ScheduleTabActions(addSinglePicture = { image, _ -> singles += image.name }),
+            presentScene = {},
+            playSlideshow = { _, _ -> },
+        ).addSinglePicture(File("candle.jpg"), 1)
+        assertEquals(listOf("candle.jpg"), singles)
     }
 
     @Test

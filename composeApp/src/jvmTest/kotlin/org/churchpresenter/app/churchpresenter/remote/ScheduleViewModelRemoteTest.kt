@@ -68,6 +68,7 @@ class ScheduleViewModelRemoteTest {
         var folderPath: String? = null
         var folderName: String? = null
         var imageCount: Int? = null
+        var imagePath: String? = null
         var filePath: String? = null
         var fileName: String? = null
         var slideCount: Int? = null
@@ -84,7 +85,7 @@ class ScheduleViewModelRemoteTest {
             songNumber = songNumber, title = title, songbook = songbook,
             bookName = bookName, chapter = chapter, verseNumber = verseNumber, verseRange = verseRange,
             text = text, textColor = textColor, backgroundColor = backgroundColor,
-            folderPath = folderPath, folderName = folderName, imageCount = imageCount,
+            folderPath = folderPath, folderName = folderName, imageCount = imageCount, imagePath = imagePath,
             filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType,
             mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType,
             presetId = presetId, presetLabel = presetLabel, url = url
@@ -146,6 +147,24 @@ class ScheduleViewModelRemoteTest {
             vm.scheduleItems.map { it::class.simpleName }
         )
         assertEquals(dtos.map { it.id }, vm.scheduleItems.map { it.id }, "mirrored order must match the primary's")
+    }
+
+    @Test
+    fun `a single-picture row mirrors as that one picture`() {
+        val vm = newViewModel()
+        vm.applyRemoteSchedule(
+            listOf(
+                dto("one", "picture") {
+                    folderPath = "/pics/Welcome"; folderName = "Welcome"; imageCount = 4
+                    imagePath = "/pics/Welcome/sunrise.jpg"
+                },
+                dto("all", "picture") { folderPath = "/pics/Welcome"; folderName = "Welcome"; imageCount = 4 },
+            ),
+        )
+        val (one, all) = vm.scheduleItems.map { it as ScheduleItem.PictureItem }
+        assertEquals("/pics/Welcome/sunrise.jpg", one.imagePath)
+        assertEquals("sunrise.jpg", one.displayText)
+        assertEquals("", all.imagePath, "a folder row stays the whole folder")
     }
 
     @Test

@@ -5,6 +5,7 @@ import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
+import java.io.File
 
 data class ScheduleTabActions(
     val newSchedule: () -> Unit = {},
@@ -26,6 +27,8 @@ data class ScheduleTabActions(
     ) -> Unit = { _, _, _, _, _, _ -> },
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
+    /** One picture as its own row; [folderImageCount] is how many its folder holds. */
+    val addSinglePicture: (image: File, folderImageCount: Int) -> Unit = { _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit =
         { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit =
@@ -48,6 +51,8 @@ data class ScheduleTabActions(
         { _, _, _, _ -> },
     val addCue: (item: ScheduleItem.CueItem) -> Unit = { },
     val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
+    /** Runs the block with every row it adds landing at index and on, rather than at the end. */
+    val insertingAt: (index: Int?, block: () -> Unit) -> Unit = { _, block -> block() },
     /** Selects a row, so the Schedule shows what the automation has just put on screen. */
     val selectItem: (id: String) -> Unit = {},
     val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
@@ -84,6 +89,8 @@ internal fun ScheduleViewModel.tabActions(files: ScheduleFileCommands) = Schedul
     },
     addSong          = { songNumber, title, songbook, songId -> addSong(songNumber, title, songbook, songId) },
     addPicture       = { folderPath, folderName, imageCount -> addPicture(folderPath, folderName, imageCount) },
+    addSinglePicture = { image, folderImageCount -> addSinglePicture(image, folderImageCount) },
+    insertingAt      = { index, block -> insertingAt(index, block) },
     addPresentation  = { filePath, fileName, slideCount, fileType ->
         addPresentation(filePath, fileName, slideCount, fileType)
     },

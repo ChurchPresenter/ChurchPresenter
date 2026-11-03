@@ -11,7 +11,9 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 data class PendingRemoteRequest(
     val item: ScheduleItem,
     val clientId: String = "",
-    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred(),
+    /** Where in the schedule the row was asked for; null for the end. */
+    val index: Int? = null,
 )
 
 /**

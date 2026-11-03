@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.settings.utils.Constants
@@ -179,7 +180,7 @@ private suspend fun DefaultWebSocketServerSession.scheduleCommand(
                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                         val item = server.parseRemoteItem(msg.payload)
                             ?: json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload).item
-                        val pending = PendingRemoteRequest(item, wsClientId)
+                        val pending = PendingRemoteRequest(item, wsClientId, index = requestedIndex(msg.payload, json))
                         scope.launch {
                             server.onAddToSchedule.emit(pending)
                             replyWithDecision(pending.decision)
@@ -272,3 +273,9 @@ private suspend fun DefaultWebSocketServerSession.clearCommand(
     }
     sendCommandAck(msg.commandId, ok = true, json = json)
 }
+
+/** Where an `add_to_schedule` asks for its row to go; null when it does not say, or says nonsense. */
+internal fun requestedIndex(payload: String, json: Json): Int? =
+    runCatching { json.parseToJsonElement(payload).jsonObject["index"]?.jsonPrimitive?.intOrNull }
+        .getOrNull()
+        ?.takeIf { it >= 0 }

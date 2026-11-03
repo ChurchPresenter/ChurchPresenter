@@ -5,6 +5,9 @@
 
 package org.churchpresenter.media.tabs
 
+import org.churchpresenter.settings.BackgroundContent
+import org.churchpresenter.sharedui.composables.BackgroundTarget
+import java.io.File
 import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.sharedui.composables.handleGoLiveKey
 import androidx.compose.ui.focus.onFocusChanged
@@ -131,6 +134,12 @@ fun MediaTab(
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit)? = null,
     /** Save preset, to the left of Add to Schedule: the same media, kept for the Calendar Manager. */
     onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
+    /** Where Set as Background can put the loaded clip, besides every output. */
+    backgroundTargets: List<BackgroundTarget> = emptyList(),
+    /** Saves the loaded clip as a background: on the profile named, or every output for null. */
+    onSetAsBackground: ((file: File, profileId: String?, content: BackgroundContent) -> Unit)? = null,
+    /** Whether [file] is that background already, so its button in the menu is outlined. */
+    isBackground: (file: File, profileId: String?, content: BackgroundContent) -> Boolean = { _, _, _ -> false },
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     /**
      * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
@@ -189,14 +198,19 @@ fun MediaTab(
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
-        appSettings, onSettingsChange, onAddToSchedule, onSavePreset, presenterManager, onInstanceLinkSendProject,
-        state, scope, sourceTypeItems, selectFileLabel, mediaFilesLabel, shortcuts, wentLive, fileChooser,
+        appSettings, onSettingsChange, onAddToSchedule, onSavePreset, backgroundTargets, onSetAsBackground,
+        isBackground, presenterManager, onInstanceLinkSendProject, state, scope, sourceTypeItems, selectFileLabel,
+        mediaFilesLabel,
+        shortcuts, wentLive, fileChooser,
     ) {
         MediaTabScope(
             appSettings = appSettings,
             onSettingsChange = onSettingsChange,
             onAddToSchedule = onAddToSchedule,
             onSavePreset = onSavePreset,
+            backgroundTargets = backgroundTargets,
+            onSetAsBackground = onSetAsBackground,
+            isBackground = isBackground,
             presenterManager = presenterManager,
             onInstanceLinkSendProject = onInstanceLinkSendProject,
             state = state,

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import java.io.File
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.withoutAdds
 import org.churchpresenter.core.models.songs.SongItem
@@ -83,6 +84,15 @@ class ExecuteProjectItemTest {
 
         assertEquals(emptyList(), recorder.added)
         assertEquals(Presenting.NONE, presenter.slideContent.value)
+    }
+
+    @Test
+    fun `without adds a single picture is not added either`() {
+        val added = mutableListOf<String>()
+        ScheduleActions(addSinglePicture = { image, _ -> added += image.name })
+            .withoutAdds()
+            .addSinglePicture(File("candle.jpg"), 1)
+        assertTrue(added.isEmpty())
     }
 
     @Test

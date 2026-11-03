@@ -28,3 +28,20 @@ internal fun dragDropTarget(
     val target = visibleItems.firstOrNull { cursorY >= it.offset && cursorY <= it.offset + it.size }
     return DragDropTarget(overDeleteZone = false, targetIndex = target?.index)
 }
+
+/** Where a drop lands: the row [index] it goes in front of, and the [lineY] the insertion mark sits at. */
+internal data class DropSlot(val index: Int, val lineY: Float)
+
+/**
+ * The slot a drop at [cursorY] goes into: in front of the first visible row whose middle is below
+ * the cursor, or after the last visible row. An empty list has the one slot at the top.
+ */
+internal fun dropSlot(cursorY: Float, visibleItems: List<DragItemGeometry>): DropSlot {
+    val last = visibleItems.lastOrNull() ?: return DropSlot(0, 0f)
+    val before = visibleItems.firstOrNull { cursorY < it.offset + it.size / 2f }
+    return if (before != null) {
+        DropSlot(before.index, before.offset.toFloat())
+    } else {
+        DropSlot(last.index + 1, (last.offset + last.size).toFloat())
+    }
+}

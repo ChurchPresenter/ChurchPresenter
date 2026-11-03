@@ -12,7 +12,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
@@ -153,9 +153,9 @@ class PicturesTabOptionsTest {
     @Test
     fun `double-clicking a picture takes it live`() = tab { h ->
         waitUntil("two thumbnails drawn", 5_000) { drawnThumbnails().size >= 2 }
-        onNodeWithContentDescription(drawnThumbnails()[1]).performTouchInput {
-            down(center); up(); advanceEventTime(50); down(center); up()
-        }
+        // A mouse double-click: AWT delivers no touch pointers on the desktop, and the thumbnail's
+        // drag-out reads synthetic touch taps as the start of a long-press drag.
+        onNodeWithContentDescription(drawnThumbnails()[1]).performMouseInput { doubleClick(center) }
         waitForIdle()
         assertEquals(1, h.vm.selectedImageIndex)
         assertEquals(Presenting.PICTURES, h.output.onAir.value)
@@ -310,9 +310,9 @@ class PicturesTabOptionsTest {
     @Test
     fun `double-clicking a picture with no output only selects it`() = picturesTab { vm, _ ->
         waitUntil("two thumbnails drawn", 5_000) { drawnThumbnails().size >= 2 }
-        onNodeWithContentDescription(drawnThumbnails()[1]).performTouchInput {
-            down(center); up(); advanceEventTime(50); down(center); up()
-        }
+        // A mouse double-click: AWT delivers no touch pointers on the desktop, and the thumbnail's
+        // drag-out reads synthetic touch taps as the start of a long-press drag.
+        onNodeWithContentDescription(drawnThumbnails()[1]).performMouseInput { doubleClick(center) }
         waitForIdle()
         assertEquals(1, vm.selectedImageIndex)
     }

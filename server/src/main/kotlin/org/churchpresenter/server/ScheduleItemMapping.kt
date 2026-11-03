@@ -1,5 +1,6 @@
 package org.churchpresenter.server
 
+import java.io.File
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
@@ -24,12 +25,7 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
             bibleVerseItem(safeId, bookName, chapter, verseNumber)
         // Picture folder — must have folderPath
         folderPath != null ->
-            ScheduleItem.PictureItem(
-                id         = safeId,
-                folderPath = folderPath,
-                folderName = folderName ?: folderPath,
-                imageCount = imageCount ?: 0
-            )
+            pictureItem(safeId, folderPath, folderName ?: folderPath, imageCount ?: 0, imagePath)
         // Presentation — must have filePath
         filePath != null ->
             ScheduleItem.PresentationItem(
@@ -118,7 +114,8 @@ internal fun ScheduleItem.toDto(): ScheduleItemDto = when (this) {
     )
     is ScheduleItem.PictureItem -> ScheduleItemDto(
         id = id, type = "picture", displayText = displayText,
-        folderPath = folderPath, folderName = folderName, imageCount = imageCount
+        folderPath = folderPath, folderName = folderName, imageCount = imageCount,
+        imagePath = imagePath.ifEmpty { null },
     )
     is ScheduleItem.PresentationItem -> ScheduleItemDto(
         id = id, type = "presentation", displayText = displayText,
@@ -173,3 +170,27 @@ private fun RemoteItemDto.bibleVerseItem(id: String, bookName: String, chapter: 
         verseRange  = verseRange ?: "",
         bookId      = bookId ?: 0,
     )
+
+/**
+ * A picture row: the whole of [folderPath], or — given [imagePath] — that one picture in it, named
+ * as a single-picture row is on the Schedule.
+ */
+fun pictureItem(
+    id: String,
+    folderPath: String,
+    folderName: String,
+    imageCount: Int,
+    imagePath: String?,
+): ScheduleItem.PictureItem =
+    if (imagePath.isNullOrEmpty()) {
+        ScheduleItem.PictureItem(id = id, folderPath = folderPath, folderName = folderName, imageCount = imageCount)
+    } else {
+        ScheduleItem.PictureItem(
+            id = id,
+            folderPath = folderPath,
+            folderName = folderName,
+            imageCount = imageCount,
+            displayText = File(imagePath).name,
+            imagePath = imagePath,
+        )
+    }

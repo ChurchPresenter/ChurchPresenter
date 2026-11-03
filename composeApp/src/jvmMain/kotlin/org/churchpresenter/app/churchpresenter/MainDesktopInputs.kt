@@ -167,7 +167,7 @@ data class InstanceLinkBridge(
     val mediaStreamUrl: ((itemId: String) -> String)? = null,
     /** Non-null only when connected AND the operator has enabled pushing items to the primary's
      *  schedule — see ScheduleViewModel.onPushToRemoteSchedule. */
-    val sendAddToSchedule: ((ScheduleItem) -> Unit)? = null,
+    val sendAddToSchedule: ((item: ScheduleItem, index: Int?) -> Unit)? = null,
     /** Same gate as [sendAddToSchedule] — see ScheduleViewModel.onRemoveFromRemoteSchedule. */
     val sendRemoveFromSchedule: ((id: String) -> Unit)? = null,
     /** See InstanceLinkRole — CONTROLLED (default, mirror the primary) or CONTROLLER (drive it). */

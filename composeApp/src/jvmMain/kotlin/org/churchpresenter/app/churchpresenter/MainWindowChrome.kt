@@ -381,7 +381,7 @@ private fun MainWindowScope.instanceLinkBridge(
             companionServer.updateBibleFilePaths(paths)
         },
         sendAddToSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
-            { item -> instanceLinkViewModel.sendAddToSchedule(item) }
+            { item, index -> instanceLinkViewModel.sendAddToSchedule(item, index) }
         } else null,
         sendRemoveFromSchedule = if (canPushToSchedule(appSettings.instanceLink)) {
             { id -> instanceLinkViewModel.sendRemoveFromSchedule(id) }

@@ -59,6 +59,9 @@ internal class MainDesktopState(
 
     /** The item a tab's Save preset is naming, or null while that dialog is closed. */
     var presetToSave by mutableStateOf<ScheduleItem?>(null)
+
+    /** The background a tab's Set as Background is asking about, or null while that question is closed. */
+    var pendingBackground by mutableStateOf<PendingBackground?>(null)
     var editingLabelItem by mutableStateOf<ScheduleItem.LabelItem?>(null)
     var showAddWebsiteDialog by mutableStateOf(false)
     var showKonamiEasterEgg by mutableStateOf(false)

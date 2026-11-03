@@ -60,8 +60,12 @@ internal fun MainWindowScope.RemoteAddRequests() {
                 val item = pending.item
                 val add: () -> Unit = {
                     UsageEvents.record(UsageEvent.REMOTE_ADDED_TO_SCHEDULE)
-                    addScheduleItem(item, currentScheduleActions) { song ->
-                        coroutineScope.launch { remoteSelectSongFlow.emit(openedByRemote(song)) }
+                    // Where a follower dropped it; approval can take a while, so a schedule that has
+                    // shrunk since only clamps it.
+                    currentScheduleActions.insertingAt(pending.index) {
+                        addScheduleItem(item, currentScheduleActions) { song ->
+                            coroutineScope.launch { remoteSelectSongFlow.emit(openedByRemote(song)) }
+                        }
                     }
                     pending.decision.complete(true)
                 }

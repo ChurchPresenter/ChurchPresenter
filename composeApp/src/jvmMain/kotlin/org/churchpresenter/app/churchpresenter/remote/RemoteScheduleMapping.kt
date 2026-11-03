@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.server.pictureItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.schedule.ScheduleViewModel
 import org.churchpresenter.server.InstanceLinkLogSide
@@ -40,12 +41,7 @@ internal fun ScheduleItemDto.toScheduleItem(): ScheduleItem? = when (type) {
         textColor = textColor ?: "#FFFFFF",
         backgroundColor = backgroundColor ?: "#2196F3"
     )
-    "picture" -> ScheduleItem.PictureItem(
-        id = id,
-        folderPath = folderPath ?: "",
-        folderName = folderName ?: "",
-        imageCount = imageCount ?: 0
-    )
+    "picture" -> pictureItem(id, folderPath ?: "", folderName ?: "", imageCount ?: 0, imagePath)
     "presentation" -> ScheduleItem.PresentationItem(
         id = id,
         filePath = filePath ?: "",

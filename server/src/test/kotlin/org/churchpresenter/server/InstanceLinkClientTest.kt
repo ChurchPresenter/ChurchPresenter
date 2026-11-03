@@ -358,6 +358,48 @@ class InstanceLinkClientTest {
     }
 
     @Test
+    fun `sendAddToSchedule carries where the row goes`() {
+        val (client, _) = connectedClient()
+        try {
+            val asked = mutableListOf<Int?>()
+            collecting(server.onAddToSchedule) { asked.add(it.index); it.decision.complete(true) }
+
+            client.sendAddToSchedule(ScheduleItem.LabelItem("add-2", "Offering", "#FFFFFF", "#000000"), 2)
+
+            awaitUntil("the operator to be asked") { asked.isNotEmpty() }
+            assertEquals(2, asked.single())
+        } finally {
+            client.dispose()
+        }
+    }
+
+    @Test
+    fun `sendAddToSchedule keeps a single picture a single picture`() {
+        val (client, _) = connectedClient()
+        try {
+            val asked = mutableListOf<ScheduleItem>()
+            collecting(server.onAddToSchedule) { asked.add(it.item); it.decision.complete(true) }
+
+            client.sendAddToSchedule(
+                ScheduleItem.PictureItem(
+                    id = "pic-1",
+                    folderPath = "/pics/Welcome",
+                    folderName = "Welcome",
+                    imageCount = 4,
+                    displayText = "sunrise.jpg",
+                    imagePath = "/pics/Welcome/sunrise.jpg",
+                ),
+            )
+
+            awaitUntil("the operator to be asked") { asked.isNotEmpty() }
+            val row = asked.single() as ScheduleItem.PictureItem
+            assertEquals("/pics/Welcome/sunrise.jpg", row.imagePath)
+        } finally {
+            client.dispose()
+        }
+    }
+
+    @Test
     fun `sendCommand before ever connecting reports not_connected without touching the network`() {
         val callbacks = Callbacks()
         val client = callbacks.client()
