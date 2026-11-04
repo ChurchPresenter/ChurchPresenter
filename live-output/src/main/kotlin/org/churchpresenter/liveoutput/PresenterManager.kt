@@ -178,6 +178,8 @@ class PresenterManager private constructor(
     val previewSettingsOverride: State<AppSettings?> = _previewSettingsOverride
 
     fun setPresentingMode(mode: Presenting) {
+        // An announcement's ticking text can't tell a new one from the old, so its arrival shows it.
+        if (mode == Presenting.ANNOUNCEMENTS && textClearedFor.value != null && !isLive(mode)) restoreText()
         if (mode.isOverlay) {
             overlayLayers.showOverlay(mode)
             return

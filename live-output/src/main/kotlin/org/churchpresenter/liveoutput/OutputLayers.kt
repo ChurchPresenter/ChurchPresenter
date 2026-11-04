@@ -89,7 +89,7 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
         // always has, so a video and an audio cue go through the same check.
         is Cue.Video, is Cue.Audio -> MediaCue(surface)
         is Cue.LowerThird -> LowerThirdCue(surface)
-        is Cue.Announcement -> AnnouncementCue(surface)
+        is Cue.Announcement -> if (!surface.presenterManager.textCleared) AnnouncementCue(surface)
         is Cue.Web -> WebCue(surface)
         is Cue.SceneCue -> ScenePresenter(scene = surface.presenterManager.activeScene.value)
         is Cue.QuestionCue -> if (!surface.presenterManager.hidesQuestion()) QuestionCue(surface)
