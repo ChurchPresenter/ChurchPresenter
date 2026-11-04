@@ -102,8 +102,9 @@ internal fun BibleProperties(
         mutableStateOf(appSettings?.bibleSettings?.translationList()?.firstOrNull()?.fileName ?: "")
     }
 
-    val bible by produceState<Bible?>(null, storageDir, selectedBibleFile) {
-        value = withContext(Dispatchers.IO) { loadBibleSource(storageDir, selectedBibleFile) }
+    val bookNames = appSettings?.bibleSettings?.bookNameOverridesOf(selectedBibleFile).orEmpty()
+    val bible by produceState<Bible?>(null, storageDir, selectedBibleFile, bookNames) {
+        value = withContext(Dispatchers.IO) { loadBibleSource(storageDir, selectedBibleFile, bookNames) }
     }
     val browser = remember(bible) { BibleSourceBrowser(bible) }
 

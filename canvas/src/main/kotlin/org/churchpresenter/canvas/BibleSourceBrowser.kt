@@ -43,9 +43,12 @@ internal class BibleSourceBrowser(val bible: Bible?) {
 }
 
 /** The translation [fileName] in [storageDir], read off disk; null when there is none to read. */
-internal fun loadBibleSource(storageDir: String, fileName: String): Bible? {
+internal fun loadBibleSource(storageDir: String, fileName: String, bookNames: Map<Int, String>): Bible? {
     if (storageDir.isEmpty() || fileName.isEmpty()) return null
     val file = File(storageDir, fileName)
     if (!file.isFile) return null
-    return Bible().apply { loadFromSpb(file.absolutePath) }
+    return Bible().apply {
+        loadFromSpb(file.absolutePath)
+        applyBookNameOverrides(bookNames)
+    }
 }

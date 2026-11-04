@@ -28,6 +28,7 @@ data class BibleTranslationSettings(
      */
     val customName: String = "",
     val customAbbreviation: String = "",
+    val bookNameOverrides: Map<Int, String> = emptyMap(),
     val textColor: String = "#FFFFFF",
     val textFontType: String = "Arial",
     val textFontSize: Int = 70,
@@ -500,9 +501,13 @@ data class BibleSettings(
             ?.let { it.customName to it.customAbbreviation }
             ?: ("" to "")
 
+    /** [fileName]'s book names as configured, by book id. */
+    fun bookNameOverridesOf(fileName: String): Map<Int, String> =
+        translationList().firstOrNull { it.fileName == fileName }?.bookNameOverrides.orEmpty()
+
     /** The renames in stack order — the key a caller watches to notice one being typed. */
     fun customNameKey(): List<String> =
-        translationList().flatMap { listOf(it.customName, it.customAbbreviation) }
+        translationList().flatMap { listOf(it.customName, it.customAbbreviation, it.bookNameOverrides.toString()) }
 
     private fun primaryTranslation() = BibleTranslationSettings(
         fileName = primaryBible,

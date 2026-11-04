@@ -180,7 +180,7 @@ class AddBibleDemoTour {
         val name = panelItems(hasText("Name", ignoreCase = true)).first()
         panelNote("Name", "What your church calls it", name, numbered = true)
         say("abbreviation")
-        val abbreviation = panelItems(hasText("Abbreviation", ignoreCase = true)).first()
+        val abbreviation = panelItems(hasText("Abbrev.", ignoreCase = true)).first()
         panelNote("Abbreviation", "The short form shown with each verse", abbreviation)
         closePanel()
     }

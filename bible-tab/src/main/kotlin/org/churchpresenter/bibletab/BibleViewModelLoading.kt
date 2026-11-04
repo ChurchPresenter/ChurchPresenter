@@ -48,14 +48,18 @@ internal fun BibleViewModel.updateSettings(newSettings: AppSettings) {
     _loadedTranslations.value.forEach { translation ->
         val (name, abbreviation) = settings.customNameOf(translation.fileName)
         translation.bible.applyNameOverride(name, abbreviation)
+        translation.bible.applyBookNameOverrides(settings.bookNameOverridesOf(translation.fileName))
     }
     _primaryBible.value?.let { primary ->
         // The books-only module shown while the full parse is still running is not in that list.
         if (_loadedTranslations.value.none { it.bible === primary }) {
-            val (name, abbreviation) =
-                settings.customNameOf(settings.translationList().firstOrNull()?.fileName.orEmpty())
+            val fileName = settings.translationList().firstOrNull()?.fileName.orEmpty()
+            val (name, abbreviation) = settings.customNameOf(fileName)
             primary.applyNameOverride(name, abbreviation)
+            primary.applyBookNameOverrides(settings.bookNameOverridesOf(fileName))
         }
+        _books.value = primary.getCanonicalBooks()
+        refreshFilteredLists()
     }
     if (_verses.value.isNotEmpty()) _verseSelectionToken.value++
 }
@@ -243,6 +247,7 @@ internal fun BibleViewModel.loadBibles() {
                         Bible().apply {
                             loadBooksOnly(path.absolutePath)
                             applyNameOverride(rename?.customName, rename?.customAbbreviation)
+                            applyBookNameOverrides(rename?.bookNameOverrides.orEmpty())
                         }
                     } catch (_: Exception) { null }
                 }
@@ -386,14 +391,16 @@ private suspend fun BibleViewModel.loadModules(
     configuredTranslations: List<BibleTranslationSettings>,
     translationSources: List<Pair<String, File>>,
 ): LoadedModules = coroutineScope {
+    val englishNames = _englishBookNames.value
     val bibleDeferred = translationSources.map { (identity, path) ->
         val rename = configuredTranslations.firstOrNull { it.fileName == identity }
         identity to async(ioDispatcher) {
             // No try: loadFromSpb reports a bad module through loadError instead of throwing, and
             // the rename only trims two strings.
             Bible().apply {
-                loadFromSpb(path.absolutePath)
+                loadFromSpb(path.absolutePath, englishNames)
                 applyNameOverride(rename?.customName, rename?.customAbbreviation)
+                applyBookNameOverrides(rename?.bookNameOverrides.orEmpty())
             }
         }
     }
