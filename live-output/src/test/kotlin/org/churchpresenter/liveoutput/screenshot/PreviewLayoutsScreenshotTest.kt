@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -28,8 +30,8 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureComponent
 
 /**
- * The preview panel as its layout draws and edits it, the gear's layout list, and the profile sets
- * menu, in both themes.
+ * The preview panel as its layout draws and edits it, the gear's layout list, the profile sets
+ * menu and an output's own profile menu, in both themes.
  */
 class PreviewLayoutsScreenshotTest {
 
@@ -176,7 +178,33 @@ class PreviewLayoutsScreenshotTest {
         ProfileSetsPopover(expanded = true, onDismiss = {}, proj = withProfiles(), onChange = {})
     }
 
+    // ── One output's profile ────────────────────────────────────────────────────────────────────
+
+    /** Two outputs following one of two profiles, as the wiki's switch-translations steps set up. */
+    private fun withTranslationProfiles(vararg roots: PreviewArea) = projection(*roots).let { proj ->
+        proj.copy(
+            outputProfiles = listOf(
+                OutputProfile(id = "one", name = "Afrikaans"),
+                OutputProfile(id = "two", name = "Afrikaans + Dutch"),
+            ),
+            browserSourceOutputs = proj.browserSourceOutputs.map { it.copy(activeProfileId = "one") },
+            ndiOutputs = proj.ndiOutputs.map { it.copy(activeProfileId = "one") },
+        )
+    }
+
+    @Test
+    fun `one output's profile menu, the one in use ticked`() = captureComponent(
+        SECTION,
+        "profile_swap_menu",
+        rootIndex = 1,
+        // Lobby's: it follows Afrikaans, so the menu has a tick to show.
+        drive = { onAllNodesWithContentDescription(SWAP_PROFILE)[0].performClick() },
+    ) {
+        Panel(withTranslationProfiles(splitArea(SPLIT_DOWN, listOf(leaf(bs0), leaf(ndi0)))))
+    }
+
     private companion object {
+        const val SWAP_PROFILE = "Swap output profile"
         const val SECTION = "previewLayouts"
         val PANEL_WIDTH = 320.dp
         val FILL_HEIGHT = 300.dp
