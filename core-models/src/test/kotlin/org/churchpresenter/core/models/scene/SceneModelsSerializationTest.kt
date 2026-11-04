@@ -70,6 +70,15 @@ class SceneModelsSerializationTest {
         assertEquals(0.5f, old.x)
         assertEquals(1f, old.width, "a source from before width was stored must not collapse to nothing")
         assertEquals(1f, old.opacity)
+        assertEquals(DEFAULT_CROP, old.cropX, "a scene saved before the crop could move reads as centred")
+        assertEquals(DEFAULT_CROP, old.cropY)
+    }
+
+    @Test
+    fun `a moved crop is saved with the box`() {
+        val cropped = SourceTransform(cropX = 0.8f, cropY = 0.1f)
+        val encoded = json.encodeToString(SourceTransform.serializer(), cropped)
+        assertEquals(cropped, json.decodeFromString(SourceTransform.serializer(), encoded))
     }
 
     @Test

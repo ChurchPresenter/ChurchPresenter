@@ -113,13 +113,11 @@ class SceneLayoutsTest {
     // ── turnedFor ───────────────────────────────────────────────────────────────
 
     @Test
-    fun `a full-screen capture becomes a full-width band across the middle`() {
+    fun `a full-screen capture fills the turned canvas too`() {
+        // It used to keep its shape, a full-width band across the middle of a portrait screen (#937).
         val t = SourceTransform().turnedFor(capture, 1920, 1080, 1080, 1920)
 
-        assertNear(1f, t.width)
-        assertNear(1080f * 0.5625f / 1920f, t.height, "16:9 at the portrait canvas's width")
-        assertNear(0f, t.x)
-        assertNear(0.5f, t.y + t.height / 2f, "centred where it was")
+        assertEquals(SourceTransform(), t)
     }
 
     @Test
@@ -241,5 +239,87 @@ class SceneLayoutsTest {
             assertEquals(moved, result.transform, "${source::class.simpleName} did not move")
             assertEquals(source, result.withTransform(source.transform), "${source::class.simpleName} lost a field")
         }
+    }
+
+    // ── Turning with the canvas (#937) ──────────────────────────────────────────
+
+    private val colour = SceneSource.ColorSource(id = "colour", name = "Colour")
+    private val picture = SceneSource.ImageSource(id = "picture", name = "Picture", filePath = "/p.png")
+
+    @Test
+    fun `a layer over the whole canvas covers the whole turned one, whatever it holds`() {
+        listOf(picture, title, colour, capture).forEach { source ->
+            val t = SourceTransform(x = 0.004f, y = 0f, width = 0.995f, height = 1f)
+                .turnedFor(source, 1920, 1080, 1080, 1920)
+            assertEquals(SourceTransform(), t, "${source.name} fills the portrait canvas")
+        }
+    }
+
+    @Test
+    fun `halves side by side in landscape are stacked in portrait, the left one on top`() {
+        val left = SourceTransform(x = 0.008f, y = 0f, width = 0.492f, height = 1f)
+        val right = SourceTransform(x = 0.5f, y = 0f, width = 0.5f, height = 1f)
+
+        val top = left.turnedFor(picture, 1920, 1080, 1080, 1920)
+        val bottom = right.turnedFor(colour, 1920, 1080, 1080, 1920)
+
+        assertEquals(SourceTransform(x = 0f, y = 0.008f, width = 1f, height = 0.492f), top)
+        assertEquals(SourceTransform(x = 0f, y = 0.5f, width = 1f, height = 0.5f), bottom)
+    }
+
+    @Test
+    fun `rows across a portrait canvas sit side by side in landscape`() {
+        val row = SourceTransform(x = 0f, y = 0.6f, width = 1f, height = 0.4f)
+        assertEquals(
+            SourceTransform(x = 0.6f, y = 0f, width = 0.4f, height = 1f),
+            row.turnedFor(picture, 1080, 1920, 1920, 1080),
+        )
+    }
+
+    @Test
+    fun `a band across a landscape canvas stays a band`() {
+        val band = SourceTransform(x = 0f, y = 0.8f, width = 1f, height = 0.2f)
+        val t = band.turnedFor(colour, 1920, 1080, 1080, 1920)
+        assertEquals(band, t, "a colour band keeps its fractions, as before")
+    }
+
+    @Test
+    fun `a column that stops short of an edge keeps its shape`() {
+        val short = SourceTransform(x = 0f, y = 0.05f, width = 0.5f, height = 0.9f)
+        val t = short.turnedFor(picture, 1920, 1080, 1080, 1920)
+        assertTrue(t.width < 1f, "not turned into a full-width row")
+    }
+
+    @Test
+    fun `a canvas that keeps its orientation turns nothing`() {
+        val column = SourceTransform(x = 0f, y = 0f, width = 0.5f, height = 1f)
+        assertEquals(column, column.turnedFor(colour, 1920, 1080, 1280, 720))
+    }
+
+    @Test
+    fun `the crop and rotation come across when a layer turns with the canvas`() {
+        val column = SourceTransform(x = 0f, y = 0f, width = 0.5f, height = 1f, rotation = 5f, cropX = 0.2f)
+        val t = column.turnedFor(picture, 1920, 1080, 1080, 1920)
+        assertEquals(0.2f, t.cropX)
+        assertEquals(5f, t.rotation)
+    }
+
+    @Test
+    fun `opacity is the layer's own in both layouts`() {
+        val faded = SceneSource.ImageSource(
+            id = "picture", name = "Picture", filePath = "/p.png",
+            transform = SourceTransform(opacity = 0.4f),
+        )
+        val scene = Scene(
+            id = "s", canvasWidth = 1920, canvasHeight = 1080, sources = listOf(faded),
+            alternate = SceneAlternateLayout(mapOf("picture" to SourceTransform(width = 0.5f, opacity = 1f))),
+        )
+        assertNear(0.4f, scene.alternateScene().sources.single().transform.opacity)
+    }
+
+    @Test
+    fun `a crop starts centred`() {
+        assertEquals(DEFAULT_CROP, SourceTransform().cropX)
+        assertEquals(DEFAULT_CROP, SourceTransform().cropY)
     }
 }

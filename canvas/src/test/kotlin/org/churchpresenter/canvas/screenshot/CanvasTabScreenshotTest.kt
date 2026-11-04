@@ -13,6 +13,7 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.canvas.CANVAS_DUAL_LAYOUT_TAG
 import org.churchpresenter.canvas.CANVAS_SIZE_BUTTON_TAG
+import org.churchpresenter.canvas.editLayout
 import org.churchpresenter.canvas.CanvasLabel
 import org.churchpresenter.canvas.canvasButton
 import org.churchpresenter.canvas.canvasButtonAt
@@ -149,6 +150,29 @@ class CanvasTabScreenshotTest {
         },
     ) { vm ->
         vm.selectSource("s2")
+        waitForIdle()
+    }
+
+    @Test
+    fun `a picture on Fill edited in the portrait layout, cropped to its right`() = shoot(
+        "dual_layout_portrait_crop",
+        seed = {
+            addSource(
+                SceneSource.ImageSource(
+                    id = "photo",
+                    name = "Photo",
+                    filePath = photo().absolutePath,
+                    contentScale = "FILL",
+                    transform = SourceTransform(width = 0.5f, height = 1f),
+                ),
+            )
+            dual()
+            // Filling the portrait canvas, showing the right of the picture there (#937).
+            updateTransform("photo", SourceTransform(cropX = 0.85f), alternate = true)
+        },
+    ) { vm ->
+        vm.selectSource("photo")
+        vm.editLayout(alternate = true)
         waitForIdle()
     }
 

@@ -19,8 +19,18 @@ data class SourceTransform(
     val width: Float = 1f,
     val height: Float = 1f,
     val rotation: Float = 0f,
-    val opacity: Float = 1f
+    val opacity: Float = 1f,
+    /**
+     * Which part of a picture set to Fill shows when the picture is cropped to its box: 0 keeps its
+     * left (or top) edge, 1 its right (or bottom), 0.5 the centre. Per layout, like the rest of the
+     * box, so a portrait screen can show a different part of the picture from a landscape one (#937).
+     */
+    val cropX: Float = DEFAULT_CROP,
+    val cropY: Float = DEFAULT_CROP,
 )
+
+/** A crop centred in the picture: what Fill did before a crop could be moved. */
+const val DEFAULT_CROP = 0.5f
 
 @Serializable
 sealed class SceneSource {
@@ -424,7 +434,8 @@ fun Scene.alternateScene(): Scene {
         sources = sources.map { source ->
             val transform = layout.transforms[source.id]
                 ?: source.transform.turnedFor(source, canvasWidth, canvasHeight, canvasHeight, canvasWidth)
-            source.withTransform(transform)
+            // Opacity is the layer's own, like its content: one setting for both layouts.
+            source.withTransform(transform.copy(opacity = source.transform.opacity))
         },
     )
 }
@@ -436,12 +447,20 @@ private const val EDGE_SLACK = 0.001f
  * Where [source] starts on a [toWidth]×[toHeight] canvas when this is where it sits on a
  * [fromWidth]×[fromHeight] one — for a layer not yet moved in a scene's second layout.
  *
- * Copying the fractions would change the box's shape along with the canvas's, so:
+ * Two kinds of layer are turned with the canvas rather than kept as they were:
+ * - One that covers the whole canvas covers the whole of the new one, whatever it holds — a
+ *   full-screen picture set to Fill fills a portrait screen and crops the sides.
+ * - One that spans the whole of the canvas's short side — a column down a landscape canvas, a row
+ *   across a portrait one — spans the new canvas's short side at the same place along it. So
+ *   halves side by side in landscape are stacked in portrait, the left one on top (#937).
+ *
+ * Any other layer keeps its shape, since copying its fractions would change the box's shape along
+ * with the canvas's:
  * - Pictures, video, captures, QR codes and shapes keep their shape, scaled by as much as the whole
- *   canvas has to shrink to fit the new one. A full-screen capture becomes a full-width band.
+ *   canvas has to shrink to fit the new one.
  * - Text, clocks and Bible verses keep their text size (fonts are in canvas pixels): the box keeps
  *   its pixel width, up to the canvas width, and its pixel area, so wrapped lines have room.
- * - A colour keeps its fractions, so a full-screen background stays full screen.
+ * - A colour keeps its fractions.
  *
  * The box's centre stays at the same fractions, and a box that was inside the canvas is kept inside.
  */
@@ -453,7 +472,24 @@ fun SourceTransform.turnedFor(
     toHeight: Int,
 ): SourceTransform {
     val sized = minOf(fromWidth, fromHeight, toWidth, toHeight) > 0
-    if (source is SceneSource.ColorSource || !sized) return this
+    val turned = sized && (fromWidth > fromHeight) != (toWidth > toHeight)
+    val withCanvas = if (turned) turnedWithCanvas(fromLandscape = fromWidth > fromHeight) else null
+    return when {
+        !sized -> this
+        withCanvas != null -> withCanvas
+        source is SceneSource.ColorSource -> this
+        else -> keptShape(source, fromWidth, fromHeight, toWidth, toHeight)
+    }
+}
+
+/** [turnedFor] for a layer that keeps its shape: see its rules for pictures and text. */
+private fun SourceTransform.keptShape(
+    source: SceneSource,
+    fromWidth: Int,
+    fromHeight: Int,
+    toWidth: Int,
+    toHeight: Int,
+): SourceTransform {
     val pixelWidth = width * fromWidth
     val pixelHeight = height * fromHeight
     val (newWidth, newHeight) = when (source) {
@@ -477,6 +513,24 @@ fun SourceTransform.turnedFor(
     }
     return copy(x = newX, y = newY, width = newWidth, height = newHeight)
 }
+
+/**
+ * Where this box goes when the canvas turns and the box turns with it: the whole canvas stays the
+ * whole canvas, and a box spanning the short side of a [fromLandscape] canvas has its fractions
+ * transposed, so a column becomes a row at the same place. Null for any other box.
+ */
+private fun SourceTransform.turnedWithCanvas(fromLandscape: Boolean): SourceTransform? {
+    val fullWidth = x <= SPAN_SLACK && x + width >= 1f - SPAN_SLACK
+    val fullHeight = y <= SPAN_SLACK && y + height >= 1f - SPAN_SLACK
+    return when {
+        fullWidth && fullHeight -> copy(x = 0f, y = 0f, width = 1f, height = 1f)
+        if (fromLandscape) fullHeight else fullWidth -> copy(x = y, y = x, width = height, height = width)
+        else -> null
+    }
+}
+
+/** How near an edge a box has to come to count as reaching it, as a fraction of the canvas. */
+private const val SPAN_SLACK = 0.01f
 
 /**
  * The layout to draw on an area of [width]×[height]: the alternate when there is one and the area

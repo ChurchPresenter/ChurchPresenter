@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -41,6 +42,8 @@ internal fun ImageSourceContent(
     when (val loaded = picture) {
         ScenePicture.Loading -> Box(modifier.fillMaxSize())
         is ScenePicture.Ready -> {
+            // Fill crops the picture to its box; the crop is wherever the layout puts it.
+            val crop = BiasAlignment(source.transform.cropX * 2f - 1f, source.transform.cropY * 2f - 1f)
             val scale = when (source.contentScale) {
                 "FILL" -> ContentScale.Crop
                 "STRETCH" -> ContentScale.FillBounds
@@ -51,6 +54,7 @@ internal fun ImageSourceContent(
                 painter = BitmapPainter(loaded.bitmap),
                 contentDescription = source.name,
                 contentScale = scale,
+                alignment = if (source.contentScale == "FILL") crop else Alignment.Center,
                 modifier = modifier.fillMaxSize()
             )
         }

@@ -205,9 +205,14 @@ internal fun EditorCanvas(
         modifier = modifier,
         scene = layout.scene,
         selectedSourceId = selectedSourceId,
-        onSourceSelected = { sceneViewModel.selectSource(it) },
+        onSourceSelected = {
+            sceneViewModel.selectSource(it)
+            // The Properties panel follows the canvas pressed: its numbers are this layout's.
+            if (it != null) sceneViewModel.editLayout(layout.isAlternate)
+        },
         onTransformChanged = { sourceId, transform ->
             sceneViewModel.updateTransform(sourceId, transform, alternate = layout.isAlternate)
+            sceneViewModel.editLayout(layout.isAlternate)
         },
         isInteractive = true,
         activeTool = activeTool,
