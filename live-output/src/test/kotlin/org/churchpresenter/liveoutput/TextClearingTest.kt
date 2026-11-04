@@ -106,4 +106,113 @@ class TextClearingTest {
         manager.setDisplayedAnnouncementText("09:59")
         assertTrue(manager.textCleared)
     }
+
+    @Test
+    fun `going live again brings back the same line`() {
+        singing("Amazing grace")
+        manager.clearTextOnly()
+
+        manager.previewBus.present(Presenting.LYRICS)
+        assertFalse(manager.textCleared)
+    }
+
+    @Test
+    fun `going live again brings back the same verse`() {
+        manager.setPresentingMode(Presenting.BIBLE)
+        manager.setDisplayedVerses(listOf(verse(16)))
+        manager.clearTextOnly()
+
+        manager.previewBus.present(Presenting.BIBLE)
+        assertFalse(manager.textCleared)
+    }
+
+    @Test
+    fun `going live again brings back the same question`() {
+        manager.setDisplayedQuestion(Question(id = "q1", text = "Why?", timestamp = 0))
+        manager.setPresentingMode(Presenting.QA)
+        manager.clearTextOnly()
+
+        manager.previewBus.present(Presenting.QA)
+        assertFalse(manager.hidesQuestion())
+    }
+
+    @Test
+    fun `going live again brings back the same dictionary entry`() {
+        manager.setDisplayedDictionaryEntry(entry("H430"))
+        manager.setPresentingMode(Presenting.DICTIONARY)
+        manager.clearTextOnly()
+
+        manager.previewBus.present(Presenting.DICTIONARY)
+        assertFalse(manager.textCleared)
+    }
+
+    @Test
+    fun `going live again brings back the same announcement`() {
+        manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        manager.clearTextOnly()
+        assertTrue(manager.textCleared)
+
+        manager.previewBus.present(Presenting.ANNOUNCEMENTS)
+        assertFalse(manager.textCleared)
+    }
+
+    @Test
+    fun `an overlay with no text going live leaves the text cleared`() {
+        singing("Amazing grace")
+        manager.clearTextOnly()
+
+        manager.previewBus.present(Presenting.LOWER_THIRD)
+        assertTrue(manager.textCleared)
+    }
+
+    @Test
+    fun `a new announcement shows over cleared text whichever way it arrives`() {
+        singing("Amazing grace")
+        manager.clearTextOnly()
+
+        manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        assertFalse(manager.textCleared)
+    }
+
+    @Test
+    fun `the announcement on air reporting itself live again stays cleared`() {
+        manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        manager.clearTextOnly()
+
+        manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        assertTrue(manager.textCleared)
+    }
+
+    @Test
+    fun `a timer on air goes live again past preview mode and shows`() {
+        manager.setAnnouncementTickerLive(true)
+        manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        manager.previewBus.setEnabled(true)
+        manager.clearTextOnly()
+
+        manager.previewBus.present(Presenting.ANNOUNCEMENTS)
+        assertFalse(manager.textCleared)
+    }
+
+    @Test
+    fun `cueing another song leaves the text on air cleared`() {
+        singing("Amazing grace")
+        manager.previewBus.setEnabled(true)
+        manager.clearTextOnly()
+
+        manager.previewBus.present(Presenting.LYRICS)
+        assertTrue(manager.previewBus.manager.isLive(Presenting.LYRICS))
+        assertTrue(manager.textCleared)
+    }
+
+    @Test
+    fun `taking the announcement already on air shows it`() {
+        manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        manager.previewBus.setEnabled(true)
+        manager.clearTextOnly()
+        manager.previewBus.manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+
+        manager.previewBus.take()
+        assertFalse(manager.textCleared)
+    }
 }

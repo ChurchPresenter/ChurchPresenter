@@ -71,7 +71,7 @@ class PreviewBus internal constructor(internal val program: PresenterManager) {
         when {
             forNewItem(mode) === program -> program.goLive(mode)
             // A timer's text ticks on air; its go-live goes there with it.
-            mode == Presenting.ANNOUNCEMENTS && program.announcementTickerLive.value -> program.setPresentingMode(mode)
+            mode == Presenting.ANNOUNCEMENTS && program.announcementTickerLive.value -> program.goLive(mode)
             manager.isLive(mode) -> Unit
             (mode == Presenting.PICTURES || mode == Presenting.PRESENTATION) && program.isLive(mode) -> Unit
             // The song on air going live again -- a section of it double-clicked -- is a step.
@@ -262,11 +262,12 @@ private fun putOnAir(mode: Presenting, from: PresenterManager, to: PresenterMana
         }
         else -> return
     }
-    to.setPresentingMode(mode)
+    to.goLive(mode)
 }
 
 /** The modes whose words [clearTextOnly] takes off the outputs. */
-private val TEXT_MODES = setOf(Presenting.LYRICS, Presenting.BIBLE, Presenting.QA, Presenting.DICTIONARY)
+private val TEXT_MODES =
+    setOf(Presenting.LYRICS, Presenting.BIBLE, Presenting.QA, Presenting.DICTIONARY, Presenting.ANNOUNCEMENTS)
 
 /** Going live with text brings back what [clearTextOnly] took off, even when it is the same text. */
 private fun PresenterManager.goLive(mode: Presenting) {

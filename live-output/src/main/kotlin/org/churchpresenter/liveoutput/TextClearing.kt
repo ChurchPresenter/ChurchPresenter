@@ -16,9 +16,10 @@ private fun PresenterManager.onAirText(): Any = listOf(
 /**
  * Takes the words on air off every output and leaves the background up -- the pause between verses
  * while the band plays on. A song's or Bible's words go and their background stays; a question or
- * a dictionary entry goes with the card it is drawn on, which is the text's own. A Q&A QR code is
- * not text and stays. Only the text on air now is cleared: the next line, verse, question or entry
- * put live shows as usual.
+ * a dictionary entry goes with the card it is drawn on, which is the text's own, and so does an
+ * announcement. A Q&A QR code is not text and stays. Only the text on air now is cleared: the next
+ * line, verse, question or entry put live shows as usual, and so does anything sent live again. A
+ * running timer's ticks do not count as a next text: it keeps counting, unseen.
  */
 fun PresenterManager.clearTextOnly() {
     textClearedFor.value = onAirText()
