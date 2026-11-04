@@ -77,6 +77,11 @@ internal fun openHeaderReader(resourcePath: String): java.io.BufferedReader {
     return Files.newBufferedReader(path, StandardCharsets.UTF_8)
 }
 
+private val PLACEHOLDER_BOOK_NAME = Regex("""Book \d+""")
+
+/** Whether a header's name for a book says nothing: blank, or the "Book 5" a converter writes without one. */
+fun isPlaceholderBookName(name: String): Boolean = name.isBlank() || PLACEHOLDER_BOOK_NAME.matches(name.trim())
+
 internal fun collectBookHeader(
     line: String,
     headerOrder: MutableList<Int>,

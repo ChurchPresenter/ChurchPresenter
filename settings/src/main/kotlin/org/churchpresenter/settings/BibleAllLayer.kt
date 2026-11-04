@@ -18,7 +18,7 @@ private val layerJson = Json {
 }
 
 /** The fields that say which translation this is, rather than how it looks. */
-private val IDENTITY_FIELDS = setOf("fileName", "customName", "customAbbreviation", "ownStyleKeys")
+private val IDENTITY_FIELDS = setOf("fileName", "customName", "customAbbreviation", "bookNameOverrides", "ownStyleKeys")
 
 private fun BibleTranslationSettings.fields(): JsonObject = layerJson.encodeToJsonElement(this).jsonObject
 
@@ -94,4 +94,10 @@ fun BibleSettings.migrateAllLayer(): BibleSettings {
 
 /** [this] as the layer stores it: a look belonging to no translation. */
 private fun BibleTranslationSettings.asLayer(): BibleTranslationSettings =
-    copy(fileName = "", customName = "", customAbbreviation = "", ownStyleKeys = emptySet())
+    copy(
+        fileName = "",
+        customName = "",
+        customAbbreviation = "",
+        bookNameOverrides = emptyMap(),
+        ownStyleKeys = emptySet(),
+    )

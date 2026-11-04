@@ -30,6 +30,7 @@ fun OutputProfile.defaultBaseline(): OutputProfile {
                     fileName = it.fileName,
                     customName = it.customName,
                     customAbbreviation = it.customAbbreviation,
+                    bookNameOverrides = it.bookNameOverrides,
                 )
             },
         ),

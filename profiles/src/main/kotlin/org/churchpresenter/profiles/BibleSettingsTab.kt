@@ -30,12 +30,13 @@ import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_bible_translation
 import org.churchpresenter.strings.generated.resources.bible_cross_references_enable
-import org.churchpresenter.strings.generated.resources.customize_show_abbreviation
+import org.churchpresenter.strings.generated.resources.bible_abbreviation_short
 import org.churchpresenter.strings.generated.resources.bible_custom_name
 import org.churchpresenter.strings.generated.resources.bible_miscellaneous
 import org.churchpresenter.strings.generated.resources.bible_split_browse_mode
 import org.churchpresenter.strings.generated.resources.bible_translation
 import org.churchpresenter.strings.generated.resources.bible_translations
+import org.churchpresenter.strings.generated.resources.book_names_hint
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.churchpresenter.icons.generated.resources.ic_delete
@@ -118,6 +119,12 @@ fun BibleSettingsTab(
                     moduleTitles = listing?.titles.orEmpty(),
                     scanning = listing == null,
                 )
+                Text(
+                    text = stringResource(Res.string.book_names_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                )
                 MiscellaneousSection(settings, onSettingsChange)
             }
             SettingsScrollbar(scrollState)
@@ -176,6 +183,7 @@ private fun TranslationsSection(
                         bibleFilesInDirectory = bibleFilesInDirectory,
                         bibleFileDisplayNames = bibleFileDisplayNames,
                         moduleTitle = moduleTitles[translation.fileName].orEmpty(),
+                        storageDirectory = settings.bibleSettings.storageDirectory,
                         pickerWidth = pickerWidth,
                         noneStr = noneStr,
                         onSettingsChange = onSettingsChange,
@@ -223,6 +231,7 @@ private fun TranslationRow(
     bibleFilesInDirectory: List<String>,
     bibleFileDisplayNames: Map<String, String>,
     moduleTitle: String,
+    storageDirectory: String,
     pickerWidth: Dp,
     noneStr: String,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -254,7 +263,16 @@ private fun TranslationRow(
                     } else {
                         app.copy(
                             bibleSettings = app.bibleSettings
-                                .updateTranslation(index) { it.copy(fileName = fileName) },
+                                .updateTranslation(index) {
+                                    it.copy(
+                                        fileName = fileName,
+                                        bookNameOverrides = if (fileName == it.fileName) {
+                                            it.bookNameOverrides
+                                        } else {
+                                            emptyMap()
+                                        },
+                                    )
+                                },
                         )
                     }
                 }
@@ -293,6 +311,7 @@ private fun TranslationRow(
         index = index,
         translation = translation,
         moduleTitle = moduleTitle,
+        storageDirectory = storageDirectory,
         onSettingsChange = onSettingsChange,
     )
     }
@@ -315,6 +334,7 @@ private fun TranslationIdentityRow(
     index: Int,
     translation: BibleTranslationSettings,
     moduleTitle: String,
+    storageDirectory: String,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     fun edit(transform: (BibleTranslationSettings) -> BibleTranslationSettings) {
@@ -337,18 +357,33 @@ private fun TranslationIdentityRow(
         SettingsTextField(
             value = translation.customAbbreviation,
             onValueChange = { typed -> edit { it.copy(customAbbreviation = typed) } },
-            label = stringResource(Res.string.customize_show_abbreviation),
+            label = stringResource(Res.string.bible_abbreviation_short),
             // The module's own abbreviation, which is exactly what a blank box falls back to on
             // screen -- so the placeholder is the live value rather than a hint about one.
             placeholder = { Text(defaultTranslationAbbreviation(moduleTitle, translation.fileName)) },
             modifier = Modifier.width(ABBREVIATION_FIELD_WIDTH),
             fillWidth = true,
         )
+        BookNamesButton(
+            translationName = translation.customName.ifBlank {
+                moduleTitle.ifBlank { translation.fileName.substringBeforeLast('.') }
+            },
+            abbreviation = translation.customAbbreviation.ifBlank {
+                defaultTranslationAbbreviation(moduleTitle, translation.fileName)
+            },
+            storageDirectory = storageDirectory,
+            fileName = translation.fileName,
+            overrides = translation.bookNameOverrides,
+            onSave = { saved -> edit { it.copy(bookNameOverrides = saved) } },
+            modifier = Modifier.width(BOOK_NAMES_KEY_WIDTH),
+        )
     }
 }
 
 /** Wide enough for the longest abbreviation anyone writes; the name beside it takes the rest. */
-private val ABBREVIATION_FIELD_WIDTH = 96.dp
+private val ABBREVIATION_FIELD_WIDTH = 80.dp
+
+private val BOOK_NAMES_KEY_WIDTH = 128.dp
 
 /**
  * The two flags that decide what the live Bible tab itself offers -- content, not appearance, so

@@ -561,6 +561,37 @@
     <!-- Bible Settings -->
     <string name="position">Vāhi</string>
     <string name="bible_custom_name">Iʻoa</string>
+    <string name="bible_abbreviation_short">Poto</string>
+    <string name="book_names">Iʻoa buka</string>
+    <string name="book_names_from_file">Nō te fichier</string>
+    <string name="book_names_edited">%1$d i tauihia</string>
+    <string name="book_names_not_set">ʻAita i faʻataahia</string>
+    <string name="book_names_partly_set">%1$d/66</string>
+    <string name="book_names_custom">Hinaʻaro iho</string>
+    <string name="book_names_hint">Nō roto mai te mau iʻoa buka i te fichier Bibilia mai te mea tei reira. Mai te mea ʻaita, e faʻaʻohipahia te mau iʻoa reo Peretāne e tae noa atu i te taime e faʻataa ai ʻoe i tō ʻoe.</string>
+    <string name="book_names_file_title">E faʻaʻohipa ana i te mau iʻoa nō te fichier Bibilia.</string>
+    <string name="book_names_file_text">Pāpaʻi i roto i te hōʻē rēni nō te mono i te iʻoa o te buka e faʻaitehia. E vai noa te iʻoa o te fichier i te mau rēni ʻāfaʻafaʻa.</string>
+    <string name="book_names_some_title">ʻAita i nehenehe e huti mai i te tahi mau iʻoa buka nō roto mai i teie fichier.</string>
+    <string name="book_names_some_text">Ua ʻitehia te mau iʻoa nō %1$d buka i nià i te 66. E faʻaite te toe i te mau iʻoa reo Peretāne e tae noa atu i te taime e faʻataa ai ʻoe i tō ʻoe.</string>
+    <string name="book_names_no_file_title">ʻAita i nehenehe e huti mai i te mau iʻoa buka nō roto mai i teie fichier.</string>
+    <string name="book_names_no_file_text">E faʻaitehia te mau iʻoa reo Peretāne e tae noa atu i te taime e faʻataa ai ʻoe i tō ʻoe. Pāpaʻi i raro nei.</string>
+    <string name="book_names_failed_title">ʻAita i nehenehe e taio i teie fichier Bibilia.</string>
+    <string name="book_names_failed_text">ʻAita i nehenehe e huti mai i te mau iʻoa buka, nō reira e faʻaitehia te mau iʻoa reo Peretāne. E nehenehe ā ʻoe e faʻataa i tō ʻoe.</string>
+    <string name="book_names_filter_all">Pauroa</string>
+    <string name="book_names_old_testament">Faufaa Tahito</string>
+    <string name="book_names_new_testament">Faufaa Apī</string>
+    <string name="book_names_overridden">Monohia</string>
+    <string name="book_names_find">ʻImi i te buka</string>
+    <string name="book_names_book">Buka</string>
+    <string name="book_names_show_as">Faʻaite mai</string>
+    <string name="book_names_no_match">ʻAita e buka e tūʻati.</string>
+    <string name="book_names_use_file_name">Faʻaʻohipa i te iʻoa o te fichier</string>
+    <string name="book_names_use_default">Faʻaʻohipa i te iʻoa mātāmua</string>
+    <string name="book_names_one_override">1 mono</string>
+    <string name="book_names_overrides">%1$d mono</string>
+    <string name="book_names_no_overrides">ʻAita e mono</string>
+    <string name="book_names_no_names_set">ʻAita e iʻoa i faʻataahia</string>
+    <string name="book_names_clear">Tāmā i te mau mono</string>
 
     <!-- Dialog Messages -->
     <string name="confirm_delete">Haʻapāpū i te haʻamoʻeraʻa</string>

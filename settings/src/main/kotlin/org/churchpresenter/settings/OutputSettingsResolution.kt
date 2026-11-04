@@ -51,7 +51,7 @@ const val BIBLE_STACK_KEY = "translations"
  * What the document keeps of each translation in the stack: which module it is, and what this
  * church calls it. How it looks is each profile's.
  */
-val BIBLE_TRANSLATION_GLOBAL_KEYS = setOf("fileName", "customName", "customAbbreviation")
+val BIBLE_TRANSLATION_GLOBAL_KEYS = setOf("fileName", "customName", "customAbbreviation", "bookNameOverrides")
 
 /**
  * The Bible's keep-list projection ([styleTree]), with the translation *stack* still the document's.
@@ -71,6 +71,7 @@ internal fun BibleSettings.withSparseBibleOverride(styleTree: JsonObject?): Bibl
             styled.copy(
                 customName = global.customName,
                 customAbbreviation = global.customAbbreviation,
+                bookNameOverrides = global.bookNameOverrides,
             )
         },
     )

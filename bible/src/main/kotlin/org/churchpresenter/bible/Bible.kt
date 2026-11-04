@@ -83,6 +83,7 @@ class Bible {
     // copy of that is the one the parse produced.
     private var titleOverride: String? = null
     private var abbreviationOverride: String? = null
+    private var bookNameOverrides: Map<String, String> = emptyMap()
     private val books = mutableListOf<BibleBook>()
     private val operatorBible = mutableListOf<BibleVerse>()
 
@@ -342,11 +343,11 @@ class Bible {
         val maxBook = state.bookChapterMap.keys.maxOrNull() ?: 0
         val fromVerses = (1..maxBook).filter { it !in headerBookIds && state.bookChapterMap.containsKey(it) }
         for (b in state.headerOrder + fromVerses) {
-            val name = when {
-                state.parsedBookNames.containsKey(b) && b in headerBookIds -> state.parsedBookNames.getValue(b)
-                bookNames.size >= b -> bookNames[b - 1]
-                else -> "Book $b"
-            }
+            val fromHeader = state.parsedBookNames[b]?.takeIf { b in headerBookIds }
+            val name = fromHeader?.takeUnless(::isPlaceholderBookName)
+                ?: bookNames.getOrNull(b - 1)
+                ?: fromHeader
+                ?: "Book $b"
             books.add(BibleBook(
                 book = name,
                 bookId = b.toString(),
@@ -371,7 +372,9 @@ class Bible {
     }
 
     /** The module's books in header order, or empty when nothing has been loaded yet. */
-    fun getBooks(): List<String> = books.map { it.book }
+    fun getBooks(): List<String> = books.map { it.shownName }
+
+    private val BibleBook.shownName: String get() = bookNameOverrides[bookId] ?: book
 
     fun getChapter(book: Int, chapter: Int): ChapterResult {
         val previewIds = mutableListOf<String>()
@@ -452,7 +455,7 @@ class Bible {
     }
 
     private val bookIdToName: Map<String, String> get() =
-        books.associate { it.bookId to it.book }
+        books.associate { it.bookId to it.shownName }
 
     private fun addSearchResult(bv: BibleVerse, bsl: MutableList<BibleSearch>) {
         val bookName = bookIdToName[bv.book.toString()] ?: ""
@@ -489,7 +492,7 @@ class Bible {
         // O(1) lookup via chapterIndex, then find specific verse number
         val bibleVerse = chapterIndex[chapterKey(book, chapter)]
             ?.firstOrNull { it.verseNumber == verseNumber } ?: return null
-        val bookName = books.firstOrNull { it.bookId == book.toString() }?.book ?: "Book $book"
+        val bookName = books.firstOrNull { it.bookId == book.toString() }?.shownName ?: "Book $book"
         return Triple(bookName, bibleVerse.verseText, bibleVerse.verseId)
     }
 
@@ -503,7 +506,7 @@ class Bible {
     /**
      * Returns the book name for the given 1-based book id, or null if not found.
      */
-    fun getBookName(bookId: Int): String? = books.firstOrNull { it.bookId == bookId.toString() }?.book
+    fun getBookName(bookId: Int): String? = books.firstOrNull { it.bookId == bookId.toString() }?.shownName
 
     /**
      * Returns the short form of the book name for the given 1-based book id, or null if not found.
@@ -511,8 +514,11 @@ class Bible {
      * In the module's own language, since it is derived from the name the module gives the book —
      * which is what a reference shown beside this module's verse text has to be written in.
      */
-    fun getBookAbbreviation(bookId: Int): String? =
-        books.firstOrNull { it.bookId == bookId.toString() }?.abbreviation?.takeIf { it.isNotBlank() }
+    fun getBookAbbreviation(bookId: Int): String? {
+        val key = bookId.toString()
+        return bookNameOverrides[key]?.let(::generateAbbreviation)
+            ?: books.firstOrNull { it.bookId == key }?.abbreviation?.takeIf { it.isNotBlank() }
+    }
 
     /**
      * Returns the SPB book ID for the given 0-based display index.
@@ -526,7 +532,8 @@ class Bible {
      * plain book name — e.g. when broadcasting a live verse over Instance Link, where only the name
      * crosses the wire, not this Bible's internal book ID.
      */
-    fun getBookIdByName(name: String): Int? = books.firstOrNull { it.book == name }?.bookId?.toIntOrNull()
+    fun getBookIdByName(name: String): Int? =
+        books.firstOrNull { it.shownName == name || it.book == name }?.bookId?.toIntOrNull()
 
     /**
      * Returns the 0-based display index for the given canonical book ID, or -1 if not found.
@@ -573,7 +580,7 @@ class Bible {
         // incoming code number.
         val codeId = "B%03dC%03dV%03d".format(codeBook, codeChapter, codeVerse)
         codeIndex[codeId]?.let { bv ->
-            val bookName = books.firstOrNull { it.bookId == bv.book.toString() }?.book ?: "Book ${bv.book}"
+            val bookName = books.firstOrNull { it.bookId == bv.book.toString() }?.shownName ?: "Book ${bv.book}"
             return CodeLookupResult(bookName, bv.verseText, bv.verseId, bv.chapter, bv.verseNumber)
         }
 
@@ -621,6 +628,14 @@ class Bible {
     fun applyNameOverride(name: String?, abbreviation: String?) {
         titleOverride = name?.trim()?.takeIf { it.isNotEmpty() }
         abbreviationOverride = abbreviation?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    /** Shows each book id in [overrides] under its name; like a rename, the file stays as it is. */
+    fun applyBookNameOverrides(overrides: Map<Int, String>) {
+        bookNameOverrides = overrides
+            .mapValues { it.value.trim() }
+            .filterValues { it.isNotEmpty() }
+            .mapKeys { it.key.toString() }
     }
 
     companion object {
