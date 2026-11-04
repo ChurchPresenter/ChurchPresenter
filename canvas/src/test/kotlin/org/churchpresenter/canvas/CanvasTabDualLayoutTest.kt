@@ -114,6 +114,31 @@ class CanvasTabDualLayoutTest {
     }
 
     @Test
+    fun `the Properties panel follows the canvas pressed`() {
+        canvasTab(seed = { dualScene(); selectSource(box.id) }) { vm, _ ->
+            onNodeWithTag(alternate).performMouseInput {
+                moveTo(center)
+                press()
+                moveTo(center.copy(x = center.x + 10f))
+                moveTo(center.copy(x = center.x + 20f))
+                release()
+            }
+            waitForIdle()
+            assertEquals(true, vm.editingAlternate.value, "a drag on the portrait canvas edits the portrait layout")
+
+            onNodeWithTag(main).performMouseInput {
+                moveTo(center)
+                press()
+                moveTo(center.copy(x = center.x + 10f))
+                moveTo(center.copy(x = center.x + 20f))
+                release()
+            }
+            waitForIdle()
+            assertEquals(false, vm.editingAlternate.value, "and one on the landscape canvas the landscape one")
+        }
+    }
+
+    @Test
     fun `dragging in the landscape canvas leaves the portrait one alone`() {
         canvasTab(seed = { dualScene(); selectSource(box.id) }) { vm, _ ->
             onNodeWithTag(main).performMouseInput {

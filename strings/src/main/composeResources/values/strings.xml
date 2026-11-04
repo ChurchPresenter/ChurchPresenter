@@ -1393,6 +1393,12 @@
     <string name="canvas_layout_portrait">Portrait %1$s</string>
     <string name="canvas_layout_landscape_short">Landscape</string>
     <string name="canvas_layout_portrait_short">Portrait</string>
+    <string name="canvas_layout_reset">Reset</string>
+    <string name="canvas_layout_reset_tooltip">Put this layer back where it starts in this layout</string>
+    <string name="canvas_fill_canvas">Fill canvas</string>
+    <string name="canvas_crop_position">Crop position</string>
+    <string name="canvas_crop_horizontal">Horizontal</string>
+    <string name="canvas_crop_vertical">Vertical</string>
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Remove the portrait/landscape layout? Its positions will be lost.</string>
     <string name="canvas_add_source">Add source</string>

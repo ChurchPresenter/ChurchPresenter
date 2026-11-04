@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -178,17 +177,17 @@ fun SceneCanvas(
                 if (!source.visible) return@forEach
                 SceneSourceLayer(
                     source = source,
-                    sources = drawn.sources,
                     canvasPx = Size(cw, ch),
                     fontScale = fontScale,
                     isSelected = isInteractive && source.id == selectedSourceId,
                     isInteractive = isInteractive,
                     activeTool = activeTool,
                     onSourceSelected = onSourceSelected,
-                    onTransformChanged = onTransformChanged,
-                    onSnapLines = { activeSnapLines = it },
                 )
             }
+            // The selected layer's grip goes above them all, so a covered layer can still be moved.
+            SelectedSourceGrip(drawn.sources, selectedSourceId.takeIf { isInteractive }, Size(cw, ch), activeTool,
+                onTransformChanged) { activeSnapLines = it }
 
             // Draw snap guide lines
             if (activeSnapLines.isNotEmpty() && cw > 0 && ch > 0) SnapGuides(activeSnapLines)
@@ -369,117 +368,6 @@ private fun DrawingPreview(tool: String, start: Offset, end: Offset, freehand: L
 }
 
 /** One visible source on the canvas: drawn in place, and -- when selected -- dragged, resized and rotated. */
-@Composable
-private fun SceneSourceLayer(
-    source: SceneSource,
-    sources: List<SceneSource>,
-    canvasPx: Size,
-    fontScale: Float,
-    isSelected: Boolean,
-    isInteractive: Boolean,
-    activeTool: String,
-    onSourceSelected: (String?) -> Unit,
-    onTransformChanged: (sourceId: String, SourceTransform) -> Unit,
-    onSnapLines: (List<SnapLine>) -> Unit,
-) {
-    val density = LocalDensity.current
-    val cw = canvasPx.width
-    val ch = canvasPx.height
-    val t = source.transform
-    val currentTransform by rememberUpdatedState(t)
-    val sxDp = with(density) { (t.x * cw).toInt().toDp() }
-    val syDp = with(density) { (t.y * ch).toInt().toDp() }
-    val swDp = with(density) { (t.width * cw).toInt().toDp() }
-    val shDp = with(density) { (t.height * ch).toInt().toDp() }
-
-    val editableForDrag = isSelected && !source.locked && activeTool == "select"
-    Box(
-        modifier = Modifier
-            .offset(sxDp, syDp)
-            .size(width = swDp, height = shDp)
-            // Pointer input BEFORE graphicsLayer so drag is in parent (unrotated) space
-            .then(
-                if (isInteractive && editableForDrag) {
-                    // Selected + unlocked: drag to move with snapping
-                    Modifier.pointerInput(source.id, isSelected) {
-                        var rawX = 0f
-                        var rawY = 0f
-                        detectDragGestures(
-                            onDragStart = {
-                                rawX = currentTransform.x
-                                rawY = currentTransform.y
-                            },
-                            onDragEnd = { onSnapLines(emptyList()) },
-                            onDragCancel = { onSnapLines(emptyList()) },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                if (cw > 0 && ch > 0) {
-                                    val ct = currentTransform
-                                    // Track raw (un-snapped) position so snap doesn't
-                                    // cause drift between cursor and element
-                                    rawX += dragAmount.x / cw
-                                    rawY += dragAmount.y / ch
-
-                                    // Snap logic
-                                    val snapResult = computeSnap(
-                                        SnapBox(rawX, rawY, ct.width, ct.height),
-                                        SnapTargets(sources, source.id, cw, ch),
-                                    )
-                                    onSnapLines(snapResult.snapLines)
-
-                                    onTransformChanged(
-                                        source.id,
-                                        ct.copy(x = snapResult.x, y = snapResult.y)
-                                    )
-                                }
-                            }
-                        )
-                    }
-                } else if (isInteractive && activeTool == "select") {
-                    // Not selected or locked: tap to select only
-                    Modifier.pointerInput(source.id, isSelected) {
-                        detectTapGestures { onSourceSelected(source.id) }
-                    }
-                } else Modifier
-            )
-            .graphicsLayer {
-                rotationZ = t.rotation
-                alpha = t.opacity
-            }
-            .then(
-                if (isSelected) Modifier.border(2.dp, Color.Cyan) else Modifier
-            )
-    ) {
-        SceneSourceRenderer(
-            source = source,
-            fontScale = fontScale,
-            showDiagnostics = isInteractive
-        )
-    }
-
-    // Resize + rotate handles for selected source
-    val resizable = isSelected && !source.locked
-    val hasArea = cw > 0 && ch > 0
-    if (resizable && hasArea && activeTool == "select") {
-        ResizeHandles(
-            transform = t,
-            canvasWidth = cw,
-            canvasHeight = ch,
-            onTransformChanged = { newTransform ->
-                onTransformChanged(source.id, newTransform)
-            }
-        )
-        RotateHandle(
-            transform = t,
-            canvasWidth = cw,
-            canvasHeight = ch,
-            onTransformChanged = { newTransform ->
-                onTransformChanged(source.id, newTransform)
-            }
-        )
-    }
-}
-
 // --- Snap computation ---
 
 internal data class SnapResult(val x: Float, val y: Float, val snapLines: List<SnapLine>)
@@ -625,7 +513,7 @@ internal fun resizeHandles(canvasWidth: Float, canvasHeight: Float): List<Resize
 )
 
 @Composable
-private fun ResizeHandles(
+internal fun ResizeHandles(
     transform: SourceTransform,
     canvasWidth: Float,
     canvasHeight: Float,
@@ -682,7 +570,7 @@ private fun ResizeHandles(
 }
 
 @Composable
-private fun RotateHandle(
+internal fun RotateHandle(
     transform: SourceTransform,
     canvasWidth: Float,
     canvasHeight: Float,

@@ -44,6 +44,13 @@ class SceneViewModel {
     val selectedSource: SceneSource?
         get() = currentScene?.sources?.find { it.id == _selectedSourceId.value }
 
+    /**
+     * Whether the Properties panel shows and edits the selected layer in the scene's second layout
+     * rather than its main one. Follows the canvas last pressed; meaningless with one layout.
+     */
+    internal val _editingAlternate = mutableStateOf(false)
+    val editingAlternate: State<Boolean> = _editingAlternate
+
     init {
         loadScenes()
         if (_scenes.isNotEmpty() && _currentSceneId.value == null) {

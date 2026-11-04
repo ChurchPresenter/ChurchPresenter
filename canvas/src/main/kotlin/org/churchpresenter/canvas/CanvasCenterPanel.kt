@@ -456,6 +456,7 @@ internal fun CanvasTabScope.CanvasPropertiesPanel(sceneViewModel: SceneViewModel
                 modifier = Modifier.fillMaxSize(),
                 appSettings = appSettings,
                 cameraHost = cameraHost,
+                layouts = sceneViewModel.layoutsFor(selectedSource.id),
                 onSourceUpdate = { updatedSource ->
                     sceneViewModel.updateSource(updatedSource.id) { updatedSource }
                 }
