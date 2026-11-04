@@ -35,7 +35,13 @@ fun AppSettings.removeBibleTranslation(index: Int): AppSettings {
         }
 }
 
-/** Moves the translation at [index] by [offset], and follows it in every profile that named it. */
+/**
+ * Moves the translation at [index] by [offset], and follows it in every profile that named it.
+ *
+ * A profile that picked its own translations keeps its own order through the move -- the Profiles
+ * tab is where a room's reading order is set, and a reorder on the Bible tab must not undo it. A
+ * profile showing all of them (an empty selection) follows the stack's new order.
+ */
 fun AppSettings.moveBibleTranslation(index: Int, offset: Int): AppSettings {
     val stack = bibleSettings.translationList()
     val target = index + offset
@@ -141,7 +147,8 @@ private fun AppSettings.remapOutputTranslations(newPositionOf: (Int) -> Int?): A
 private fun OutputProfile.remapped(newPositionOf: (Int) -> Int?): OutputProfile {
     // An empty selection means "all of them", which stays true whatever the stack does.
     if (bibleTranslations.isEmpty()) return this
-    val remapped = bibleTranslations.mapNotNull(newPositionOf).distinct().sorted()
+    // Not sorted: the list is the profile's own drawing order (`BibleLook`), not a set.
+    val remapped = bibleTranslations.mapNotNull(newPositionOf).distinct()
     if (remapped == bibleTranslations) return this
     return if (remapped.isEmpty()) {
         // Every translation this profile named has gone. Letting the selection fall empty would
