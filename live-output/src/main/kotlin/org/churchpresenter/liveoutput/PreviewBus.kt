@@ -69,14 +69,14 @@ class PreviewBus internal constructor(internal val program: PresenterManager) {
      */
     fun present(mode: Presenting) {
         when {
-            forNewItem(mode) === program -> program.setPresentingMode(mode)
+            forNewItem(mode) === program -> program.goLive(mode)
             // A timer's text ticks on air; its go-live goes there with it.
-            mode == Presenting.ANNOUNCEMENTS && program.announcementTickerLive.value -> program.setPresentingMode(mode)
+            mode == Presenting.ANNOUNCEMENTS && program.announcementTickerLive.value -> program.goLive(mode)
             manager.isLive(mode) -> Unit
             (mode == Presenting.PICTURES || mode == Presenting.PRESENTATION) && program.isLive(mode) -> Unit
             // The song on air going live again -- a section of it double-clicked -- is a step.
-            mode == Presenting.LYRICS && songTarget === program -> program.setPresentingMode(mode)
-            mode == Presenting.BIBLE && verseTarget === program -> program.setPresentingMode(mode)
+            mode == Presenting.LYRICS && songTarget === program -> program.goLive(mode)
+            mode == Presenting.BIBLE && verseTarget === program -> program.goLive(mode)
             else -> manager.setPresentingMode(mode)
         }
     }
@@ -262,7 +262,17 @@ private fun putOnAir(mode: Presenting, from: PresenterManager, to: PresenterMana
         }
         else -> return
     }
-    to.setPresentingMode(mode)
+    to.goLive(mode)
+}
+
+/** The modes whose words [clearTextOnly] takes off the outputs. */
+private val TEXT_MODES =
+    setOf(Presenting.LYRICS, Presenting.BIBLE, Presenting.QA, Presenting.DICTIONARY, Presenting.ANNOUNCEMENTS)
+
+/** Going live with text brings back what [clearTextOnly] took off, even when it is the same text. */
+private fun PresenterManager.goLive(mode: Presenting) {
+    if (mode in TEXT_MODES) restoreText()
+    setPresentingMode(mode)
 }
 
 /** Which chapter [verse] is from, as far as telling one passage from another goes. */

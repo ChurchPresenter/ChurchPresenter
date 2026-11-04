@@ -49,4 +49,27 @@ class LivePreviewTextClearingTest {
         waitForIdle()
         onNodeWithText(lyric, substring = true).assertExists()
     }
+
+    @Test
+    fun `the cleared announcement leaves the preview and comes back on go live`() = runComposeUiTest {
+        val announcement = "Coffee after the service"
+        val manager = PresenterManager().apply {
+            setAnnouncementText(announcement)
+            setDisplayedAnnouncementText(announcement)
+            setPresentingMode(Presenting.ANNOUNCEMENTS)
+        }
+        setContent {
+            MaterialTheme { LivePreviewPanel(presenterManager = manager, appSettings = settings) }
+        }
+        waitForIdle()
+        onNodeWithText(announcement, substring = true).assertExists()
+
+        manager.clearTextOnly()
+        waitForIdle()
+        onNodeWithText(announcement, substring = true).assertDoesNotExist()
+
+        manager.previewBus.present(Presenting.ANNOUNCEMENTS)
+        waitForIdle()
+        onNodeWithText(announcement, substring = true).assertExists()
+    }
 }
