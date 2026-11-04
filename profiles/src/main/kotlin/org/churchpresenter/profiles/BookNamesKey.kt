@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_arrow_right
+import org.churchpresenter.sharedui.composables.SCANNING_ROW_TAG
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.book_names
 import org.churchpresenter.strings.generated.resources.book_names_custom
@@ -91,13 +93,14 @@ internal fun BookNamesKey(status: BookNamesStatus?, onClick: () -> Unit, modifie
     } else {
         Modifier
     }
+    val scanning = if (status == null) Modifier.testTag(SCANNING_ROW_TAG) else Modifier
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
         RaisedChip(
             onClick = onClick,
             fill = elevationPalette().key,
             shape = BUTTON_SHAPE,
             enabled = status != null,
-            modifier = modifier.height(BOOK_NAMES_KEY_HEIGHT).then(rim),
+            modifier = modifier.height(BOOK_NAMES_KEY_HEIGHT).then(rim).then(scanning),
             label = {
                 Column(modifier = Modifier.width(BOOK_NAMES_LABEL_WIDTH)) {
                     ColumnCaption(stringResource(Res.string.book_names))
