@@ -149,6 +149,23 @@ class TranslationStackEditsTest {
         assertEquals(listOf(2), after.screen().bibleTranslations)
     }
 
+    @Test
+    fun `a profile's own order survives a move`() {
+        // The screen reads rst above kjv. niv moves to the front; both shift down one, and rst
+        // still comes first on that screen.
+        val after = settings(screenSelection = listOf(1, 0)).moveBibleTranslation(2, -2)
+
+        assertEquals(listOf("niv.spb", "kjv.spb", "rst.spb"), after.stack())
+        assertEquals(listOf(2, 1), after.screen().bibleTranslations, "rst, then kjv")
+    }
+
+    @Test
+    fun `removing a translation keeps the order of what survives`() {
+        val after = settings(screenSelection = listOf(2, 0)).removeBibleTranslation(1)
+
+        assertEquals(listOf(1, 0), after.screen().bibleTranslations, "niv, then kjv")
+    }
+
     // ── Swapping ────────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -159,6 +176,15 @@ class TranslationStackEditsTest {
         assertEquals(listOf("rst.spb", "kjv.spb", "niv.spb"), after.stack())
         assertEquals(listOf(1), after.screen().bibleTranslations)
         assertEquals(listOf(0), after.browserSource().bibleTranslations)
+    }
+
+    @Test
+    fun `the swap button keeps a profile's own order`() {
+        // The screen reads kjv above rst. The Bible tab swaps them in the stack; the screen keeps
+        // kjv first, now at position 1.
+        val after = settings(screenSelection = listOf(0, 1)).swapBibleTranslations()
+
+        assertEquals(listOf(1, 0), after.screen().bibleTranslations, "kjv, then rst")
     }
 
     @Test
