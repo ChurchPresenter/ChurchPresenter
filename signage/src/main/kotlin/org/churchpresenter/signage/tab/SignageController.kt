@@ -106,7 +106,8 @@ class SignageController(
 
     private val folders = StableFolders(store)
 
-    private val features = KnownFeatures()
+    /** What each screen's player said it can do, the last time it connected. */
+    internal val features = KnownFeatures()
 
     /** Starts keeping the screens in step; does nothing when already started. */
     fun start() {
@@ -141,6 +142,9 @@ class SignageController(
 
     /** Each screen's weekly schedule, and how it is mounted. */
     val plans = ScreenPlans(::update)
+
+    /** Shows [message] on the screens it names, in place of any before it; null takes it away. */
+    fun setMessage(message: SignageMessage?) = update { it.copy(message = message) }
 
     /**
      * Empties [screenId]: it plays [ScreenPlan.NOTHING], and once that empty manifest is published

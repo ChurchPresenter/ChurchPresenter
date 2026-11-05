@@ -11,6 +11,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.signage.core.ScheduleBlock
+import org.churchpresenter.signage.core.ScreenMessage
 import org.churchpresenter.signage.core.SignageJson
 import java.io.IOException
 import java.nio.file.Files
@@ -25,6 +26,8 @@ data class SignageSettings(
     val screens: Map<String, ScreenPlan> = emptyMap(),
     /** The playlists added in the tab, in the order they were added. */
     val added: List<AddedPlaylist> = emptyList(),
+    /** The message written over what the screens show; none when null. */
+    val message: SignageMessage? = null,
 ) {
     fun plan(id: String): ScreenPlan = screens[id] ?: ScreenPlan()
 
@@ -67,6 +70,28 @@ data class ScreenPlan(
         fun forChoice(name: String, nothing: String, playlists: List<PlaylistSummary>): String? =
             if (name == nothing) NOTHING else playlists.firstOrNull { it.name == name }?.id
     }
+}
+
+/**
+ * A message for the screens: [text] in a band across the top over what plays, or [fullScreen] in its
+ * place, until [untilMs] (epoch milliseconds; until cleared when null), on the screens in [screenIds]
+ * (every screen when null).
+ */
+@Serializable
+data class SignageMessage(
+    val text: String,
+    val fullScreen: Boolean = false,
+    val untilMs: Long? = null,
+    val screenIds: List<String>? = null,
+) {
+    /** Whether [screenId] is one it goes to. */
+    fun reaches(screenId: String): Boolean = screenIds == null || screenId in screenIds
+
+    /** Whether it still shows at [nowMs]. */
+    fun showsAt(nowMs: Long): Boolean = toScreen().showsAt(nowMs)
+
+    /** What a screen is sent. */
+    fun toScreen(): ScreenMessage = ScreenMessage(text.trim(), fullScreen, untilMs)
 }
 
 /** A file's hash, and the size and time it had when it was hashed. */

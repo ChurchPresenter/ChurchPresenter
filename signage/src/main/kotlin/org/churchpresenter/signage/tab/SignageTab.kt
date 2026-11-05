@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import org.churchpresenter.sharedui.composables.ZoneLabel
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.UrlOpener
+import org.churchpresenter.signage.core.Features
 import org.churchpresenter.signage.core.Orientation
 import org.churchpresenter.signage.core.PowerAction
 import org.churchpresenter.signage.core.ScheduleBlock
@@ -48,6 +50,7 @@ import org.churchpresenter.signage.hub.ScreenLink
 import org.churchpresenter.signage.smugmug.SmugMugSite
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.signage_default_name
+import org.churchpresenter.strings.generated.resources.signage_message_button
 import org.churchpresenter.strings.generated.resources.signage_no_screens
 import org.churchpresenter.strings.generated.resources.signage_no_screens_hint
 import org.churchpresenter.strings.generated.resources.signage_screens
@@ -86,6 +89,7 @@ fun SignageTab(
     // Read so the cards offer an update once a newer release is found.
     val latest by controller.controls.latestRelease.collectAsState()
     var largePreview by remember { mutableStateOf<String?>(null) }
+    var writingMessage by remember { mutableStateOf(false) }
     // One set for the tab's life, so a card whose screen did not change is skipped on recomposition.
     val actions = remember(controller) {
         ScreenActions(
@@ -123,6 +127,8 @@ fun SignageTab(
         Column(modifier = modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 8.dp)) {
             if (!serverRunning) ServerOffBanner(onTurnOnServer)
             val lookingSinceMs = remember(serverRunning) { System.currentTimeMillis() }
+            val messageBar = messageSlot(folder.settings.message, { targets(screens, links, controller) },
+                onWrite = { writingMessage = true }, onClear = { controller.setMessage(null) })
             Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val defaultName = stringResource(Res.string.signage_default_name, screens.size + 1)
                 ScreensColumn(
@@ -141,6 +147,7 @@ fun SignageTab(
                         }
                     },
                     actions = actions,
+                    message = messageBar,
                     modifier = Modifier.weight(SCREENS_WEIGHT).fillMaxSize(),
                 )
                 SignageFolderPanel(
@@ -164,6 +171,69 @@ fun SignageTab(
                     modifier = Modifier.weight(1f).fillMaxSize(),
                 )
             }
+        }
+        if (writingMessage) {
+            ScreenMessageDialog(
+                current = folder.settings.message?.takeIf { it.showsAt(System.currentTimeMillis()) },
+                screens = targets(screens, links, controller),
+                onShow = controller::setMessage,
+                onDismiss = { writingMessage = false },
+            )
+        }
+    }
+}
+
+/** A paired screen a message can go to; [canShow] is false when its player is too old to show one. */
+data class MessageTarget(val id: String, val name: String, val canShow: Boolean)
+
+/** Every paired screen as a message target, and whether its player can show one. */
+private fun targets(
+    screens: List<PairedScreen>,
+    links: Map<String, ScreenLink>,
+    controller: SignageController,
+): List<MessageTarget> = screens.map { screen ->
+    val features = links[screen.id]?.features?.takeIf { it.isNotEmpty() } ?: controller.features.of(screen.id)
+    // A screen never heard from yet is offered: it may well be new enough.
+    MessageTarget(screen.id, screen.name, canShow = features.isEmpty() || Features.MESSAGE in features)
+}
+
+/**
+ * [MessageBar] for the screens [targets] lists, or nothing at all (not even a gap in the list) when
+ * there is no screen to send to and no [message] showing.
+ */
+private fun messageSlot(
+    message: SignageMessage?,
+    targets: () -> List<MessageTarget>,
+    onWrite: () -> Unit,
+    onClear: () -> Unit,
+): (@Composable () -> Unit)? {
+    val showing = message?.showsAt(System.currentTimeMillis()) == true
+    return if (showing || targets().isNotEmpty()) {
+        { MessageBar(message, targets(), onWrite, onClear) }
+    } else {
+        null
+    }
+}
+
+/** The message showing on the screens with Change and Clear, or the button that writes one. */
+@Composable
+private fun MessageBar(
+    message: SignageMessage?,
+    targets: List<MessageTarget>,
+    onWrite: () -> Unit,
+    onClear: () -> Unit,
+) {
+    val now = System.currentTimeMillis()
+    if (message != null && message.showsAt(now)) {
+        ActiveMessageCard(message, targets, onEdit = onWrite, onClear = onClear, nowMs = now)
+        return
+    }
+    if (targets.isEmpty()) return
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        RingedGhostButton(onClick = onWrite) {
+            Icon(Icons.Filled.Campaign, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(Res.string.signage_message_button))
         }
     }
 }
@@ -257,11 +327,13 @@ private fun ScreensColumn(
     screens: List<ScreenRowState>,
     pendingCards: @Composable () -> Unit,
     actions: ScreenActions,
+    message: (@Composable () -> Unit)?,
     modifier: Modifier,
 ) {
     Column(modifier = modifier) {
         ZoneLabel(stringResource(Res.string.signage_screens), modifier = Modifier.padding(start = 8.dp, bottom = 6.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxSize()) {
+            message?.let { item { it() } }
             item { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { pendingCards() } }
             items(screens, key = { it.screen.id }) { row -> ScreenCard(row, actions) }
             if (screens.isEmpty()) item { NoScreens() }

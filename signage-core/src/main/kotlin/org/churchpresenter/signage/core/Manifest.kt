@@ -62,11 +62,31 @@ data class ScreenSettings(
      * one has none.
      */
     @EncodeDefault(EncodeDefault.Mode.NEVER) val kioskGesturePlaylistId: String? = null,
+    /**
+     * A message written over whatever the screen shows, from ChurchPresenter's Signage tab, until it
+     * ends or is cleared; none when null. Only on a player with [Features.MESSAGE].
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val message: ScreenMessage? = null,
 ) {
     companion object {
         const val DEFAULT_WIDTH = 1920
         const val DEFAULT_HEIGHT = 1080
     }
+}
+
+/**
+ * A message for the screen: [text] in a band across the top over what plays, or [fullScreen] in place
+ * of it, until [untilMs] (epoch milliseconds) or, when that is null, until it is cleared.
+ */
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
+data class ScreenMessage(
+    val text: String,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val fullScreen: Boolean = false,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val untilMs: Long? = null,
+) {
+    /** Whether it still shows at [nowMs]: it has words, and has not run out. */
+    fun showsAt(nowMs: Long): Boolean = text.isNotBlank() && (untilMs == null || nowMs < untilMs)
 }
 
 @Serializable

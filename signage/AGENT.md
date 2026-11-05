@@ -69,6 +69,7 @@ gives the same `SignageHub` to both.
   not time (a share keeps times only to a second or two). This computer's caches (`hashes.json`,
   player builds) stay in its app data folder.
 
+- **A message for the screens** (`SignageSettings.message`, written in `ScreenMessageDialog.kt`) goes in each named screen's manifest (`screen.message`) only for a player that lists `message`, and not once it has run out; the player keeps it while ChurchPresenter is away. Its card and the Message button sit at the top of the screens column, which has no slot at all when there is neither a screen nor a message.
 - **A playlist of a kind this version cannot read is set aside, never fatal**: `SignageStore` reads each playlist on its own, plays the rest, and writes the unread ones back unchanged, so a newer ChurchPresenter sharing the folder keeps its playlists and an older one does not empty every screen.
 - **A SmugMug slideshow is a folder ChurchPresenter fills** (`FolderBacked`): read, hashed and sent as a picked folder is. Its photos are downloaded, not copied, so removing it deletes them outright (no Trash), and a pick that finishes after its removal deletes what it made. The API key never goes in a manifest, a log or a shared export.
 
