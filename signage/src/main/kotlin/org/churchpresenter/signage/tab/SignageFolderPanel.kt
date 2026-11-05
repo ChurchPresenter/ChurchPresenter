@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -32,46 +34,60 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.composables.ZoneLabel
 import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.signage.smugmug.SmugMugState
+import org.churchpresenter.signage.smugmug.SmugMugSync
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.signage_add
 import org.churchpresenter.strings.generated.resources.signage_add_file
 import org.churchpresenter.strings.generated.resources.signage_add_folder
 import org.churchpresenter.strings.generated.resources.signage_add_link
+import org.churchpresenter.strings.generated.resources.signage_add_rotation
+import org.churchpresenter.strings.generated.resources.signage_add_smugmug
 import org.churchpresenter.strings.generated.resources.signage_choose_file
 import org.churchpresenter.strings.generated.resources.signage_choose_playlist_folder
 import org.churchpresenter.strings.generated.resources.signage_copy_failed
 import org.churchpresenter.strings.generated.resources.signage_copying
-import org.churchpresenter.strings.generated.resources.signage_remove_copy_for_good
-import org.churchpresenter.strings.generated.resources.signage_remove_copy_trash
 import org.churchpresenter.strings.generated.resources.signage_file_missing
+import org.churchpresenter.strings.generated.resources.signage_file_title_edit
+import org.churchpresenter.strings.generated.resources.signage_folder_counts
 import org.churchpresenter.strings.generated.resources.signage_folder_missing
 import org.churchpresenter.strings.generated.resources.signage_folder_title_edit
+import org.churchpresenter.strings.generated.resources.signage_link_title_edit
 import org.churchpresenter.strings.generated.resources.signage_no_playlists
-import org.churchpresenter.strings.generated.resources.signage_reading_playlists
 import org.churchpresenter.strings.generated.resources.signage_pictures_and_videos
+import org.churchpresenter.strings.generated.resources.signage_playlists
+import org.churchpresenter.strings.generated.resources.signage_reading_playlists
 import org.churchpresenter.strings.generated.resources.signage_remove
+import org.churchpresenter.strings.generated.resources.signage_remove_copy_for_good
+import org.churchpresenter.strings.generated.resources.signage_remove_copy_trash
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist_text
 import org.churchpresenter.strings.generated.resources.signage_remove_playlist_title
-import org.churchpresenter.strings.generated.resources.signage_link_title_edit
-import org.churchpresenter.strings.generated.resources.signage_file_title_edit
-import org.churchpresenter.strings.generated.resources.signage_rotation_title_edit
-import org.churchpresenter.strings.generated.resources.signage_add_rotation
-import org.churchpresenter.strings.generated.resources.signage_rotation_summary
 import org.churchpresenter.strings.generated.resources.signage_rotation_minutes
 import org.churchpresenter.strings.generated.resources.signage_rotation_seconds_short
-import org.churchpresenter.strings.generated.resources.signage_folder_counts
-import org.churchpresenter.strings.generated.resources.signage_playlists
+import org.churchpresenter.strings.generated.resources.signage_rotation_summary
+import org.churchpresenter.strings.generated.resources.signage_rotation_title_edit
+import org.churchpresenter.strings.generated.resources.signage_smugmug_failed
+import org.churchpresenter.strings.generated.resources.signage_smugmug_no_key
+import org.churchpresenter.strings.generated.resources.signage_smugmug_pick_now
+import org.churchpresenter.strings.generated.resources.signage_smugmug_picked
+import org.churchpresenter.strings.generated.resources.signage_smugmug_picking
+import org.churchpresenter.strings.generated.resources.signage_smugmug_title_edit
 import org.jetbrains.compose.resources.stringResource
 
 /** The playlists screens can play, and the Add menu that makes them. */
@@ -113,6 +129,7 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
     var open by remember { mutableStateOf(false) }
     var addingLink by remember { mutableStateOf(false) }
     var addingRotation by remember { mutableStateOf(false) }
+    var addingSmugMug by remember { mutableStateOf(false) }
     val chooseTitle = stringResource(Res.string.signage_choose_file)
     val chooseFolderTitle = stringResource(Res.string.signage_choose_playlist_folder)
     val filterName = stringResource(Res.string.signage_pictures_and_videos)
@@ -153,6 +170,14 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
                 },
             )
             DropdownMenuItem(
+                text = { Text(stringResource(Res.string.signage_add_smugmug)) },
+                leadingIcon = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
+                onClick = {
+                    open = false
+                    addingSmugMug = true
+                },
+            )
+            DropdownMenuItem(
                 text = { Text(stringResource(Res.string.signage_add_folder)) },
                 leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },
                 onClick = {
@@ -181,6 +206,17 @@ private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
             onDismiss = { addingRotation = false },
         )
     }
+    if (addingSmugMug) {
+        SmugMugDialog(
+            initial = null,
+            apiKey = actions.smugMug.apiKey,
+            onApiKey = actions.smugMug.onApiKey,
+            lookUp = actions.smugMug.lookUp,
+            onSave = actions.onSaveSmugMug,
+            onDismiss = { addingSmugMug = false },
+            openUrl = actions.smugMug.openUrl,
+        )
+    }
 }
 
 @Composable
@@ -205,7 +241,15 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
         }
         LazyColumn {
             items(state.playlists, key = { it.id }) { playlist ->
-                PlaylistRow(playlist, onRename = { renaming = playlist }, onDelete = { deleting = playlist })
+                PlaylistRow(
+                    playlist,
+                    slideshow = state.slideshows[playlist.id],
+                    picking = playlist.id in state.picking,
+                    onRename = { renaming = playlist },
+                    onDelete = { deleting = playlist },
+                    onPickNew = { actions.onPickNewPhotos(playlist.id) },
+                    clock = actions.clock,
+                )
                 if (playlist != state.playlists.last()) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
@@ -240,6 +284,15 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
             onSave = { name, seconds -> actions.onEditFolder(editing.id, name, seconds) },
             onDismiss = { renaming = null },
         )
+        is SmugMugPlaylist -> SmugMugDialog(
+            initial = editing,
+            apiKey = actions.smugMug.apiKey,
+            onApiKey = actions.smugMug.onApiKey,
+            lookUp = actions.smugMug.lookUp,
+            onSave = actions.onSaveSmugMug,
+            onDismiss = { renaming = null },
+            openUrl = actions.smugMug.openUrl,
+        )
         is RotationPlaylist, null -> Unit
     }
     deleting?.let { playlist ->
@@ -260,9 +313,20 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
     }
 }
 
-/** One playlist: its kind's icon and name, its folder, file or address under it, and a folder's counts beside it. */
+/**
+ * One playlist: its kind's icon and name, its folder, file or address under it, and a folder's counts
+ * beside it; a SmugMug slideshow says how its last pick went ([slideshow], [picking]) and can pick anew.
+ */
 @Composable
-private fun PlaylistRow(playlist: PlaylistSummary, onRename: () -> Unit, onDelete: () -> Unit) {
+private fun PlaylistRow(
+    playlist: PlaylistSummary,
+    onRename: () -> Unit,
+    onDelete: () -> Unit,
+    slideshow: SmugMugState? = null,
+    picking: Boolean = false,
+    onPickNew: () -> Unit = {},
+    clock: Clock = Clock.systemDefaultZone(),
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -274,7 +338,17 @@ private fun PlaylistRow(playlist: PlaylistSummary, onRename: () -> Unit, onDelet
             modifier = Modifier.size(20.dp),
         )
         Spacer(Modifier.width(12.dp))
-        PlaylistText(playlist, Modifier.weight(1f))
+        if (playlist.kind == SourceKind.SMUGMUG) {
+            SlideshowText(playlist, slideshow, picking, clock, Modifier.weight(1f))
+            TooltipIconButton(
+                painter = rememberVectorPainter(Icons.Filled.Refresh),
+                text = stringResource(Res.string.signage_smugmug_pick_now),
+                onClick = onPickNew,
+                enabled = !picking,
+            )
+        } else {
+            PlaylistText(playlist, Modifier.weight(1f))
+        }
         if (playlist.kind == SourceKind.FOLDER && !playlist.missing) {
             Text(
                 stringResource(Res.string.signage_folder_counts, playlist.pictures, playlist.videos, playlist.seconds),
@@ -289,6 +363,7 @@ private fun PlaylistRow(playlist: PlaylistSummary, onRename: () -> Unit, onDelet
                     SourceKind.WEB, SourceKind.STREAM -> Res.string.signage_link_title_edit
                     SourceKind.ROTATION -> Res.string.signage_rotation_title_edit
                     SourceKind.FOLDER -> Res.string.signage_folder_title_edit
+                    SourceKind.SMUGMUG -> Res.string.signage_smugmug_title_edit
                     SourceKind.PICTURE, SourceKind.VIDEO -> Res.string.signage_file_title_edit
                 },
             ),
@@ -338,6 +413,53 @@ private fun iconOf(kind: SourceKind): ImageVector = when (kind) {
     SourceKind.WEB -> Icons.Filled.Language
     SourceKind.STREAM -> Icons.Filled.LiveTv
     SourceKind.ROTATION -> Icons.Filled.Repeat
+    SourceKind.SMUGMUG -> Icons.Filled.PhotoLibrary
+}
+
+/**
+ * A SmugMug slideshow's name, and under it how its photos stand: being picked, how many and when, or
+ * (in red) why the last pick failed, with the set it keeps playing.
+ */
+@Composable
+private fun SlideshowText(
+    playlist: PlaylistSummary,
+    state: SmugMugState?,
+    picking: Boolean,
+    clock: Clock,
+    modifier: Modifier,
+) {
+    val failure = state?.error
+    val photos = playlist.pictures
+    val line = when {
+        picking -> stringResource(Res.string.signage_smugmug_picking)
+        failure == SmugMugSync.NO_KEY -> stringResource(Res.string.signage_smugmug_no_key)
+        failure != null -> stringResource(Res.string.signage_smugmug_failed, failure, photos)
+        state?.pickedAtMs != null -> stringResource(
+            Res.string.signage_smugmug_picked, photos, playlist.seconds, timeOf(state.pickedAtMs, clock),
+        )
+        else -> playlist.detail.orEmpty()
+    }
+    Column(modifier = modifier) {
+        Text(playlist.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(
+            line,
+            style = MaterialTheme.typography.bodySmall,
+            color = with(MaterialTheme.colorScheme) { if (failure != null && !picking) error else onSurfaceVariant },
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/** [ms] as a time of day, or a date and time when it was not today by [clock]. */
+private fun timeOf(ms: Long, clock: Clock): String {
+    val at = Instant.ofEpochMilli(ms).atZone(clock.zone)
+    val style = if (at.toLocalDate() == LocalDate.now(clock)) {
+        DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+    } else {
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+    }
+    return style.format(at)
 }
 
 private const val SECONDS_PER_MINUTE = 60

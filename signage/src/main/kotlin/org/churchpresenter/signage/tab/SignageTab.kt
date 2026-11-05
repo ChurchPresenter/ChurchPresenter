@@ -1,6 +1,5 @@
 package org.churchpresenter.signage.tab
 
-import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,15 +31,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import java.io.IOException
+import java.nio.file.Path
+import java.time.Clock
 import kotlinx.coroutines.delay
+import org.churchpresenter.sharedui.composables.ZoneLabel
+import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.signage.core.Orientation
 import org.churchpresenter.signage.core.PowerAction
 import org.churchpresenter.signage.core.ScheduleBlock
 import org.churchpresenter.signage.hub.LatestRelease
 import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.ScreenLink
-import org.churchpresenter.sharedui.composables.ZoneLabel
-import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.signage.smugmug.SmugMugSite
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.signage_default_name
 import org.churchpresenter.strings.generated.resources.signage_no_screens
@@ -48,11 +53,9 @@ import org.churchpresenter.strings.generated.resources.signage_no_screens_hint
 import org.churchpresenter.strings.generated.resources.signage_screens
 import org.churchpresenter.strings.generated.resources.signage_server_off
 import org.churchpresenter.strings.generated.resources.signage_turn_on_server
+import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.sharedui.filechooser.FileChooser
-import org.churchpresenter.sharedui.utils.UrlOpener
-import java.nio.file.Path
 
 /**
  * The Signage tab: the lobby screens this ChurchPresenter owns, the ones asking to
@@ -63,6 +66,8 @@ import java.nio.file.Path
  *   through it.
  * @param onTurnOnServer turns the companion server on.
  * @param desktop the file and folder chooser, file manager and Trash the tab uses.
+ * @param smugMugApiKey the SmugMug API key the slideshows read with, this computer's own.
+ * @param onSmugMugApiKey saves a SmugMug API key typed into a slideshow's dialog.
  */
 @Composable
 fun SignageTab(
@@ -71,6 +76,8 @@ fun SignageTab(
     onTurnOnServer: () -> Unit,
     modifier: Modifier = Modifier,
     desktop: SignageDesktop = remember { SignageDesktop() },
+    smugMugApiKey: String = "",
+    onSmugMugApiKey: (String) -> Unit = {},
 ) {
     val folder by controller.state.collectAsState()
     val screens by controller.screens.collectAsState()
@@ -150,6 +157,9 @@ fun SignageTab(
                         onEditFile = controller.added::updateFile,
                         onEditFolder = controller.added::updateFolder,
                         onLocate = controller.added::locate,
+                        onSaveSmugMug = controller.slideshows::save,
+                        onPickNewPhotos = controller.slideshows::pickNewPhotos,
+                        smugMug = SmugMugAccess(smugMugApiKey, onSmugMugApiKey, controller.slideshows::lookUp),
                     ),
                     modifier = Modifier.weight(1f).fillMaxSize(),
                 )
@@ -184,6 +194,24 @@ internal class FolderActions(
     val onEditFolder: (id: String, name: String, pictureSeconds: Int) -> Unit = { _, _, _ -> },
     /** Where a playlist's copy is on this computer, to open it in the file manager. */
     val onLocate: (id: String) -> Path? = { null },
+    /** Adds a SmugMug slideshow, or saves one edited under its id. */
+    val onSaveSmugMug: (SmugMugPlaylist) -> Unit = {},
+    /** Has a SmugMug slideshow pick a new set of photos now. */
+    val onPickNewPhotos: (id: String) -> Unit = {},
+    val smugMug: SmugMugAccess = SmugMugAccess(),
+    /** What a slideshow's "picked at" time is read against: this computer's clock and zone. */
+    val clock: Clock = Clock.systemDefaultZone(),
+)
+
+/**
+ * What the SmugMug dialog needs of the app: this computer's API key and where to save it, a lookup of
+ * a site's account, and a way to open SmugMug's page for a key.
+ */
+internal class SmugMugAccess(
+    val apiKey: String = "",
+    val onApiKey: (String) -> Unit = {},
+    val lookUp: suspend (site: String, key: String) -> SmugMugSite = { _, _ -> throw IOException("No lookup") },
+    val openUrl: (String) -> Unit = { UrlOpener.open(it) },
 )
 
 /**

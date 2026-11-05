@@ -18,6 +18,8 @@ import kotlin.io.path.nameWithoutExtension
 class AddedPlaylistEdits internal constructor(
     private val update: (then: () -> Unit, change: (SignageSettings) -> SignageSettings) -> Unit,
     private val media: MediaCopies,
+    /** Deletes a removed SmugMug slideshow's photos. */
+    private val forget: (SmugMugPlaylist) -> Unit = {},
 ) {
     /** Adds [link] as a playlist. */
     fun addLink(link: NewLink) = update({}) { settings ->
@@ -132,7 +134,12 @@ class AddedPlaylistEdits internal constructor(
      */
     fun remove(id: String) {
         var gone: String? = null
-        update({ gone?.let(media::discard) }) { settings ->
+        var slideshow: SmugMugPlaylist? = null
+        update({
+            gone?.let(media::discard)
+            slideshow?.let(forget)
+        }) { settings ->
+            slideshow = settings.added.firstOrNull { it.id == id } as? SmugMugPlaylist
             val left = settings.withoutAdded(id)
             // A copy another playlist still plays stays.
             gone = settings.added.firstOrNull { it.id == id }?.copyPath()?.takeIf { left.unused(it) }
@@ -172,7 +179,8 @@ internal class MediaCopies(
 internal fun AddedPlaylist.copyPath(): String? = when (this) {
     is FilePlaylist -> path
     is PickedFolderPlaylist -> path
-    is LinkPlaylist, is RotationPlaylist -> null
+    // A slideshow's photos are downloaded, not copied: removing it deletes them (SmugMugSync.forget).
+    is LinkPlaylist, is RotationPlaylist, is SmugMugPlaylist -> null
 }
 
 /** Whether no playlist in [this] plays [path]. */

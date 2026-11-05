@@ -122,7 +122,7 @@ class SignageStore(private val dir: Path, private val cacheDir: Path = dir) {
      */
     fun hashAdded(entry: AddedPlaylist): HashedPlaylist = when (entry) {
         is FilePlaylist -> HashedPlaylist(entry, entry.currentFile(dir)?.let { mapOf(it to hashOf(it)) }.orEmpty())
-        is PickedFolderPlaylist -> hashFolder(SignageFolder.read(entry, dir))
+        is FolderBacked -> hashFolder(SignageFolder.read(entry, dir))
         is LinkPlaylist, is RotationPlaylist -> HashedPlaylist(entry)
     }
 

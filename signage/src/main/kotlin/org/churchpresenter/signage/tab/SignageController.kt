@@ -17,6 +17,9 @@ import org.churchpresenter.signage.hub.PairedScreen
 import org.churchpresenter.signage.hub.PendingScreen
 import org.churchpresenter.signage.hub.ScreenLink
 import org.churchpresenter.signage.hub.SignageHub
+import org.churchpresenter.signage.smugmug.JdkSmugMugHttp
+import org.churchpresenter.signage.smugmug.SmugMugHttp
+import org.churchpresenter.signage.smugmug.SmugMugState
 import java.nio.file.Path
 import java.time.ZoneId
 import kotlin.io.path.name
@@ -51,6 +54,10 @@ data class SignageFolderState(
     val copying: List<String> = emptyList(),
     /** The name of the last copy that failed; cleared when another starts. */
     val copyFailed: String? = null,
+    /** How each SmugMug slideshow's last pick went, by playlist id. */
+    val slideshows: Map<String, SmugMugState> = emptyMap(),
+    /** The SmugMug slideshows picking new photos now. */
+    val picking: Set<String> = emptySet(),
 )
 
 /**
@@ -74,6 +81,9 @@ class SignageController(
     private val diagnostics: StateFlow<Boolean> = MutableStateFlow(true),
     /** This computer's own cache (file hashes), kept out of the shared folder. */
     cacheDir: Path = storeDir,
+    /** The SmugMug API key the slideshows read with; blank when none is set. */
+    private val smugMugApiKey: StateFlow<String> = MutableStateFlow(""),
+    smugMugHttp: SmugMugHttp = JdkSmugMugHttp(),
 ) {
     private val store = SignageStore(storeDir, cacheDir)
     private val io = Dispatchers.IO.limitedParallelism(1)
@@ -119,8 +129,15 @@ class SignageController(
         settings.copy(screens = settings.screens + (screenId to settings.plan(screenId).copy(playlistId = playlistId)))
     }
 
+    /** The SmugMug slideshows' photos, picked into the signage folder. */
+    val slideshows = SlideshowPicks(storeDir, smugMugApiKey, smugMugHttp, _state, ::update)
+
     /** Adding, renaming and removing the playlists, copying what they play into the signage folder. */
-    val added = AddedPlaylistEdits(::update, MediaCopies(storeDir, scope, _state))
+    val added = AddedPlaylistEdits(
+        ::update,
+        MediaCopies(storeDir, scope, _state),
+        forget = { slideshow -> scope.launch(Dispatchers.IO) { slideshows.forget(slideshow) } },
+    )
 
     /** Each screen's weekly schedule, and how it is mounted. */
     val plans = ScreenPlans(::update)
@@ -146,6 +163,7 @@ class SignageController(
             _state.update { it.copy(settings = settings) }
             publishAll()
             then()
+            slideshows.wake()
         }
     }
 
@@ -162,11 +180,15 @@ class SignageController(
         launch { hub.registry.screens.collect { publishAll() } }
         launch { diagnostics.collect { publishAll() } }
         launch { hub.links.links.collect { links -> if (features.remember(links)) publishAll() } }
+        // Off the controller's one thread: a pick downloads for a while, and the folders go on being read.
+        launch(Dispatchers.IO) { slideshows.run() }
+        // A key typed in tries every slideshow again at once.
+        launch { smugMugApiKey.collect { slideshows.wake() } }
         var lastRead: Any? = null
         var published: Any? = null
         while (true) {
             val added = _state.value.settings.added
-            val read = added.filterIsInstance<PickedFolderPlaylist>().map { SignageFolder.read(it, storeDir) }
+            val read = added.filterIsInstance<FolderBacked>().map { SignageFolder.read(it, storeDir) }
             val addedFiles = added.filterIsInstance<FilePlaylist>().map { it.currentFile(storeDir) }
             val snapshot = read to addedFiles
             if (snapshot == lastRead && snapshot != published) {
@@ -196,8 +218,13 @@ class SignageController(
      * that did not change is not sent.
      */
     private fun publishAll() {
-        val hashed = _state.value.settings.added.map(folders::hashedOf)
-        _state.update { it.copy(playlists = hashed.map { it.addedSummary() }) }
+        val added = _state.value.settings.added
+        val hashed = added.map(folders::hashedOf)
+        val summaries = hashed.zip(added) { playlist, entry ->
+            val summary = playlist.addedSummary()
+            if (entry is SmugMugPlaylist) summary.copy(kind = SourceKind.SMUGMUG, detail = entry.site) else summary
+        }
+        _state.update { it.copy(playlists = summaries) }
         if (hub.registry.ownerId.isEmpty()) return
         val settings = _state.value.settings
         val zone = ZoneId.systemDefault().id
@@ -229,7 +256,7 @@ internal class StableFolders(private val store: SignageStore) {
 
     /** [entry] with its files' hashes; a folder as last read, under the name it has now. */
     fun hashedOf(entry: AddedPlaylist): HashedPlaylist {
-        if (entry !is PickedFolderPlaylist) return store.hashAdded(entry)
+        if (entry !is FolderBacked) return store.hashAdded(entry)
         val last = read[entry.id]?.takeIf { (it.playlist as FolderPlaylist).path == entry.path }
         // A folder just picked, or pointed somewhere else, is read now rather than polls later.
         val hashed = last ?: store.hashAdded(entry).also { read = read + (entry.id to it) }

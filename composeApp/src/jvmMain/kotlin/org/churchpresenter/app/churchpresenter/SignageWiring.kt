@@ -38,6 +38,8 @@ internal fun AppRootState.SignageEffect() {
     // The screens follow this ChurchPresenter's analytics setting for their own crash reports.
     val analytics = appSettings.analyticsReportingEnabled
     LaunchedEffect(analytics) { signageDiagnostics.value = analytics }
+    val smugMugKey = appSettings.smugMugApiKey
+    LaunchedEffect(smugMugKey) { signageSmugMugKey.value = smugMugKey }
     val shown = signageTabShown()
     val folderSetting = appSettings.signageStorageDirectory
     LaunchedEffect(shown, folderSetting) {
@@ -62,7 +64,7 @@ internal fun AppRootState.SignageEffect() {
             companionServer.signage = hub
             SignageController(
                 hub, shared, coroutineScope,
-                diagnostics = signageDiagnostics, cacheDir = local,
+                diagnostics = signageDiagnostics, cacheDir = local, smugMugApiKey = signageSmugMugKey,
             )
         }.also {
             signageController = it
@@ -83,6 +85,11 @@ internal fun AppRootState.signageTabInput(): SignageTabInput? {
         onTurnOnServer = {
             companionServer.start(appSettings.serverSettings.port, appSettings.serverSettings.serverHost)
             appSettings = appSettings.copy(serverSettings = appSettings.serverSettings.copy(enabled = true))
+            settingsManager.saveSettings(appSettings)
+        },
+        smugMugApiKey = appSettings.smugMugApiKey,
+        onSmugMugApiKey = { key ->
+            appSettings = appSettings.copy(smugMugApiKey = key)
             settingsManager.saveSettings(appSettings)
         },
     )
