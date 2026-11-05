@@ -365,6 +365,21 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
     )
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // What to show first, then which playlist when it is one.
+            DropdownSettingsField(
+                value = labels.getValue(page.idleChoice),
+                options = IdleChoice.entries.map(labels::getValue),
+                onValueChange = { picked ->
+                    page.idleChoice = IdleChoice.entries[labels.values.indexOf(picked)]
+                    // A playlist chosen starts on the first one, so the dialog can save straight away.
+                    if (page.idleChoice == IdleChoice.PLAYLIST && page.idlePlaylistId == null) {
+                        page.idlePlaylistId = idlePlaylists.firstOrNull()?.id
+                    }
+                },
+                label = stringResource(Res.string.signage_link_idle_screen),
+                modifier = Modifier.weight(CHOICE_SHARE),
+                width = Dp.Unspecified,
+            )
             if (page.idleChoice == IdleChoice.PLAYLIST && idlePlaylists.isNotEmpty()) {
                 val current = idlePlaylists.firstOrNull { it.id == page.idlePlaylistId }
                 DropdownSettingsField(
@@ -380,20 +395,6 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
                     width = Dp.Unspecified,
                 )
             }
-            DropdownSettingsField(
-                value = labels.getValue(page.idleChoice),
-                options = IdleChoice.entries.map(labels::getValue),
-                onValueChange = { picked ->
-                    page.idleChoice = IdleChoice.entries[labels.values.indexOf(picked)]
-                    // A playlist chosen starts on the first one, so the dialog can save straight away.
-                    if (page.idleChoice == IdleChoice.PLAYLIST && page.idlePlaylistId == null) {
-                        page.idlePlaylistId = idlePlaylists.firstOrNull()?.id
-                    }
-                },
-                label = stringResource(Res.string.signage_link_idle_screen),
-                modifier = Modifier.weight(CHOICE_SHARE),
-                width = Dp.Unspecified,
-            )
             NumberSettingsTextField(
                 label = stringResource(Res.string.signage_link_idle_reset),
                 initialText = page.idleSeconds,
