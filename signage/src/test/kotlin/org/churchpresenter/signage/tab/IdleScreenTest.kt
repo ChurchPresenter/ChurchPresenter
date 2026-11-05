@@ -91,6 +91,30 @@ class IdleScreenTest {
     }
 
     @Test
+    fun `the page and its idle page each keep their own reload time`() = runComposeUiTest {
+        val saved = mutableListOf<NewLink>()
+        dialog(saved)
+        pick("Show this page", "Show another web page")
+        field(LINK_IDLE_URL_TAG).performTextInput("photos.example.org/show")
+        field(LINK_REFRESH_TAG).performTextReplacement("15")
+        field(LINK_IDLE_REFRESH_TAG).performTextReplacement("30")
+        onNodeWithText("Save").performClick()
+        assertEquals(15, saved.single().refreshMinutes)
+        assertEquals(30, saved.single().interactive!!.idleRefreshMinutes)
+    }
+
+    @Test
+    fun `an idle reload is kept only with an idle page`() = runComposeUiTest {
+        val saved = mutableListOf<NewLink>()
+        dialog(saved, touchPage(InteractiveLink(idleUrl = "https://slides.example.org", idleRefreshMinutes = 30)))
+        field(LINK_IDLE_REFRESH_TAG).assertExists()
+        pick("Show another web page", "Show this page")
+        field(LINK_IDLE_REFRESH_TAG).assertDoesNotExist()
+        onNodeWithText("Save").performClick()
+        assertEquals(0, saved.single().interactive!!.idleRefreshMinutes)
+    }
+
+    @Test
     fun `a saved idle page opens with its address and its own line`() = runComposeUiTest {
         val saved = mutableListOf<NewLink>()
         val initial = touchPage(

@@ -50,9 +50,34 @@ class ManifestInteractiveTest {
             ),
             page,
         )
-        assertNull(page.refreshMs, "a touch page never reloads under someone's hands")
+        assertNull(page.refreshMs, "an older player is sent no reload for a touch page")
         assertNull(page.maxFps)
         assertTrue(manifest.playlists.single { it.id == "rotation:r" }.items.single().interactive)
+    }
+
+    @Test
+    fun aTouchPagesReloadsGoOnlyToAPlayerThatReloadsWhileNobodyUsesIt() {
+        val reloads = signup.copy(
+            interactive = InteractiveLink(
+                90, idleUrl = "https://photos.example.org/show", idleRefreshMinutes = 30,
+            ),
+        )
+        fun page(features: List<String>) = buildManifest(
+            screen = screen,
+            ownerId = "owner",
+            settings = SignageSettings(screens = mapOf("p" to ScreenPlan()), added = listOf(reloads)),
+            playlists = listOf(HashedPlaylist(reloads)),
+            timeZone = "UTC",
+            features = features,
+        ).first.playlists.single().items.single()
+        val touch = listOf(Features.WEB, Features.INTERACTIVE, Features.IDLE_SCREEN)
+        val reloaded = page(touch + Features.TOUCH_RELOAD)
+        assertEquals(600_000L to 1_800_000L, reloaded.refreshMs to reloaded.idleRefreshMs)
+        val older = page(touch)
+        assertEquals(null to null, older.refreshMs to older.idleRefreshMs)
+        // An idle page's reload is sent only with the idle page itself.
+        val noIdlePage = page(listOf(Features.WEB, Features.INTERACTIVE, Features.TOUCH_RELOAD))
+        assertEquals(600_000L to null, noIdlePage.refreshMs to noIdlePage.idleRefreshMs)
     }
 
     @Test

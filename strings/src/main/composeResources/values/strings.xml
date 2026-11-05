@@ -4151,7 +4151,7 @@
     <string name="signage_link_stream">Video or live stream</string>
     <string name="signage_link_smooth">Smooth motion</string>
     <string name="signage_link_smooth_hint">Shows the page 30 times a second instead of 15, for pages that animate, scroll or play video. It takes more of the screen's processor, so leave it off for pages that mostly stand still.</string>
-    <string name="signage_link_refresh">Reload every (minutes, 0 for never)</string>
+    <string name="signage_link_refresh">Reload, minutes</string>
     <string name="signage_link_internet">The screen opens it itself, so it needs the internet. While it cannot load, the screen shows its idle card.</string>
     <string name="signage_link_older_player">Screens whose player is older than this feature, or that cannot show web pages, show their idle card for it.</string>
     <string name="signage_link_interactive">People use it on the touchscreen</string>
@@ -4167,6 +4167,7 @@
     <string name="signage_link_idle_web">Show another web page</string>
     <string name="signage_link_idle_playlist_pick">Playlist</string>
     <string name="signage_link_idle_url">Web page to show</string>
+    <string name="signage_link_touch_reload_hint">Reload, in minutes (0 for never): the page and its idle page reload only while nobody is using the screen, so a slideshow picks up new pictures. Screens whose player is older than this feature reload a touch page only when it starts over.</string>
     <string name="signage_link_idle_prompt">Text on the screen</string>
     <string name="signage_link_idle_prompt_default">Tap the screen to start</string>
     <string name="signage_link_idle_prompt_hint">Written at the bottom so people know they can touch it. Leave empty for none.</string>

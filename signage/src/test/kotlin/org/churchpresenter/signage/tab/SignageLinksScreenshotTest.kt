@@ -150,6 +150,45 @@ class SignageLinksScreenshotTest {
         )
     }
 
+    /** A photo slideshow while nobody uses the screen, each page with its own reload time. */
+    @Test
+    fun `a touch page over a slideshow that reloads`() =
+        captureComponent(SECTION, "link_touch_idle_page", rootIndex = 1) {
+            LinkDialog(
+                onAdd = {},
+                onDismiss = {},
+                initial = LinkPlaylist(
+                    "link:3", "Photos", "https://photos.example.org", LinkKind.WEB, refreshMinutes = 60,
+                    interactive = InteractiveLink(
+                        90, listOf(InteractiveLink.ANY_HOST),
+                        idleUrl = "https://photos.example.org/slideshow", idlePrompt = "Tap the screen to start",
+                        idleRefreshMinutes = 30,
+                    ),
+                ),
+            )
+        }
+
+    /** A playlist while nobody uses the screen: what to show first, then which playlist. */
+    @Test
+    fun `a touch page over a playlist`() =
+        captureComponent(SECTION, "link_touch_idle_playlist", rootIndex = 1) {
+            LinkDialog(
+                onAdd = {},
+                onDismiss = {},
+                initial = LinkPlaylist(
+                    "link:4", "Photos", "https://photos.example.org", LinkKind.WEB,
+                    interactive = InteractiveLink(
+                        90, listOf(InteractiveLink.ANY_HOST),
+                        idlePlaylistId = "folder:Events", idlePrompt = "Tap the screen to start",
+                    ),
+                ),
+                idlePlaylists = listOf(
+                    PlaylistSummary("folder:Events", "Events", 4, 0, detail = "Folders/Events", seconds = 15),
+                    PlaylistSummary("file:2", "Lobby loop", kind = SourceKind.VIDEO, detail = "lobby-loop.mp4"),
+                ),
+            )
+        }
+
     /** Scrolled down to the code, which fills the end of the dialog. */
     @Test
     fun `a page restyled with the church's own code`() = captureComponent(SECTION, "link_code", rootIndex = 1, drive = {

@@ -122,6 +122,7 @@ private fun linkItem(link: LinkPlaylist, features: Collection<String>): Playlist
     // Drawn as a picture nobody can use by a screen that cannot show it in a browser: not sent there.
     val item = if (touch != null) {
         interactiveItem(link.url, touch, Features.IDLE_SCREEN in features)
+            .withReloads(link.refreshMinutes, touch.idleRefreshMinutes, Features.TOUCH_RELOAD in features)
             .takeIf { Features.INTERACTIVE in features } ?: return null
     } else {
         val refreshMs = (link.refreshMinutes * MS_PER_MINUTE).takeIf { web && it > 0 }
@@ -129,6 +130,18 @@ private fun linkItem(link: LinkPlaylist, features: Collection<String>): Playlist
         PlaylistItem(kind = kind, url = link.url, refreshMs = refreshMs, maxFps = maxFps)
     }
     return item.withCode(link.pageCode?.takeIf { web && Features.PAGE_CODE in features })
+}
+
+/**
+ * An interactive item's reloads while nobody uses it: the page every [pageMinutes], its idle page every
+ * [idleMinutes]. Only where the player can ([reloads]); an older one leaves both as they first loaded.
+ */
+private fun PlaylistItem.withReloads(pageMinutes: Int, idleMinutes: Int, reloads: Boolean): PlaylistItem {
+    if (!reloads) return this
+    return copy(
+        refreshMs = (pageMinutes * MS_PER_MINUTE).takeIf { it > 0 },
+        idleRefreshMs = (idleMinutes * MS_PER_MINUTE).takeIf { it > 0 && idleUrl != null },
+    )
 }
 
 /** [code] on the item; an older player, given none, shows the page as its site made it. */
