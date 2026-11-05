@@ -246,6 +246,9 @@ internal class AppRootState(
     /** The analytics setting as the signage screens are sent it: whether they may report crashes. */
     val signageDiagnostics = MutableStateFlow(appSettings.analyticsReportingEnabled)
 
+    /** The SmugMug API key the signage slideshows read with, kept in step with the settings. */
+    val signageSmugMugKey = MutableStateFlow(appSettings.smugMugApiKey)
+
     /**
      * Dev mode: a dev build, the developer menu unlocked, or the forced dev window. The features not
      * ready for production -- the sidebar's Dev mode only box and what is behind it -- exist only

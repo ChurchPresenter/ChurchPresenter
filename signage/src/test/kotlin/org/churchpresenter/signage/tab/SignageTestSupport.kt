@@ -23,6 +23,8 @@ import org.churchpresenter.signage.core.sha256Hex
 import org.churchpresenter.signage.hub.AgentUpdates
 import org.churchpresenter.signage.hub.PendingScreen
 import org.churchpresenter.signage.hub.SignageHub
+import org.churchpresenter.signage.smugmug.FakeAlbum
+import org.churchpresenter.signage.smugmug.FakeSmugMug
 import java.io.IOException
 import java.nio.file.Path
 import java.security.KeyPairGenerator
@@ -79,12 +81,22 @@ class SignageWorld(
     /** This ChurchPresenter's analytics setting, as the app hands it to the controller. */
     val diagnostics = MutableStateFlow(true)
 
+    /** The SmugMug API key the app hands the controller. */
+    val smugMugKey = MutableStateFlow("KEY")
+
+    /** The SmugMug account the slideshows read: never the real one. */
+    val smugMug = FakeSmugMug(
+        listOf(FakeAlbum("a1", "Harvest", listOf("p1", "p2", "p3")), FakeAlbum("a2", "Seminar", listOf("p4"))),
+    )
+
     val controller = SignageController(
         hub,
         signage,
         scope,
         pollMs = POLL_MS,
         diagnostics = diagnostics,
+        smugMugApiKey = smugMugKey,
+        smugMugHttp = smugMug,
     )
 
     /**

@@ -23,6 +23,16 @@ sealed interface PlaylistSource {
 sealed interface AddedPlaylist : PlaylistSource
 
 /**
+ * A playlist played from a folder in the signage folder ([path], relative to it), each picture up for
+ * [pictureSeconds]: one picked in the tab, or one this computer fills itself. Read into a
+ * [FolderPlaylist] before it is sent.
+ */
+sealed interface FolderBacked : AddedPlaylist {
+    val path: String
+    val pictureSeconds: Int
+}
+
+/**
  * A folder: every picture and video directly in it, in file-name order, each picture up for
  * [pictureSeconds]; read again as it changes. Its copy is in the signage folder (see
  * [SignageMedia]). Read into a [FolderPlaylist] before it is sent.
@@ -32,14 +42,49 @@ sealed interface AddedPlaylist : PlaylistSource
 data class PickedFolderPlaylist(
     override val id: String,
     override val name: String,
-    val path: String,
-    val pictureSeconds: Int = DEFAULT_PICTURE_SECONDS,
-) : AddedPlaylist {
+    override val path: String,
+    override val pictureSeconds: Int = DEFAULT_PICTURE_SECONDS,
+) : FolderBacked {
     companion object {
         const val DEFAULT_PICTURE_SECONDS = 10
         val PICTURE_SECONDS = 1..600
 
         fun create(name: String, path: String) = PickedFolderPlaylist("dir:${UUID.randomUUID()}", name, path)
+    }
+}
+
+/**
+ * A random slideshow of [photoCount] photos from the public galleries of a SmugMug [site] (its address,
+ * such as `https://photos.example.org`, or the account's nickname), [excludedAlbumKeys] left out and
+ * unlisted galleries too when [includeUnlisted]. A new set is picked every [refreshHours]. The photos
+ * are downloaded into the signage folder ([path]) and played from there as a folder's are, so the
+ * screens need nothing new and keep playing the last set while SmugMug cannot be reached.
+ */
+@Serializable
+@SerialName("smugmug")
+data class SmugMugPlaylist(
+    override val id: String,
+    override val name: String,
+    val site: String,
+    val photoCount: Int = DEFAULT_PHOTO_COUNT,
+    override val pictureSeconds: Int = DEFAULT_PICTURE_SECONDS,
+    val refreshHours: Int = DEFAULT_REFRESH_HOURS,
+    val excludedAlbumKeys: Set<String> = emptySet(),
+    val includeUnlisted: Boolean = false,
+) : FolderBacked {
+    /** Where its photos are kept, in the signage folder. */
+    override val path: String get() = "$FOLDER/${id.substringAfter(':')}"
+
+    companion object {
+        /** The folder in the signage folder each slideshow's photos are kept under. */
+        const val FOLDER = "SmugMug"
+        const val DEFAULT_PHOTO_COUNT = 50
+        const val DEFAULT_PICTURE_SECONDS = 8
+        const val DEFAULT_REFRESH_HOURS = 6
+        val PHOTO_COUNTS = 10..500
+        val REFRESH_HOURS = 1..168
+
+        fun create(name: String) = SmugMugPlaylist("smugmug:${UUID.randomUUID()}", name, site = "")
     }
 }
 
@@ -203,4 +248,4 @@ enum class LinkKind {
 }
 
 /** What a playlist is, as its row shows it. */
-enum class SourceKind { FOLDER, PICTURE, VIDEO, WEB, STREAM, ROTATION }
+enum class SourceKind { FOLDER, PICTURE, VIDEO, WEB, STREAM, ROTATION, SMUGMUG }

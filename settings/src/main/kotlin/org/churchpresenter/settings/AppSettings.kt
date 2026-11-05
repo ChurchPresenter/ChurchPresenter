@@ -57,6 +57,11 @@ data class AppSettings(
      * screens. Resolved by [signageFolder].
      */
     val signageStorageDirectory: String = "",
+    /**
+     * The SmugMug API key the Signage tab's SmugMug slideshows read public galleries with; blank when
+     * none is set. A credential, so a shared export leaves it out ([withoutSecrets]).
+     */
+    val smugMugApiKey: String = "",
     /** Where the schedule's Open and Save As dialogs start. Blank means the home folder. */
     val scheduleStorageDirectory: String = "",
     /**

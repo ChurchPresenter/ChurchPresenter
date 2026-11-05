@@ -19,6 +19,7 @@ gives the same `SignageHub` to both.
 | `SignageFolder.kt` | Reads a folder playlist's copy: the pictures and videos directly in it, in name order |
 | `SignageMedia.kt`, `AddedPlaylistEdits.kt` | Copying a picked folder or file into the signage folder (`Folders/`, `Files/`), finding a copy from its relative path, sending a removed one to the Trash; the tab's playlist edits over them |
 | `PlaylistSource.kt`, `LinkAddress.kt` | What a playlist can be, each added in the tab: a folder (`PickedFolderPlaylist`), a single picture or video (`FilePlaylist`), a link (`LinkPlaylist`, a web page or a stream, its kind guessed from the address), or a rotation (`RotationPlaylist`: other entries in turn, each for its own time); what counts as a link's address |
+| `SlideshowPicks.kt`, `SmugMugDialog.kt`, `smugmug/` | SmugMug slideshows: a random set of photos from a SmugMug account's public galleries, downloaded into the signage folder (`SmugMug/<id>`) and played as a folder is, so the players need nothing new. `smugmug/SmugMugClient.kt` reads the account as a visitor with the API key (`AppSettings.smugMugApiKey`, a secret), `SmugMugSync.kt` picks a set and swaps it in whole, keeping the last set when a pick fails; `SlideshowPicks.kt` picks each one when due, edited or asked to |
 | `SignageStore.kt` | The tab's settings (`signage.json`: the added playlists, and each screen's plan with its weekly schedule) in the signage folder, and the hash cache (`hashes.json`) in this computer's own |
 | `ManifestBuilder.kt` | One screen's `Manifest` and the file behind each hash; a link only for a player that listed its kind |
 | `WebTestVerdict.kt` | What a screen's web page test says: smooth, normal motion only, or too slow — decided here, so the thresholds change without a player update |
@@ -68,6 +69,9 @@ gives the same `SignageHub` to both.
   not time (a share keeps times only to a second or two). This computer's caches (`hashes.json`,
   player builds) stay in its app data folder.
 
+- **A playlist of a kind this version cannot read is set aside, never fatal**: `SignageStore` reads each playlist on its own, plays the rest, and writes the unread ones back unchanged, so a newer ChurchPresenter sharing the folder keeps its playlists and an older one does not empty every screen.
+- **A SmugMug slideshow is a folder ChurchPresenter fills** (`FolderBacked`): read, hashed and sent as a picked folder is. Its photos are downloaded, not copied, so removing it deletes them outright (no Trash), and a pick that finishes after its removal deletes what it made. The API key never goes in a manifest, a log or a shared export.
+
 ## Tests
 
 `SignageWorld` (`SignageTestSupport.kt`) is a signage folder, a hub and a controller in a temp
@@ -75,7 +79,7 @@ directory the test owns, with a copied folder playlist already added for each of
 (`world.file` writes into them, `world.original` outside, to add from),
 and player releases served from memory and signed with a key made for the test. Waits listen on
 the hub's own flows (`expect` starts listening before the action: messages to a screen are not
-replayed). UI tests hand the tab a `FakeDesktop`, so nothing opens a real chooser, file manager or Trash.
+replayed). The world's SmugMug is `FakeSmugMug` (answering in the real API's shapes), so no test reaches SmugMug. UI tests hand the tab a `FakeDesktop`, so nothing opens a real chooser, file manager or Trash.
 `ScreenCardAloneTest` and `SignageFolderPanelAloneTest` compose one piece on its own and
 change its inputs between frames, which is where most branches are; the main window's
 `AccessibleNamesTest` and `FocusRingVisibleTest` are `SignageTabAccessibilityTest` here, since the

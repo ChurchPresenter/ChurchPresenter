@@ -206,6 +206,9 @@ class SignageTabInput(
     /** Whether the companion server is on; the screens reach ChurchPresenter only through it. */
     val serverRunning: Boolean,
     val onTurnOnServer: () -> Unit,
+    /** The SmugMug API key the slideshows read with, and where a new one is saved. */
+    val smugMugApiKey: String = "",
+    val onSmugMugApiKey: (String) -> Unit = {},
 )
 
 /** The server addresses, the public tunnel and the remote-presentation controls the tabs show. */

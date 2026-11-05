@@ -205,7 +205,7 @@ internal fun defaultStep(entry: PlaylistSummary): RotationStep = RotationStep(
     when (entry.kind) {
         SourceKind.WEB, SourceKind.STREAM -> LINK_SECONDS
         SourceKind.PICTURE -> PICTURE_SECONDS
-        SourceKind.VIDEO, SourceKind.FOLDER, SourceKind.ROTATION -> null
+        SourceKind.VIDEO, SourceKind.FOLDER, SourceKind.SMUGMUG, SourceKind.ROTATION -> null
     },
 )
 

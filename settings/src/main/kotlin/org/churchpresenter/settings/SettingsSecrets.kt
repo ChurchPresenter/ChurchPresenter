@@ -9,6 +9,7 @@ package org.churchpresenter.settings
  * - OBS: the WebSocket password.
  * - The remote-control server's API key, and the key an InstanceLink follower connects with.
  * - The Pexels and Pixabay API keys the stock-photo browser searches with.
+ * - The SmugMug API key the Signage tab's slideshows read with.
  *
  * A setting added that is a credential belongs here, or it leaks into every shared export.
  */
@@ -24,6 +25,7 @@ fun AppSettings.withoutSecrets(): AppSettings = copy(
     serverSettings = serverSettings.copy(apiKey = ""),
     instanceLink = instanceLink.copy(apiKey = ""),
     stockPhotoSettings = stockPhotoSettings.copy(pexelsApiKey = "", pixabayApiKey = ""),
+    smugMugApiKey = "",
 )
 
 /**
@@ -39,6 +41,7 @@ val AppSettings.hasSecrets: Boolean
         instanceLink.apiKey,
         stockPhotoSettings.pexelsApiKey,
         stockPhotoSettings.pixabayApiKey,
+        smugMugApiKey,
     ).any { it.isNotBlank() }
 
 /** These settings with every password, sign-in and API key taken from [source] instead. */
@@ -57,6 +60,7 @@ fun AppSettings.withSecretsFrom(source: AppSettings): AppSettings = copy(
         pexelsApiKey = source.stockPhotoSettings.pexelsApiKey,
         pixabayApiKey = source.stockPhotoSettings.pixabayApiKey,
     ),
+    smugMugApiKey = source.smugMugApiKey,
 )
 
 /**

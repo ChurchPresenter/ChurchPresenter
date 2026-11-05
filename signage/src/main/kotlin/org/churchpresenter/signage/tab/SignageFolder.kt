@@ -94,6 +94,9 @@ internal fun HashedPlaylist.addedSummary(): PlaylistSummary = when (val source =
     is PickedFolderPlaylist -> PlaylistSummary(
         source.id, source.name, detail = source.path, seconds = source.pictureSeconds,
     )
+    is SmugMugPlaylist -> PlaylistSummary(
+        source.id, source.name, kind = SourceKind.SMUGMUG, detail = source.site, seconds = source.pictureSeconds,
+    )
 }
 
 /** Reads the folders playlists are made from. Blocking: run it on `Dispatchers.IO`. */
@@ -102,10 +105,10 @@ object SignageFolder {
     internal val VIDEOS = setOf("mp4", "m4v", "mov", "webm", "mkv")
 
     /**
-     * [picked] as it stands now, a copy found under [signage]: its pictures and videos, or none and
-     * missing when the folder is gone.
+     * [picked] as it stands now, a copy (or a slideshow's photos) found under [signage]: its pictures
+     * and videos, or none and missing when the folder is gone.
      */
-    fun read(picked: PickedFolderPlaylist, signage: Path): FolderPlaylist {
+    fun read(picked: FolderBacked, signage: Path): FolderPlaylist {
         val dir = SignageMedia.resolve(signage, picked.path)?.takeIf { it.isDirectory() }
         return FolderPlaylist(
             picked.id, picked.name, dir?.let(::filesIn).orEmpty(), picked.path,

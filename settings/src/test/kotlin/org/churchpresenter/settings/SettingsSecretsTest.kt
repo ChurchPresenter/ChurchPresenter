@@ -37,6 +37,7 @@ class SettingsSecretsTest {
         serverSettings = ServerSettings(apiKey = "$tag-server"),
         instanceLink = InstanceLinkSettings(apiKey = "$tag-link"),
         stockPhotoSettings = StockPhotoSettings(pexelsApiKey = "$tag-pexels", pixabayApiKey = "$tag-pixabay"),
+        smugMugApiKey = "$tag-smugmug",
     )
 
     @Test
@@ -50,6 +51,7 @@ class SettingsSecretsTest {
         assertEquals("", shared.serverSettings.apiKey)
         assertEquals("", shared.instanceLink.apiKey)
         assertEquals(StockPhotoSettings(), shared.stockPhotoSettings)
+        assertEquals("", shared.smugMugApiKey)
     }
 
     /**
@@ -82,6 +84,7 @@ class SettingsSecretsTest {
         assertFalse(AppSettings().hasSecrets)
         assertTrue(withEverySecret("x").hasSecrets)
         assertTrue(AppSettings(obsSettings = OBSSettings(password = "p")).hasSecrets)
+        assertTrue(AppSettings(smugMugApiKey = "k").hasSecrets)
         assertFalse(
             AppSettings(calendarSync = CalendarSyncSettings(desktopToken = "t")).hasSecrets,
             "calendar sync is never exported and always kept, so it does not ask",
@@ -98,11 +101,13 @@ class SettingsSecretsTest {
         assertEquals("mine-obs", kept.obsSettings.password)
         assertEquals("file.local", kept.obsSettings.host, "the file's own settings still come in")
         assertEquals("mine-pexels", kept.stockPhotoSettings.pexelsApiKey)
+        assertEquals("mine-smugmug", kept.smugMugApiKey)
 
         val taken = importedSettings(file, mine, useFileSecrets = true)
         assertEquals("file-access", taken.planningCenterSettings.accessToken)
         assertEquals("file-obs", taken.obsSettings.password)
         assertEquals("file-server", taken.serverSettings.apiKey)
+        assertEquals("file-smugmug", taken.smugMugApiKey)
         assertEquals(mine.calendarSync, taken.calendarSync, "calendar sync is always this computer's")
     }
 
