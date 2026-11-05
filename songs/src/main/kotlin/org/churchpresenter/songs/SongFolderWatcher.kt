@@ -159,10 +159,18 @@ class SongFolderWatcher(
         stop()
     }
 
+    /**
+     * Closing a watch service waits for its polling thread to stop, which on Windows can take
+     * hundreds of milliseconds (CHURCH-PRESENTER-DESKTOP-KJ), and this is called from the event
+     * thread -- so the close happens on a thread of its own. The job is cancelled first, so
+     * nothing reads the old service once it is let go.
+     */
     private fun stop() {
         watchJob?.cancel()
         watchJob = null
-        watchService?.let { runCatching { it.close() } }
+        watchService?.let { old ->
+            Thread({ runCatching { old.close() } }, "song-watch-close").apply { isDaemon = true }.start()
+        }
         watchService = null
     }
 }
