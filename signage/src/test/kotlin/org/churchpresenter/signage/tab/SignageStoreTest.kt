@@ -11,6 +11,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
+import kotlin.io.path.readText
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalPathApi::class)
 class SignageStoreTest {
@@ -22,6 +24,34 @@ class SignageStoreTest {
     private fun folderFile(name: String, text: String): FolderFile {
         val path = dir.resolve(name).also { it.writeText(text) }
         return FolderFile(path, MediaKind.IMAGE, Files.size(path), Files.getLastModifiedTime(path).toMillis())
+    }
+
+    @Test
+    fun aPlaylistOfAKindThisVersionDoesNotKnowIsKeptAsideAndWrittenBack() {
+        val file = dir.resolve("signage.json")
+        file.writeText(
+            """{"added":[""" +
+                """{"type":"folder","id":"folder:","name":"Welcome","path":"Folders/Welcome"},""" +
+                """{"type":"hologram","id":"hologram:1","name":"From a newer version","depth":3}""" +
+                """],"screens":{"p":{"playlistId":"hologram:1"}}}""",
+        )
+        val store = SignageStore(dir)
+        val read = store.loadSettings()
+        assertEquals(listOf("folder:"), read.added.map { it.id })
+        assertEquals("hologram:1", read.plan("p").playlistId, "the screen's choice is left as it was")
+        val weather = LinkPlaylist.create(NewLink("Weather", "https://w.example.org", LinkKind.WEB))
+        store.saveSettings(read.copy(added = read.added + weather))
+        val saved = file.readText()
+        assertTrue(""""type":"hologram"""" in saved && """"depth":3""" in saved, saved)
+        assertEquals(2, SignageStore(dir).loadSettings().added.size)
+    }
+
+    @Test
+    fun damagedSettingsReadAsNone() {
+        dir.resolve("signage.json").writeText("{ not json")
+        assertEquals(SignageSettings(), SignageStore(dir).loadSettings())
+        dir.resolve("signage.json").writeText("""{"added":[],"screens":"not a map"}""")
+        assertEquals(SignageSettings(), SignageStore(dir).loadSettings())
     }
 
     @Test
