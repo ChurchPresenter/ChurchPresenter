@@ -233,6 +233,29 @@ class UiStallReporterTest {
     }
 
     @Test
+    fun `an app frame in a minority of the samples blames nothing, and groups with the no-app-frame stalls`() {
+        val outside = listOf(jdkFrame)
+        val passing = listOf(jdkFrame, appFrame)
+        val stall = Stall(1_100, 100, frames = passing, samples = listOf(outside, passing, outside, outside))
+
+        val event = eventOf(stall, live = true)
+
+        assertEquals(listOf("ui-stall", STALL_CAUSE_NO_APP_FRAME, "macos", "METAL"), event.fingerprint)
+        assertEquals(STALL_CAUSE_NO_APP_FRAME, event.tags["stall.cause"])
+    }
+
+    @Test
+    fun `an app frame in half the samples is still the cause`() {
+        val outside = listOf(jdkFrame)
+        val passing = listOf(jdkFrame, appFrame)
+        val stall = Stall(1_100, 100, frames = passing, samples = listOf(outside, passing, passing, outside))
+
+        val event = eventOf(stall, live = true)
+
+        assertEquals(listOf("ui-stall", "org.churchpresenter.liveoutput.PresenterScreen.draw"), event.fingerprint)
+    }
+
+    @Test
     fun `a stall with no app frame groups apart per OS and per render API`() {
         val stall = Stall(300, 100, listOf(jdkFrame))
 

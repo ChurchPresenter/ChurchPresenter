@@ -10,7 +10,9 @@ package org.churchpresenter.diagnostics
  * or while it sat idle waiting for an event ([isIdle]), says nothing about the stall and is left out.
  *
  * What is left names its first frame of the app's own code; the one named most often is the cause,
- * and the sample it came from is the stack Sentry shows. The outermost screen on the stack
+ * and the sample it came from is the stack Sentry shows -- but only when it is named in at least
+ * half the samples. A frame one sample in seventeen happened to land in blames nothing, and grouping
+ * on it opened a new issue for every string or constructor the thread passed through. The outermost screen on the stack
  * (`stall.screen`, [screenOf]) is grouped on too, ahead of the cause, so one screen's slow opening
  * is one issue rather than one per frame it happened to be in.
  *
@@ -19,7 +21,7 @@ package org.churchpresenter.diagnostics
  * one most of whose samples are loading code or a string for the first time
  * ([STALL_CAUSE_COLD_LOAD]); one whose first sample came far later than the watchdog's polling
  * allows, so the whole process was paused and the stack is from after it ([STALL_CAUSE_PAUSED]);
- * and one with no app frame in any sample ([STALL_CAUSE_NO_APP_FRAME]), grouped on [osFamily] and
+ * and one with no app frame named by at least half its samples ([STALL_CAUSE_NO_APP_FRAME]), grouped on [osFamily] and
  * [renderApi], since a driver or the OS is all such a stack can blame.
  */
 fun stallEvent(
@@ -32,7 +34,7 @@ fun stallEvent(
     val samples = evidence.ifEmpty { listOf(stall.frames) }
     val cut = samples.map(::aboveInnermostLoop)
     val causes = cut.map { sample -> sample.getOrNull(appFrameIndex(sample))?.groupName }
-    val cause = mostFrequent(causes.filterNotNull())
+    val cause = mostFrequent(causes.filterNotNull())?.takeIf { top -> causes.count { it == top } * 2 >= causes.size }
     val shown = cause?.let { samples[causes.indexOf(it)] } ?: samples.first()
     val screen = mostFrequent(cut.mapNotNull(::screenOf))
     val kind = when {
