@@ -7,7 +7,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -46,16 +45,16 @@ class SignageFolderPanelAloneTest {
         var actions by mutableStateOf(actions("first", earlier))
         setContent {
             ChurchPresenterTheme(ThemeMode.LIGHT) {
-                Surface(color = MaterialTheme.colorScheme.background) { SignageFolderPanel(state, actions, Modifier) }
+                Surface(color = MaterialTheme.colorScheme.background) { PanelWithMenu(state, actions) }
             }
         }
-        onNodeWithText("Add").performClick()
+        onNodeWithText("Add a playlist").performClick()
         onNodeWithText("Folder…").performClick()
         waitUntil { calls.isNotEmpty() }
         state = first.copy(copying = listOf("Easter"))
         actions = actions("later", later)
         waitForIdle()
-        onNodeWithText("Add").performClick()
+        onNodeWithText("Add a playlist").performClick()
         onNodeWithText("Folder…").performClick()
         onAllNodesWithContentDescription("Remove playlist")[1].performClick()
         state = first.copy(copyFailed = "Easter")

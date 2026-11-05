@@ -86,7 +86,7 @@ class SignageTabScreenshotTest {
             )
         }
         world.hub.links.reported("player-1", PlayerMessage.Preview(jpegBase64(), 480, 270, 1))
-        shoot("everything", waitFor = arrayOf("4821", "Events", "Update to 26.0.9"))
+        shoot("everything", waitFor = arrayOf("Approve", "Events", "Update to 26.0.9"))
     }
 
     @Test

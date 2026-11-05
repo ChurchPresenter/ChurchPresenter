@@ -91,10 +91,12 @@ class SlideshowPicks internal constructor(
     /** Picks [show]'s photos now, said in [state] while it runs. */
     private suspend fun pick(show: SmugMugPlaylist) {
         state.update { it.copy(picking = it.picking + show.id) }
-        sync.pick(show)
+        sync.pick(show) { progress ->
+            state.update { it.copy(pickProgress = it.pickProgress + (show.id to progress)) }
+        }
         // Removed while it picked: what the pick just made goes too.
         if (state.value.settings.added.none { it.id == show.id }) sync.forget(show)
-        state.update { it.copy(picking = it.picking - show.id) }
+        state.update { it.copy(picking = it.picking - show.id, pickProgress = it.pickProgress - show.id) }
     }
 
     private companion object {

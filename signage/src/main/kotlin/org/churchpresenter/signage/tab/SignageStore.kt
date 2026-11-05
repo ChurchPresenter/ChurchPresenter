@@ -83,6 +83,8 @@ data class SignageMessage(
     val fullScreen: Boolean = false,
     val untilMs: Long? = null,
     val screenIds: List<String>? = null,
+    /** A band keeps people from using a touch page under it; a full-screen message always does. */
+    val blockTouch: Boolean = false,
 ) {
     /** Whether [screenId] is one it goes to. */
     fun reaches(screenId: String): Boolean = screenIds == null || screenId in screenIds
@@ -91,7 +93,7 @@ data class SignageMessage(
     fun showsAt(nowMs: Long): Boolean = toScreen().showsAt(nowMs)
 
     /** What a screen is sent. */
-    fun toScreen(): ScreenMessage = ScreenMessage(text.trim(), fullScreen, untilMs)
+    fun toScreen(): ScreenMessage = ScreenMessage(text.trim(), fullScreen, untilMs, blockTouch && !fullScreen)
 }
 
 /** A file's hash, and the size and time it had when it was hashed. */

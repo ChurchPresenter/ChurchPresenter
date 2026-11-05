@@ -52,6 +52,16 @@ class ScreenMessageTest {
     }
 
     @Test
+    fun `a band can keep touches from a touch page, and a full-screen one sends no setting of its own`() {
+        val band = SignageMessage("Doors open", blockTouch = true)
+        assertEquals(ScreenMessage("Doors open", blockTouch = true), sent(lobby, band, listOf(Features.MESSAGE)))
+        val full = band.copy(fullScreen = true)
+        val onWire = sent(lobby, full, listOf(Features.MESSAGE))
+        assertEquals(ScreenMessage("Doors open", fullScreen = true), onWire)
+        assertTrue(onWire!!.blocksTouch)
+    }
+
+    @Test
     fun `it shows while it has words and time`() {
         assertTrue(SignageMessage("Hi").showsAt(Long.MAX_VALUE))
         assertFalse(SignageMessage("  ").showsAt(0))
@@ -63,7 +73,8 @@ class ScreenMessageTest {
     @Test
     fun `it is saved with the tab's settings`() {
         val store = SignageStore(dir)
-        val settings = SignageSettings(message = SignageMessage("Doors open", untilMs = 9, screenIds = listOf("lobby")))
+        val message = SignageMessage("Doors open", untilMs = 9, screenIds = listOf("lobby"), blockTouch = true)
+        val settings = SignageSettings(message = message)
         store.saveSettings(settings)
         assertEquals(settings, store.loadSettings())
     }

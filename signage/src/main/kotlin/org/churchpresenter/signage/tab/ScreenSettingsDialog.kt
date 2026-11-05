@@ -27,8 +27,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.sharedui.composables.DropdownSettingsField
-import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.signage.core.KioskPin
 import org.churchpresenter.signage.core.Orientation
 import org.churchpresenter.strings.generated.resources.Res
@@ -42,7 +40,6 @@ import org.churchpresenter.strings.generated.resources.signage_kiosk_pin_new
 import org.churchpresenter.strings.generated.resources.signage_kiosk_pin_none
 import org.churchpresenter.strings.generated.resources.signage_kiosk_pin_remove
 import org.churchpresenter.strings.generated.resources.signage_kiosk_pin_removing
-import org.churchpresenter.strings.generated.resources.signage_orientation
 import org.churchpresenter.strings.generated.resources.signage_orientation_hint
 import org.churchpresenter.strings.generated.resources.signage_orientation_landscape
 import org.churchpresenter.strings.generated.resources.signage_orientation_landscape_flipped
@@ -53,7 +50,7 @@ import org.churchpresenter.strings.generated.resources.signage_restart
 import org.churchpresenter.strings.generated.resources.signage_screen_name
 import org.churchpresenter.strings.generated.resources.signage_screen_settings
 import org.churchpresenter.strings.generated.resources.signage_shut_down
-import org.churchpresenter.strings.generated.resources.signage_touch
+import org.churchpresenter.strings.generated.resources.signage_touch_page
 import org.churchpresenter.strings.generated.resources.signage_touch_gesture
 import org.churchpresenter.strings.generated.resources.signage_touch_gesture_hint
 import org.churchpresenter.strings.generated.resources.signage_touch_none
@@ -61,6 +58,30 @@ import org.churchpresenter.strings.generated.resources.signage_touch_target
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.SettingsTextField
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import org.churchpresenter.strings.generated.resources.signage_mounting
+import org.churchpresenter.strings.generated.resources.signage_power_title
+import org.churchpresenter.theme.keyboardFocusRing
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -81,6 +102,8 @@ internal fun ScreenSettingsDialog(
     onTv: (Boolean) -> Unit = {},
     /** The device's address, model, player and health, as the card knows them. */
     deviceInfo: @Composable () -> Unit = {},
+    /** The line under the title: the screen's name and what it runs on. */
+    subtitle: String? = null,
 ) {
     var newName by remember { mutableStateOf(initial.name) }
     var mounted by remember { mutableStateOf(initial.orientation) }
@@ -88,33 +111,45 @@ internal fun ScreenSettingsDialog(
     val labels = Orientation.entries.associateWith { stringResource(labelOf(it)) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.signage_screen_settings)) },
+        title = {
+            SignageDialogTitle(
+                stringResource(Res.string.signage_screen_settings),
+                subtitle,
+                icon = Icons.Filled.Settings,
+            )
+        },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.width(DIALOG_WIDTH).verticalScroll(rememberScrollState()),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    SettingsTextField(
-                        value = newName,
-                        onValueChange = { newName = it },
-                        label = stringResource(Res.string.signage_screen_name),
-                        fillWidth = true,
-                        modifier = Modifier.weight(1f).testTag(SCREEN_NAME_TAG),
+                SettingsTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = stringResource(Res.string.signage_screen_name),
+                    fillWidth = true,
+                    modifier = Modifier.fillMaxWidth().testTag(SCREEN_NAME_TAG),
+                )
+                Column {
+                    FieldCaption(
+                        stringResource(Res.string.signage_mounting),
+                        info = stringResource(Res.string.signage_orientation_hint),
                     )
-                    DropdownSettingsField(
-                        value = labels.getValue(mounted),
-                        options = Orientation.entries.map(labels::getValue),
-                        onValueChange = { picked ->
-                            labels.entries.firstOrNull { it.value == picked }?.let { mounted = it.key }
-                        },
-                        label = stringResource(Res.string.signage_orientation),
-                    )
+                    Row(
+                        modifier = Modifier.selectableGroup().height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Orientation.entries.forEach { orientation ->
+                            MountTile(
+                                orientation = orientation,
+                                label = labels.getValue(orientation),
+                                selected = mounted == orientation,
+                                onClick = { mounted = orientation },
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                            )
+                        }
+                    }
                 }
-                Hint(stringResource(Res.string.signage_orientation_hint))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 TouchSection(initial, touch)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -164,39 +199,105 @@ private class TouchChoices(initial: ScreenSettingsInput) {
  */
 @Composable
 private fun TouchSection(initial: ScreenSettingsInput, touch: TouchChoices) {
-    SectionTitle(stringResource(Res.string.signage_touch))
-    LabeledSwitch(
+    InfoSwitch(
+        title = stringResource(Res.string.signage_touch_page),
+        info = stringResource(Res.string.signage_touch_gesture) + ". " +
+            stringResource(Res.string.signage_touch_gesture_hint),
         checked = touch.gesture,
-        onCheckedChange = { touch.gesture = it },
-        label = stringResource(Res.string.signage_touch_gesture),
-        supporting = stringResource(Res.string.signage_touch_gesture_hint),
-        controlAtEnd = true,
-        spacing = 12.dp,
-        modifier = Modifier.fillMaxWidth(),
+        onChange = { touch.gesture = it },
     )
     if (!touch.gesture) return
     val pages = initial.touchPlaylists
-    if (pages.isEmpty()) Hint(stringResource(Res.string.signage_touch_none))
-    // Where it switches to and the PIN it asks for, side by side: a PIN is
-    // eight digits at most.
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (pages.isNotEmpty()) {
-            val current = pages.firstOrNull { it.id == touch.playlistId } ?: pages.first()
-            DropdownSettingsField(
-                value = current.name,
-                options = pages.map { it.name },
-                onValueChange = { name -> touch.playlistId = pages.firstOrNull { it.name == name }?.id },
-                label = stringResource(Res.string.signage_touch_target),
-            )
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = PANEL_WASH), RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        if (pages.isEmpty()) Hint(stringResource(Res.string.signage_touch_none))
+        // Where it switches to and the PIN it asks for, side by side: a PIN is
+        // eight digits at most.
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (pages.isNotEmpty()) {
+                val current = pages.firstOrNull { it.id == touch.playlistId } ?: pages.first()
+                PickerField(
+                    value = current.name,
+                    name = stringResource(Res.string.signage_touch_target),
+                    options = pages.map { PickerOption(it.name) { KindTile(tileKindOf(it.kind), size = 22.dp) } },
+                    onPick = { touch.playlistId = pages[it].id },
+                    leading = { KindTile(tileKindOf(current.kind), size = 22.dp) },
+                    height = 42.dp,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            PinField(initial.hasPin, touch)
         }
-        PinField(initial.hasPin, touch)
+        val status = when {
+            touch.removing -> Res.string.signage_kiosk_pin_removing
+            initial.hasPin -> Res.string.signage_kiosk_pin_is_set
+            else -> Res.string.signage_kiosk_pin_none
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Hint(stringResource(status))
+            Spacer(Modifier.width(4.dp))
+            InfoHint(stringResource(Res.string.signage_kiosk_pin_hint))
+        }
     }
-    val status = when {
-        touch.removing -> Res.string.signage_kiosk_pin_removing
-        initial.hasPin -> Res.string.signage_kiosk_pin_is_set
-        else -> Res.string.signage_kiosk_pin_none
+}
+
+/**
+ * One way the TV can hang, as a tile: a little screen in that shape with an arrow to its top, and its
+ * name under it.
+ */
+@Composable
+private fun MountTile(
+    orientation: Orientation,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(12.dp)
+    val ink = if (selected) scheme.primary else scheme.onSurfaceVariant
+    val portrait = orientation == Orientation.PORTRAIT || orientation == Orientation.PORTRAIT_FLIPPED
+    val flipped = orientation == Orientation.LANDSCAPE_FLIPPED || orientation == Orientation.PORTRAIT_FLIPPED
+    Column(
+        modifier = modifier
+            .keyboardFocusRing(shape)
+            .clip(shape)
+            .background(
+                if (selected) scheme.primary.copy(alpha = CHOICE_WASH) else scheme.onSurface.copy(alpha = PANEL_WASH),
+            )
+            .border(1.5.dp, if (selected) scheme.primary else scheme.outlineVariant, shape)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(start = 6.dp, end = 6.dp, top = 12.dp, bottom = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(Modifier.height(40.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.size(if (portrait) 22.dp else 38.dp, if (portrait) 38.dp else 22.dp)
+                    .border(2.dp, ink, RoundedCornerShape(3.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Filled.ArrowUpward,
+                    contentDescription = null,
+                    tint = ink,
+                    modifier = Modifier.size(12.dp).rotate(if (flipped) HALF_TURN else 0f),
+                )
+            }
+        }
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = ink,
+            textAlign = TextAlign.Center,
+        )
     }
-    Hint(stringResource(status) + " " + stringResource(Res.string.signage_kiosk_pin_hint))
 }
 
 /** A new PIN, short as the PIN is, and removing the one set. */
@@ -232,34 +333,51 @@ private fun DeviceSection(
     onAsk: (CardQuestion) -> Unit,
 ) {
     val canPower = initial.canPower
-    SectionTitle(stringResource(Res.string.signage_device))
-    info()
     // The TV's own power, over HDMI, where it answers: at once, without changing what plays.
-    if (initial.canTv) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionTitle(stringResource(Res.string.signage_device), Modifier.weight(1f))
+        if (initial.canTv) {
             KeyButton(onClick = { onTv(true) }) { OneLine(stringResource(Res.string.signage_tv_on)) }
             KeyButton(onClick = { onTv(false) }) { OneLine(stringResource(Res.string.signage_tv_off)) }
         }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        KeyButton(onClick = { onAsk(CardQuestion.RESTART) }, enabled = canPower) {
-            OneLine(stringResource(Res.string.signage_restart))
+    info()
+    val shape = RoundedCornerShape(12.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = DANGER_EDGE), shape)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(Res.string.signage_power_title),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.width(6.dp))
+            InfoHint(stringResource(Res.string.signage_power_hint))
         }
-        KeyButton(onClick = { onAsk(CardQuestion.SHUT_DOWN) }, enabled = canPower) {
-            OneLine(stringResource(Res.string.signage_shut_down))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            KeyButton(onClick = { onAsk(CardQuestion.RESTART) }, enabled = canPower) {
+                OneLine(stringResource(Res.string.signage_restart))
+            }
+            KeyButton(onClick = { onAsk(CardQuestion.SHUT_DOWN) }, enabled = canPower) {
+                OneLine(stringResource(Res.string.signage_shut_down))
+            }
+            Spacer(Modifier.weight(1f))
+            // The error red makes it the danger key.
+            KeyButton(
+                onClick = { onAsk(CardQuestion.FACTORY_RESET) },
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+            ) { OneLine(stringResource(Res.string.signage_factory_reset)) }
         }
-        // The error red makes it the danger key.
-        KeyButton(
-            onClick = { onAsk(CardQuestion.FACTORY_RESET) },
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-        ) { OneLine(stringResource(Res.string.signage_factory_reset)) }
     }
-    Hint(stringResource(Res.string.signage_power_hint))
 }
 
 @Composable
-private fun SectionTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.titleSmall)
+private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
+    Text(text, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, modifier = modifier)
 }
 
 /** A button's label, kept to one line. */
@@ -269,8 +387,13 @@ private fun OneLine(text: String) {
 }
 
 @Composable
-private fun Hint(text: String) {
-    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun Hint(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
+    )
 }
 
 private fun labelOf(orientation: Orientation): StringResource = when (orientation) {
@@ -283,5 +406,9 @@ private fun labelOf(orientation: Orientation): StringResource = when (orientatio
 /** The dialog's text fields, whose captions are drawn apart from the box a test types into. */
 internal const val SCREEN_NAME_TAG = "signage-screen-name"
 internal const val SCREEN_PIN_TAG = "signage-screen-pin"
-private val DIALOG_WIDTH = 440.dp
+private val DIALOG_WIDTH = 540.dp
+private const val PANEL_WASH = 0.03f
+private const val CHOICE_WASH = 0.10f
+private const val DANGER_EDGE = 0.4f
+private const val HALF_TURN = 180f
 private val PIN_WIDTH = 120.dp

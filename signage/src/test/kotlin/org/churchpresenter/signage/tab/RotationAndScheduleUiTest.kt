@@ -145,9 +145,9 @@ class RotationAndScheduleUiTest {
         val actions = ScreenActions({ _, _ -> }, {}, { _, _ -> }, {}, onSchedule = { _, blocks -> scheduled += blocks })
         show { ScreenCard(ScreenRowState(screen, link, folder), actions) }
         // A screen in good health keeps its health off the card: it is in its settings.
-        onNodeWithText("Processor 23% · Memory 61% · 54 °C · up 3 d").assertDoesNotExist()
+        onNodeWithText("CPU").assertDoesNotExist()
         onNodeWithContentDescription("Screen settings").performClick()
-        onNodeWithText("Processor 23% · Memory 61% · 54 °C · up 3 d").assertExists()
+        listOf("CPU", "23%", "61%", "54 °C", "3 days").forEach { onNodeWithText(it).assertExists() }
         onNodeWithText("Address: 10.0.0.5").assertExists()
         onNodeWithText("Cancel").performClick()
         onNodeWithText("drawn in software", substring = true).assertExists()
@@ -159,19 +159,36 @@ class RotationAndScheduleUiTest {
 
     @Test
     fun uptimeReadsInDaysHoursOrMinutes() = runComposeUiTest {
-        show { ScreenHealthLine(PlayerMessage.Status(uptimeSeconds = 7_300, memoryPercent = 95)) }
-        onNodeWithText("Memory 95% · up 2 h").assertExists()
+        show { HealthGrid(PlayerMessage.Status(uptimeSeconds = 7_300, memoryPercent = 95)) }
+        onNodeWithText("2 hours").assertExists()
+        onNodeWithText("95%").assertExists()
+        onNodeWithText("CPU").assertDoesNotExist()
     }
 
     @Test
-    fun aShortUptimeIsInMinutesAndNoHealthIsNoLine() = runComposeUiTest {
+    fun aShortUptimeIsInMinutesAndNoHealthIsNoGrid() = runComposeUiTest {
         show {
-            ScreenHealthLine(PlayerMessage.Status(uptimeSeconds = 600))
-            ScreenHealthLine(PlayerMessage.Status())
-            ScreenHealthLine(null)
+            HealthGrid(PlayerMessage.Status(uptimeSeconds = 600))
+            HealthGrid(PlayerMessage.Status())
+            HealthGrid(null)
         }
-        onNodeWithText("up 10 min").assertExists()
-        assertEquals(1, onAllNodesWithText("up", substring = true).fetchSemanticsNodes().size)
+        onNodeWithText("10 min").assertExists()
+        assertEquals(1, onAllNodesWithText("Up").fetchSemanticsNodes().size)
+    }
+
+    @Test
+    fun onlyAStrainedReadingIsAChipOnTheCard() = runComposeUiTest {
+        show {
+            StrainChips(PlayerMessage.Status(cpuPercent = 99, memoryPercent = 92, temperatureC = 79.0))
+            StrainChips(PlayerMessage.Status(memoryPercent = 10, temperatureC = 85.0))
+            StrainChips(PlayerMessage.Status(cpuPercent = 50))
+            StrainChips(null)
+        }
+        onNodeWithText("92%").assertExists()
+        onNodeWithText("85 °C").assertExists()
+        assertEquals(1, onAllNodesWithText("Memory").fetchSemanticsNodes().size)
+        assertEquals(1, onAllNodesWithText("Temp").fetchSemanticsNodes().size)
+        onNodeWithText("CPU").assertDoesNotExist()
     }
 
     private companion object {
@@ -187,7 +204,7 @@ class RotationAndScheduleUiTest {
         show { RotationDialog(withVideo, rotation, { _, steps -> saved = steps }, {}) }
         // A video's time says that 0 plays it to its end.
         onNodeWithText("0 plays it to its end", substring = true, ignoreCase = true).assertExists()
-        onNodeWithText("STEP 1").performClick()
+        onNodeWithContentDescription("Step 1", substring = true).performClick()
         waitForIdle()
         onAllNodesWithText("Weather").onLast().performClick()
         waitForIdle()

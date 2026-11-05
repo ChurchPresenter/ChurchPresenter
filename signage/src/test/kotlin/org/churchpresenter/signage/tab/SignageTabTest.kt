@@ -76,7 +76,7 @@ class SignageTabTest {
     fun aWaitingScreenIsApprovedWithItsCode() = signageTab(world) {
         runBlocking { hub.registry.load() }
         val decision = world.scope.async { hub.pairing.await(hello(), "10.0.0.5") }
-        waitForText("4821")
+        waitFor { onAllNodesWithContentDescription("Code 4821").fetchSemanticsNodes().isNotEmpty() }
         onNodeWithText("Approve").performClick()
         waitFor { decision.isCompleted }
         assertIs<PairingDecision.Approved>(runBlocking { decision.await() })

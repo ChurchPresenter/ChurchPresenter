@@ -91,7 +91,7 @@ class SignageRotationScreenshotTest {
 
     @Test
     fun `the schedule dialog`() = captureComponent(SECTION, "schedule_dialog", rootIndex = 1) {
-        ScheduleDialog("Lobby", folder.playlists, schedule, {}, {})
+        ScheduleDialog("Lobby", folder.playlists, schedule, {}, {}, plays = "Welcome")
     }
 
     @Test
@@ -101,6 +101,7 @@ class SignageRotationScreenshotTest {
             PlaylistSummary("link:checkin", "Check-in", kind = SourceKind.WEB),
         )
         ScreenSettingsDialog(
+            subtitle = "Lobby · Raspberry Pi",
             initial = ScreenSettingsInput(
                 "Lobby", Orientation.PORTRAIT, hasPin = true, touchPlaylists = pages, canTv = true,
             ),
@@ -113,6 +114,11 @@ class SignageRotationScreenshotTest {
                     "Raspberry Pi · 1920×1080 · Player 26.0.41",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                HealthGrid(
+                    PlayerMessage.Status(
+                        cpuPercent = 23, memoryPercent = 92, temperatureC = 52.0, uptimeSeconds = 3 * 86_400L,
+                    ),
                 )
             },
         )
