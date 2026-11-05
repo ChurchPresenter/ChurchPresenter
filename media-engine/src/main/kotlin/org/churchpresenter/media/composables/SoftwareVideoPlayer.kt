@@ -254,7 +254,7 @@ internal fun SoftwarePlayback(
         mp.events().addMediaPlayerEventListener(
             softwarePlayerEvents(viewModel, firstFrameCaptured, gate, pauseTimer, reportsPlaybackEnd)
         )
-        onDispose { stopAndRelease(gate, pauseTimer, mp, release) }
+        onDispose { stopAndRelease(gate, pauseTimer, mp, release, PlayerReleaseThread) }
     }
 
     AudioOutputDevice(mp, audioDeviceId)

@@ -1,5 +1,6 @@
 package org.churchpresenter.media.viewmodel
 
+import javax.swing.SwingUtilities
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.media.subtitles.SubtitleCue
@@ -31,6 +32,24 @@ internal fun siblingSubtitleFiles(mediaUrl: String): List<File> {
             name == stem || name.startsWith("$stem.") && !name.removePrefix("$stem.").contains('.')
         }
         .sortedBy { it.name.lowercase() }
+}
+
+/**
+ * The subtitle files beside [mediaUrl], each with the cues parsing it gave: the disk work
+ * [MediaViewModel.loadMedia] does off the event thread.
+ */
+internal fun readSiblingSubtitles(mediaUrl: String): List<Pair<String, List<SubtitleCue>>> =
+    siblingSubtitleFiles(mediaUrl).map { it.absolutePath to SubtitleCueParser.parseSubtitleFile(it) }
+
+/**
+ * Reads [mediaUrl]'s sibling subtitles on a background thread and hands them to [apply] on the
+ * event thread: a folder on a network share can take seconds to list.
+ */
+internal fun scanSubtitlesInBackground(mediaUrl: String, apply: (List<Pair<String, List<SubtitleCue>>>) -> Unit) {
+    Thread({
+        val found = runCatching { readSiblingSubtitles(mediaUrl) }.getOrDefault(emptyList())
+        SwingUtilities.invokeLater { apply(found) }
+    }, "subtitle-scan").apply { isDaemon = true }.start()
 }
 
 /**
@@ -130,7 +149,12 @@ class MediaSubtitles(private val position: () -> Long) {
      */
     fun addSubtitleFile(path: String) {
         if (path.isBlank() || _sidecars.value.any { it.path == path }) return
-        val cues = SubtitleCueParser.parseSubtitleFile(File(path))
+        addParsedSubtitleFile(path, SubtitleCueParser.parseSubtitleFile(File(path)))
+    }
+
+    /** [addSubtitleFile] for a file already read: [cues] are what parsing [path] gave. */
+    internal fun addParsedSubtitleFile(path: String, cues: List<SubtitleCue>) {
+        if (path.isBlank() || _sidecars.value.any { it.path == path }) return
         if (cues.isEmpty()) {
             // Nothing this app can draw: hand it to VLC, which costs the one reload that is real.
             _subtitleUrl.value = path
