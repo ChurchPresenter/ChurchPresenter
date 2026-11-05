@@ -55,6 +55,7 @@ import org.churchpresenter.strings.generated.resources.menu_developer
 import org.churchpresenter.strings.generated.resources.menu_developer_always_on_top
 import org.churchpresenter.strings.generated.resources.menu_developer_display
 import org.churchpresenter.strings.generated.resources.menu_developer_show_window
+import org.churchpresenter.strings.generated.resources.menu_developer_simulate_missing_outputs
 import org.churchpresenter.strings.generated.resources.menu_developer_style_editor
 import org.churchpresenter.strings.generated.resources.menu_developer_memory_monitor
 import org.churchpresenter.strings.generated.resources.menu_developer_story_prompt
@@ -135,6 +136,8 @@ fun FrameWindowScope.NavigationTopBar(
     onSetPresenterWindowVisible: (Boolean) -> Unit = {},
     isDevWindowAlwaysOnTop: Boolean = false,
     onSetDevWindowAlwaysOnTop: (Boolean) -> Unit = {},
+    isSimulatingMissingOutputs: Boolean = false,
+    onSetSimulatingMissingOutputs: (Boolean) -> Unit = {},
     onOpenStyleEditor: () -> Unit = {},
     onOpenMemoryMonitor: () -> Unit = {},
     onOpenStoryPrompt: () -> Unit = {},
@@ -173,8 +176,13 @@ fun FrameWindowScope.NavigationTopBar(
             onHowToBlog,
             onConverter, onSongLibrary, onCalendar, onAbout, onHelp, onContactUs, onCheckForUpdates)
         if (showDeveloperMenu) {
-            DeveloperMenu(isPresenterWindowVisible, onSetPresenterWindowVisible, isDevWindowAlwaysOnTop,
-                onSetDevWindowAlwaysOnTop, onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt, onOpenWickIntro)
+            DeveloperMenu(
+                DeveloperDisplayToggles(
+                    isPresenterWindowVisible, onSetPresenterWindowVisible, isDevWindowAlwaysOnTop,
+                    onSetDevWindowAlwaysOnTop, isSimulatingMissingOutputs, onSetSimulatingMissingOutputs,
+                ),
+                onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt, onOpenWickIntro,
+            )
         }
     }
 }
@@ -452,12 +460,19 @@ private fun MenuBarScope.HelpMenu(
     }
 }
 
+/** The Developer → Display checkboxes: each one's state and what ticking it does. */
+private class DeveloperDisplayToggles(
+    val isPresenterWindowVisible: Boolean,
+    val onSetPresenterWindowVisible: (Boolean) -> Unit,
+    val isDevWindowAlwaysOnTop: Boolean,
+    val onSetDevWindowAlwaysOnTop: (Boolean) -> Unit,
+    val isSimulatingMissingOutputs: Boolean,
+    val onSetSimulatingMissingOutputs: (Boolean) -> Unit,
+)
+
 @Composable
 private fun MenuBarScope.DeveloperMenu(
-    isPresenterWindowVisible: Boolean,
-    onSetPresenterWindowVisible: (Boolean) -> Unit,
-    isDevWindowAlwaysOnTop: Boolean,
-    onSetDevWindowAlwaysOnTop: (Boolean) -> Unit,
+    display: DeveloperDisplayToggles,
     onOpenStyleEditor: () -> Unit,
     onOpenMemoryMonitor: () -> Unit,
     onOpenStoryPrompt: () -> Unit,
@@ -467,13 +482,18 @@ private fun MenuBarScope.DeveloperMenu(
         Menu(stringResource(Res.string.menu_developer_display), mnemonic = 'S') {
             CheckboxItem(
                 text = stringResource(Res.string.menu_developer_show_window),
-                checked = isPresenterWindowVisible,
-                onCheckedChange = onSetPresenterWindowVisible
+                checked = display.isPresenterWindowVisible,
+                onCheckedChange = display.onSetPresenterWindowVisible
             )
             CheckboxItem(
                 text = stringResource(Res.string.menu_developer_always_on_top),
-                checked = isDevWindowAlwaysOnTop,
-                onCheckedChange = onSetDevWindowAlwaysOnTop
+                checked = display.isDevWindowAlwaysOnTop,
+                onCheckedChange = display.onSetDevWindowAlwaysOnTop
+            )
+            CheckboxItem(
+                text = stringResource(Res.string.menu_developer_simulate_missing_outputs),
+                checked = display.isSimulatingMissingOutputs,
+                onCheckedChange = display.onSetSimulatingMissingOutputs
             )
         }
         Item(stringResource(Res.string.menu_developer_style_editor), onClick = onOpenStyleEditor)

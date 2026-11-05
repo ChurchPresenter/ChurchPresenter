@@ -68,6 +68,14 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.sharedui.utils.outputSizeOf
 import org.churchpresenter.sharedui.utils.DevFlags
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
+import org.churchpresenter.settings.DisplayRect
+import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
+import org.churchpresenter.sharedui.utils.simulatedOutputCount
 import org.churchpresenter.sharedui.utils.findScreenIndexByBounds
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
@@ -88,6 +96,9 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val NANOS_PER_MILLI = 1_000_000
 
+/** How long a simulated output's window has to stay put before where it was left is saved. */
+private const val SIMULATED_WINDOW_SAVE_DELAY_MS = 500L
+
 @Composable
 internal fun PresenterWindows(
     screens: Array<GraphicsDevice>,
@@ -103,6 +114,8 @@ internal fun PresenterWindows(
     },
     /** Opens each output's window; the app's is [awtOutputWindow], a test draws the content in place. */
     window: OutputWindowHost = awtOutputWindow,
+    /** A simulated output's window was moved or resized to this frame -- the app saves it on that output. */
+    onSimulatedWindowMoved: (slotIndex: Int, frame: SimulatedWindowFrame) -> Unit = { _, _ -> },
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val slideContent by presenterManager.slideContent
@@ -164,13 +177,18 @@ internal fun PresenterWindows(
 
     val deckLinkDeviceCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
     val windowCount = presenterWindowCount(availableScreens.size, deckLinkDeviceCount)
-    val devWindowedFallback = isDevWindowedFallback(
-        BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, windowCount,
+    // Outputs with nothing real behind them, opened as windows -- see simulatedOutputCount. Each
+    // keeps its own slot number, so it is the same output with or without its monitor.
+    val devFallbackCount = simulatedOutputCount(
+        windowCount, proj.devWindowCount,
+        developmentFallback = !BuildConfig.IS_RELEASE || DevFlags.forceDevWindow,
+        simulateMissing = LocalSimulateMissingOutputs.current,
     )
-    val devFallbackCount = devFallbackWindowCount(devWindowedFallback, proj.devWindowCount)
+    val devWindowedFallback = devFallbackCount > 0
+    val displays = screens.map { it.defaultConfiguration.bounds.asDisplayRect() }
     for (i in 0 until (windowCount + devFallbackCount)) {
         val isFallback = isFallbackWindowSlot(devWindowedFallback, i, windowCount)
-        val slotIndex = if (isFallback) fallbackSlotIndex(i, windowCount) else i
+        val slotIndex = i
         val screenAssignment = proj.getAssignment(slotIndex)
         // The profile this output is assigned to -- everything about how it looks and what it
         // shows, used below wherever this file itself (not `PresenterOutputContent`, which
@@ -196,7 +214,7 @@ internal fun PresenterWindows(
         when {
             isFallback -> DevFallbackWindow(
                 slot, slotIndex, showPresenterWindow, identifyingScreen, presenterManager, presenterOutputContent,
-                window,
+                window, displays, onSimulatedWindowMoved,
             )
             isDeckLinkPrimaryOutput(screenAssignment) ->
                 DeckLinkOutputs(slot, screens, showPresenterWindow, hideCursor, env, window)
@@ -401,21 +419,28 @@ private fun DevFallbackWindow(
     presenterManager: PresenterManager,
     presenterOutputContent: @Composable (ScreenAssignment, Presenting, Int?) -> Unit,
     window: OutputWindowHost,
+    displays: List<DisplayRect>,
+    onMoved: (slotIndex: Int, frame: SimulatedWindowFrame) -> Unit,
 ) {
     val fallbackIndex = slotIndex
     // Keyed on the size too: without it, changing an output's resolution in settings
-    // did nothing until the app was restarted.
+    // did nothing until the app was restarted. Opens where it was last left (see
+    // simulatedWindowPositionDp), read once: the saves below must not reopen it.
     val devSize = outputSizeOf(slot.assignment, OutputKind.SCREEN)
     val fallbackWindowState = remember(fallbackIndex, devSize) {
-        val (windowWidth, windowHeight) = devFallbackWindowSizeDp(devSize.width, devSize.height)
-        WindowState(
-            width = windowWidth.dp,
-            height = windowHeight.dp,
-            position = WindowPosition(
-                x = devFallbackWindowOffsetDp(fallbackIndex).dp,
-                y = devFallbackWindowOffsetDp(fallbackIndex).dp,
-            ),
-        )
+        val (windowWidth, windowHeight) = simulatedWindowSizeDp(slot.assignment, devSize.width, devSize.height)
+        val (x, y) = simulatedWindowPositionDp(slot.assignment, fallbackIndex, displays)
+        WindowState(width = windowWidth.dp, height = windowHeight.dp, position = WindowPosition(x.dp, y.dp))
+    }
+    val currentOnMoved by rememberUpdatedState(onMoved)
+    LaunchedEffect(fallbackWindowState) {
+        // Saved once the window has settled, not on every step of a drag.
+        snapshotFlow { fallbackWindowState.position to fallbackWindowState.size }
+            .drop(1)
+            .collectLatest { (position, size) ->
+                delay(SIMULATED_WINDOW_SAVE_DELAY_MS)
+                simulatedWindowFrame(position, size)?.let { currentOnMoved(fallbackIndex, it) }
+            }
     }
     val spec = OutputWindowSpec(
         visible = showPresenterWindow,

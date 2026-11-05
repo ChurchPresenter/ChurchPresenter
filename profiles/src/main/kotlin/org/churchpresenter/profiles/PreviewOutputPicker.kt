@@ -27,6 +27,8 @@ import org.churchpresenter.strings.generated.resources.screen_number
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.sharedui.utils.DevFlags
+import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
+import org.churchpresenter.sharedui.utils.simulatedOutputCount
 import org.churchpresenter.sharedui.utils.FallbackOutputSize
 import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.sharedui.utils.PreviewOutput
@@ -97,8 +99,13 @@ fun outputsShowing(
 
     // Mirrors LivePreviewPanel's own dev-fallback detection, so the picker lists exactly what
     // main.kt actually opens on this machine, dev fallback windows included.
-    val devWindowedFallback = (LocalDevelopmentBuild.current || DevFlags.forceDevWindow) && realWindowCount == 0
-    val displayCount = realWindowCount + if (devWindowedFallback) proj.devWindowCount.coerceAtLeast(1) else 0
+    val simulatedCount = simulatedOutputCount(
+        realWindowCount, proj.devWindowCount,
+        developmentFallback = LocalDevelopmentBuild.current || DevFlags.forceDevWindow,
+        simulateMissing = LocalSimulateMissingOutputs.current,
+    )
+    val devWindowedFallback = simulatedCount > 0
+    val displayCount = realWindowCount + simulatedCount
 
     for (index in 0 until displayCount) {
         val assignment = proj.getAssignment(index)
