@@ -94,6 +94,24 @@ class SignageLinksScreenshotTest {
         )
     }
 
+    /** A photo slideshow while nobody uses the screen, each page with its own reload time. */
+    @Test
+    fun `a touch page over a slideshow that reloads`() =
+        captureComponent(SECTION, "link_touch_idle_page", rootIndex = 1) {
+            LinkDialog(
+                onAdd = {},
+                onDismiss = {},
+                initial = LinkPlaylist(
+                    "link:3", "Photos", "https://photos.example.org", LinkKind.WEB, refreshMinutes = 60,
+                    interactive = InteractiveLink(
+                        90, listOf(InteractiveLink.ANY_HOST),
+                        idleUrl = "https://photos.example.org/slideshow", idlePrompt = "Tap the screen to start",
+                        idleRefreshMinutes = 30,
+                    ),
+                ),
+            )
+        }
+
     /** Scrolled down to the code, which fills the end of the dialog. */
     @Test
     fun `a page restyled with the church's own code`() = captureComponent(SECTION, "link_code", rootIndex = 1, drive = {

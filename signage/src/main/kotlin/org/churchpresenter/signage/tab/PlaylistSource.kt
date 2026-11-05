@@ -102,6 +102,8 @@ data class InteractiveLink(
     val idlePlaylistId: String? = null,
     val idleUrl: String? = null,
     val idlePrompt: String? = null,
+    /** How often [idleUrl] reloads while it shows, in minutes; never when 0. */
+    val idleRefreshMinutes: Int = 0,
 ) {
     companion object {
         const val DEFAULT_IDLE_RESET_SECONDS = 90
