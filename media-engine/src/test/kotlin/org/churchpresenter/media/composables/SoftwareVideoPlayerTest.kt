@@ -27,6 +27,8 @@ class SoftwareVideoPlayerTest {
         val mp = mockk<MediaPlayer>(relaxed = true)
         var format: BufferFormatCallback? = null
         var render: RenderCallback? = null
+
+        @Volatile
         var released = 0
         var opened = 0
         val open: () -> SoftwareVlc? = {
@@ -65,6 +67,8 @@ class SoftwareVideoPlayerTest {
         waitUntil(timeoutMillis = 5_000) { onAllNodesWithTag("video").fetchSemanticsNodes().isNotEmpty() }
         shown = false
         waitForIdle()
+        // Released on the player release thread, not this one.
+        waitUntil(timeoutMillis = 5_000) { vlc.released == 1 }
         assertEquals(1, vlc.opened)
         assertEquals(1, vlc.released)
     }

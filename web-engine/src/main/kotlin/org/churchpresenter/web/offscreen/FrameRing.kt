@@ -1,5 +1,6 @@
 package org.churchpresenter.web.offscreen
 
+import java.util.concurrent.RejectedExecutionException
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorType
 import org.jetbrains.skia.Data
@@ -147,7 +148,16 @@ internal fun inBands(top: Int, bottom: Int, pool: ExecutorService, work: (Int, I
         val y1 = minOf(bottom, y0 + rows)
         if (y1 > y0) work(y0, y1)
     }
-    val others = (1 until COPY_THREADS).map { k -> pool.submit { band(k) } }
+    // A pool already shut down -- the session closing while a frame is copied
+    // (CHURCH-PRESENTER-DESKTOP-RX) -- leaves the band to this thread rather than losing it.
+    val others = (1 until COPY_THREADS).mapNotNull { k ->
+        try {
+            pool.submit { band(k) }
+        } catch (_: RejectedExecutionException) {
+            band(k)
+            null
+        }
+    }
     band(0)
     others.forEach { it.get() }
 }

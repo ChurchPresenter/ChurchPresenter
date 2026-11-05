@@ -239,6 +239,8 @@ internal fun SoftwarePlayback(
     audioDeviceId: String = "",
     reportsPlaybackEnd: Boolean = true,
     release: () -> Unit = {},
+    /** Where the player is stopped and released when it leaves -- see [stopAndRelease]. */
+    stopOn: (Runnable) -> Unit = PlayerReleaseThread,
 ) {
     // What the load effect below last opened it for, so it can tell a genuinely new file or a loop
     // restart (both begin at zero) from the same file being re-opened only because a subtitle VLC
@@ -254,7 +256,7 @@ internal fun SoftwarePlayback(
         mp.events().addMediaPlayerEventListener(
             softwarePlayerEvents(viewModel, firstFrameCaptured, gate, pauseTimer, reportsPlaybackEnd)
         )
-        onDispose { stopAndRelease(gate, pauseTimer, mp, release) }
+        onDispose { stopAndRelease(gate, pauseTimer, mp, release, stopOn) }
     }
 
     AudioOutputDevice(mp, audioDeviceId)

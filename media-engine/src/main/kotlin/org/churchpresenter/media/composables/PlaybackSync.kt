@@ -1,5 +1,6 @@
 package org.churchpresenter.media.composables
 
+import java.util.concurrent.Executors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -50,19 +51,40 @@ internal fun pollPlayback(mp: MediaPlayer, viewModel: MediaViewModel) {
 /**
  * Stops the player and lets it go: the gate first, so anything already queued sees the player as
  * gone, then the grace timer, then [release] for whatever owns the native handle.
+ *
+ * VLC's stop waits for its decoder threads, a few hundred milliseconds on the event thread. A
+ * player that draws through callbacks rather than into a native window can be stopped on
+ * [stopOn] instead -- [PlayerReleaseThread] -- so leaving it does not freeze the UI. One drawing
+ * into a window must not: the window can be gone before VLC stops drawing into it.
  */
 internal fun stopAndRelease(
     gate: PlayerReleaseGate,
     pauseTimer: MutableState<javax.swing.Timer?>,
     mp: MediaPlayer,
     release: () -> Unit,
+    stopOn: (Runnable) -> Unit = Runnable::run,
 ) {
     gate.release()
     pauseTimer.value?.stop()
-    try {
-        mp.controls().stop()
-        release()
-    } catch (_: Throwable) { }
+    stopOn(
+        Runnable {
+            try {
+                mp.controls().stop()
+                release()
+            } catch (_: Throwable) { }
+        }
+    )
+}
+
+/** The one thread callback players are stopped and released on, in the order they were left. */
+internal object PlayerReleaseThread : (Runnable) -> Unit {
+    private val executor = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "vlc-release").apply { isDaemon = true }
+    }
+
+    override fun invoke(task: Runnable) {
+        executor.execute(task)
+    }
 }
 
 /** Sends the sound to [audioDeviceId]; blank leaves VLC on the system default. */

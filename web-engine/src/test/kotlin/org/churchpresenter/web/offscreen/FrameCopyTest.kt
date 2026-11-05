@@ -4,6 +4,7 @@ import org.jetbrains.skia.ColorType
 import java.awt.Rectangle
 import java.lang.ref.Reference
 import java.nio.ByteBuffer
+import java.util.concurrent.Executors
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -108,6 +109,14 @@ class FrameCopyTest {
             inBands(0, rows, pool) { y0, y1 -> synchronized(seen) { for (y in y0 until y1) seen[y]++ } }
             assertTrue(seen.all { it == 1 }, "$rows rows")
         }
+    }
+
+    @Test
+    fun `a pool already shut down leaves every band to the calling thread`() {
+        val pool = Executors.newFixedThreadPool(2).apply { shutdown() }
+        val seen = IntArray(7)
+        inBands(0, 7, pool) { y0, y1 -> for (y in y0 until y1) seen[y]++ }
+        assertTrue(seen.all { it == 1 })
     }
 
     @Test

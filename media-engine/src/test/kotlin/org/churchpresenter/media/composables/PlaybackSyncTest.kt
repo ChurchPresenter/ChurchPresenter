@@ -132,7 +132,7 @@ class PlaybackSyncTest {
         val gate = PlayerReleaseGate()
         val timer = javax.swing.Timer(10_000) {}.apply { start() }
         var released = false
-        stopAndRelease(gate, mutableStateOf(timer), mp) { released = true }
+        stopAndRelease(gate, mutableStateOf(timer), mp, release = { released = true })
         assertFalse(timer.isRunning)
         assertTrue(released)
         var ran = false
@@ -144,7 +144,7 @@ class PlaybackSyncTest {
     @Test
     fun `a release that throws does not escape`() {
         val mp = mockk<MediaPlayer>(relaxed = true)
-        stopAndRelease(PlayerReleaseGate(), mutableStateOf(null), mp) { error("native handle gone") }
+        stopAndRelease(PlayerReleaseGate(), mutableStateOf(null), mp, release = { error("native handle gone") })
         verify { mp.controls().stop() }
     }
 

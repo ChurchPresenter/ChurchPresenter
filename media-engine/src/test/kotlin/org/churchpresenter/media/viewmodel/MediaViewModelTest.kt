@@ -810,7 +810,7 @@ class MediaViewModelTest {
         val folder = createTempDirectory().toFile().apply { deleteOnExit() }
         val video = File(folder, "sermon.mp4").apply { writeText("x"); deleteOnExit() }
         File(folder, "sermon.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
-        val vm = MediaViewModel()
+        val vm = MediaViewModel { url, apply -> apply(readSiblingSubtitles(url)) }
 
         vm.loadMedia(video.absolutePath, Constants.MEDIA_TYPE_LOCAL)
 
@@ -823,11 +823,26 @@ class MediaViewModelTest {
         val video = File(folder, "sermon.mp4").apply { writeText("x"); deleteOnExit() }
         File(folder, "sermon.es.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
         File(folder, "sermon.en.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
-        val vm = MediaViewModel()
+        val vm = MediaViewModel { url, apply -> apply(readSiblingSubtitles(url)) }
 
         vm.loadMedia(video.absolutePath, Constants.MEDIA_TYPE_LOCAL)
 
         assertEquals(listOf("sermon.en.srt", "sermon.es.srt"), vm.sidecarSubtitles.map { it.name })
+    }
+
+    @Test
+    fun `subtitles found for a clip already replaced are dropped`() {
+        val folder = createTempDirectory().toFile().apply { deleteOnExit() }
+        val video = File(folder, "sermon.mp4").apply { writeText("x"); deleteOnExit() }
+        File(folder, "sermon.srt").apply { writeText(CUE_TEXT); deleteOnExit() }
+        val pending = mutableListOf<() -> Unit>()
+        val vm = MediaViewModel { url, apply -> pending += { apply(readSiblingSubtitles(url)) } }
+
+        vm.loadMedia(video.absolutePath, Constants.MEDIA_TYPE_LOCAL)
+        vm.loadMedia(File(folder, "other.mp4").absolutePath, Constants.MEDIA_TYPE_LOCAL)
+        pending.forEach { it() }
+
+        assertEquals(emptyList(), vm.sidecarSubtitles.map { it.name })
     }
 
     @Test
