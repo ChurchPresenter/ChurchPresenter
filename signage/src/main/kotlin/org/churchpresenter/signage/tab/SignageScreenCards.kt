@@ -2,7 +2,6 @@ package org.churchpresenter.signage.tab
 
 import org.churchpresenter.signage.core.CecState
 import androidx.compose.foundation.layout.FlowRow
-import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +37,6 @@ import org.churchpresenter.signage.core.Features
 import org.churchpresenter.signage.core.PowerAction
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.hub.PendingScreen
-import org.churchpresenter.sharedui.composables.DropdownSettingsField
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.strings.generated.resources.Res
@@ -76,6 +74,31 @@ import org.churchpresenter.strings.generated.resources.signage_wipe_confirm
 import org.churchpresenter.strings.generated.resources.signage_wipe_text
 import org.churchpresenter.strings.generated.resources.signage_web_test
 import org.churchpresenter.strings.generated.resources.signage_wipe_title
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.signage.core.UpdateState
+import org.churchpresenter.strings.generated.resources.signage_code
+import org.churchpresenter.strings.generated.resources.signage_status_offline
+import org.churchpresenter.strings.generated.resources.signage_status_updating
+import org.churchpresenter.theme.dropdownField
+import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.keyboardFocusRing
+import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -83,14 +106,26 @@ import org.jetbrains.compose.resources.stringResource
 /** A player waiting on the TV with its code, to approve or decline. */
 @Composable
 internal fun PendingScreenCard(player: PendingScreen, onApprove: () -> Unit, onDecline: () -> Unit) {
+    val accent = MaterialTheme.colorScheme.primary
     Row(
-        modifier = Modifier.fillMaxWidth().bibleListCard()
-            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = PENDING_TINT))
+        modifier = Modifier.fillMaxWidth()
+            .bibleListCard()
+            .background(accent.copy(alpha = PENDING_WASH))
+            .border(1.5.dp, accent.copy(alpha = PENDING_EDGE), RoundedCornerShape(14.dp))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(Res.string.signage_new_screen), style = MaterialTheme.typography.titleSmall)
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(Modifier.size(8.dp).background(accent, CircleShape))
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(Res.string.signage_new_screen),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
             Text(
                 listOf(
                     stringResource(platformName(player.platform)),
@@ -106,15 +141,40 @@ internal fun PendingScreenCard(player: PendingScreen, onApprove: () -> Unit, onD
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Text(
-            player.code,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp),
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            KeyButton(onClick = onDecline) { Text(stringResource(Res.string.signage_decline)) }
-            RaisedButton(onClick = onApprove) { Text(stringResource(Res.string.signage_approve)) }
+        PairingCode(player.code)
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.width(IntrinsicSize.Max)) {
+            RaisedButton(onClick = onApprove, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.signage_approve))
+            }
+            RingedGhostButton(onClick = onDecline, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.signage_decline))
+            }
+        }
+    }
+}
+
+/** The code the TV shows, a digit to a box, so it is read off one digit at a time. */
+@Composable
+private fun PairingCode(code: String) {
+    val name = stringResource(Res.string.signage_code, code)
+    val shape = RoundedCornerShape(9.dp)
+    val palette = elevationPalette()
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier.clearAndSetSemantics { contentDescription = name },
+    ) {
+        code.forEach { digit ->
+            Box(
+                modifier = Modifier.size(width = 36.dp, height = 46.dp).sunken(shape, palette),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    digit.toString(),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }
@@ -135,15 +195,12 @@ internal fun ScreenCard(row: ScreenRowState, actions: ScreenActions) {
         },
     )
     Row(
-        modifier = Modifier.fillMaxWidth().bibleListCard()
-            .padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth().bibleListCard().padding(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Box(Modifier.padding(top = 6.dp)) {
-            PreviewThumbnail(currentPreview(row.link).takeIf { showsPreview }, placeholder) {
-                enlarged = true
-                actions.onPreviewOpen(screen.id)
-            }
+        PreviewThumbnail(currentPreview(row.link).takeIf { showsPreview }, placeholder) {
+            enlarged = true
+            actions.onPreviewOpen(screen.id)
         }
         ScreenDetails(row, actions, onRename = { renaming = true }, onAsk = { asking = it })
     }
@@ -156,6 +213,7 @@ internal fun ScreenCard(row: ScreenRowState, actions: ScreenActions) {
     if (renaming) {
         val plan = row.folder.settings.plan(screen.id)
         ScreenSettingsDialog(
+            subtitle = listOf(screen.name, stringResource(platformName(screen.platform))).joinToString(SEPARATOR),
             initial = ScreenSettingsInput(
                 name = screen.name,
                 orientation = plan.orientation,
@@ -206,6 +264,7 @@ internal fun ScreenCard(row: ScreenRowState, actions: ScreenActions) {
             screenName = screen.name,
             playlists = row.folder.playlists,
             blocks = row.folder.settings.plan(screen.id).schedule,
+            plays = playsName(row),
             onSave = { actions.onSchedule(screen.id, it) },
             onDismiss = { asking = null },
         )
@@ -227,46 +286,29 @@ private fun RowScope.ScreenDetails(
     val screen = row.screen
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            StatusDot(online = row.link != null)
-            Spacer(Modifier.width(10.dp))
-            Text(screen.name, style = MaterialTheme.typography.titleMedium)
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Visibility),
-                text = stringResource(Res.string.signage_identify),
-                onClick = { actions.onIdentify(screen.id) },
-                enabled = row.link != null,
-            )
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Schedule),
-                text = stringResource(Res.string.signage_schedule),
-                onClick = { onAsk(CardQuestion.SCHEDULE) },
-            )
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Speed),
-                text = stringResource(Res.string.signage_web_test),
-                onClick = { actions.onTestWebPages(screen.id) },
-                enabled = row.link?.let { Features.WEB_TEST in it.features && it.webTestStartedAtMs == null } == true,
-            )
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Settings),
-                text = stringResource(Res.string.signage_screen_settings),
-                onClick = onRename,
-            )
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.DeleteSweep),
-                text = stringResource(Res.string.signage_wipe),
-                onClick = { onAsk(CardQuestion.WIPE) },
-                enabled = row.link?.features?.contains(Features.WIPE) == true,
-            )
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    screen.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                ScreenPill(row)
+            }
+            CardButtons(row, actions, onRename, onAsk)
         }
         val now = rememberNow()
         val away = awayState(row, now)
         Text(
             connectionLine(row, away, now),
-            style = MaterialTheme.typography.bodyMedium,
-            color = with(MaterialTheme.colorScheme) { if (row.link != null) onSurface else onSurfaceVariant },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (away == AwayState.WAITING) {
             Text(
@@ -275,63 +317,186 @@ private fun RowScope.ScreenDetails(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        // The rest of its details are in its settings; only a screen under strain says so here.
-        ScreenHealthLine(row.link?.status, onlyWhenStrained = true)
+        StrainChips(row.link?.status)
         row.link?.status?.errors?.forEach { error ->
             Text(error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
         UpdateLine(row)
         WebTestLine(row)
+        Spacer(Modifier.height(2.dp))
         // Side by side where the card is wide enough; the button moves under the picker where it is not.
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
             PlaylistPicker(row, onPlay = { actions.onPlay(screen.id, it) })
+            row.folder.settings.plan(screen.id).schedule.takeIf { it.isNotEmpty() }?.let { blocks ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.Schedule,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text(
+                        stringResource(Res.string.signage_schedule_summary, blocks.sumOf { it.days.size }),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             UpdateButton(row, onUpdate = { actions.onUpdate(screen.id) })
-        }
-        row.folder.settings.plan(screen.id).schedule.takeIf { it.isNotEmpty() }?.let { blocks ->
-            Text(
-                stringResource(Res.string.signage_schedule_summary, blocks.sumOf { it.days.size }),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }
 
-/** What the screen plays: a playlist, or nothing (its idle card). */
+/** The card's quiet icon buttons: identify, schedule, web test, settings, wipe. */
+@Composable
+private fun CardButtons(
+    row: ScreenRowState,
+    actions: ScreenActions,
+    onRename: () -> Unit,
+    onAsk: (CardQuestion) -> Unit,
+) {
+    val screen = row.screen
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Filled.Visibility),
+            text = stringResource(Res.string.signage_identify),
+            onClick = { actions.onIdentify(screen.id) },
+            enabled = row.link != null,
+        )
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Filled.Schedule),
+            text = stringResource(Res.string.signage_schedule),
+            onClick = { onAsk(CardQuestion.SCHEDULE) },
+        )
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Filled.Speed),
+            text = stringResource(Res.string.signage_web_test),
+            onClick = { actions.onTestWebPages(screen.id) },
+            enabled = row.link?.let { Features.WEB_TEST in it.features && it.webTestStartedAtMs == null } == true,
+        )
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Filled.Settings),
+            text = stringResource(Res.string.signage_screen_settings),
+            onClick = onRename,
+        )
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Filled.DeleteSweep),
+            text = stringResource(Res.string.signage_wipe),
+            onClick = { onAsk(CardQuestion.WIPE) },
+            enabled = row.link?.features?.contains(Features.WIPE) == true,
+        )
+    }
+}
+
+/** Online, Updating (while an update runs) or Offline. */
+@Composable
+private fun ScreenPill(row: ScreenRowState) {
+    val link = row.link
+    val updating = link?.update?.state?.let { it != UpdateState.FAILED && it != UpdateState.ROLLED_BACK } == true
+    when {
+        link == null -> StatusPill(stringResource(Res.string.signage_status_offline), MaterialTheme.colorScheme.outline)
+        updating -> StatusPill(stringResource(Res.string.signage_status_updating), MaterialTheme.semantic.warning)
+        else -> StatusPill(stringResource(Res.string.signage_online), MaterialTheme.semantic.success)
+    }
+}
+
+/** What the screen plays: a playlist, or nothing (its idle card), with the playlist's kind on its tile. */
 @Composable
 private fun PlaylistPicker(row: ScreenRowState, onPlay: (String) -> Unit) {
     val playlists = row.folder.playlists
     val wanted = row.folder.settings.plan(row.screen.id).playlistId
     if (playlists.isEmpty() && wanted != ScreenPlan.NOTHING) return
     val nothing = stringResource(Res.string.signage_nothing)
-    val current = when (wanted) {
-        ScreenPlan.NOTHING -> nothing
-        else -> (playlists.firstOrNull { it.id == wanted } ?: playlists.first()).name
+    val current = if (wanted == ScreenPlan.NOTHING) {
+        null
+    } else {
+        playlists.firstOrNull { it.id == wanted } ?: playlists.first()
     }
-    DropdownSettingsField(
-        value = current,
-        options = playlists.map { it.name } + nothing,
-        onValueChange = { name -> ScreenPlan.forChoice(name, nothing, playlists)?.let(onPlay) },
-        label = stringResource(Res.string.signage_plays),
-    )
+    var open by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(8.dp)
+    val plays = stringResource(Res.string.signage_plays)
+    Box {
+        Row(
+            modifier = Modifier.height(32.dp)
+                .keyboardFocusRing(shape)
+                .dropdownField(shape, open)
+                .semantics { contentDescription = "$plays ${current?.name ?: nothing}" }
+                .clickable(role = Role.DropdownList) { open = true }
+                .padding(start = 10.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            Text(
+                plays.uppercase(),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.6.sp,
+                color = MaterialTheme.colorScheme.outline,
+            )
+            current?.let { KindTile(tileKindOf(it.kind), size = 18.dp) }
+            Text(
+                current?.name ?: nothing,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = PICKER_MAX_NAME),
+            )
+            Icon(
+                Icons.Filled.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            playlists.forEach { playlist ->
+                DropdownMenuItem(
+                    text = { Text(playlist.name) },
+                    leadingIcon = { KindTile(tileKindOf(playlist.kind), size = 24.dp) },
+                    onClick = {
+                        open = false
+                        onPlay(playlist.id)
+                    },
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(nothing) },
+                onClick = {
+                    open = false
+                    onPlay(ScreenPlan.NOTHING)
+                },
+            )
+        }
+    }
 }
 
+/** The name of what [row]'s Plays picker is set to: a playlist, or nothing. */
 @Composable
-private fun StatusDot(online: Boolean) {
-    val colour = if (online) MaterialTheme.semantic.success else MaterialTheme.colorScheme.outline
-    Spacer(Modifier.size(10.dp).background(colour, CircleShape))
+private fun playsName(row: ScreenRowState): String {
+    val playlists = row.folder.playlists
+    val wanted = row.folder.settings.plan(row.screen.id).playlistId
+    return if (wanted == ScreenPlan.NOTHING || playlists.isEmpty()) {
+        stringResource(Res.string.signage_nothing)
+    } else {
+        (playlists.firstOrNull { it.id == wanted } ?: playlists.first()).name
+    }
 }
 
 @Composable
 private fun connectionLine(row: ScreenRowState, away: AwayState?, nowMs: Long): String {
     val link = row.link ?: return awayLine(row, away ?: AwayState.WAITING, nowMs)
     val showing = link.status?.showingPlaylistId?.let { id -> row.folder.playlists.firstOrNull { it.id == id }?.name }
-    val what = if (showing != null) {
+    return if (showing != null) {
         stringResource(Res.string.signage_showing, showing)
     } else {
         stringResource(Res.string.signage_showing_idle)
     }
-    return listOf(stringResource(Res.string.signage_online), what).joinToString(SEPARATOR)
 }
 
 internal fun platformName(platform: Platform): StringResource = when (platform) {
@@ -342,4 +507,6 @@ internal fun platformName(platform: Platform): StringResource = when (platform) 
 
 internal const val SEPARATOR = " · "
 
-private const val PENDING_TINT = 0.35f
+private const val PENDING_WASH = 0.06f
+private const val PENDING_EDGE = 0.45f
+private val PICKER_MAX_NAME = 180.dp

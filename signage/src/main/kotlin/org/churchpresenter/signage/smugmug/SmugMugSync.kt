@@ -1,5 +1,6 @@
 package org.churchpresenter.signage.smugmug
 
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -78,14 +79,17 @@ class SmugMugSync(
         }
     }
 
-    /** Picks a new set for [playlist] and puts it in its folder; on failure keeps the set it had. */
-    suspend fun pick(playlist: SmugMugPlaylist): SmugMugState {
+    /**
+     * Picks a new set for [playlist] and puts it in its folder; on failure keeps the set it had. How far
+     * it has got goes to [onProgress] as it goes: the galleries listed, then the photos saved.
+     */
+    suspend fun pick(playlist: SmugMugPlaylist, onProgress: (SmugMugProgress) -> Unit = {}): SmugMugState {
         val dir = dirOf(playlist)
         val before = state(playlist)
         val after = try {
             val key = apiKey().trim()
             if (key.isEmpty()) throw IOException(NO_KEY)
-            fill(playlist, dir, before, SmugMugClient(http, key))
+            fill(playlist, dir, before, SmugMugClient(http, key), onProgress)
         } catch (e: IOException) {
             Log.warn(TAG, "SmugMug slideshow ${playlist.name} could not pick new photos: ${e.message}")
             // Remembered as tried with these settings, so it waits before trying them again.
@@ -111,6 +115,7 @@ class SmugMugSync(
         dir: Path,
         before: SmugMugState,
         client: SmugMugClient,
+        onProgress: (SmugMugProgress) -> Unit,
     ): SmugMugState {
         val nickname = client.nickname(playlist.site)
         val albums = SmugMugPick.albumsToUse(
@@ -120,22 +125,26 @@ class SmugMugSync(
         )
         // Only galleries whose photos changed since the last pick are listed again, [LISTING] at a time.
         val gate = Semaphore(LISTING)
+        val listedSoFar = AtomicInteger()
+        onProgress(SmugMugProgress(SmugMugProgress.Stage.LISTING, 0, albums.size))
         val listed = coroutineScope {
             albums.map { album ->
                 async {
                     val cached = before.albums[album.key]
                         ?.takeIf { it.updated == album.imagesLastUpdated && it.updated.isNotEmpty() }
-                    album.key to (
-                        cached ?: gate.withPermit {
-                            SmugMugState.CachedAlbum(album.imagesLastUpdated, client.photoKeys(album))
-                        }
-                        )
+                    val photos = cached ?: gate.withPermit {
+                        SmugMugState.CachedAlbum(album.imagesLastUpdated, client.photoKeys(album))
+                    }
+                    onProgress(
+                        SmugMugProgress(SmugMugProgress.Stage.LISTING, listedSoFar.incrementAndGet(), albums.size),
+                    )
+                    album.key to photos
                 }
             }.awaitAll().toMap()
         }
         val picked = SmugMugPick.pick(listed.values.flatMap { it.photos }, playlist.photoCount, random)
         if (picked.isEmpty()) throw IOException(NO_PHOTOS)
-        val saved = download(picked, dir, client)
+        val saved = download(picked, dir, client, onProgress)
         if (saved == 0) throw IOException(NOTHING_SAVED)
         return SmugMugState(
             pickedAtMs = now(),
@@ -151,7 +160,12 @@ class SmugMugSync(
      * the folder and swapped in whole, so the folder never holds half of one. The number saved.
      */
     @OptIn(ExperimentalPathApi::class)
-    private suspend fun download(keys: List<String>, dir: Path, client: SmugMugClient): Int {
+    private suspend fun download(
+        keys: List<String>,
+        dir: Path,
+        client: SmugMugClient,
+        onProgress: (SmugMugProgress) -> Unit,
+    ): Int {
         val next = staging(dir)
         withContext(Dispatchers.IO) {
             if (next.exists()) next.deleteRecursively()
@@ -159,10 +173,15 @@ class SmugMugSync(
         }
         val had = withContext(Dispatchers.IO) { photosIn(dir) }
         val gate = Semaphore(PARALLEL)
+        val done = AtomicInteger()
+        onProgress(SmugMugProgress(SmugMugProgress.Stage.DOWNLOADING, 0, keys.size))
         val saved = coroutineScope {
             keys.mapIndexed { index, key ->
                 async {
-                    gate.withPermit { savePhoto(key, index, had[key], next, client) }
+                    gate.withPermit { savePhoto(key, index, had[key], next, client) }.also {
+                        val saved = done.incrementAndGet()
+                        onProgress(SmugMugProgress(SmugMugProgress.Stage.DOWNLOADING, saved, keys.size))
+                    }
                 }
             }.awaitAll().count { it }
         }
@@ -261,3 +280,8 @@ private suspend fun write(dir: Path, state: SmugMugState) = withContext(Dispatch
 
 private const val TAG = "Signage"
 private val JSON = Json { ignoreUnknownKeys = true }
+
+/** How far a slideshow's pick has got: [done] of [total] galleries listed, or photos saved. */
+data class SmugMugProgress(val stage: Stage, val done: Int, val total: Int) {
+    enum class Stage { LISTING, DOWNLOADING }
+}

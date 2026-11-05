@@ -123,7 +123,7 @@ class TouchSettingsUiTest {
         settings(ScreenSettingsInput("Lobby", Orientation.LANDSCAPE, hasPin = true, touchPlaylists = pages), saved)
         onNodeWithText("Remove PIN").performClick()
         onNodeWithText("The PIN is removed when you save.", substring = true).assertExists()
-        onNodeWithText("Holding the top-left corner switches to a touch page").performClick()
+        onNodeWithText("Touchscreen page").performClick()
         // Off, there is nothing to switch to and no PIN to ask for.
         onNodeWithText("Event sign-up").assertDoesNotExist()
         field(SCREEN_PIN_TAG).assertDoesNotExist()
@@ -138,8 +138,6 @@ class TouchSettingsUiTest {
         onNodeWithText("Remove PIN").performClick()
         field(SCREEN_PIN_TAG).performTextInput("9876")
         onNodeWithText("A PIN is set", substring = true).assertExists()
-        onNodeWithText("MOUNTED").performClick()
-        waitForIdle()
         onNodeWithText("Portrait").performClick()
         onNodeWithText("Save").performClick()
         assertEquals(PinChange.Set("9876") to Orientation.PORTRAIT, saved.single().pin to saved.single().orientation)

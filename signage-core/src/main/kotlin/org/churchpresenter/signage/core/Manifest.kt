@@ -76,7 +76,8 @@ data class ScreenSettings(
 
 /**
  * A message for the screen: [text] in a band across the top over what plays, or [fullScreen] in place
- * of it, until [untilMs] (epoch milliseconds) or, when that is null, until it is cleared.
+ * of it, until [untilMs] (epoch milliseconds) or, when that is null, until it is cleared. Over a touch
+ * page a full-screen one takes the touches; a band lets them through to the page unless [blockTouch].
  */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -84,7 +85,11 @@ data class ScreenMessage(
     val text: String,
     @EncodeDefault(EncodeDefault.Mode.NEVER) val fullScreen: Boolean = false,
     @EncodeDefault(EncodeDefault.Mode.NEVER) val untilMs: Long? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val blockTouch: Boolean = false,
 ) {
+    /** Whether it keeps people from using a touch page under it: a full-screen one always does. */
+    val blocksTouch: Boolean get() = fullScreen || blockTouch
+
     /** Whether it still shows at [nowMs]: it has words, and has not run out. */
     fun showsAt(nowMs: Long): Boolean = text.isNotBlank() && (untilMs == null || nowMs < untilMs)
 }

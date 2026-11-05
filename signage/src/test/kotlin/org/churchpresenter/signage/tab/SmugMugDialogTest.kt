@@ -2,6 +2,7 @@
 
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.signage.smugmug.SmugMugProgress
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -178,19 +179,18 @@ class SmugMugDialogTest {
         setContent {
             ChurchPresenterTheme(ThemeMode.LIGHT) {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    SignageFolderPanel(
+                    PanelWithMenu(
                         SignageFolderState(listOf(row), SignageSettings(added = listOf(slideshow)), ready = true),
                         FolderActions(
                             FakeDesktop().desktop,
                             onSaveSmugMug = { saved.playlists += it },
                             smugMug = access,
                         ),
-                        Modifier,
                     )
                 }
             }
         }
-        onNodeWithText("Add").performClick()
+        onNodeWithText("Add a playlist").performClick()
         onNodeWithText("SmugMug slideshow…").performClick()
         onNodeWithText("Add a SmugMug slideshow").assertExists()
         onNodeWithText("Cancel").performClick()
@@ -237,8 +237,14 @@ class SmugMugDialogTest {
         onNodeWithText("Could not pick new photos (offline); still playing the 50 it has").assertExists()
         state = state.copy(picking = setOf("smugmug:1"))
         onNodeWithText("Picking new photos…").assertExists()
+        val listing = SmugMugProgress(SmugMugProgress.Stage.LISTING, 3, 12)
+        state = state.copy(pickProgress = mapOf("smugmug:1" to listing))
+        onNodeWithText("Listing galleries: 3 of 12").assertExists()
+        val downloading = SmugMugProgress(SmugMugProgress.Stage.DOWNLOADING, 23, 50)
+        state = state.copy(pickProgress = mapOf("smugmug:1" to downloading))
+        onNodeWithText("Downloading photos: 23 of 50").assertExists()
         val picked = SmugMugState(pickedAtMs = 0, photos = 50)
-        state = state.copy(picking = emptySet(), slideshows = mapOf("smugmug:1" to picked))
+        state = state.copy(picking = emptySet(), pickProgress = emptyMap(), slideshows = mapOf("smugmug:1" to picked))
         onNodeWithText("50 photos · 8 s each", substring = true).assertExists()
         onNodeWithContentDescription("Pick new photos now").performClick()
         assertEquals(listOf("smugmug:1"), picks)

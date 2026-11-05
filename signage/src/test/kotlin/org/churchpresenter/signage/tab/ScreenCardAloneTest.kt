@@ -112,8 +112,6 @@ class ScreenCardAloneTest {
         onNodeWithText("Factory reset").performClick()
         onNodeWithContentDescription("Screen settings").performClick()
         onNode(hasSetTextAction() and hasText("Lobby")).performTextReplacement("Hall")
-        onNodeWithText("MOUNTED").performClick()
-        waitForIdle()
         onNodeWithText("Portrait").performClick()
         onNodeWithText("Save").performClick()
         onAllNodesWithText("PLAYS")[0].performClick()
@@ -199,7 +197,7 @@ class ScreenCardAloneTest {
             field(SCREEN_PIN_TAG).performTextInput("2468")
             onNodeWithText("Save").performClick()
             onNodeWithContentDescription("Screen settings").performClick()
-            onNodeWithText("Holding the top-left corner switches to a touch page").performClick()
+            onNodeWithText("Touchscreen page").performClick()
             onNodeWithText("Save").performClick()
             // With a PIN set, it can be removed; nothing else changed saves nothing else.
             swap(ScreenRowState(screen, able, withPin), all)
@@ -248,7 +246,7 @@ class ScreenCardAloneTest {
         swap(updating("26.0.9", UpdateState.ROLLED_BACK, " "), same)
         onNodeWithText("didn't start", substring = true).assertExists()
         swap(ScreenRowState(screen, null, folder.copy(playlists = emptyList())), same)
-        onNodeWithText("Offline", substring = true).assertExists()
+        onNodeWithText("Offline").assertExists()
     }
 
     @Test
@@ -327,8 +325,6 @@ class ScreenCardAloneTest {
     @Test
     fun screenSettingsSendOnlyWhatChanged() = card(ScreenRowState(screen, link, folder)) {
         onNodeWithContentDescription("Screen settings").performClick()
-        onNodeWithText("MOUNTED").performClick()
-        waitForIdle()
         onNodeWithText("Landscape, upside down").performClick()
         onNodeWithText("Save").performClick()
         // Saved again untouched: nothing to send.

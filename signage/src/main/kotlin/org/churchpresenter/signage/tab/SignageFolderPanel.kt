@@ -1,43 +1,32 @@
 package org.churchpresenter.signage.tab
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LiveTv
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.time.Clock
@@ -45,21 +34,12 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.composables.TooltipIconButton
-import org.churchpresenter.sharedui.composables.ZoneLabel
 import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.signage.smugmug.SmugMugProgress
 import org.churchpresenter.signage.smugmug.SmugMugState
 import org.churchpresenter.signage.smugmug.SmugMugSync
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.signage_add
-import org.churchpresenter.strings.generated.resources.signage_add_file
-import org.churchpresenter.strings.generated.resources.signage_add_folder
-import org.churchpresenter.strings.generated.resources.signage_add_link
-import org.churchpresenter.strings.generated.resources.signage_add_rotation
-import org.churchpresenter.strings.generated.resources.signage_add_smugmug
-import org.churchpresenter.strings.generated.resources.signage_choose_file
-import org.churchpresenter.strings.generated.resources.signage_choose_playlist_folder
 import org.churchpresenter.strings.generated.resources.signage_copy_failed
 import org.churchpresenter.strings.generated.resources.signage_copying
 import org.churchpresenter.strings.generated.resources.signage_file_missing
@@ -69,7 +49,6 @@ import org.churchpresenter.strings.generated.resources.signage_folder_missing
 import org.churchpresenter.strings.generated.resources.signage_folder_title_edit
 import org.churchpresenter.strings.generated.resources.signage_link_title_edit
 import org.churchpresenter.strings.generated.resources.signage_no_playlists
-import org.churchpresenter.strings.generated.resources.signage_pictures_and_videos
 import org.churchpresenter.strings.generated.resources.signage_playlists
 import org.churchpresenter.strings.generated.resources.signage_reading_playlists
 import org.churchpresenter.strings.generated.resources.signage_remove
@@ -82,7 +61,9 @@ import org.churchpresenter.strings.generated.resources.signage_rotation_minutes
 import org.churchpresenter.strings.generated.resources.signage_rotation_seconds_short
 import org.churchpresenter.strings.generated.resources.signage_rotation_summary
 import org.churchpresenter.strings.generated.resources.signage_rotation_title_edit
+import org.churchpresenter.strings.generated.resources.signage_smugmug_downloading
 import org.churchpresenter.strings.generated.resources.signage_smugmug_failed
+import org.churchpresenter.strings.generated.resources.signage_smugmug_listing
 import org.churchpresenter.strings.generated.resources.signage_smugmug_no_key
 import org.churchpresenter.strings.generated.resources.signage_smugmug_pick_now
 import org.churchpresenter.strings.generated.resources.signage_smugmug_picked
@@ -93,15 +74,11 @@ import org.jetbrains.compose.resources.stringResource
 /** The playlists screens can play, and the Add menu that makes them. */
 @Composable
 internal fun SignageFolderPanel(state: SignageFolderState, actions: FolderActions, modifier: Modifier) {
-    Column(modifier = modifier) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(start = 8.dp, bottom = 6.dp),
-        ) {
-            ZoneLabel(stringResource(Res.string.signage_playlists), modifier = Modifier.weight(1f))
-            SignageHelpButton()
-            AddPlaylistMenu(state, actions)
-        }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        CountedHeading(
+            stringResource(Res.string.signage_playlists),
+            state.playlists.size.takeIf { state.ready && it > 0 },
+        )
         PlaylistList(state, actions, Modifier.fillMaxWidth().weight(1f, fill = false))
         state.copying.forEach { name ->
             Text(
@@ -119,103 +96,6 @@ internal fun SignageFolderPanel(state: SignageFolderState, actions: FolderAction
                 modifier = Modifier.padding(start = 8.dp, top = 8.dp),
             )
         }
-    }
-}
-
-/** Add a link, a single picture or video, a rotation, or a folder, the file and folder from anywhere. */
-@Composable
-private fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) {
-    val scope = rememberCoroutineScope()
-    var open by remember { mutableStateOf(false) }
-    var addingLink by remember { mutableStateOf(false) }
-    var addingRotation by remember { mutableStateOf(false) }
-    var addingSmugMug by remember { mutableStateOf(false) }
-    val chooseTitle = stringResource(Res.string.signage_choose_file)
-    val chooseFolderTitle = stringResource(Res.string.signage_choose_playlist_folder)
-    val filterName = stringResource(Res.string.signage_pictures_and_videos)
-    Box {
-        RingedGhostButton(onClick = { open = true }) {
-            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(stringResource(Res.string.signage_add))
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.signage_add_link)) },
-                leadingIcon = { Icon(Icons.Filled.Language, contentDescription = null) },
-                onClick = {
-                    open = false
-                    addingLink = true
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.signage_add_file)) },
-                leadingIcon = { Icon(Icons.Filled.Image, contentDescription = null) },
-                onClick = {
-                    open = false
-                    scope.launch {
-                        val filters = listOf(picturesAndVideosFilter(filterName))
-                        actions.desktop.fileChooser
-                            .chooseSingle(null, filters, chooseTitle, selectDirectory = false)
-                            ?.let(actions.onAddFile)
-                    }
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.signage_add_rotation)) },
-                leadingIcon = { Icon(Icons.Filled.Repeat, contentDescription = null) },
-                onClick = {
-                    open = false
-                    addingRotation = true
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.signage_add_smugmug)) },
-                leadingIcon = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
-                onClick = {
-                    open = false
-                    addingSmugMug = true
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.signage_add_folder)) },
-                leadingIcon = { Icon(Icons.Filled.Folder, contentDescription = null) },
-                onClick = {
-                    open = false
-                    scope.launch {
-                        actions.desktop.fileChooser
-                            .chooseSingle(null, emptyList(), chooseFolderTitle, selectDirectory = true)
-                            ?.let(actions.onAddFolder)
-                    }
-                },
-            )
-        }
-    }
-    if (addingLink) {
-        LinkDialog(
-            onAdd = actions.onAddLink,
-            onDismiss = { addingLink = false },
-            idlePlaylists = idlePlaylists(state, editing = null),
-        )
-    }
-    if (addingRotation) {
-        RotationDialog(
-            entries = state.playlists.filter { it.kind != SourceKind.ROTATION },
-            initial = null,
-            onSave = actions.onAddRotation,
-            onDismiss = { addingRotation = false },
-        )
-    }
-    if (addingSmugMug) {
-        SmugMugDialog(
-            initial = null,
-            apiKey = actions.smugMug.apiKey,
-            onApiKey = actions.smugMug.onApiKey,
-            lookUp = actions.smugMug.lookUp,
-            onSave = actions.onSaveSmugMug,
-            onDismiss = { addingSmugMug = false },
-            openUrl = actions.smugMug.openUrl,
-        )
     }
 }
 
@@ -239,20 +119,18 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
             )
             return@Column
         }
-        LazyColumn {
+        LazyColumn(modifier = Modifier.padding(5.dp)) {
             items(state.playlists, key = { it.id }) { playlist ->
                 PlaylistRow(
                     playlist,
                     slideshow = state.slideshows[playlist.id],
                     picking = playlist.id in state.picking,
+                    progress = state.pickProgress[playlist.id],
                     onRename = { renaming = playlist },
                     onDelete = { deleting = playlist },
                     onPickNew = { actions.onPickNewPhotos(playlist.id) },
                     clock = actions.clock,
                 )
-                if (playlist != state.playlists.last()) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                }
             }
         }
     }
@@ -326,20 +204,19 @@ private fun PlaylistRow(
     picking: Boolean = false,
     onPickNew: () -> Unit = {},
     clock: Clock = Clock.systemDefaultZone(),
+    progress: SmugMugProgress? = null,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 4.dp, top = 7.dp, bottom = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            iconOf(playlist.kind),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
+        KindTile(
+            tileKindOf(playlist.kind),
+            tint = if (playlist.missing) errorTint() else tintOf(tileKindOf(playlist.kind)),
         )
         Spacer(Modifier.width(12.dp))
         if (playlist.kind == SourceKind.SMUGMUG) {
-            SlideshowText(playlist, slideshow, picking, clock, Modifier.weight(1f))
+            SlideshowText(playlist, slideshow, picking, clock, Modifier.weight(1f), progress)
             TooltipIconButton(
                 painter = rememberVectorPainter(Icons.Filled.Refresh),
                 text = stringResource(Res.string.signage_smugmug_pick_now),
@@ -348,13 +225,6 @@ private fun PlaylistRow(
             )
         } else {
             PlaylistText(playlist, Modifier.weight(1f))
-        }
-        if (playlist.kind == SourceKind.FOLDER && !playlist.missing) {
-            Text(
-                stringResource(Res.string.signage_folder_counts, playlist.pictures, playlist.videos, playlist.seconds),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
         TooltipIconButton(
             painter = rememberVectorPainter(Icons.Filled.Edit),
@@ -377,27 +247,32 @@ private fun PlaylistRow(
     }
 }
 
-/** A playlist's name, with its folder, file or address under it (in red when the file or folder is gone). */
+/**
+ * A playlist's name, a folder's path faint beside it, and under it what it holds: a folder's counts, a
+ * rotation's steps, or its file or address (in red when the file or folder is gone).
+ */
 @Composable
 private fun PlaylistText(playlist: PlaylistSummary, modifier: Modifier) {
-    Column(modifier = modifier) {
-        Text(playlist.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(
-            when {
-                playlist.missing && playlist.kind == SourceKind.FOLDER ->
-                    stringResource(Res.string.signage_folder_missing, playlist.detail.orEmpty())
-                playlist.missing -> stringResource(Res.string.signage_file_missing, playlist.detail.orEmpty())
-                playlist.kind == SourceKind.ROTATION -> stringResource(
-                    Res.string.signage_rotation_summary,
-                    playlist.steps,
-                    if (playlist.seconds >= SECONDS_PER_MINUTE) {
-                        stringResource(Res.string.signage_rotation_minutes, playlist.seconds / SECONDS_PER_MINUTE)
-                    } else {
-                        stringResource(Res.string.signage_rotation_seconds_short, playlist.seconds)
-                    },
-                )
-                else -> playlist.detail.orEmpty()
+    val folder = playlist.kind == SourceKind.FOLDER
+    val meta = when {
+        playlist.missing && folder -> stringResource(Res.string.signage_folder_missing, playlist.detail.orEmpty())
+        playlist.missing -> stringResource(Res.string.signage_file_missing, playlist.detail.orEmpty())
+        folder -> stringResource(Res.string.signage_folder_counts, playlist.pictures, playlist.videos, playlist.seconds)
+        playlist.kind == SourceKind.ROTATION -> stringResource(
+            Res.string.signage_rotation_summary,
+            playlist.steps,
+            if (playlist.seconds >= SECONDS_PER_MINUTE) {
+                stringResource(Res.string.signage_rotation_minutes, playlist.seconds / SECONDS_PER_MINUTE)
+            } else {
+                stringResource(Res.string.signage_rotation_seconds_short, playlist.seconds)
             },
+        )
+        else -> playlist.detail.orEmpty()
+    }
+    Column(modifier = modifier) {
+        PlaylistName(playlist.name, beside = playlist.detail.takeIf { folder && !playlist.missing })
+        Text(
+            meta,
             style = MaterialTheme.typography.bodySmall,
             color = with(MaterialTheme.colorScheme) { if (playlist.missing) error else onSurfaceVariant },
             maxLines = 1,
@@ -406,14 +281,30 @@ private fun PlaylistText(playlist: PlaylistSummary, modifier: Modifier) {
     }
 }
 
-private fun iconOf(kind: SourceKind): ImageVector = when (kind) {
-    SourceKind.FOLDER -> Icons.Filled.Folder
-    SourceKind.PICTURE -> Icons.Filled.Image
-    SourceKind.VIDEO -> Icons.Filled.Movie
-    SourceKind.WEB -> Icons.Filled.Language
-    SourceKind.STREAM -> Icons.Filled.LiveTv
-    SourceKind.ROTATION -> Icons.Filled.Repeat
-    SourceKind.SMUGMUG -> Icons.Filled.PhotoLibrary
+/** A playlist's name, semi-bold, with [beside] faint after it on the same line. */
+@Composable
+private fun PlaylistName(name: String, beside: String? = null) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            name,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        if (beside != null) {
+            Spacer(Modifier.width(8.dp))
+            Text(
+                beside,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+        }
+    }
 }
 
 /**
@@ -427,10 +318,19 @@ private fun SlideshowText(
     picking: Boolean,
     clock: Clock,
     modifier: Modifier,
+    progress: SmugMugProgress? = null,
 ) {
     val failure = state?.error
     val photos = playlist.pictures
     val line = when {
+        picking && progress != null -> stringResource(
+            when (progress.stage) {
+                SmugMugProgress.Stage.LISTING -> Res.string.signage_smugmug_listing
+                SmugMugProgress.Stage.DOWNLOADING -> Res.string.signage_smugmug_downloading
+            },
+            progress.done,
+            progress.total,
+        )
         picking -> stringResource(Res.string.signage_smugmug_picking)
         failure == SmugMugSync.NO_KEY -> stringResource(Res.string.signage_smugmug_no_key)
         failure != null -> stringResource(Res.string.signage_smugmug_failed, failure, photos)
@@ -440,13 +340,37 @@ private fun SlideshowText(
         else -> playlist.detail.orEmpty()
     }
     Column(modifier = modifier) {
-        Text(playlist.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        PlaylistName(playlist.name)
         Text(
             line,
             style = MaterialTheme.typography.bodySmall,
             color = with(MaterialTheme.colorScheme) { if (failure != null && !picking) error else onSurfaceVariant },
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+        )
+        if (picking) PickBar(progress)
+    }
+}
+
+/**
+ * A thin bar under a slideshow that is picking: how far through the galleries, then the photos, it
+ * is; moving on its own until the first count comes.
+ */
+@Composable
+private fun PickBar(progress: SmugMugProgress?) {
+    val modifier = Modifier.padding(top = 5.dp, end = 8.dp).fillMaxWidth().height(3.dp)
+    val share = progress?.takeIf { it.total > 0 }?.let { it.done.toFloat() / it.total }
+    val colour = MaterialTheme.colorScheme.primary
+    val track = MaterialTheme.colorScheme.onSurface.copy(alpha = TRACK_ALPHA)
+    if (share == null) {
+        LinearProgressIndicator(modifier = modifier, color = colour, trackColor = track)
+    } else {
+        LinearProgressIndicator(
+            progress = { share },
+            modifier = modifier,
+            color = colour,
+            trackColor = track,
+            drawStopIndicator = {},
         )
     }
 }
@@ -463,6 +387,7 @@ private fun timeOf(ms: Long, clock: Clock): String {
 }
 
 private const val SECONDS_PER_MINUTE = 60
+private const val TRACK_ALPHA = 0.1f
 
 /**
  * What a touchscreen page's screen may play while nobody uses it: any entry but a rotation, another

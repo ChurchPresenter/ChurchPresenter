@@ -1,5 +1,17 @@
 package org.churchpresenter.signage.tab
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.ui.text.font.FontWeight
+import org.churchpresenter.theme.semantic
+import org.churchpresenter.strings.generated.resources.signage_smugmug_subtitle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +40,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.composables.LabeledCheckbox
-import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
@@ -62,6 +73,7 @@ import org.churchpresenter.strings.generated.resources.signage_smugmug_unreachab
 import org.churchpresenter.strings.generated.resources.signage_smugmug_wrong_key
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.theme.components.KeyButton
 import org.jetbrains.compose.resources.stringResource
 import java.io.IOException
 
@@ -128,7 +140,11 @@ internal fun SmugMugDialog(
         onDismissRequest = onDismiss,
         title = {
             val title = if (initial == null) Res.string.signage_smugmug_title else Res.string.signage_smugmug_title_edit
-            Text(stringResource(title))
+            SignageDialogTitle(
+                stringResource(title),
+                stringResource(Res.string.signage_smugmug_subtitle),
+                kind = TileKind.SMUGMUG,
+            )
         },
         text = {
             val scroll = rememberScrollState()
@@ -166,11 +182,11 @@ internal fun SmugMugDialog(
                         onSeconds = { seconds = it },
                         onHours = { hours = it },
                     )
-                    LabeledSwitch(
+                    InfoSwitch(
+                        title = stringResource(Res.string.signage_smugmug_unlisted),
+                        info = stringResource(Res.string.signage_smugmug_unlisted_hint),
                         checked = unlisted,
-                        onCheckedChange = { unlisted = it },
-                        label = stringResource(Res.string.signage_smugmug_unlisted),
-                        supporting = stringResource(Res.string.signage_smugmug_unlisted_hint),
+                        onChange = { unlisted = it },
                     )
                     (lookup as? Lookup.Found)?.let { found ->
                         Galleries(found.site.albums, unlisted, excluded) { excluded = it }
@@ -218,31 +234,33 @@ private fun SiteFields(
     found: @Composable () -> Unit,
     openUrl: (String) -> Unit,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         SettingsTextField(
             value = site,
             onValueChange = onSite,
             label = stringResource(Res.string.signage_smugmug_site),
-            supportingText = { Hint(stringResource(Res.string.signage_smugmug_site_hint)) },
             fillWidth = true,
             modifier = Modifier.weight(1f).testTag(SMUGMUG_SITE_TAG),
         )
-        RingedGhostButton(onClick = onTest, enabled = site.isNotBlank() && key.isNotBlank()) {
+        InfoHint(stringResource(Res.string.signage_smugmug_site_hint))
+        KeyButton(onClick = onTest, enabled = site.isNotBlank() && key.isNotBlank()) {
             Text(stringResource(Res.string.signage_smugmug_test))
         }
     }
     found()
-    SettingsTextField(
-        value = key,
-        onValueChange = onKey,
-        label = stringResource(Res.string.signage_smugmug_key),
-        supportingText = { Hint(stringResource(Res.string.signage_smugmug_key_hint)) },
-        visualTransformation = PasswordVisualTransformation(),
-        fillWidth = true,
-        modifier = Modifier.fillMaxWidth().testTag(SMUGMUG_KEY_TAG),
-    )
-    RingedGhostButton(onClick = { openUrl(API_KEY_URL) }) {
-        Text(stringResource(Res.string.signage_smugmug_get_key))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        SettingsTextField(
+            value = key,
+            onValueChange = onKey,
+            label = stringResource(Res.string.signage_smugmug_key),
+            visualTransformation = PasswordVisualTransformation(),
+            fillWidth = true,
+            modifier = Modifier.weight(1f).testTag(SMUGMUG_KEY_TAG),
+        )
+        InfoHint(stringResource(Res.string.signage_smugmug_key_hint))
+        RingedGhostButton(onClick = { openUrl(API_KEY_URL) }) {
+            Text(stringResource(Res.string.signage_smugmug_get_key))
+        }
     }
 }
 
@@ -297,12 +315,36 @@ private fun LookupLine(lookup: Lookup, unlisted: Boolean, excluded: Set<String>)
             else -> stringResource(Res.string.signage_smugmug_unreachable, lookup.message)
         }
     }
-    Text(
-        text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (lookup is Lookup.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.testTag(SMUGMUG_LOOKUP_TAG),
-    )
+    val colour = when (lookup) {
+        is Lookup.Failed -> MaterialTheme.colorScheme.error
+        is Lookup.Found -> MaterialTheme.semantic.success
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .background(colour.copy(alpha = RESULT_WASH), RoundedCornerShape(9.dp))
+            .padding(horizontal = 11.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        val icon = when (lookup) {
+            is Lookup.Found -> Icons.Filled.CheckCircle
+            is Lookup.Failed -> Icons.Filled.Error
+            else -> null
+        }
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = colour, modifier = Modifier.size(16.dp))
+        } else {
+            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+        }
+        Text(
+            text,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold,
+            color = colour,
+            modifier = Modifier.testTag(SMUGMUG_LOOKUP_TAG),
+        )
+    }
 }
 
 /** The galleries a slideshow can take from, each ticked unless it is left out. */
@@ -316,9 +358,16 @@ private fun Galleries(
     val offered = SmugMugPick.albumsToUse(albums, unlisted, emptySet())
     if (offered.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(Res.string.signage_smugmug_galleries), style = MaterialTheme.typography.titleSmall)
-        Hint(stringResource(Res.string.signage_smugmug_galleries_hint))
-        Column(Modifier.heightIn(max = GALLERIES_HEIGHT).verticalScroll(rememberScrollState())) {
+        FieldCaption(
+            stringResource(Res.string.signage_smugmug_galleries),
+            info = stringResource(Res.string.signage_smugmug_galleries_hint),
+        )
+        Column(
+            Modifier.fillMaxWidth()
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .heightIn(max = GALLERIES_HEIGHT).verticalScroll(rememberScrollState()),
+        ) {
             offered.forEach { album ->
                 LabeledCheckbox(
                     checked = album.key !in excluded,
@@ -330,11 +379,7 @@ private fun Galleries(
     }
 }
 
-/** The line under a field, as small as the other dialogs' hints. */
-@Composable
-private fun Hint(text: String) {
-    Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-}
+private const val RESULT_WASH = 0.12f
 
 /** Where SmugMug hands out API keys. */
 internal const val API_KEY_URL = "https://api.smugmug.com/api/developer/apply"

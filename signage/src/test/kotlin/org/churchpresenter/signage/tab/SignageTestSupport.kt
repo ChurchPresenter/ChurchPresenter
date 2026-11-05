@@ -1,5 +1,9 @@
 package org.churchpresenter.signage.tab
 
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasAnyAncestor
@@ -205,3 +209,18 @@ class SignedRelease(val version: String = "26.0.9") {
 /** The text box inside the field tagged [tag]: a settings field draws its caption apart from it. */
 @OptIn(ExperimentalTestApi::class)
 internal fun ComposeUiTest.field(tag: String) = onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(tag)))
+
+/**
+ * The playlist panel with the header's Help and Add a playlist beside it, as the tab draws them, for a
+ * test that composes the panel without the whole tab.
+ */
+@Composable
+internal fun PanelWithMenu(state: SignageFolderState, actions: FolderActions) {
+    Column {
+        Row {
+            SignageHelpButton()
+            AddPlaylistMenu(state, actions)
+        }
+        SignageFolderPanel(state, actions, Modifier)
+    }
+}

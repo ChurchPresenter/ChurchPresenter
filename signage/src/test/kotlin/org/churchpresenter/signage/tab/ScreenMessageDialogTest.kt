@@ -2,6 +2,8 @@
 
 package org.churchpresenter.signage.tab
 
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -57,7 +59,7 @@ class ScreenMessageDialogTest {
         onNodeWithText("Show").assertIsNotEnabled()
         field(MESSAGE_TEXT_TAG).performTextInput(" Parking lot B is full ")
         onNodeWithText("Show").assertIsEnabled()
-        onNodeWithText("Full screen: hides what plays, for something urgent").performClick()
+        onNodeWithText("Full screen").performClick()
         pick("Until I clear it", "For 30 minutes")
         onNodeWithText("Its player is too old to show messages; update it first").assertExists()
         onNodeWithText("Old TV").performClick()
@@ -71,6 +73,30 @@ class ScreenMessageDialogTest {
             ),
             shown.single(),
         )
+    }
+
+    @Test
+    fun `a band can stop people using touch pages, and full screen always does without asking`() = runComposeUiTest {
+        val shown = mutableListOf<SignageMessage>()
+        dialog(shown)
+        field(MESSAGE_TEXT_TAG).performTextInput("Doors open")
+        onNodeWithText("Stop people using touch pages while it shows").assertIsOff().performClick()
+        onNodeWithText("Stop people using touch pages while it shows").assertIsOn()
+        onNodeWithText("Full screen").performClick()
+        onNodeWithText("Stop people using touch pages while it shows").assertDoesNotExist()
+        onNodeWithText("Band across the top").performClick()
+        onNodeWithText("Show").performClick()
+        assertEquals(true, shown.single().blockTouch)
+    }
+
+    @Test
+    fun `a message changed to full screen keeps no touch setting of its own`() = runComposeUiTest {
+        val shown = mutableListOf<SignageMessage>()
+        dialog(shown, current = SignageMessage("Doors open", blockTouch = true))
+        onNodeWithText("Stop people using touch pages while it shows").assertIsOn()
+        onNodeWithText("Full screen").performClick()
+        onNodeWithText("Show").performClick()
+        assertEquals(false, shown.single().blockTouch)
     }
 
     @Test
