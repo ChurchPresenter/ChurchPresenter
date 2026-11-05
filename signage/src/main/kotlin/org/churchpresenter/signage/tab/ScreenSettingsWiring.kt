@@ -69,7 +69,7 @@ internal fun DeviceDetails(row: ScreenRowState) {
     detailLines(row).forEach { line ->
         Text(line, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
-    ScreenHealthLine(row.link?.status)
+    HealthGrid(row.link?.status)
 }
 
 /** What the device is; how its content stands; whether it can turn the TV on and off. */

@@ -27,8 +27,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.composables.DropdownSettingsField
-import org.churchpresenter.sharedui.composables.LabeledRadioButton
-import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
@@ -38,7 +36,6 @@ import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.save
 import org.churchpresenter.strings.generated.resources.signage_add
 import org.churchpresenter.strings.generated.resources.signage_link_address
-import org.churchpresenter.strings.generated.resources.signage_link_address_hint
 import org.churchpresenter.strings.generated.resources.signage_link_allowed_sites
 import org.churchpresenter.strings.generated.resources.signage_link_allowed_sites_hint
 import org.churchpresenter.strings.generated.resources.signage_link_any_site
@@ -58,6 +55,7 @@ import org.churchpresenter.strings.generated.resources.signage_link_idle_web
 import org.churchpresenter.strings.generated.resources.signage_link_interactive
 import org.churchpresenter.strings.generated.resources.signage_link_interactive_hint
 import org.churchpresenter.strings.generated.resources.signage_link_internet
+import org.churchpresenter.strings.generated.resources.signage_link_idle_caption
 import org.churchpresenter.strings.generated.resources.signage_link_name
 import org.churchpresenter.strings.generated.resources.signage_link_older_player
 import org.churchpresenter.strings.generated.resources.signage_link_page_code
@@ -68,7 +66,18 @@ import org.churchpresenter.strings.generated.resources.signage_link_page_script
 import org.churchpresenter.strings.generated.resources.signage_link_page_script_hint
 import org.churchpresenter.strings.generated.resources.signage_link_refresh
 import org.churchpresenter.strings.generated.resources.signage_link_smooth
-import org.churchpresenter.strings.generated.resources.signage_link_smooth_hint
+import org.churchpresenter.strings.generated.resources.signage_link_kind
+import org.churchpresenter.strings.generated.resources.signage_link_motion
+import org.churchpresenter.strings.generated.resources.signage_link_motion_hint
+import org.churchpresenter.strings.generated.resources.signage_link_normal
+import org.churchpresenter.strings.generated.resources.signage_link_normal_desc
+import org.churchpresenter.strings.generated.resources.signage_link_smooth_desc
+import org.churchpresenter.strings.generated.resources.signage_link_stream_desc
+import org.churchpresenter.strings.generated.resources.signage_link_subtitle
+import org.churchpresenter.strings.generated.resources.signage_link_web_desc
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import org.churchpresenter.strings.generated.resources.signage_link_stream
 import org.churchpresenter.strings.generated.resources.signage_link_title
 import org.churchpresenter.strings.generated.resources.signage_link_title_edit
@@ -109,17 +118,24 @@ internal fun LinkDialog(
         onDismissRequest = onDismiss,
         title = {
             val title = if (initial == null) Res.string.signage_link_title else Res.string.signage_link_title_edit
-            Text(stringResource(title))
+            SignageDialogTitle(
+                stringResource(title),
+                stringResource(Res.string.signage_link_subtitle),
+                info = stringResource(Res.string.signage_link_internet) + " " +
+                    stringResource(Res.string.signage_link_older_player),
+                kind = if (kind == LinkKind.WEB) TileKind.WEB else TileKind.STREAM,
+            )
         },
         text = {
             val scroll = rememberScrollState()
             Box {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
                     modifier = Modifier.width(DIALOG_WIDTH)
                         .verticalScroll(scroll)
                         .padding(end = SettingsScrollbarGutter),
                 ) {
+                    AddressRow(field, { field = it }, page.takeIf { kind == LinkKind.WEB })
                     SettingsTextField(
                         value = name,
                         onValueChange = { name = it },
@@ -128,26 +144,31 @@ internal fun LinkDialog(
                         fillWidth = true,
                         modifier = Modifier.fillMaxWidth().testTag(LINK_NAME_TAG),
                     )
-                    AddressRow(field, { field = it }, page.takeIf { kind == LinkKind.WEB })
-                    Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        LabeledRadioButton(
-                            selected = kind == LinkKind.WEB,
-                            onClick = { chosenKind = LinkKind.WEB },
-                            label = stringResource(Res.string.signage_link_web),
-                        )
-                        LabeledRadioButton(
-                            selected = kind == LinkKind.STREAM,
-                            onClick = { chosenKind = LinkKind.STREAM },
-                            label = stringResource(Res.string.signage_link_stream),
-                        )
+                    Column {
+                        FieldCaption(stringResource(Res.string.signage_link_kind))
+                        Row(
+                            modifier = Modifier.selectableGroup().height(IntrinsicSize.Min),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ChoiceTile(
+                                selected = kind == LinkKind.WEB,
+                                onClick = { chosenKind = LinkKind.WEB },
+                                title = stringResource(Res.string.signage_link_web),
+                                description = stringResource(Res.string.signage_link_web_desc),
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                                leading = { KindTile(TileKind.WEB, size = 30.dp) },
+                            )
+                            ChoiceTile(
+                                selected = kind == LinkKind.STREAM,
+                                onClick = { chosenKind = LinkKind.STREAM },
+                                title = stringResource(Res.string.signage_link_stream),
+                                description = stringResource(Res.string.signage_link_stream_desc),
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                                leading = { KindTile(TileKind.STREAM, size = 30.dp) },
+                            )
+                        }
                     }
                     if (kind == LinkKind.WEB) WebOptionFields(page, idlePlaylists)
-                    Text(
-                        stringResource(Res.string.signage_link_internet) + " " +
-                            stringResource(Res.string.signage_link_older_player),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
                 Box(Modifier.matchParentSize()) { SettingsScrollbar(scroll) }
             }
@@ -192,7 +213,6 @@ private fun AddressRow(field: TextFieldValue, onField: (TextFieldValue) -> Unit,
                 onField(if (text == typed.text) typed else TextFieldValue(text, TextRange(text.length)))
             },
             label = stringResource(Res.string.signage_link_address),
-            supportingText = { FieldHint(stringResource(Res.string.signage_link_address_hint)) },
             fillWidth = true,
             modifier = Modifier.weight(1f).testTag(LINK_ADDRESS_TAG),
         )
@@ -306,13 +326,39 @@ private fun WebOptionFields(page: WebOptions, idlePlaylists: List<PlaylistSummar
             )
         }
     } else {
-        SwitchRow(
-            title = stringResource(Res.string.signage_link_smooth),
-            hint = stringResource(Res.string.signage_link_smooth_hint),
-            checked = page.smooth,
-        ) { page.smooth = it }
+        MotionChoice(page)
     }
     PageCodeFields(page)
+}
+
+/** Normal or smooth motion for a page drawn on the TV, side by side, and how to find out which a screen can do. */
+@Composable
+private fun MotionChoice(page: WebOptions) {
+    Column {
+        FieldCaption(
+            stringResource(Res.string.signage_link_motion),
+            info = stringResource(Res.string.signage_link_motion_hint),
+        )
+        Row(
+            modifier = Modifier.selectableGroup().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ChoiceTile(
+                selected = !page.smooth,
+                onClick = { page.smooth = false },
+                title = stringResource(Res.string.signage_link_normal),
+                description = stringResource(Res.string.signage_link_normal_desc),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            ChoiceTile(
+                selected = page.smooth,
+                onClick = { page.smooth = true },
+                title = stringResource(Res.string.signage_link_smooth),
+                description = stringResource(Res.string.signage_link_smooth_desc),
+                modifier = Modifier.weight(1f).fillMaxHeight().testTag(LINK_SMOOTH_TAG),
+            )
+        }
+    }
 }
 
 /** The church's own CSS and JavaScript for the page, behind a switch: for someone who knows web pages. */
@@ -364,6 +410,14 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
         IdleChoice.WEB to stringResource(Res.string.signage_link_idle_web),
     )
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        FieldCaption(
+            stringResource(Res.string.signage_link_idle_caption),
+            info = listOfNotNull(
+                stringResource(Res.string.signage_link_idle_hint).takeIf { page.idleChoice != IdleChoice.PAGE },
+                stringResource(Res.string.signage_link_idle_prompt_hint).takeIf { page.idleChoice != IdleChoice.PAGE },
+                stringResource(Res.string.signage_link_touch_reload_hint),
+            ).joinToString(" "),
+        )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // What to show first, then which playlist when it is one.
             DropdownSettingsField(
@@ -436,34 +490,23 @@ private fun IdleScreenFields(page: WebOptions, idlePlaylists: List<PlaylistSumma
                 value = page.idlePrompt,
                 onValueChange = { page.idlePrompt = it },
                 label = stringResource(Res.string.signage_link_idle_prompt),
-                supportingText = { FieldHint(stringResource(Res.string.signage_link_idle_prompt_hint)) },
                 fillWidth = true,
                 modifier = Modifier.fillMaxWidth().testTag(LINK_IDLE_PROMPT_TAG),
             )
-            FieldHint(stringResource(Res.string.signage_link_idle_hint))
         }
-        FieldHint(stringResource(Res.string.signage_link_touch_reload_hint))
     }
 }
 
 /** The line under a field, as small as every other hint in the dialog. */
 @Composable
-private fun FieldHint(text: String) {
-    Text(text, style = MaterialTheme.typography.bodySmall)
+private fun FieldHint(text: String, modifier: Modifier = Modifier) {
+    Text(text, style = MaterialTheme.typography.bodySmall, modifier = modifier)
 }
 
 /** A switch with what it does, and what it costs, said under it: the app's own labelled switch. */
 @Composable
 private fun SwitchRow(title: String, hint: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    LabeledSwitch(
-        checked = checked,
-        onCheckedChange = onChange,
-        label = title,
-        supporting = hint,
-        controlAtEnd = true,
-        spacing = 12.dp,
-        modifier = Modifier.fillMaxWidth(),
-    )
+    InfoSwitch(title, hint, checked, onChange)
 }
 
 /** The dialog's text fields, whose captions are drawn apart from the field a test types into. */
@@ -475,6 +518,7 @@ internal const val LINK_IDLE_REFRESH_TAG = "signage-link-idle-refresh"
 internal const val LINK_REFRESH_TAG = "signage-link-refresh"
 internal const val LINK_IDLE_PROMPT_TAG = "signage-link-idle-prompt"
 internal const val LINK_CSS_TAG = "signage-link-css"
+internal const val LINK_SMOOTH_TAG = "signage-link-smooth"
 internal const val LINK_SCRIPT_TAG = "signage-link-script"
 
 /** What the empty code fields show: code, the same in every language. */

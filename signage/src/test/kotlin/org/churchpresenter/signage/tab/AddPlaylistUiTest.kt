@@ -4,7 +4,6 @@ package org.churchpresenter.signage.tab
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -83,14 +82,14 @@ class AddPlaylistUiTest {
         )
         setContent {
             ChurchPresenterTheme(ThemeMode.LIGHT) {
-                Surface(color = MaterialTheme.colorScheme.background) { SignageFolderPanel(state, actions, Modifier) }
+                Surface(color = MaterialTheme.colorScheme.background) { PanelWithMenu(state, actions) }
             }
         }
         block()
     }
 
     private fun ComposeUiTest.openLinkDialog() {
-        onNodeWithText("Add").performClick()
+        onNodeWithText("Add a playlist").performClick()
         onNodeWithText("Link…").performClick()
     }
 
@@ -101,7 +100,7 @@ class AddPlaylistUiTest {
 
     @Test
     fun theAddMenuAddsAPictureOrVideo() = panel(FakeDesktop(chosen = Path("/pictures/welcome.png"))) {
-        onNodeWithText("Add").performClick()
+        onNodeWithText("Add a playlist").performClick()
         onNodeWithText("Picture or video…").performClick()
         waitUntil { files.isNotEmpty() }
         assertEquals(listOf(Path("/pictures/welcome.png").toString()), files)
@@ -111,7 +110,7 @@ class AddPlaylistUiTest {
     fun theFolderEntryAddsTheChosenFolder() {
         val desktop = FakeDesktop(chosen = Path("/pictures/Events"))
         panel(desktop) {
-            onNodeWithText("Add").performClick()
+            onNodeWithText("Add a playlist").performClick()
             onNodeWithText("Folder…").performClick()
             waitUntil { folders.isNotEmpty() }
         }
@@ -145,7 +144,7 @@ class AddPlaylistUiTest {
 
     @Test
     fun aRotationIsAddedFromTheMenuAndEditedFromItsRow() = panel(FakeDesktop()) {
-        onNodeWithText("Add").performClick()
+        onNodeWithText("Add a playlist").performClick()
         onNodeWithText("Rotation…").performClick()
         // A new rotation offers every entry but a rotation.
         field(ROTATION_NAME_TAG).performTextInput("Mornings")
@@ -235,7 +234,7 @@ class AddPlaylistUiTest {
         onNodeWithText("How signage works").assertExists()
         onNodeWithText("Folders that stay up to date").assertExists()
         onNodeWithText("Running the screens from more than one computer").assertExists()
-        onNodeWithText("Close").performClick()
+        onNodeWithText("Got it").performClick()
         onNodeWithText("How signage works").assertDoesNotExist()
     }
 

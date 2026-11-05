@@ -59,6 +59,19 @@ class SmugMugSyncTest {
     }
 
     @Test
+    fun `a pick says how far it has got, galleries first and then photos`() = runTest {
+        val seen = mutableListOf<SmugMugProgress>()
+        sync.pick(show) { seen += it }
+        val listing = seen.filter { it.stage == SmugMugProgress.Stage.LISTING }
+        val downloading = seen.filter { it.stage == SmugMugProgress.Stage.DOWNLOADING }
+        assertEquals(listOf(0, 1, 2), listing.map { it.done })
+        assertTrue(listing.all { it.total == 2 })
+        assertEquals(listOf(0, 1, 2, 3), downloading.map { it.done }.sorted())
+        assertTrue(downloading.all { it.total == 3 })
+        assertEquals(listing + downloading, seen, "every gallery is listed before the first photo")
+    }
+
+    @Test
     fun `the next pick reuses the photos it has and lists only galleries that changed`() = runTest {
         sync.pick(show.copy(photoCount = 5))
         smugMug.asked.clear()

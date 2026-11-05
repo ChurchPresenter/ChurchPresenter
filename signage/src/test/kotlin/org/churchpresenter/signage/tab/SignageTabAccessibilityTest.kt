@@ -52,7 +52,7 @@ class SignageTabAccessibilityTest {
         world.hub.links.reported("player-1", PlayerMessage.Preview(jpegBase64(), 480, 270, 1))
         signageTab(world) {
             waitUntil(timeoutMillis = SignageWorld.WAIT_MS) {
-                listOf("4821", "Events", "Update to 26.0.9")
+                listOf("Approve", "Events", "Update to 26.0.9")
                     .all { onAllNodesWithText(it).fetchSemanticsNodes().isNotEmpty() }
             }
             block()

@@ -1,5 +1,6 @@
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.signage.smugmug.SmugMugProgress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -58,6 +59,8 @@ data class SignageFolderState(
     val slideshows: Map<String, SmugMugState> = emptyMap(),
     /** The SmugMug slideshows picking new photos now. */
     val picking: Set<String> = emptySet(),
+    /** How far each slideshow picking now has got, once it has started listing. */
+    val pickProgress: Map<String, SmugMugProgress> = emptyMap(),
 )
 
 /**

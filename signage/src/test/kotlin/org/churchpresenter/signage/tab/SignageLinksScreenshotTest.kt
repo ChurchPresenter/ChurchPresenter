@@ -2,6 +2,7 @@
 
 package org.churchpresenter.signage.tab
 
+import org.churchpresenter.signage.smugmug.SmugMugProgress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -95,6 +96,7 @@ class SignageLinksScreenshotTest {
                 "smugmug:3" to SmugMugState(error = SmugMugSync.NO_KEY),
             ),
             picking = setOf("smugmug:1"),
+            pickProgress = mapOf("smugmug:1" to SmugMugProgress(SmugMugProgress.Stage.DOWNLOADING, 23, 50)),
         )
         Box(Modifier.size(PANEL_WIDTH.dp, SLIDESHOW_PANEL_HEIGHT.dp)) {
             SignageFolderPanel(state, FolderActions(FakeDesktop().desktop, clock = PINNED_CLOCK), Modifier)
@@ -127,9 +129,13 @@ class SignageLinksScreenshotTest {
 
     @Test
     fun `the add menu`() = captureComponent(SECTION, "add_menu", rootIndex = 1, drive = {
-        onNodeWithText("Add").performClick()
+        onNodeWithText("Add a playlist").performClick()
         waitForIdle()
-    }) { Panel() }
+    }) {
+        Box(Modifier.size(PANEL_WIDTH.dp, PANEL_HEIGHT.dp)) {
+            PanelWithMenu(folder, FolderActions(FakeDesktop().desktop))
+        }
+    }
 
     @Test
     fun `a web page link moving smoothly`() = captureComponent(SECTION, "link_web", rootIndex = 1, drive = {
