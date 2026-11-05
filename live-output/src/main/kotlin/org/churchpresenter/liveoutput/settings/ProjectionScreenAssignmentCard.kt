@@ -54,6 +54,10 @@ internal fun ScreenAssignmentCard(
     detectedScreens: Int,
     devWindowCount: Int,
     devWindowedFallback: Boolean,
+    /** Whether the Simulate Outputs count is offered — it can be while it simulates nothing. */
+    simulationOn: Boolean,
+    /** How many rows have a real display or DeckLink device behind them; the rest are simulated. */
+    realWindowCount: Int,
     presenterWindowCount: Int,
     numScreens: Int,
     screenAssignments: List<ScreenAssignment>,
@@ -68,7 +72,7 @@ internal fun ScreenAssignmentCard(
 SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     // Detected screens info + simulate stepper + Identify button
     ScreenAssignmentInfoRow(
-        detectedScreens, presenterWindowCount, devWindowedFallback, devWindowCount, onIdentifyScreen,
+        detectedScreens, presenterWindowCount, simulationOn, devWindowCount, onIdentifyScreen,
     ) { count -> updateProjection { it.copy(devWindowCount = count) } }
     Spacer(modifier = Modifier.height(4.dp))
 
@@ -89,8 +93,9 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     for (i in 0 until numScreens) {
         val assignment = screenAssignments[i]
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Screen label — the dev-window fallback always occupies slot 0
-            val defaultScreenLabel = if (devWindowedFallback && i == 0) {
+            val simulated = i >= realWindowCount
+            // Screen label — with no real output, the first simulated window is slot 0
+            val defaultScreenLabel = if (simulated && i == 0) {
                 stringResource(Res.string.dev_window_label)
             } else {
                 stringResource(Res.string.screen_col_label, i + 1)
@@ -155,7 +160,17 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             // devWindowWidth/Height, which is what outputSizeOf falls back to when a slot has no
             // display bounds, so the window, its live preview and every settings preview all take
             // the size from the one place.
-            if (devWindowedFallback) {
+            if (devWindowedFallback && simulated && assignment.targetBoundsW > 0 && assignment.targetBoundsH > 0) {
+                // Simulating a monitor this output was last on: its size is that monitor's, and
+                // the picker below would write a size nothing reads.
+                Box(modifier = Modifier.width(resolutionCellWidth), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "${assignment.targetBoundsW}×${assignment.targetBoundsH}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else if (devWindowedFallback && simulated) {
                 ResolutionPicker(
                     label = "",
                     width = assignment.devWindowWidth,
@@ -164,10 +179,20 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     labelHeight = 0.dp,
                     onChange = { w, h ->
                         updateProjection {
-                            it.withAssignment(i, assignment.copy(devWindowWidth = w, devWindowHeight = h))
+                            // A new shape drops the size the window was dragged to, so it opens at this one.
+                            it.withAssignment(
+                                i,
+                                assignment.copy(
+                                    devWindowWidth = w, devWindowHeight = h,
+                                    simulatedWindowWidth = 0, simulatedWindowHeight = 0,
+                                ),
+                            )
                         }
                     },
                 )
+            } else if (devWindowedFallback) {
+                // A real row beside simulated ones: an empty cell keeps the columns lined up.
+                Spacer(modifier = Modifier.width(resolutionCellWidth))
             }
 
             Spacer(modifier = Modifier.width(8.dp))

@@ -42,6 +42,12 @@ data class ProjectionSettings(
     // when real displays/DeckLink devices exist. Clamped to at least 1 at the use sites.
     val devWindowCount: Int = 1,
     /**
+     * Developer menu → Display → Simulate Missing Outputs: open a window for every output up to
+     * [devWindowCount] that has no real display or DeckLink device behind it, even when others do.
+     * Saved, but read only while dev mode is on -- see `LocalSimulateMissingOutputs`.
+     */
+    val simulateMissingOutputs: Boolean = false,
+    /**
      * Which output each content tab previews, keyed by tab.
      *
      * Content can be routed to several outputs at once and they need not be the same shape -- a

@@ -111,6 +111,13 @@ internal fun MainWindowScope.AppMenuBar() {
             onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
             isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
             onSetDevWindowAlwaysOnTop = { presenterManager.setDevWindowAlwaysOnTop(it) },
+            isSimulatingMissingOutputs = appSettings.projectionSettings.simulateMissingOutputs,
+            onSetSimulatingMissingOutputs = { on ->
+                appSettings = appSettings.copy(
+                    projectionSettings = appSettings.projectionSettings.copy(simulateMissingOutputs = on)
+                )
+                settingsManager.saveSettings(appSettings)
+            },
             onOpenStyleEditor = { showStyleEditorWindow = true },
             onOpenMemoryMonitor = { showMemoryMonitorWindow = true },
             onOpenStoryPrompt = { showStoryPrompt = true },

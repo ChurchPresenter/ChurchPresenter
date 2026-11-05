@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.liveoutput.isScreenIndexValid
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.DisplayRect
 import org.churchpresenter.settings.ScreenAssignment
 
 private const val DEV_WINDOW_BASE_OFFSET_DP = 40
@@ -10,23 +11,6 @@ private const val DEV_WINDOW_BASE_OFFSET_DP = 40
 private const val DEV_WINDOW_MAX_WIDTH_DP = 960f
 private const val DEV_WINDOW_MAX_HEIGHT_DP = 540f
 private const val DEV_WINDOW_STEP_DP = 48
-
-/**
- * Whether output windows have to fall back to ordinary windows on this machine.
- *
- * Only when there is genuinely nowhere else to put them — no second display and no DeckLink device
- * — and only in a build that asked for it, so a release install with one monitor shows nothing
- * extra rather than a stray window over the operator's screen.
- */
-internal fun isDevWindowedFallback(
-    isRelease: Boolean,
-    forceDevWindow: Boolean,
-    realWindowCount: Int,
-): Boolean = (!isRelease || forceDevWindow) && realWindowCount == 0
-
-/** How many fallback windows to open — at least one whenever they are used at all. */
-internal fun devFallbackWindowCount(devWindowedFallback: Boolean, configured: Int): Int =
-    if (devWindowedFallback) configured.coerceAtLeast(1) else 0
 
 /**
  * The on-screen size of a dev fallback window standing in for a [width] x [height] output.
@@ -62,8 +46,43 @@ internal fun isFallbackWindowSlot(
     realWindowCount: Int,
 ): Boolean = devWindowedFallback && index >= realWindowCount
 
-/** Which fallback window a slot is, counting from the first one after the real outputs. */
-internal fun fallbackSlotIndex(index: Int, realWindowCount: Int): Int = index - realWindowCount
+/** Where a simulated output's window was left, as [ScreenAssignment] keeps it — in dp. */
+internal data class SimulatedWindowFrame(val x: Int, val y: Int, val width: Int, val height: Int)
+
+/** [assignment] remembering that its simulated window was left at [frame]. */
+internal fun withSimulatedFrame(assignment: ScreenAssignment, frame: SimulatedWindowFrame): ScreenAssignment =
+    assignment.copy(
+        simulatedWindowX = frame.x,
+        simulatedWindowY = frame.y,
+        simulatedWindowWidth = frame.width,
+        simulatedWindowHeight = frame.height,
+    )
+
+/**
+ * Where a simulated output's window opens: where it was last left, else its cascade spot.
+ *
+ * The saved spot is used only while its top-left corner is on a display attached now -- restored
+ * onto a monitor that has since been unplugged, the window would open where nobody can see it.
+ */
+internal fun simulatedWindowPositionDp(
+    assignment: ScreenAssignment,
+    index: Int,
+    displays: List<DisplayRect>,
+): Pair<Int, Int> {
+    val x = assignment.simulatedWindowX
+    val y = assignment.simulatedWindowY
+    val onADisplay = x != Int.MIN_VALUE && y != Int.MIN_VALUE &&
+        displays.any { x >= it.x && x < it.right && y >= it.y && y < it.bottom }
+    return if (onADisplay) x to y else devFallbackWindowOffsetDp(index) to devFallbackWindowOffsetDp(index)
+}
+
+/** The size a simulated output's window opens at: the size it was left at, else its output's shape. */
+internal fun simulatedWindowSizeDp(assignment: ScreenAssignment, outputWidth: Int, outputHeight: Int): Pair<Float, Float> =
+    if (assignment.simulatedWindowWidth > 0 && assignment.simulatedWindowHeight > 0) {
+        assignment.simulatedWindowWidth.toFloat() to assignment.simulatedWindowHeight.toFloat()
+    } else {
+        devFallbackWindowSizeDp(outputWidth, outputHeight)
+    }
 
 /** Whether this output has no display chosen for it at all. */
 internal fun hasNoPrimaryTarget(assignment: ScreenAssignment): Boolean =

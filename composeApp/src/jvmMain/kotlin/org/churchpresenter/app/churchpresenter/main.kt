@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
 import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import org.churchpresenter.dialogs.showAlreadyRunningDialog
 import androidx.compose.ui.window.ApplicationScope
@@ -456,8 +457,13 @@ private fun ApplicationScope.ChurchPresenterApp(
         VirtualOutputs(effectiveAppSettings)
         StartupEffect()
         SignageEffect()
-        OutputGuardWiring(relaunchedByGuard) {
-            AppWindows(effectiveAppSettings, calendarSync, tunnelStatus, tunnelUrl, onThemeCustomizationChange)
+        // The saved Simulate Missing Outputs tick counts only while dev mode is on.
+        CompositionLocalProvider(
+            LocalSimulateMissingOutputs provides (devMode && appSettings.projectionSettings.simulateMissingOutputs),
+        ) {
+            OutputGuardWiring(relaunchedByGuard) {
+                AppWindows(effectiveAppSettings, calendarSync, tunnelStatus, tunnelUrl, onThemeCustomizationChange)
+            }
         }
     }
 }
