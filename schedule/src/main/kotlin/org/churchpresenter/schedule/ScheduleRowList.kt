@@ -1,5 +1,6 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.diagnostics.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -132,6 +133,7 @@ internal fun ScheduleRowList(
         }
 
         val rows = viewModel.scheduleItems.toList()
+        val rowKeys = remember(rows) { scheduleRowKeys(rows) }
         val selectedItemId = viewModel.selectedItemId
         LazyColumn(
             state = listState,
@@ -139,7 +141,7 @@ internal fun ScheduleRowList(
                 .padding(start = 4.dp, top = LIST_TOP_PADDING, bottom = 10.dp)
                 .onGloballyPositioned { viewportOrigin.value = it.positionInRoot() }
         ) {
-            itemsIndexed(rows, key = { _, item -> item.id }) { index, item ->
+            itemsIndexed(rows, key = { index, _ -> rowKeys[index] }) { index, item ->
                 val isDraggingThis = drag.isActive && drag.fromIndex == index
                 Box(
                     modifier = Modifier
@@ -547,3 +549,20 @@ private const val SKIPPED_FILES_MAX_LINES = 2
 private val DRAG_HANDLE_THRESHOLD = 4.dp
 
 private val DELETE_ZONE_HEIGHT = 56.dp
+
+/**
+ * Each row's list key: its id, or -- for an id already used by an earlier row -- the id and its
+ * position. Two rows with one id threw the moment the list scrolled
+ * (CHURCH-PRESENTER-DESKTOP-G9); which path produced them is unknown, so it is logged.
+ */
+internal fun scheduleRowKeys(rows: List<ScheduleItem>): List<String> {
+    val seen = HashSet<String>()
+    return rows.mapIndexed { index, item ->
+        if (seen.add(item.id)) {
+            item.id
+        } else {
+            Log.warn("Schedule", "Row $index repeats the id of an earlier row")
+            "${item.id}#$index"
+        }
+    }
+}
