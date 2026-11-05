@@ -73,7 +73,6 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
-import kotlin.math.roundToInt
 import org.churchpresenter.settings.DisplayRect
 import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
 import org.churchpresenter.sharedui.utils.simulatedOutputCount
@@ -440,15 +439,7 @@ private fun DevFallbackWindow(
             .drop(1)
             .collectLatest { (position, size) ->
                 delay(SIMULATED_WINDOW_SAVE_DELAY_MS)
-                if (position.isSpecified) {
-                    currentOnMoved(
-                        fallbackIndex,
-                        SimulatedWindowFrame(
-                            position.x.value.roundToInt(), position.y.value.roundToInt(),
-                            size.width.value.roundToInt(), size.height.value.roundToInt(),
-                        ),
-                    )
-                }
+                simulatedWindowFrame(position, size)?.let { currentOnMoved(fallbackIndex, it) }
             }
     }
     val spec = OutputWindowSpec(

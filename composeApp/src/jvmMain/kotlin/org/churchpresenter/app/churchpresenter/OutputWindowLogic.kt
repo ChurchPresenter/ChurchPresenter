@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.liveoutput.isScreenIndexValid
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.DisplayRect
 import org.churchpresenter.settings.ScreenAssignment
 
 private const val DEV_WINDOW_BASE_OFFSET_DP = 40
@@ -45,44 +44,6 @@ internal fun isFallbackWindowSlot(
     index: Int,
     realWindowCount: Int,
 ): Boolean = devWindowedFallback && index >= realWindowCount
-
-/** Where a simulated output's window was left, as [ScreenAssignment] keeps it — in dp. */
-internal data class SimulatedWindowFrame(val x: Int, val y: Int, val width: Int, val height: Int)
-
-/** [assignment] remembering that its simulated window was left at [frame]. */
-internal fun withSimulatedFrame(assignment: ScreenAssignment, frame: SimulatedWindowFrame): ScreenAssignment =
-    assignment.copy(
-        simulatedWindowX = frame.x,
-        simulatedWindowY = frame.y,
-        simulatedWindowWidth = frame.width,
-        simulatedWindowHeight = frame.height,
-    )
-
-/**
- * Where a simulated output's window opens: where it was last left, else its cascade spot.
- *
- * The saved spot is used only while its top-left corner is on a display attached now -- restored
- * onto a monitor that has since been unplugged, the window would open where nobody can see it.
- */
-internal fun simulatedWindowPositionDp(
-    assignment: ScreenAssignment,
-    index: Int,
-    displays: List<DisplayRect>,
-): Pair<Int, Int> {
-    val x = assignment.simulatedWindowX
-    val y = assignment.simulatedWindowY
-    val onADisplay = x != Int.MIN_VALUE && y != Int.MIN_VALUE &&
-        displays.any { x >= it.x && x < it.right && y >= it.y && y < it.bottom }
-    return if (onADisplay) x to y else devFallbackWindowOffsetDp(index) to devFallbackWindowOffsetDp(index)
-}
-
-/** The size a simulated output's window opens at: the size it was left at, else its output's shape. */
-internal fun simulatedWindowSizeDp(assignment: ScreenAssignment, outputWidth: Int, outputHeight: Int): Pair<Float, Float> =
-    if (assignment.simulatedWindowWidth > 0 && assignment.simulatedWindowHeight > 0) {
-        assignment.simulatedWindowWidth.toFloat() to assignment.simulatedWindowHeight.toFloat()
-    } else {
-        devFallbackWindowSizeDp(outputWidth, outputHeight)
-    }
 
 /** Whether this output has no display chosen for it at all. */
 internal fun hasNoPrimaryTarget(assignment: ScreenAssignment): Boolean =

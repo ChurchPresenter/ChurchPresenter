@@ -244,7 +244,8 @@ fun ProjectionSettingsTab(
     // Without this, that window would have no row here to configure it.
     val developmentFallback = !isRelease || DevFlags.forceDevWindow
     val simulateMissing = LocalSimulateMissingOutputs.current
-    val simulatedCount = simulatedOutputCount(realWindowCount, proj.devWindowCount, developmentFallback, simulateMissing)
+    val simulatedCount =
+        simulatedOutputCount(realWindowCount, proj.devWindowCount, developmentFallback, simulateMissing)
     val devWindowedFallback = simulatedCount > 0
     // Whether the Simulate Outputs count is offered: with real outputs it can be at or under their
     // number, simulating none, and still has to be there to raise.

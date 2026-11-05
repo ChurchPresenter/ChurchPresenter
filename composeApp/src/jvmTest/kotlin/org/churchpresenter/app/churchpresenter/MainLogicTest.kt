@@ -14,6 +14,9 @@ import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.OBSSettings
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowPosition
 import org.churchpresenter.settings.DisplayRect
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.ServerSettings
@@ -843,8 +846,20 @@ class MainLogicTest {
     @Test
     fun `a simulated window never moved opens at its cascade spot and its output's shape`() {
         val offset = devFallbackWindowOffsetDp(0)
-        assertEquals(offset to offset, simulatedWindowPositionDp(ScreenAssignment(), 0, listOf(DisplayRect(0, 0, 1440, 900))))
+        val laptop = listOf(DisplayRect(0, 0, 1440, 900))
+        assertEquals(offset to offset, simulatedWindowPositionDp(ScreenAssignment(), 0, laptop))
         assertEquals(devFallbackWindowSizeDp(1024, 768), simulatedWindowSizeDp(ScreenAssignment(), 1024, 768))
+    }
+
+    @Test
+    fun `a placed simulated window is saved rounded to whole dp`() {
+        val frame = simulatedWindowFrame(WindowPosition(10.4.dp, 20.6.dp), DpSize(640.dp, 360.dp))
+        assertEquals(SimulatedWindowFrame(10, 21, 640, 360), frame)
+    }
+
+    @Test
+    fun `a simulated window the window system has not placed yet is not saved`() {
+        assertEquals(null, simulatedWindowFrame(WindowPosition.PlatformDefault, DpSize(640.dp, 360.dp)))
     }
 
     /**
