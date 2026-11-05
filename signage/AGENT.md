@@ -18,7 +18,7 @@ gives the same `SignageHub` to both.
 | `SignageController.kt` | Keeps every paired screen's manifest in step with the playlists and the tab's choices; runs while the tab is shown in the tab bar, whichever tab is selected |
 | `SignageFolder.kt` | Reads a folder playlist's copy: the pictures and videos directly in it, in name order |
 | `SignageMedia.kt`, `AddedPlaylistEdits.kt` | Copying a picked folder or file into the signage folder (`Folders/`, `Files/`), finding a copy from its relative path, sending a removed one to the Trash; the tab's playlist edits over them |
-| `PlaylistSource.kt` | What a playlist can be, each added in the tab: a folder (`PickedFolderPlaylist`), a single picture or video (`FilePlaylist`), a link (`LinkPlaylist`, a web page or a stream, its kind guessed from the address), or a rotation (`RotationPlaylist`: other entries in turn, each for its own time) |
+| `PlaylistSource.kt`, `LinkAddress.kt` | What a playlist can be, each added in the tab: a folder (`PickedFolderPlaylist`), a single picture or video (`FilePlaylist`), a link (`LinkPlaylist`, a web page or a stream, its kind guessed from the address), or a rotation (`RotationPlaylist`: other entries in turn, each for its own time); what counts as a link's address |
 | `SignageStore.kt` | The tab's settings (`signage.json`: the added playlists, and each screen's plan with its weekly schedule) in the signage folder, and the hash cache (`hashes.json`) in this computer's own |
 | `ManifestBuilder.kt` | One screen's `Manifest` and the file behind each hash; a link only for a player that listed its kind |
 | `WebTestVerdict.kt` | What a screen's web page test says: smooth, normal motion only, or too slow — decided here, so the thresholds change without a player update |

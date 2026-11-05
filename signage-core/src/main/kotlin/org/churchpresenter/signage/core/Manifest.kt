@@ -108,7 +108,10 @@ data class PlaylistItem(
     val transitionMs: Long = DEFAULT_TRANSITION_MS,
     /** What a [MediaKind.STREAM] or [MediaKind.WEB] item opens. */
     @EncodeDefault(EncodeDefault.Mode.NEVER) val url: String? = null,
-    /** How often a [MediaKind.WEB] page reloads; never when null. */
+    /**
+     * How often a [MediaKind.WEB] page reloads; never when null. An [interactive] page reloads only
+     * while nobody is using it, and only on a player with [Features.TOUCH_RELOAD].
+     */
     @EncodeDefault(EncodeDefault.Mode.NEVER) val refreshMs: Long? = null,
     /**
      * At most how many frames a second a [MediaKind.WEB] page is drawn at; [DEFAULT_WEB_FPS] when
@@ -145,6 +148,11 @@ data class PlaylistItem(
      * comes back here.
      */
     @EncodeDefault(EncodeDefault.Mode.NEVER) val idleUrl: String? = null,
+    /**
+     * How often [idleUrl] reloads while it is showing, so a slideshow picks up new pictures; never when
+     * null, and never while someone uses the page. Only on a player with [Features.TOUCH_RELOAD].
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val idleRefreshMs: Long? = null,
     /**
      * The line written over [idlePlaylistId] or [idleUrl] so people know the screen can be touched,
      * such as "Tap to sign up"; nothing is written when null or blank.
