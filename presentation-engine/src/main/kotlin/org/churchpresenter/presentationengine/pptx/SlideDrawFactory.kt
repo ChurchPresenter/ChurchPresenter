@@ -2,16 +2,23 @@ package org.churchpresenter.presentationengine.pptx
 
 import org.apache.poi.sl.draw.DrawFactory
 import org.apache.poi.sl.draw.DrawFreeformShape
+import org.apache.poi.sl.draw.DrawPaint
 import org.apache.poi.sl.draw.DrawPictureShape
 import org.apache.poi.sl.draw.DrawTextBox
 import org.apache.poi.sl.draw.DrawTextFragment
 import org.apache.poi.sl.draw.DrawTextShape
+import org.apache.poi.sl.draw.geom.Outline
 import org.apache.poi.sl.usermodel.FreeformShape
 import org.apache.poi.sl.usermodel.PictureShape
+import org.apache.poi.sl.usermodel.PlaceableShape
+import org.apache.poi.sl.usermodel.Shape
 import org.apache.poi.sl.usermodel.ShapeType
 import org.apache.poi.sl.usermodel.TextBox
 import org.apache.poi.sl.usermodel.TextShape
+import org.apache.poi.xslf.usermodel.XSLFShape
+import org.openxmlformats.schemas.presentationml.x2006.main.CTShape
 import java.awt.Graphics2D
+import java.awt.Paint
 import java.awt.font.TextAttribute
 import java.awt.font.TextLayout
 import java.awt.geom.Path2D
@@ -36,6 +43,10 @@ import java.text.CharacterIterator
  * - A line is 1.2 times its largest font size tall, as PowerPoint draws single spacing whatever the
  *   font. POI takes the height from the font's own metrics, which for Arial and Times New Roman is
  *   1.15 — so a verse slide's lines sit closer together than on the screen it was made on.
+ * - A shape with `useBgFill` is filled with the slide's background. POI ignores the attribute and
+ *   uses the shape's style, so a full-slide rectangle PowerPoint's Designer laid over a navy
+ *   background covered it in the theme's accent color.
+ * - A gradient on a vertical line is drawn as PowerPoint draws it (see [SlidePaint]).
  *
  * Installed per graphics as the [org.apache.poi.sl.draw.Drawable.DRAW_FACTORY] hint, which
  * `DrawFactory.getInstance` reads before anything else.
@@ -51,6 +62,32 @@ internal object SlideDrawFactory : DrawFactory() {
 
     override fun getTextFragment(layout: TextLayout, str: AttributedString): DrawTextFragment =
         PowerPointLine(layout, str)
+
+    override fun getPaint(shape: PlaceableShape<*, *>): DrawPaint = SlidePaint(shape)
+}
+
+private fun usesSlideBackground(shape: Shape<*, *>): Boolean =
+    ((shape as? XSLFShape)?.xmlObject as? CTShape)?.useBgFill == true
+
+/** The filled parts of a shape's geometry, in the graphics' user space; null when it has none. */
+private fun filledArea(outlines: Collection<Outline>?): Path2D? {
+    val filled = outlines?.filter { it.path.isFilled }.orEmpty()
+    if (filled.isEmpty()) return null
+    val area = Path2D.Double()
+    filled.forEach { area.append(it.outline, false) }
+    return area
+}
+
+private fun drawSlideBackgroundInside(graphics: Graphics2D, shape: Shape<*, *>, area: Path2D?) {
+    val background = shape.sheet.background
+    if (area == null || background == null) return
+    val oldClip = graphics.clip
+    graphics.clip(area)
+    try {
+        runCatching { DrawFactory.getInstance(graphics).getDrawable(background).draw(graphics) }
+    } finally {
+        graphics.clip = oldClip
+    }
 }
 
 private class ShapedPictureShape(private val picture: PictureShape<*, *>) : DrawPictureShape(picture) {
@@ -58,7 +95,11 @@ private class ShapedPictureShape(private val picture: PictureShape<*, *>) : Draw
     override fun drawContent(graphics: Graphics2D) {
         // A plain rectangle is the anchor itself: clipping to it would change nothing but the
         // edge pixels, so those pictures keep POI's own path exactly.
-        val outline = if (picture.shapeType == ShapeType.RECT) null else outlineOf(graphics)
+        val outline = if (picture.shapeType == ShapeType.RECT) {
+            null
+        } else {
+            filledArea(runCatching { computeOutlines(graphics) }.getOrNull())
+        }
         if (outline == null) {
             super.drawContent(graphics)
             return
@@ -70,17 +111,6 @@ private class ShapedPictureShape(private val picture: PictureShape<*, *>) : Draw
         } finally {
             graphics.clip = oldClip
         }
-    }
-
-    /** The filled parts of the picture's geometry, in the graphics' user space; null when it has none. */
-    private fun outlineOf(graphics: Graphics2D): Path2D? {
-        val filled = runCatching { computeOutlines(graphics) }.getOrNull()
-            ?.filter { it.path.isFilled }
-            .orEmpty()
-        if (filled.isEmpty()) return null
-        val area = Path2D.Double()
-        filled.forEach { area.append(it.outline, false) }
-        return area
     }
 }
 
@@ -143,16 +173,46 @@ private fun largestFontSize(str: AttributedString): Double? {
 }
 
 private class StackedTextShape(private val text: TextShape<*, *>) : DrawTextShape(text) {
+    private val slideBackgroundFill = usesSlideBackground(text)
+
+    override fun draw(graphics: Graphics2D) {
+        if (slideBackgroundFill) drawSlideBackgroundInside(graphics, text, filledArea(computeOutlines(graphics)))
+        super.draw(graphics)
+    }
+
+    override fun getFillPaint(graphics: Graphics2D): Paint? =
+        if (slideBackgroundFill) null else super.getFillPaint(graphics)
+
     override fun drawParagraphs(graphics: Graphics2D, x: Double, y: Double): Double =
         stackParagraphs(text, graphics, x, y)
 }
 
 private class StackedTextBox(private val text: TextBox<*, *>) : DrawTextBox(text) {
+    private val slideBackgroundFill = usesSlideBackground(text)
+
+    override fun draw(graphics: Graphics2D) {
+        if (slideBackgroundFill) drawSlideBackgroundInside(graphics, text, filledArea(computeOutlines(graphics)))
+        super.draw(graphics)
+    }
+
+    override fun getFillPaint(graphics: Graphics2D): Paint? =
+        if (slideBackgroundFill) null else super.getFillPaint(graphics)
+
     override fun drawParagraphs(graphics: Graphics2D, x: Double, y: Double): Double =
         stackParagraphs(text, graphics, x, y)
 }
 
 private class StackedFreeformShape(private val text: FreeformShape<*, *>) : DrawFreeformShape(text) {
+    private val slideBackgroundFill = usesSlideBackground(text)
+
+    override fun draw(graphics: Graphics2D) {
+        if (slideBackgroundFill) drawSlideBackgroundInside(graphics, text, filledArea(computeOutlines(graphics)))
+        super.draw(graphics)
+    }
+
+    override fun getFillPaint(graphics: Graphics2D): Paint? =
+        if (slideBackgroundFill) null else super.getFillPaint(graphics)
+
     override fun drawParagraphs(graphics: Graphics2D, x: Double, y: Double): Double =
         stackParagraphs(text, graphics, x, y)
 }
