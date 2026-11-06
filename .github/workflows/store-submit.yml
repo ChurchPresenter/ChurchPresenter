@@ -1,0 +1,78 @@
+name: Submit to Microsoft Store
+
+# Sends the MSIX that build.yml already built to Partner Center, so what the Store certifies is the
+# same build as the release. Run by hand: a submission replaces a pending draft, and certification
+# holds one update at a time. The artifact lasts 7 days (build.yml); after that, build again.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Build Platforms run to submit — leave empty for the newest successful one on main'
+        required: false
+        type: string
+        default: ''
+      draft:
+        description: 'Leave it as a draft in Partner Center instead of sending it to certification'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: store-submit
+  cancel-in-progress: false
+
+env:
+  STORE_PRODUCT_ID: 9NL7LPCMNH5N
+
+jobs:
+  submit:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Download MSIX
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          if [ -z "$RUN_ID" ]; then
+            RUN_ID=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow build.yml --branch main \
+              --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          fi
+          [ -n "$RUN_ID" ] || { echo "::error::No successful Build Platforms run on main"; exit 1; }
+          echo "Submitting the MSIX from run $RUN_ID"
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name windows-msix --dir msix
+
+      - name: Install Microsoft Store CLI
+        uses: microsoft/microsoft-store-apppublisher@cc9910a8d59f2eb55cbb83df0a3800cf3b5300e0 # v1.4
+
+      - name: Configure Store credentials
+        shell: pwsh
+        env:
+          TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+          SELLER_ID: ${{ secrets.SELLER_ID }}
+          CLIENT_ID: ${{ secrets.AZURE_AD_APPLICATION_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.AZURE_AD_APPLICATION_SECRET }}
+        run: >-
+          msstore reconfigure
+          --tenantId $env:TENANT_ID
+          --sellerId $env:SELLER_ID
+          --clientId $env:CLIENT_ID
+          --clientSecret $env:CLIENT_SECRET
+
+      - name: Publish
+        shell: pwsh
+        env:
+          DRAFT: ${{ inputs.draft }}
+        run: |
+          $packages = @(Get-ChildItem msix -Filter *.msix)
+          if ($packages.Count -ne 1) { throw "Expected one MSIX, found $($packages.Count)" }
+          Write-Host "Publishing $($packages[0].Name)"
+          $extra = if ($env:DRAFT -eq 'true') { @('--noCommit') } else { @() }
+          msstore publish $packages[0].FullName -id $env:STORE_PRODUCT_ID @extra
+          if ($LASTEXITCODE -ne 0) { throw "msstore publish failed with exit code $LASTEXITCODE" }
