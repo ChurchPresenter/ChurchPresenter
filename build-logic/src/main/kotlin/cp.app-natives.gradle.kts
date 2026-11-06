@@ -1,4 +1,5 @@
 import org.churchpresenter.buildlogic.isConfigured
+import org.churchpresenter.buildlogic.macJbrPin
 import org.churchpresenter.buildlogic.resolvedJdk21Home
 import org.churchpresenter.buildlogic.signingProps
 import java.io.File
@@ -108,6 +109,41 @@ val fetchBundledFfmpeg = tasks.register("fetchBundledFfmpeg") {
         logger.lifecycle("Bundled ffmpeg: ${outFile.relativeTo(rootProject.projectDir)} (${outFile.length() / 1_048_576} MB)")
     }
 }
+
+// ── The JetBrains Runtime, on macOS ──────────────────────────────────────────
+// On macOS the app runs and ships on the JBR pinned in gradle/jbr-builds.properties (issue #969);
+// `resolvedJdk21Home()` already points `run` and packaging at the folder this task fills.
+val macJbr = macJbrPin()
+val provisionMacJbr = tasks.register("provisionMacJbr") {
+    description = "Downloads and unpacks the pinned JetBrains Runtime the app runs and ships on, on macOS."
+    group = "build"
+    onlyIf { macJbr != null }
+
+    doLast {
+        val pin = macJbr!!
+        if (File(pin.home, "bin/java").exists()) return@doLast
+        val dir = pin.installDir.apply { deleteRecursively(); mkdirs() }
+        val archive = File(dir, "jbr.tar.gz")
+        logger.lifecycle("Downloading the JetBrains Runtime from ${pin.url}")
+        uri(pin.url).toURL().openStream().use { input -> archive.outputStream().use { input.copyTo(it) } }
+        val actual = sha256Of(archive)
+        check(actual == pin.sha256) {
+            "JetBrains Runtime download does not match its pinned digest.\n" +
+                "  expected ${pin.sha256}\n  actual   $actual\n" +
+                "Either the pin is stale or the download was tampered with; do not 'fix' this by " +
+                "updating the digest without knowing which."
+        }
+        val tar = ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", dir.absolutePath)
+            .redirectErrorStream(true).start()
+        val tarOutput = tar.inputStream.bufferedReader().readText()
+        check(tar.waitFor() == 0) { "tar could not unpack the JetBrains Runtime:\n$tarOutput" }
+        archive.delete()
+        check(File(pin.home, "bin/java").exists()) { "No bin/java in the JetBrains Runtime at ${pin.home}" }
+    }
+}
+
+tasks.matching { it.name in setOf("run", "runRelease", "checkRuntime", "checkMacRuntimeSelfContained") }
+    .configureEach { dependsOn(provisionMacJbr) }
 
 fun sha256Of(file: File): String =
     MessageDigest.getInstance("SHA-256").let { digest ->
@@ -312,7 +348,18 @@ val checkMacRuntimeSelfContained = tasks.register("checkMacRuntimeSelfContained"
     onlyIf { System.getProperty("os.name", "").lowercase().contains("mac") && javaHome != null }
 
     doLast {
-        val fontManager = File(javaHome!!, "lib/libfontmanager.dylib")
+        // The JetBrains Runtime, not a stock OpenJDK: on macOS 26 a stock JDK's window brought
+        // forward by a click takes no keys (issue #969).
+        val implementor = File(javaHome!!, "release").takeIf { it.exists() }?.readLines()
+            ?.firstOrNull { it.startsWith("IMPLEMENTOR=") }
+            ?.substringAfter('=')?.trim('"')
+        check(implementor?.contains("JetBrains") == true) {
+            "The JDK this build would bundle is not the JetBrains Runtime ($implementor): $javaHome\n" +
+                "A stock OpenJDK on macOS 26 drops every key after the app is clicked into from " +
+                "another app (issue #969). Gradle downloads JBR 21 itself when it may auto-download."
+        }
+
+        val fontManager = File(javaHome, "lib/libfontmanager.dylib")
         if (!fontManager.exists()) return@doLast   // A JDK laid out differently; nothing to judge.
 
         val otool = ProcessBuilder("otool", "-L", fontManager.absolutePath)
@@ -337,7 +384,7 @@ val checkMacRuntimeSelfContained = tasks.register("checkMacRuntimeSelfContained"
             links to:
             ${foreign.joinToString("\n            ")}
 
-            Those paths do not exist inside a packaged .app. Use a distribution JDK — Temurin 21 —
+            Those paths do not exist inside a packaged .app. Use a distribution JDK — the JetBrains Runtime 21 —
             rather than one from Homebrew or MacPorts, and check `/usr/libexec/java_home -V`.
             """.trimIndent()
         }

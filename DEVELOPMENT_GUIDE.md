@@ -167,7 +167,9 @@ try {
 ### Getting started
 
 1. Fork and clone the repository — no submodules, a plain clone is everything.
-2. Install JDK 21 (Temurin recommended).
+2. Install JDK 21 (Temurin recommended). On macOS the build runs and packages the app on the
+   JetBrains Runtime 21 pinned in `gradle/jbr-builds.properties`, which it downloads itself
+   (issue #969).
 3. Run `./gradlew :composeApp:run` to verify the build works.
 4. Read this guide, CODING_STANDARDS.md and AGENT.md before making changes.
 
