@@ -52,6 +52,8 @@ import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.DevFlags
+import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
+import org.churchpresenter.sharedui.utils.simulatedOutputCount
 import org.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.sharedui.utils.OutputSize
@@ -91,8 +93,13 @@ fun LivePreviewPanel(
     val realWindowCount = ((rememberScreenDevices().size - 1) + deckLinkCount).coerceAtLeast(0)
     // Mirror main.kt's dev-fallback: with no real output, preview the dev fallback window(s) so the
     // right-pane preview matches what's actually opened. devWindowCount lets several be previewed.
-    val devWindowedFallback = (!isRelease || DevFlags.forceDevWindow) && realWindowCount == 0
-    val displayCount = realWindowCount + if (devWindowedFallback) proj.devWindowCount.coerceAtLeast(1) else 0
+    val simulatedCount = simulatedOutputCount(
+        realWindowCount, proj.devWindowCount,
+        developmentFallback = !isRelease || DevFlags.forceDevWindow,
+        simulateMissing = LocalSimulateMissingOutputs.current,
+    )
+    val devWindowedFallback = simulatedCount > 0
+    val displayCount = realWindowCount + simulatedCount
     val mediaViewModel = LocalMediaViewModel.current
 
     val layout = proj.activeLayout()

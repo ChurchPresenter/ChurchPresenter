@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.window.WindowPosition
+import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -74,6 +77,8 @@ class PresenterWindowsLayoutTest {
         val media: MediaViewModel,
         val windows: Map<String, OutputWindowSpec>,
         val update: (AppSettings) -> Unit,
+        /** Each simulated window's saved frame, as the app is told of it. */
+        val moves: List<Pair<Int, SimulatedWindowFrame>> = emptyList(),
     )
 
     private fun rig(
@@ -82,18 +87,21 @@ class PresenterWindowsLayoutTest {
         show: Boolean = true,
         identifying: Boolean = false,
         base: AppSettings = AppSettings(),
+        simulateMissing: Boolean = false,
         block: ComposeUiTest.(Rig) -> Unit,
     ) = runComposeUiTest {
         val manager = PresenterManager().apply { setShowPresenterWindow(show) }
         val media = MediaViewModel()
         val windows = mutableStateMapOf<String, OutputWindowSpec>()
         var settings by mutableStateOf(base.copy(projectionSettings = projection))
+        val moves = mutableListOf<Pair<Int, SimulatedWindowFrame>>()
         // Every test but the pointer one passes the setting off; see `the hide-pointer setting`.
         val host: OutputWindowHost = { spec, content ->
             SideEffect { windows[spec.title] = spec }
             if (spec.visible) Box(Modifier.testTag(spec.title)) { content() }
         }
         setContent {
+            CompositionLocalProvider(LocalSimulateMissingOutputs provides simulateMissing) {
             PresenterWindows(
                 screens = screens,
                 presenterManager = manager,
@@ -105,10 +113,12 @@ class PresenterWindowsLayoutTest {
                 sttManager = STTManager(),
                 defaultScreenDevice = { operator },
                 window = host,
+                onSimulatedWindowMoved = { index, frame -> moves += index to frame },
             )
+            }
         }
         waitForIdle()
-        block(Rig(manager, media, windows) { settings = it })
+        block(Rig(manager, media, windows, { settings = it }, moves))
     }
 
     @Test
@@ -269,6 +279,39 @@ class PresenterWindowsLayoutTest {
         }
 
     @Test
+    fun `a missing output is simulated beside a real one and saves where it is moved to`() =
+        rig(
+            ProjectionSettings(devWindowCount = 2, hideCursorOnOutputs = false),
+            screens = arrayOf(operator, audience),
+            simulateMissing = true,
+        ) { rig ->
+            val simulated = rig.windows.getValue("Presenter View 2")
+            assertTrue(!simulated.undecorated && simulated.resizable)
+            simulated.state.position = WindowPosition(300.dp, 200.dp)
+            mainClock.advanceTimeBy(SIMULATED_SAVE_WAIT_MS)
+            waitForIdle()
+            val (index, frame) = rig.moves.last()
+            assertEquals(1, index)
+            assertEquals(300 to 200, frame.x to frame.y)
+        }
+
+    @Test
+    fun `a simulated window reopens where it was left`() =
+        rig(
+            ProjectionSettings(
+                devWindowCount = 1,
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(
+                    ScreenAssignment(simulatedWindowX = 120, simulatedWindowY = 80),
+                ),
+            ),
+            screens = arrayOf(operator),
+            simulateMissing = true,
+        ) { rig ->
+            assertEquals(WindowPosition(120.dp, 80.dp), rig.windows.getValue("Presenter View 1").state.position)
+        }
+
+    @Test
     fun `merged dev windows each show their tile and the identify number over it`() =
         rig(
             ProjectionSettings(
@@ -400,3 +443,5 @@ class PresenterWindowsLayoutTest {
             assertEquals(1f, rig.manager.lottieProgress.value)
         }
 }
+
+private const val SIMULATED_SAVE_WAIT_MS = 600L

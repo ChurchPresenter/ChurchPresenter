@@ -95,6 +95,15 @@ data class ScreenAssignment(
     val devWindowWidth: Int = 1920,
     val devWindowHeight: Int = 1080,
     /**
+     * Where the window simulating this output was last left, in dp, so it opens there again after a
+     * restart or once its monitor has been unplugged again. `Int.MIN_VALUE` (and a zero size) means
+     * it has never been moved: it opens at its cascade spot, at the size its output's shape gives.
+     */
+    val simulatedWindowX: Int = Int.MIN_VALUE,
+    val simulatedWindowY: Int = Int.MIN_VALUE,
+    val simulatedWindowWidth: Int = 0,
+    val simulatedWindowHeight: Int = 0,
+    /**
      * One of `Constants.NDI_MODE_*`. Defaults to alpha, which is the mode worth defaulting to: it
      * is the one SDI cannot do, and it is what makes a lower third arrive in OBS already keyed.
      *

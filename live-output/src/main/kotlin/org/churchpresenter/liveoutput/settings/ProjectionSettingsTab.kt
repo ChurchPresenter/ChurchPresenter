@@ -90,6 +90,9 @@ import org.churchpresenter.settings.isScreenUnused
 import org.churchpresenter.settings.screenKey
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.DevFlags
+import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
+import org.churchpresenter.sharedui.utils.simulatedOutputCount
+import org.churchpresenter.sharedui.utils.simulatesOutputs
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import kotlin.io.path.Path
@@ -239,9 +242,16 @@ fun ProjectionSettingsTab(
     // Dev convenience: mirrors main.kt's devWindowedFallback — on a single-monitor dev machine
     // with no DeckLink device, main.kt opens an extra windowed "dev" output at assignment slot 0.
     // Without this, that window would have no row here to configure it.
-    val devWindowedFallback = (!isRelease || DevFlags.forceDevWindow) && realWindowCount == 0
+    val developmentFallback = !isRelease || DevFlags.forceDevWindow
+    val simulateMissing = LocalSimulateMissingOutputs.current
+    val simulatedCount =
+        simulatedOutputCount(realWindowCount, proj.devWindowCount, developmentFallback, simulateMissing)
+    val devWindowedFallback = simulatedCount > 0
+    // Whether the Simulate Outputs count is offered: with real outputs it can be at or under their
+    // number, simulating none, and still has to be there to raise.
+    val simulationOn = simulatesOutputs(realWindowCount, developmentFallback, simulateMissing)
     val devWindowCount = proj.devWindowCount.coerceAtLeast(1)
-    val presenterWindowCount = realWindowCount + if (devWindowedFallback) devWindowCount else 0
+    val presenterWindowCount = realWindowCount + simulatedCount
 
     // Extend the assignments list and resolve any unassigned (-1 auto) to actual non-primary displays.
     val nonPrimaryDevices = remember(screenDevicesAll) {
@@ -298,6 +308,8 @@ fun ProjectionSettingsTab(
         detectedScreens = detectedScreens,
         devWindowCount = devWindowCount,
         devWindowedFallback = devWindowedFallback,
+        simulationOn = simulationOn,
+        realWindowCount = realWindowCount,
         presenterWindowCount = presenterWindowCount,
         numScreens = numScreens,
         screenAssignments = screenAssignments,

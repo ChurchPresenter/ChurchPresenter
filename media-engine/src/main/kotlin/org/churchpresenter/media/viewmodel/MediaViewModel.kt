@@ -26,7 +26,17 @@ data class SidecarSubtitle(
     fun showsOn(profileId: String): Boolean = outputs.isEmpty() || profileId in outputs
 }
 
-class MediaViewModel {
+/**
+ * @param scanSubtitles reads a clip's sibling subtitle files and hands back their cues — on a
+ *   background thread, then the event thread, in the app; a test passes one that answers at once.
+ */
+class MediaViewModel internal constructor(
+    private val scanSubtitles: (String, (List<Pair<String, List<SubtitleCue>>>) -> Unit) -> Unit,
+) {
+    constructor() : this(::scanSubtitlesInBackground)
+
+    /** Bumped by every load, so a scan that answers after the next clip was loaded is dropped. */
+    private var subtitleScan = 0
 
     // Media source
     private val _mediaUrl = mutableStateOf("")
@@ -136,11 +146,15 @@ class MediaViewModel {
 
     fun loadMedia(url: String, type: String) {
         subtitles.setSubtitleFile("")
-        siblingSubtitleFiles(url).forEach { subtitles.addSubtitleFile(it.absolutePath) }
+        val scan = ++subtitleScan
         restart(url, mediaTitleFromUrl(url), type)
+        scanSubtitles(url) { found ->
+            if (scan == subtitleScan) found.forEach { (path, cues) -> subtitles.addParsedSubtitleFile(path, cues) }
+        }
     }
 
     fun loadMediaFromSchedule(url: String, title: String, type: String, subtitleUrl: String = "") {
+        subtitleScan++
         subtitles.setSubtitleFile(subtitleUrl)
         restart(url, title, type)
         // Loaded is the moment a cue's request can be carried out; before it there is nothing to play.

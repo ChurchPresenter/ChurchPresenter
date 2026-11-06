@@ -12,23 +12,6 @@ private const val DEV_WINDOW_MAX_HEIGHT_DP = 540f
 private const val DEV_WINDOW_STEP_DP = 48
 
 /**
- * Whether output windows have to fall back to ordinary windows on this machine.
- *
- * Only when there is genuinely nowhere else to put them — no second display and no DeckLink device
- * — and only in a build that asked for it, so a release install with one monitor shows nothing
- * extra rather than a stray window over the operator's screen.
- */
-internal fun isDevWindowedFallback(
-    isRelease: Boolean,
-    forceDevWindow: Boolean,
-    realWindowCount: Int,
-): Boolean = (!isRelease || forceDevWindow) && realWindowCount == 0
-
-/** How many fallback windows to open — at least one whenever they are used at all. */
-internal fun devFallbackWindowCount(devWindowedFallback: Boolean, configured: Int): Int =
-    if (devWindowedFallback) configured.coerceAtLeast(1) else 0
-
-/**
  * The on-screen size of a dev fallback window standing in for a [width] x [height] output.
  *
  * Scaled down to fit [DEV_WINDOW_MAX_WIDTH_DP] x [DEV_WINDOW_MAX_HEIGHT_DP] while keeping the
@@ -61,9 +44,6 @@ internal fun isFallbackWindowSlot(
     index: Int,
     realWindowCount: Int,
 ): Boolean = devWindowedFallback && index >= realWindowCount
-
-/** Which fallback window a slot is, counting from the first one after the real outputs. */
-internal fun fallbackSlotIndex(index: Int, realWindowCount: Int): Int = index - realWindowCount
 
 /** Whether this output has no display chosen for it at all. */
 internal fun hasNoPrimaryTarget(assignment: ScreenAssignment): Boolean =

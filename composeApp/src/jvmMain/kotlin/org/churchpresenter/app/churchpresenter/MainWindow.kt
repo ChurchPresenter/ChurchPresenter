@@ -181,6 +181,12 @@ internal fun AppRootState.AppWindows(
             serverUrl = companionServer.serverUrl.collectAsState().value,
             qaDisplayUrl = qaDisplayUrl,
             sttManager = sttManager,
+            onSimulatedWindowMoved = { index, frame ->
+                val proj = appSettings.projectionSettings
+                val moved = withSimulatedFrame(proj.getAssignment(index), frame)
+                appSettings = appSettings.copy(projectionSettings = proj.withAssignment(index, moved))
+                settingsManager.saveSettings(appSettings)
+            },
         )
     }
 

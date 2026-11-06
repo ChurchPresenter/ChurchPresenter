@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.sharedui.language.Language
+import org.churchpresenter.sharedui.utils.simulatedOutputCount
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongBackgroundType
@@ -13,6 +14,10 @@ import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.OBSSettings
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowPosition
+import org.churchpresenter.settings.DisplayRect
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.ServerSettings
 import org.churchpresenter.sharedui.models.Presenting
@@ -796,31 +801,24 @@ class MainLogicTest {
 
     @Test
     fun `a dev machine with nowhere to output falls back to a window`() {
-        assertTrue(isDevWindowedFallback(isRelease = false, forceDevWindow = false, realWindowCount = 0))
-        assertTrue(isDevWindowedFallback(isRelease = true, forceDevWindow = true, realWindowCount = 0))
+        assertEquals(1, simulatedOutputCount(0, 1, developmentFallback = true, simulateMissing = false))
     }
 
     @Test
     fun `a real output is always preferred to the fallback`() {
-        assertFalse(isDevWindowedFallback(isRelease = false, forceDevWindow = false, realWindowCount = 1))
-        assertFalse(isDevWindowedFallback(isRelease = true, forceDevWindow = true, realWindowCount = 2))
+        assertEquals(0, simulatedOutputCount(1, 3, developmentFallback = true, simulateMissing = false))
+        assertEquals(0, simulatedOutputCount(2, 1, developmentFallback = true, simulateMissing = false))
     }
 
     @Test
     fun `a packaged build that did not ask for it gets no stray window`() {
-        assertFalse(isDevWindowedFallback(isRelease = true, forceDevWindow = false, realWindowCount = 0))
+        assertEquals(0, simulatedOutputCount(0, 3, developmentFallback = false, simulateMissing = false))
     }
 
     @Test
     fun `the fallback opens at least one window, however it is configured`() {
-        assertEquals(1, devFallbackWindowCount(devWindowedFallback = true, configured = 0))
-        assertEquals(1, devFallbackWindowCount(devWindowedFallback = true, configured = 1))
-        assertEquals(3, devFallbackWindowCount(devWindowedFallback = true, configured = 3))
-    }
-
-    @Test
-    fun `no fallback means no windows at all`() {
-        assertEquals(0, devFallbackWindowCount(devWindowedFallback = false, configured = 3))
+        assertEquals(1, simulatedOutputCount(0, 0, developmentFallback = true, simulateMissing = false))
+        assertEquals(3, simulatedOutputCount(0, 3, developmentFallback = true, simulateMissing = false))
     }
 
     @Test
@@ -828,6 +826,40 @@ class MainLogicTest {
         assertEquals(40, devFallbackWindowOffsetDp(0))
         assertTrue(devFallbackWindowOffsetDp(1) > devFallbackWindowOffsetDp(0))
         assertTrue(devFallbackWindowOffsetDp(2) > devFallbackWindowOffsetDp(1))
+    }
+
+    @Test
+    fun `a simulated window reopens where it was left while that spot is on a display`() {
+        val left = withSimulatedFrame(ScreenAssignment(), SimulatedWindowFrame(300, 200, 640, 360))
+        val displays = listOf(DisplayRect(0, 0, 1440, 900))
+        assertEquals(300 to 200, simulatedWindowPositionDp(left, 0, displays))
+        assertEquals(640f to 360f, simulatedWindowSizeDp(left, 1920, 1080))
+    }
+
+    @Test
+    fun `a simulated window left on a monitor that is gone opens at its cascade spot`() {
+        val left = withSimulatedFrame(ScreenAssignment(), SimulatedWindowFrame(2000, 100, 640, 360))
+        val offset = devFallbackWindowOffsetDp(1)
+        assertEquals(offset to offset, simulatedWindowPositionDp(left, 1, listOf(DisplayRect(0, 0, 1440, 900))))
+    }
+
+    @Test
+    fun `a simulated window never moved opens at its cascade spot and its output's shape`() {
+        val offset = devFallbackWindowOffsetDp(0)
+        val laptop = listOf(DisplayRect(0, 0, 1440, 900))
+        assertEquals(offset to offset, simulatedWindowPositionDp(ScreenAssignment(), 0, laptop))
+        assertEquals(devFallbackWindowSizeDp(1024, 768), simulatedWindowSizeDp(ScreenAssignment(), 1024, 768))
+    }
+
+    @Test
+    fun `a placed simulated window is saved rounded to whole dp`() {
+        val frame = simulatedWindowFrame(WindowPosition(10.4.dp, 20.6.dp), DpSize(640.dp, 360.dp))
+        assertEquals(SimulatedWindowFrame(10, 21, 640, 360), frame)
+    }
+
+    @Test
+    fun `a simulated window the window system has not placed yet is not saved`() {
+        assertEquals(null, simulatedWindowFrame(WindowPosition.PlatformDefault, DpSize(640.dp, 360.dp)))
     }
 
     /**
@@ -997,8 +1029,6 @@ class MainLogicTest {
     fun `the slots past the real outputs are the fallback windows`() {
         assertFalse(isFallbackWindowSlot(devWindowedFallback = true, index = 0, realWindowCount = 1))
         assertTrue(isFallbackWindowSlot(devWindowedFallback = true, index = 1, realWindowCount = 1))
-        assertEquals(0, fallbackSlotIndex(index = 1, realWindowCount = 1))
-        assertEquals(2, fallbackSlotIndex(index = 3, realWindowCount = 1))
     }
 
     @Test

@@ -179,7 +179,14 @@ object CrashReporter {
             analyticsReportingEnabled,
             buildIdentity,
             setUncaughtHandler = { Thread.setDefaultUncaughtExceptionHandler(it) },
-            addShutdownHook = { Runtime.getRuntime().addShutdownHook(Thread(it)) },
+            // The JVM refuses a hook once it is already shutting down -- the app quit while it was
+            // still starting (CHURCH-PRESENTER-DESKTOP-H4) -- and there is nothing left to run it for.
+            addShutdownHook = {
+                try {
+                    Runtime.getRuntime().addShutdownHook(Thread(it))
+                } catch (_: IllegalStateException) {
+                }
+            },
         )
 
     /**

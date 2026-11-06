@@ -56,6 +56,8 @@ private fun navigationTopBar(
     onSetPresenterWindowVisible: (Boolean) -> Unit = {},
     isDevWindowAlwaysOnTop: Boolean = false,
     onSetDevWindowAlwaysOnTop: (Boolean) -> Unit = {},
+    isSimulatingMissingOutputs: Boolean = false,
+    onSetSimulatingMissingOutputs: (Boolean) -> Unit = {},
     onOpenStyleEditor: () -> Unit = {},
     onOpenMemoryMonitor: () -> Unit = {},
     onOpenStoryPrompt: () -> Unit = {},
@@ -108,6 +110,8 @@ private fun navigationTopBar(
                 onSetPresenterWindowVisible = onSetPresenterWindowVisible,
                 isDevWindowAlwaysOnTop = isDevWindowAlwaysOnTop,
                 onSetDevWindowAlwaysOnTop = onSetDevWindowAlwaysOnTop,
+                isSimulatingMissingOutputs = isSimulatingMissingOutputs,
+                onSetSimulatingMissingOutputs = onSetSimulatingMissingOutputs,
                 onOpenStyleEditor = onOpenStyleEditor,
                 onOpenMemoryMonitor = onOpenMemoryMonitor,
                 onOpenStoryPrompt = onOpenStoryPrompt,
@@ -513,12 +517,15 @@ class NavigationTopBarTest {
     fun `developer menu display submenu toggles checkboxes`() {
         var visibleCalls = mutableListOf<Boolean>()
         var alwaysOnTopCalls = mutableListOf<Boolean>()
+        val simulateCalls = mutableListOf<Boolean>()
         navigationTopBar(
             showDeveloperMenu = true,
             isPresenterWindowVisible = true,
             onSetPresenterWindowVisible = { visibleCalls.add(it) },
             isDevWindowAlwaysOnTop = false,
             onSetDevWindowAlwaysOnTop = { alwaysOnTopCalls.add(it) },
+            isSimulatingMissingOutputs = false,
+            onSetSimulatingMissingOutputs = { simulateCalls.add(it) },
         ) {
             assertEquals(8, menuCount)
             val developer = getMenu(7)
@@ -527,7 +534,7 @@ class NavigationTopBarTest {
 
             val display = developer.getItem(0) as JMenu
             assertEquals("Display", display.text)
-            assertEquals(2, display.itemCount)
+            assertEquals(3, display.itemCount)
 
             val showWindow = display.getItem(0) as JCheckBoxMenuItem
             assertEquals("Show Window", showWindow.text)
@@ -538,9 +545,15 @@ class NavigationTopBarTest {
             assertEquals("Always on Top", alwaysOnTop.text)
             assertFalse(alwaysOnTop.isSelected)
             alwaysOnTop.doClick(0)
+
+            val simulate = display.getItem(2) as JCheckBoxMenuItem
+            assertEquals("Simulate Missing Outputs", simulate.text)
+            assertFalse(simulate.isSelected)
+            simulate.doClick(0)
         }
         assertEquals(listOf(false), visibleCalls)
         assertEquals(listOf(true), alwaysOnTopCalls)
+        assertEquals(listOf(true), simulateCalls)
     }
 
     @Test

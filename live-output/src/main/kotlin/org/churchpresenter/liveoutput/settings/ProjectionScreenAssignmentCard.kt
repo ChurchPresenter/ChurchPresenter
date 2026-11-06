@@ -54,6 +54,10 @@ internal fun ScreenAssignmentCard(
     detectedScreens: Int,
     devWindowCount: Int,
     devWindowedFallback: Boolean,
+    /** Whether the Simulate Outputs count is offered — it can be while it simulates nothing. */
+    simulationOn: Boolean,
+    /** How many rows have a real display or DeckLink device behind them; the rest are simulated. */
+    realWindowCount: Int,
     presenterWindowCount: Int,
     numScreens: Int,
     screenAssignments: List<ScreenAssignment>,
@@ -68,7 +72,7 @@ internal fun ScreenAssignmentCard(
 SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     // Detected screens info + simulate stepper + Identify button
     ScreenAssignmentInfoRow(
-        detectedScreens, presenterWindowCount, devWindowedFallback, devWindowCount, onIdentifyScreen,
+        detectedScreens, presenterWindowCount, simulationOn, devWindowCount, onIdentifyScreen,
     ) { count -> updateProjection { it.copy(devWindowCount = count) } }
     Spacer(modifier = Modifier.height(4.dp))
 
@@ -89,8 +93,9 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
     for (i in 0 until numScreens) {
         val assignment = screenAssignments[i]
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Screen label — the dev-window fallback always occupies slot 0
-            val defaultScreenLabel = if (devWindowedFallback && i == 0) {
+            val simulated = i >= realWindowCount
+            // Screen label — with no real output, the first simulated window is slot 0
+            val defaultScreenLabel = if (simulated && i == 0) {
                 stringResource(Res.string.dev_window_label)
             } else {
                 stringResource(Res.string.screen_col_label, i + 1)
@@ -151,23 +156,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 },
             )
 
-            // Dev fallback only — see the header comment. Written to the slot's own
-            // devWindowWidth/Height, which is what outputSizeOf falls back to when a slot has no
-            // display bounds, so the window, its live preview and every settings preview all take
-            // the size from the one place.
             if (devWindowedFallback) {
-                ResolutionPicker(
-                    label = "",
-                    width = assignment.devWindowWidth,
-                    height = assignment.devWindowHeight,
-                    cellWidth = resolutionCellWidth,
-                    labelHeight = 0.dp,
-                    onChange = { w, h ->
-                        updateProjection {
-                            it.withAssignment(i, assignment.copy(devWindowWidth = w, devWindowHeight = h))
-                        }
-                    },
-                )
+                SimulatedResolutionCell(assignment, simulated, resolutionCellWidth) { resized ->
+                    updateProjection { it.withAssignment(i, resized) }
+                }
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -231,3 +223,48 @@ private fun ScreenNameCell(
 
 /** Dim enough to read as "not typed yet", solid enough to read at all. */
 private const val SCREEN_NAME_PLACEHOLDER_ALPHA = 0.6f
+
+/**
+ * The Resolution cell of one row while outputs are simulated. Dev fallback only — see the header
+ * comment. Written to the slot's own devWindowWidth/Height, which is what outputSizeOf falls back to
+ * when a slot has no display bounds, so the window, its live preview and every settings preview all
+ * take the size from the one place.
+ */
+@Composable
+private fun SimulatedResolutionCell(
+    assignment: ScreenAssignment,
+    simulated: Boolean,
+    cellWidth: Dp,
+    onResize: (ScreenAssignment) -> Unit,
+) {
+    val knownMonitor = assignment.targetBoundsW > 0 && assignment.targetBoundsH > 0
+    when {
+        // A real row beside simulated ones: an empty cell keeps the columns lined up.
+        !simulated -> Spacer(modifier = Modifier.width(cellWidth))
+        // Simulating a monitor this output was last on: its size is that monitor's, and a picker
+        // would write a size nothing reads.
+        knownMonitor -> Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
+            Text(
+                text = "${assignment.targetBoundsW}×${assignment.targetBoundsH}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        else -> ResolutionPicker(
+            label = "",
+            width = assignment.devWindowWidth,
+            height = assignment.devWindowHeight,
+            cellWidth = cellWidth,
+            labelHeight = 0.dp,
+            // A new shape drops the size the window was dragged to, so it opens at this one.
+            onChange = { w, h ->
+                onResize(
+                    assignment.copy(
+                        devWindowWidth = w, devWindowHeight = h,
+                        simulatedWindowWidth = 0, simulatedWindowHeight = 0,
+                    )
+                )
+            },
+        )
+    }
+}

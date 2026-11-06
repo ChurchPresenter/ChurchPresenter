@@ -51,6 +51,7 @@ class SoftwarePlaybackTest {
             if (shown) {
                 SoftwarePlayback(
                     vm, player.mp, mutableStateOf(false), audioEnabled = false, release = { released = true },
+                    stopOn = Runnable::run,
                 )
             }
         }

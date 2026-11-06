@@ -180,6 +180,7 @@
     <string name="menu_developer_display">Display</string>
     <string name="menu_developer_show_window">Show Window</string>
     <string name="menu_developer_always_on_top">Always on Top</string>
+    <string name="menu_developer_simulate_missing_outputs">Simulate Missing Outputs</string>
     <string name="menu_developer_style_editor">Animation Style Editor…</string>
     <string name="style_editor_window_title">Animation Style Editor</string>
     <string name="menu_developer_memory_monitor">Memory Monitor…</string>
