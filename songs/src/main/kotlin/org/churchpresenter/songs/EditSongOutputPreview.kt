@@ -40,6 +40,7 @@ import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.composables.PaneTab
 import org.churchpresenter.sharedui.composables.PaneTabRow
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.sharedui.utils.previewOutputSize
 import org.churchpresenter.strings.generated.resources.Res
@@ -125,39 +126,43 @@ internal fun EditSongOutputPane(state: EditSongState, appSettings: AppSettings, 
     val profiles = remember(appSettings) { previewProfilesOf(appSettings) }
     val output = remember(appSettings) { previewOutputSize(appSettings) }
     var mode by remember { mutableStateOf(Constants.SONG_DISPLAY_MODE_VERSE) }
-    Column(
-        modifier = modifier.verticalScroll(rememberScrollState()).padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        if (slide == null) {
-            Text(
-                text = stringResource(Res.string.song_output_nothing),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            PaneTabRow {
-                PaneTab(stringResource(Res.string.song_chunk_verse), mode == Constants.SONG_DISPLAY_MODE_VERSE) {
-                    mode = Constants.SONG_DISPLAY_MODE_VERSE
+    val scrollState = rememberScrollState()
+    Box(modifier) {
+        Column(
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (slide == null) {
+                Text(
+                    text = stringResource(Res.string.song_output_nothing),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                PaneTabRow {
+                    PaneTab(stringResource(Res.string.song_chunk_verse), mode == Constants.SONG_DISPLAY_MODE_VERSE) {
+                        mode = Constants.SONG_DISPLAY_MODE_VERSE
+                    }
+                    PaneTab(stringResource(Res.string.song_chunk_line), mode == Constants.SONG_DISPLAY_MODE_LINE) {
+                        mode = Constants.SONG_DISPLAY_MODE_LINE
+                    }
                 }
-                PaneTab(stringResource(Res.string.song_chunk_line), mode == Constants.SONG_DISPLAY_MODE_LINE) {
-                    mode = Constants.SONG_DISPLAY_MODE_LINE
+                // The look being edited, not the one the song was opened with.
+                val shown = slide.slides.map { it.copy(textOverrides = state.textOverrides) }
+                profiles.first?.let { profile ->
+                    PreviewCaption(stringResource(Res.string.song_output_full_screen), profile.name)
+                    val settings = appSettings.resolvedFor(profile).withSongDisplayMode(mode)
+                    OutputPreview(settings, output, shown, slide, lowerThird = false)
+                }
+                profiles.second?.let { profile ->
+                    PreviewCaption(stringResource(Res.string.song_output_lower_third), profile.name)
+                    val settings = appSettings.resolvedFor(profile).withSongDisplayMode(mode)
+                    OutputPreview(settings, output, shown, slide, lowerThird = true)
                 }
             }
-            // The look being edited, not the one the song was opened with.
-            val shown = slide.slides.map { it.copy(textOverrides = state.textOverrides) }
-            profiles.first?.let { profile ->
-                PreviewCaption(stringResource(Res.string.song_output_full_screen), profile.name)
-                val settings = appSettings.resolvedFor(profile).withSongDisplayMode(mode)
-                OutputPreview(settings, output, shown, slide, lowerThird = false)
-            }
-            profiles.second?.let { profile ->
-                PreviewCaption(stringResource(Res.string.song_output_lower_third), profile.name)
-                val settings = appSettings.resolvedFor(profile).withSongDisplayMode(mode)
-                OutputPreview(settings, output, shown, slide, lowerThird = true)
-            }
+            SongLookCard(state, appSettings, profiles.first ?: profiles.second)
         }
-        SongLookCard(state, appSettings, profiles.first ?: profiles.second)
+        SettingsScrollbar(scrollState)
     }
 }
 
