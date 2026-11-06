@@ -170,7 +170,7 @@ jobs:
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
         run: ./gradlew :composeApp:signWindowsMsi
 
-      # Its own step, bounded and allowed to fail: the MSIX is for a hand upload to Partner Center,
+      # Its own step, bounded and allowed to fail: the MSIX is only for the Store (store-submit.yml),
       # and a makeappx that stalls must not hold back the signed MSI, the release or the nightly.
       - name: Package MSIX
         id: msix
@@ -208,7 +208,7 @@ jobs:
           path: composeApp/build/compose/binaries/main/msi
           retention-days: 2
 
-      # For upload to Partner Center by hand; not attached to the GitHub release, since an MSIX
+      # For store-submit.yml or a hand upload; not attached to the GitHub release, since an MSIX
       # outside the Store installs only with a trusted signature.
       - name: Upload MSIX artifact
         if: steps.msix.outcome == 'success'
