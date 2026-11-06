@@ -339,6 +339,12 @@ enum class Platform {
     @SerialName("linux_x64") LINUX_X64,
 
     @SerialName("windows_x64") WINDOWS_X64,
+
+    /**
+     * ChurchPresenter's mobile app on an Android or Google TV. It never takes [Features.UPDATE]: its
+     * updates come from the app store, so a release has no asset for it.
+     */
+    @SerialName("android_tv") ANDROID_TV,
 }
 
 @Serializable
