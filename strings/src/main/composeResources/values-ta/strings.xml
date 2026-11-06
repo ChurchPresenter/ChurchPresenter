@@ -173,6 +173,7 @@
     <string name="submit_feature_request">அம்ச வேண்டுகோள்</string>
     <string name="action_ok">OK</string>
     <string name="menu_how_to_blog">வழிகாட்டி வலைப்பதிவு</string>
+    <string name="menu_tutorial_videos">வழிகாட்டி காணொளிகள்</string>
     <string name="menu_check_for_updates">புதுப்பிப்புகளைச் சரிபார்…</string>
     <string name="menu_keyboard_shortcuts">விசைப்பலகை குறுக்குவழிகள்</string>
     <string name="shortcut_category_global">பொதுவானது</string>

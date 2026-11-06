@@ -66,6 +66,7 @@ import org.churchpresenter.strings.generated.resources.menu_exit
 import org.churchpresenter.strings.generated.resources.menu_file
 import org.churchpresenter.strings.generated.resources.menu_help
 import org.churchpresenter.strings.generated.resources.menu_how_to_blog
+import org.churchpresenter.strings.generated.resources.menu_tutorial_videos
 import org.churchpresenter.strings.generated.resources.open_converter
 import org.churchpresenter.strings.generated.resources.open_calendar_manager
 import org.churchpresenter.strings.generated.resources.open_song_library
@@ -122,6 +123,7 @@ fun FrameWindowScope.NavigationTopBar(
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {},
     onHowToBlog: () -> Unit = {},
+    onTutorialVideos: () -> Unit = {},
     onGettingStarted: () -> Unit = {},
     /** Help → Show Helper; null leaves the item out — Wick is shown in dev mode only. */
     onShowHelper: (() -> Unit)? = null,
@@ -173,7 +175,7 @@ fun FrameWindowScope.NavigationTopBar(
             ZoomActions(onZoomIn, onZoomOut, onActualSize), ::accelerator)
         LanguageMenu(onLanguageChange)
         HelpMenu(helpLabel, helpMnemonic, ::accelerator, onGettingStarted, onShowHelper, onKeyboardShortcuts,
-            onHowToBlog,
+            onHowToBlog, onTutorialVideos,
             onConverter, onSongLibrary, onCalendar, onAbout, onHelp, onContactUs, onCheckForUpdates)
         if (showDeveloperMenu) {
             DeveloperMenu(
@@ -421,6 +423,7 @@ private fun MenuBarScope.HelpMenu(
     onShowHelper: (() -> Unit)?,
     onKeyboardShortcuts: () -> Unit,
     onHowToBlog: () -> Unit,
+    onTutorialVideos: () -> Unit,
     onConverter: () -> Unit,
     onSongLibrary: () -> Unit,
     onCalendar: () -> Unit,
@@ -438,6 +441,7 @@ private fun MenuBarScope.HelpMenu(
             shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS)
         )
         Item(stringResource(Res.string.menu_how_to_blog), onClick = onHowToBlog)
+        Item(stringResource(Res.string.menu_tutorial_videos), onClick = onTutorialVideos)
         Item(
             stringResource(Res.string.open_converter),
             onClick = onConverter,
