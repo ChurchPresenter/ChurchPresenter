@@ -7,7 +7,13 @@ This guide explains how to build DMG (macOS), EXE (Windows), and other installer
 ### For macOS (DMG)
 - macOS operating system
 - Xcode Command Line Tools installed: `xcode-select --install`
-- **A distribution JDK 21 — Temurin. Not Homebrew's, not MacPorts'.**
+- **The JetBrains Runtime (JBR) 21 — not Temurin, not Homebrew's, not MacPorts'.**
+
+  A stock OpenJDK on macOS 26 never gives a window brought forward by a click Java's focus, so
+  after clicking into the app from another one no key arrives (issue #969); JBR does not have the
+  bug. On macOS the build downloads the JBR pinned in `gradle/jbr-builds.properties` itself
+  (`provisionMacJbr`, under Gradle's user home) and both `run` and packaging use it, whatever JDK
+  the machine has. Windows and Linux stay on any JDK 21 (Temurin in CI).
 
   jpackage copies the JDK it is given straight into the `.app`, and a package manager's JDK is not
   self-contained: Homebrew builds `libfontmanager.dylib` against Homebrew's own harfbuzz and links
@@ -15,10 +21,9 @@ This guide explains how to build DMG (macOS), EXE (Windows), and other installer
   every other one, at the first thing that touches a font, with
   `Library not loaded: /usr/local/opt/harfbuzz/lib/libharfbuzz.0.dylib`.
 
-  Gradle's toolchain API resolves *any* registered JDK 21, so which one gets bundled is whatever
-  the machine happens to have — check with `/usr/libexec/java_home -V`. The
-  `checkMacRuntimeSelfContained` task runs before every macOS packaging task and fails the build
-  when the chosen JDK links outside `/usr/lib` and `/System`, so this is caught rather than shipped.
+  The `checkMacRuntimeSelfContained` task runs before every macOS packaging task and fails the
+  build when the chosen JDK is not JBR, or links outside `/usr/lib` and `/System`, so either is
+  caught rather than shipped.
 
 ### For Windows (EXE/MSI)
 - Windows operating system

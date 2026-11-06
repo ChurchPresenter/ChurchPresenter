@@ -129,11 +129,37 @@ fun Project.signingProps(platform: String): Properties {
 fun String?.isConfigured() =
     this != null && isNotBlank() && !contains("XXXXXXXXXX") && this != "CHANGE_ME" && !startsWith("YOUR_")
 
+/** True when the build runs on macOS, where the app runs and ships on the JetBrains Runtime. */
+val isMacBuild: Boolean = System.getProperty("os.name", "").lowercase().contains("mac")
+
+/** The pinned JetBrains Runtime for this Mac (gradle/jbr-builds.properties); null off macOS. */
+class MacJbrPin(val url: String, val sha256: String, val installDir: File) {
+    /** The JDK home inside the unpacked archive. */
+    val home: File get() = File(installDir, "${url.substringAfterLast('/').removeSuffix(".tar.gz")}/Contents/Home")
+}
+
+fun Project.macJbrPin(): MacJbrPin? {
+    if (!isMacBuild) return null
+    val props = loadPropsFile(rootProject.file("gradle/jbr-builds.properties").path)
+    val arch = when (System.getProperty("os.arch", "").lowercase()) {
+        "aarch64", "arm64" -> "aarch64"
+        else -> "x86_64"
+    }
+    val url = props.getProperty("macos-$arch.url", "")
+    val sha256 = props.getProperty("macos-$arch.sha256", "")
+    if (url.isBlank() || sha256.isBlank()) return null
+    return MacJbrPin(url, sha256, File(gradle.gradleUserHomeDir, "churchpresenter/jbr/${sha256.take(12)}"))
+}
+
 // Resolve Java 21 home for both the run task and packaging tasks.
 // Java 24 breaks jlink/jpackage used by Compose Desktop — always use Java 21.
+// On macOS it is the pinned JetBrains Runtime (unpacked by `provisionMacJbr`): on macOS 26 a stock
+// OpenJDK window brought forward by a click never becomes Java's focused window, so no key reaches
+// it (issue #969).
+// Elsewhere:
 // 1. Try Gradle's toolchain API (works on any machine with JDK 21 registered).
-// 2. Fall back to a manual path scan for common macOS install locations.
-fun Project.resolvedJdk21Home(): String? = try {
+// 2. Fall back to a manual path scan for common install locations.
+fun Project.resolvedJdk21Home(): String? = macJbrPin()?.home?.absolutePath ?: try {
     val launcher = extensions.getByType(JavaToolchainService::class.java).launcherFor {
         languageVersion.set(JavaLanguageVersion.of(21))
     }.get()
