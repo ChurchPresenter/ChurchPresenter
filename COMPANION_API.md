@@ -1574,8 +1574,9 @@ runs plain HTTP.
 Lobby screens running the ChurchPresenter Signage player (its own repo,
 `ChurchPresenter/ChurchPresenter-Signage`, whose `docs/PROTOCOL.md` is the full protocol). Signage is
 on while the desktop's Signage tab is shown (it starts hidden). The server advertises itself as
-`_churchpresenter._tcp` over mDNS while signage and the server are on, so a player on the same
-network finds it without an address.
+`_churchpresenter._tcp` over mDNS while it is on, so a player on the same network, or a TV running
+the mobile app, finds it without an address. A player that reaches it with signage off is answered
+as below.
 
 - `WS /api/signage/ws` — the player's first message is `hello`. An unpaired player is answered
   `pairing_pending` and listed in the Signage tab with the code its TV shows; on approval it is sent

@@ -113,7 +113,7 @@ private fun rotationItems(
 }
 
 /** [link] as a playlist item, or null where the screen cannot play it. */
-private fun linkItem(link: LinkPlaylist, features: Collection<String>): PlaylistItem? {
+internal fun linkItem(link: LinkPlaylist, features: Collection<String>): PlaylistItem? {
     val (kind, feature) = when (link.kind) {
         LinkKind.WEB -> MediaKind.WEB to Features.WEB
         LinkKind.STREAM -> MediaKind.STREAM to Features.STREAM

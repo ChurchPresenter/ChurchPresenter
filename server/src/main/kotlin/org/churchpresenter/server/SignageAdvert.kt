@@ -11,9 +11,9 @@ import javax.jmdns.JmDNS
 import javax.jmdns.ServiceInfo
 
 /**
- * Advertises the companion server as `_churchpresenter._tcp` over mDNS, so a signage player on the
- * same network finds it without being told the address. [wanted] says what to advertise now, or null
- * for nothing; [refresh] brings the advert in line with it on a thread of its own, in order.
+ * Advertises the companion server as `_churchpresenter._tcp` over mDNS, so a signage player or a TV
+ * on the same network finds it without being told the address. [wanted] says what to advertise now,
+ * or null for nothing; [refresh] brings the advert in line with it on a thread of its own, in order.
  */
 internal class SignageAdvert(private val wanted: () -> Wanted?) {
     /** The port to advertise, and the name a player logs. */

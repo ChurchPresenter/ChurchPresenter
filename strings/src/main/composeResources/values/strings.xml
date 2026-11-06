@@ -4084,6 +4084,7 @@
     <string name="signage_age_days">%1$d days ago</string>
     <string name="signage_preview_not_connected">Not connected</string>
     <string name="signage_preview_unsupported">No preview on this player</string>
+    <string name="signage_cannot_play">This player can’t show %1$s, so it’s skipped</string>
     <string name="signage_showing">Showing %1$s</string>
     <string name="signage_showing_idle">Showing the idle card</string>
     <string name="signage_plays">Plays</string>
@@ -4095,6 +4096,7 @@
     <string name="signage_platform_linux_arm64">Linux (ARM)</string>
     <string name="signage_platform_linux_x64">Linux PC</string>
     <string name="signage_platform_windows_x64">Windows PC</string>
+    <string name="signage_platform_android_tv">Android TV</string>
     <string name="signage_identify">Show its name on the screen</string>
     <string name="signage_factory_reset">Factory reset</string>
     <string name="signage_factory_reset_hint">Deletes everything on the screen and removes it from this list. It asks first.</string>

@@ -50,6 +50,7 @@ import org.churchpresenter.strings.generated.resources.signage_preview_not_conne
 import org.churchpresenter.strings.generated.resources.signage_preview_unsupported
 import org.churchpresenter.strings.generated.resources.signage_waiting_hint
 import org.churchpresenter.strings.generated.resources.signage_online
+import org.churchpresenter.strings.generated.resources.signage_platform_android_tv
 import org.churchpresenter.strings.generated.resources.signage_platform_linux_arm64
 import org.churchpresenter.strings.generated.resources.signage_platform_linux_x64
 import org.churchpresenter.strings.generated.resources.signage_platform_windows_x64
@@ -323,6 +324,7 @@ private fun RowScope.ScreenDetails(
         }
         UpdateLine(row)
         WebTestLine(row)
+        UnplayableLine(row)
         Spacer(Modifier.height(2.dp))
         // Side by side where the card is wide enough; the button moves under the picker where it is not.
         FlowRow(
@@ -503,6 +505,7 @@ internal fun platformName(platform: Platform): StringResource = when (platform) 
     Platform.LINUX_ARM64 -> Res.string.signage_platform_linux_arm64
     Platform.LINUX_X64 -> Res.string.signage_platform_linux_x64
     Platform.WINDOWS_X64 -> Res.string.signage_platform_windows_x64
+    Platform.ANDROID_TV -> Res.string.signage_platform_android_tv
 }
 
 internal const val SEPARATOR = " · "
