@@ -168,6 +168,7 @@
     <string name="submit_feature_request">ขอฟีเจอร์ใหม่</string>
     <string name="action_ok">ตกลง</string>
     <string name="menu_how_to_blog">บล็อกวิธีใช้</string>
+    <string name="menu_tutorial_videos">วิดีโอสอนการใช้งาน</string>
     <string name="menu_check_for_updates">ตรวจหาการอัปเดต…</string>
     <string name="menu_keyboard_shortcuts">แป้นลัด</string>
     <string name="shortcut_category_global">ทั่วทั้งโปรแกรม</string>

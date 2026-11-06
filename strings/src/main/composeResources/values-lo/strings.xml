@@ -168,6 +168,7 @@
     <string name="submit_feature_request">ຂໍຟັງຊັນໃໝ່</string>
     <string name="action_ok">ຕົກລົງ</string>
     <string name="menu_how_to_blog">ບົດແນະນຳການໃຊ້ງານ</string>
+    <string name="menu_tutorial_videos">ວິດີໂອແນະນຳການໃຊ້ງານ</string>
     <string name="menu_check_for_updates">ກວດຫາການອັບເດດ…</string>
     <string name="menu_keyboard_shortcuts">ປຸ່ມລັດ</string>
     <string name="shortcut_category_global">ທົ່ວແອັບ</string>

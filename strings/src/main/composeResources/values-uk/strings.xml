@@ -78,6 +78,7 @@
     <string name="submit_feature_request">Надіслати запит на функцію</string>
     <string name="action_ok">OK</string>
     <string name="menu_how_to_blog">Навчальний блог</string>
+    <string name="menu_tutorial_videos">Відеоуроки</string>
     <string name="menu_check_for_updates">Перевірити оновлення…</string>
 
     <!-- Options Dialog Strings -->

@@ -64,6 +64,7 @@ internal fun MainWindowScope.AppMenuBar() {
             onCalendar = { showCalendarWindow = true },
             onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
             onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
+            onTutorialVideos = { UrlOpener.open("https://www.churchpresenter.org/tutorials/") },
             onCheckForUpdates = {
                 coroutineScope.launch {
                     pendingUpdateResult = UpdateChecker.checkForUpdate(

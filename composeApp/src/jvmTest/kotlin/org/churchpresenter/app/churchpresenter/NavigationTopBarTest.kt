@@ -43,6 +43,7 @@ private fun navigationTopBar(
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {},
     onHowToBlog: () -> Unit = {},
+    onTutorialVideos: () -> Unit = {},
     onGettingStarted: () -> Unit = {},
     onShowHelper: () -> Unit = {},
     onConverter: () -> Unit = {},
@@ -97,6 +98,7 @@ private fun navigationTopBar(
                 onAbout = onAbout,
                 onHelp = onHelp,
                 onHowToBlog = onHowToBlog,
+                onTutorialVideos = onTutorialVideos,
                 onGettingStarted = onGettingStarted,
                 onShowHelper = onShowHelper,
                 onConverter = onConverter,
@@ -450,6 +452,7 @@ class NavigationTopBarTest {
         var showHelper = 0
         var keyboardShortcuts = 0
         var howToBlog = 0
+        var tutorialVideos = 0
         var converter = 0
         var songLibrary = 0
         var calendar = 0
@@ -462,6 +465,7 @@ class NavigationTopBarTest {
             onShowHelper = { showHelper++ },
             onKeyboardShortcuts = { keyboardShortcuts++ },
             onHowToBlog = { howToBlog++ },
+            onTutorialVideos = { tutorialVideos++ },
             onConverter = { converter++ },
             onSongLibrary = { songLibrary++ },
             onCalendar = { calendar++ },
@@ -472,30 +476,32 @@ class NavigationTopBarTest {
         ) {
             val helpMenu = getMenu(6)
             assertEquals("Help", helpMenu.text)
-            assertEquals(11, helpMenu.itemCount)
+            assertEquals(12, helpMenu.itemCount)
             assertEquals("Getting Started…", helpMenu.getItem(0).text)
             assertEquals("Show Helper", helpMenu.getItem(1).text)
             assertEquals("Keyboard Shortcuts", helpMenu.getItem(2).text)
             assertEquals("How To Blog", helpMenu.getItem(3).text)
-            assertEquals("Song and Bible Converter", helpMenu.getItem(4).text)
-            assertEquals("Song Library Manager", helpMenu.getItem(5).text)
-            assertEquals("Calendar Manager", helpMenu.getItem(6).text)
-            assertEquals("About", helpMenu.getItem(7).text)
-            assertEquals("Help", helpMenu.getItem(8).text)
-            assertEquals("Contact", helpMenu.getItem(9).text)
-            assertEquals("Check for Updates…", helpMenu.getItem(10).text)
-            assertNotNull(helpMenu.getItem(4).accelerator, "the converter has a shortcut")
-            assertNotNull(helpMenu.getItem(5).accelerator, "the song library has a shortcut")
-            assertNotNull(helpMenu.getItem(6).accelerator, "the calendar has a shortcut")
-            assertEquals(KeyEvent.VK_K, helpMenu.getItem(4).accelerator.keyCode)
-            assertEquals(KeyEvent.VK_L, helpMenu.getItem(5).accelerator.keyCode)
-            assertEquals(KeyEvent.VK_D, helpMenu.getItem(6).accelerator.keyCode)
+            assertEquals("Tutorial Videos", helpMenu.getItem(4).text)
+            assertEquals("Song and Bible Converter", helpMenu.getItem(5).text)
+            assertEquals("Song Library Manager", helpMenu.getItem(6).text)
+            assertEquals("Calendar Manager", helpMenu.getItem(7).text)
+            assertEquals("About", helpMenu.getItem(8).text)
+            assertEquals("Help", helpMenu.getItem(9).text)
+            assertEquals("Contact", helpMenu.getItem(10).text)
+            assertEquals("Check for Updates…", helpMenu.getItem(11).text)
+            assertNotNull(helpMenu.getItem(5).accelerator, "the converter has a shortcut")
+            assertNotNull(helpMenu.getItem(6).accelerator, "the song library has a shortcut")
+            assertNotNull(helpMenu.getItem(7).accelerator, "the calendar has a shortcut")
+            assertEquals(KeyEvent.VK_K, helpMenu.getItem(5).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_L, helpMenu.getItem(6).accelerator.keyCode)
+            assertEquals(KeyEvent.VK_D, helpMenu.getItem(7).accelerator.keyCode)
             for (i in 0 until helpMenu.itemCount) helpMenu.getItem(i).doClick(0)
         }
         assertEquals(1, gettingStarted)
         assertEquals(1, showHelper)
         assertEquals(1, keyboardShortcuts)
         assertEquals(1, howToBlog)
+        assertEquals(1, tutorialVideos)
         assertEquals(1, converter)
         assertEquals(1, songLibrary)
         assertEquals(1, calendar)
@@ -503,6 +509,28 @@ class NavigationTopBarTest {
         assertEquals(1, help)
         assertEquals(1, contactUs)
         assertEquals(1, checkForUpdates)
+    }
+
+    @Test
+    fun `tutorial videos follows the blog item and fires only its own callback`() {
+        var tutorialVideos = 0
+        var howToBlog = 0
+        var help = 0
+        navigationTopBar(
+            onTutorialVideos = { tutorialVideos++ },
+            onHowToBlog = { howToBlog++ },
+            onHelp = { help++ },
+        ) {
+            val helpMenu = getMenu(6)
+            val items = (0 until helpMenu.itemCount).map { helpMenu.getItem(it) }
+            val blogIndex = items.indexOfFirst { it.text == "How To Blog" }
+            val tutorials = items[blogIndex + 1]
+            assertEquals("Tutorial Videos", tutorials.text)
+            tutorials.doClick(0)
+        }
+        assertEquals(1, tutorialVideos)
+        assertEquals(0, howToBlog)
+        assertEquals(0, help)
     }
 
     @Test
