@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import org.churchpresenter.sharedui.composables.SectionInk
 import org.churchpresenter.sharedui.composables.SectionLabelRow
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.ZoneLabel
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.song_background_untitled_section
@@ -383,11 +384,20 @@ private fun AddSectionButton(sections: EditSongSections, effective: List<String>
 /** The right pane's In order tab: the song as it will play, each section's words under its label. */
 @Composable
 internal fun EditSongOrderPreview(state: EditSongState, sections: EditSongSections, modifier: Modifier) {
+    val scrollState = rememberScrollState()
+    Box(modifier) {
+        OrderPreviewSections(state, sections, Modifier.fillMaxWidth().verticalScroll(scrollState))
+        SettingsScrollbar(scrollState)
+    }
+}
+
+@Composable
+private fun OrderPreviewSections(state: EditSongState, sections: EditSongSections, modifier: Modifier) {
     val effective = state.order.ifEmpty { sections.defaultOrder }
     val untitled = stringResource(Res.string.song_background_untitled_section)
     val seen = mutableSetOf<String>()
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         effective.forEachIndexed { index, key ->

@@ -6,6 +6,7 @@ import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.composables.sectionKindOf
 import org.churchpresenter.sharedui.composables.SectionLabelRow
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.ZoneLabel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -247,29 +248,32 @@ fun SongChordPreview(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         // The song itself.
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            // Without chord rows there is nothing to leave room for, so the whole chart closes up
-            // and reads as a plain lyric sheet.
-            verticalArrangement = Arrangement.spacedBy(if (showChords) 18.dp else 10.dp),
-        ) {
-            sections.forEach { section ->
-                Column(verticalArrangement = Arrangement.spacedBy(if (showChords) 5.dp else 2.dp)) {
-                    if (section.label.isNotBlank()) {
-                        SectionLabelRow(
-                            section.label,
-                            modifier = Modifier.padding(bottom = 3.dp),
-                            slideIndex = section.slideIndex,
-                            slideCount = section.slideCount,
-                        )
+        val songScroll = rememberScrollState()
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(songScroll)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                // Without chord rows there is nothing to leave room for, so the whole chart closes up
+                // and reads as a plain lyric sheet.
+                verticalArrangement = Arrangement.spacedBy(if (showChords) 18.dp else 10.dp),
+            ) {
+                sections.forEach { section ->
+                    Column(verticalArrangement = Arrangement.spacedBy(if (showChords) 5.dp else 2.dp)) {
+                        if (section.label.isNotBlank()) {
+                            SectionLabelRow(
+                                section.label,
+                                modifier = Modifier.padding(bottom = 3.dp),
+                                slideIndex = section.slideIndex,
+                                slideCount = section.slideCount,
+                            )
+                        }
+                        section.lines.forEach { line -> ChordLine(line, showChords) }
                     }
-                    section.lines.forEach { line -> ChordLine(line, showChords) }
                 }
             }
+            SettingsScrollbar(songScroll)
         }
 
         // The chords of the chosen key, and any other chord, to insert from.
