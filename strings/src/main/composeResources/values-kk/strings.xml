@@ -78,6 +78,7 @@
     <string name="submit_feature_request">Мүмкіндік сұрауын жіберу</string>
     <string name="action_ok">OK</string>
     <string name="menu_how_to_blog">Нұсқаулық блог</string>
+    <string name="menu_tutorial_videos">Бейне нұсқаулықтар</string>
     <string name="menu_check_for_updates">Жаңартуларды тексеру…</string>
 
     <!-- Options Dialog Strings -->
