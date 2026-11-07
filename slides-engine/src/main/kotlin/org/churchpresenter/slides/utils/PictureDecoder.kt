@@ -36,7 +36,7 @@ object PictureDecoder {
 
     /** Decodes [file], or throws with the reason Skia gave. */
     fun decode(file: File): Image {
-        val bytes = file.readBytes()
+        val bytes = readInChunks(file)
 
         // Skia refuses an image it cannot decode with an IllegalArgumentException.
         val skiaError = try {
@@ -142,14 +142,39 @@ object PictureDecoder {
 
         val newWidth = (original.width * scale).toInt()
         val newHeight = (original.height * scale).toInt()
-        val surface = Surface.makeRasterN32Premul(newWidth, newHeight)
         val srcRect = Rect.makeWH(original.width.toFloat(), original.height.toFloat())
         val dstRect = Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
-        // Mitchell over the default (nearest-neighbour) sampling — a straight downscale without it
-        // aliases badly enough to be visible on a full-frame background.
-        surface.canvas.drawImageRect(original, srcRect, dstRect, SamplingMode.MITCHELL, Paint(), true)
-        return surface.makeImageSnapshot()
+        // The full-size decode and the surface are native memory the GC cannot see, so they are
+        // freed here rather than left to a collection a small heap may never need: a folder of large
+        // photos otherwise piles them up until a native allocation fails.
+        return try {
+            Surface.makeRasterN32Premul(newWidth, newHeight).use { surface ->
+                // Mitchell over the default (nearest-neighbour) sampling — a straight downscale
+                // without it aliases badly enough to be visible on a full-frame background.
+                surface.canvas.drawImageRect(original, srcRect, dstRect, SamplingMode.MITCHELL, Paint(), true)
+                surface.makeImageSnapshot()
+            }
+        } finally {
+            original.close()
+        }
     }
+
+    /**
+     * [file]'s bytes, read a block at a time. A single read of the whole file, which is what
+     * `File.readBytes` does, makes the JDK allocate a native buffer as large as the file on top of
+     * the array, and a large picture fails that with an `OutOfMemoryError`.
+     */
+    private fun readInChunks(file: File): ByteArray =
+        file.inputStream().use { stream ->
+            val out = ByteArrayOutputStream(file.length().coerceIn(0, Int.MAX_VALUE.toLong()).toInt())
+            val buffer = ByteArray(READ_CHUNK)
+            while (true) {
+                val read = stream.read(buffer)
+                if (read < 0) break
+                out.write(buffer, 0, read)
+            }
+            out.toByteArray()
+        }
 
     /** [decodeScaled], or null if [file] could not be decoded at all. */
     fun decodeScaledOrNull(file: File, maxWidth: Int, maxHeight: Int): Image? = try {
@@ -200,6 +225,8 @@ object PictureDecoder {
 
     /** Enough leading bytes to name a format — JPEG needs three, PNG eight. */
     private const val MAGIC_LENGTH = 8
+
+    private const val READ_CHUNK = 64 * 1024
 
     private val HEIF_EXTENSIONS = setOf("heic", "heif")
 

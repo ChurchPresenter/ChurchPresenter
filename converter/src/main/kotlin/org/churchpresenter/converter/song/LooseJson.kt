@@ -20,6 +20,8 @@ internal class LooseJson private constructor(private val fields: Map<String, Any
     /** [name] as text, empty when the object does not carry it or carries something structured. */
     fun text(name: String): String = fields[name] as? String ?: ""
 
+    fun child(name: String): LooseJson? = fields[name] as? LooseJson
+
     /** The objects in the array at [name] — empty for a missing field or an array of scalars. */
     fun children(name: String): List<LooseJson> =
         (fields[name] as? List<*>)?.filterIsInstance<LooseJson>().orEmpty()
