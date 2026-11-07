@@ -206,7 +206,7 @@ class JnaOmtLibrary internal constructor(private val lib: OmtLibC) : OmtLibrary 
                     mapOf(Library.OPTION_STRING_ENCODING to Charsets.UTF_8.name()),
                 ),
             )
-        } catch (e: UnsatisfiedLinkError) {
+        } catch (e: LinkageError) {
             runCatching {
                 CrashReporter.setTag("omt.load_failed", "true")
                 CrashReporter.breadcrumb(
