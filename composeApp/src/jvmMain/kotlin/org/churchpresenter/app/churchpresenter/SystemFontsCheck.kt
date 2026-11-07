@@ -26,16 +26,25 @@ internal fun exitIfSystemFontsUnavailable(olderThanWindows10: Boolean) {
 
 private fun showSystemFontsFailure(olderThanWindows10: Boolean) {
     val (title, lines) = runBlocking {
-        val advice = if (olderThanWindows10) {
-            listOf(
-                getString(Res.string.system_fonts_failed_old_windows_reason),
-                getString(Res.string.system_fonts_failed_old_windows_fix),
-            )
-        } else {
-            emptyList()
-        }
-        val body = getString(Res.string.system_fonts_failed_body)
-        getString(Res.string.system_fonts_failed_title) to listOf(body) + advice
+        getString(Res.string.system_fonts_failed_title) to systemFontsFailureLines(
+            olderThanWindows10,
+            body = getString(Res.string.system_fonts_failed_body),
+            oldWindowsReason = getString(Res.string.system_fonts_failed_old_windows_reason),
+            oldWindowsFix = getString(Res.string.system_fonts_failed_old_windows_fix),
+        )
     }
     JOptionPane.showMessageDialog(null, lines.toTypedArray(), title, JOptionPane.ERROR_MESSAGE)
 }
+
+/**
+ * What the dialog says: what went wrong, and — only where it is the likely cause — that this
+ * Windows is older than the app supports and what to do about it.
+ *
+ * Split from [showSystemFontsFailure] so the choice can be tested without a dialog.
+ */
+internal fun systemFontsFailureLines(
+    olderThanWindows10: Boolean,
+    body: String,
+    oldWindowsReason: String,
+    oldWindowsFix: String,
+): List<String> = if (olderThanWindows10) listOf(body, oldWindowsReason, oldWindowsFix) else listOf(body)

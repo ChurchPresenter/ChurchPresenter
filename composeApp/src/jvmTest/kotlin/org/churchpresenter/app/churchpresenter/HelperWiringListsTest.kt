@@ -15,6 +15,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /** What the app tells Wick about the operator's own outputs, profiles, screens and Bible. */
@@ -30,6 +31,30 @@ class HelperWiringListsTest {
             OutputProfile(id = "stage", name = "Stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
         ),
     )
+
+    @Test
+    fun `an output is on the monitor whose bounds it targets, and on no other`() {
+        val audience = ScreenAssignment(
+            targetType = Constants.TARGET_TYPE_SCREEN,
+            targetBoundsX = 1920,
+            targetBoundsY = 0,
+            targetBoundsW = 1920,
+            targetBoundsH = 1080,
+        )
+        assertTrue(audience.isOn(1920, 0, 1920, 1080))
+        assertFalse(audience.isOn(0, 0, 1920, 1080), "the laptop's own screen is not the audience screen")
+        // A DeckLink output drives a card, not a monitor, even with matching bounds left over.
+        assertFalse(audience.copy(targetType = Constants.TARGET_TYPE_DECKLINK).isOn(1920, 0, 1920, 1080))
+    }
+
+    @Test
+    fun `the fonts dialog adds the old-Windows advice only on old Windows`() {
+        assertEquals(listOf("Fonts failed"), systemFontsFailureLines(false, "Fonts failed", "Too old", "Update"))
+        assertEquals(
+            listOf("Fonts failed", "Too old", "Update"),
+            systemFontsFailureLines(true, "Fonts failed", "Too old", "Update"),
+        )
+    }
 
     @Test
     fun `every output is listed by its card, in the Projection page's order, with its profile`() = runComposeUiTest {

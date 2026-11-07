@@ -246,7 +246,11 @@ internal fun helperOutputs(projection: ProjectionSettings): List<KnownOutput> {
     return screens + browser + ndi + omt
 }
 
-private fun ScreenAssignment.isOn(x: Int, y: Int, w: Int, h: Int): Boolean =
+/**
+ * Whether this output drives the monitor with these bounds. `internal` so it can be tested: its
+ * only caller asks AWT for the attached screens, which a test cannot supply.
+ */
+internal fun ScreenAssignment.isOn(x: Int, y: Int, w: Int, h: Int): Boolean =
     targetType == Constants.TARGET_TYPE_SCREEN && targetScreenKey == screenKey(x, y, w, h)
 
 /**

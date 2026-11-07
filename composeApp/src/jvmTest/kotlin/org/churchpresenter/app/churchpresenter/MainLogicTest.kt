@@ -844,6 +844,31 @@ class MainLogicTest {
     }
 
     @Test
+    fun `a simulated window counts as on a display only with its corner inside it on both axes`() {
+        val laptop = DisplayRect(0, 0, 1440, 900)
+        val offset = devFallbackWindowOffsetDp(2)
+        fun openedAt(x: Int, y: Int, displays: List<DisplayRect> = listOf(laptop)): Pair<Int, Int> {
+            val left = withSimulatedFrame(ScreenAssignment(), SimulatedWindowFrame(x, y, 640, 360))
+            return simulatedWindowPositionDp(left, 2, displays)
+        }
+
+        // Left of, right of, above and below the only display: each one is off it.
+        assertEquals(offset to offset, openedAt(-50, 100))
+        assertEquals(offset to offset, openedAt(1440, 100))
+        assertEquals(offset to offset, openedAt(100, -50))
+        assertEquals(offset to offset, openedAt(100, 900))
+        // On a second monitor to the right, it stays where it was left.
+        assertEquals(1500 to 100, openedAt(1500, 100, listOf(laptop, DisplayRect(1440, 0, 1920, 1080))))
+    }
+
+    @Test
+    fun `a simulated window with only one coordinate saved opens at its cascade spot`() {
+        val offset = devFallbackWindowOffsetDp(0)
+        val halfSaved = ScreenAssignment(simulatedWindowX = 100, simulatedWindowY = Int.MIN_VALUE)
+        assertEquals(offset to offset, simulatedWindowPositionDp(halfSaved, 0, listOf(DisplayRect(0, 0, 1440, 900))))
+    }
+
+    @Test
     fun `a simulated window never moved opens at its cascade spot and its output's shape`() {
         val offset = devFallbackWindowOffsetDp(0)
         val laptop = listOf(DisplayRect(0, 0, 1440, 900))
