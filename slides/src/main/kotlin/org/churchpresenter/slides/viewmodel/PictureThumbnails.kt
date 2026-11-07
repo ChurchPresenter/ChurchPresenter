@@ -134,4 +134,6 @@ internal class PictureThumbnails(
 
 private fun decodeTile(file: File): ImageBitmap =
     // Grid tile size, not the display's — this is the thumbnails strip, never presented.
-    PictureDecoder.decodeScaled(file, THUMBNAIL_MAX_DIMENSION, THUMBNAIL_MAX_DIMENSION).toComposeImageBitmap()
+    // toComposeImageBitmap copies the pixels, so the Skia image is freed now rather than by the GC.
+    PictureDecoder.decodeScaled(file, THUMBNAIL_MAX_DIMENSION, THUMBNAIL_MAX_DIMENSION)
+        .use { it.toComposeImageBitmap() }
