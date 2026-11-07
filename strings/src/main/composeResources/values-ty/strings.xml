@@ -3967,4 +3967,8 @@
     <string name="calendar_joined_leave">Faʻarue</string>
     <string name="calendar_joined_take_over">Faʻariro i teie ei ʻōnohi matamua</string>
     <string name="calendar_joined_take_over_hint">ʻAita %1$s i synchronisé nō te hōʻē hepetoma. Mai te mea ua moʻe roa ʻoia, e nehenehe teie ʻōnohi e mono iāna.</string>
+    <string name="system_fonts_failed_title">ʻAita e nehenehe e haʻamata i te Church Presenter i niʻa i teie roro uira</string>
+    <string name="system_fonts_failed_body">ʻAita i nehenehe e faʻauta i te mau huru pāpaʻi o te système o teie roro uira.</string>
+    <string name="system_fonts_failed_old_windows_reason">E mea tahito aʻe teie version Windows i te Windows 10, ʻo te tumu paha ia.</string>
+    <string name="system_fonts_failed_old_windows_fix">Ia faʻaʻāpī i te Windows 10 aore ra i te hōʻē version ʻāpī aʻe, e mea tiʻa ia ʻafaro te reira.</string>
 </resources>

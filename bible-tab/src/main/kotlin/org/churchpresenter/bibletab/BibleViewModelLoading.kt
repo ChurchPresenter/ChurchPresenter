@@ -90,6 +90,8 @@ internal fun BibleViewModel.applyTranslationOrder() {
     if (_verses.value.isNotEmpty()) _verseSelectionToken.value++
 }
 
+private val cacheFileMoveLock = Any()
+
 /**
  * Writes a cached module by building it beside its destination and moving it into place.
  *
@@ -100,12 +102,18 @@ internal fun BibleViewModel.applyTranslationOrder() {
  * Each write builds in a part file of its own: a reconnect can deliver the same translations again
  * while the last delivery is still being written, and two writers sharing one part file left the
  * second moving a file the first had already moved away.
+ *
+ * The moves themselves take turns. On Windows the fallback in `moveIntoPlace` deletes the destination
+ * and then renames onto it, so a second writer landing between those steps fails the first with
+ * `FileAlreadyExistsException`.
  */
 internal fun writeCacheFile(cacheFile: File, bytes: ByteArray) {
     val part = File.createTempFile("${cacheFile.name}.", ".part", cacheFile.parentFile)
     try {
         part.writeBytes(bytes)
-        BibleInstallSupport.moveIntoPlace(part, cacheFile)
+        synchronized(cacheFileMoveLock) {
+            BibleInstallSupport.moveIntoPlace(part, cacheFile)
+        }
     } finally {
         part.delete()
     }

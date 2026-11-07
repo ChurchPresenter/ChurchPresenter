@@ -3848,4 +3848,8 @@
     <string name="action_field_button">Button</string>
     <string name="action_field_macro">Pangalan ng macro</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Hindi makapagsimula ang Church Presenter sa computer na ito</string>
+    <string name="system_fonts_failed_body">Hindi ma-load ang mga system font ng computer na ito.</string>
+    <string name="system_fonts_failed_old_windows_reason">Mas luma ang bersyong ito ng Windows kaysa sa Windows 10, at ito ang pinakamalamang na dahilan.</string>
+    <string name="system_fonts_failed_old_windows_fix">Dapat itong maayos sa pag-update sa Windows 10 o mas bago.</string>
 </resources>

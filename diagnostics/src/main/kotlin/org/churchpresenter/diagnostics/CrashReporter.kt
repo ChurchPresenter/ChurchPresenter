@@ -35,7 +35,7 @@ private const val RELEASE_SAMPLE_RATE = 0.2
  * `EX_SOFTWARE` in the BSD sysexits convention — an internal software error, which is exactly what
  * an uncaught exception on any thread is by the time it reaches this handler.
  */
-internal const val EXIT_CODE_FATAL_CRASH = 70
+const val EXIT_CODE_FATAL_CRASH = 70
 
 /**
  * The AWT clipboard peers, which throw when the OS will not hand the clipboard over.
@@ -50,6 +50,9 @@ private val CLIPBOARD_PEERS = setOf(
 
 /** The JDK's Windows shell-folder classes, which throw when Explorer will not bind an item. */
 private const val WINDOWS_SHELL_FOLDER = "sun.awt.shell.Win32ShellFolder"
+
+/** The JDK's file chooser list, whose focus listener repaints a selected row that has no cell. */
+private const val FILE_CHOOSER_PANE = "sun.swing.FilePane"
 
 /**
  * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
@@ -235,12 +238,7 @@ object CrashReporter {
                 throwable.printStackTrace()
                 return@setUncaughtHandler
             }
-            // Record what failed before anything else can go wrong: the next run reads this to
-            // decide whether the crash-loop guard should blame video backgrounds for it.
-            writeCrashKind(classifyCrash(throwable))
-            writeCrashLog(throwable, context = "Thread: ${thread.name}", fatal = true)
-            // Flush Sentry synchronously so the event is delivered before the JVM exits
-            try { Sentry.flush(FLUSH_TIMEOUT_MS) } catch (_: Exception) {}
+            recordFatal(throwable, context = "Thread: ${thread.name}")
             // The JVM's own default (print to stderr) does not end the process, and every output
             // this app draws — the presenter windows, DeckLink, and the NDI/Browser Source scenes
             // pumped through ComposeScenePump — shares the one AWT event-dispatch thread with the
@@ -274,6 +272,16 @@ object CrashReporter {
 
         // Delete lock file on clean exit
         addShutdownHook { try { runningFile.delete() } catch (_: Exception) {} }
+    }
+
+    /** Puts a crash the process is about to end on on record, delivered before the caller exits. */
+    fun recordFatal(throwable: Throwable, context: String) {
+        // Record what failed before anything else can go wrong: the next run reads this to
+        // decide whether the crash-loop guard should blame video backgrounds for it.
+        writeCrashKind(classifyCrash(throwable))
+        writeCrashLog(throwable, context, fatal = true)
+        // Flush Sentry synchronously so the event is delivered before the JVM exits
+        try { Sentry.flush(FLUSH_TIMEOUT_MS) } catch (_: Exception) {}
     }
 
     /**
@@ -396,26 +404,30 @@ object CrashReporter {
         }
 
     /**
-     * What failed, as far as the crash handler could tell — classified by exception **type**, never
-     * by message, so a wording change upstream cannot silently reclassify a crash.
+     * What failed, as far as the crash handler could tell — classified by exception **type** and
+     * the frame that threw it, never by message, so a wording change upstream cannot silently
+     * reclassify a crash.
      *
      * Only the distinction the escalation guard acts on is drawn: a fault in the rendering stack
      * versus anything else. skiko surfaces a GPU driver access violation as its own
      * `org.jetbrains.skiko.RenderException`, thrown from `RenderExceptionsHandler`, so the package
-     * is the whole test — the stack below it is AWT and coroutines, with no application frame in it.
+     * is the test — the stack below it is AWT and coroutines, with no application frame in it. Skia
+     * also throws a bare `RuntimeException` when a native call returns null, so a throwable whose
+     * top frame is in those packages counts too.
      */
     internal fun classifyCrash(throwable: Throwable?): CrashKind {
         val seen = mutableSetOf<Throwable>()
         var current = throwable
         while (current != null && seen.add(current)) {
-            val name = current.javaClass.name
-            if (name.startsWith("org.jetbrains.skiko.") || name.startsWith("org.jetbrains.skia.")) {
-                return CrashKind.RENDERER
-            }
+            val thrownBy = current.stackTrace.firstOrNull()?.className.orEmpty()
+            if (isRendererClass(current.javaClass.name) || isRendererClass(thrownBy)) return CrashKind.RENDERER
             current = current.cause
         }
         return CrashKind.OTHER
     }
+
+    private fun isRendererClass(name: String): Boolean =
+        name.startsWith("org.jetbrains.skiko.") || name.startsWith("org.jetbrains.skia.")
 
     /**
      * Whether [throwable] is a development build's own output changing under it: a class of ours
@@ -822,6 +834,12 @@ object CrashReporter {
      * list's own loading, with no frame of ours in it. The folder simply lists without that item
      * (Sentry CHURCH-PRESENTER-DESKTOP-C7).
      *
+     * The third is `FilePane`'s focus listener, which passes `JList.getCellBounds` straight to
+     * `repaint` and throws a `NullPointerException` when a selected index has no cell. It arrives
+     * here from inside the chooser's own modal event loop, which carries on with the dialog still
+     * open; nothing around `showOpenDialog` can catch it, because it never unwinds that far
+     * (Sentry CHURCH-PRESENTER-DESKTOP-9R).
+     *
      * Widen this only for something with the same two properties: a named platform condition, and
      * a thread that demonstrably survives it.
      *
@@ -834,7 +852,8 @@ object CrashReporter {
      */
     internal fun isRecoverableInteraction(throwable: Throwable): Boolean =
         (throwable is IllegalStateException && throwable.thrownFrom { it in CLIPBOARD_PEERS }) ||
-            (throwable is InternalError && throwable.thrownFrom { it.startsWith(WINDOWS_SHELL_FOLDER) })
+            (throwable is InternalError && throwable.thrownFrom { it.startsWith(WINDOWS_SHELL_FOLDER) }) ||
+            (throwable is NullPointerException && throwable.thrownFrom { it.startsWith(FILE_CHOOSER_PANE) })
 
     private fun Throwable.thrownFrom(matches: (className: String) -> Boolean): Boolean =
         stackTrace.any { frame -> matches(frame.className) }

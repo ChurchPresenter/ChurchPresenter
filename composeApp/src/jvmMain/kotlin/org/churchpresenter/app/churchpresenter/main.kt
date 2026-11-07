@@ -371,6 +371,7 @@ fun main(args: Array<String>) {
         startupSettings.atemSettings
     )
 
+    exitIfSystemFontsUnavailable(olderThanWindows10 = CefManager.windowsUnsupported)
     runApplication(startupSettings, coroutineExceptionHandler, relaunchedByGuard = RELAUNCHED_ARGUMENT in args)
 }
 

@@ -3804,4 +3804,8 @@
     <string name="action_field_button">Taste</string>
     <string name="action_field_macro">Makroname</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Church Presenter kann auf diesem Computer nicht starten</string>
+    <string name="system_fonts_failed_body">Die Systemschriftarten dieses Computers konnten nicht geladen werden.</string>
+    <string name="system_fonts_failed_old_windows_reason">Diese Windows-Version ist älter als Windows 10, was die wahrscheinlichste Ursache ist.</string>
+    <string name="system_fonts_failed_old_windows_fix">Ein Update auf Windows 10 oder neuer sollte das Problem beheben.</string>
 </resources>

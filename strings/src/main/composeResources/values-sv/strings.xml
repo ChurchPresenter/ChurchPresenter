@@ -3848,4 +3848,8 @@
     <string name="action_field_button">Knapp</string>
     <string name="action_field_macro">Makronamn</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Church Presenter kan inte starta på den här datorn</string>
+    <string name="system_fonts_failed_body">Det gick inte att läsa in datorns systemteckensnitt.</string>
+    <string name="system_fonts_failed_old_windows_reason">Den här Windows-versionen är äldre än Windows 10, vilket är den troligaste orsaken.</string>
+    <string name="system_fonts_failed_old_windows_fix">En uppdatering till Windows 10 eller senare bör lösa problemet.</string>
 </resources>

@@ -2,6 +2,7 @@ package org.churchpresenter.web.offscreen
 
 import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinUser
+import org.churchpresenter.diagnostics.Log
 import javax.swing.SwingUtilities
 import javax.swing.Timer
 
@@ -25,8 +26,14 @@ internal object SentMessagePump {
         SwingUtilities.invokeLater {
             if (started) return@invokeLater
             started = true
-            val msg = WinUser.MSG()
-            Timer(PUMP_MS) { User32.INSTANCE.PeekMessage(msg, null, 0, 0, PM_NOREMOVE or PM_QS_SENDMESSAGE) }.start()
+            try {
+                val msg = WinUser.MSG()
+                val user32 = User32.INSTANCE
+                Timer(PUMP_MS) { user32.PeekMessage(msg, null, 0, 0, PM_NOREMOVE or PM_QS_SENDMESSAGE) }.start()
+            } catch (e: LinkageError) {
+                // JNA would not load on this machine, and an uncaught throw here ends the app.
+                Log.warn("Web", "Sent-message pump not started: $e")
+            }
         }
     }
 

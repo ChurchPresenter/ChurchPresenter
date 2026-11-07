@@ -3848,4 +3848,8 @@
     <string name="action_field_button">Gumb</string>
     <string name="action_field_macro">Naziv makronaredbe</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Church Presenter se ne može pokrenuti na ovom računalu</string>
+    <string name="system_fonts_failed_body">Nije moguće učitati sistemske fontove ovog računala.</string>
+    <string name="system_fonts_failed_old_windows_reason">Ova je verzija Windowsa starija od Windowsa 10, što je najvjerojatniji uzrok.</string>
+    <string name="system_fonts_failed_old_windows_fix">Ažuriranje na Windows 10 ili noviji trebalo bi riješiti problem.</string>
 </resources>

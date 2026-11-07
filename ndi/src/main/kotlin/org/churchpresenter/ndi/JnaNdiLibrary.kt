@@ -220,7 +220,7 @@ class JnaNdiLibrary internal constructor(private val lib: NdiLibC) : NdiLibrary 
          */
         fun load(libraryPath: String): JnaNdiLibrary? = try {
             JnaNdiLibrary(Native.load(libraryPath, NdiLibC::class.java))
-        } catch (e: UnsatisfiedLinkError) {
+        } catch (e: LinkageError) {
             runCatching {
                 CrashReporter.setTag("ndi.load_failed", "true")
                 CrashReporter.breadcrumb(
