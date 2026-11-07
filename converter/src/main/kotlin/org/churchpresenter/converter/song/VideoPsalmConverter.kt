@@ -43,9 +43,10 @@ data class VideoPsalmBook(
  *    and 12 instead of stacking three "Verse 1"s.
  *  - **The last verse carries the book's end marker** — a line of `***` or `<><><>` — which is
  *    punctuation for the operator, not a lyric.
- *  - **The text carries the book's own colors.** A bilingual book wraps its second language in
- *    `<cAARRGGBB>` … `</c>`, which is styling from another program's slides — and which hides the
- *    end marker when the marker is written inside it. See [colorMarkup].
+ *  - **The text carries the book's own styling.** Inline color, font and size tags are styling from
+ *    another program's slides — and they hide the end marker when it is written inside them. Text
+ *    set in a legacy-encoded font (Yoruba's `Yor_Arial` and the like) reads right only in that
+ *    font, so it is turned into the real letters. See [VideoPsalmText].
  *  - **A bilingual verse is one block with a rule through it.** The two languages are separated by
  *    a row of dashes inside the same verse, so they become the `.song` file's `[Primary]` and
  *    `[Secondary]` halves rather than one section with a line of dashes in the middle. See
@@ -80,18 +81,6 @@ object VideoPsalmConverter {
     private val endMarker = Regex("""^[*<>\s]+$""")
 
     /**
-     * VideoPsalm's inline color markup: `<cAARRGGBB>` … `</c>`, which a bilingual book wraps its
-     * second language in to give it a color of its own.
-     *
-     * It is one program's slide styling rather than a lyric, and ChurchPresenter colors a song from
-     * its own background settings — so it is dropped rather than carried across. Dropping it
-     * also puts the end marker back within reach of [endMarker]: a book that writes the marker
-     * inside the colour it just used, as `<cFF00D800>***</c>`, was leaving a line of asterisks at
-     * the end of the last verse because the tags around it are not `*`, `<` or `>`.
-     */
-    private val colorMarkup = Regex("""</?c[0-9a-fA-F]*>""")
-
-    /**
      * The rule a bilingual book draws between its two languages: a line of nothing but dashes,
      * inside the verse both languages share.
      *
@@ -104,8 +93,14 @@ object VideoPsalmConverter {
     private val sequenceSeparators = Regex("""[\s,]+""")
 
     fun parse(file: File): VideoPsalmBook {
-        val book = LooseJson.parse(file.readText(Charsets.UTF_8))
-        return VideoPsalmBook(book.text("Text").trim(), book.children("Songs").map { songOf(it) })
+        val source = file.readText(Charsets.UTF_8)
+        val book = LooseJson.parse(source)
+        val bookFont = VideoPsalmText.bodyFontOf(book)
+        val legacyFont = VideoPsalmText.legacyFontOf(source)
+        return VideoPsalmBook(
+            VideoPsalmText.plain(book.text("Text")).trim(),
+            book.children("Songs").map { songOf(it, bookFont, legacyFont) },
+        )
     }
 
     fun convert(input: File, outputDir: File): SongConversionResult {
@@ -140,16 +135,18 @@ object VideoPsalmConverter {
         return title.ifBlank { input.nameWithoutExtension }
     }
 
-    private fun songOf(node: LooseJson): VideoPsalmSong {
-        val sections = sectionsOf(node.children("Verses"))
+    private fun songOf(node: LooseJson, bookFont: String, legacyFont: String): VideoPsalmSong {
+        val font = VideoPsalmText.bodyFontOf(node).ifEmpty { bookFont }
+        val typed = VideoPsalmText.typedFor(node, legacyFont)
+        val sections = sectionsOf(node.children("Verses"), font, typed)
         return VideoPsalmSong(
             // `Alias` is the number the book prints; `ID` is its position, and they differ in a book
             // that numbers from something other than one.
             number = node.text("Alias").ifBlank { node.text("ID") }.trim(),
-            title = flattened(node.text("Text")),
-            author = flattened(node.text("Author")),
-            composer = flattened(node.text("Composer")),
-            copyright = flattened(node.text("Copyright")),
+            title = flattened(node.text("Text"), font, typed),
+            author = flattened(node.text("Author"), font, typed),
+            composer = flattened(node.text("Composer"), font, typed),
+            copyright = flattened(node.text("Copyright"), font, typed),
             ccli = node.text("CCLI").trim(),
             sequence = sequenceLabels(node.text("Sequence")),
             sections = sections.primary,
@@ -158,19 +155,16 @@ object VideoPsalmConverter {
     }
 
     /** One line: an author or a copyright is stored with the line breaks its slide had. */
-    private fun flattened(value: String): String =
-        withoutMarkup(value).replace(runsOfWhitespace, " ").trim()
+    private fun flattened(value: String, font: String, typedFor: String): String =
+        VideoPsalmText.plain(value, font, typedFor).replace(runsOfWhitespace, " ").trim()
 
-    /** [text] with the book's color markup taken out. */
-    private fun withoutMarkup(text: String): String = text.replace(colorMarkup, "")
-
-    internal fun sectionsOf(verses: List<LooseJson>): BookSections {
+    internal fun sectionsOf(verses: List<LooseJson>, bodyFont: String = "", typedFor: String = ""): BookSections {
         val alreadySung = mutableSetOf<String>()
         val used = mutableSetOf<String>()
         val primary = mutableListOf<SongSection>()
         val secondary = mutableListOf<SongSection>()
         for (verse in verses) {
-            val lines = linesOf(verse.text("Text"))
+            val lines = linesOf(verse.text("Text"), VideoPsalmText.bodyFontOf(verse).ifEmpty { bodyFont }, typedFor)
             // A chorus stored once per singing is one section: the repeats are matched on their
             // lyrics — both languages of them, since a verse that differs only in translation is
             // still a different verse.
@@ -203,8 +197,9 @@ object VideoPsalmConverter {
         return "$name $number"
     }
 
-    private fun linesOf(text: String): List<String> =
-        withoutMarkup(text).lines().map { it.trim() }.filterNot { it.isEmpty() || endMarker.matches(it) }
+    private fun linesOf(text: String, font: String, typedFor: String): List<String> =
+        VideoPsalmText.plain(text, font, typedFor).lines().map { it.trim() }
+            .filterNot { it.isEmpty() || endMarker.matches(it) }
 
     /** Turns `V1 C1 V2 C2` into the section names it calls for. */
     internal fun sequenceLabels(sequence: String): List<String> =

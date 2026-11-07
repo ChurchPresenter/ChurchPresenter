@@ -52,7 +52,12 @@ Built with Kotlin Multiplatform and Compose Desktop.
   - Verses past the ninth, which books stop numbering, keep counting up instead of stacking
   - The `***` / `<><><>` end marker on the last verse is dropped, including when the book wrote it
     inside its own color markup
-  - A bilingual book's `<cAARRGGBB>` … `</c>` color markup is dropped rather than imported as lyrics
+  - A bilingual book's `<cAARRGGBB>` … `</c>` color markup is dropped rather than imported as lyrics,
+    and so are VideoPsalm's font (`<f…>`), size (`<s…>`) and other inline tags
+  - Text typed for a legacy-encoded font — Yoruba's `Yor_Arial`, `Yoruba_ITC Officina Serif` and
+    the like, which draw ẹ ọ Ẹ Ọ in place of `[ ] { }` — becomes the real Unicode letters, so any
+    font that covers the language shows it; a song typed for such a font is caught even where the
+    book no longer names it, and every text is NFC-normalized
   - A bilingual verse — two languages either side of a row of dashes — becomes the `.song` file's
     `[Primary]` and `[Secondary]` halves, so the app can show either language or both; a verse the
     book never translated holds its place, since the two halves are paired by position
