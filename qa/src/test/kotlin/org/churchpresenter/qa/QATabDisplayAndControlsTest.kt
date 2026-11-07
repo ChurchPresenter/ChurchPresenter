@@ -79,6 +79,7 @@ class QATabDisplayAndControlsTest {
             waitForIdle()
             qaButton(QALabel.GO_LIVE).performClick()
             waitForIdle()
+            presenter.setPresentingMode(Presenting.QA)
             assertTrue(presenter.displayedQuestion.value != null)
 
             qaButton(QALabel.DONE_CLEAR).performClick()
@@ -96,6 +97,7 @@ class QATabDisplayAndControlsTest {
             waitForIdle()
             qaButton(QALabel.GO_LIVE).performClick()
             waitForIdle()
+            presenter.setPresentingMode(Presenting.QA)
 
             qaButton(QALabel.DELETE).performClick()
             waitForIdle()

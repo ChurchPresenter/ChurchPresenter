@@ -434,6 +434,12 @@ class CompanionServer(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /** Emitted when the web admin edits the displayed question. It changes the text, never what is live. */
+    val onQADisplayedEdit = MutableSharedFlow<Question>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /** Emitted when a remote client calls POST /api/clear or sends WS "clear". Clears the display instantly. */
     val onClear = MutableSharedFlow<Unit>(
         extraBufferCapacity = 4,

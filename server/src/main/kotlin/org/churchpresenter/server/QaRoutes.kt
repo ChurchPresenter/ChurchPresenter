@@ -282,8 +282,10 @@ private fun Route.qaQuestionEditRoutes(
                         return@post
                     }
                     val ok = server.qaManager?.editQuestion(id, request.text) ?: false
-                    if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    if (ok) {
+                        server.announceDisplayedEdit(id, scope)
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    } else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: deny question
@@ -306,9 +308,10 @@ private fun Route.qaQuestionEditRoutes(
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
+                    val wasDisplayed = server.isDisplayedQuestion(id)
                     val ok = server.qaManager?.denyQuestion(id) ?: false
                     if (ok) {
-                        if (server.qaManager?.displayedQuestion == null) scope.launch { server.onQADisplay.emit(null) }
+                        if (wasDisplayed) scope.launch { server.onQADisplay.emit(null) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
@@ -339,9 +342,10 @@ private fun Route.qaQuestionStateRoutes(
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
+                    val wasDisplayed = server.isDisplayedQuestion(id)
                     val ok = server.qaManager?.markDone(id) ?: false
                     if (ok) {
-                        if (server.qaManager?.displayedQuestion == null) scope.launch { server.onQADisplay.emit(null) }
+                        if (wasDisplayed) scope.launch { server.onQADisplay.emit(null) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
@@ -375,11 +379,12 @@ private fun Route.qaQuestionStateRoutes(
                 }
 
                 // Admin: delete question
-    qaQuestionDeleteRoutes(server)
+    qaQuestionDeleteRoutes(server, scope)
 }
 
 private fun Route.qaQuestionDeleteRoutes(
     server: CompanionServer,
+    scope: CoroutineScope,
 ) {
                 delete("/api/qa/questions/{id}") {
                     if (!server.checkQaAdmin(call)) return@delete
@@ -401,9 +406,12 @@ private fun Route.qaQuestionDeleteRoutes(
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@delete
                     }
+                    val wasDisplayed = server.isDisplayedQuestion(id)
                     val ok = server.qaManager?.deleteQuestion(id) ?: false
-                    if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    if (ok) {
+                        if (wasDisplayed) scope.launch { server.onQADisplay.emit(null) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    } else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: add question (admin-created)
@@ -472,6 +480,16 @@ private fun Route.qaAdminActionRoutes(
                         return@post
                     }
                     server.qaManager?.clearAll()
+                    scope.launch { server.onQADisplay.emit(null) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
+}
+
+/** Whether [id] is the question on display: only taking that one down clears the output. */
+private fun CompanionServer.isDisplayedQuestion(id: String): Boolean = qaManager?.displayedQuestion?.id == id
+
+/** Sends the output the new text of [id] if it is the question on display. */
+private fun CompanionServer.announceDisplayedEdit(id: String, scope: CoroutineScope) {
+    val edited = qaManager?.displayedQuestion?.takeIf { it.id == id } ?: return
+    scope.launch { onQADisplayedEdit.emit(edited) }
 }

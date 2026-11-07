@@ -212,9 +212,16 @@ internal fun MainWindowScope.ServerCommandWiring() {
                     presenterManager.setPresentingMode(Presenting.QA)
                 } else {
                     presenterManager.setDisplayedQuestion(null)
-                    presenterManager.setPresentingMode(Presenting.NONE)
+                    presenterManager.setShowQRCodeOnDisplay(false)
+                    // Clearing takes everything down, so it waits for Q&A to be what is on air.
+                    if (presenterManager.slideContent.value == Presenting.QA) {
+                        presenterManager.setPresentingMode(Presenting.NONE)
+                    }
                 }
             }
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onQADisplayedEdit.collect { presenterManager.setDisplayedQuestion(it) }
         }
     }
 }

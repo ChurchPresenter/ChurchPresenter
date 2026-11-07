@@ -23,17 +23,20 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.qa.QAManager
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import java.io.File
 import java.nio.file.Files
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Moderating a Q&A session from a phone.
@@ -56,6 +59,7 @@ class CompanionServerQaModerationTest {
 
     private lateinit var client: HttpClient
     private var operatorScope: CoroutineScope? = null
+    private var outputScope: CoroutineScope? = null
 
     companion object {
         private lateinit var server: CompanionServer
@@ -123,6 +127,8 @@ class CompanionServerQaModerationTest {
     fun closeClient() {
         runCatching { operatorScope?.cancel() }
         operatorScope = null
+        runCatching { outputScope?.cancel() }
+        outputScope = null
         runCatching { client.close() }
     }
 
@@ -580,6 +586,159 @@ class CompanionServerQaModerationTest {
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(QuestionStatus.DENIED, qa.findQuestion(id)?.status)
+    }
+
+    /** What the projector was told: [displays] from `onQADisplay`, [edits] from `onQADisplayedEdit`. */
+    private class OutputTraffic {
+        val displays = CopyOnWriteArrayList<Question?>()
+        val edits = CopyOnWriteArrayList<Question>()
+    }
+
+    /** Listens as the app's wiring does. The flows replay nothing, so this waits for both subscriptions. */
+    private fun watchOutput(): OutputTraffic {
+        val traffic = OutputTraffic()
+        outputScope = CoroutineScope(Dispatchers.IO + Job()).also { scope ->
+            scope.launch { server.onQADisplay.collect { traffic.displays.add(it) } }
+            scope.launch { server.onQADisplayedEdit.collect { traffic.edits.add(it) } }
+        }
+        runBlocking {
+            withTimeout(5_000) {
+                server.onQADisplay.subscriptionCount.first { it > 0 }
+                server.onQADisplayedEdit.subscriptionCount.first { it > 0 }
+            }
+        }
+        return traffic
+    }
+
+    /** A bounded poll on [condition]; the timeout only exists to fail the test. */
+    private fun awaitTrue(what: String, condition: () -> Boolean) = runBlocking {
+        withTimeout(5_000) { while (!condition()) kotlinx.coroutines.delay(5) }
+    }.also { check(condition()) { what } }
+
+    /**
+     * Shows a fresh approved question and waits for the output to hear of it. Emissions arrive in
+     * the order they were sent, so everything before this one has been heard once it lands: the
+     * signal that "nothing was sent" is now safe to assert.
+     */
+    private fun fenceOutput(qa: QAManager, traffic: OutputTraffic): Question {
+        val id = submitQuestion("fence")
+        qa.approveQuestion(id)
+        assertEquals(HttpStatusCode.OK, post("/api/qa/questions/$id/display").status)
+        awaitTrue("the fence was never heard") { traffic.displays.any { it?.id == id } }
+        return traffic.displays.last()!!
+    }
+
+    private fun liveQuestion(qa: QAManager, text: String): String {
+        val id = submitQuestion(text)
+        qa.approveQuestion(id)
+        qa.displayQuestion(id)
+        return id
+    }
+
+    // ── What the projector is told ──────────────────────────────────────────────
+
+    @Test
+    fun `denying or finishing a question leaves the QR code on screen`() {
+        val qa = openSession()
+        val pending = submitQuestion("still pending")
+        val approved = submitQuestion("approved one")
+        qa.approveQuestion(approved)
+        qa.toggleQRCodeDisplay()
+        playOperator(allow = true)
+        val traffic = watchOutput()
+
+        assertEquals(HttpStatusCode.OK, post("/api/qa/questions/$pending/deny").status)
+        assertEquals(HttpStatusCode.OK, post("/api/qa/questions/$approved/done").status)
+        val fence = fenceOutput(qa, traffic)
+
+        assertEquals(listOf<Question?>(fence), traffic.displays.toList(), "the QR was not the operator's to take down")
+    }
+
+    @Test
+    fun `denying a question that is not on screen leaves the live one up`() {
+        val qa = openSession()
+        liveQuestion(qa, "on screen")
+        val other = submitQuestion("another")
+        playOperator(allow = true)
+        val traffic = watchOutput()
+
+        post("/api/qa/questions/$other/deny")
+        val fence = fenceOutput(qa, traffic)
+
+        assertEquals(listOf<Question?>(fence), traffic.displays.toList())
+    }
+
+    @Test
+    fun `denying finishing or deleting the question on screen takes it down`() {
+        val qa = openSession()
+        playOperator(allow = true)
+        val traffic = watchOutput()
+
+        for (action in listOf<(String) -> Unit>(
+            { post("/api/qa/questions/$it/deny") },
+            { post("/api/qa/questions/$it/done") },
+            { delete("/api/qa/questions/$it") },
+        )) {
+            traffic.displays.clear()
+            val id = liveQuestion(qa, "going down")
+            action(id)
+            awaitTrue("the output was never told") { traffic.displays.contains(null) }
+            assertNull(qa.displayedQuestion)
+        }
+    }
+
+    @Test
+    fun `deleting a question that is not on screen leaves the live one up`() {
+        val qa = openSession()
+        liveQuestion(qa, "on screen")
+        val other = submitQuestion("another")
+        playOperator(allow = true)
+        val traffic = watchOutput()
+
+        delete("/api/qa/questions/$other")
+        val fence = fenceOutput(qa, traffic)
+
+        assertEquals(listOf<Question?>(fence), traffic.displays.toList())
+    }
+
+    @Test
+    fun `clear-all takes down whatever Q and A was showing`() {
+        val qa = openSession()
+        liveQuestion(qa, "on screen")
+        playOperator(allow = true)
+        val traffic = watchOutput()
+
+        post("/api/qa/clear-all")
+
+        awaitTrue("the output was never told") { traffic.displays.contains(null) }
+    }
+
+    @Test
+    fun `editing the question on screen sends its new text to the output`() {
+        val qa = openSession()
+        val id = liveQuestion(qa, "teh question")
+        playOperator(allow = true)
+        val traffic = watchOutput()
+
+        post("/api/qa/questions/$id/edit", """{"text":"the question","name":""}""")
+
+        awaitTrue("the edit never reached the output") { traffic.edits.isNotEmpty() }
+        assertEquals("the question", traffic.edits.single().text)
+        assertTrue(traffic.displays.isEmpty(), "an edit changes the text, never what is live")
+    }
+
+    @Test
+    fun `editing a question that is not on screen tells the output nothing`() {
+        val qa = openSession()
+        liveQuestion(qa, "on screen")
+        val other = submitQuestion("another")
+        playOperator(allow = true)
+        val traffic = watchOutput()
+
+        post("/api/qa/questions/$other/edit", """{"text":"reworded","name":""}""")
+        fenceOutput(qa, traffic)
+
+        assertTrue(traffic.edits.isEmpty())
     }
 
     @Test

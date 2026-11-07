@@ -169,21 +169,28 @@ internal fun QATabScope.QuestionList(filteredQuestions: List<Question>) {
         verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
     ) {
         items(filteredQuestions.distinctBy { it.id }, key = { it.id }) { question ->
-            // What was on screen when the row was drawn: marking it done or deleting it clears the
-            // manager's own copy before the handler asks whether it was the one showing.
+            // What was on screen when the row was drawn: denying it, marking it done or deleting it
+            // clears the manager's own copy before the handler asks whether it was the one showing.
             val wasDisplayed = displayedQuestion?.id == question.id
+            val takeDownIfDisplayed = {
+                if (wasDisplayed) {
+                    output.setDisplayedQuestion(null)
+                    // Clearing takes everything down, so it waits for Q&A to be what is on air.
+                    if (output.slideContent.value == Presenting.QA) presenting(Presenting.NONE)
+                }
+            }
             QuestionRow(
                 question = question,
                 isDisplayed = wasDisplayed,
                 isHistory = selectedFilter == 6,
                 onApprove = { qaManager.approveQuestion(question.id) },
-                onDeny = { qaManager.denyQuestion(question.id) },
+                onDeny = {
+                    qaManager.denyQuestion(question.id)
+                    takeDownIfDisplayed()
+                },
                 onMarkDone = {
                     qaManager.markDone(question.id)
-                    if (wasDisplayed) {
-                        output.setDisplayedQuestion(null)
-                        presenting(Presenting.NONE)
-                    }
+                    takeDownIfDisplayed()
                 },
                 onEdit = { newText ->
                     qaManager.editQuestion(question.id, newText)
@@ -201,10 +208,7 @@ internal fun QATabScope.QuestionList(filteredQuestions: List<Question>) {
                 },
                 onDelete = {
                     qaManager.deleteQuestion(question.id)
-                    if (wasDisplayed) {
-                        output.setDisplayedQuestion(null)
-                        presenting(Presenting.NONE)
-                    }
+                    takeDownIfDisplayed()
                 }
             )
         }
