@@ -6,7 +6,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import org.churchpresenter.diagnostics.Log
 import java.awt.Cursor
+import java.awt.HeadlessException
 import java.awt.Point
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
@@ -20,24 +22,35 @@ import java.awt.Window as AwtWindow
 // ([HideOutputWindowCursor]), and put back when the setting is turned off.
 
 /**
- * A cursor with nothing in it -- one fully transparent pixel.
- *
- * Built on first use rather than at class load: `createCustomCursor` throws `HeadlessException` on a
- * machine with no display, which is every test run, and only an output window ever asks for it.
+ * A cursor with nothing in it -- fully transparent, at the platform's own cursor size so Windows has
+ * no image to scale. Null when the platform cannot build one (no display, or the runtime's native
+ * AWT library can no longer be loaded); the pointer then simply stays visible.
  */
-private val blankCursor: Cursor by lazy {
-    Toolkit.getDefaultToolkit().createCustomCursor(
-        BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB),
-        Point(0, 0),
-        "blank",
-    )
+private val blankCursor: Cursor? by lazy {
+    try {
+        val toolkit = Toolkit.getDefaultToolkit()
+        val size = toolkit.getBestCursorSize(1, 1)
+        toolkit.createCustomCursor(
+            BufferedImage(size.width.coerceAtLeast(1), size.height.coerceAtLeast(1), BufferedImage.TYPE_INT_ARGB),
+            Point(0, 0),
+            "blank",
+        )
+    } catch (e: HeadlessException) {
+        Log.warn(TAG, "No blank cursor without a display: ${e.message}")
+        null
+    } catch (e: UnsatisfiedLinkError) {
+        Log.warn(TAG, "No blank cursor, native AWT library unavailable: ${e.message}")
+        null
+    }
 }
+
+private const val TAG = "OutputCursor"
 
 /** Sets [window]'s own cursor to nothing while [hide] is on, and back to the arrow when it is not. */
 @Composable
 fun HideOutputWindowCursor(window: AwtWindow, hide: Boolean) {
     DisposableEffect(window, hide) {
-        window.cursor = if (hide) blankCursor else Cursor.getDefaultCursor()
+        window.cursor = blankCursor?.takeIf { hide } ?: Cursor.getDefaultCursor()
         onDispose { }
     }
 }
@@ -75,4 +88,4 @@ fun outputCursorScript(hide: Boolean): String =
 
 /** A blank pointer over this content and everything in it, while [hide] is on. */
 fun Modifier.hiddenOutputCursor(hide: Boolean): Modifier =
-    if (hide) pointerHoverIcon(PointerIcon(blankCursor), overrideDescendants = true) else this
+    blankCursor?.takeIf { hide }?.let { pointerHoverIcon(PointerIcon(it), overrideDescendants = true) } ?: this
