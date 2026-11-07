@@ -51,6 +51,9 @@ private val CLIPBOARD_PEERS = setOf(
 /** The JDK's Windows shell-folder classes, which throw when Explorer will not bind an item. */
 private const val WINDOWS_SHELL_FOLDER = "sun.awt.shell.Win32ShellFolder"
 
+/** The JDK's file chooser list, whose focus listener repaints a selected row that has no cell. */
+private const val FILE_CHOOSER_PANE = "sun.swing.FilePane"
+
 /**
  * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
  * and whether it is a release.
@@ -822,6 +825,12 @@ object CrashReporter {
      * list's own loading, with no frame of ours in it. The folder simply lists without that item
      * (Sentry CHURCH-PRESENTER-DESKTOP-C7).
      *
+     * The third is `FilePane`'s focus listener, which passes `JList.getCellBounds` straight to
+     * `repaint` and throws a `NullPointerException` when a selected index has no cell. It arrives
+     * here from inside the chooser's own modal event loop, which carries on with the dialog still
+     * open; nothing around `showOpenDialog` can catch it, because it never unwinds that far
+     * (Sentry CHURCH-PRESENTER-DESKTOP-9R).
+     *
      * Widen this only for something with the same two properties: a named platform condition, and
      * a thread that demonstrably survives it.
      *
@@ -834,7 +843,8 @@ object CrashReporter {
      */
     internal fun isRecoverableInteraction(throwable: Throwable): Boolean =
         (throwable is IllegalStateException && throwable.thrownFrom { it in CLIPBOARD_PEERS }) ||
-            (throwable is InternalError && throwable.thrownFrom { it.startsWith(WINDOWS_SHELL_FOLDER) })
+            (throwable is InternalError && throwable.thrownFrom { it.startsWith(WINDOWS_SHELL_FOLDER) }) ||
+            (throwable is NullPointerException && throwable.thrownFrom { it.startsWith(FILE_CHOOSER_PANE) })
 
     private fun Throwable.thrownFrom(matches: (className: String) -> Boolean): Boolean =
         stackTrace.any { frame -> matches(frame.className) }
