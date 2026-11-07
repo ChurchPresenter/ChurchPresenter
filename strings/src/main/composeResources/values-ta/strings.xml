@@ -3854,4 +3854,8 @@
     <string name="action_field_button">பொத்தான்</string>
     <string name="action_field_macro">மேக்ரோ பெயர்</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Church Presenter இந்தக் கணினியில் தொடங்க முடியவில்லை</string>
+    <string name="system_fonts_failed_body">இந்தக் கணினியின் சிஸ்டம் எழுத்துருக்களை ஏற்ற முடியவில்லை.</string>
+    <string name="system_fonts_failed_old_windows_reason">இந்த Windows பதிப்பு Windows 10-ஐ விடப் பழையது; இதுவே பெரும்பாலும் காரணமாக இருக்கலாம்.</string>
+    <string name="system_fonts_failed_old_windows_fix">Windows 10 அல்லது புதிய பதிப்புக்குப் புதுப்பித்தால் இது சரியாக வேண்டும்.</string>
 </resources>

@@ -3831,4 +3831,8 @@
     <string name="action_field_button">Bouton</string>
     <string name="action_field_macro">Nom de la macro</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Church Presenter ne peut pas démarrer sur cet ordinateur</string>
+    <string name="system_fonts_failed_body">Impossible de charger les polices système de cet ordinateur.</string>
+    <string name="system_fonts_failed_old_windows_reason">Cette version de Windows est antérieure à Windows 10, ce qui en est la cause la plus probable.</string>
+    <string name="system_fonts_failed_old_windows_fix">La mise à niveau vers Windows 10 ou une version ultérieure devrait résoudre le problème.</string>
 </resources>

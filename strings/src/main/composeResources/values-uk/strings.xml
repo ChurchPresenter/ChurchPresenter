@@ -3803,4 +3803,8 @@
     <string name="action_field_button">Кнопка</string>
     <string name="action_field_macro">Назва макроса</string>
     <string name="action_wait_seconds">%1$s с</string>
+    <string name="system_fonts_failed_title">Church Presenter не може запуститися на цьому комп'ютері</string>
+    <string name="system_fonts_failed_body">Не вдалося завантажити системні шрифти цього комп'ютера.</string>
+    <string name="system_fonts_failed_old_windows_reason">Ця версія Windows старіша за Windows 10 — найімовірніше, причина в цьому.</string>
+    <string name="system_fonts_failed_old_windows_fix">Оновлення до Windows 10 або новішої версії має вирішити проблему.</string>
 </resources>

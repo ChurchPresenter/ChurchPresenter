@@ -3848,4 +3848,8 @@
     <string name="action_field_button">Kitufe</string>
     <string name="action_field_macro">Jina la makro</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Church Presenter haiwezi kuanza kwenye kompyuta hii</string>
+    <string name="system_fonts_failed_body">Imeshindwa kupakia fonti za mfumo za kompyuta hii.</string>
+    <string name="system_fonts_failed_old_windows_reason">Toleo hili la Windows ni la zamani kuliko Windows 10, na hiyo ndiyo sababu inayowezekana zaidi.</string>
+    <string name="system_fonts_failed_old_windows_fix">Kusasisha hadi Windows 10 au toleo jipya zaidi kunapaswa kutatua tatizo hili.</string>
 </resources>

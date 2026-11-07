@@ -3833,4 +3833,8 @@
     <string name="action_field_button">Tlačidlo</string>
     <string name="action_field_macro">Názov makra</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">Church Presenter sa na tomto počítači nedá spustiť</string>
+    <string name="system_fonts_failed_body">Nepodarilo sa načítať systémové písma tohto počítača.</string>
+    <string name="system_fonts_failed_old_windows_reason">Táto verzia Windows je staršia ako Windows 10, čo je najpravdepodobnejšia príčina.</string>
+    <string name="system_fonts_failed_old_windows_fix">Problém by mala vyriešiť aktualizácia na Windows 10 alebo novší.</string>
 </resources>

@@ -4309,4 +4309,8 @@
     <string name="signage_update_restarting">restarting</string>
     <string name="signage_update_failed">Update to %1$s failed: %2$s</string>
     <string name="signage_update_rolled_back">Update to %1$s didn't start, so the screen went back: %2$s</string>
+    <string name="system_fonts_failed_title">Church Presenter can't start on this computer</string>
+    <string name="system_fonts_failed_body">It couldn't load this computer's system fonts.</string>
+    <string name="system_fonts_failed_old_windows_reason">This version of Windows is older than Windows 10, which is the most likely reason.</string>
+    <string name="system_fonts_failed_old_windows_fix">Updating to Windows 10 or later should fix it.</string>
 </resources>

@@ -35,7 +35,7 @@ private const val RELEASE_SAMPLE_RATE = 0.2
  * `EX_SOFTWARE` in the BSD sysexits convention — an internal software error, which is exactly what
  * an uncaught exception on any thread is by the time it reaches this handler.
  */
-internal const val EXIT_CODE_FATAL_CRASH = 70
+const val EXIT_CODE_FATAL_CRASH = 70
 
 /**
  * The AWT clipboard peers, which throw when the OS will not hand the clipboard over.
@@ -238,12 +238,7 @@ object CrashReporter {
                 throwable.printStackTrace()
                 return@setUncaughtHandler
             }
-            // Record what failed before anything else can go wrong: the next run reads this to
-            // decide whether the crash-loop guard should blame video backgrounds for it.
-            writeCrashKind(classifyCrash(throwable))
-            writeCrashLog(throwable, context = "Thread: ${thread.name}", fatal = true)
-            // Flush Sentry synchronously so the event is delivered before the JVM exits
-            try { Sentry.flush(FLUSH_TIMEOUT_MS) } catch (_: Exception) {}
+            recordFatal(throwable, context = "Thread: ${thread.name}")
             // The JVM's own default (print to stderr) does not end the process, and every output
             // this app draws — the presenter windows, DeckLink, and the NDI/Browser Source scenes
             // pumped through ComposeScenePump — shares the one AWT event-dispatch thread with the
@@ -277,6 +272,16 @@ object CrashReporter {
 
         // Delete lock file on clean exit
         addShutdownHook { try { runningFile.delete() } catch (_: Exception) {} }
+    }
+
+    /** Puts a crash the process is about to end on on record, delivered before the caller exits. */
+    fun recordFatal(throwable: Throwable, context: String) {
+        // Record what failed before anything else can go wrong: the next run reads this to
+        // decide whether the crash-loop guard should blame video backgrounds for it.
+        writeCrashKind(classifyCrash(throwable))
+        writeCrashLog(throwable, context, fatal = true)
+        // Flush Sentry synchronously so the event is delivered before the JVM exits
+        try { Sentry.flush(FLUSH_TIMEOUT_MS) } catch (_: Exception) {}
     }
 
     /**
@@ -399,26 +404,30 @@ object CrashReporter {
         }
 
     /**
-     * What failed, as far as the crash handler could tell — classified by exception **type**, never
-     * by message, so a wording change upstream cannot silently reclassify a crash.
+     * What failed, as far as the crash handler could tell — classified by exception **type** and
+     * the frame that threw it, never by message, so a wording change upstream cannot silently
+     * reclassify a crash.
      *
      * Only the distinction the escalation guard acts on is drawn: a fault in the rendering stack
      * versus anything else. skiko surfaces a GPU driver access violation as its own
      * `org.jetbrains.skiko.RenderException`, thrown from `RenderExceptionsHandler`, so the package
-     * is the whole test — the stack below it is AWT and coroutines, with no application frame in it.
+     * is the test — the stack below it is AWT and coroutines, with no application frame in it. Skia
+     * also throws a bare `RuntimeException` when a native call returns null, so a throwable whose
+     * top frame is in those packages counts too.
      */
     internal fun classifyCrash(throwable: Throwable?): CrashKind {
         val seen = mutableSetOf<Throwable>()
         var current = throwable
         while (current != null && seen.add(current)) {
-            val name = current.javaClass.name
-            if (name.startsWith("org.jetbrains.skiko.") || name.startsWith("org.jetbrains.skia.")) {
-                return CrashKind.RENDERER
-            }
+            val thrownBy = current.stackTrace.firstOrNull()?.className.orEmpty()
+            if (isRendererClass(current.javaClass.name) || isRendererClass(thrownBy)) return CrashKind.RENDERER
             current = current.cause
         }
         return CrashKind.OTHER
     }
+
+    private fun isRendererClass(name: String): Boolean =
+        name.startsWith("org.jetbrains.skiko.") || name.startsWith("org.jetbrains.skia.")
 
     /**
      * Whether [throwable] is a development build's own output changing under it: a class of ours

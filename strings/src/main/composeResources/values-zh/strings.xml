@@ -3848,4 +3848,8 @@
     <string name="action_field_button">按钮</string>
     <string name="action_field_macro">宏名称</string>
     <string name="action_wait_seconds">%1$s 秒</string>
+    <string name="system_fonts_failed_title">Church Presenter 无法在此计算机上启动</string>
+    <string name="system_fonts_failed_body">无法加载此计算机的系统字体。</string>
+    <string name="system_fonts_failed_old_windows_reason">此 Windows 版本低于 Windows 10，这是最可能的原因。</string>
+    <string name="system_fonts_failed_old_windows_fix">升级到 Windows 10 或更高版本应可解决此问题。</string>
 </resources>

@@ -3832,4 +3832,8 @@
     <string name="action_field_button">Botão</string>
     <string name="action_field_macro">Nome da macro</string>
     <string name="action_wait_seconds">%1$s s</string>
+    <string name="system_fonts_failed_title">O Church Presenter não pode ser iniciado neste computador</string>
+    <string name="system_fonts_failed_body">Não foi possível carregar as fontes do sistema deste computador.</string>
+    <string name="system_fonts_failed_old_windows_reason">Esta versão do Windows é anterior ao Windows 10, o que é a causa mais provável.</string>
+    <string name="system_fonts_failed_old_windows_fix">Atualizar para o Windows 10 ou posterior deve resolver o problema.</string>
 </resources>

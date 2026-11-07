@@ -3848,4 +3848,8 @@
     <string name="action_field_button">Düğme</string>
     <string name="action_field_macro">Makro adı</string>
     <string name="action_wait_seconds">%1$s sn</string>
+    <string name="system_fonts_failed_title">Church Presenter bu bilgisayarda başlatılamıyor</string>
+    <string name="system_fonts_failed_body">Bu bilgisayarın sistem yazı tipleri yüklenemedi.</string>
+    <string name="system_fonts_failed_old_windows_reason">Bu Windows sürümü Windows 10'dan eski; en olası neden bu.</string>
+    <string name="system_fonts_failed_old_windows_fix">Windows 10 veya sonraki bir sürüme güncellemek sorunu çözmelidir.</string>
 </resources>
