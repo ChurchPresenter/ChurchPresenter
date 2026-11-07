@@ -27,7 +27,7 @@ import java.awt.Window as AwtWindow
  * AWT library can no longer be loaded); the pointer then simply stays visible.
  */
 private val blankCursor: Cursor? by lazy {
-    try {
+    cursorOrNull {
         val toolkit = Toolkit.getDefaultToolkit()
         val size = toolkit.getBestCursorSize(1, 1)
         toolkit.createCustomCursor(
@@ -35,6 +35,13 @@ private val blankCursor: Cursor? by lazy {
             Point(0, 0),
             "blank",
         )
+    }
+}
+
+/** What [create] builds, or null when the platform cannot build a cursor at all. */
+internal fun cursorOrNull(create: () -> Cursor): Cursor? =
+    try {
+        create()
     } catch (e: HeadlessException) {
         Log.warn(TAG, "No blank cursor without a display: ${e.message}")
         null
@@ -42,7 +49,6 @@ private val blankCursor: Cursor? by lazy {
         Log.warn(TAG, "No blank cursor, native AWT library unavailable: ${e.message}")
         null
     }
-}
 
 private const val TAG = "OutputCursor"
 

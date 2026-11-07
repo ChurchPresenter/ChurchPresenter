@@ -3,6 +3,7 @@ package org.churchpresenter.slides.utils
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
+import java.util.Random
 import java.nio.file.Files
 import javax.imageio.ImageIO
 import kotlin.test.AfterTest
@@ -11,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -232,6 +234,35 @@ class PictureDecoderTest {
 
         assertEquals(12, scaled.width)
         assertEquals(9, scaled.height)
+    }
+
+    @Test
+    fun `a file larger than one read block is read whole`() {
+        val random = Random(1)
+        val noise = BufferedImage(300, 200, BufferedImage.TYPE_INT_RGB)
+        for (y in 0 until 200) for (x in 0 until 300) noise.setRGB(x, y, random.nextInt())
+        val file = File(folder, "noise.png").also { ImageIO.write(noise, "png", it) }
+        assertTrue(file.length() > 64 * 1024, "fixture must span several read blocks")
+
+        val decoded = PictureDecoder.decode(file)
+
+        assertEquals(300, decoded.width)
+        assertEquals(200, decoded.height)
+    }
+
+    @Test
+    fun `a scaled picture is still open after the full-size decode is freed`() {
+        val scaled = PictureDecoder.decodeScaled(write("large.png", "png"), maxWidth = 6, maxHeight = 100)
+
+        assertFalse(scaled.isClosed)
+        assertEquals(6, scaled.width)
+    }
+
+    @Test
+    fun `a picture returned unscaled is not freed`() {
+        val scaled = PictureDecoder.decodeScaled(write("small.png", "png"), maxWidth = 1920, maxHeight = 1080)
+
+        assertFalse(scaled.isClosed)
     }
 
     @Test
