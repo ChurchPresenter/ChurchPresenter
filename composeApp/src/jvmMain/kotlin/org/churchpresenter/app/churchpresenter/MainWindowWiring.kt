@@ -34,6 +34,8 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.lowerthird.LowerThirdSequencer
 import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.seedCalendarFolder
+import org.churchpresenter.diagnostics.Log
+import java.io.IOException
 import org.churchpresenter.calendar.CueRunner
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.macroNamed
@@ -109,7 +111,15 @@ internal fun MainWindowScope.CalendarAutomationWiring() {
         LaunchedEffect(calendarFolder, appSettings.calendarSync.enabled) {
             // A folder chosen in Settings starts from what the app data folder
             // holds, once, so the calendar does not vanish on the switch.
-            withContext(Dispatchers.IO) { seedCalendarFolder(AppDataDir.resolve(), calendarFolder) }
+            // A folder on a drive that is not there right now is seeded on a later launch;
+            // sync and the auto-loader below still have to start.
+            withContext(Dispatchers.IO) {
+                try {
+                    seedCalendarFolder(AppDataDir.resolve(), calendarFolder)
+                } catch (e: IOException) {
+                    Log.warn("Calendar", "Could not copy the calendar to $calendarFolder: ${e.message}")
+                }
+            }
             // Phones plan all week; their edits are pulled and merged before the
             // auto-loader looks, so it loads this week's plan.
             calendarSync.syncOnStartup()
