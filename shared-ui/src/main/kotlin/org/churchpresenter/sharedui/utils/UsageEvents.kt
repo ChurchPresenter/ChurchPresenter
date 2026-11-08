@@ -137,6 +137,9 @@ enum class UsageEvent(
      * nothing typed is ever sent.
      */
     WICK_USED("wickUsed"),
+
+    /** A different song went live from the Songs tab, whatever it was shown with. */
+    SONG_LIVE("songLive"),
 }
 
 @Serializable

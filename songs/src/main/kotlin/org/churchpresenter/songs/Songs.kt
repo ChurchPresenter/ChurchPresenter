@@ -11,6 +11,9 @@ import java.nio.file.Paths
 private const val MIN_SPS_FILE_BYTES = 16
 private const val SPS_MIN_FIELDS = 6
 
+/** How many songs the bundled songbook holds — what the Songs tab shows when the song folder has none. */
+fun bundledSongCount(): Int = Songs().apply { loadFromSps(Constants.FALLBACK_SONG_RESOURCE) }.getSongCount()
+
 class Songs {
     private val items = mutableStateListOf<SongItem>()
 
