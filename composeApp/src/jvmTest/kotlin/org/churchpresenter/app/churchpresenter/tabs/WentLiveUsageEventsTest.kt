@@ -23,8 +23,9 @@ import kotlin.test.assertEquals
 
 /**
  * What the Songs and Bible tabs' went-live hooks report, read back from the real [UsageEvents]
- * store: each presentation is counted only when the live outputs are set up to show it, and an
- * output switched off (no display) is not one of them.
+ * store: every song that goes live is counted as [UsageEvent.SONG_LIVE], each presentation is
+ * counted only when the live outputs are set up to show it, and an output switched off (no
+ * display) is not one of them.
  */
 class WentLiveUsageEventsTest {
 
@@ -76,12 +77,12 @@ class WentLiveUsageEventsTest {
     // ── Songs ────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `a plain song on matching outputs records no presentation events`() {
+    fun `a plain song on matching outputs records only that a song went live`() {
         val song = SongItem(number = "7", title = "Plain", lyrics = listOf("words"))
 
         recordSongWentLive(song, settings(OutputProfile(songMode = Constants.SONG_LANG_PRIMARY)), null)
 
-        assertEquals(emptySet(), recorded())
+        assertEquals(setOf(UsageEvent.SONG_LIVE), recorded())
     }
 
     @Test
@@ -97,7 +98,10 @@ class WentLiveUsageEventsTest {
 
         recordSongWentLive(song, settings, null)
 
-        assertEquals(setOf(UsageEvent.SONG_DUAL_LANGUAGE, UsageEvent.SONG_SPLIT_SCREEN), recorded())
+        assertEquals(
+            setOf(UsageEvent.SONG_LIVE, UsageEvent.SONG_DUAL_LANGUAGE, UsageEvent.SONG_SPLIT_SCREEN),
+            recorded(),
+        )
     }
 
     @Test
@@ -110,7 +114,10 @@ class WentLiveUsageEventsTest {
 
         recordSongWentLive(song, settings, null)
 
-        assertEquals(setOf(UsageEvent.SONG_LOTTIE_BAND, UsageEvent.SONG_CHORD_CHART), recorded())
+        assertEquals(
+            setOf(UsageEvent.SONG_LIVE, UsageEvent.SONG_LOTTIE_BAND, UsageEvent.SONG_CHORD_CHART),
+            recorded(),
+        )
     }
 
     @Test

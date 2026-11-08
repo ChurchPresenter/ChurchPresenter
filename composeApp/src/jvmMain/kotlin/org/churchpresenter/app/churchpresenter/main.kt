@@ -49,6 +49,7 @@ import org.churchpresenter.settings.signageFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.songs.bundledSongCount
 import org.churchpresenter.appsettings.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
@@ -305,7 +306,7 @@ fun main(args: Array<String>) {
             LiveMapReporter.setupFacts(
                 startupSettings,
                 screenCount = LiveMapReporter.detectScreenCount(),
-                songCounts = LiveMapReporter.gatherSongCounts(startupSettings),
+                songCounts = LiveMapReporter.gatherSongCounts(startupSettings, ::bundledSongCount),
                 sessionMinutes = previousRun.sessionMinutes,
                 liveMinutes = previousRun.liveMinutes,
                 liveStalls = previousRun.liveStalls,

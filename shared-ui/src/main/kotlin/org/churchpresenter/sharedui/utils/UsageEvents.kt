@@ -137,6 +137,15 @@ enum class UsageEvent(
      * nothing typed is ever sent.
      */
     WICK_USED("wickUsed"),
+
+    /** A different song went live from the Songs tab, whatever it was shown with. */
+    SONG_LIVE("songLive"),
+
+    /** A passage went live from a translation whose book names the operator renamed. */
+    BIBLE_BOOK_OVERRIDE("bibleBookOverride"),
+
+    /** A page drawn on a phone or tablet's canvas was allowed live. */
+    MOBILE_DRAWING_LIVE("mobileDrawingLive"),
 }
 
 @Serializable

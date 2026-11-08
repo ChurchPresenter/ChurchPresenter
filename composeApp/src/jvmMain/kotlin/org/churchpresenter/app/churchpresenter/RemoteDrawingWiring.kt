@@ -51,7 +51,10 @@ private fun MainWindowScope.askToShowDrawing(request: PendingDrawingRequest, sho
         sessionAllowedClients, sessionBlockedClients,
     )
     val allow: () -> Unit = {
-        if (!request.decision.isCompleted) UsageEvents.record(UsageEvent.REMOTE_PUT_LIVE)
+        if (!request.decision.isCompleted) {
+            UsageEvents.record(UsageEvent.REMOTE_PUT_LIVE)
+            UsageEvents.record(UsageEvent.MOBILE_DRAWING_LIVE)
+        }
         coroutineScope.launch { show.allow(request) }
     }
     val (title, detail) = drawingEventLabel(request.title)

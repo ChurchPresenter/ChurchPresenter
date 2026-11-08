@@ -11,8 +11,8 @@ import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 
 /**
- * A verse has just gone live from the Bible tab: the multi-translation, split-screen and lottie-band
- * presentations it went out in are recorded.
+ * A verse has just gone live from the Bible tab: the multi-translation, split-screen, lottie-band and
+ * renamed-book presentations it went out in are recorded.
  */
 fun recordBibleWentLive(appSettings: AppSettings) {
     val translationCount = appSettings.bibleSettings.translationList().size
@@ -28,5 +28,8 @@ fun recordBibleWentLive(appSettings: AppSettings) {
     }
     if (lottieBandPath(appSettings, Presenting.BIBLE) != null) {
         UsageEvents.record(UsageEvent.BIBLE_LOTTIE_BAND)
+    }
+    if (appSettings.bibleSettings.translationList().any { it.bookNameOverrides.isNotEmpty() }) {
+        UsageEvents.record(UsageEvent.BIBLE_BOOK_OVERRIDE)
     }
 }

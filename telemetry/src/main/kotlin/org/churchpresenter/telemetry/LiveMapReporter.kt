@@ -107,10 +107,20 @@ object LiveMapReporter {
      * Touches the disk, so it is called from inside the ping coroutine rather than on the startup
      * path — a library on a slow network share must not delay the app opening. Counts only: no
      * folder name, no path, no title.
+     *
+     * @param bundledSongCount the size of the songbook the app ships, which the Songs tab shows
+     * when the folder holds no songs — counted as one songbook in that case, so an install on the
+     * bundled songs is not reported as having none.
      */
-    fun gatherSongCounts(settings: AppSettings): Pair<Int, Int> = try {
+    fun gatherSongCounts(settings: AppSettings, bundledSongCount: () -> Int = { 0 }): Pair<Int, Int> = try {
         val folders = FileManager().getSongFoldersInDirectory(settings.songSettings.storageDirectory)
-        folders.size to folders.sumOf { it.second }
+        val songs = folders.sumOf { it.second }
+        val bundled = if (songs > 0) 0 else bundledSongCount()
+        when {
+            songs > 0 -> folders.size to songs
+            bundled > 0 -> 1 to bundled
+            else -> 0 to 0
+        }
     } catch (_: Throwable) {
         // As in [detectScreenCount]: a count for a ping is never worth taking the app down for,
         // and what goes wrong at this depth is not always an Exception.
