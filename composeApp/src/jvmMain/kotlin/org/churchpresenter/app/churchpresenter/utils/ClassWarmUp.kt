@@ -9,9 +9,11 @@ import org.churchpresenter.diagnostics.Log
  * A class is read, verified and defined the first time it is used, on whichever thread uses it; for
  * the settings pages, the profiles editor, the Bible output and the server that is the event
  * thread, and a first opening on a slow disk freezes the window for most of a second. Loading a
- * class here leaves it defined for the whole run, so the screen finds it already there. Nothing is
- * initialised: `Class.forName(name, false, …)` runs no static initialiser, so this cannot change
- * what any class does or when.
+ * class here leaves it defined and linked for the whole run, so the screen finds it already there.
+ * `Class.forName(name, false, …)` alone only defines it: verification waits for first use, on the
+ * event thread, so [linkClass] asks for its fields, which makes the JVM link (verify) it. Nothing is
+ * initialised -- neither step runs a static initialiser, so this cannot change what any class does
+ * or when.
  *
  * Call it off the event thread, after the main window's first frame and [warmStrings]
  * ([startClassWarmUp] does). A name that does not load is counted and the rest go on; the count is
@@ -22,7 +24,7 @@ import org.churchpresenter.diagnostics.Log
  */
 internal fun warmClasses(
     names: List<String> = WARM_CLASSES,
-    load: (String) -> Unit = { Class.forName(it, false, ClassWarmUpLoader::class.java.classLoader) },
+    load: (String) -> Unit = { linkClass(Class.forName(it, false, ClassWarmUpLoader::class.java.classLoader)) },
 ): Int {
     var failed = 0
     var firstFailure: Throwable? = null
@@ -41,6 +43,11 @@ internal fun warmClasses(
         Log.info(TAG, "$failed of ${names.size} classes could not be loaded ahead: ${firstFailure::class.simpleName}")
     }
     return names.size - failed
+}
+
+/** Links [cls] without initialising it: reflecting on its fields makes the JVM verify it first. */
+private fun linkClass(cls: Class<*>) {
+    cls.declaredFields
 }
 
 /** Runs [warmClasses] on a daemon thread of its own at the lowest priority, so it never competes with drawing. */
