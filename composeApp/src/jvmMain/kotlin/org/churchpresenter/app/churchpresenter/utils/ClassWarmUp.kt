@@ -96,7 +96,16 @@ internal val WARM_CLASSES = listOf(
     "org.churchpresenter.serverui.ServerClientsCardKt",
     "org.churchpresenter.serverui.CompanionTriggersCardKt",
     "org.churchpresenter.serverui.CalendarSyncCardKt",
-    // The song editor's Output pane: its preview, the song's own look and the font picker in it.
+    // The song editor: every file of the dialog, its Output pane and the font picker in it.
+    "org.churchpresenter.songs.EditSongDialogKt",
+    "org.churchpresenter.songs.EditSongEditorKt",
+    "org.churchpresenter.songs.EditSongHeaderKt",
+    "org.churchpresenter.songs.EditSongStateKt",
+    "org.churchpresenter.songs.EditSongTextKt",
+    "org.churchpresenter.songs.EditSongLyricsFieldKt",
+    "org.churchpresenter.songs.EditSongCueFieldKt",
+    "org.churchpresenter.songs.EditSongOrderKt",
+    "org.churchpresenter.songs.EditSongOrderPaneKt",
     "org.churchpresenter.songs.EditSongOutputPreviewKt",
     "org.churchpresenter.songs.EditSongLookKt",
     "org.churchpresenter.sharedui.composables.FontSettingsDropdownKt",
