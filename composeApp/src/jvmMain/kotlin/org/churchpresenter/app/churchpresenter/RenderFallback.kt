@@ -60,19 +60,28 @@ internal fun renderFallbackFile(dataDir: File): File = File(dataDir, FALLBACK_FI
 internal fun renderFallbackGpu(): String? = runCatching { GpuInfo.crashTags()["gpu.adapter"] }.getOrNull()
 
 /** Blocks until the app this one replaces has exited, so it has let go of its lock and ports. */
-internal fun awaitReplacedProcess(args: Array<String>) {
+internal fun awaitReplacedProcess(args: Array<String>, timeoutSeconds: Long = REPLACED_EXIT_WAIT_SECONDS) {
     val pid = replacedPid(args) ?: return
     ProcessHandle.of(pid).ifPresent { handle ->
-        runCatching { handle.onExit().get(REPLACED_EXIT_WAIT_SECONDS, TimeUnit.SECONDS) }
+        runCatching { handle.onExit().get(timeoutSeconds, TimeUnit.SECONDS) }
     }
 }
+
+/** [base] with this process's [pid] as the one to replace, in place of any it already carried. */
+internal fun replacingCommand(base: List<String>, pid: Long): List<String> =
+    base.filterNot { it.startsWith(REPLACING_PID_ARGUMENT) } + "$REPLACING_PID_ARGUMENT$pid"
 
 /**
  * Saves [api] for this GPU, starts the app again and exits. Called once the main window has drawn,
  * before anything is live. A failed save or start keeps this session running on what it has.
  */
-internal fun switchRenderApiAndRelaunch(api: String, actual: String, dataDir: File) {
-    val gpu = renderFallbackGpu()
+internal fun switchRenderApiAndRelaunch(
+    api: String,
+    actual: String,
+    dataDir: File,
+    gpu: String? = renderFallbackGpu(),
+    relaunch: (List<String>) -> Unit = ::replaceThisProcess,
+) {
     try {
         saveRenderFallback(renderFallbackFile(dataDir), api, gpu)
     } catch (e: IOException) {
@@ -83,14 +92,16 @@ internal fun switchRenderApiAndRelaunch(api: String, actual: String, dataDir: Fi
         "Render API fell back to OpenGL; switching to software",
         tags = mapOf("render.api.actual" to actual, "render.fallback" to api),
     )
-    val command = relaunchCommand().filterNot { it.startsWith(REPLACING_PID_ARGUMENT) } +
-        "$REPLACING_PID_ARGUMENT${ProcessHandle.current().pid()}"
     try {
-        ProcessBuilder(command).inheritIO().start()
+        relaunch(replacingCommand(relaunchCommand(), ProcessHandle.current().pid()))
     } catch (e: IOException) {
         Log.warn("Startup", "Could not restart with $api drawing: ${e.message}")
-        return
     }
-    Log.warn("Startup", "Skiko settled on $actual; restarting with $api drawing")
+}
+
+/** Starts [command] and exits this process, which the new one waits for. */
+private fun replaceThisProcess(command: List<String>) {
+    ProcessBuilder(command).inheritIO().start()
+    Log.warn("Startup", "Restarting with a different render API")
     exitProcess(0)
 }
