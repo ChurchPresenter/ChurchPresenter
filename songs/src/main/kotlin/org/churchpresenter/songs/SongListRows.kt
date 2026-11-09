@@ -321,30 +321,38 @@ private fun SongListScope.SongDataCell(
     Box(modifier = Modifier.width(6.dp))
 }
 
-/** A cell's full [text] in a tooltip under it, on hover; nothing when [text] is empty. */
+/** Where every cell's tooltip opens: one instance for the whole list, not one per cell composed. */
+private val SongCellTooltipPlacement = TooltipPlacement.ComponentRect(
+    anchor = Alignment.BottomStart,
+    offset = DpOffset(0.dp, 4.dp)
+)
+
+/**
+ * A cell's full [text] in a tooltip under it, on hover; nothing when [text] is empty. An empty cell
+ * gets no tooltip area at all -- it would show nothing, and each one costs every row composed.
+ */
 @Composable
 private fun SongCellTooltip(text: String, content: @Composable () -> Unit) {
+    if (text.isEmpty()) {
+        content()
+        return
+    }
     TooltipArea(
         tooltip = {
-            if (text.isNotEmpty()) {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp
-                ) {
-                    Text(
-                        text,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp
+            ) {
+                Text(
+                    text,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomStart,
-            offset = DpOffset(0.dp, 4.dp)
-        ),
+        tooltipPlacement = SongCellTooltipPlacement,
         content = content,
     )
 }
