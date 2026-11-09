@@ -37,6 +37,9 @@ import org.churchpresenter.diagnostics.Logger
  *   creation* only, so a fault during `swapBuffers` never triggers it — the default has to be right
  *   rather than recoverable.
  *
+ * [saved] is what the app switched itself to after a first frame on a bad rung (RenderFallback.kt);
+ * it replaces the platform default, and [override] still wins over it.
+ *
  * [override] is the operator's escape hatch, so a machine that does worse on the platform default
  * has a way out without waiting for a build. It is taken when this platform can run it and ignored,
  * with a warning to [log], when it cannot: skiko rejects an API outside the platform's
@@ -45,18 +48,24 @@ import org.churchpresenter.diagnostics.Logger
  *
  * Matched on the name rather than a platform enum because that is what the property carries.
  */
-internal fun preferredRenderApi(osName: String, override: String?, log: Logger = Log): String? {
+internal fun preferredRenderApi(
+    osName: String,
+    override: String?,
+    log: Logger = Log,
+    saved: String? = null,
+): String? {
     val name = osName.lowercase()
     val (platformDefault, supported) = when {
         name.contains("mac") -> "METAL" to MAC_RENDER_APIS
         name.contains("win") -> null to WINDOWS_RENDER_APIS
         else -> "OPENGL" to OTHER_RENDER_APIS
     }
+    val fallback = saved?.trim()?.uppercase()?.takeIf { it in supported } ?: platformDefault
     val requested = override?.trim()?.uppercase()
-    if (requested.isNullOrEmpty()) return platformDefault
+    if (requested.isNullOrEmpty()) return fallback
     if (requested in supported) return requested
     log.warn("Startup", "Render API override $requested is not supported on $osName; using the platform default")
-    return platformDefault
+    return fallback
 }
 
 /*

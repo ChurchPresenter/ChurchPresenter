@@ -208,7 +208,10 @@ private fun turnOffLinuxVsync() {
 
 private fun setLatchedSystemProperties() {
     // Skiko latches this on its first SkiaLayer, so a later set is ignored.
-    preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
+    val osName = System.getProperty("os.name", "")
+    // Only Windows ever writes one (renderFallbackAfterFirstFrame).
+    val saved = savedRenderFallback(renderFallbackFile(AppDataDir.resolve()), renderFallbackGpu())
+    preferredRenderApi(osName, DevFlags.renderApiOverride, saved = saved)?.let {
         System.setProperty("skiko.renderApi", it)
     }
     // A Store (MSIX) install's %TEMP% cannot hold the AF_UNIX socket the JDK's Windows selector
@@ -222,6 +225,8 @@ fun main(args: Array<String>) {
     // Before anything can touch AWT, the output guard included; see initXlibThreads.
     initXlibThreads()
     if (runAsOutputGuard(args)) return
+    // Started by switchRenderApiAndRelaunch: the copy it replaces still holds the lock until it exits.
+    awaitReplacedProcess(args)
     setLatchedSystemProperties()
     // Off unless the startup benchmark asked for it; see StartupProbe.
     StartupProbe.mainStarted(exit = { exitProcess(STARTUP_PROBE_NO_FRAME_EXIT) })
