@@ -67,6 +67,7 @@ import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -245,6 +246,15 @@ private fun AppRootState.MainWindow(
             // stall groups on it.
             CrashReporter.setTag("render.api.actual", window.renderApi.name)
             uiStallReporter.renderApi(window.renderApi.name)
+            // Windows only: skiko fell to OpenGL on its own, whose old drivers crash in swapBuffers.
+            val actualApi = window.renderApi.name
+            renderFallbackAfterFirstFrame(
+                osName = System.getProperty("os.name", ""),
+                requested = System.getProperty("skiko.renderApi"),
+                actual = actualApi,
+            )?.let { api ->
+                withContext(Dispatchers.IO) { switchRenderApiAndRelaunch(api, actualApi, AppDataDir.resolve()) }
+            }
             // Each string's first stringResource reads the jar on this thread; read them all now, off it.
             withContext(Dispatchers.IO) { warmStrings() }
             // Then the classes behind the settings pages, profiles, outputs and server, loaded off
