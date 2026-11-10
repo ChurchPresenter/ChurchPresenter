@@ -10,7 +10,9 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -145,6 +147,37 @@ class CompanionServerSignageTest {
             hub.reject("player-1")
             assertEquals(ServerMessage.PairingRejected, hear())
         }
+    }
+
+    @Test
+    fun aRemovedPlayerIsTurnedAwayWithTryAgainLaterAndNeverListed() = runBlocking<Unit> {
+        hub.pairing.hold("player-1", "Lobby")
+        client.webSocket(urlString = "ws://127.0.0.1:$port/api/signage/ws") {
+            say(hello())
+            assertEquals(null, hear(), "closed without a pairing_pending")
+            assertEquals(CloseReason.Codes.TRY_AGAIN_LATER.code, closeReason.await()?.code)
+        }
+        assertEquals(emptyList(), hub.pairing.pending.value)
+    }
+
+    @Test
+    fun aScreenRemovedWhileAwayIsHeldBackWhenItsOldTokenIsRefused() = runBlocking<Unit> {
+        val token = paired()
+        hub.revoke("player-1")
+        hub.pairing.release("player-1")
+        assertEquals(401, client.get(url("/manifest")) { bearerAuth(token) }.status.value)
+        assertTrue(hub.pairing.isHeld("player-1"))
+    }
+
+    @Test
+    fun aWaitingPlayerThatHangsUpStopsBeingListed() = runBlocking<Unit> {
+        client.webSocket(urlString = "ws://127.0.0.1:$port/api/signage/ws") {
+            say(hello())
+            assertEquals(ServerMessage.PairingPending("4821"), hear())
+            withTimeout(WAIT_MS) { hub.pairing.pending.first { it.isNotEmpty() } }
+            close()
+        }
+        withTimeout(WAIT_MS) { hub.pairing.pending.first { it.isEmpty() } }
     }
 
     @Test

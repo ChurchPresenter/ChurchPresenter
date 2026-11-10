@@ -4071,6 +4071,9 @@
     <string name="signage_new_screen">A new screen wants to join</string>
     <string name="signage_new_screen_hint">Approve only if the TV shows this same code.</string>
     <string name="signage_approve">Approve</string>
+    <string name="signage_held_screen">%1$s was removed</string>
+    <string name="signage_held_screen_hint">It is held back for a few minutes so another computer can pick it up. Pair it here instead if you changed your mind.</string>
+    <string name="signage_pair_here">Pair here</string>
     <string name="signage_decline">Decline</string>
     <string name="signage_default_name">Screen %1$d</string>
     <string name="signage_online">Online</string>
@@ -4196,6 +4199,8 @@
     <string name="signage_choose_file">Choose a picture or video</string>
     <string name="signage_file_title_edit">Edit picture or video</string>
     <string name="signage_file_change">Change file…</string>
+    <string name="signage_folder_change">Change…</string>
+    <string name="signage_locate">Locate…</string>
     <string name="signage_pictures_and_videos">Pictures and videos</string>
     <string name="signage_link_title">Add a link</string>
     <string name="signage_link_title_edit">Edit link</string>

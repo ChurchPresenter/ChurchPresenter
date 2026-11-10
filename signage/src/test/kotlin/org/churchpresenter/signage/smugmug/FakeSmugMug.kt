@@ -14,6 +14,7 @@ import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.io.path.writeText
 
 /** A gallery the fake account has: its key, name, photos, and how a visitor sees it. */
@@ -41,11 +42,11 @@ class FakeSmugMug(
     private val domain: String = "photos.example.org",
     private val pageSize: Int = 2,
 ) : SmugMugHttp {
-    /** Every URL asked for, in order. */
-    val asked = mutableListOf<String>()
+    /** Every URL asked for, in order. Safe to add to from the sync's parallel downloads. */
+    val asked: MutableList<String> = CopyOnWriteArrayList()
 
-    /** Every photo downloaded, by its URL. */
-    val downloads = mutableListOf<String>()
+    /** Every photo downloaded, by its URL; added to by several downloads at once. */
+    val downloads: MutableList<String> = CopyOnWriteArrayList()
 
     /** When set, every request fails with it. */
     var failure: IOException? = null

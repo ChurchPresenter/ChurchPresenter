@@ -96,6 +96,9 @@ class SignageController(
     /** The paired screens, the players asking to join, and the screens connected now. */
     val screens: StateFlow<List<PairedScreen>> = hub.registry.screens
     val pending: StateFlow<List<PendingScreen>> = hub.pairing.pending
+
+    /** The screens removed from here a moment ago, held back so another ChurchPresenter can take them. */
+    val holds = HeldScreens(hub.pairing)
     val links: StateFlow<Map<String, ScreenLink>> = hub.links.links
 
     /** Approving, declining, renaming, identifying, previewing and updating screens: what needs no folder. */

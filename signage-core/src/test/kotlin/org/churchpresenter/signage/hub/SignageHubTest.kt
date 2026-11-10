@@ -114,6 +114,43 @@ class SignageHubTest {
     }
 
     @Test
+    fun aPlayerThatCanResetItselfIsToldToWhenRemovedAndHeldBack() = runTest {
+        pairedAndConnected(features = listOf(Features.FACTORY_RESET))
+        val sent = async { hub.links.messagesFor("player-1").first() }
+        runCurrent()
+        hub.revoke("player-1")
+        assertEquals(ServerMessage.FactoryReset, sent.await())
+        assertTrue(hub.pairing.isHeld("player-1"))
+        val held = hub.pairing.held.value.single()
+        assertEquals("Lobby" to "10.0.0.5", held.name to held.address)
+    }
+
+    @Test
+    fun aScreenRemovedWhileAwayIsHeldWhenItComesBackWithItsOldToken() = runTest {
+        hub.registry.load()
+        val token = hub.registry.pair(pending(), "Lobby")
+        hub.revoke("player-1")
+        hub.pairing.release("player-1")
+        assertFalse(hub.refusedToken("not a token", "10.0.0.7"))
+        assertTrue(hub.refusedToken(token, "10.0.0.7"))
+        assertEquals("10.0.0.7", hub.pairing.held.value.single().address)
+        assertFalse(hub.refusedToken(token, "10.0.0.7"), "only the first time")
+    }
+
+    @Test
+    fun releasingTheHoldLetsARemovedPlayerBePairedHereAgain() = runTest {
+        pairedAndConnected()
+        hub.revoke("player-1")
+        assertTrue(hub.pairing.release("player-1"))
+        assertFalse(hub.pairing.isHeld("player-1"))
+    }
+
+    @Test
+    fun anUnpairedPlayerThatIsNotHeldIsNotTurnedAway() {
+        assertFalse(hub.pairing.isHeld("player-1"))
+    }
+
+    @Test
     fun anUpdateIsDownloadedHereThenOfferedWithTheSignedRelease() = runTest {
         pairedAndConnected()
         updates.check()

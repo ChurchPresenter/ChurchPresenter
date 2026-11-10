@@ -59,6 +59,7 @@ class AddPlaylistUiTest {
     private val linkEdits = mutableListOf<Pair<String, NewLink>>()
     private val fileEdits = mutableListOf<Triple<String, String, String?>>()
     private val folderEdits = mutableListOf<Pair<String, String>>()
+    private val folderMoves = mutableListOf<Triple<String, String, String>>()
     private val removed = mutableListOf<String>()
     private val rotations = mutableListOf<String>()
 
@@ -74,7 +75,13 @@ class AddPlaylistUiTest {
             onAddFolder = { folders += it.toString() },
             onEditLink = { id, link -> linkEdits += id to link },
             onEditFile = { id, name, file -> fileEdits += Triple(id, name, file?.toString()) },
-            onEditFolder = { id, name, seconds -> folderEdits += id to "$name $seconds" },
+            onEditFolder = { id, name, seconds, folder ->
+                if (folder == null) {
+                    folderEdits += id to "$name $seconds"
+                } else {
+                    folderMoves += Triple(id, "$name $seconds", folder.toString())
+                }
+            },
             onLocate = { id -> LOCATED.takeIf { id == "dir:1" } },
             onRemove = { removed += it },
             onAddRotation = { name, steps -> rotations += "add $name ${steps.size}" },
@@ -239,6 +246,38 @@ class AddPlaylistUiTest {
     }
 
     @Test
+    fun aMissingFileOrFolderIsLocatedUnderItsOwnIdAndName() = panel(FakeDesktop(chosen = NEW_FILE)) {
+        // Only the two missing rows offer it.
+        onAllNodesWithText("Locate…").assertCountEquals(2)
+        onAllNodesWithText("Locate…")[0].performClick()
+        waitUntil { fileEdits.isNotEmpty() }
+        onAllNodesWithText("Locate…")[1].performClick()
+        waitUntil { folderMoves.isNotEmpty() }
+        val located = Triple<String, String, String?>("file:1", "Old flyer", NEW_FILE.toString())
+        assertEquals(listOf(located), fileEdits)
+        assertEquals(listOf(Triple("dir:2", "Old event 10", NEW_FILE.toString())), folderMoves)
+    }
+
+    @Test
+    fun locatingNothingChangesNothing() = panel(FakeDesktop(chosen = null)) {
+        onAllNodesWithText("Locate…")[1].performClick()
+        waitForIdle()
+        assertEquals(emptyList(), folderMoves)
+    }
+
+    @Test
+    fun aFolderIsPointedAtAnotherFolderWithItsNameAndSeconds() = panel(FakeDesktop(chosen = NEW_FOLDER)) {
+        onAllNodesWithContentDescription("Edit folder")[1].performClick()
+        onNodeWithText("Change…").performClick()
+        waitUntil { onAllNodesWithText(NEW_FOLDER.toString()).fetchSemanticsNodes().isNotEmpty() }
+        // The folder it plays until saved is no longer the one shown, so it is not opened from here.
+        onNodeWithText("Open folder").assertIsNotEnabled()
+        onNodeWithText("Save").performClick()
+        assertEquals(listOf(Triple("dir:1", "Lobby 8", NEW_FOLDER.toString())), folderMoves)
+        assertEquals(emptyList(), folderEdits)
+    }
+
+    @Test
     fun aFolderWhoseCopyCannotBeFoundHasNothingToOpen() = panel(FakeDesktop()) {
         onAllNodesWithContentDescription("Edit folder")[2].performClick()
         onNodeWithText("Open folder").assertIsNotEnabled()
@@ -282,5 +321,6 @@ class AddPlaylistUiTest {
     private companion object {
         val LOCATED = Path("/signage/Folders/Lobby")
         val NEW_FILE = Path("/pictures/new.jpg")
+        val NEW_FOLDER = Path("/pictures/Youth")
     }
 }

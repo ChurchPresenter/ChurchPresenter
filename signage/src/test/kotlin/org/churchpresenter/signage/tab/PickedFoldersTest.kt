@@ -119,6 +119,34 @@ class PickedFoldersTest {
     }
 
     @Test
+    fun aFolderPlaylistCanBePointedAtAnotherFolderAndKeepsItsId() = runBlocking {
+        world.original("Events/flyer.png")
+        val other = world.original("Youth/poster.png")
+        controller.start()
+        controller.added.addFolder(world.root.resolve("pictures/Events"))
+        val id = listed { it.size == 1 }.single().id
+        controller.added.updateFolder(id, "Events", 12, other.parent)
+        listed { list -> list.any { it.detail == "Folders/Youth" } }
+        assertEquals(listOf(PickedFolderPlaylist(id, "Events", "Folders/Youth", pictureSeconds = 12)), saved())
+        awaitGone(signage.resolve("Folders/Events"))
+        assertTrue(world.root.resolve("pictures/Events/flyer.png").exists(), "the original stays")
+    }
+
+    @Test
+    fun aMissingFolderIsLocatedAgainUnderTheSameId() = runBlocking {
+        world.original("Events/flyer.png")
+        controller.start()
+        controller.added.addFolder(world.root.resolve("pictures/Events"))
+        val id = listed { it.size == 1 }.single().id
+        signage.resolve("Folders/Events").toFile().deleteRecursively()
+        listed { list -> list.single().missing }
+        val seconds = PickedFolderPlaylist.DEFAULT_PICTURE_SECONDS
+        controller.added.updateFolder(id, "Events", seconds, world.root.resolve("pictures/Events"))
+        listed { list -> list.single().let { !it.missing && it.pictures == 1 } }
+        assertEquals(id, saved().single().id)
+    }
+
+    @Test
     fun removingAPlaylistRemovesItsCopyButNotTheOriginal() = runBlocking {
         val original = world.original("Events/flyer.png")
         controller.start()

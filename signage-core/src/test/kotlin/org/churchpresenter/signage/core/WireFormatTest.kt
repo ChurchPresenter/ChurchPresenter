@@ -63,6 +63,7 @@ class WireFormatTest {
             ServerMessage.Paired("t", "o", "Main PC"),
             ServerMessage.PairingRejected,
             ServerMessage.Released,
+            ServerMessage.FactoryReset,
             ServerMessage.ManifestChanged("v"),
             ServerMessage.SetOverride(ScreenOverride(OverrideAction.Play("welcome"), Until.Time(5), 1)),
             ServerMessage.SetOverride(null),
@@ -117,5 +118,15 @@ class WireFormatTest {
         assertTrue(isSha256Hex(sha256Hex("x".toByteArray())))
         assertFalse(isSha256Hex("../../etc/passwd"))
         assertFalse(isSha256Hex("A".repeat(64)))
+    }
+
+    @Test
+    fun aKnockForAPlayerCarriesItsIdHashedAndAnOldKnockStillReads() {
+        val invite = Nudge(nudgeOwner("owner-1"), 8765, player = nudgePlayer("player-1"))
+        val text = SignageJson.encodeToString(Nudge.serializer(), invite)
+        assertTrue("player-1" !in text, "the id itself is not sent")
+        assertEquals(invite, SignageJson.decodeFromString(Nudge.serializer(), text))
+        val old = SignageJson.decodeFromString(Nudge.serializer(), """{"owner":"abc","port":8765}""")
+        assertEquals(null, old.player)
     }
 }

@@ -157,6 +157,7 @@ fun SignageTab(
                             ScreenRowState(screen, link, folder, offer, lookingSinceMs)
                         },
                         pendingCards = {
+                            HeldScreenCards(controller.holds)
                             pending.forEach { player ->
                                 PendingScreenCard(
                                     player = player,
@@ -303,7 +304,8 @@ internal class FolderActions(
     val onEditLink: (id: String, link: NewLink) -> Unit = { _, _ -> },
     /** Renames a file playlist, and plays a copy of the file chosen, if one was. */
     val onEditFile: (id: String, name: String, file: Path?) -> Unit = { _, _, _ -> },
-    val onEditFolder: (id: String, name: String, pictureSeconds: Int) -> Unit = { _, _, _ -> },
+    /** Renames a folder playlist and sets its seconds per picture; plays the folder chosen instead, if one was. */
+    val onEditFolder: (id: String, name: String, pictureSeconds: Int, folder: Path?) -> Unit = { _, _, _, _ -> },
     /** Where a playlist's copy is on this computer, to open it in the file manager. */
     val onLocate: (id: String) -> Path? = { null },
     /** Adds a SmugMug slideshow, or saves one edited under its id. */

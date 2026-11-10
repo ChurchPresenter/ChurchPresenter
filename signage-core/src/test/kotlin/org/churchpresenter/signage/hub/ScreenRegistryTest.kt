@@ -146,4 +146,32 @@ class ScreenRegistryTest {
     private companion object {
         const val SCREENS = 20
     }
+
+    @Test
+    fun aRemovedScreenIsKnownByItsOldTokenOnceAndOnlyForAWhile() = runTest {
+        var now = 1_000L
+        val registry = ScreenRegistry(file, scope, clock = { now }, random = SecureRandom())
+        registry.load()
+        val pending = PendingScreen("player-1", "1234", Platform.LINUX_ARM64, "26.0.32", 1920, 1080, "10.0.0.9")
+        val token = registry.pair(pending, "Lobby")
+        assertNull(registry.removed.take(token), "still paired")
+        registry.remove("player-1")
+        assertNull(registry.removed.take("another token"))
+
+        scope.settle()
+        val reread = ScreenRegistry(file, scope, clock = { now }, random = SecureRandom()).also { it.load() }
+        assertEquals("Lobby", reread.removed.take(token)?.name, "kept on disk")
+        assertEquals("player-1", registry.removed.take(token)?.id)
+        assertNull(registry.removed.take(token), "taken once")
+
+        val again = registry.pair(pending, "Lobby")
+        registry.remove("player-1")
+        registry.pair(pending, "Lobby")
+        assertNull(registry.removed.take(again), "paired again")
+
+        val last = registry.pair(pending, "Lobby")
+        registry.remove("player-1")
+        now += ScreenRegistry.REMOVED_KEEP_MS
+        assertNull(registry.removed.take(last), "past its keeping")
+    }
 }

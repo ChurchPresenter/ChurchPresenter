@@ -23,12 +23,19 @@ const val NUDGE_PORT = 47640
  * "This ChurchPresenter is up at [port]", sent over UDP to [NUDGE_PORT] at a paired screen's last
  * address while the screen is away. [owner] is [nudgeOwner] of the sender's owner id: a screen
  * acts only on its own owner's nudge, and even then only by connecting, where its token is checked.
+ *
+ * [player], when set, is [nudgePlayer] of an unpaired player's id: "come and pair here", sent when
+ * someone presses Pair here on a screen this ChurchPresenter removed. Only an unpaired player whose
+ * id it names acts on it, by connecting there, where pairing still needs approval with its code.
  */
 @Serializable
-data class Nudge(val owner: String, val port: Int)
+data class Nudge(val owner: String, val port: Int, val player: String? = null)
 
 /** An owner id as a [Nudge] carries it: enough to recognise, not the id itself. */
 fun nudgeOwner(ownerId: String): String = sha256Hex(ownerId.toByteArray()).take(NUDGE_OWNER_CHARS)
+
+/** A player id as a [Nudge] carries it. */
+fun nudgePlayer(playerId: String): String = nudgeOwner(playerId)
 
 private const val NUDGE_OWNER_CHARS = 16
 
