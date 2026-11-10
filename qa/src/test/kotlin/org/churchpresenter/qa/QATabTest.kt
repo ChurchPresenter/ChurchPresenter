@@ -157,6 +157,8 @@ class QATabTest {
         assertFalse(qa.sessionActive, "closed to begin with")
 
         clickQaLabel(QALabel.NEW_SESSION)
+        assertFalse(qa.sessionActive, "naming it comes first")
+        clickQaLabel(QALabel.START_SESSION)
         assertTrue(qa.sessionActive, "open for questions")
 
         clickQaLabel(QALabel.STOP_SESSION)

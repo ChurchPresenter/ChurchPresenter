@@ -3,7 +3,9 @@
 package org.churchpresenter.qa.screenshot
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
@@ -54,7 +56,14 @@ class QATabScreenshotTest {
     fun `no session started yet`() = shoot("no_session")
 
     @Test
-    fun `a session open with nothing asked yet`() = shoot("session_waiting", seed = { toggleSession() })
+    fun `a session open with nothing asked yet`() = shoot("session_waiting", seed = { open() })
+
+    /** The name is typed over the start time the dialog offers, which would change every minute. */
+    @Test
+    fun `naming a new session`() = shoot("new_session_dialog", rootIndex = 1) {
+        clickQaLabel(QALabel.NEW_SESSION)
+        onAllNodes(hasSetTextAction())[0].performTextReplacement(SESSION_NAME)
+    }
 
     /** No server means no QR code and nowhere for a phone to post — the tab says so. */
     @Test
@@ -149,7 +158,24 @@ class QATabScreenshotTest {
     @Test
     fun `a finished session waiting to be resumed`() = shoot("history", seed = {
         asked()
-        toggleSession()
+        stopSession(now = SESSION_START + SESSION_LENGTH)
+    })
+
+    @Test
+    fun `the finished sessions in the history`() = shoot("history_open", seed = { twoSessions() }) {
+        clickQaLabel("${QALabel.HISTORY} (2)")
+    }
+
+    @Test
+    fun `picking a finished session to resume`() = shoot("resume_menu", seed = { twoSessions() }, rootIndex = 1) {
+        clickQaLabel(QALabel.RESUME)
+    }
+
+    @Test
+    fun `a long question, and a sender who gave a name`() = shoot("long_question", seed = {
+        open()
+        submitQuestion(LONG_QUESTION, clientIp = "10.0.0.1", timestamp = SESSION_START)
+        submitQuestion(QUESTIONS[0], name = "Anna", clientIp = "10.0.0.2", timestamp = SESSION_START + 60_000L)
     })
 
     @Test
@@ -169,7 +195,7 @@ class QATabScreenshotTest {
 
     /** Four questions as a congregation would send them, at fixed minutes past a fixed hour. */
     private fun QAManager.ask() {
-        if (!sessionActive) toggleSession()
+        if (!sessionActive) open()
         QUESTIONS.forEachIndexed { index, text ->
             // A distinct IP per question: the manager rate-limits repeat submissions from one device.
             submitQuestion(text, clientIp = "10.0.0.${index + 1}", timestamp = SESSION_START + index * 60_000L)
@@ -184,6 +210,20 @@ class QATabScreenshotTest {
         questions.first { it.text == QUESTIONS[3] }.let { denyQuestion(it.id) }
     }
 
+    /** A session under a fixed name and start: an unnamed one is named for the wall clock. */
+    private fun QAManager.open() = startSession(SESSION_NAME, now = SESSION_START)
+
+    /** Two finished sessions, so the history and the resume menu have a choice to offer. */
+    private fun QAManager.twoSessions() {
+        startSession("Morning service", now = SESSION_START)
+        submitQuestion(QUESTIONS[0], clientIp = "10.0.0.1", timestamp = SESSION_START)
+        stopSession(now = SESSION_START + SESSION_LENGTH)
+        startSession("Evening service", now = SESSION_START + 2 * SESSION_LENGTH)
+        submitQuestion(QUESTIONS[1], clientIp = "10.0.0.2", timestamp = SESSION_START + 2 * SESSION_LENGTH)
+        submitQuestion(QUESTIONS[2], clientIp = "10.0.0.3", timestamp = SESSION_START + 2 * SESSION_LENGTH + 60_000L)
+        stopSession(now = SESSION_START + 3 * SESSION_LENGTH)
+    }
+
     /** Approved questions carrying different vote counts, so an ordering by votes has something to do. */
     private fun QAManager.voted() {
         ask()
@@ -195,6 +235,15 @@ class QATabScreenshotTest {
 
     private companion object {
         const val SECTION = "qaTab"
+        const val SESSION_NAME = "Sunday service"
+        const val SESSION_LENGTH = 3_600_000L
+        val LONG_QUESTION = listOf(
+            "Could you say more about the small groups?",
+            "When do they meet, and where?",
+            "Is there childcare during the evening ones?",
+            "Можно ли присоединиться в середине семестра?",
+            "And who do we contact to sign up?",
+        ).joinToString("\n")
 
         /** 2026-08-08 10:30 local time — a fixed instant, so every row's `HH:mm` is fixed too. */
         const val SESSION_START = 1_786_530_600_000L

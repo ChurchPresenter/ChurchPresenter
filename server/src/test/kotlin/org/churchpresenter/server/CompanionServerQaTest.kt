@@ -117,6 +117,7 @@ class CompanionServerQaTest {
         qaStateFile.delete()
         server.qaManager = null
         server.qaAdminPassword = ""
+        server.qaAdminPasswordTrusted = false
         server.qaVotingEnabled = false
         server.qaCooldownSeconds = 0
     }
@@ -242,6 +243,17 @@ class CompanionServerQaTest {
         assertEquals("true", status.getValue("sessionActive").jsonPrimitive.content)
         assertEquals(45, status.int("cooldownSeconds"), "the phone counts its own cooldown from this")
         assertEquals("true", status.getValue("votingEnabled").jsonPrimitive.content)
+    }
+
+    @Test
+    fun `the status endpoint names the running session, quoted safely`() {
+        assertEquals("", get("/api/qa/status").obj().str("sessionName"), "no session, no name")
+
+        val qa = openSession()
+        qa.stopSession()
+        qa.startSession("Sunday \"evening\" service")
+
+        assertEquals("Sunday \"evening\" service", get("/api/qa/status").obj().str("sessionName"))
     }
 
     // ── Submitting ──────────────────────────────────────────────────────────────
@@ -794,6 +806,33 @@ class CompanionServerQaTest {
         // had to be raised before the response, and was not. Nothing here waits on a duration.
         assertEquals(HttpStatusCode.Unauthorized, response.status)
         assertTrue(prompts.isEmpty(), "the operator must not be shown a device that failed the gate")
+    }
+
+    @Test
+    fun `the Q&A page's own password lets a device in without asking the desk`() {
+        server.qaAdminPassword = "let-me-in"
+        server.qaAdminPasswordTrusted = true
+        val prompts = playConnectOperator()
+
+        val response = post("/api/qa/auth", password = "let-me-in", deviceId = "moderator-phone")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(prompts.isEmpty(), "knowing the Q&A password is the operator's approval")
+    }
+
+    @Test
+    fun `with the Q&A page's own password moderating asks the desk nothing`() {
+        val qa = openSession()
+        server.qaAdminPassword = "let-me-in"
+        server.qaAdminPasswordTrusted = true
+        val prompts = playOperator()
+        val id = submit("Where is the nursery?").obj().str("id")
+
+        val response = post("/api/qa/questions/$id/approve", password = "let-me-in")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals("APPROVED", qa.findQuestion(id)?.status?.name)
+        assertTrue(prompts.isEmpty(), "each action is allowed without a dialog on the desk")
     }
 
     @Test

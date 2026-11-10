@@ -278,7 +278,7 @@ class QAManagerTest {
         qa.toggleSession() // close
         assertFalse(qa.sessionActive)
         assertTrue(qa.questions.isEmpty(), "the live queue should empty when the session closes")
-        assertEquals(1, qa.history.size, "closed-out questions belong in history")
+        assertEquals(1, qa.archived.size, "closed-out questions belong in history")
         assertNull(qa.displayedQuestion, "closing the session must clear the screen")
     }
 
@@ -295,16 +295,16 @@ class QAManagerTest {
     }
 
     @Test
-    fun `restoreFromHistory brings an archived session back and reopens it`() {
+    fun `resumeSession brings an archived session back and reopens it`() {
         val qa = openSession()
         qa.submitQuestion("Q1")
         qa.submitQuestion("Q2")
         qa.toggleSession() // close, archiving both
-        assertEquals(2, qa.history.size)
+        assertEquals(2, qa.archived.size)
 
-        qa.restoreFromHistory()
+        qa.resumeNewest()
         assertEquals(2, qa.questions.size)
-        assertTrue(qa.history.isEmpty())
+        assertTrue(qa.archived.isEmpty())
         assertTrue(qa.sessionActive, "restoring should leave the session usable")
     }
 
@@ -318,10 +318,10 @@ class QAManagerTest {
 
         qa.clearAll()
         assertTrue(qa.questions.isEmpty())
-        assertEquals(1, qa.history.size, "clearAll must not touch history")
+        assertEquals(1, qa.archived.size, "clearAll must not touch history")
 
         qa.clearHistory()
-        assertTrue(qa.history.isEmpty())
+        assertTrue(qa.archived.isEmpty())
     }
 
     // ── Voting ──────────────────────────────────────────────────────────────────

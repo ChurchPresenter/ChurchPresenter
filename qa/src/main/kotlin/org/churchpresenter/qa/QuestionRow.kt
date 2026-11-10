@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,6 +53,9 @@ import org.churchpresenter.strings.generated.resources.qa_done
 import org.churchpresenter.strings.generated.resources.qa_edit_question_hint
 import org.churchpresenter.strings.generated.resources.qa_submitter_device
 import org.churchpresenter.strings.generated.resources.save
+import org.churchpresenter.strings.generated.resources.qa_show_less
+import org.churchpresenter.strings.generated.resources.qa_show_more
+import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.strings.generated.resources.tooltip_edit
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.elevationPalette
@@ -66,6 +71,7 @@ private const val DISPLAYED_ROW_ALPHA = 0.35f
 private const val HINT_ALPHA = 0.5f
 private const val QUESTION_MAX_LINES = 3
 private const val EDIT_MAX_LINES = 5
+private val SENDER_COLUMN_WIDTH = 72.dp
 
 /** What a question's buttons do; each acts on the one question the row shows. */
 internal class QuestionActions(
@@ -122,12 +128,24 @@ internal fun QuestionRow(
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(8.dp).clip(AppShape(4.dp)).background(statusColor))
             Spacer(Modifier.width(8.dp))
-            Text(
-                text = timeFormat.format(Date(question.timestamp)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(50.dp)
-            )
+            // The sender's name sits under the time, so every question starts at the same place
+            // whether or not its sender gave one.
+            Column(modifier = Modifier.width(SENDER_COLUMN_WIDTH)) {
+                Text(
+                    text = timeFormat.format(Date(question.timestamp)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (question.submitterName.isNotBlank()) {
+                    Text(
+                        text = question.submitterName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
             if (!state.editing) {
                 VoteBadges(question)
@@ -196,7 +214,7 @@ private fun StatusLabel(status: QuestionStatus, color: Color) {
     )
 }
 
-/** Who sent the question, if they said, and the question itself; the device is in the tooltip. */
+/** The question itself; who sent it, in full, and their device are in the tooltip. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SubmitterText(question: Question, modifier: Modifier) {
@@ -208,25 +226,41 @@ private fun SubmitterText(question: Question, modifier: Modifier) {
         ),
         modifier = modifier
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (question.submitterName.isNotBlank()) {
+        ExpandableQuestionText(question, Modifier.fillMaxWidth().padding(horizontal = 4.dp))
+    }
+}
+
+/**
+ * The question, shown whole, with Show less under it when it runs past [QUESTION_MAX_LINES] to cut
+ * it to that; the line breaks the sender typed are kept.
+ */
+@Composable
+private fun ExpandableQuestionText(question: Question, modifier: Modifier) {
+    var expanded by remember(question.id) { mutableStateOf(true) }
+    var overflows by remember(question.id, question.text) { mutableStateOf(false) }
+    Column(modifier = modifier) {
+        Text(
+            text = question.text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = if (expanded) Int.MAX_VALUE else QUESTION_MAX_LINES,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { layout ->
+                overflows = if (expanded) layout.lineCount > QUESTION_MAX_LINES else layout.hasVisualOverflow
+            }
+        )
+        if (overflows) {
+            GhostButton(
+                onClick = { expanded = !expanded },
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                modifier = Modifier.heightIn(min = 24.dp)
+            ) {
                 Text(
-                    text = question.submitterName,
+                    stringResource(if (expanded) Res.string.qa_show_less else Res.string.qa_show_more),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 4.dp),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
-            Text(
-                text = question.text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
-                maxLines = QUESTION_MAX_LINES,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }

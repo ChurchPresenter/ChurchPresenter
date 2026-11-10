@@ -170,7 +170,7 @@ internal fun appPreview(
                             appSettings = appSettings,
                             presenterManager = presenterManager,
                             companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                            qaManager = QAManager(),
+                            qaManager = previewQAManager(),
                             // MainDesktop renders the STT tab only when this is non-null — with the
                             // default null the tab is selectable and draws nothing at all. Constructing
                             // one is inert: STTManager opens no socket until it is told to connect.
@@ -497,11 +497,23 @@ internal fun writeQuestions() {
     val json = Json { encodeDefaults = true }
     val file = File(System.getProperty("user.home"), ".churchpresenter/qa_state.json")
     file.parentFile?.mkdirs()
+    // Both as finished sessions: a session never comes back running after a restart, so the live
+    // one is resumed by [previewQAManager] once the manager has read the file.
+    fun session(id: String, name: String, startedAt: Long, endedAt: Long, questions: List<QuestionDto>) =
+        """{"id":"$id","name":"$name","startedAt":$startedAt,"endedAt":$endedAt,""" +
+            """"questions":${json.encodeToString(list, questions)}}"""
     file.writeText(
-        """{"questions":${json.encodeToString(list, asked)},""" +
-            """"history":${json.encodeToString(list, answered)},"votedIps":{}}"""
+        """{"questions":[],"votedIps":{},"sessions":[""" +
+            session(PREVIEW_LIVE_SESSION, "Sunday service", 1_769_999_900_000, 1_770_000_400_000, asked) + "," +
+            session("preview-earlier", "Last Sunday", 1_769_395_000_000, 1_769_399_400_000, answered) +
+            "]}"
     )
 }
+
+private const val PREVIEW_LIVE_SESSION = "preview-live"
+
+/** A manager over [writeQuestions]' file with this week's session running, as during a service. */
+internal fun previewQAManager(): QAManager = QAManager().also { it.resumeSession(PREVIEW_LIVE_SESSION) }
 
 /**
  * Writes the Canvas scenes where `SceneViewModel` reads them — it owns its own file under

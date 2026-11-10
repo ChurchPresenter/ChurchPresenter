@@ -130,3 +130,13 @@ internal fun CompanionServer.browserSourceOverlayPageHtml(
 ): String = browserSourceOverlayPage(
     index, output, _apiKey.value, bgOverride
 )
+
+/**
+ * Whether the desk allows a Q&A admin action. A dedicated Q&A password, once the request has passed
+ * [checkQaAdmin], is the operator's approval given ahead of time, so nothing is asked.
+ */
+internal suspend fun CompanionServer.awaitQaAdminDecision(pending: CompanionServer.PendingQAAdminRequest): Boolean {
+    if (qaAdminPasswordTrusted) return true
+    onQAAdminRequest.emit(pending)
+    return pending.decision.await()
+}

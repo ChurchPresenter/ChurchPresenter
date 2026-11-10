@@ -31,15 +31,15 @@ class QATabHistoryTest {
     }
 
     @Test
-    fun `the history button reports how many questions are held`() =
+    fun `the history button reports how many sessions are held`() =
         qaTab(seed = { askAll("First question", "Second question") }) { qa, _, _ ->
             onNodeWithText("${QALabel.HISTORY} (0)", substring = true).assertExists("empty to start with")
 
             qa.toggleSession()
             waitForIdle()
 
-            onNodeWithText("${QALabel.HISTORY} (2)", substring = true)
-                .assertExists("both questions moved into history: ${renderedText().take(200)}")
+            onNodeWithText("${QALabel.HISTORY} (1)", substring = true)
+                .assertExists("both questions were filed as one session: ${renderedText().take(200)}")
         }
 
     @Test
@@ -84,12 +84,12 @@ class QATabHistoryTest {
         qaTab(seed = { askAll("Asked before the break", "And another") }) { qa, _, _ ->
             qa.toggleSession()
             waitForIdle()
-            assertEquals(2, qa.history.size)
+            assertEquals(2, qa.archived.size)
 
-            qa.restoreFromHistory()
+            qa.resumeNewest()
             waitForIdle()
 
-            assertTrue(qa.history.isEmpty(), "history handed them back rather than copying them")
+            assertTrue(qa.archived.isEmpty(), "history handed them back rather than copying them")
             assertTrue(qa.sessionActive, "and the session is running again")
             assertTrue(showsQuestion("Asked before the break"), "they are answerable again")
             assertTrue(showsQuestion("And another"))
@@ -107,12 +107,12 @@ class QATabHistoryTest {
             qa.clearHistory()
             waitForIdle()
 
-            assertTrue(qa.history.isEmpty())
+            assertTrue(qa.archived.isEmpty())
             assertTrue(showsQuestion("From the second session"), "the current queue is untouched")
         }
 
     @Test
-    fun `history survives a second session ending, accumulating both`() =
+    fun `a second session is filed apart from the first`() =
         qaTab(seed = { askAll("Session one question") }) { qa, _, _ ->
             qa.toggleSession()
             waitForIdle()
@@ -123,8 +123,13 @@ class QATabHistoryTest {
             qa.toggleSession()
             waitForIdle()
 
+            assertEquals(
+                listOf(listOf("Session two question"), listOf("Session one question")),
+                qa.sessions.map { s -> s.questions.map { it.text } },
+                "each session keeps its own questions, newest first",
+            )
             openHistory()
-            assertTrue(showsQuestion("Session one question"), "the first session is still there")
-            assertTrue(showsQuestion("Session two question"), "and the second joined it")
+            assertTrue(showsQuestion("Session two question"), "the history opens on the newest session")
+            assertFalse(showsQuestion("Session one question"), "and does not lump the first one in with it")
         }
 }

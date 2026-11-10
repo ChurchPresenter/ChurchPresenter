@@ -48,7 +48,10 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.strings.generated.resources.qa_admin_panel
-import org.churchpresenter.strings.generated.resources.qa_admin_uses_api_key
+import org.churchpresenter.strings.generated.resources.qa_admin_password_hint
+import org.churchpresenter.strings.generated.resources.qa_admin_password_label
+import org.churchpresenter.strings.generated.resources.qa_hide_password
+import org.churchpresenter.strings.generated.resources.qa_show_password
 import org.churchpresenter.strings.generated.resources.qa_copy_url
 import org.churchpresenter.strings.generated.resources.qa_cooldown_label
 import org.churchpresenter.strings.generated.resources.qa_disable_public_access
@@ -72,6 +75,15 @@ import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import org.churchpresenter.sharedui.utils.generateQRCodeBitmap
 import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.theme.ProvideUiScale
@@ -80,7 +92,6 @@ import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
-import java.net.URLEncoder
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 
 @Composable
@@ -186,8 +197,7 @@ internal fun QARemoteContent(
     copyText: (String) -> Unit = {},
     onDismiss: () -> Unit
 ) {
-    val (submissionUrl, adminDisplayUrl, adminQrUrl) =
-        qaRemoteUrls(serverUrl, qaDisplayUrl, tunnelUrl, if (apiKeyEnabled) apiKey else "")
+    val (submissionUrl, adminUrl) = qaRemoteUrls(serverUrl, qaDisplayUrl, tunnelUrl)
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -254,9 +264,9 @@ internal fun QARemoteContent(
                     // ── Right: Admin QR ──────────────────────────────
                     QaQrColumn(
                         title = stringResource(Res.string.qa_admin_panel),
-                        description = stringResource(Res.string.qa_admin_uses_api_key),
-                        qrUrl = adminQrUrl,
-                        shownUrl = adminQrUrl.ifEmpty { adminDisplayUrl },
+                        description = null,
+                        qrUrl = adminUrl,
+                        shownUrl = adminUrl,
                         copyText = copyText,
                         modifier = Modifier.weight(1f),
                     )
@@ -267,7 +277,10 @@ internal fun QARemoteContent(
                 Spacer(Modifier.height(12.dp))
                 // What the QR code's link page says -- one message for the install. How a question
                 // and its QR code look on each output is styled per profile, on the Profiles tab.
-                QrMessageField(qaSettings, onSettingsChange)
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    QrMessageField(qaSettings, onSettingsChange, Modifier.weight(1f))
+                    QaAdminPasswordField(qaSettings, onSettingsChange, Modifier.weight(1f))
+                }
             } else {
                 Spacer(Modifier.height(12.dp))
                 Text(
@@ -304,10 +317,24 @@ private fun QaTunnelControls(
     onStartTunnel: () -> Unit,
     onStopTunnel: () -> Unit,
 ) {
+    // Public access was turned on here to be used: once the tunnel is up, the QR code moves to it.
+    var switchToPublic by remember { mutableStateOf(false) }
+    val startPublic = {
+        switchToPublic = true
+        onStartTunnel()
+    }
+    LaunchedEffect(tunnelStatus) {
+        if (switchToPublic && tunnelStatus is TunnelStatus.Connected) {
+            switchToPublic = false
+            onQaDisplayUrlChanged(tunnelStatus.url)
+        } else if (tunnelStatus is TunnelStatus.Error) {
+            switchToPublic = false
+        }
+    }
     when (tunnelStatus) {
         TunnelStatus.Idle -> {
             RaisedButton(
-                onClick = onStartTunnel,
+                onClick = startPublic,
                 modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.QA_PUBLIC_ACCESS),
                 shape = AppShape(6.dp)
             ) {
@@ -335,7 +362,7 @@ private fun QaTunnelControls(
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             RaisedButton(
-                onClick = onStartTunnel,
+                onClick = startPublic,
                 modifier = Modifier.fillMaxWidth(),
                 shape = AppShape(6.dp)
             ) {
@@ -404,8 +431,12 @@ private fun QaQrColumn(
 
 /** What the QR code's link page says, with a reset back to the default message. */
 @Composable
-private fun QrMessageField(qaSettings: QASettings, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
-Column(modifier = Modifier.fillMaxWidth()) {
+private fun QrMessageField(
+    qaSettings: QASettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+Column(modifier = modifier) {
     Text(
         stringResource(Res.string.qa_qr_message_label),
         style = MaterialTheme.typography.labelSmall,
@@ -544,24 +575,89 @@ RaisedButton(
 }
 }
 
-/** The submission page, and the admin page as shown and as its QR code opens it, with the key. */
-private data class QaRemoteUrls(val submission: String, val adminDisplay: String, val adminQr: String)
+/**
+ * The submission page and the admin page. The admin link never carries the password, in its QR code
+ * or as copied: whoever opens it types the password in.
+ */
+private data class QaRemoteUrls(val submission: String, val admin: String)
 
 /**
  * Where the dialog's QR codes lead: the submission page on the address the display uses, and the
- * admin page on the tunnel only when the display is on it too. [apiKey] is empty when none is required.
+ * admin page on the tunnel only when the display is on it too.
  */
-private fun qaRemoteUrls(serverUrl: String, qaDisplayUrl: String, tunnelUrl: String, apiKey: String): QaRemoteUrls {
+private fun qaRemoteUrls(serverUrl: String, qaDisplayUrl: String, tunnelUrl: String): QaRemoteUrls {
     val effectiveBaseUrl = qaDisplayUrl.ifEmpty { serverUrl }
     val submissionUrl = if (effectiveBaseUrl.isNotEmpty()) "$effectiveBaseUrl/qa" else ""
     val adminBaseUrl = if (tunnelUrl.isNotEmpty() && qaDisplayUrl == tunnelUrl) tunnelUrl else serverUrl
-    val adminDisplayUrl = if (adminBaseUrl.isNotEmpty()) "$adminBaseUrl/qa/admin" else ""
-    val adminQrUrl = when {
-        adminBaseUrl.isEmpty() -> ""
-        apiKey.isNotEmpty() -> "$adminBaseUrl/qa/admin?password=${URLEncoder.encode(apiKey, "UTF-8")}"
-        else -> "$adminBaseUrl/qa/admin"
+    val adminUrl = if (adminBaseUrl.isNotEmpty()) "$adminBaseUrl/qa/admin" else ""
+    return QaRemoteUrls(submissionUrl, adminUrl)
+}
+
+/**
+ * The password the admin page asks for, drawn like the QR message beside it. Left empty, the server
+ * API key guards the page while key checking is on, as it did before the page had a password.
+ */
+@Composable
+private fun QaAdminPasswordField(
+    qaSettings: QASettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var shown by remember { mutableStateOf(false) }
+    Column(modifier = modifier) {
+        Text(
+            stringResource(Res.string.qa_admin_password_label),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(4.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(42.dp)
+                .sunken(AppShape(8.dp), elevationPalette())
+                .hoverTint(AppShape(8.dp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                BasicTextField(
+                    value = qaSettings.adminPassword,
+                    onValueChange = { pw ->
+                        onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(adminPassword = pw)) }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    visualTransformation = if (shown) VisualTransformation.None else PasswordVisualTransformation(),
+                )
+            }
+            RaisedIconButton(
+                onClick = { shown = !shown },
+                modifier = Modifier.size(30.dp),
+                shape = AppShape(5.dp),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Icon(
+                    if (shown) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = stringResource(
+                        if (shown) Res.string.qa_hide_password else Res.string.qa_show_password
+                    ),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(Res.string.qa_admin_password_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
-    return QaRemoteUrls(submissionUrl, adminDisplayUrl, adminQrUrl)
 }
 
 /** How long, in seconds, one phone waits between questions. */

@@ -168,6 +168,18 @@ class QAManagerStateTest {
     /** A second manager against the same home — i.e. the app restarted. */
     private fun restarted(): QAManager = track(QAManager())
 
+    /**
+     * The app restarted and the operator resumed the session that was open: a restart files it
+     * as a finished session rather than leaving it to merge into the next one.
+     */
+    private fun restartedAndResumed(): QAManager = restarted().also { it.resumeNewest() }
+
+    /** The text of every question in every finished session the saved state holds. */
+    private fun JsonObject.archivedTexts(): List<String> =
+        entries("sessions").flatMap { session ->
+            session["questions"]?.jsonArray?.mapNotNull { it.jsonObject["text"]?.jsonPrimitive?.content }.orEmpty()
+        }
+
     // ── Surviving a restart ─────────────────────────────────────────────────────
 
     @Test
@@ -178,7 +190,7 @@ class QAManagerStateTest {
         qa.submitApproved("How do I join a group?")
         awaitState("both questions to be saved") { it.entries("questions").size == 2 }
 
-        val afterRestart = restarted()
+        val afterRestart = restartedAndResumed()
 
         assertEquals(
             listOf("How do I join a group?", "Where is the nursery?"),
@@ -205,7 +217,7 @@ class QAManagerStateTest {
         assertTrue(qa.denyQuestion(denied))
         awaitState("the denial") { it.statuses().contains("DENIED") }
 
-        val afterRestart = restarted()
+        val afterRestart = restartedAndResumed()
 
         assertEquals(QuestionStatus.APPROVED, afterRestart.findQuestion(approved)?.status)
         assertEquals(QuestionStatus.PENDING, afterRestart.findQuestion(pending)?.status)
@@ -219,7 +231,7 @@ class QAManagerStateTest {
         assertTrue(qa.voteForQuestion(id, "10.0.0.5", "up"))
         awaitSaved("10.0.0.5")
 
-        val afterRestart = restarted()
+        val afterRestart = restartedAndResumed()
 
         assertEquals("up", afterRestart.getVoteDirection(id, "10.0.0.5"), "the vote record is what stops double-voting")
         assertEquals(1, afterRestart.findQuestion(id)?.upvotes)
@@ -232,12 +244,12 @@ class QAManagerStateTest {
 
         qa.toggleSession() // closing archives the queue
         awaitState("the closed session to be archived") {
-            it.texts("history") == listOf("Asked last service") && it.entries("questions").isEmpty()
+            it.archivedTexts() == listOf("Asked last service") && it.entries("questions").isEmpty()
         }
 
         val afterRestart = restarted()
 
-        assertEquals(listOf("Asked last service"), afterRestart.history.map { it.text })
+        assertEquals(listOf("Asked last service"), afterRestart.archived.map { it.text })
         assertTrue(afterRestart.questions.isEmpty())
     }
 
@@ -251,7 +263,13 @@ class QAManagerStateTest {
 
         assertFalse(afterRestart.sessionActive, "whether the room may submit is the operator's call, not the file's")
         assertNull(afterRestart.submitQuestion("After the crash"), "submissions stay closed until reopened")
-        assertEquals(1, afterRestart.questions.size, "but the queue is still there to moderate")
+        assertTrue(afterRestart.questions.isEmpty(), "the open session is filed, not merged into the next")
+        assertEquals(
+            listOf("Before the crash"),
+            afterRestart.archived.map { it.text },
+            "but its questions are kept, ready to resume",
+        )
+        assertEquals(qa.sessionName, afterRestart.sessions.single().name, "under the name it was opened with")
     }
 
     @Test
@@ -284,12 +302,12 @@ class QAManagerStateTest {
         val qa = openSession()
         qa.submitApproved("Old question")
         qa.toggleSession()
-        awaitState("the session to be closed and archived") { it.entries("history").size == 1 }
+        awaitState("the session to be closed and archived") { it.entries("sessions").size == 1 }
 
         qa.clearHistory()
-        awaitState("the cleared archive to be written") { it.entries("history").isEmpty() }
+        awaitState("the cleared archive to be written") { it.entries("sessions").isEmpty() }
 
-        assertTrue(restarted().history.isEmpty())
+        assertTrue(restarted().archived.isEmpty())
     }
 
     // ── Bad state files ─────────────────────────────────────────────────────────
@@ -302,7 +320,7 @@ class QAManagerStateTest {
         val qa = restarted()
 
         assertTrue(qa.questions.isEmpty())
-        assertTrue(qa.history.isEmpty())
+        assertTrue(qa.archived.isEmpty())
         assertFalse(qa.sessionActive)
     }
 
@@ -324,7 +342,7 @@ class QAManagerStateTest {
                 """"history":[],"votedIps":{}}"""
         )
 
-        val qa = restarted()
+        val qa = restartedAndResumed()
 
         assertEquals(QuestionStatus.PENDING, qa.findQuestion("q1")?.status)
         assertFalse(qa.displayQuestion("q1"), "and it cannot be put on screen until approved")
@@ -407,7 +425,7 @@ class QAManagerStateTest {
         qa.submitApproved("Asked last time")
         qa.toggleSession()
 
-        val events = qa.eventsDuring { qa.restoreFromHistory() }
+        val events = qa.eventsDuring { qa.resumeNewest() }
 
         assertEquals(true, events.filterIsInstance<QAEvent.SessionChanged>().single().active)
         assertTrue(qa.sessionActive)

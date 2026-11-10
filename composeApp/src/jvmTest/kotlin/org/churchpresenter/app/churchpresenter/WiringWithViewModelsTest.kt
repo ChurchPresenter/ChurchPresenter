@@ -173,6 +173,15 @@ class WiringWithViewModelsTest {
         assertEquals(10, server.qaCooldownSeconds, "a changed cooldown must reach the server")
         assertFalse(server.qaVotingEnabled, "and so must a switched-off vote")
         assertEquals("", server.qaAdminPassword, "with key checking off the admin panel asks for no password")
+        assertFalse(server.qaAdminPasswordTrusted, "and with no Q&A password every device is asked about")
+
+        settings = settings.copy(
+            qaSettings = settings.qaSettings.copy(adminPassword = "own-password"),
+            serverSettings = settings.serverSettings.copy(apiKeyEnabled = true),
+        )
+        waitForIdle()
+        assertEquals("own-password", server.qaAdminPassword, "the Q&A page's own password comes before the key")
+        assertTrue(server.qaAdminPasswordTrusted, "and stands in for the operator's approval")
     }
 
     /**

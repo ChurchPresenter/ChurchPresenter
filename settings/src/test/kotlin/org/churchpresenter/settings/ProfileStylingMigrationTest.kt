@@ -5,6 +5,7 @@ import java.nio.file.Files
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -159,10 +160,21 @@ class ProfileStylingMigrationTest {
         // Of the install-wide keys, the ones this older document has: a key added since is not made up.
         val sttKeys = root(v20).getValue("sttSettings").jsonObject.keys
         assertEquals(STT_GLOBAL_KEYS intersect sttKeys, stripped.getValue("sttSettings").jsonObject.keys)
-        assertEquals(QA_GLOBAL_KEYS, stripped.getValue("qaSettings").jsonObject.keys)
+        val qaKeys = root(v20).getValue("qaSettings").jsonObject.keys
+        assertEquals(QA_GLOBAL_KEYS intersect qaKeys, stripped.getValue("qaSettings").jsonObject.keys)
         assertFalse("dictionarySettings" in stripped)
         assertFalse("mediaSettings" in stripped)
         assertEquals(root(v20).getValue("projectionSettings"), stripped.getValue("projectionSettings"))
+    }
+
+    @Test
+    fun `a save keeps the Q&A admin password`() {
+        val doc = """{"settingsVersion":21,"qaSettings":{"textColor":"#00FF00","adminPassword":"let-me-in"}}"""
+
+        val stripped = root(SettingsManager().stripProfileOwnedStyling(doc)).getValue("qaSettings").jsonObject
+
+        assertEquals("let-me-in", stripped.getValue("adminPassword").jsonPrimitive.content, "one password per install")
+        assertFalse("textColor" in stripped, "while the look still goes to the profiles")
     }
 
     @Test
