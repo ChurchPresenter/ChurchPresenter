@@ -3,62 +3,41 @@ package org.churchpresenter.settings
 import org.churchpresenter.settings.utils.Constants
 
 /**
- * Editing the translation stack, with every profile's selection carried along.
+ * Editing the translation stack, with every profile carried along.
  *
  * A profile names the translations it shows by **position** in the stack
- * ([OutputProfile.bibleTranslations]), so removing or reordering a translation moves the ground
- * under every one of those selections. Editing only [BibleSettings] leaves them pointing at whatever
- * has since slid into that position: delete the first of `[KJV, RST, NIV]` and the profile pinned to
- * position 1 goes from Russian to NIV, silently, in the middle of a service.
+ * ([OutputProfile.bibleTranslations]) -- the primary, the secondary -- and that is what it keeps
+ * showing whichever Bible is in that place: a confidence monitor set to the secondary shows the
+ * secondary after a swap. Its looks go with the place or with the Bible, as the profile's own
+ * [BibleSettings.looksFollowPosition] says (`BibleLooksByPosition.kt`).
  *
- * These are the only correct way to remove or reorder — they update the stack and rewrite the
- * selections in the same step. [BibleSettings.removeTranslation] and
- * [BibleSettings.moveTranslation] remain for the stack alone; call them directly only where no
- * profile selection can exist.
- *
- * Position, rather than a stable file name, is what the settings store; changing that is a migration
- * this does not attempt. Keeping the positions honest through an edit is the cheaper half of the
- * problem and covers what an operator actually does.
+ * These are the only correct way to remove or reorder -- they update the stack and every profile in
+ * the same step. [BibleSettings.removeTranslation] and [BibleSettings.moveTranslation] remain for
+ * the stack alone; call them directly only where no profile can exist.
  */
 
-/** Removes the translation at [index], and drops it from every profile that named it. */
+/**
+ * Removes the translation at [index]. Every selection stays on its places, and a place past the end
+ * of the shorter stack is dropped from it; a profile left with none switches its scripture off.
+ */
 fun AppSettings.removeBibleTranslation(index: Int): AppSettings {
     val stack = bibleSettings.translationList()
     if (index !in stack.indices) return this
+    val remaining = stack.size - 1
     return copy(bibleSettings = bibleSettings.removeTranslation(index))
-        .remapOutputTranslations { position ->
-            when {
-                position == index -> null
-                position > index -> position - 1
-                else -> position
-            }
-        }
+        .withLooksKeptInPlace(stack)
+        .remapOutputTranslations { position -> position.takeIf { it < remaining } }
 }
 
-/**
- * Moves the translation at [index] by [offset], and follows it in every profile that named it.
- *
- * A profile that picked its own translations keeps its own order through the move -- the Profiles
- * tab is where a room's reading order is set, and a reorder on the Bible tab must not undo it. A
- * profile showing all of them (an empty selection) follows the stack's new order.
- */
+/** Moves the translation at [index] by [offset]. Every selection stays on its places. */
 fun AppSettings.moveBibleTranslation(index: Int, offset: Int): AppSettings {
     val stack = bibleSettings.translationList()
     val target = index + offset
     if (index !in stack.indices || target !in stack.indices) return this
-    return copy(bibleSettings = bibleSettings.moveTranslation(index, offset))
-        .remapOutputTranslations { position ->
-            when {
-                position == index -> target
-                // Everything the moved translation passed over shifts one place the other way.
-                index < target && position in (index + 1)..target -> position - 1
-                index > target && position in target until index -> position + 1
-                else -> position
-            }
-        }
+    return copy(bibleSettings = bibleSettings.moveTranslation(index, offset)).withLooksKeptInPlace(stack)
 }
 
-/** The Bible tab's swap button: the first two translations exchange places, selections included. */
+/** The Bible tab's swap button: the first two translations exchange places. */
 fun AppSettings.swapBibleTranslations(): AppSettings = moveBibleTranslation(0, 1)
 
 /**

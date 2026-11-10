@@ -32,6 +32,7 @@ import org.churchpresenter.strings.generated.resources.profile_reference
 import org.churchpresenter.strings.generated.resources.profile_shift
 import org.churchpresenter.strings.generated.resources.profile_shift_element_sub
 import org.churchpresenter.strings.generated.resources.profile_shift_sub
+import org.churchpresenter.strings.generated.resources.profile_bible_translation_place
 import org.churchpresenter.strings.generated.resources.profile_space_between_translations
 import org.churchpresenter.strings.generated.resources.bible_split_long_verses
 import org.churchpresenter.strings.generated.resources.profile_split_words
@@ -138,8 +139,12 @@ internal class BibleEdit(
     fun styleTarget(): StyleTarget? {
         val entry = stack.getOrNull(index)
         if (!picked || entry == null) return null
-        val label = entry.customAbbreviation
-            .ifBlank { defaultTranslationAbbreviation(title = "", fileName = entry.fileName) }
+        // A look that stays with its place belongs to the place, not to the Bible in it now.
+        val label = if (bs.looksFollowPosition) {
+            (index + 1).toString()
+        } else {
+            entry.customAbbreviation.ifBlank { defaultTranslationAbbreviation(title = "", fileName = entry.fileName) }
+        }
         return StyleTarget(label, "bibleSettings.translations[${entry.fileName}]", entry.ownStyleKeys, ::clearOwn)
     }
 
@@ -230,7 +235,7 @@ private fun BibleTextGroup(
         action = ResetAction(style != defaults || edit.referenceShift != (0 to 0)) { edit.reset(defaults) },
         header = {
             AppliesToStrip(
-                targets = bibleTargets(edit.stack, edit.shownPositions),
+                targets = bibleTargets(edit.stack, edit.shownPositions, edit.bs.looksFollowPosition),
                 target = edit.index,
                 onTarget = onTranslationChange,
                 elements = listOf(
@@ -455,10 +460,15 @@ private fun BiblePlacementGroups(
 
 /**
  * All, then each translation this output draws, in its order -- the rest of the stack is not on
- * this screen, so there is nothing of theirs to see here. Each keeps its stack position as its value.
+ * this screen, so there is nothing of theirs to see here. Each keeps its stack position as its value,
+ * and is named by it too -- `1 · KJV` -- when [byPlace]: its look is the place's.
  */
 @Composable
-private fun bibleTargets(stack: List<BibleTranslationSettings>, shown: List<Int>): List<RowOption<Int>> =
+private fun bibleTargets(
+    stack: List<BibleTranslationSettings>,
+    shown: List<Int>,
+    byPlace: Boolean,
+): List<RowOption<Int>> =
     listOf(
         RowOption(
             ALL_TRANSLATIONS,
@@ -469,7 +479,12 @@ private fun bibleTargets(stack: List<BibleTranslationSettings>, shown: List<Int>
         val abbreviation = translation.customAbbreviation.ifBlank {
             defaultTranslationAbbreviation(title = "", fileName = translation.fileName)
         }
-        RowOption(index, abbreviation, translationChipTag(index))
+        val label = if (byPlace) {
+            stringResource(Res.string.profile_bible_translation_place, index + 1, abbreviation)
+        } else {
+            abbreviation
+        }
+        RowOption(index, label, translationChipTag(index))
     }
 
 private val SPACING_RANGE = -20..160
@@ -477,7 +492,7 @@ private val SPACING_RANGE = -20..160
 /** Everything the Translations group writes. */
 private val TRANSLATIONS_PATHS = listOf(
     "bilingualLayout", "bilingualLayoutLowerThird", "multiTranslationDivider", "multiTranslationSpacing",
-    "splitLongVerses", "longVerseWordCount",
+    "splitLongVerses", "longVerseWordCount", "looksFollowPosition",
 ).map { "bibleSettings.$it" }
 private const val SPACING_STEP = 4
 
@@ -496,27 +511,12 @@ private fun TranslationsGroup(edit: BibleEdit, profile: OutputProfile) {
     val parallel = profile.bibleMode != Constants.SONG_LANG_OFF &&
         (profile.bibleTranslations.size > 1 || profile.bibleTranslations.isEmpty()) &&
         stack.size > 1
-    val d = BibleSettings()
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_translations), key = "translations",
         paths = TRANSLATIONS_PATHS,
-        action = ResetAction(
-            bs.bilingualLayout != d.bilingualLayout || bs.bilingualLayoutLowerThird != d.bilingualLayoutLowerThird ||
-                bs.multiTranslationDivider != d.multiTranslationDivider ||
-                bs.multiTranslationSpacing != d.multiTranslationSpacing || bs.splitLongVerses != d.splitLongVerses,
-        ) {
-            updateBible {
-                it.copy(
-                    bilingualLayout = d.bilingualLayout,
-                    bilingualLayoutLowerThird = d.bilingualLayoutLowerThird,
-                    multiTranslationDivider = d.multiTranslationDivider,
-                    multiTranslationSpacing = d.multiTranslationSpacing,
-                    splitLongVerses = d.splitLongVerses,
-                    longVerseWordCount = d.longVerseWordCount,
-                )
-            }
-        },
+        action = ResetAction(bs.translationsGroupChanged()) { updateBible { it.withTranslationsGroupReset() } },
     ) {
+        LooksFollowRow(bs.looksFollowPosition) { v -> updateBible { it.copy(looksFollowPosition = v) } }
         if (parallel) {
             SettingsRow(
                 Res.string.profile_layout,

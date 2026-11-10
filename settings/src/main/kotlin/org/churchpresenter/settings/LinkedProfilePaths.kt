@@ -88,14 +88,14 @@ private fun walk(element: JsonElement, path: String, legacy: String, visit: (Str
  * The path of an object's member [key] under [path]: after a dot, or -- a key a dot or a bracket
  * would cut short, like a Bible box's `REFERENCE#kjv.spb` -- named in brackets.
  */
-private fun member(path: String, key: String): String =
+internal fun member(path: String, key: String): String =
     if (key.none { it in PATH_SYNTAX }) "$path.$key" else named(path, key)
 
 /**
  * [path] with [name] in brackets: a list's entry, or an object's member that needs them. A bracket
  * or a backslash in the name is escaped with a backslash, so a file name may hold one.
  */
-private fun named(path: String, name: String): String =
+internal fun named(path: String, name: String): String =
     "$path[${name.replace("\\", "\\\\").replace("]", "\\]")}]"
 
 /** The characters a key cannot hold after a dot. */

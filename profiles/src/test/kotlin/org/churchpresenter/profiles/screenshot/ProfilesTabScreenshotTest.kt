@@ -23,8 +23,12 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.rightClick
@@ -168,6 +172,30 @@ class ProfilesTabScreenshotTest {
     fun `the Bible page in Advanced`() = shoot("page_bible_advanced") {
         tab(CustomizePane.BIBLE)
         onNodeWithTag(DETAIL_ADVANCED_TAG).performClick()
+    }
+
+    @Test
+    fun `the Bible page's translations, looks following the place`() = shoot("translations_follow_place") {
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        showTranslationsGroup()
+    }
+
+    @Test
+    fun `the Bible page's translations, looks following the Bible`() = shoot("translations_follow_bible") {
+        tab(CustomizePane.BIBLE)
+        waitForIdle()
+        onNodeWithText("Bible version").performScrollTo().performClick()
+        waitForIdle()
+        showTranslationsGroup()
+    }
+
+    /**
+     * The Translations group whole: scrolled to its last row, the Reference row -- the last of the
+     * page's "Reference" texts, the Text group's element chip being the first.
+     */
+    private fun ComposeUiTest.showTranslationsGroup() {
+        onAllNodesWithText("Reference").onLast().performScrollTo()
     }
 
     @Test

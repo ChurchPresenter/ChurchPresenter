@@ -59,6 +59,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.removeBibleTranslation
+import org.churchpresenter.settings.replaceBibleTranslation
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -262,19 +263,7 @@ private fun TranslationRow(
                     if (fileName.isEmpty()) {
                         app.removeBibleTranslation(index)
                     } else {
-                        app.copy(
-                            bibleSettings = app.bibleSettings
-                                .updateTranslation(index) {
-                                    it.copy(
-                                        fileName = fileName,
-                                        bookNameOverrides = if (fileName == it.fileName) {
-                                            it.bookNameOverrides
-                                        } else {
-                                            emptyMap()
-                                        },
-                                    )
-                                },
-                        )
+                        app.replaceBibleTranslation(index, fileName)
                     }
                 }
             },
