@@ -56,6 +56,7 @@ class QAHappyPathTest : HappyPathHarness() {
     /** A session started, and [QUESTION] sent in from a phone. */
     private fun ComposeUiTest.questionArrives(qa: QAManager) {
         clickText("New Session")
+        clickText("Start")
         await("the session is open") { qa.sessionActive }
         qa.submitQuestion(QUESTION, name = "Peter", clientIp = "10.0.0.7")
         await("the question is listed") { shows(QUESTION) }
@@ -66,6 +67,7 @@ class QAHappyPathTest : HappyPathHarness() {
         val qa = QAManager()
         happyPath(settings(Tabs.QA), qaManager = qa, serverUrl = SERVER) { app ->
             clickText("New Session")
+            clickText("Start")
             await("the session is open") { qa.sessionActive }
 
             clickTabControl("Show QR on Display")

@@ -66,6 +66,6 @@ class QATabSettingsTest {
 
             onNodeWithText(QALabel.DELETE_ALL_HISTORY).performClick()
             waitForIdle()
-            assertTrue(qa.history.isEmpty())
+            assertTrue(qa.archived.isEmpty())
         }
 }

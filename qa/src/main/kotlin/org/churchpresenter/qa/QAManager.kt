@@ -26,10 +26,13 @@ class QAManager private constructor(
 
     val questions: List<Question> get() = store.questions
 
-    /** Questions from previous sessions. */
-    val history: List<Question> get() = store.history
+    /** Finished sessions, newest first. */
+    val sessions: List<QASession> get() = store.sessions
 
     val sessionActive: Boolean get() = store.sessionActive.value
+
+    /** The running session's name; empty while none is running. */
+    val sessionName: String get() = store.sessionName.value
     val displayedQuestion: Question? get() = store.displayedQuestion.value
     val showQRCodeOnDisplay: Boolean get() = store.showQRCodeOnDisplay.value
 
@@ -55,6 +58,6 @@ class QAManager private constructor(
 sealed class QAEvent {
     data class QuestionSubmitted(val question: Question) : QAEvent()
     data class QuestionUpdated(val question: Question) : QAEvent()
-    data class SessionChanged(val active: Boolean) : QAEvent()
+    data class SessionChanged(val active: Boolean, val name: String = "") : QAEvent()
     data class DisplayChanged(val question: Question?) : QAEvent()
 }

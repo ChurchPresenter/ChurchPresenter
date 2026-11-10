@@ -29,7 +29,7 @@ val STT_GLOBAL_KEYS = setOf("serverUrl", "lastConnectedUrl", "tab")
  * The Q&A settings a profile never carries: how the audience submits questions, and what the QR
  * code's link page says. How a question and its QR code look on screen is the profile's.
  */
-val QA_GLOBAL_KEYS = setOf("rateLimitCooldownSeconds", "votingEnabled", "qrCodeMessage")
+val QA_GLOBAL_KEYS = setOf("rateLimitCooldownSeconds", "votingEnabled", "qrCodeMessage", "adminPassword")
 
 /** The Bible's equivalent. [BIBLE_STACK_KEY] is excluded separately -- it is styled, not chosen. */
 val BIBLE_GLOBAL_KEYS = setOf(

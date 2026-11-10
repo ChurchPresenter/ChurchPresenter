@@ -306,11 +306,13 @@ class QATabDisplayAndControlsTest {
             waitForIdle()
             assertFalse(qa.sessionActive)
 
-            onNodeWithText("Resume (", substring = true).performClick()
+            val session = qa.sessions.single()
+            clickQaLabel(QALabel.RESUME)
+            onNodeWithText("${session.name} (1)").performClick()
             waitForIdle()
 
             assertTrue(qa.sessionActive)
-            assertTrue(qa.history.isEmpty())
+            assertTrue(qa.archived.isEmpty())
             assertTrue(showsQuestion("kept"))
         }
 
@@ -383,7 +385,7 @@ class QATabDisplayAndControlsTest {
 
             clickQaLabel(QALabel.DELETE_ALL_HISTORY)
 
-            assertTrue(qa.history.isEmpty())
+            assertTrue(qa.archived.isEmpty())
         }
 
     // ── Who asked ───────────────────────────────────────────────────────────────

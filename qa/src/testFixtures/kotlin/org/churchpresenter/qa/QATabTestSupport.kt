@@ -156,6 +156,12 @@ fun QAManager.askAll(vararg texts: String) {
     }
 }
 
+/** Every finished session's questions, newest session first: what the flat history used to hold. */
+val QAManager.archived: List<Question> get() = sessions.flatMap { it.questions }
+
+/** Resumes the newest finished session, as picking the top of the Resume menu does. */
+fun QAManager.resumeNewest() = resumeSession(sessions.first().id)
+
 // ── Labels, as the tab renders them ─────────────────────────────────────────────────────────────
 
 object QALabel {
@@ -167,6 +173,8 @@ object QALabel {
     const val DENIED = "Denied"
     const val HISTORY = "History"
     const val NEW_SESSION = "New Session"
+    const val START_SESSION = "Start"
+    const val RESUME = "Resume"
     const val STOP_SESSION = "Stop Session"
     const val ADD = "Add"
     const val ADD_HINT = "Add a question…"
@@ -204,6 +212,10 @@ object QALabel {
     const val EXPORT_TO_FILE = "Export to File"
     const val IMPORT_FROM_FILE = "Import from File"
     const val EXPORT_AND_CLEAR = "Export & Clear"
+    const val NO_SESSION_BANNER = "No session running — nobody can submit questions yet."
+    const val DELETE_SESSION = "Delete Session"
+    const val SHOW_MORE = "Show more"
+    const val SHOW_LESS = "Show less"
 }
 
 /** Whether a question's text is on screen anywhere. */

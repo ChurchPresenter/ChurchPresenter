@@ -46,12 +46,31 @@ interface QAAudienceActions {
     fun isRateLimited(clientIp: String, cooldownSeconds: Int): Boolean
 }
 
-/** Starting and ending a session, and what is kept between them. */
+/** Starting and ending a session, and the finished sessions kept between them. */
 interface QASessionActions {
+    /**
+     * Opens a session called [name] -- the start time when blank -- so phones can send questions.
+     * Does nothing while one is already running.
+     */
+    fun startSession(name: String = "", now: Long = System.currentTimeMillis())
+
+    /** Closes the running session and files its questions as a finished session. */
+    fun stopSession(now: Long = System.currentTimeMillis())
+
+    /** [stopSession] while one is running, otherwise [startSession] with the default name. */
     fun toggleSession()
+
+    /**
+     * Reopens the finished session [id]: its questions and its name come back live, and it leaves
+     * the history. A running session is filed first, so the two never merge.
+     */
+    fun resumeSession(id: String)
+
+    fun deleteSession(id: String)
     fun clearAll()
+
+    /** Deletes every finished session. */
     fun clearHistory()
-    fun restoreFromHistory()
 }
 
 internal class QAModeration(private val store: QAStore) : QAModerating {
@@ -247,19 +266,43 @@ internal class QASessionControl(
     private val moderation: QAModeration,
 ) : QASessionActions {
 
-    override fun toggleSession(): Unit = synchronized(store.lock) {
-        store.sessionActive.value = !store.sessionActive.value
-        if (store.sessionActive.value) store.usage.record(UsageEvent.QA_SESSION_STARTED)
-        if (!store.sessionActive.value) {
-            store.showQRCodeOnDisplay.value = false
-            store.history.addAll(store.questions)
-            store.questions.clear()
-            moderation.clearDisplay()
-            store.lastSubmission.clear()
-            store.votedIps.clear()
-        }
-        store.emit(QAEvent.SessionChanged(store.sessionActive.value))
+    override fun startSession(name: String, now: Long): Unit = synchronized(store.lock) {
+        if (store.sessionActive.value) return@synchronized
+        store.sessionId.value = UUID.randomUUID().toString()
+        store.sessionName.value = name.trim().ifEmpty { defaultSessionName(now) }
+        store.sessionStartedAt.value = now
+        store.sessionActive.value = true
+        store.usage.record(UsageEvent.QA_SESSION_STARTED)
+        store.emit(QAEvent.SessionChanged(true, store.sessionName.value))
         store.save()
+    }
+
+    override fun stopSession(now: Long): Unit = synchronized(store.lock) {
+        if (!store.sessionActive.value) return@synchronized
+        closeRunningSession(now)
+        store.emit(QAEvent.SessionChanged(false, ""))
+        store.save()
+    }
+
+    override fun toggleSession() {
+        if (store.sessionActive.value) stopSession() else startSession()
+    }
+
+    override fun resumeSession(id: String): Unit = synchronized(store.lock) {
+        val session = store.sessions.firstOrNull { it.id == id } ?: return@synchronized
+        if (store.sessionActive.value) closeRunningSession(System.currentTimeMillis())
+        store.sessions.removeAll { it.id == id }
+        store.questions.addAll(session.questions)
+        store.sessionId.value = session.id
+        store.sessionName.value = session.name
+        store.sessionStartedAt.value = session.startedAt
+        store.sessionActive.value = true
+        store.emit(QAEvent.SessionChanged(true, session.name))
+        store.save()
+    }
+
+    override fun deleteSession(id: String): Unit = synchronized(store.lock) {
+        if (store.sessions.removeAll { it.id == id }) store.save()
     }
 
     override fun clearAll(): Unit = synchronized(store.lock) {
@@ -270,15 +313,17 @@ internal class QASessionControl(
     }
 
     override fun clearHistory(): Unit = synchronized(store.lock) {
-        store.history.clear()
+        store.sessions.clear()
         store.save()
     }
 
-    override fun restoreFromHistory(): Unit = synchronized(store.lock) {
-        store.questions.addAll(store.history)
-        store.history.clear()
-        store.sessionActive.value = true
-        store.emit(QAEvent.SessionChanged(true))
-        store.save()
+    /** Takes everything down and files the questions; the caller announces and saves. */
+    private fun closeRunningSession(now: Long) {
+        store.sessionActive.value = false
+        store.showQRCodeOnDisplay.value = false
+        moderation.clearDisplay()
+        store.fileCurrentSession(endedAt = now)
+        store.lastSubmission.clear()
+        store.votedIps.clear()
     }
 }

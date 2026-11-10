@@ -128,7 +128,7 @@ class QATabFileChooserTest {
             clickQaLabel(QALabel.EXPORT_TO_FILE)
             awaitDialogAnswered(chooser)
 
-            assertEquals(1, qa.history.size, "cancelling the save dialog must not touch history")
+            assertEquals(1, qa.archived.size, "cancelling the save dialog must not touch history")
         }
     }
 
@@ -205,7 +205,7 @@ class QATabFileChooserTest {
             awaitDialogAnswered(chooser)
 
             assertFalse(dest.exists())
-            assertEquals(1, qa.history.size, "the failed export must not touch history")
+            assertEquals(1, qa.archived.size, "the failed export must not touch history")
         }
     }
 

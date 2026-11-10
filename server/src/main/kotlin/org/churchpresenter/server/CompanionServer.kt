@@ -135,6 +135,12 @@ class CompanionServer(
 
     @Volatile var qaAdminPassword: String = ""
 
+    /**
+     * Whether [qaAdminPassword] is the Q&A page's own password rather than the server API key. Its
+     * own password stands in for the desk's approval: a device that knows it is not asked about.
+     */
+    @Volatile var qaAdminPasswordTrusted: Boolean = false
+
     @Volatile var qaCooldownSeconds: Int = 30
 
     @Volatile var qaVotingEnabled: Boolean = false

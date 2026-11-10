@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.effectiveAdminPassword
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,14 +48,16 @@ internal fun ObsSceneWiring(
                 obsManager.setScene(sceneName)
             }
     }
-    // Sync QA settings to server — admin auth reuses the server API key, just like the presentation remote
+    // Sync QA settings to server — admin auth takes the Q&A password, or the server API key without one
     LaunchedEffect(
         appSettings.serverSettings.apiKeyEnabled,
         appSettings.serverSettings.apiKey,
+        appSettings.qaSettings.adminPassword,
         appSettings.qaSettings.rateLimitCooldownSeconds,
         appSettings.qaSettings.votingEnabled
     ) {
-        companionServer.qaAdminPassword = activeApiKey(appSettings.serverSettings)
+        companionServer.qaAdminPassword = appSettings.qaSettings.effectiveAdminPassword(appSettings.serverSettings)
+        companionServer.qaAdminPasswordTrusted = appSettings.qaSettings.adminPassword.isNotEmpty()
         companionServer.qaCooldownSeconds = appSettings.qaSettings.rateLimitCooldownSeconds
         companionServer.qaVotingEnabled = appSettings.qaSettings.votingEnabled
     }

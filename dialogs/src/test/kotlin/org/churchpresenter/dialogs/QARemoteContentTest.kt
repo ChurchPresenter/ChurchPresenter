@@ -2,6 +2,8 @@
 
 package org.churchpresenter.dialogs
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +66,9 @@ class QARemoteContentTest {
         var tunnelStops = 0
         var dismissed = 0
         var settings = QASettings()
+
+        /** The tunnel as the dialog sees it; a test moves it on to play the tunnel coming up. */
+        val tunnel = mutableStateOf<TunnelStatus>(TunnelStatus.Idle)
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -80,6 +85,7 @@ class QARemoteContentTest {
     ) {
         val h = Harness()
         h.settings = initialQaSettings
+        h.tunnel.value = tunnelStatus
         runComposeUiTest {
             setContent {
                 MaterialTheme {
@@ -90,7 +96,7 @@ class QARemoteContentTest {
                         onQaDisplayUrlChanged = { h.urlChanges += it },
                         apiKeyEnabled = apiKeyEnabled,
                         apiKey = apiKey,
-                        tunnelStatus = tunnelStatus,
+                        tunnelStatus = h.tunnel.value,
                         tunnelUrl = tunnelUrl,
                         onStartTunnel = { h.tunnelStarts++ },
                         onStopTunnel = { h.tunnelStops++ },
@@ -166,24 +172,13 @@ class QARemoteContentTest {
             assertTrue(shows("$SERVER/qa/admin"), "a tunnel merely running must not move the moderator link")
         }
 
-    // ── The API key in the moderator link ───────────────────────────────────────
+    // ── No key in the moderator link ───────────────────────────────────────
 
     @Test
-    fun `an enabled API key is carried in the moderator link so the QR opens straight in`() =
+    fun `the moderator link shown on screen leaves the key out`() =
         qaRemote(apiKeyEnabled = true, apiKey = "secret123") { h ->
-            assertTrue(
-                shows("$SERVER/qa/admin?password=secret123"),
-                "the moderator's QR has to get past the key without it being typed on a phone",
-            )
-        }
-
-    @Test
-    fun `a key with characters that would break a URL is encoded`() =
-        qaRemote(apiKeyEnabled = true, apiKey = "p@ss word&more") { h ->
-            assertTrue(
-                shows("$SERVER/qa/admin?password=p%40ss+word%26more"),
-                "an unencoded & would cut the key short and an unencoded space would break the link",
-            )
+            assertTrue(shows("$SERVER/qa/admin"), "the plain link is the one to show")
+            assertTrue(!shows("$SERVER/qa/admin?password=secret123"), "the key is not printed on screen")
         }
 
     @Test
@@ -208,13 +203,13 @@ class QARemoteContentTest {
     }
 
     @Test
-    fun `copying the moderator panel copies the link including its key`() =
+    fun `copying the moderator panel copies the link without its key`() =
         qaRemote(apiKeyEnabled = true, apiKey = "secret123") { h ->
             copy(1)
             assertEquals(
-                listOf("$SERVER/qa/admin?password=secret123"),
+                listOf("$SERVER/qa/admin"),
                 h.clipboard,
-                "the copied moderator link must be the one that actually gets in",
+                "a pasted link must not hand the password to whoever it is pasted to",
             )
         }
 
@@ -307,7 +302,9 @@ class QARemoteContentTest {
 
     @Test
     fun `typing a QR message updates the setting`() = qaRemote { h ->
-        onNode(hasSetTextAction() and hasText("")).performTextReplacement("Scan me!")
+        // The admin password field is empty too; it is the one marked as a password.
+        val notPassword = !SemanticsMatcher.keyIsDefined(SemanticsProperties.Password)
+        onNode(hasSetTextAction() and hasText("") and notPassword).performTextReplacement("Scan me!")
         waitForIdle()
         assertEquals("Scan me!", h.settings.qrCodeMessage)
     }
@@ -318,5 +315,51 @@ class QARemoteContentTest {
             onNodeWithContentDescription("Reset to default").performClick()
             waitForIdle()
             assertEquals("", h.settings.qrCodeMessage)
+        }
+
+    // ── The admin password ──────────────────────────────────────────────────────
+
+    private val isPassword = SemanticsMatcher.keyIsDefined(SemanticsProperties.Password)
+
+    @Test
+    fun `typing an admin password saves it`() = qaRemote { h ->
+        onNode(hasSetTextAction() and isPassword).performTextReplacement("let-me-in")
+        waitForIdle()
+        assertEquals("let-me-in", h.settings.adminPassword)
+    }
+
+    @Test
+    fun `the eye shows the password and hides it again`() =
+        qaRemote(initialQaSettings = QASettings(adminPassword = "let-me-in")) { _ ->
+            // The field stays a password field either way (its keyboard type); the masking is
+            // drawn, not exposed, so the eye's own label is what says which way it is set.
+            onNodeWithContentDescription("Show password").performClick()
+            waitForIdle()
+            onNodeWithContentDescription("Hide password").assertExists()
+
+            onNodeWithContentDescription("Hide password").performClick()
+            waitForIdle()
+            onNodeWithContentDescription("Show password").assertExists()
+        }
+
+    // ── Turning public access on ────────────────────────────────────────────────
+
+    @Test
+    fun `public access turned on here moves the QR code to the tunnel once it is up`() = qaRemote { h ->
+        onNodeWithText("Enable Public Access").performClick()
+        waitForIdle()
+        assertEquals(1, h.tunnelStarts)
+
+        h.tunnel.value = TunnelStatus.Connected(TUNNEL)
+        waitForIdle()
+
+        assertEquals(listOf(TUNNEL), h.urlChanges)
+    }
+
+    @Test
+    fun `a tunnel already up when the dialog opens leaves the QR code where it is`() =
+        qaRemote(tunnelStatus = TunnelStatus.Connected(TUNNEL), tunnelUrl = TUNNEL) { h ->
+            waitForIdle()
+            assertTrue(h.urlChanges.isEmpty(), "only switching public access on here moves it")
         }
 }

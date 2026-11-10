@@ -13,18 +13,23 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionDto
-import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.qa.toDto
 import org.churchpresenter.sharedui.utils.UsageEventStore
 import java.io.File
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
 @Serializable
 private data class QAState(
     val questions: List<QuestionDto> = emptyList(),
+    /** The flat archive kept before sessions had names; read once and filed as one session. */
     val history: List<QuestionDto> = emptyList(),
-    val votedIps: Map<String, Map<String, String>> = emptyMap()
+    val votedIps: Map<String, Map<String, String>> = emptyMap(),
+    val sessionId: String = "",
+    val sessionName: String = "",
+    val sessionStartedAt: Long = 0L,
+    val sessions: List<QASessionDto> = emptyList(),
 )
 
 /**
@@ -43,10 +48,15 @@ internal class QAStore(val usage: UsageEventStore) {
 
     val questions = mutableStateListOf<Question>()
 
-    /** Questions from previous sessions. */
-    val history = mutableStateListOf<Question>()
+    /** Finished sessions, newest first. */
+    val sessions = mutableStateListOf<QASession>()
 
     val sessionActive = mutableStateOf(false)
+
+    /** The running session: its id, its name and when it started. */
+    val sessionId = mutableStateOf("")
+    val sessionName = mutableStateOf("")
+    val sessionStartedAt = mutableStateOf(0L)
     val displayedQuestion = mutableStateOf<Question?>(null)
     val showQRCodeOnDisplay = mutableStateOf(false)
 
@@ -86,8 +96,11 @@ internal class QAStore(val usage: UsageEventStore) {
     fun save() {
         val state = QAState(
             questions = questions.map { it.toDto() },
-            history = history.map { it.toDto() },
-            votedIps = votedIps.mapValues { entry -> entry.value.toMap() }
+            votedIps = votedIps.mapValues { entry -> entry.value.toMap() },
+            sessionId = sessionId.value,
+            sessionName = sessionName.value,
+            sessionStartedAt = sessionStartedAt.value,
+            sessions = sessions.map { it.toDto() },
         )
         val previous = pendingSave.get()
         val job = scope.launch(Dispatchers.IO) {
@@ -108,12 +121,43 @@ internal class QAStore(val usage: UsageEventStore) {
         pendingSave.get()?.join()
     }
 
+    /**
+     * Files the live [questions] as a finished session, newest first, and empties them. Nothing is
+     * filed when there are no questions: an empty session is not worth a row in the history.
+     */
+    fun fileCurrentSession(endedAt: Long) {
+        if (questions.isNotEmpty()) {
+            val startedAt = sessionStartedAt.value.takeIf { it > 0 } ?: questions.minOf { it.timestamp }
+            sessions.add(
+                0,
+                QASession(
+                    id = sessionId.value.ifEmpty { UUID.randomUUID().toString() },
+                    name = sessionName.value.ifBlank { defaultSessionName(startedAt) },
+                    startedAt = startedAt,
+                    endedAt = endedAt,
+                    questions = questions.toList(),
+                )
+            )
+            questions.clear()
+        }
+        sessionId.value = ""
+        sessionName.value = ""
+        sessionStartedAt.value = 0L
+    }
+
     fun load() {
         try {
             if (!stateFile.exists()) return
             val state = json.decodeFromString(QAState.serializer(), stateFile.readText())
             questions.addAll(state.questions.map { it.toQuestion() })
-            history.addAll(state.history.map { it.toQuestion() })
+            sessionId.value = state.sessionId
+            sessionName.value = state.sessionName
+            sessionStartedAt.value = state.sessionStartedAt
+            sessions.addAll(state.sessions.map { it.toSession() })
+            if (state.history.isNotEmpty()) sessions.add(legacyHistorySession(state.history))
+            // A session never survives a restart as running, so one that was open when the app
+            // quit is filed, ready to resume, rather than left to merge into the next one.
+            fileCurrentSession(endedAt = questions.maxOfOrNull { it.timestamp } ?: 0L)
             state.votedIps.forEach { (qId, ipMap) ->
                 val map = ConcurrentHashMap<String, String>()
                 map.putAll(ipMap)
@@ -123,14 +167,11 @@ internal class QAStore(val usage: UsageEventStore) {
     }
 }
 
-private fun QuestionDto.toQuestion() = Question(
-    id = id,
-    text = text,
-    submitterName = submitterName,
-    submitterDeviceId = submitterDeviceId,
-    timestamp = timestamp,
-    status = try { QuestionStatus.valueOf(status) } catch (_: Exception) { QuestionStatus.PENDING },
-    voteCount = voteCount,
-    upvotes = upvotes,
-    downvotes = downvotes,
+/** The pre-sessions archive, filed as one session dated by its oldest and newest question. */
+private fun legacyHistorySession(history: List<QuestionDto>) = QASession(
+    id = UUID.randomUUID().toString(),
+    name = LEGACY_HISTORY_SESSION_NAME,
+    startedAt = history.minOf { it.timestamp },
+    endedAt = history.maxOf { it.timestamp },
+    questions = history.map { it.toQuestion() },
 )

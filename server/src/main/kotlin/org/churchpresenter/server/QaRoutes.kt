@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
 import org.churchpresenter.core.models.qa.QuestionDto
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.qa.SubmitQuestionRequest
@@ -58,10 +59,12 @@ private fun Route.qaPublicRoutes(
                 // Public: session status
                 get("/api/qa/status") {
                     val qa = server.qaManager
+                    val sessionName = JsonPrimitive(qa?.sessionName.orEmpty())
                     call.respondText(
                         """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":""" +
                             """${server.qaCooldownSeconds},"displayedQuestionId":""" +
-                            """"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled}}""",
+                            """"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":${server.qaVotingEnabled},""" +
+                            """"sessionName":$sessionName}""",
                         ContentType.Application.Json
                     )
                 }
@@ -197,7 +200,8 @@ private fun Route.qaModerationRoutes(
 ) {
                 post("/api/qa/auth") {
                     if (!server.checkQaAdmin(call)) return@post
-                    if (!server.checkQaAdminConnect(call)) return@post
+                    // The Q&A password is itself the operator's say-so; only without one is the desk asked.
+                    if (!server.qaAdminPasswordTrusted && !server.checkQaAdminConnect(call)) return@post
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -235,8 +239,7 @@ private fun Route.qaModerationRoutes(
                         text = question?.text ?: "",
                         clientId = clientId
                     )
-                    server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) {
+                    if (!server.awaitQaAdminDecision(pending)) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
@@ -275,8 +278,7 @@ private fun Route.qaQuestionEditRoutes(
                         text = request.text,
                         clientId = clientId
                     )
-                    server.onQAAdminRequest.emit(pending)
-                    val allowed = pending.decision.await()
+                    val allowed = server.awaitQaAdminDecision(pending)
                     if (!allowed) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
@@ -303,8 +305,7 @@ private fun Route.qaQuestionEditRoutes(
                         text = question?.text ?: "",
                         clientId = clientId
                     )
-                    server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) {
+                    if (!server.awaitQaAdminDecision(pending)) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
@@ -337,8 +338,7 @@ private fun Route.qaQuestionStateRoutes(
                         text = question?.text ?: "",
                         clientId = clientId
                     )
-                    server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) {
+                    if (!server.awaitQaAdminDecision(pending)) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
@@ -365,8 +365,7 @@ private fun Route.qaQuestionStateRoutes(
                         text = question?.text ?: "",
                         clientId = clientId
                     )
-                    server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) {
+                    if (!server.awaitQaAdminDecision(pending)) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
@@ -400,8 +399,7 @@ private fun Route.qaQuestionDeleteRoutes(
                         text = question?.text ?: "",
                         clientId = clientId
                     )
-                    server.onQAAdminRequest.emit(pending)
-                    val allowed = pending.decision.await()
+                    val allowed = server.awaitQaAdminDecision(pending)
                     if (!allowed) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@delete
@@ -424,6 +422,10 @@ private fun Route.qaAdminActionRoutes(
 ) {
                 post("/api/qa/add") {
                     if (!server.checkQaAdmin(call)) return@post
+                    if (server.qaManager?.sessionActive != true) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
+                        return@post
+                    }
                     val body = call.receiveText()
                     val request = try {
                         json.decodeFromString(SubmitQuestionRequest.serializer(), body)
@@ -437,8 +439,7 @@ private fun Route.qaAdminActionRoutes(
                         text = request.text,
                         clientId = clientId
                     )
-                    server.onQAAdminRequest.emit(pending)
-                    val allowed = pending.decision.await()
+                    val allowed = server.awaitQaAdminDecision(pending)
                     if (!allowed) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
@@ -459,8 +460,7 @@ private fun Route.qaAdminActionRoutes(
                     if (!server.checkQaAdmin(call)) return@post
                     val clientId = call.request.headers["X-Device-Id"] ?: ""
                     val pending = CompanionServer.PendingQAAdminRequest(action = "clear-display", clientId = clientId)
-                    server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) {
+                    if (!server.awaitQaAdminDecision(pending)) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied"}""")
                         return@post
                     }
@@ -474,8 +474,7 @@ private fun Route.qaAdminActionRoutes(
                     if (!server.checkQaAdmin(call)) return@post
                     val clientId = call.request.headers["X-Device-Id"] ?: ""
                     val pending = CompanionServer.PendingQAAdminRequest(action = "clear-all", clientId = clientId)
-                    server.onQAAdminRequest.emit(pending)
-                    if (!pending.decision.await()) {
+                    if (!server.awaitQaAdminDecision(pending)) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"denied"}""")
                         return@post
                     }

@@ -27,6 +27,11 @@ data class QASettings(
     val position: String = Constants.BOTTOM_CENTER,
     val rateLimitCooldownSeconds: Int = 30,
     val votingEnabled: Boolean = false,
+    /**
+     * What the Q&A admin page asks for. Empty falls back to the server API key while key checking is
+     * on, and to no password at all when it is off -- see [effectiveAdminPassword].
+     */
+    val adminPassword: String = "",
     val qrCodeMessage: String = "",
     val qrForegroundColor: String = "#000000",
     val qrBackgroundColor: String = "#FFFFFF",
@@ -39,3 +44,7 @@ data class QASettings(
     /** How this page's boxes behave -- see [TextBoxOptions]. */
     val textBoxOptions: TextBoxOptions = TextBoxOptions(),
 )
+
+/** The password the Q&A admin page takes: its own when set, otherwise the server API key if one is required. */
+fun QASettings.effectiveAdminPassword(server: ServerSettings): String =
+    adminPassword.ifEmpty { if (server.apiKeyEnabled) server.apiKey else "" }
