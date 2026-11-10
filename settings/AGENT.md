@@ -112,6 +112,12 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
 - **A Bible translation's look follows the stack's All layer** (`BibleAllLayer.kt`) except at the
   fields named in its `ownStyleKeys`. Presenters read each translation's own values and never the
   layer.
+- **Looks are stored by file name, and a stack edit moves them** (`BibleLooksByPosition.kt`): where a
+  profile's `bibleSettings.looksFollowPosition` is on, a change, swap, move or removal renames its
+  look entries, text boxes and a follower's override paths to the Bible now in each place. A
+  translation a profile has no look for takes its All look. Never resolve looks by position instead;
+  boxes, linked paths and the presenters all read them by name. What a profile shows
+  (`bibleTranslations`) is positions, and stack edits leave them alone.
 - **A song's All layer is stored only where the first language has values of its own**
   (`SongLayoutExtras.allLanguages`): everywhere else All *is* the first language's look, so settings
   written before it read unchanged. New song settings go in `SongLayoutExtras`, never on `SongSettings`

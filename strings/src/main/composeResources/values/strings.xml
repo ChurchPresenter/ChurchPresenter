@@ -2887,6 +2887,12 @@
     <string name="profile_applies_to">Applies to</string>
     <string name="profile_group_text">Text</string>
     <string name="profile_group_translations">Translations</string>
+    <string name="profile_bible_looks_follow">Follow</string>
+    <string name="profile_bible_looks_follow_place">Place</string>
+    <string name="profile_bible_looks_follow_bible">Bible version</string>
+    <string name="profile_bible_looks_follow_place_hint">Each place keeps its look when its Bible is changed or swapped</string>
+    <string name="profile_bible_looks_follow_bible_hint">Each Bible keeps its own look wherever it moves</string>
+    <string name="profile_bible_translation_place">%1$d · %2$s</string>
     <string name="profile_layout">Layout</string>
     <string name="profile_region_moves_background">Background follows Content Region</string>
     <string name="profile_region_moves_background_sub">On: the background shrinks and moves with the text. Off: the background fills the screen and only the text moves.</string>

@@ -39,7 +39,8 @@ class ProfileTargetingTest {
             waitForIdle()
             typeInRow("Size", 50)
             assertEquals(listOf(50, 70), sizes(get))
-            onNodeWithText("Only KJV").assertExists()
+            // Looks follow the place by default, so the look is place 1's rather than KJV's.
+            onNodeWithText("Only 1").assertExists()
             onNodeWithTag(translationChipTag(ALL_TRANSLATIONS)).performScrollTo().performClick()
             waitForIdle()
             typeInRow("Size", 80)

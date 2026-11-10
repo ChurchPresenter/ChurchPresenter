@@ -298,6 +298,7 @@
 - `profiles/…/ProfileGeneralPage.kt`, `profiles/…/ProfileOutputsPage.kt`, `profiles/…/ProfileBiblePage.kt`, `profiles/…/ProfileSongsPage.kt`, `profiles/…/ProfileBackgroundPage.kt`, `profiles/…/ProfileStagePage.kt` — the pages
 - `data/settings/LinkedProfiles.kt`, `data/settings/LinkedProfilePaths.kt`, `data/settings/LinkedProfileValues.kt`, `dialogs/tabs/ProfileLink*.kt` — linked profiles: a master, and profiles that keep only what they change
 - `data/settings/BibleAllLayer.kt`, `profiles/…/SongAllLanguages.kt`, `profiles/…/ProfileStyleTarget.kt` — "Applies to": All, or one translation or language with values of its own
+- `settings/…/BibleLooksByPosition.kt`, `settings/…/TranslationStackEdits.kt`, `profiles/…/ProfileBibleLooksFollow.kt` — Follow: a profile's Bible looks stay with their place in the stack, or with the Bible, when one is changed, swapped or removed; what a profile shows always stays on its places
 - `dialogs/tabs/PreviewAdjust*.kt`, `profiles/…/LargePreview.kt`, `presenter/PresentedBlock.kt` — adjusting a page from its preview, and the preview across the window
 - `profiles/…/SongElementMove.kt`, `presenter/…/SongElementMove.kt`, `presenter/…/BibleBlockShift.kt` — moving one song element, one Bible translation or its reference on its own, and Reset positions
 - `data/settings/ProfileDefaults.kt`, `profiles/…/ProfileLinkCard.kt` — what a profile changes from the defaults, listed beside the preview with Revert

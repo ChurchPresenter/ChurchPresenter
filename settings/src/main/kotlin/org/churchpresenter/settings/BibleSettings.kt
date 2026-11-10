@@ -364,6 +364,14 @@ data class BibleSettings(
     val verseAutoScroll: Boolean = true,
 
     /**
+     * Whether this profile's translation looks stay with their place in the stack rather than with
+     * the Bible: true, putting NIV where KJV was gives NIV the look KJV had, and a swap leaves each
+     * place looking as it did; false, every Bible keeps its own look wherever it moves. One per
+     * profile -- see `BibleLooksByPosition.kt`.
+     */
+    val looksFollowPosition: Boolean = true,
+
+    /**
      * Whether a very long verse is shown as two halves rather than shrunk to fit in one.
      *
      * The presenter never cuts scripture off -- it scales the whole verse down until it fits -- so

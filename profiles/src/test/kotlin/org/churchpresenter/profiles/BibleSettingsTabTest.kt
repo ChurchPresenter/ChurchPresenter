@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -22,6 +23,9 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.bibleSettingsFor
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.nio.file.Files
@@ -255,6 +259,40 @@ class BibleSettingsTabTest {
             2, harness.current.bibleSettings.translationList().size,
             "and nothing was changed by looking",
         )
+    }
+
+    @Test
+    fun `picking another bible for a slot keeps that slot's look on every screen`() = runComposeUiTest {
+        // The issue this answers: putting NIV where KJV was drew NIV in the class defaults, because
+        // every profile had its look stored under kjv.spb and none under niv.spb.
+        val dir = bibleFolder("kjv.spb" to "King James", "rst.spb" to "Synodal", "niv.spb" to "New International")
+        val profile = OutputProfile(
+            id = "main",
+            bibleSettings = BibleSettings(
+                translations = listOf(
+                    BibleTranslationSettings(fileName = "kjv.spb", textFontSize = 70),
+                    BibleTranslationSettings(fileName = "rst.spb", textFontSize = 40),
+                ),
+            ),
+        )
+        val harness = showTab(
+            AppSettings(
+                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
+                    listOf("kjv.spb", "rst.spb").map { BibleTranslationSettings(fileName = it) },
+                ),
+                projectionSettings = ProjectionSettings(outputProfiles = listOf(profile)),
+            ),
+        )
+        waitForIdle()
+
+        onAllNodesWithText("TRANSLATION 1").onFirst().performClick()
+        waitForIdle()
+        onAllNodesWithText("New International", substring = true).onLast().performClick()
+        waitForIdle()
+
+        val drawn = harness.current.bibleSettingsFor(harness.current.projectionSettings.outputProfiles.first())
+            .translationList().map { it.fileName to it.textFontSize }
+        assertEquals(listOf("niv.spb" to 70, "rst.spb" to 40), drawn)
     }
 
     // ── The stack is bounded, and its rows line up ─────────────────────────────

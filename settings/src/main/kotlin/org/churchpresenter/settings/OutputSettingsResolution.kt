@@ -66,9 +66,12 @@ internal fun BibleSettings.withSparseBibleOverride(styleTree: JsonObject?): Bibl
     if (styleTree == null || styleTree.isEmpty()) return this
     val merged = withSparseOverride(this, styleTree, BibleSettings.serializer())
     val overrideStyles = merged.translationList().associateBy { it.fileName }
+    // A translation this profile has never styled -- just added, or put in a place another Bible
+    // held -- takes the profile's All look rather than the class defaults no screen is set up with.
+    val unstyled by lazy { merged.allStyle().copy(ownStyleKeys = emptySet()) }
     return merged.copy(
         translations = translationList().map { global ->
-            val styled = overrideStyles[global.fileName] ?: return@map global
+            val styled = overrideStyles[global.fileName] ?: unstyled.copy(fileName = global.fileName)
             styled.copy(
                 customName = global.customName,
                 customAbbreviation = global.customAbbreviation,
