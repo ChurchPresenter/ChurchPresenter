@@ -95,7 +95,6 @@
     <string name="clear">Temizle</string>
     <string name="clear_recents">Son kullanılanları temizle</string>
     <string name="recent">Son kullanılan:</string>
-    <string name="found_results">%1$d sonuç bulundu</string>
     <string name="menu_edit">Düzen</string>
     <string name="menu_settings">Ayarlar</string>
     <string name="menu_connect">Bağlan</string>

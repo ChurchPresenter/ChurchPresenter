@@ -64,7 +64,6 @@
     <!-- Schedule Tab Strings -->
     <string name="schedule">Programm</string>
     <string name="clear">Löschen</string>
-    <string name="found_results">%1$d Ergebnis(se) gefunden</string>
 
     <string name="menu_edit">Bearbeiten</string>
     <string name="menu_settings">Einstellungen</string>

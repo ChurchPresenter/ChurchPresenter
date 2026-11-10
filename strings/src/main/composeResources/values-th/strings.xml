@@ -95,7 +95,6 @@
     <string name="clear">ล้าง</string>
     <string name="clear_recents">ล้างรายการล่าสุด</string>
     <string name="recent">ล่าสุด:</string>
-    <string name="found_results">พบ %1$d รายการ</string>
     <string name="menu_edit">แก้ไข</string>
     <string name="menu_settings">การตั้งค่า</string>
     <string name="menu_connect">เชื่อมต่อ</string>

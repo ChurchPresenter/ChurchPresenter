@@ -74,17 +74,17 @@ class BibleSearchAndHistoryPanesTest {
         setContent {
             MaterialTheme {
                 Box(Modifier.size(500.dp, 400.dp)) {
-                    Column { BibleSearchResults(results, query, onResultChosen = { chosen += it }) }
+                    Column { BibleSearchResults(results, query, scopeBook = null, onResultChosen = { chosen += it }) }
                 }
             }
         }
         waitForIdle()
-        assertTrue(has("Found 1 result(s)"))
+        assertTrue(has("Found 1 result(s) in the entire Bible"))
 
         query = "world"
         results = results + BibleSearch("1 John", "4", "9", "sent his only begotten Son into the world")
         waitForIdle()
-        assertTrue(has("Found 2 result(s)"))
+        assertTrue(has("Found 2 result(s) in the entire Bible"))
         onAllNodes(hasText("begotten", substring = true), useUnmergedTree = true)[0].performClick()
         waitForIdle()
         assertEquals("1 John", chosen.single().book)

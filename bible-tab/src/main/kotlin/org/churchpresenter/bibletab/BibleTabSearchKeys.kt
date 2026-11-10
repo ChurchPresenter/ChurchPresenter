@@ -67,7 +67,7 @@ private fun BibleTabScope.referenceIsLive(ref: SmartReference): Boolean {
 }
 
 private fun BibleTabScope.holdForSearch(viewModel: BibleViewModel, query: String) {
-    if (searchMode == BibleSearchMode.TEXT || viewModel.parseReference(query.trim()) == null) return
+    if (viewModel.referenceFor(query.trim()) == null) return
     holdOutputForBrowsing()
 }
 
@@ -89,7 +89,7 @@ private fun BibleTabScope.goLiveFromSearch(viewModel: BibleViewModel) {
     }
     val query = searchQuery.trim()
     if (query.isEmpty()) return
-    val ref = if (searchMode == BibleSearchMode.TEXT) null else viewModel.parseReference(query)
+    val ref = viewModel.referenceFor(query)
     val deeper = ref?.let(::drilledReference)
     when {
         ref == null -> viewModel.submitSmartQuery()

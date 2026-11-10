@@ -67,7 +67,6 @@
     <!-- Schedule Tab Strings -->
     <string name="schedule">Program</string>
     <string name="clear">Vymazať</string>
-    <string name="found_results">Nájdených %1$d výsledok/výsledkov</string>
 
     <string name="menu_edit">Upraviť</string>
     <string name="menu_settings">Nastavenia</string>

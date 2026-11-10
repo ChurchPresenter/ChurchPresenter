@@ -29,7 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.found_results
+import org.churchpresenter.strings.generated.resources.bible_found_results_bible
+import org.churchpresenter.strings.generated.resources.bible_found_results_book
 import org.churchpresenter.sharedui.composables.initialPassClickable
 import org.churchpresenter.sharedui.utils.highlightedText
 import org.jetbrains.compose.resources.stringResource
@@ -42,12 +43,15 @@ import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
 
 /**
- * The list a text search produced, with the matched words picked out of each verse.
+ * The list a text search produced, with the matched words picked out of each verse, under a count
+ * that says where it searched.
  */
 @Composable
 internal fun ColumnScope.BibleSearchResults(
     results: List<BibleSearch>,
     query: String,
+    /** The book the search was limited to, or null for the entire Bible. */
+    scopeBook: String?,
     onResultChosen: (BibleSearch) -> Unit,
     /** The result the arrow keys reached from the search box; -1 for none. */
     highlightedIndex: Int = -1,
@@ -63,7 +67,11 @@ internal fun ColumnScope.BibleSearchResults(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(Res.string.found_results, results.size),
+                    text = if (scopeBook == null) {
+                        stringResource(Res.string.bible_found_results_bible, results.size)
+                    } else {
+                        stringResource(Res.string.bible_found_results_book, results.size, scopeBook)
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )

@@ -95,7 +95,6 @@
     <string name="clear">クリア</string>
     <string name="clear_recents">履歴をクリア</string>
     <string name="recent">最近使った項目：</string>
-    <string name="found_results">%1$d 件見つかりました</string>
     <string name="menu_edit">編集</string>
     <string name="menu_settings">設定</string>
     <string name="menu_connect">接続</string>

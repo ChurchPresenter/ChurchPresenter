@@ -12,8 +12,11 @@ fun BibleViewModel.updateSearchQuery(query: String) {
     _searchQuery.value = query
 }
 
+/** A new scope changes what Auto makes of the query (see [referenceFor]), so it is read again. */
 fun BibleViewModel.updateSelectedScopeIndex(index: Int) {
+    if (index == _selectedScopeIndex.value) return
     _selectedScopeIndex.value = index
+    onSmartQueryChanged(_searchQuery.value)
 }
 
 fun BibleViewModel.updateSelectedModeIndex(index: Int) {
@@ -58,7 +61,7 @@ internal fun BibleViewModel.launchSearch(debounceMs: Long) {
             try {
                 val pattern = if (isExactMatch) "\\b${Regex.escape(query)}\\b" else Regex.escape(query)
                 val searchRegex = Regex(pattern, RegexOption.IGNORE_CASE)
-                if (scopeIndex == 1) {
+                if (scopeIndex == SCOPE_CURRENT_BOOK) {
                     bible.searchBible(allWords = false, searchExp = searchRegex, book = bible.getBookId(bookIndex))
                 } else {
                     bible.searchBible(allWords = false, searchExp = searchRegex)

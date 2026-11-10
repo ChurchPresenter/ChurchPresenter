@@ -119,6 +119,8 @@ internal fun ColumnScope.BibleBrowserPane(
     onLiveVerseClicked: (Int) -> Unit,
     /** The verse card's header: its label (when [showLabel]) and the actions beside it. */
     verseHeader: @Composable (showLabel: Boolean) -> Unit,
+    /** Whether picking a verse near the bottom scrolls the next ones into view (Settings → Bible). */
+    verseScrollAhead: Boolean = true,
     /** Drawn under the verse pane, inside the same column — the history panel. */
     footer: @Composable () -> Unit,
 ) {
@@ -180,6 +182,7 @@ internal fun ColumnScope.BibleBrowserPane(
                             books.getOrNull(selectedBookIndex).orEmpty(), selectedChapter, translationTitle,
                         ),
                         header = { if (!isSplitActive) verseHeader(true) },
+                        verseScrollAhead = verseScrollAhead,
                     )
 
                     if (crossRefsDocked) {
@@ -259,6 +262,7 @@ private fun VerseCard(
     onAddToSchedule: () -> Unit,
     menuHeading: VerseMenuHeading,
     header: @Composable () -> Unit,
+    verseScrollAhead: Boolean = true,
 ) {
     val density = LocalDensity.current
     Column(modifier = modifier.bibleListCard()) {
@@ -285,6 +289,7 @@ private fun VerseCard(
                 selectedIndex = selectedVerseInFiltered,
                 selectedIndices = selectedVerseIndices,
                 onItemSelected = onVerseSelected,
+                scrollAhead = verseScrollAhead,
                 refCountFor = { index ->
                     filteredVerses.getOrNull(index)
                         ?.let(::verseNumberOf)

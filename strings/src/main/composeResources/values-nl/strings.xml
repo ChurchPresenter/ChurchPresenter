@@ -67,7 +67,6 @@
     <!-- Schedule Tab Strings -->
     <string name="schedule">Programma</string>
     <string name="clear">Wissen</string>
-    <string name="found_results">%1$d resultaat/resultaten gevonden</string>
 
     <string name="menu_edit">Bewerken</string>
     <string name="menu_settings">Instellingen</string>

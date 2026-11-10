@@ -14,6 +14,8 @@ internal fun BibleTabScope.stepSearch(viewModel: BibleViewModel, forward: Boolea
         true
     }
     searchMode == BibleSearchMode.TEXT -> false
+    // A book name would read as text here, so there are no books to step from an empty box.
+    searchQuery.isBlank() && booklessReferences -> false
     searchQuery.isBlank() -> startFromSelectedBook(viewModel)
     else -> stepTypedReference(viewModel, forward)
 }
@@ -27,7 +29,7 @@ private fun BibleTabScope.startFromSelectedBook(viewModel: BibleViewModel): Bool
 
 /** One step at the level the query names, rewriting it; false when the query is not a reference. */
 private fun BibleTabScope.stepTypedReference(viewModel: BibleViewModel, forward: Boolean): Boolean {
-    val ref = viewModel.parseReference(searchQuery.trim()) ?: return false
+    val ref = viewModel.referenceFor(searchQuery.trim()) ?: return false
     val next = steppedReference(viewModel, ref, forward) ?: return true
     searchQueryChanged(viewModel, referenceText(next))
     return true
@@ -74,12 +76,20 @@ private fun BibleTabScope.lastVerseOf(ref: SmartReference): Int? {
     return verses.lastOrNull()?.let { it.substringBefore(". ").toIntOrNull() }
 }
 
-/** How a reference reads in the search box: "John", "John 3" or "John 3:16". */
+/**
+ * Auto searching the Current Book: only numbers are a reference, a place in that book
+ * ([referenceFor]), so the search box writes references without the book.
+ */
+private val BibleTabScope.booklessReferences: Boolean
+    get() = selectedScopeIndex == SCOPE_CURRENT_BOOK && searchMode == BibleSearchMode.AUTO
+
+/** How a reference reads in the search box: "John", "John 3" or "John 3:16" -- "3", "3:16" in [booklessReferences]. */
 internal fun BibleTabScope.referenceText(ref: SmartReference): String {
     val book = books.getOrNull(ref.bookIndex).orEmpty()
     val chapter = ref.chapter ?: return book
-    val verse = ref.verseStart ?: return "$book $chapter"
-    return "$book $chapter:$verse"
+    val prefix = if (booklessReferences) "" else "$book "
+    val verse = ref.verseStart ?: return "$prefix$chapter"
+    return "$prefix$chapter:$verse"
 }
 
 /**

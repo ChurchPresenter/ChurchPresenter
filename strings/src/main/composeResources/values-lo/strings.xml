@@ -95,7 +95,6 @@
     <string name="clear">ລ້າງ</string>
     <string name="clear_recents">ລ້າງລາຍການທີ່ໃຊ້ຫຼ້າສຸດ</string>
     <string name="recent">ຫຼ້າສຸດ:</string>
-    <string name="found_results">ພົບ %1$d ຜົນ</string>
     <string name="menu_edit">ແກ້ໄຂ</string>
     <string name="menu_settings">ຕັ້ງຄ່າ</string>
     <string name="menu_connect">ເຊື່ອມຕໍ່</string>

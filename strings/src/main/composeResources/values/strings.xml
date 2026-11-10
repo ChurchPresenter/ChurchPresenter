@@ -107,6 +107,7 @@
     <string name="bible_cross_references">Cross References</string>
     <string name="bible_cross_references_title">Refs</string>
     <string name="bible_cross_references_enable">Show cross reference links</string>
+    <string name="bible_verse_auto_scroll">Scroll ahead when a verse near the bottom of the list is selected</string>
     <string name="bible_cross_references_none">No cross references</string>
     <string name="bible_cross_references_often_next">Often next</string>
     <string name="bible_cross_references_passage">Passage %1$s</string>
@@ -131,7 +132,10 @@
     <string name="clear">Clear</string>
     <string name="clear_recents">Clear recents</string>
     <string name="recent">Recent:</string>
-    <string name="found_results">Found %1$d result(s)</string>
+    <string name="bible_found_results_bible">Found %1$d result(s) in the entire Bible</string>
+    <string name="bible_found_results_book">Found %1$d result(s) in %2$s</string>
+    <string name="bible_no_results_bible">No results found for "%1$s" in the entire Bible</string>
+    <string name="bible_no_results_book">No results found for "%1$s" in %2$s</string>
 
     <string name="menu_edit">Edit</string>
     <string name="menu_settings">Settings</string>
