@@ -36,6 +36,7 @@ val BIBLE_GLOBAL_KEYS = setOf(
     "storageDirectory", "bibleFiles", "primaryBible", "secondaryBible",
     "bibleColWidthBook", "bibleColWidthChapter", "captionLanguage",
     "splitBrowseMode", "splitLivePanelWidth", "crossReferencesEnabled", "crossReferencesPanel",
+    "verseAutoScroll",
 )
 
 /**

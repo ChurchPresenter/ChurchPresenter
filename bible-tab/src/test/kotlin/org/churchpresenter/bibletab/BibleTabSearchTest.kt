@@ -63,7 +63,10 @@ class BibleTabSearchTest {
         waitForIdle()
 
         assertTrue(vm.isSearchMode.value, "the result list replaced the browser")
-        assertTrue(showsExactly("Found 1 result(s)"), "the result count: ${renderedText().take(20)}")
+        assertTrue(
+            showsExactly("Found 1 result(s) in the entire Bible"),
+            "the result count: ${renderedText().take(20)}",
+        )
         assertTrue(
             showsExactly("Psalms 23:1 The LORD is my shepherd; I shall not want."),
             "the matching verse, with its reference shown exactly once: ${renderedText().take(20)}",
@@ -96,7 +99,7 @@ class BibleTabSearchTest {
         waitForIdle()
 
         assertTrue(
-            showsExactly("""No results found for "nothingmatchesthis""""),
+            showsExactly("""No results found for "nothingmatchesthis" in the entire Bible"""),
             "the empty-result message names the query: ${renderedText().take(20)}",
         )
     }
@@ -130,7 +133,7 @@ class BibleTabSearchTest {
         // to produce an empty search rather than the navigation Auto mode would have done.
         assertEquals(0, vm.selectedBookIndex.value, "the browser did not move to John")
         assertTrue(
-            showsExactly("""No results found for "John 3:16""""),
+            showsExactly("""No results found for "John 3:16" in the entire Bible"""),
             "it searched instead: ${renderedText().take(20)}",
         )
     }

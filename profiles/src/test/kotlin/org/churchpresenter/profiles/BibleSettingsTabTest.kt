@@ -155,12 +155,13 @@ class BibleSettingsTabTest {
 
     // ── Checkboxes ────────────────────────────────────────────────────────────
     //
-    // In composition order: split browse, then cross references — the only two content flags left
-    // on this tab.
+    // In composition order: split browse, cross references, then scrolling ahead in the verse list —
+    // the content flags left on this tab.
 
     private object Box {
         const val SPLIT_BROWSE = 0
         const val CROSS_REFERENCES = 1
+        const val VERSE_AUTO_SCROLL = 2
     }
 
     /** Clicks checkbox [index] and returns the bible settings that produced. */
@@ -194,6 +195,18 @@ class BibleSettingsTabTest {
 
         assertEquals(false, after.crossReferencesEnabled, "cross references start on and turn off")
         assertEquals(before.copy(crossReferencesEnabled = false), after)
+    }
+
+    @Test
+    fun `verse auto scroll toggles only its own flag`() = runComposeUiTest {
+        val harness = showTab()
+        val before = harness.current.bibleSettings
+
+        val after = toggle(Box.VERSE_AUTO_SCROLL, harness)
+        onAllNodes(isToggleable())[Box.VERSE_AUTO_SCROLL].assertIsOff()
+
+        assertEquals(false, after.verseAutoScroll, "scrolling ahead starts on and turns off")
+        assertEquals(before.copy(verseAutoScroll = false), after)
     }
 
     // ── A slot cannot be pointed at a bible another slot already holds ─────────

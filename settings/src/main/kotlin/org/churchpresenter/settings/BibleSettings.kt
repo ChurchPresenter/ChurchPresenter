@@ -360,6 +360,9 @@ data class BibleSettings(
     val crossReferencesEnabled: Boolean = true,
     val crossReferencesPanel: Boolean = false,
 
+    /** Whether picking a verse near the bottom of the verse list scrolls the next verses into view. */
+    val verseAutoScroll: Boolean = true,
+
     /**
      * Whether a very long verse is shown as two halves rather than shrunk to fit in one.
      *

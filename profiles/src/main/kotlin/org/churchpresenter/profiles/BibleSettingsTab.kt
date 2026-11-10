@@ -30,6 +30,7 @@ import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_bible_translation
 import org.churchpresenter.strings.generated.resources.bible_cross_references_enable
+import org.churchpresenter.strings.generated.resources.bible_verse_auto_scroll
 import org.churchpresenter.strings.generated.resources.bible_abbreviation_short
 import org.churchpresenter.strings.generated.resources.bible_custom_name
 import org.churchpresenter.strings.generated.resources.bible_miscellaneous
@@ -418,6 +419,17 @@ private fun MiscellaneousSection(
                 },
                 controlModifier = Modifier.size(24.dp),
                 label = stringResource(Res.string.bible_cross_references_enable),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            LabeledCheckbox(
+                checked = settings.bibleSettings.verseAutoScroll,
+                onCheckedChange = { enabled ->
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(verseAutoScroll = enabled)) }
+                },
+                controlModifier = Modifier.size(24.dp),
+                label = stringResource(Res.string.bible_verse_auto_scroll),
                 modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,

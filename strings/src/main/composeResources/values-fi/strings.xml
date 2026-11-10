@@ -95,7 +95,6 @@
     <string name="clear">Tyhjennä</string>
     <string name="clear_recents">Tyhjennä viimeisimmät</string>
     <string name="recent">Viimeisimmät:</string>
-    <string name="found_results">Löytyi %1$d tulosta</string>
     <string name="menu_edit">Muokkaa</string>
     <string name="menu_settings">Asetukset</string>
     <string name="menu_connect">Yhdistä</string>

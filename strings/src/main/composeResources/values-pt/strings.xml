@@ -67,7 +67,6 @@
     <!-- Schedule Tab Strings -->
     <string name="schedule">Roteiro</string>
     <string name="clear">Limpar</string>
-    <string name="found_results">Encontrado(s) %1$d resultado(s)</string>
 
     <string name="menu_edit">Editar</string>
     <string name="menu_settings">Configurações</string>

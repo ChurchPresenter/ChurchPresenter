@@ -64,7 +64,6 @@
     <!-- Schedule Tab Strings -->
     <string name="schedule">Бағдарлама</string>
     <string name="clear">Тазалау</string>
-    <string name="found_results">%1$d нәтиже табылды</string>
 
     <string name="menu_edit">Өңдеу</string>
     <string name="menu_settings">Параметрлер</string>

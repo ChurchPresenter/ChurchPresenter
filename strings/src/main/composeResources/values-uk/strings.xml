@@ -64,7 +64,6 @@
     <!-- Schedule Tab Strings -->
     <string name="schedule">Програма</string>
     <string name="clear">Очистити</string>
-    <string name="found_results">Знайдено %1$d результат(ів)</string>
 
     <string name="menu_edit">Правка</string>
     <string name="menu_settings">Налаштування</string>

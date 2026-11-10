@@ -95,7 +95,6 @@
     <string name="clear">清除</string>
     <string name="clear_recents">清除最近使用</string>
     <string name="recent">最近使用：</string>
-    <string name="found_results">找到 %1$d 条结果</string>
     <string name="menu_edit">编辑</string>
     <string name="menu_settings">设置</string>
     <string name="menu_connect">连接</string>

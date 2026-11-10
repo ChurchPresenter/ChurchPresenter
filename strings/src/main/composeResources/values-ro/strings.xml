@@ -83,7 +83,6 @@
     <!-- Schedule Tab Strings -->
     <string name="schedule">Program</string>
     <string name="clear">Golește</string>
-    <string name="found_results">Găsite %1$d rezultat(e)</string>
 
     <string name="menu_edit">Editare</string>
     <string name="menu_settings">Setări</string>

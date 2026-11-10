@@ -12,13 +12,18 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class BibleColumnsScrollAheadTest {
 
@@ -124,6 +129,81 @@ class BibleColumnsScrollAheadTest {
 
             assertEquals(3, selected)
         }
+
+    /** The verse number of the last row drawn whole in the [heightPx]-high column, as an index. */
+    /**
+     * The verse numbers of the rows drawn whole in the column, top to bottom. A row the list has
+     * composed ahead but not placed has no size, so it is left out.
+     */
+    private fun ComposeUiTest.wholeRows(): List<Int> {
+        val height = onRoot().fetchSemanticsNode().size.height.toFloat()
+        return onAllNodes(hasText(" verse number ", substring = true)).fetchSemanticsNodes()
+            .map { it.boundsInRoot to it.config[SemanticsProperties.Text].joinToString("") { t -> t.text } }
+            .filter { (bounds, _) -> bounds.height > 0f && bounds.top >= 0f && bounds.bottom <= height }
+            .sortedBy { (bounds, _) -> bounds.top }
+            .map { (_, text) -> text.substringBefore('.').toInt() }
+    }
+
+    /**
+     * Picks the last whole row of a verse column and reports how many rows further down the last
+     * whole row is afterwards. The bottom is what moves: a row scrolled off the top can linger in
+     * the semantics tree where it was.
+     */
+    private fun rowsScrolledByPickingTheLastWholeRow(scrollAhead: Boolean): Int {
+        var moved = 0
+        runComposeUiTest {
+            var selected by mutableIntStateOf(-1)
+            setContent {
+                MaterialTheme {
+                    Box(Modifier.size(300.dp, 200.dp)) {
+                        BibleVerseColumn(
+                            verses = chapter,
+                            selectedIndex = selected,
+                            onItemSelected = { selected = it },
+                            scrollAhead = scrollAhead,
+                        )
+                    }
+                }
+            }
+            waitForIdle()
+            val lastBefore = wholeRows().last()
+            selected = lastBefore - 1
+            waitForIdle()
+            moved = wholeRows().last() - lastBefore
+        }
+        return moved
+    }
+
+    @Test
+    fun `picking a verse at the bottom scrolls the next ones into view`() =
+        assertEquals(2, rowsScrolledByPickingTheLastWholeRow(scrollAhead = true), "the two verses after it")
+
+    @Test
+    fun `with scrolling ahead off a verse at the bottom leaves the list where it was`() =
+        assertEquals(0, rowsScrolledByPickingTheLastWholeRow(scrollAhead = false))
+
+    @Test
+    fun `with scrolling ahead off a verse off screen is still brought into view`() = runComposeUiTest {
+        var selected by mutableIntStateOf(-1)
+        setContent {
+            MaterialTheme {
+                Box(Modifier.size(300.dp, 200.dp)) {
+                    BibleVerseColumn(
+                        verses = chapter,
+                        selectedIndex = selected,
+                        onItemSelected = { selected = it },
+                        scrollAhead = false,
+                    )
+                }
+            }
+        }
+        waitForIdle()
+        selected = 30
+        waitForIdle()
+
+        // Index 30 is verse 31, which was nowhere near the window.
+        assertTrue(31 in wholeRows(), "jumped to: ${wholeRows()}")
+    }
 
     @Test
     fun `a browser column brings a selection made elsewhere into view and ignores one out of range`() =

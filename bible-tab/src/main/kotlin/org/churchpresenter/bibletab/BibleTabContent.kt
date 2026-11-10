@@ -37,7 +37,8 @@ import org.churchpresenter.strings.generated.resources.contains_phrase
 import org.churchpresenter.strings.generated.resources.current_book
 import org.churchpresenter.strings.generated.resources.entire_bible
 import org.churchpresenter.strings.generated.resources.exact_match
-import org.churchpresenter.strings.generated.resources.no_results_found
+import org.churchpresenter.strings.generated.resources.bible_no_results_bible
+import org.churchpresenter.strings.generated.resources.bible_no_results_book
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
@@ -80,6 +81,8 @@ internal fun ColumnScope.BibleTabContent(
         )
         val selectedMode = modeOptions.getOrElse(selectedModeIndex) { modeOptions.first() }
 
+        val scopeBook = if (selectedScopeIndex == SCOPE_CURRENT_BOOK) books.getOrNull(selectedBookIndex) else null
+
         val searchPlaceholder = stringResource(Res.string.bible_smart_search_hint)
         BibleSearchRow(
             searchQuery = searchQuery,
@@ -110,6 +113,7 @@ internal fun ColumnScope.BibleTabContent(
             BibleSearchResults(
                 results = searchResults,
                 query = searchQuery,
+                scopeBook = scopeBook,
                 highlightedIndex = ui.highlightedResult,
                 onResultChosen = { result ->
                     viewModel.selectSearchResult(result)
@@ -123,7 +127,11 @@ internal fun ColumnScope.BibleTabContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(Res.string.no_results_found, searchQuery),
+                    text = if (scopeBook == null) {
+                        stringResource(Res.string.bible_no_results_bible, searchQuery)
+                    } else {
+                        stringResource(Res.string.bible_no_results_book, searchQuery, scopeBook)
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -296,6 +304,7 @@ private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabSco
                 ),
                 selectedVerseInFiltered = if (filteredVerses.isEmpty()) -1 else
                     filteredVerses.indexOf(verses.getOrNull(selectedVerseIndex)).coerceAtLeast(0),
+                verseScrollAhead = appSettings.bibleSettings.verseAutoScroll,
                 bookWidthPx = colWBook,
                 chapterWidthPx = colWChapter,
                 crossRefWidthPx = colWCrossRef,

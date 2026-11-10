@@ -419,6 +419,8 @@ internal fun BibleVerseColumn(
     onRefsClicked: (Int) -> Unit = {},
 
     refPopover: @Composable () -> Unit = {},
+    /** Whether picking one of the last rows scrolls the next verses into view (Settings → Bible). */
+    scrollAhead: Boolean = true,
 ) {
     val listState = rememberLazyListState()
     LaunchedEffect(verses) {
@@ -434,7 +436,7 @@ internal fun BibleVerseColumn(
             listState.scrollToItem(it)
             return@LaunchedEffect
         }
-        if (selectedIndex + 1 >= verses.size) return@LaunchedEffect
+        if (!scrollAhead || selectedIndex + 1 >= verses.size) return@LaunchedEffect
         val scrollAmount = scrollAheadAmount(listState.layoutInfo, selectedIndex)
         if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
     }

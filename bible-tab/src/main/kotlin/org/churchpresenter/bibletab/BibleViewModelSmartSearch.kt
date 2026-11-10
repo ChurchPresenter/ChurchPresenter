@@ -71,26 +71,6 @@ internal fun BibleViewModel.resolveBookForLiveNav(token: String): Int {
     return if (top != null && topCount == 1) top.first else -1
 }
 
-internal fun BibleViewModel.parseReference(input: String): SmartReference? {
-    val refRegex = Regex("^(.*?)\\s*(\\d+)(?:\\s*[:. ]\\s*(\\d+)(?:\\s*-\\s*(\\d+))?)?\\s*$")
-    val match = refRegex.find(input)
-    if (match != null) {
-        val bookToken = match.groupValues[1].trim()
-        val chapter = match.groupValues[2].toIntOrNull()
-        val verseStart = match.groupValues[3].toIntOrNull()
-        val verseEnd = match.groupValues[4].toIntOrNull()
-        val bookIndex = if (bookToken.isEmpty()) {
-            _selectedBookIndex.value
-        } else {
-            resolveBook(bookToken).takeIf { it >= 0 } ?: return null
-        }
-        return SmartReference(bookIndex, chapter, verseStart, verseEnd)
-    }
-
-    val bookIndex = resolveBookForLiveNav(input)
-    return if (bookIndex >= 0) SmartReference(bookIndex, null, null, null) else null
-}
-
 internal fun BibleViewModel.isReferenceQuery(query: String): Boolean = parseReference(query.trim()) != null
 
 internal fun BibleViewModel.navigateToReference(
@@ -166,7 +146,7 @@ internal fun BibleViewModel.onSmartQueryChanged(query: String) {
             parseReference(trimmed)?.let { navigateToReference(it) }
         }
         BibleSearchMode.AUTO -> {
-            val ref = parseReference(trimmed)
+            val ref = referenceFor(trimmed)
             if (ref != null) {
                 searchJob?.cancel()
                 navigateToReference(ref)
@@ -187,7 +167,7 @@ internal fun BibleViewModel.submitSmartQuery() {
         BibleSearchMode.TEXT -> performSearch()
         BibleSearchMode.REFERENCE -> parseReference(trimmed)?.let { navigateToReference(it) }
         BibleSearchMode.AUTO -> {
-            val ref = parseReference(trimmed)
+            val ref = referenceFor(trimmed)
             if (ref != null) navigateToReference(ref) else performSearch()
         }
     }

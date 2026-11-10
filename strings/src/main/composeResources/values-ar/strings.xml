@@ -95,7 +95,6 @@
     <string name="clear">مسح</string>
     <string name="clear_recents">مسح العناصر الأخيرة</string>
     <string name="recent">الأخيرة:</string>
-    <string name="found_results">تم العثور على %1$d نتيجة</string>
     <string name="menu_edit">تحرير</string>
     <string name="menu_settings">الإعدادات</string>
     <string name="menu_connect">اتصال</string>
