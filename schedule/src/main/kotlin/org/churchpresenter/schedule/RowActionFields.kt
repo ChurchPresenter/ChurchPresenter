@@ -58,6 +58,7 @@ internal fun RowActionFields(
             is Action.ClearGroup -> NamePicker(Res.string.action_field_group, action.group, choices.clearGroups) {
                 onChange(action.copy(group = it))
             }
+            is Action.HoldScreen -> HoldScreenFields(action, onChange)
             is Action.Message -> MessageFields(action, choices.messages, onChange)
             is Action.Prop -> PropFields(action, choices.props, onChange)
             is Action.LowerThird -> NamePicker(Res.string.action_field_preset, action.preset, choices.lowerThirds) {

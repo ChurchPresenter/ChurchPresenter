@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.findLottiePresetFile
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.ScreenHold
 import org.churchpresenter.liveoutput.clearGroup
 import org.churchpresenter.liveoutput.clearLayer
 import org.churchpresenter.liveoutput.layerForName
@@ -87,6 +88,23 @@ internal class AppShowHost(
     }
 
     override suspend fun clearAll() = presenterManager.requestClearDisplay()
+
+    override suspend fun holdScreen(action: Action.HoldScreen) {
+        val hold = when (action.mode.trim().lowercase()) {
+            "hold" -> ScreenHold.HOLD
+            "blank" -> ScreenHold.BLANK
+            else -> throw IllegalArgumentException("No hold mode called ${action.mode}")
+        }
+        val all = action.screen.trim().equals("all", ignoreCase = true)
+        val index = if (all) 0 else requireNotNull(action.screen.trim().toIntOrNull()) {
+            "No screen called ${action.screen}"
+        } - 1
+        val holds = presenterManager.screenHolds.value
+        // Absent toggles: release what is held, otherwise hold. "all" releases only when every screen is held.
+        val on = action.on ?: if (all) holds.size < presenterManager.screenCount else index !in holds
+        val held = hold.takeIf { on }
+        if (all) presenterManager.holdAllScreens(held) else presenterManager.setScreenHold(index, held)
+    }
 
     override suspend fun clearGroup(group: String) {
         val found = settings().clearGroups.named(group, { it.id }, { it.name })

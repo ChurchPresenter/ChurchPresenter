@@ -94,6 +94,8 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_remo
 import org.churchpresenter.strings.generated.resources.shortcut_description_save_schedule
 import org.churchpresenter.strings.generated.resources.shortcut_description_save_schedule_as
 import org.churchpresenter.strings.generated.resources.shortcut_description_settings
+import org.churchpresenter.strings.generated.resources.shortcut_description_hold_all_screens
+import org.churchpresenter.strings.generated.resources.shortcut_description_release_all_screens
 import org.churchpresenter.strings.generated.resources.shortcut_description_take
 import org.churchpresenter.strings.generated.resources.shortcut_description_undo
 import org.churchpresenter.strings.generated.resources.shortcut_description_go_live_key
@@ -208,6 +210,10 @@ enum class ShortcutAction(
 
     // Preview mode's Take. Unbound until someone picks a key for it.
     TAKE(ShortcutScope.GLOBAL, Res.string.shortcut_description_take, emptyList()),
+
+    // Screen hold: freeze every screen on its last frame, or let them all go. Unbound until someone picks a key.
+    HOLD_ALL_SCREENS(ShortcutScope.GLOBAL, Res.string.shortcut_description_hold_all_screens, emptyList()),
+    RELEASE_ALL_SCREENS(ShortcutScope.GLOBAL, Res.string.shortcut_description_release_all_screens, emptyList()),
     UNDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_undo,
         listOf(KeyChord.of(Key.Z, ctrl = true))),
     REDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_redo,

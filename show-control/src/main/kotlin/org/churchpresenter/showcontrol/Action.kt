@@ -42,6 +42,14 @@ sealed interface Action {
     @SerialName("clearAll")
     data object ClearAll : Action
 
+    /**
+     * Holds a screen back from what goes live, or releases it. [screen] is the screen's number (from 1) or
+     * `all`; [mode] is `hold` (freeze the last frame) or `blank` (black); [on] absent toggles.
+     */
+    @Serializable
+    @SerialName("holdScreen")
+    data class HoldScreen(val screen: String = "all", val mode: String = "hold", val on: Boolean? = null) : Action
+
     /** Clears an operator's clear group, named by its id or its name. */
     @Serializable
     @SerialName("clearGroup")

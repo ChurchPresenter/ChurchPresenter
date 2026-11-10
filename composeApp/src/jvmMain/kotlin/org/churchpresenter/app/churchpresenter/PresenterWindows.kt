@@ -82,6 +82,7 @@ import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.liveoutput.OverlayModes
 import org.churchpresenter.liveoutput.MessageExpiry
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.HeldOutputFrame
 import org.churchpresenter.liveoutput.shownModeFor
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.diagnostics.CrashReporter
@@ -120,6 +121,7 @@ internal fun PresenterWindows(
     val showPresenterWindow by presenterManager.showPresenterWindow
     val slideContent by presenterManager.slideContent
     val screenLocks by presenterManager.screenLocks
+    val screenHolds by presenterManager.screenHolds
     val selectedVerses by presenterManager.selectedVerses
     val displayedVerses by presenterManager.displayedVerses
     val lyricSection by presenterManager.lyricSection
@@ -161,11 +163,13 @@ internal fun PresenterWindows(
         effectiveMode: Presenting,
         screenNumber: Int?
     ) -> Unit = { screenAssignment, effectiveMode, screenNumber ->
-        PresenterOutputContent(
-            screenAssignment, effectiveMode, screenNumber, presenterManager, appSettings,
-            mediaViewModel, sttManager, serverUrl, qaDisplayUrl, identifyingScreen,
-            lottieComposition, clearAnnouncementOnFinish,
-        )
+        HeldOutputFrame(hold = screenNumber?.let { screenHolds[it - 1] }) {
+            PresenterOutputContent(
+                screenAssignment, effectiveMode, screenNumber, presenterManager, appSettings,
+                mediaViewModel, sttManager, serverUrl, qaDisplayUrl, identifyingScreen,
+                lottieComposition, clearAnnouncementOnFinish,
+            )
+        }
     }
 
     val availableScreens = nonPrimaryIndices(screens.toList(), defaultScreenDevice())
@@ -185,6 +189,8 @@ internal fun PresenterWindows(
         simulateMissing = LocalSimulateMissingOutputs.current,
     )
     val devWindowedFallback = devFallbackCount > 0
+    // "Hold all" holds as many screens as there are windows.
+    SideEffect { presenterManager.setScreenCount(windowCount + devFallbackCount) }
     val displays = screens.map { it.defaultConfiguration.bounds.asDisplayRect() }
     for (i in 0 until (windowCount + devFallbackCount)) {
         val isFallback = isFallbackWindowSlot(devWindowedFallback, i, windowCount)

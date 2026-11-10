@@ -5,6 +5,7 @@ import androidx.compose.ui.input.key.Key
 import org.churchpresenter.app.churchpresenter.utils.keyDown
 import org.churchpresenter.app.churchpresenter.utils.keyUp
 import org.churchpresenter.core.models.shortcuts.KeyChord
+import org.churchpresenter.liveoutput.ScreenHold
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.settings.Macro
@@ -94,6 +95,23 @@ class MainDesktopKeyHandlerTest {
         assertEquals(0, takes)
         assertTrue(handleMainDesktopKey(keyDown(Key.F9), context(actions, devMode = true, settings = settings)))
         assertEquals(1, takes)
+    }
+
+    @Test
+    fun `the screen hold keys hold and release every screen, with or without dev mode`() {
+        val holds = mutableListOf<ScreenHold?>()
+        val settings = AppSettings(
+            keyboardShortcutSettings = KeyboardShortcutSettings(
+                overrides = mapOf(
+                    ShortcutAction.HOLD_ALL_SCREENS.name to listOf(KeyChord.of(Key.F10)),
+                    ShortcutAction.RELEASE_ALL_SCREENS.name to listOf(KeyChord.of(Key.F11)),
+                ),
+            ),
+        )
+        val actions = MainDesktopKeyActions(holdAllScreens = { holds += it })
+        assertTrue(handleMainDesktopKey(keyDown(Key.F10), context(actions, devMode = false, settings = settings)))
+        assertTrue(handleMainDesktopKey(keyDown(Key.F11), context(actions, devMode = true, settings = settings)))
+        assertEquals(listOf(ScreenHold.HOLD, null), holds)
     }
 
     @Test

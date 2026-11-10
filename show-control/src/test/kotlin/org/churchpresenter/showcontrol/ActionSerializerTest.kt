@@ -30,6 +30,7 @@ class ActionSerializerTest {
         Action.Clear("MESSAGES"),
         Action.ClearAll,
         Action.ClearGroup("Clear text"),
+        Action.HoldScreen("2", "blank", on = true),
         Action.Message(template = "Nursery", tokens = mapOf("number" to "12"), durationSeconds = 30),
         Action.Prop("Logo", on = false),
         Action.LowerThird("Pastor"),
@@ -56,7 +57,7 @@ class ActionSerializerTest {
         val types = json.parseToJsonElement(json.encodeToString(list, every)).jsonArray
             .map { it.jsonObject.getValue("type").jsonPrimitive.content }.toSet()
         val pinned = setOf(
-            "set", "preview", "take", "clear", "clearAll", "clearGroup", "message", "prop", "lowerThird",
+            "set", "preview", "take", "clear", "clearAll", "clearGroup", "holdScreen", "message", "prop", "lowerThird",
             "timer", "media", "obsScene", "atemKey", "atemMacro", "companion", "next", "previous", "wait", "macro",
         )
         assertEquals(pinned, types)

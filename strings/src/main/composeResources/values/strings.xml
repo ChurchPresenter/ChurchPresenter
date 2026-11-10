@@ -4333,4 +4333,18 @@
     <string name="system_fonts_failed_body">It couldn't load this computer's system fonts.</string>
     <string name="system_fonts_failed_old_windows_reason">This version of Windows is older than Windows 10, which is the most likely reason.</string>
     <string name="system_fonts_failed_old_windows_fix">Updating to Windows 10 or later should fix it.</string>
+    <string name="screen_hold_menu">Screen hold options</string>
+    <string name="screen_hold">Hold (freeze this screen)</string>
+    <string name="screen_blank">Blank (black)</string>
+    <string name="screen_release">Release this screen</string>
+    <string name="screen_hold_all">Hold all screens</string>
+    <string name="screen_release_all">Release all holds</string>
+    <string name="screen_held_badge">HELD · press Clear ×3 to release</string>
+    <string name="screen_blank_badge">BLANK · press Clear ×3 to release</string>
+    <string name="action_hold_screen">Hold screen</string>
+    <string name="action_field_screen">Screen (number or all)</string>
+    <string name="action_hold_mode_freeze">Freeze last frame</string>
+    <string name="action_hold_mode_black">Black</string>
+    <string name="shortcut_description_hold_all_screens">Hold every screen on its last frame</string>
+    <string name="shortcut_description_release_all_screens">Release every held screen</string>
 </resources>

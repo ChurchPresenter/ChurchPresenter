@@ -94,6 +94,7 @@ internal fun MainDesktopScope.keyContext() = MainDesktopKeyContext(
         runMacro = live.onRunMacro,
         clearGroup = { presenterManager.clearGroup(it) },
         take = { presenterManager.previewBus.take() },
+        holdAllScreens = presenterManager::holdAllScreens,
         clickPresentation = { forward ->
             clickerScope.launch {
                 clickPresentationSlide(forward, presentationViewModel.slideCursor(link), presenterManager)

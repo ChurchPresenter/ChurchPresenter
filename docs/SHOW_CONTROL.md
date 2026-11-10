@@ -104,6 +104,7 @@ HTTP/WebSocket API, Companion and MIDI/OSC:
 | `clear` | layer | Clears one layer |
 | `clearAll` | -- | Takes everything off air, as the Clear button does |
 | `clearGroup` | group | Clears a clear group |
+| `holdScreen` | screen, mode, on | Holds a screen on its last frame or black, or releases it |
 | `message` | template, tokens, duration | Puts a message up |
 | `prop` | prop, on/off/toggle | Switches a prop |
 | `lowerThird` | preset | Runs a lower third |

@@ -7,7 +7,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 What is on air, and everything that puts it on a screen or a wire:
 - `PresenterManager` and the live state it is split into (`LiveSongs`, `LiveBible`, `LiveSlides`,
   `LivePictures`, `LiveAnnouncements`, `LiveLowerThird`, `LiveOverlays`, `LiveScreens`, `LiveWeb`),
-  `PreviewBus`, `OutputLocks`, `legacyProgram` and the tabs' output adapters (`Presenter*Output`);
+  `PreviewBus`, `OutputLocks`, `ScreenHolds` (each screen held on its last frame or black, runtime
+  only, drawn by `HeldOutputFrame`, chosen from `ScreenHoldMenu` on a screen's tile), `legacyProgram` and
+  the tabs' output adapters (`Presenter*Output`);
 - the whole-cue layers `LiveShow` holds and their clearing (`docs/SHOW_CONTROL.md`): `Messages`
   (`showMessage`, `MessageExpiry`), `Props`, `ClearGroups` (with `clearFromOperator`) and
   `LayerClearing`, drawn by `MessageCue` and `PropsCue`;
@@ -55,7 +57,7 @@ settings pages in `.settings`.
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
 - **Tests and screenshots live here.** The screenshot suites are `screenshot/StageMonitorScreenshotTest`,
-  `PreviewLayoutsScreenshotTest`, `ProjectionFfmpegCardScreenshotTest`, `ProjectionOmtCardScreenshotTest`
+  `PreviewLayoutsScreenshotTest`, `ScreenHoldScreenshotTest`, `ProjectionFfmpegCardScreenshotTest`, `ProjectionOmtCardScreenshotTest`
   and the full-screen suites (`PresenterFullScreenScreenshotTest` and its portrait twin); their images are under `live-output/screenshots/`. `LiveOutputTestSupport.kt` holds this suite's copies of the app's
   `withSongsEverywhere`/`withBibleEverywhere` and `TestSingletons.latchSkikoHostOs` — copies, so the
   move did not touch `:shared-ui`.

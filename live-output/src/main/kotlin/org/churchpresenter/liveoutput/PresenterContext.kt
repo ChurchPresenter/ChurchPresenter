@@ -1,5 +1,6 @@
 package org.churchpresenter.liveoutput
 
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.referentialEqualityPolicy
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +38,12 @@ internal class PresenterContext {
 
     /** Per-screen lock: screen slot index -> locked mode; a missing entry follows [slideMode]. */
     val screenLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
+
+    /** Per-screen hold: screen slot index -> how it is held. Runtime only; a missing entry is not held. */
+    val screenHolds = mutableStateOf<Map<Int, ScreenHold>>(emptyMap())
+
+    /** How many screens the output windows opened, which "hold all" holds. */
+    val screenCount = mutableIntStateOf(0)
 
     /** Reports a live-content change of [Presenting] type; set by the manager to its own broadcast. */
     var notify: (Presenting) -> Unit = {}

@@ -362,6 +362,8 @@ internal fun SingleDisplayPreview(
             mediaAudible = mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying,
             lockable = busRole != BusRole.PREVIEW,
             bottomInset = if (profileLabelShown) PROFILE_LABEL_CLEARANCE else 0.dp,
+            holdMenu = screenHoldMenu(presenterManager, screenIndex)
+                .takeIf { outputKind == OutputKind.SCREEN && busRole != BusRole.PREVIEW },
         )
         if (profileLabelShown) PreviewProfileLabel(profiles, rawAssignment.activeProfileId)
         }
