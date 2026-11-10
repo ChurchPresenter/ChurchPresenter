@@ -208,6 +208,21 @@ class RowActionsDialogContentTest {
     }
 
     @Test
+    fun `a screen is held by its number or all, frozen or black, on, off or toggled`() =
+        editor(listOf(Action.HoldScreen())) { seen ->
+            type("Screen (number or all)", "2")
+            pick("Mode", "Black")
+            pick("Switch", "On")
+            assertEquals(listOf(Action.HoldScreen("2", "blank", on = true)), save(seen))
+            type("Screen (number or all)", " ")
+            pick("Mode", "Freeze last frame")
+            pick("Switch", "Off")
+            assertEquals(listOf(Action.HoldScreen("all", "hold", on = false)), save(seen))
+            pick("Switch", "Toggle")
+            assertEquals(listOf(Action.HoldScreen("all", "hold", on = null)), save(seen))
+        }
+
+    @Test
     fun `a timer counts down seconds, to a time, or up`() =
         editor(listOf(Action.Timer(TimerModes.DURATION, 300))) { seen ->
         type("Seconds", "90")

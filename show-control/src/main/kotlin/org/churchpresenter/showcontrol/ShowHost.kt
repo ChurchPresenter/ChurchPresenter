@@ -12,6 +12,7 @@ interface ShowHost {
     suspend fun clear(layer: String)
     suspend fun clearAll()
     suspend fun clearGroup(group: String)
+    suspend fun holdScreen(action: Action.HoldScreen)
     suspend fun message(action: Action.Message)
     suspend fun prop(action: Action.Prop)
     suspend fun lowerThird(preset: String)

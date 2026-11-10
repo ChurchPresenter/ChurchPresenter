@@ -116,6 +116,7 @@ this build does not know is kept and skipped.
 | `clear` | `layer` (e.g. `SLIDE`, `MESSAGES`) | Takes one layer off air |
 | `clearAll` | -- | Takes everything off air, as the Clear button does |
 | `clearGroup` | `group` (id or name) | Clears an operator's clear group |
+| `holdScreen` | `screen` (number from 1, or `all`), `mode` (`hold`, `blank`), `on` (`true`, `false`, or absent to toggle) | Holds a screen on its last frame or black, or releases it. Dev mode only |
 | `message` | `text`, or `template` with `tokens`; `durationSeconds` | Puts a message up |
 | `prop` | `prop` (id or name), `on` (`true`, `false`, or absent to toggle) | Switches a prop |
 | `lowerThird` | `preset` (name) | Runs a lower-third preset |

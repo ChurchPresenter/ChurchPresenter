@@ -28,6 +28,9 @@ import org.churchpresenter.strings.generated.resources.action_timer
 import org.churchpresenter.strings.generated.resources.action_unknown
 import org.churchpresenter.strings.generated.resources.action_wait
 import org.churchpresenter.strings.generated.resources.action_wait_seconds
+import org.churchpresenter.strings.generated.resources.action_hold_mode_black
+import org.churchpresenter.strings.generated.resources.action_hold_mode_freeze
+import org.churchpresenter.strings.generated.resources.action_hold_screen
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -76,6 +79,7 @@ internal enum class ActionKind(val label: StringResource) {
     CLEAR(Res.string.action_clear),
     CLEAR_GROUP(Res.string.action_clear_group),
     CLEAR_ALL(Res.string.action_clear_all),
+    HOLD_SCREEN(Res.string.action_hold_screen),
     GO_LIVE(Res.string.action_go_live),
     PREVIEW(Res.string.action_preview),
     TAKE(Res.string.action_take),
@@ -100,6 +104,7 @@ internal fun newAction(kind: ActionKind, choices: ActionChoices, rows: List<Sche
     ActionKind.CLEAR -> Action.Clear(ROW_ACTION_LAYERS.first())
     ActionKind.CLEAR_GROUP -> Action.ClearGroup(choices.clearGroups.firstOrNull().orEmpty())
     ActionKind.CLEAR_ALL -> Action.ClearAll
+    ActionKind.HOLD_SCREEN -> Action.HoldScreen()
     ActionKind.GO_LIVE -> Action.GoLive(rowId = rows.firstOrNull { it.isContent() }?.id.orEmpty())
     ActionKind.PREVIEW -> Action.ToPreview(rowId = rows.firstOrNull { it.isContent() }?.id.orEmpty())
     ActionKind.TAKE -> Action.Take()
@@ -125,6 +130,7 @@ internal val Action.kind: ActionKind?
         is Action.Clear -> ActionKind.CLEAR
         is Action.ClearGroup -> ActionKind.CLEAR_GROUP
         Action.ClearAll -> ActionKind.CLEAR_ALL
+        is Action.HoldScreen -> ActionKind.HOLD_SCREEN
         is Action.GoLive -> ActionKind.GO_LIVE
         is Action.ToPreview -> ActionKind.PREVIEW
         is Action.Take -> ActionKind.TAKE
@@ -146,6 +152,14 @@ internal fun actionSummary(action: Action, rows: List<ScheduleItem>): String {
         is Action.Prop -> action.prop
         is Action.ClearGroup -> action.group
         is Action.Clear -> layerLabel(action.layer)
+        is Action.HoldScreen -> {
+            val mode = if (action.mode == "blank") {
+                Res.string.action_hold_mode_black
+            } else {
+                Res.string.action_hold_mode_freeze
+            }
+            "${action.screen}, ${stringResource(mode)}"
+        }
         is Action.GoLive -> rows.firstOrNull { it.id == action.rowId }?.displayText.orEmpty()
         is Action.ToPreview -> rows.firstOrNull { it.id == action.rowId }?.displayText.orEmpty()
         is Action.Wait -> stringResource(Res.string.action_wait_seconds, action.seconds.secondsText())

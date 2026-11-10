@@ -32,18 +32,23 @@ class ShortcutActionDefaultsTest {
     }
 
     @Test
-    fun `only Save As, Take, the tenth quick background and the macro and clear-group slots ship unbound`() {
+    fun `only Save As, Take, the screen holds, the tenth background and the macro and group slots ship unbound`() {
         // Deliberately unbound actions. Save As has no accelerator in the app today and exists
-        // here so it can be given one; Take is left for each operator to bind, on the controller or
-        // key they use. The tenth quick-background slot has no key left to take:
+        // here so it can be given one; Take and the two screen holds are left for each operator to bind, on
+        // the controller or key they use. The tenth quick-background slot has no key left to take:
         // one to nine are spent on the first nine slots and Ctrl+0 on the reset, so it ships
         // unbound rather than claiming a two-handed chord nobody asked for. The macro and clear-group slots
         // are an operator's own: which macro sits in slot 1 is theirs to decide, and so is its key.
         val unbound = ShortcutAction.entries.filter { it.defaults.isEmpty() }
 
         assertEquals(
-            listOf(ShortcutAction.SAVE_SCHEDULE_AS, ShortcutAction.TAKE, ShortcutAction.QUICK_BACKGROUND_10) +
-                MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
+            listOf(
+                ShortcutAction.SAVE_SCHEDULE_AS,
+                ShortcutAction.TAKE,
+                ShortcutAction.HOLD_ALL_SCREENS,
+                ShortcutAction.RELEASE_ALL_SCREENS,
+                ShortcutAction.QUICK_BACKGROUND_10,
+            ) + MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
             unbound,
         )
     }
@@ -122,11 +127,12 @@ class ShortcutActionDefaultsTest {
     }
 
     @Test
-    fun `only Take, the macro slots and the clear-group slots are dev only`() {
+    fun `only Take, the screen holds, the macro slots and the clear-group slots are dev only`() {
         val devOnly = ShortcutAction.entries.filter { it.devOnly }.toSet()
 
         assertEquals(
-            setOf(ShortcutAction.TAKE) + MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
+            setOf(ShortcutAction.TAKE, ShortcutAction.HOLD_ALL_SCREENS, ShortcutAction.RELEASE_ALL_SCREENS) +
+                MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
             devOnly,
         )
         assertTrue(!ShortcutAction.SAVE_SCHEDULE.devOnly)

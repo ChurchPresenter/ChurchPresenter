@@ -103,6 +103,7 @@ internal suspend fun ShowHost.dispatch(action: Action) {
         is Action.Clear -> clear(action.layer)
         Action.ClearAll -> clearAll()
         is Action.ClearGroup -> clearGroup(action.group)
+        is Action.HoldScreen -> holdScreen(action)
         is Action.Message -> message(action)
         is Action.Prop -> prop(action)
         is Action.LowerThird -> lowerThird(action.preset)

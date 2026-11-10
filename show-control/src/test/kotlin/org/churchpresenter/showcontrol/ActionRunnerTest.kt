@@ -47,6 +47,8 @@ class ActionRunnerTest {
         override suspend fun clear(layer: String) = note("clear:$layer")
         override suspend fun clearAll() = note("clearAll")
         override suspend fun clearGroup(group: String) = note("clearGroup:$group")
+        override suspend fun holdScreen(action: Action.HoldScreen) =
+            note("holdScreen:${action.screen}/${action.mode}/${action.on}")
         override suspend fun message(action: Action.Message) =
             note("message:${action.text}${action.template}${action.tokens.values}${action.durationSeconds}")
         override suspend fun prop(action: Action.Prop) = note("prop:${action.prop}=${action.on}", action)
@@ -84,7 +86,8 @@ class ActionRunnerTest {
             listOf(
                 Action.GoLive("row1", plays = 2), Action.ToPreview("row2"), Action.Take("SLIDE"),
                 Action.Clear("PROPS"),
-                Action.ClearAll, Action.ClearGroup("Text"), Action.Message("Hi"), Action.Prop("Logo", true),
+                Action.ClearAll, Action.ClearGroup("Text"), Action.HoldScreen("2", "blank", true), Action.Message("Hi"),
+                Action.Prop("Logo", true),
                 Action.Prop("Badge"),
                 Action.LowerThird("Pastor"), Action.Timer(), Action.Media(MediaCommand.STOP), Action.ObsScene("Wide"),
                 Action.AtemKey(keyer = 2), Action.AtemMacro(1), Action.CompanionPress("S", 5), Action.NextItem,
@@ -94,6 +97,7 @@ class ActionRunnerTest {
         assertEquals(
             listOf(
                 "goLive:row1x2", "preview:row2", "take:SLIDE", "clear:PROPS", "clearAll", "clearGroup:Text",
+                "holdScreen:2/blank/true",
                 "message:Hi[]null", "prop:Logo=true", "prop:Badge=null", "lowerThird:Pastor", "timer:duration/0/",
                 "media:STOP", "obs:Wide", "atemKey:false/0/2=true", "atemMacro:1", "companion:S//5", "next", "previous",
             ).map { "$it@0" },

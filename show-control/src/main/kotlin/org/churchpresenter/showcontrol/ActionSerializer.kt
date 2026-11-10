@@ -29,6 +29,7 @@ object ActionSerializer : KSerializer<Action> {
         Action.Clear::class to Action.Clear.serializer(),
         Action.ClearAll::class to Action.ClearAll.serializer(),
         Action.ClearGroup::class to Action.ClearGroup.serializer(),
+        Action.HoldScreen::class to Action.HoldScreen.serializer(),
         Action.Message::class to Action.Message.serializer(),
         Action.Prop::class to Action.Prop.serializer(),
         Action.LowerThird::class to Action.LowerThird.serializer(),

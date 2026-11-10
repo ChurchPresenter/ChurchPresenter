@@ -7,7 +7,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 What is on air, and everything that puts it on a screen or a wire:
 - `PresenterManager` and the live state it is split into (`LiveSongs`, `LiveBible`, `LiveSlides`,
   `LivePictures`, `LiveAnnouncements`, `LiveLowerThird`, `LiveOverlays`, `LiveScreens`, `LiveWeb`),
-  `PreviewBus`, `OutputLocks`, `legacyProgram` and the tabs' output adapters (`Presenter*Output`);
+  `PreviewBus`, `OutputLocks`, `ScreenHolds` (each screen held on its last frame or black, runtime
+  only, drawn by `HeldOutputFrame`; dev mode only, through `LocalScreenHoldMenu`), `legacyProgram` and
+  the tabs' output adapters (`Presenter*Output`);
 - the whole-cue layers `LiveShow` holds and their clearing (`docs/SHOW_CONTROL.md`): `Messages`
   (`showMessage`, `MessageExpiry`), `Props`, `ClearGroups` (with `clearFromOperator`) and
   `LayerClearing`, drawn by `MessageCue` and `PropsCue`;

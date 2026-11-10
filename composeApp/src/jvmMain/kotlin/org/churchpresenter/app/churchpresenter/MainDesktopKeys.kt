@@ -7,6 +7,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import org.churchpresenter.profiles.quickBackgroundSlotFor
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.liveoutput.ScreenHold
 import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.QuickBackground
@@ -47,6 +48,8 @@ internal class MainDesktopKeyActions(
     val clearGroup: (ClearGroup) -> Unit = {},
     /** Preview mode's Take. */
     val take: () -> Unit = {},
+    /** Holds every screen on its last frame, or releases them all (`null`). */
+    val holdAllScreens: (ScreenHold?) -> Unit = {},
     /** One clicker press, forward or back, on the live presentation. */
     val clickPresentation: (forward: Boolean) -> Unit = {},
     val selectTab: (Tabs) -> Unit = {},
@@ -69,6 +72,17 @@ internal class MainDesktopKeyContext(
     val sequences: MainDesktopState,
     val actions: MainDesktopKeyActions,
 )
+
+/** Holds or releases every screen when [keyEvent] is the key for it; whether it was one. Dev mode only. */
+private fun handleScreenHoldKey(shortcuts: ShortcutMap, keyEvent: KeyEvent, actions: MainDesktopKeyActions): Boolean {
+    val hold = when {
+        shortcuts.matches(ShortcutAction.HOLD_ALL_SCREENS, keyEvent) -> ScreenHold.HOLD
+        shortcuts.matches(ShortcutAction.RELEASE_ALL_SCREENS, keyEvent) -> null
+        else -> return false
+    }
+    actions.holdAllScreens(hold)
+    return true
+}
 
 /**
  * The main window's key handler, run in the preview pass so a shortcut works whichever tab or
@@ -117,6 +131,7 @@ internal fun handleMainDesktopKey(keyEvent: KeyEvent, context: MainDesktopKeyCon
         shortcuts.matches(ShortcutAction.TAKE, keyEvent) && context.devMode -> {
             actions.take(); true
         }
+        context.devMode && handleScreenHoldKey(shortcuts, keyEvent, actions) -> true
         // Presentation clickers (Logitech/Kensington etc.) are HID keyboards
         // sending Page Down/Up. Handled here in the preview pass so a live
         // presentation responds no matter which tab or control has focus —

@@ -14,10 +14,13 @@ import org.churchpresenter.strings.generated.resources.action_field_me
 import org.churchpresenter.strings.generated.resources.action_field_message
 import org.churchpresenter.strings.generated.resources.action_field_mode
 import org.churchpresenter.strings.generated.resources.action_field_prop
+import org.churchpresenter.strings.generated.resources.action_field_screen
 import org.churchpresenter.strings.generated.resources.action_field_seconds
 import org.churchpresenter.strings.generated.resources.action_field_switch
 import org.churchpresenter.strings.generated.resources.action_field_text
 import org.churchpresenter.strings.generated.resources.action_field_until
+import org.churchpresenter.strings.generated.resources.action_hold_mode_black
+import org.churchpresenter.strings.generated.resources.action_hold_mode_freeze
 import org.churchpresenter.strings.generated.resources.action_key_downstream
 import org.churchpresenter.strings.generated.resources.action_key_upstream
 import org.churchpresenter.strings.generated.resources.action_media_pause
@@ -58,6 +61,31 @@ internal fun MessageFields(action: Action.Message, messages: List<MessageChoice>
 @Composable
 internal fun PropFields(action: Action.Prop, props: List<String>, onChange: (Action) -> Unit) {
     NamePicker(Res.string.action_field_prop, action.prop, props) { onChange(action.copy(prop = it)) }
+    Picker(
+        stringResource(Res.string.action_field_switch),
+        action.on.toString(),
+        listOf(
+            "true" to stringResource(Res.string.action_switch_on),
+            "false" to stringResource(Res.string.action_switch_off),
+            "null" to stringResource(Res.string.action_switch_toggle),
+        ),
+    ) { onChange(action.copy(on = it.toBooleanStrictOrNull())) }
+}
+
+/** Which screen to hold, typed as a number or `all`; whether it freezes or goes black; on, off or toggled. */
+@Composable
+internal fun HoldScreenFields(action: Action.HoldScreen, onChange: (Action) -> Unit) {
+    TextField(stringResource(Res.string.action_field_screen), action.screen) {
+        onChange(action.copy(screen = it.trim().ifBlank { "all" }))
+    }
+    Picker(
+        stringResource(Res.string.action_field_mode),
+        action.mode,
+        listOf(
+            "hold" to stringResource(Res.string.action_hold_mode_freeze),
+            "blank" to stringResource(Res.string.action_hold_mode_black),
+        ),
+    ) { onChange(action.copy(mode = it)) }
     Picker(
         stringResource(Res.string.action_field_switch),
         action.on.toString(),

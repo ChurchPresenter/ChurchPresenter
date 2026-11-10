@@ -34,6 +34,7 @@ class PresenterManager private constructor(
     showPresenterWindowInitially: Boolean,
     private val context: PresenterContext,
     internal val locks: OutputLocksState = OutputLocksState(context),
+    internal val holds: ScreenHoldsState = ScreenHoldsState(context),
     internal val bible: LiveBibleState = LiveBibleState(context),
     internal val songs: LiveSongsState = LiveSongsState(context),
     internal val pictures: LivePicturesState = LivePicturesState(context),
@@ -46,6 +47,7 @@ class PresenterManager private constructor(
     internal val screens: LiveScreensState = LiveScreensState(context),
     internal val overlayLayers: LiveOverlaysState = LiveOverlaysState(context),
 ) : OutputLocks by locks,
+    ScreenHolds by holds,
     LiveBible by bible,
     LiveSongs by songs,
     LivePictures by pictures,
@@ -220,6 +222,8 @@ class PresenterManager private constructor(
      *  watches this flag, animates bibleTransitionAlpha/songTransitionAlpha to 0,
      *  then clears the display. */
     fun requestClearDisplay() {
+        // A held screen outlasts one Clear; three quick ones release every hold.
+        holds.noteClearPress()
         if (anythingLive) {
             context.clearDisplayRequested.value = true
         }
