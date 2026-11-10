@@ -432,9 +432,24 @@ class CompanionServerQaModerationTest {
     @Test
     fun `adding with no session open fails rather than inventing one`() {
         // No openSession() — qaManager is null.
-        playOperator(allow = true)
+        val prompts = playOperator(allow = true)
 
-        assertEquals(HttpStatusCode.BadRequest, post("/api/qa/add", """{"text":"orphan"}""").status)
+        assertEquals(HttpStatusCode.Forbidden, post("/api/qa/add", """{"text":"orphan"}""").status)
+        assertEquals(0, prompts.size, "there is nothing to ask the operator about")
+    }
+
+    @Test
+    fun `adding while the session is stopped is refused`() {
+        val qa = openSession()
+        qa.toggleSession() // stopped: phones cannot submit, so the moderator cannot either
+        val prompts = playOperator(allow = true)
+
+        val response = post("/api/qa/add", """{"text":"between services"}""")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals("Q&A session is not active", response.obj().str("error"))
+        assertTrue(qa.questions.isEmpty())
+        assertEquals(0, prompts.size)
     }
 
     // ── Clearing the display and the session ────────────────────────────────────
@@ -533,13 +548,12 @@ class CompanionServerQaModerationTest {
 
     @Test
     fun `adding a question with no session open is refused`() {
-        // Unlike the others this is a bad request, not a not-found: the question was never going to
-        // exist, so there is nothing to fail to find.
+        // Refused as forbidden, as a phone's submission is: there is no session to add it to.
         playOperator(allow = true)
 
         val response = post("/api/qa/add", """{"text":"from the desk","name":""}""")
 
-        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals(HttpStatusCode.Forbidden, response.status)
     }
 
     @Test

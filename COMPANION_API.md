@@ -1468,7 +1468,7 @@ from an admin page. Pages: `GET /qa` (submit), `GET /qa/vote` (vote) and `GET /q
 
 | Route | Body | Answers |
 |-------|------|---------|
-| `GET /api/qa/status` | — | `{"sessionActive":true,"cooldownSeconds":30,"displayedQuestionId":"…","votingEnabled":false}` |
+| `GET /api/qa/status` | — | `{"sessionActive":true,"cooldownSeconds":30,"displayedQuestionId":"…","votingEnabled":false,"sessionName":"Sunday service"}` — `sessionName` is empty while no session runs |
 | `POST /api/qa/submit` | `{"text":"…","name":"optional"}` | The new question (`QuestionDto`); `403` when no session is active, `429` within the cooldown |
 | `GET /api/qa/approved` | — | `[{"id":"…","text":"…","voteCount":3,"voted":"up"}]` (`voted` is this client's vote or `null`); `403` when voting is off |
 | `POST /api/qa/vote` | `{"questionId":"…","direction":"up"}` (`up` or `down`) | `{"ok":true,"voted":"up"}`; voting again the same way takes the vote back |
@@ -1492,7 +1492,7 @@ Every route here takes the admin password (`X-QA-Password` or `?password=`). All
 | `POST /api/qa/questions/{id}/done` | — | Marks it answered |
 | `POST /api/qa/questions/{id}/display` | — | Puts it on the output (it must be approved) |
 | `DELETE /api/qa/questions/{id}` | — | Deletes it |
-| `POST /api/qa/add` | `{"text":"…"}` | Adds a question as the moderator; answers the `QuestionDto` |
+| `POST /api/qa/add` | `{"text":"…"}` | Adds a question as the moderator; answers the `QuestionDto`. `403` while no session is running |
 | `POST /api/qa/clear-display` | — | Takes the displayed question down |
 | `POST /api/qa/clear-all` | — | Deletes every question |
 

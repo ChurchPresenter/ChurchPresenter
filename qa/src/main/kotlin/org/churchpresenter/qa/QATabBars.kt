@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HowToVote
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
@@ -54,9 +53,9 @@ import org.churchpresenter.strings.generated.resources.qa_displaying
 import org.churchpresenter.strings.generated.resources.qa_finished
 import org.churchpresenter.strings.generated.resources.qa_hide_qr
 import org.churchpresenter.strings.generated.resources.qa_history
+import org.churchpresenter.strings.generated.resources.qa_close_history
 import org.churchpresenter.strings.generated.resources.qa_incoming
 import org.churchpresenter.strings.generated.resources.qa_new_session
-import org.churchpresenter.strings.generated.resources.qa_resume
 import org.churchpresenter.strings.generated.resources.qa_server_not_running
 import org.churchpresenter.strings.generated.resources.qa_show_qr
 import org.churchpresenter.strings.generated.resources.qa_stop_session
@@ -141,7 +140,7 @@ private fun RowScope.SessionButtons(tab: QATabScope) = with(tab) {
     } else if (sessionActive) {
         RaisedButton(
             onClick = {
-                qaManager.toggleSession()
+                qaManager.stopSession()
                 output.setDisplayedQuestion(null)
                 output.setShowQRCodeOnDisplay(false)
                 presenting(Presenting.NONE)
@@ -156,9 +155,10 @@ private fun RowScope.SessionButtons(tab: QATabScope) = with(tab) {
             Spacer(Modifier.width(4.dp))
             Text(stringResource(Res.string.qa_stop_session))
         }
+        RunningSessionChip(sessionName, Modifier.weight(1f, fill = false))
     } else {
         RaisedButton(
-            onClick = { qaManager.toggleSession() },
+            onClick = { showNewSessionDialog = true },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.inverseSurface,
                 contentColor = MaterialTheme.colorScheme.inverseOnSurface
@@ -169,15 +169,7 @@ private fun RowScope.SessionButtons(tab: QATabScope) = with(tab) {
             Spacer(Modifier.width(4.dp))
             Text(stringResource(Res.string.qa_new_session))
         }
-        if (qaManager.history.isNotEmpty()) {
-            KeyButton(onClick = { qaManager.restoreFromHistory() },
-                shape = AppShape(8.dp)
-            ) {
-                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(4.dp))
-                Text(stringResource(Res.string.qa_resume, qaManager.history.size))
-            }
-        }
+        if (sessions.isNotEmpty()) ResumeMenu(tab)
     }
 }
 
@@ -276,11 +268,11 @@ internal fun QATabScope.FilterBar() {
     }
     val doneCount = questions.count { it.status == QuestionStatus.DONE }
     val deniedCount = questions.count { it.status == QuestionStatus.DENIED }
-    val historyCount = qaManager.history.size
+    val historyCount = sessions.size
     val allCount = questions.size
 
     // Filter options: 0=All, 1=Incoming(pending only), 2=Approved, 3=Incoming+Approved, 4=Done, 5=Denied
-    // History is separate (selectedFilter = 6)
+    // History is separate (selectedFilter = FILTER_HISTORY)
 val filterLabels = listOf(
     stringResource(Res.string.qa_all),
     stringResource(Res.string.qa_incoming),
@@ -306,7 +298,7 @@ val filterCounts = listOf(allCount, pendingCount, approvedCount, incomingApprove
         DropdownSelector(
             label = stringResource(Res.string.qa_filter_label),
             items = filterItemsWithCount,
-            selected = if (selectedFilter < 6) {
+            selected = if (selectedFilter < FILTER_HISTORY) {
                 filterItemsWithCount[selectedFilter]
             } else {
                 filterItemsWithCount[0]
@@ -323,12 +315,13 @@ val filterCounts = listOf(allCount, pendingCount, approvedCount, incomingApprove
 
         Spacer(Modifier.weight(1f))
 
-        // History button
+        // History button: a toggle, so the way out of the history is the way in
+        val historyOpen = selectedFilter == FILTER_HISTORY
         KeyButton(
-            onClick = { selectedFilter = 6 },
+            onClick = { selectedFilter = if (historyOpen) 0 else FILTER_HISTORY },
             modifier = Modifier.height(42.dp),
             contentPadding = ButtonDefaults.TextButtonContentPadding,
-            colors = if (selectedFilter == 6) ButtonDefaults.outlinedButtonColors(
+            colors = if (historyOpen) ButtonDefaults.outlinedButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
             ) else ButtonDefaults.outlinedButtonColors(),
             shape = AppShape(8.dp)
@@ -337,6 +330,14 @@ val filterCounts = listOf(allCount, pendingCount, approvedCount, incomingApprove
                 "${stringResource(Res.string.qa_history)} ($historyCount)",
                 style = MaterialTheme.typography.labelMedium
             )
+            if (historyOpen) {
+                Spacer(Modifier.width(6.dp))
+                Icon(
+                    painter = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.qa_close_history),
+                    modifier = Modifier.size(12.dp)
+                )
+            }
         }
     }
 }

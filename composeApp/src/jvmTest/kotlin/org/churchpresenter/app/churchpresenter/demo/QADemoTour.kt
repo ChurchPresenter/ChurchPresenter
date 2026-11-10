@@ -37,7 +37,7 @@ class QADemoTour {
             "qa",
             tab = "Q&A",
             liveLabel = "Answer a question",
-            steps = 16,
+            steps = 18,
             settings = {
                 it.copy(serverSettings = it.serverSettings.copy(port = SERVER_PORT, serverHost = "192.168.1.42"))
             },
@@ -94,8 +94,10 @@ class QADemoTour {
         say("history")
         step("History", "Questions from earlier sessions", inTab(hasText("History", substring = true)))
         pause(1.5)
+        step("Stop Session", "Its questions are kept in History, under its name", inTab(hasText("Stop Session")))
         say("new-session")
         step("New Session", "Start fresh for this service", inTab(hasText("New Session")))
+        step("Start", "Name it after the service, then start", popupItem(hasText("Start")))
         say("add-own")
         val field = find(hasSetTextAction()) { it.left > dp(380f) }
         type("Add your own question", "Type it in and click Add", field, OWN_QUESTION)

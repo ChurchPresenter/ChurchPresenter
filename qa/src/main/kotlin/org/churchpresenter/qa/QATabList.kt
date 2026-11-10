@@ -37,6 +37,10 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.qa_clear_all_questions
 import org.churchpresenter.strings.generated.resources.qa_delete_all_history
+import org.churchpresenter.strings.generated.resources.qa_delete_session
+import org.churchpresenter.strings.generated.resources.qa_resume_session
+import org.churchpresenter.strings.generated.resources.qa_session_label
+import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.strings.generated.resources.qa_export_to_file
 import org.churchpresenter.strings.generated.resources.qa_import_from_file
 import org.churchpresenter.strings.generated.resources.qa_no_approved
@@ -80,71 +84,40 @@ internal fun QATabScope.EmptyNotice() {
     }
 }
 
-/** Export, import and delete, over the history. */
+/** Which finished session the history shows, and resume, export, import and delete over it. */
 @Composable
-internal fun QATabScope.HistoryActions(filteredQuestions: List<Question>) {
+internal fun QATabScope.HistoryActions(session: QASession) {
+    val options = sessions.map { it.id to sessionLabel(it) }
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        DropdownSelector(
+            label = stringResource(Res.string.qa_session_label),
+            value = session.id,
+            options = options,
+            onValueChange = { selectedSessionId = it },
+            modifier = Modifier.weight(1f, fill = false)
+        )
         KeyButton(onClick = {
-            coroutineScope.launch {
-                val path = FileChooser.platformInstance.save(
-                    location = null,
-                    suggestedName = "questions.txt",
-                    filters = listOf(FileNameExtensionFilter("Text files", "txt")),
-                    title = strExportTitle
-                )
-                if (path != null) {
-                    val export = filteredQuestions.joinToString("\n") { q ->
-                        val status = q.status.name.lowercase().replaceFirstChar { it.uppercase() }
-                        val time = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                            .format(Date(q.timestamp))
-                        "[$time] [$status] ${q.text}"
-                    }
-                    try {
-                        withContext(Dispatchers.IO) { path.toFile().writeText(export) }
-                    } catch (e: IOException) {
-                        CrashReporter.reportException(e, context = "QATab.exportQuestions")
-                    }
-                }
-            }
-        },
-            shape = AppShape(8.dp)
-        ) {
-            Text(
-                stringResource(Res.string.qa_export_to_file),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            qaManager.resumeSession(session.id)
+            selectedFilter = 0
+        }, shape = AppShape(8.dp)) {
+            Text(stringResource(Res.string.qa_resume_session), color = MaterialTheme.colorScheme.onSurface)
         }
-        KeyButton(onClick = {
-            coroutineScope.launch {
-                val path = FileChooser.platformInstance.chooseSingle(
-                    path = null,
-                    filters = listOf(FileNameExtensionFilter("Text files", "txt")),
-                    title = strImportTitle,
-                    selectDirectory = false
-                )
-                if (path != null) {
-                    val lines = try {
-                        withContext(Dispatchers.IO) { path.toFile().readLines() }
-                    } catch (e: IOException) {
-                        CrashReporter.reportException(e, context = "QATab.importQuestions")
-                        emptyList()
-                    }
-                    for (line in lines) {
-                        val text = line.replace(Regex("^\\[.*?\\]\\s*\\[.*?\\]\\s*"), "").trim()
-                        if (text.isNotBlank()) qaManager.addQuestion(text)
-                    }
-                }
-            }
-        },
+        KeyButton(onClick = { exportQuestions(session.questions) }, shape = AppShape(8.dp)) {
+            Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)
+        }
+        KeyButton(onClick = { importQuestions() }, shape = AppShape(8.dp)) {
+            Text(stringResource(Res.string.qa_import_from_file), color = MaterialTheme.colorScheme.onSurface)
+        }
+        KeyButton(
+            onClick = { qaManager.deleteSession(session.id) },
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
             shape = AppShape(8.dp)
         ) {
-            Text(
-                stringResource(Res.string.qa_import_from_file),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Text(stringResource(Res.string.qa_delete_session))
         }
         KeyButton(
             onClick = { qaManager.clearHistory() },
@@ -159,6 +132,63 @@ internal fun QATabScope.HistoryActions(filteredQuestions: List<Question>) {
         }
     }
 }
+
+/** Saves [toExport] to a text file the operator picks, one question per line. */
+private fun QATabScope.exportQuestions(toExport: List<Question>) {
+    coroutineScope.launch {
+        val path = FileChooser.platformInstance.save(
+            location = null,
+            suggestedName = "questions.txt",
+            filters = listOf(FileNameExtensionFilter("Text files", "txt")),
+            title = strExportTitle
+        ) ?: return@launch
+        val export = toExport.joinToString("\n") { q ->
+            val status = q.status.name.lowercase().replaceFirstChar { it.uppercase() }
+            val time = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(q.timestamp))
+            "[$time] [$status] ${encodeQuestionLine(q.text)}"
+        }
+        try {
+            withContext(Dispatchers.IO) { path.toFile().writeText(export) }
+        } catch (e: IOException) {
+            CrashReporter.reportException(e, context = "QATab.exportQuestions")
+        }
+    }
+}
+
+/** Adds every question in a text file the operator picks, as [exportQuestions] wrote it. */
+private fun QATabScope.importQuestions() {
+    coroutineScope.launch {
+        val path = FileChooser.platformInstance.chooseSingle(
+            path = null,
+            filters = listOf(FileNameExtensionFilter("Text files", "txt")),
+            title = strImportTitle,
+            selectDirectory = false
+        ) ?: return@launch
+        val lines = try {
+            withContext(Dispatchers.IO) { path.toFile().readLines() }
+        } catch (e: IOException) {
+            CrashReporter.reportException(e, context = "QATab.importQuestions")
+            emptyList()
+        }
+        for (line in lines) {
+            val text = decodeQuestionLine(line.replace(Regex("^\\[.*?\\]\\s*\\[.*?\\]\\s*"), "")).trim()
+            if (text.isNotBlank()) qaManager.addQuestion(text)
+        }
+    }
+}
+
+/**
+ * A question's text on one line of an export file: a line break becomes `\n` and a backslash
+ * `\\`, so a question written over several lines comes back whole.
+ */
+internal fun encodeQuestionLine(text: String): String =
+    text.replace("\\", "\\\\").replace("\r\n", "\n").replace("\n", "\\n")
+
+/** The inverse of [encodeQuestionLine]. */
+internal fun decodeQuestionLine(line: String): String =
+    ESCAPE.replace(line) { if (it.groupValues[1] == "n") "\n" else "\\" }
+
+private val ESCAPE = Regex("""\\([n\\])""")
 
 /** The questions, each with the actions its state allows. */
 @Composable
@@ -182,7 +212,7 @@ internal fun QATabScope.QuestionList(filteredQuestions: List<Question>) {
             QuestionRow(
                 question = question,
                 isDisplayed = wasDisplayed,
-                isHistory = selectedFilter == 6,
+                isHistory = selectedFilter == FILTER_HISTORY,
                 onApprove = { qaManager.approveQuestion(question.id) },
                 onDeny = {
                     qaManager.denyQuestion(question.id)
@@ -257,7 +287,7 @@ internal fun QATabScope.ClearAllDialog() {
                                         toExport.joinToString("\n") { q ->
                                             val time = SimpleDateFormat("HH:mm", Locale.getDefault())
                                                 .format(Date(q.timestamp))
-                                            "[$time] [${q.status}] ${q.text}"
+                                            "[$time] [${q.status}] ${encodeQuestionLine(q.text)}"
                                         }
                                     )
                                 }

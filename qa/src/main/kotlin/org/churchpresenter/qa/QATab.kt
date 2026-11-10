@@ -90,20 +90,18 @@ fun QATab(
                 .bibleListCard()
         ) {
             tab.TopBar()
+            if (tab.isServerRunning && !tab.sessionActive) tab.NoSessionBanner()
             tab.FilterBar()
             if (tab.sessionActive) tab.AddQuestionField()
             tab.displayedQuestion?.let { tab.DisplayingBar(it) }
             val filtered = tab.filteredQuestions
-            if (filtered.isEmpty()) {
-                tab.EmptyNotice()
-            } else {
-                if (ui.selectedFilter == FILTER_HISTORY) tab.HistoryActions(filtered)
-                tab.QuestionList(filtered)
-            }
+            if (ui.selectedFilter == FILTER_HISTORY) tab.selectedSession?.let { tab.HistoryActions(it) }
+            if (filtered.isEmpty()) tab.EmptyNotice() else tab.QuestionList(filtered)
         }
 
         // ── Clear All Confirmation Dialog ─────────────────────────────
         if (ui.showClearConfirm) tab.ClearAllDialog()
+        if (ui.showNewSessionDialog) tab.NewSessionDialog()
     }
 
     if (ui.showRemoteDialog) {
@@ -120,6 +118,10 @@ internal class QATabUi {
     var showClearConfirm by mutableStateOf(false)
     var addQuestionText by mutableStateOf("")
     var showRemoteDialog by mutableStateOf(false)
+    var showNewSessionDialog by mutableStateOf(false)
+
+    /** The finished session the history shows; empty is the newest. */
+    var selectedSessionId by mutableStateOf("")
 }
 
 /** Where the tab's export and import run, and the titles of their file dialogs. */
@@ -155,8 +157,16 @@ internal class QATabScope(
     var showClearConfirm by ui::showClearConfirm
     var addQuestionText by ui::addQuestionText
     var showRemoteDialog by ui::showRemoteDialog
+    var showNewSessionDialog by ui::showNewSessionDialog
+    var selectedSessionId by ui::selectedSessionId
 
     val sessionActive get() = qaManager.sessionActive
+    val sessionName get() = qaManager.sessionName
+    val sessions get() = qaManager.sessions
+
+    /** The finished session the history shows: the one picked, or the newest. */
+    val selectedSession: QASession?
+        get() = sessions.firstOrNull { it.id == selectedSessionId } ?: sessions.firstOrNull()
     val questions get() = qaManager.questions
     val displayedQuestion get() = qaManager.displayedQuestion
     val showQROnDisplay get() = qaManager.showQRCodeOnDisplay
@@ -164,7 +174,7 @@ internal class QATabScope(
     val qaSettings get() = appSettings.qaSettings
     val isQALocked get() = output.screenLocks.value.values.any { it == Presenting.QA }
 
-    /** The questions the current filter and sort show; filter 6 is the history, unsorted. */
+    /** The questions the current filter and sort show; filter 6 is the picked session, unsorted. */
     val filteredQuestions: List<Question>
         get() {
             val sorted = { list: List<Question> -> list.applySortMode(sortMode, { it.timestamp }, { it.voteCount }) }
@@ -177,7 +187,7 @@ internal class QATabScope(
                 )
                 4 -> sorted(questions.filter { it.status == QuestionStatus.DONE })
                 5 -> sorted(questions.filter { it.status == QuestionStatus.DENIED })
-                6 -> qaManager.history
+                FILTER_HISTORY -> selectedSession?.questions.orEmpty()
                 else -> questions
             }
         }

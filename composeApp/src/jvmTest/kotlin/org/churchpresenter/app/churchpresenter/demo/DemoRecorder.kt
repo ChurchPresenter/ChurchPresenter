@@ -75,7 +75,7 @@ import org.churchpresenter.liveoutput.PresenterOutputContent
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.qa.QAManager
+import org.churchpresenter.app.churchpresenter.screenshot.previewQAManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
@@ -231,7 +231,7 @@ internal fun recordTour(
                                     presenterManager = presenter,
                                     companionSatelliteViewModel = companion
                                         ?: remember { CompanionSatelliteViewModel() },
-                                    qaManager = QAManager(),
+                                    qaManager = previewQAManager(),
                                     sttManager = demoStt,
                                     theme = windowTheme,
                                     statisticsManager = statistics,
