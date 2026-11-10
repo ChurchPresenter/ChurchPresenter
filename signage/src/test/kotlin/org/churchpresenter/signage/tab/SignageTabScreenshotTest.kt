@@ -90,6 +90,13 @@ class SignageTabScreenshotTest {
     }
 
     @Test
+    fun `a screen removed from here, held back`() {
+        world.controller.start()
+        world.hub.pairing.hold("player-2", "Lobby", "10.0.0.8")
+        shoot("held", waitFor = arrayOf("Lobby was removed", "0 pictures · 0 videos · 10 s each"))
+    }
+
+    @Test
     fun `the companion server is off`() {
         world.controller.start()
         // Once the folder is read, or the shot can catch it still reading.

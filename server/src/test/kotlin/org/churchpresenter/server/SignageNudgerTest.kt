@@ -9,6 +9,7 @@ import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.signage.core.SignageJson
 import org.churchpresenter.signage.core.nudgeOwner
+import org.churchpresenter.signage.core.nudgePlayer
 import org.churchpresenter.signage.hub.PendingScreen
 import org.churchpresenter.signage.hub.SignageHub
 import java.io.IOException
@@ -122,5 +123,21 @@ class SignageNudgerTest {
 
     private companion object {
         const val PORT = 8765
+    }
+
+    @Test
+    fun `a screen asked back with Pair here is knocked on by id until it comes`() {
+        hub.pairing.hold("lobby", "Lobby", "192.168.2.221")
+        hub.pairing.invite("lobby")
+        nudger.tick()
+        val (host, text) = sent.single()
+        assertEquals("192.168.2.221", host)
+        val nudge = SignageJson.decodeFromString(Nudge.serializer(), text)
+        assertEquals(Nudge(nudgeOwner(hub.registry.ownerId), PORT, nudgePlayer("lobby")), nudge)
+
+        hub.pairing.arrived("lobby")
+        sent.clear()
+        assertEquals(0, nudger.knockInvites(SignageNudger.Wanted(hub, PORT)))
+        assertEquals(emptyList(), sent)
     }
 }

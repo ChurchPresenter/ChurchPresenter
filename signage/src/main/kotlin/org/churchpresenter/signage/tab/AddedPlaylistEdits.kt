@@ -60,18 +60,32 @@ class AddedPlaylistEdits internal constructor(
         }
     }
 
-    /** Renames folder playlist [id] (its copy keeps its own name) and sets how long each picture stays up. */
-    fun updateFolder(id: String, name: String, pictureSeconds: Int) = update({}) { settings ->
+    /**
+     * Renames folder playlist [id] (its copy keeps its own name) and sets how long each picture stays
+     * up; when [folder] is given, it plays that instead, copied in as [addFolder] does (or played where
+     * it is inside the signage folder), and the copy it had is removed unless another playlist plays
+     * it. It keeps its id, so every screen, rotation and schedule using it carries on.
+     */
+    fun updateFolder(id: String, name: String, pictureSeconds: Int, folder: Path? = null) {
         val seconds = pictureSeconds.coerceIn(PickedFolderPlaylist.PICTURE_SECONDS)
-        settings.copy(
-            added = settings.added.map { entry ->
-                if (entry is PickedFolderPlaylist && entry.id == id) {
-                    entry.copy(name = name.trim(), pictureSeconds = seconds)
-                } else {
-                    entry
+        if (folder == null) {
+            update({}) { settings ->
+                settings.withFolder(id) { it.copy(name = name.trim(), pictureSeconds = seconds) }
+            }
+            return
+        }
+        val copyName = folder.name.ifEmpty { folder.toString() }
+        media.copy(copyName, { SignageMedia.place(folder, it, SignageMedia::copyFolder) }) { path ->
+            var replaced: String? = null
+            update({ replaced?.let(media::discard) }) { settings ->
+                val changed = settings.withFolder(id) { entry ->
+                    replaced = entry.path.takeIf { it != path }
+                    entry.copy(name = name.trim(), pictureSeconds = seconds, path = path)
                 }
-            },
-        )
+                replaced = replaced?.takeIf { changed.unused(it) }
+                changed
+            }
+        }
     }
 
     /**
@@ -185,6 +199,11 @@ internal fun AddedPlaylist.copyPath(): String? = when (this) {
 
 /** Whether no playlist in [this] plays [path]. */
 private fun SignageSettings.unused(path: String) = added.none { it.copyPath() == path }
+
+/** [this] with folder playlist [id] changed by [edit]. */
+private fun SignageSettings.withFolder(id: String, edit: (PickedFolderPlaylist) -> PickedFolderPlaylist) = copy(
+    added = added.map { entry -> if (entry is PickedFolderPlaylist && entry.id == id) edit(entry) else entry },
+)
 
 /** [this] with file playlist [id] changed by [edit]. */
 private fun SignageSettings.withFile(id: String, edit: (FilePlaylist) -> FilePlaylist) = copy(

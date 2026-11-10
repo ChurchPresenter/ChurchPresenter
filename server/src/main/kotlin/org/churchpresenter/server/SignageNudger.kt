@@ -12,6 +12,7 @@ import org.churchpresenter.signage.core.NUDGE_PORT
 import org.churchpresenter.signage.core.Nudge
 import org.churchpresenter.signage.core.SignageJson
 import org.churchpresenter.signage.core.nudgeOwner
+import org.churchpresenter.signage.core.nudgePlayer
 import org.churchpresenter.signage.hub.SignageHub
 import java.io.IOException
 import java.net.DatagramPacket
@@ -43,6 +44,8 @@ internal class SignageNudger(
         val on = wanted() != null
         if (on && job == null) {
             job = scope.launch {
+                // Pair here is answered at once, not at the next tick.
+                launch { wanted()?.hub?.pairing?.invites?.collect { wanted()?.let(::knockInvites) } }
                 while (isActive) {
                     tick()
                     delay(FAST_EVERY_MS)
@@ -63,6 +66,7 @@ internal class SignageNudger(
             sentAtMs = null
             return 0
         }
+        knockInvites(now)
         val at = clock()
         val since = startedAtMs ?: at.also { startedAtMs = it }
         val every = if (at - since < FAST_FOR_MS) FAST_EVERY_MS else SLOW_EVERY_MS
@@ -71,19 +75,35 @@ internal class SignageNudger(
         return knock(now)
     }
 
+    /**
+     * Knocks on each screen asked back with Pair here, naming it, so a player waiting on another
+     * ChurchPresenter comes; says how many were knocked on.
+     */
+    @Synchronized
+    internal fun knockInvites(now: Wanted): Int {
+        val invites = now.hub.pairing.activeInvites()
+        invites.forEach { invite ->
+            val nudge = Nudge(nudgeOwner(now.hub.registry.ownerId), now.port, nudgePlayer(invite.playerId))
+            sendQuietly(invite.address, SignageJson.encodeToString(Nudge.serializer(), nudge).toByteArray())
+        }
+        return invites.size
+    }
+
+    private fun sendQuietly(host: String, bytes: ByteArray) {
+        try {
+            send(host, bytes)
+        } catch (e: IOException) {
+            Log.info(TAG, "Could not knock on a signage screen: ${e.message}")
+        }
+    }
+
     private fun knock(now: Wanted): Int {
         val online = now.hub.links.links.value.keys
         val away = now.hub.registry.screens.value.filter { it.id !in online }.mapNotNull { it.lastAddress }.distinct()
         if (away.isEmpty()) return 0
         val nudge = Nudge(nudgeOwner(now.hub.registry.ownerId), now.port)
         val bytes = SignageJson.encodeToString(Nudge.serializer(), nudge).toByteArray()
-        away.forEach { host ->
-            try {
-                send(host, bytes)
-            } catch (e: IOException) {
-                Log.info(TAG, "Could not knock on a signage screen: ${e.message}")
-            }
-        }
+        away.forEach { host -> sendQuietly(host, bytes) }
         return away.size
     }
 

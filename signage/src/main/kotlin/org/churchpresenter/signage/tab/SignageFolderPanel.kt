@@ -23,12 +23,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -41,6 +43,8 @@ import org.churchpresenter.signage.smugmug.SmugMugState
 import org.churchpresenter.signage.smugmug.SmugMugSync
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.signage_copy_failed
+import org.churchpresenter.strings.generated.resources.signage_choose_file
+import org.churchpresenter.strings.generated.resources.signage_choose_playlist_folder
 import org.churchpresenter.strings.generated.resources.signage_copying
 import org.churchpresenter.strings.generated.resources.signage_file_missing
 import org.churchpresenter.strings.generated.resources.signage_file_title_edit
@@ -48,7 +52,9 @@ import org.churchpresenter.strings.generated.resources.signage_folder_counts
 import org.churchpresenter.strings.generated.resources.signage_folder_missing
 import org.churchpresenter.strings.generated.resources.signage_folder_title_edit
 import org.churchpresenter.strings.generated.resources.signage_link_title_edit
+import org.churchpresenter.strings.generated.resources.signage_locate
 import org.churchpresenter.strings.generated.resources.signage_no_playlists
+import org.churchpresenter.strings.generated.resources.signage_pictures_and_videos
 import org.churchpresenter.strings.generated.resources.signage_playlists
 import org.churchpresenter.strings.generated.resources.signage_reading_playlists
 import org.churchpresenter.strings.generated.resources.signage_remove
@@ -102,6 +108,7 @@ internal fun SignageFolderPanel(state: SignageFolderState, actions: FolderAction
 @Composable
 private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modifier: Modifier) {
     val desktop = actions.desktop
+    val locate = rememberLocate(state, actions)
     var deleting by remember { mutableStateOf<PlaylistSummary?>(null) }
     var renaming by remember { mutableStateOf<PlaylistSummary?>(null) }
     Column(modifier = modifier.bibleListCard()) {
@@ -128,6 +135,7 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
                     progress = state.pickProgress[playlist.id],
                     onRename = { renaming = playlist },
                     onDelete = { deleting = playlist },
+                    onLocate = { locate(playlist.id) },
                     onPickNew = { actions.onPickNewPhotos(playlist.id) },
                     clock = actions.clock,
                 )
@@ -159,7 +167,7 @@ private fun PlaylistList(state: SignageFolderState, actions: FolderActions, modi
             initial = editing,
             location = actions.onLocate(editing.id),
             desktop = desktop,
-            onSave = { name, seconds -> actions.onEditFolder(editing.id, name, seconds) },
+            onSave = { name, seconds, folder -> actions.onEditFolder(editing.id, name, seconds, folder) },
             onDismiss = { renaming = null },
         )
         is SmugMugPlaylist -> SmugMugDialog(
@@ -200,6 +208,7 @@ private fun PlaylistRow(
     playlist: PlaylistSummary,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    onLocate: () -> Unit = {},
     slideshow: SmugMugState? = null,
     picking: Boolean = false,
     onPickNew: () -> Unit = {},
@@ -225,6 +234,9 @@ private fun PlaylistRow(
             )
         } else {
             PlaylistText(playlist, Modifier.weight(1f))
+        }
+        if (playlist.missing) {
+            RingedGhostButton(onClick = onLocate) { Text(stringResource(Res.string.signage_locate)) }
         }
         TooltipIconButton(
             painter = rememberVectorPainter(Icons.Filled.Edit),
@@ -384,6 +396,34 @@ private fun timeOf(ms: Long, clock: Clock): String {
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
     }
     return style.format(at)
+}
+
+/**
+ * Locate… for a playlist whose folder or file is gone: picks one in its place and points the playlist
+ * at it, copied in as Add does, keeping its id (and name, and a folder's seconds per picture), so
+ * every screen, rotation and schedule using it carries on.
+ */
+@Composable
+private fun rememberLocate(state: SignageFolderState, actions: FolderActions): (id: String) -> Unit {
+    val scope = rememberCoroutineScope()
+    val folderTitle = stringResource(Res.string.signage_choose_playlist_folder)
+    val fileTitle = stringResource(Res.string.signage_choose_file)
+    val filterName = stringResource(Res.string.signage_pictures_and_videos)
+    val chooser = actions.desktop.fileChooser
+    return { id ->
+        when (val entry = state.settings.added.firstOrNull { it.id == id }) {
+            is PickedFolderPlaylist -> scope.launch {
+                chooser.chooseSingle(null, emptyList(), folderTitle, selectDirectory = true)
+                    ?.let { actions.onEditFolder(id, entry.name, entry.pictureSeconds, it) }
+            }
+            is FilePlaylist -> scope.launch {
+                val filters = listOf(picturesAndVideosFilter(filterName))
+                chooser.chooseSingle(null, filters, fileTitle, selectDirectory = false)
+                    ?.let { actions.onEditFile(id, entry.name, it) }
+            }
+            else -> Unit
+        }
+    }
 }
 
 private const val SECONDS_PER_MINUTE = 60

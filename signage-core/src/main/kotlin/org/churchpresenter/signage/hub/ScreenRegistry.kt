@@ -44,8 +44,19 @@ data class PairedScreen(
     val lastSeenAtMs: Long? = null,
 )
 
+/**
+ * A screen removed from here, kept for [ScreenRegistry.REMOVED_KEEP_MS] so that, if it was away when
+ * it was removed, it is recognised by its old token when it comes back and held back then.
+ */
 @Serializable
-private data class RegistryFile(val ownerId: String, val screens: List<PairedScreen> = emptyList())
+data class RemovedScreen(val id: String, val name: String, val tokenSha256: String, val removedAtMs: Long)
+
+@Serializable
+private data class RegistryFile(
+    val ownerId: String,
+    val screens: List<PairedScreen> = emptyList(),
+    val removed: List<RemovedScreen> = emptyList(),
+)
 
 /**
  * The screens this ChurchPresenter owns, and its own owner id, kept in [file]. Writes happen on
@@ -63,6 +74,9 @@ class ScreenRegistry(
     /** Which ChurchPresenter this is, to its players: made on first use and kept. */
     @Volatile var ownerId: String = ""
         private set
+
+    /** The screens removed from here lately, known by their old tokens; saved with the paired ones. */
+    val removed = RemovedScreens(clock) { save() }
 
     private val saving = Mutex()
 
@@ -89,6 +103,7 @@ class ScreenRegistry(
         }
         ownerId = stored?.ownerId ?: UUID.randomUUID().toString()
         _screens.value = stored?.screens.orEmpty()
+        removed.list.value = stored?.removed.orEmpty()
         seen = textOf(file)
         if (stored == null) save()
     }
@@ -109,6 +124,7 @@ class ScreenRegistry(
             }
             ownerId = stored.ownerId
             _screens.value = stored.screens
+            removed.list.value = stored.removed
             seen = text
             true
         }
@@ -137,6 +153,7 @@ class ScreenRegistry(
             pairedAtMs = clock(),
         )
         _screens.update { list -> list.filterNot { it.id == screen.id } + screen }
+        removed.list.update { list -> list.filterNot { it.id == screen.id } }
         save()
         return token
     }
@@ -164,8 +181,14 @@ class ScreenRegistry(
         if (name.isNotBlank() && name != old.name) replace(old.copy(name = name.trim()))
     }
 
+    /** Removes [id], remembering its token for a while so it is recognised if it was away. */
     fun remove(id: String) {
+        val old = screen(id)
         _screens.update { list -> list.filterNot { it.id == id } }
+        if (old != null) {
+            val entry = RemovedScreen(old.id, old.name, old.tokenSha256, clock())
+            removed.list.update { list -> list.filterNot { it.id == id } + entry }
+        }
         save()
     }
 
@@ -181,7 +204,7 @@ class ScreenRegistry(
     private fun save() {
         scope.launch(Dispatchers.IO) {
             saving.withLock {
-                val snapshot = RegistryFile(ownerId, _screens.value)
+                val snapshot = RegistryFile(ownerId, _screens.value, removed.kept())
                 try {
                     Files.createDirectories(file.parent)
                     val next = file.resolveSibling("${file.fileName}.next")
@@ -195,15 +218,40 @@ class ScreenRegistry(
         }
     }
 
-    private companion object {
-        const val TAG = "Signage"
+    companion object {
+        /** How long a removed screen's token is remembered: long enough for a screen left off for weeks. */
+        const val REMOVED_KEEP_MS = 30L * 24 * 60 * 60 * 1000
 
-        fun textOf(file: Path): String? = try {
+        private const val TAG = "Signage"
+
+        private fun textOf(file: Path): String? = try {
             if (Files.exists(file)) Files.readString(file) else null
         } catch (_: IOException) {
             null
         }
-        const val TOKEN_BYTES = 32
+        private const val TOKEN_BYTES = 32
+    }
+}
+
+/** The screens removed from a [ScreenRegistry], kept for [ScreenRegistry.REMOVED_KEEP_MS]; [changed] saves them. */
+class RemovedScreens internal constructor(private val clock: () -> Long, private val changed: () -> Unit) {
+    internal val list = MutableStateFlow<List<RemovedScreen>>(emptyList())
+
+    /**
+     * The removed screen whose old token is [token], compared in constant time, and forgotten as it is
+     * taken: it is recognised once. Null when there is none, or it is past its keeping.
+     */
+    fun take(token: String): RemovedScreen? {
+        val hash = sha256Hex(token.toByteArray()).toByteArray()
+        val found = kept().firstOrNull { MessageDigest.isEqual(it.tokenSha256.toByteArray(), hash) } ?: return null
+        list.update { all -> all.filterNot { it.id == found.id } }
+        changed()
+        return found
+    }
+
+    internal fun kept(): List<RemovedScreen> {
+        val since = clock() - ScreenRegistry.REMOVED_KEEP_MS
+        return list.value.filter { it.removedAtMs > since }
     }
 }
 

@@ -248,7 +248,7 @@ class SignageLinksScreenshotTest {
             PickedFolderPlaylist("folder:Events", "Events", "Folders/Events"),
             Path("/Users/church/Documents/ChurchPresenter/signage/Folders/Events"),
             FakeDesktop().desktop,
-            { _, _ -> },
+            { _, _, _ -> },
             {},
         )
     }

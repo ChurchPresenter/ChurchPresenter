@@ -2,6 +2,7 @@ package org.churchpresenter.signage.hub
 
 import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.signage.core.Features
 import org.churchpresenter.signage.core.Manifest
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.core.PlayerMessage
@@ -33,7 +34,7 @@ class SignageHub(
     val updates: AgentUpdates = AgentUpdates(dir.resolve(BUILDS_DIR)),
 ) {
     val registry = ScreenRegistry(dir.resolve(REGISTRY_FILE), scope, clock)
-    val pairing = PairingQueue()
+    val pairing = PairingQueue(clock)
     val links = ScreenLinks(clock)
     private val published = ConcurrentHashMap<String, PublishedManifest>()
 
@@ -50,12 +51,32 @@ class SignageHub(
         pairing.decide(playerId, PairingDecision.Rejected)
     }
 
-    /** Unpairs [id]: told now if connected, and refused with 401 when it next connects if not. */
+    /**
+     * Removes [id]: a player that can reset itself is told to (and told [ServerMessage.Released] if it
+     * cannot), and one that is away is refused with 401 when it next connects. It is then held back
+     * for a few minutes ([PairingQueue.hold]), so a player that looks again finds another ChurchPresenter.
+     */
     fun revoke(id: String) {
-        links.send(id, ServerMessage.Released)
+        val screen = registry.screen(id)
+        val link = links.links.value[id]
+        val resets = Features.FACTORY_RESET in link?.features.orEmpty()
+        links.send(id, if (resets) ServerMessage.FactoryReset else ServerMessage.Released)
+        pairing.hold(id, screen?.name.orEmpty(), link?.address ?: screen?.lastAddress)
         links.forget(id)
         published.remove(id)
         registry.remove(id)
+    }
+
+    /**
+     * A player connected from [address] with [token], which names no paired screen. When it is a
+     * screen removed from here while it was away, that screen is held back from now ([PairingQueue.hold]),
+     * as the 401 it is about to get makes it look for a ChurchPresenter again. True when it was one.
+     */
+    fun refusedToken(token: String, address: String): Boolean {
+        val removed = registry.removed.take(token) ?: return false
+        pairing.hold(removed.id, removed.name, address)
+        Log.info(TAG, "Removed screen ${removed.id} came back at $address; holding it back")
+        return true
     }
 
     fun setOverride(id: String, override: ScreenOverride?) = links.setOverride(id, override)

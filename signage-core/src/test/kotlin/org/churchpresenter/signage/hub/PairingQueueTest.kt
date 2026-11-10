@@ -11,7 +11,8 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PairingQueueTest {
-    private val queue = PairingQueue()
+    private var now = 1_000L
+    private val queue = PairingQueue { now }
 
     @Test
     fun aWaitingPlayerIsListedUntilDecided() = runTest {
@@ -46,5 +47,61 @@ class PairingQueueTest {
 
         queue.decide("player-1", PairingDecision.Rejected)
         assertEquals(PairingDecision.Rejected, second.await())
+    }
+
+    @Test
+    fun aHeldPlayerIsTurnedAwayUntilTheHoldRunsOut() {
+        queue.hold("player-1", "Lobby")
+        assertTrue(queue.isHeld("player-1"))
+        assertFalse(queue.isHeld("player-2"))
+        assertEquals("Lobby", queue.held.value.single().name)
+
+        now += PairingQueue.HOLD_MS - 1
+        assertTrue(queue.isHeld("player-1"))
+        now += 1
+        assertFalse(queue.isHeld("player-1"))
+        assertEquals(emptyList(), queue.held.value)
+    }
+
+    @Test
+    fun releasingAHoldSaysWhetherThereWasOne() {
+        queue.hold("player-1", "Lobby")
+        assertTrue(queue.release("player-1"))
+        assertFalse(queue.isHeld("player-1"))
+        assertFalse(queue.release("player-1"))
+    }
+
+    @Test
+    fun holdingAPlayerAgainRestartsItsTimeWithoutListingItTwice() {
+        queue.hold("player-1", "Lobby")
+        now += PairingQueue.HOLD_MS / 2
+        queue.hold("player-1", "Lobby")
+        now += PairingQueue.HOLD_MS / 2 + 1
+        assertTrue(queue.isHeld("player-1"))
+        assertEquals(1, queue.held.value.size)
+    }
+
+    @Test
+    fun pairHereTakesAHeldScreenOffHoldAndAsksItBackUntilItComesOrTimeRunsOut() {
+        queue.hold("player-1", "Lobby", "192.168.1.30")
+        assertTrue(queue.invite("player-1"))
+        assertFalse(queue.isHeld("player-1"))
+        assertEquals(listOf("192.168.1.30"), queue.activeInvites().map { it.address })
+        queue.arrived("player-1")
+        assertEquals(emptyList(), queue.activeInvites())
+
+        queue.hold("player-1", "Lobby", "192.168.1.30")
+        queue.invite("player-1")
+        now += PairingQueue.INVITE_MS
+        assertEquals(emptyList(), queue.activeInvites())
+        assertFalse(queue.invite("player-2"), "never held")
+    }
+
+    @Test
+    fun pairHereOnAScreenWithNoKnownAddressOnlyReleasesIt() {
+        queue.hold("player-1", "Lobby")
+        assertTrue(queue.invite("player-1"))
+        assertFalse(queue.isHeld("player-1"))
+        assertEquals(emptyList(), queue.activeInvites())
     }
 }

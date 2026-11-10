@@ -21,7 +21,9 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import org.churchpresenter.diagnostics.Log
@@ -111,8 +113,10 @@ private val SignageGate = createRouteScopedPlugin("SignageGate", ::SignageGateCo
         when {
             !server.signageEnabled || server.signage == null ->
                 call.respond(HttpStatusCode.Forbidden, """{"ok":false,"reason":"signage is off"}""")
-            call.bearerToken() != null && call.signageScreen(server, respond = false) == null ->
+            call.bearerToken() != null && call.signageScreen(server, respond = false) == null -> {
+                server.signage?.refusedToken(call.bearerToken().orEmpty(), call.request.origin.remoteAddress)
                 call.respond(HttpStatusCode.Unauthorized, """{"ok":false,"reason":"unknown screen"}""")
+            }
         }
     }
 }
@@ -162,14 +166,14 @@ private suspend fun DefaultWebSocketServerSession.runPairing(
         close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "no pairing code"))
         return
     }
-    sendSignage(ServerMessage.PairingPending(hello.pairingCode.orEmpty()))
-    // Reading on keeps the connection's close noticed: the player sends nothing more until paired.
-    val watcher = launch { incoming.consumeEach { } }
-    val decision = try {
-        hub.pairing.await(hello, address)
-    } finally {
-        watcher.cancel()
+    hub.pairing.arrived(hello.playerId)
+    if (hub.pairing.isHeld(hello.playerId)) {
+        // Removed from here a moment ago: turned away so that it looks for another ChurchPresenter.
+        close(CloseReason(CloseReason.Codes.TRY_AGAIN_LATER, "held after removal"))
+        return
     }
+    sendSignage(ServerMessage.PairingPending(hello.pairingCode.orEmpty()))
+    val decision = awaitDecisionOrClose(hub, hello, address) ?: return
     when (decision) {
         is PairingDecision.Approved -> {
             Log.info(TAG, "Paired screen ${hello.playerId} at $address")
@@ -178,6 +182,30 @@ private suspend fun DefaultWebSocketServerSession.runPairing(
         PairingDecision.Rejected -> sendSignage(ServerMessage.PairingRejected)
     }
     close(CloseReason(CloseReason.Codes.NORMAL, "pairing settled"))
+}
+
+/**
+ * The tab's decision on [hello], or null when the player's connection ends first: it is then no longer
+ * listed. The player sends nothing more until paired, so reading on is how the close is noticed.
+ */
+private suspend fun DefaultWebSocketServerSession.awaitDecisionOrClose(
+    hub: SignageHub,
+    hello: PlayerMessage.Hello,
+    address: String,
+): PairingDecision? = coroutineScope {
+    val decision = async { hub.pairing.await(hello, address) }
+    val watcher = launch {
+        incoming.consumeEach { }
+        decision.cancel()
+    }
+    try {
+        // join() ends the same way whether the tab decided or the watcher cancelled the wait; it
+        // throws only when this handler itself is cancelled.
+        decision.join()
+        if (decision.isCancelled) null else decision.await()
+    } finally {
+        watcher.cancel()
+    }
 }
 
 /** A paired player: what it is sent, and what it reports, until either side closes. */

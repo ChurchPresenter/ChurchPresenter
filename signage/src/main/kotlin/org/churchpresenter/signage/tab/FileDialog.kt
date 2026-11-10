@@ -28,6 +28,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.save
 import org.churchpresenter.strings.generated.resources.signage_choose_file
+import org.churchpresenter.strings.generated.resources.signage_choose_playlist_folder
 import org.churchpresenter.strings.generated.resources.signage_file_change
 import org.churchpresenter.strings.generated.resources.signage_file_title_edit
 import org.churchpresenter.strings.generated.resources.signage_folder_title_edit
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import org.churchpresenter.strings.generated.resources.signage_add_file_desc
 import org.churchpresenter.strings.generated.resources.signage_file_caption
 import org.churchpresenter.strings.generated.resources.signage_folder_caption
+import org.churchpresenter.strings.generated.resources.signage_folder_change
 import org.churchpresenter.strings.generated.resources.signage_folder_subfolders
 import org.churchpresenter.strings.generated.resources.signage_folder_subtitle
 import org.jetbrains.compose.resources.stringResource
@@ -93,7 +95,7 @@ internal fun FileDialog(
 
 /**
  * Edits a folder playlist's name and how long each picture stays up; its copy in the signage folder
- * opens in the file manager.
+ * opens in the file manager, and Change… plays another folder instead, chosen here and copied in on save.
  */
 @Composable
 internal fun FolderDialog(
@@ -101,24 +103,39 @@ internal fun FolderDialog(
     /** Where the copy is on this computer; null when it cannot be found. */
     location: Path?,
     desktop: SignageDesktop,
-    onSave: (name: String, pictureSeconds: Int) -> Unit,
+    onSave: (name: String, pictureSeconds: Int, chosen: Path?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var seconds by remember { mutableStateOf(initial.pictureSeconds) }
+    var chosen by remember { mutableStateOf<Path?>(null) }
+    val chooseTitle = stringResource(Res.string.signage_choose_playlist_folder)
     NameDialog(
         title = stringResource(Res.string.signage_folder_title_edit),
         subtitle = stringResource(Res.string.signage_folder_subtitle),
         kind = TileKind.FOLDER,
         initialName = initial.name,
-        onSave = { onSave(it, seconds) },
+        onSave = { onSave(it, seconds, chosen) },
         onDismiss = onDismiss,
     ) {
-        SourceCard(stringResource(Res.string.signage_folder_caption), TileKind.FOLDER, initial.path) {
-            KeyButton(
-                onClick = { location?.let { scope.launch(Dispatchers.IO) { desktop.openFolder(it) } } },
-                enabled = location != null,
-            ) { Text(stringResource(Res.string.signage_open_folder)) }
+        val shown = chosen?.toString() ?: initial.path
+        SourceCard(stringResource(Res.string.signage_folder_caption), TileKind.FOLDER, shown) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                KeyButton(
+                    onClick = { location?.let { scope.launch(Dispatchers.IO) { desktop.openFolder(it) } } },
+                    // The folder it plays until saved; a newly chosen one is not opened from here.
+                    enabled = location != null && chosen == null,
+                ) { Text(stringResource(Res.string.signage_open_folder)) }
+                KeyButton(
+                    onClick = {
+                        scope.launch {
+                            desktop.fileChooser
+                                .chooseSingle(chosen?.parent, emptyList(), chooseTitle, selectDirectory = true)
+                                ?.let { chosen = it }
+                        }
+                    },
+                ) { Text(stringResource(Res.string.signage_folder_change)) }
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             NumberSettingsTextField(

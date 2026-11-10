@@ -118,6 +118,9 @@ object Features {
     /** Answers [ServerMessage.Wipe]. */
     const val WIPE = "wipe"
 
+    /** Answers [ServerMessage.FactoryReset]; a player without it is sent [ServerMessage.Released]. */
+    const val FACTORY_RESET = "factory_reset"
+
     /** Plays [MediaKind.STREAM] items. */
     const val STREAM = "stream"
 
@@ -265,6 +268,15 @@ sealed interface ServerMessage {
     @Serializable
     @SerialName("wipe")
     data object Wipe : ServerMessage
+
+    /**
+     * Sent when the owner removes the screen: everything the player stored is deleted and it forgets
+     * its owner, its token and the address it last used, then looks for a ChurchPresenter again as a
+     * new screen. It keeps its player id, so the ChurchPresenter that removed it can hold it back.
+     */
+    @Serializable
+    @SerialName("factory_reset")
+    data object FactoryReset : ServerMessage
 
     /**
      * Updates the machine itself (Chromium, mpv, every package, the player's settings) and restarts
