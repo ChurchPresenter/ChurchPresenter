@@ -45,8 +45,6 @@ import androidx.compose.material.icons.outlined.SwitchAccount
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import org.churchpresenter.liveoutput.preview.LocalScreenHoldMenu
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -165,22 +163,19 @@ internal fun PreviewSidebar(
             )
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
             val previewFills = appSettings.projectionSettings.run { previewLayoutFillsPanel && activeLayout() != null }
-            // The hold menu is Dev mode only until it is approved for production.
-            CompositionLocalProvider(LocalScreenHoldMenu provides state.showControl.devMode) {
-                LivePreviewPanel(
-                    presenterManager = presenterManager,
-                    appSettings = state.livePreviewAppSettings,
-                    modifier = (if (previewFills) Modifier.fillMaxWidth().weight(1f) else Modifier.fillMaxWidth())
-                        .guideTarget(GuideTargets.LIVE_PREVIEW),
-                    serverUrl = state.serverUrl,
-                    qaDisplayUrl = state.qaDisplayUrl,
-                    sttManager = sttManager,
-                    onSettingsChange = onSettingsChange,
-                    editingLayout = editingPreviewLayout,
-                    onDoneEditing = { editingPreviewLayout = false },
-                    isRelease = BuildConfig.IS_RELEASE,
-                )
-            }
+            LivePreviewPanel(
+                presenterManager = presenterManager,
+                appSettings = state.livePreviewAppSettings,
+                modifier = (if (previewFills) Modifier.fillMaxWidth().weight(1f) else Modifier.fillMaxWidth())
+                    .guideTarget(GuideTargets.LIVE_PREVIEW),
+                serverUrl = state.serverUrl,
+                qaDisplayUrl = state.qaDisplayUrl,
+                sttManager = sttManager,
+                onSettingsChange = onSettingsChange,
+                editingLayout = editingPreviewLayout,
+                onDoneEditing = { editingPreviewLayout = false },
+                isRelease = BuildConfig.IS_RELEASE,
+            )
             QuickBackgroundTray(
                 backgrounds = appSettings.quickBackgrounds,
                 // A quick background is a full-screen background: its tile is a picture of the

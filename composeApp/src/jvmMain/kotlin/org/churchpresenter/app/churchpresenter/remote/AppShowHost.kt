@@ -68,8 +68,6 @@ internal class AppShowHost(
     private val presenterManager: PresenterManager,
     private val settings: () -> AppSettings,
     private val outlets: ShowOutlets,
-    /** Whether screen holds are on: dev mode only until they are approved for production. */
-    private val holdEnabled: () -> Boolean = { false },
 ) : ShowHost {
 
     override suspend fun goLive(action: Action.GoLive) = outlets.goLive(itemOf(action.item, action.rowId), action.plays)
@@ -92,7 +90,6 @@ internal class AppShowHost(
     override suspend fun clearAll() = presenterManager.requestClearDisplay()
 
     override suspend fun holdScreen(action: Action.HoldScreen) {
-        require(holdEnabled()) { "Screen hold is off" }
         val hold = when (action.mode.trim().lowercase()) {
             "hold" -> ScreenHold.HOLD
             "blank" -> ScreenHold.BLANK

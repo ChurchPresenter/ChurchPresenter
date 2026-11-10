@@ -35,7 +35,6 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
     presenterManager = presenterManager,
     // Preview mode is dev mode only; outside it the host sees it off, as the outputs do.
     settings = { if (devMode) appSettings else appSettings.withPreviewMode(false) },
-    holdEnabled = { devMode },
     outlets = ShowOutlets(
         rows = { currentScheduleItems },
         currentRowId = { lastLiveRowId ?: selectedScheduleItemId },

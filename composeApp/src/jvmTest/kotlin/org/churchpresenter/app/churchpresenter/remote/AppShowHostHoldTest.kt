@@ -10,14 +10,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** The `holdScreen` action: a screen by its number or all, held, blanked, released or toggled; dev mode only. */
+/** The `holdScreen` action: a screen by its number or all, held, blanked, released or toggled. */
 class AppShowHostHoldTest {
 
     private val pm = PresenterManager(showPresenterWindowInitially = false).apply { setScreenCount(2) }
     private val log = mutableListOf<String>()
-    private var enabled = true
 
-    private val host = AppShowHost(pm, { AppSettings() }, ShowOutlets(log = { log += it }), holdEnabled = { enabled })
+    private val host = AppShowHost(pm, { AppSettings() }, ShowOutlets(log = { log += it }))
 
     private fun run(action: Action) = runBlocking { ActionRunner(host, this).perform(listOf(action)) }
 
@@ -59,11 +58,9 @@ class AppShowHostHoldTest {
     }
 
     @Test
-    fun `a screen or mode that is not there is refused, and so is every hold outside dev mode`() {
+    fun `a screen or mode that is not there is refused`() {
         assertEquals("No screen called stage", refused(Action.HoldScreen("stage")))
         assertEquals("No hold mode called freeze", refused(Action.HoldScreen("1", "freeze")))
-        enabled = false
-        assertEquals("Screen hold is off", refused(Action.HoldScreen("1", on = true)))
         assertTrue(pm.screenHolds.value.isEmpty())
     }
 }

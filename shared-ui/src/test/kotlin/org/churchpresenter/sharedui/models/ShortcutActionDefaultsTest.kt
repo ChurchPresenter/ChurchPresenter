@@ -127,12 +127,11 @@ class ShortcutActionDefaultsTest {
     }
 
     @Test
-    fun `only Take, the screen holds, the macro slots and the clear-group slots are dev only`() {
+    fun `only Take, the macro slots and the clear-group slots are dev only`() {
         val devOnly = ShortcutAction.entries.filter { it.devOnly }.toSet()
 
         assertEquals(
-            setOf(ShortcutAction.TAKE, ShortcutAction.HOLD_ALL_SCREENS, ShortcutAction.RELEASE_ALL_SCREENS) +
-                MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
+            setOf(ShortcutAction.TAKE) + MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
             devOnly,
         )
         assertTrue(!ShortcutAction.SAVE_SCHEDULE.devOnly)

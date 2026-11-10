@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
@@ -340,8 +341,17 @@ class LivePreviewPanelTest {
 
     // ── LOCKED badge + lock toggle ─────────────────────────────────────────────────────────────
 
+    // A screen's corner button opens the hold menu (`ScreenHoldMenuTest`), which carries the lock; the
+    // other outputs keep the plain toggle, covered below.
+
+    /** Opens screen 1's hold menu. */
+    private fun ComposeUiTest.openScreenMenu() {
+        onNode(hasClickAction() and hasContentDescription(SCREEN_MENU)).performClick()
+        waitForIdle()
+    }
+
     @Test
-    fun `locking a screen shows the LOCKED badge and the filled lock icon`() = runComposeUiTest {
+    fun `locking a screen shows the LOCKED badge, and its menu offers to unlock`() = runComposeUiTest {
         val pm = PresenterManager()
         pm.setScreenLock(0, Presenting.BIBLE)
         setContent {
@@ -350,22 +360,24 @@ class LivePreviewPanelTest {
             }
         }
         onNodeWithText("LOCKED").assertExists()
-        onNodeWithContentDescription("Unlock screen").assertExists()
+        openScreenMenu()
+        onNodeWithText("Unlock screen").assertExists()
     }
 
     @Test
-    fun `an unlocked screen shows neither the LOCKED badge nor the filled lock icon`() = runComposeUiTest {
+    fun `an unlocked screen shows no LOCKED badge, and its menu offers to lock`() = runComposeUiTest {
         setContent {
             MaterialTheme {
                 LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
             }
         }
         onNodeWithText("LOCKED").assertDoesNotExist()
-        onNodeWithContentDescription("Lock screen to current tab").assertExists()
+        openScreenMenu()
+        onNodeWithText("Lock screen to current tab").assertExists()
     }
 
     @Test
-    fun `clicking the lock toggle locks the screen to its current mode`() = runComposeUiTest {
+    fun `locking a screen from its menu locks it to its current mode`() = runComposeUiTest {
         val pm = PresenterManager()
         pm.setPresentingMode(Presenting.LYRICS)
         setContent {
@@ -373,13 +385,14 @@ class LivePreviewPanelTest {
                 LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
             }
         }
-        onNode(hasClickAction() and hasContentDescription("Lock screen to current tab")).performClick()
+        openScreenMenu()
+        onNodeWithText("Lock screen to current tab").performClick()
 
         assertEquals(Presenting.LYRICS, pm.screenLocks.value[0])
     }
 
     @Test
-    fun `clicking the lock toggle again unlocks the screen`() = runComposeUiTest {
+    fun `unlocking a screen from its menu lets it go`() = runComposeUiTest {
         val pm = PresenterManager()
         pm.setScreenLock(0, Presenting.LYRICS)
         setContent {
@@ -387,7 +400,8 @@ class LivePreviewPanelTest {
                 LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
             }
         }
-        onNode(hasClickAction() and hasContentDescription("Unlock screen")).performClick()
+        openScreenMenu()
+        onNodeWithText("Unlock screen").performClick()
 
         assertNull(pm.screenLocks.value[0])
     }
@@ -404,9 +418,8 @@ class LivePreviewPanelTest {
                 LivePreviewPanel(presenterManager = pm, appSettings = settings)
             }
         }
-        // Two unlocked toggles exist (the dev-fallback screen and the browser source output);
-        // the browser source one is the last, since it's rendered after the screen loop, and it
-        // sits below the default test window's height, so it must be scrolled into view first.
+        // The screen's corner opens its hold menu, so the browser source output's is the only plain
+        // toggle; it sits below the default test window's height, so it must be scrolled into view first.
         onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
             .onLast().performScrollTo().performClick()
 
@@ -1087,7 +1100,7 @@ class LivePreviewPanelTest {
         }
 
         onNodeWithText("Auditorium").assertDoesNotExist()
-        onNodeWithContentDescription(LOCK).performMouseInput { moveTo(center) }
+        onNodeWithContentDescription(SCREEN_MENU).performMouseInput { moveTo(center) }
         waitForIdle()
         onNodeWithText("Auditorium").assertExists()
 
@@ -1104,7 +1117,7 @@ class LivePreviewPanelTest {
             }
         }
 
-        onNodeWithContentDescription(LOCK).performMouseInput { moveTo(center) }
+        onNodeWithContentDescription(SCREEN_MENU).performMouseInput { moveTo(center) }
         waitForIdle()
 
         onNodeWithText("Auditorium").assertDoesNotExist()
@@ -1125,5 +1138,6 @@ class LivePreviewPanelTest {
         onNodeWithText("OUTPUT PROFILE · FULL SCREEN", substring = true).assertExists()
     }
 
-    private val LOCK = "Lock screen to current tab"
+    /** A screen tile's corner button: it opens the hold menu, and is a point on the picture to hover. */
+    private val SCREEN_MENU = "Screen hold options"
 }

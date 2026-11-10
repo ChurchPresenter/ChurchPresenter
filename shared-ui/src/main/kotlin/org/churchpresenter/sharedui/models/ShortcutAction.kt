@@ -211,7 +211,7 @@ enum class ShortcutAction(
     // Preview mode's Take. Unbound until someone picks a key for it.
     TAKE(ShortcutScope.GLOBAL, Res.string.shortcut_description_take, emptyList()),
 
-    // Screen hold: freeze every screen on its last frame, or let them all go. Unbound, dev mode only.
+    // Screen hold: freeze every screen on its last frame, or let them all go. Unbound until someone picks a key.
     HOLD_ALL_SCREENS(ShortcutScope.GLOBAL, Res.string.shortcut_description_hold_all_screens, emptyList()),
     RELEASE_ALL_SCREENS(ShortcutScope.GLOBAL, Res.string.shortcut_description_release_all_screens, emptyList()),
     UNDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_undo,
@@ -350,9 +350,7 @@ enum class ShortcutAction(
      * Whether this belongs to a feature that is not ready for production yet: it is offered, and
      * answers its key, only in dev mode (AGENT.md, "Dev mode only").
      */
-    val devOnly: Boolean
-        get() = this == TAKE || this == HOLD_ALL_SCREENS || this == RELEASE_ALL_SCREENS ||
-            this in MACRO_ACTIONS || this in CLEAR_GROUP_ACTIONS
+    val devOnly: Boolean get() = this == TAKE || this in MACRO_ACTIONS || this in CLEAR_GROUP_ACTIONS
 }
 
 /** The keys that run the first nine macros, in the order the macros are listed. */

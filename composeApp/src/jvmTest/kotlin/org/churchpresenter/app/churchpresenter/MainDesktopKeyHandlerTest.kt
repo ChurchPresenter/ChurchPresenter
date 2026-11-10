@@ -98,7 +98,7 @@ class MainDesktopKeyHandlerTest {
     }
 
     @Test
-    fun `the screen hold keys hold and release every screen, in dev mode only`() {
+    fun `the screen hold keys hold and release every screen, with or without dev mode`() {
         val holds = mutableListOf<ScreenHold?>()
         val settings = AppSettings(
             keyboardShortcutSettings = KeyboardShortcutSettings(
@@ -109,9 +109,7 @@ class MainDesktopKeyHandlerTest {
             ),
         )
         val actions = MainDesktopKeyActions(holdAllScreens = { holds += it })
-        assertFalse(handleMainDesktopKey(keyDown(Key.F10), context(actions, devMode = false, settings = settings)))
-        assertTrue(holds.isEmpty())
-        assertTrue(handleMainDesktopKey(keyDown(Key.F10), context(actions, devMode = true, settings = settings)))
+        assertTrue(handleMainDesktopKey(keyDown(Key.F10), context(actions, devMode = false, settings = settings)))
         assertTrue(handleMainDesktopKey(keyDown(Key.F11), context(actions, devMode = true, settings = settings)))
         assertEquals(listOf(ScreenHold.HOLD, null), holds)
     }

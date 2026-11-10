@@ -73,7 +73,7 @@ internal class MainDesktopKeyContext(
     val actions: MainDesktopKeyActions,
 )
 
-/** Holds or releases every screen when [keyEvent] is the key for it; whether it was one. Dev mode only. */
+/** Holds or releases every screen when [keyEvent] is the key for it; whether it was one. */
 private fun handleScreenHoldKey(shortcuts: ShortcutMap, keyEvent: KeyEvent, actions: MainDesktopKeyActions): Boolean {
     val hold = when {
         shortcuts.matches(ShortcutAction.HOLD_ALL_SCREENS, keyEvent) -> ScreenHold.HOLD
@@ -131,7 +131,7 @@ internal fun handleMainDesktopKey(keyEvent: KeyEvent, context: MainDesktopKeyCon
         shortcuts.matches(ShortcutAction.TAKE, keyEvent) && context.devMode -> {
             actions.take(); true
         }
-        context.devMode && handleScreenHoldKey(shortcuts, keyEvent, actions) -> true
+        handleScreenHoldKey(shortcuts, keyEvent, actions) -> true
         // Presentation clickers (Logitech/Kensington etc.) are HID keyboards
         // sending Page Down/Up. Handled here in the preview pass so a live
         // presentation responds no matter which tab or control has focus —

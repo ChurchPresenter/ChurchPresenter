@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -36,16 +35,9 @@ import org.churchpresenter.strings.generated.resources.unlock_screen
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * Whether screen tiles carry the hold menu in place of the lock toggle. Off by default: the feature is
- * Dev mode only until it is approved, so the app provides it from `devMode` (root AGENT.md).
- */
-val LocalScreenHoldMenu = staticCompositionLocalOf { false }
-
-/** The hold menu for screen [screenIndex], or null while [LocalScreenHoldMenu] is off. */
+/** The hold menu for screen [screenIndex]. */
 @Composable
-internal fun screenHoldMenu(presenterManager: PresenterManager, screenIndex: Int): ScreenHoldMenu? {
-    if (!LocalScreenHoldMenu.current) return null
+internal fun screenHoldMenu(presenterManager: PresenterManager, screenIndex: Int): ScreenHoldMenu {
     val holds by presenterManager.screenHolds
     return ScreenHoldMenu(
         hold = holds[screenIndex],
@@ -57,8 +49,7 @@ internal fun screenHoldMenu(presenterManager: PresenterManager, screenIndex: Int
 
 /**
  * What a screen tile's menu does about holding its output: how it is held now, and the calls that
- * hold or release it, or every screen at once. The tile gets one only for a screen, and only while
- * the Dev mode rule lets the feature show.
+ * hold or release it, or every screen at once. Only a screen's tile gets one.
  */
 internal class ScreenHoldMenu(
     val hold: ScreenHold?,

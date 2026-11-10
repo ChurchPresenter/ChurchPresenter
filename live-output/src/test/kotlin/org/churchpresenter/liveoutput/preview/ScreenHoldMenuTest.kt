@@ -1,7 +1,6 @@
 package org.churchpresenter.liveoutput.preview
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasClickAction
@@ -24,20 +23,18 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * The screen tile's hold menu, which stands in for the lock toggle while [LocalScreenHoldMenu] is on:
- * every item it offers, what each does to the manager, and the badge the tile then wears. Off, the
- * tile keeps the plain toggle `LivePreviewPanelTest` covers.
+ * The screen tile's hold menu, which stands in for the lock toggle on a screen: every item it offers,
+ * what each does to the manager, and the badge the tile then wears. The other outputs keep the plain
+ * toggle `LivePreviewPanelTest` covers.
  */
 @OptIn(ExperimentalTestApi::class)
 class ScreenHoldMenuTest {
 
     private val pm = PresenterManager(showPresenterWindowInitially = false)
 
-    private fun ComposeUiTest.panel(settings: AppSettings = AppSettings(), menu: Boolean = true) = setContent {
+    private fun ComposeUiTest.panel(settings: AppSettings = AppSettings()) = setContent {
         MaterialTheme {
-            CompositionLocalProvider(LocalScreenHoldMenu provides menu) {
-                LivePreviewPanel(presenterManager = pm, appSettings = settings)
-            }
+            LivePreviewPanel(presenterManager = pm, appSettings = settings)
         }
     }
 
@@ -47,13 +44,6 @@ class ScreenHoldMenuTest {
         waitForIdle()
         onNodeWithText(item).performClick()
         waitForIdle()
-    }
-
-    @Test
-    fun `off, the tile keeps the plain lock toggle`() = runComposeUiTest {
-        panel(menu = false)
-        onNodeWithContentDescription(MENU).assertDoesNotExist()
-        onNodeWithContentDescription("Lock screen to current tab").assertExists()
     }
 
     @Test
