@@ -28,7 +28,9 @@ class TitleSlideLottieRowTest {
                 var song by mutableStateOf(SongSettings())
                 setContent {
                     MaterialTheme {
-                        TitleSlideLottieRow(song, lowerThird = true, updateSong = { song = it(song) }, templatesDir = folder)
+                        TitleSlideLottieRow(
+                            song, lowerThird = true, updateSong = { song = it(song) }, templatesDir = folder,
+                        )
                     }
                 }
                 onNodeWithText("No template selected").performClick()

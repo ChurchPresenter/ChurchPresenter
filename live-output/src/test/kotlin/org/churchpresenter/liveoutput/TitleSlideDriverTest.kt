@@ -39,7 +39,8 @@ class TitleSlideDriverTest {
             bgInSeconds = 0.1f, textInSeconds = 0.1f, holdSeconds = 0.2f, textOutSeconds = 0.1f, bgOutSeconds = 0.1f,
         ),
     )
-    private val title = LyricSection(type = Constants.SECTION_TYPE_TITLE_SLIDE, title = "Amazing Grace", songNumber = 427)
+    private val title =
+        LyricSection(type = Constants.SECTION_TYPE_TITLE_SLIDE, title = "Amazing Grace", songNumber = 427)
     private val verse1 = LyricSection(type = "verse", title = "Amazing Grace", lines = listOf("Amazing grace"))
     private val phases = mutableListOf<BibleBandPhase>()
 
@@ -100,7 +101,10 @@ class TitleSlideDriverTest {
         manager.setLyricSection(verse1)
         waitUntil("verse 1 is on the output") { manager.displayedLyricSection.value == verse1 }
         assertEquals(
-            listOf(BibleBandPhase.IDLE, BibleBandPhase.ENTER, BibleBandPhase.HOLD, BibleBandPhase.EXIT, BibleBandPhase.IDLE),
+            listOf(
+                BibleBandPhase.IDLE, BibleBandPhase.ENTER, BibleBandPhase.HOLD,
+                BibleBandPhase.EXIT, BibleBandPhase.IDLE,
+            ),
             phases,
         )
     }
