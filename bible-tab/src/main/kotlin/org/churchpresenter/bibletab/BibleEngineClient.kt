@@ -68,11 +68,16 @@ internal fun retryDelayMs(attempt: Int, floorMs: Long = DEFAULT_RETRY_FLOOR_MS):
  *   from. Two seconds in the app — long enough not to hammer an engine that is restarting. Tests pass
  *   a few milliseconds so a reconnect is observable inside the per-test time budget; that is the only
  *   reason it is a parameter.
+ * @param startEngine starts the in-process engine; [EngineServer.start] in the app. Tests hand in
+ *   a handle of their own, since a real engine's stop waits out its server's grace period.
  */
 class BibleEngineClient(
     private val onScripture: (EngineScripture) -> Unit,
     private val onVersion: (String?) -> Unit,
     private val retryFloorMs: Long = DEFAULT_RETRY_FLOOR_MS,
+    private val startEngine: (EngineStart) -> EngineHandle? = {
+        EngineServer.start(it.sttUrl, it.bibleRoot, it.port, it.bibleFiles)
+    },
 ) : BibleEngineStatus {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = HttpClient(CIO) {
@@ -97,8 +102,23 @@ class BibleEngineClient(
     private val _engineSttConnected = mutableStateOf<Boolean?>(null)
     override val engineSttConnected: State<Boolean?> = _engineSttConnected
 
-    private var engineHandle: EngineHandle? = null
+    @Volatile private var engineHandle: EngineHandle? = null
+
+    /** Whether an in-process engine this client started is running. */
+    internal val engineRunning: Boolean get() = engineHandle != null
     private var wsJob: Job? = null
+
+    /**
+     * Stopping an engine waits out its WebSocket server's grace period, and [stop] is called from
+     * the event thread, so the stop runs here instead -- a scope of its own, which [dispose] does not
+     * cancel, so an engine is always taken down. [start] waits for it, so a restart can bind the
+     * same port again.
+     */
+    private val stopScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /** The stop of the engine [stop] last took down, while it runs; joined by [start] and tests. */
+    @Volatile internal var engineStopping: Job? = null
+        private set
 
     @Volatile private var session: DefaultClientWebSocketSession? = null
 
@@ -110,12 +130,9 @@ class BibleEngineClient(
 
     /**
      * Starts (or restarts) the engine link. When [runLocal] is true the engine is launched in-process
-     * pointed at [sttUrl] + [bibleRoot]; otherwise we just connect to an already-running engine.
+     * pointed at its STT url and Bible folder; otherwise we just connect to an already-running engine.
      */
     fun start(engine: EngineStart) {
-        val sttUrl = engine.sttUrl
-        val bibleRoot = engine.bibleRoot
-        val bibleFiles = engine.bibleFiles
         val runLocal = engine.runLocal
         val host = engine.host
         val port = engine.port
@@ -126,9 +143,11 @@ class BibleEngineClient(
         currentContinuationSpeed = continuationSpeed
         _startFailed.value = false
         // Engine startup (SPB load + BM25 index) is heavy — keep it off the UI thread.
+        val previousStop = engineStopping
         wsJob = scope.launch {
+            previousStop?.join()
             if (runLocal) {
-                engineHandle = runCatching { EngineServer.start(sttUrl, bibleRoot, port, bibleFiles) }.getOrNull()
+                engineHandle = runCatching { startEngine(engine) }.getOrNull()
                 if (engineHandle == null) {
                     // The engine could not start (bad config or — the headline bug — a port collision
                     // that prevents the WS server from binding). Don't enter the connect loop against
@@ -271,8 +290,9 @@ class BibleEngineClient(
         _connected.value = false
         _startFailed.value = false
         _engineSttConnected.value = null
-        engineHandle?.stop()
+        val handle = engineHandle ?: return
         engineHandle = null
+        engineStopping = stopScope.launch { handle.stop() }
     }
 
     /** Appends a line to ~/.churchpresenter/bible-stt-logs/engine-errors.jsonl for crash-level issues. */

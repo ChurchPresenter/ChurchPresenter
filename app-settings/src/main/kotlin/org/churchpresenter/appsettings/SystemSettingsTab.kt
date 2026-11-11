@@ -54,6 +54,7 @@ import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -298,7 +299,9 @@ private fun GeneralCard(
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             // Launch at login — the OS registration is the source of truth, not settings.json
             val autoStart = LocalAutoStart.current
-            var autoStartEnabled by remember { mutableStateOf(autoStart.isEnabled()) }
+            // Asked off the event thread: on Windows it is the registry, through JNA's first load.
+            var autoStartEnabled by remember { mutableStateOf(false) }
+            LaunchedEffect(autoStart) { autoStartEnabled = withContext(Dispatchers.IO) { autoStart.isEnabled() } }
             // Says why a change did not take, until one does: a switch that only refuses to move
             // gets pressed again and again.
             var lastAutoStartChange by remember { mutableStateOf<AutoStartChange?>(null) }

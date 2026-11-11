@@ -134,6 +134,16 @@ class SongsViewModel(
 
     val filteredSongItems: State<List<SongItem>> = filteredSongItemsState
 
+    // The search caches come before [init]: loading the library fills them, and on a dispatcher
+    // that runs at once the load runs inside this constructor.
+    internal val lyricSearchText = IdentityHashMap<SongItem, String>()
+
+    internal var lyricSearchTextFor: List<SongItem>? = null
+
+    internal val lyricSections = IdentityHashMap<SongItem, MutableMap<Int, List<SearchableSection>>>()
+
+    internal var lyricSectionsFor: List<SongItem>? = null
+
     init {
         loadSongs()
     }
@@ -255,14 +265,6 @@ class SongsViewModel(
             }
         }
     }
-
-    internal val lyricSearchText = IdentityHashMap<SongItem, String>()
-
-    internal var lyricSearchTextFor: List<SongItem>? = null
-
-    internal val lyricSections = IdentityHashMap<SongItem, MutableMap<Int, List<SearchableSection>>>()
-
-    internal var lyricSectionsFor: List<SongItem>? = null
 
     fun dispose() {
         songFolderWatcher.dispose()

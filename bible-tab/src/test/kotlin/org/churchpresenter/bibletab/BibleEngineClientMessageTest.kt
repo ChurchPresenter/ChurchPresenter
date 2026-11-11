@@ -1,5 +1,10 @@
 package org.churchpresenter.bibletab
 
+import kotlinx.coroutines.runBlocking
+import org.churchpresenter.bibleengine.EngineHandle
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -444,6 +449,68 @@ class BibleEngineClientMessageTest {
         assertNull(c.engineSttConnected.value)
     }
 
+    @Test
+    fun `stopping an in-process engine returns at once, and its stop runs behind the caller`() {
+        val stopping = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        val stopped = AtomicBoolean(false)
+        val handle = EngineHandle(boundPort = ENGINE_PORT) {
+            stopping.countDown()
+            release.await(5, TimeUnit.SECONDS)
+            stopped.set(true)
+        }
+        val started = CountDownLatch(1)
+        val c = BibleEngineClient(
+            onScripture = {},
+            onVersion = {},
+            startEngine = { handle.also { started.countDown() } },
+        ).also { created.add(it) }
+        c.start(EngineStart(
+            sttUrl = "", bibleRoot = "unused", bibleFiles = emptyList(),
+            runLocal = true, host = "127.0.0.1", port = ENGINE_PORT, level = "off",
+        ))
+        assertTrue(started.await(5, TimeUnit.SECONDS), "the engine was started")
+        awaitUntil("the client to hold the engine") { c.engineRunning }
+
+        c.stop()
+
+        assertTrue(stopping.await(5, TimeUnit.SECONDS), "the engine's stop was asked for")
+        assertFalse(stopped.get(), "stop() returned while the engine was still shutting down")
+        release.countDown()
+        runBlocking { c.engineStopping?.join() }
+        assertTrue(stopped.get())
+    }
+
+    @Test
+    fun `a restart waits for the engine it replaces to be down`() {
+        val release = CountDownLatch(1)
+        val starts = mutableListOf<Boolean>()
+        var first = true
+        val c = BibleEngineClient(
+            onScripture = {},
+            onVersion = {},
+            startEngine = {
+                val isFirst = first
+                first = false
+                synchronized(starts) { starts += release.count == 0L }
+                EngineHandle(boundPort = ENGINE_PORT) { if (isFirst) release.await(5, TimeUnit.SECONDS) }
+            },
+        ).also { created.add(it) }
+        val start = EngineStart(
+            sttUrl = "", bibleRoot = "unused", bibleFiles = emptyList(),
+            runLocal = true, host = "127.0.0.1", port = ENGINE_PORT, level = "off",
+        )
+        c.start(start)
+        awaitUntil("the first engine to start") { synchronized(starts) { starts.size == 1 } }
+
+        c.start(start)
+        assertEquals(1, synchronized(starts) { starts.size }, "the second engine waits for the first to stop")
+        release.countDown()
+
+        awaitUntil("the second engine to start") { synchronized(starts) { starts.size == 2 } }
+        assertTrue(synchronized(starts) { starts[1] }, "and starts only once the first one is down")
+    }
+
     private fun awaitUntil(what: String, timeoutMs: Long = 10_000, condition: () -> Boolean) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
@@ -451,5 +518,10 @@ class BibleEngineClientMessageTest {
             Thread.sleep(20)
         }
         throw AssertionError("timed out after ${timeoutMs}ms waiting for $what")
+    }
+
+    private companion object {
+        /** Its own port: the engine's own suite uses 39 940 and up. */
+        const val ENGINE_PORT = 39_960
     }
 }

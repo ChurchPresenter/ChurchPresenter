@@ -245,8 +245,7 @@ internal fun SoftwarePlayback(
     // What the load effect below last opened it for, so it can tell a genuinely new file or a loop
     // restart (both begin at zero) from the same file being re-opened only because a subtitle VLC
     // has to burn in itself was chosen (resume where the operator was).
-    val loadedUrl = remember { mutableStateOf("") }
-    val loadedLoopVersion = remember { mutableIntStateOf(-1) }
+    val loaded = remember { LoadedMedia(mutableStateOf(""), mutableIntStateOf(-1)) }
 
     // Native-handle lifetime guard and the deferred pause it protects — see PlayerReleaseGate.
     val gate = remember { PlayerReleaseGate() }
@@ -261,7 +260,7 @@ internal fun SoftwarePlayback(
 
     AudioOutputDevice(mp, audioDeviceId)
 
-    SoftwareMediaLoad(viewModel, mp, audioEnabled, firstFrameCaptured, loadedUrl, loadedLoopVersion)
+    SoftwareMediaLoad(viewModel, mp, audioEnabled, firstFrameCaptured, loaded, stopOn)
 
     SubtitleTrackSync(viewModel, mp, gate)
 
@@ -286,9 +285,11 @@ private fun SoftwareMediaLoad(
     mp: MediaPlayer,
     audioEnabled: Boolean,
     firstFrameCaptured: MutableState<Boolean>,
-    loadedUrl: MutableState<String>,
-    loadedLoopVersion: MutableIntState,
+    loaded: LoadedMedia,
+    stopOn: (Runnable) -> Unit,
 ) {
+    val loadedUrl = loaded.url
+    val loadedLoopVersion = loaded.loopVersion
     LaunchedEffect(viewModel.mediaUrl, viewModel.loopRestartVersion, viewModel.vlcSubtitleReloadVersion) {
         val url = viewModel.mediaUrl
         // A reload forced by a subtitle format VLC has to burn in itself must not lose the
@@ -299,7 +300,10 @@ private fun SoftwareMediaLoad(
         loadedLoopVersion.intValue = viewModel.loopRestartVersion
         firstFrameCaptured.value = false  // reset so next file gets the 200 ms grace window
         SharedVideoOutput.frame.value = null  // clear stale frame while new media loads
-        mp.controls().stop()
+        // VLC's stop waits for its decoder threads. This player draws through callbacks, so it is
+        // stopped on the thread that also releases it, and the load waits for that without
+        // holding the event thread.
+        awaitOnPlayerThread(stopOn) { mp.controls().stop() }
         if (url.isBlank()) return@LaunchedEffect
 
         val mrl = mediaResourceLocator(url)
@@ -331,3 +335,6 @@ private fun SoftwareMediaLoad(
         if (resumeAtMs > 0) mp.controls().setTime(resumeAtMs)
     }
 }
+
+/** What [SoftwareMediaLoad] last opened the player for: the url and the loop restart it began. */
+private class LoadedMedia(val url: MutableState<String>, val loopVersion: MutableIntState)

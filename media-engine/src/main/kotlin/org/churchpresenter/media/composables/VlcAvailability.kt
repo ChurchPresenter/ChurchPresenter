@@ -7,7 +7,9 @@ import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
 /** Custom VLC installation directory. Set from saved settings before first VLC access. */
 var vlcCustomPath: String = ""
 
-private var _vlcAvailable: Boolean? = null
+@Volatile private var _vlcAvailable: Boolean? = null
+
+private val vlcCheckLock = Any()
 
 /**
  * Human-readable reason VLC is unavailable; empty when VLC loaded successfully.
@@ -15,8 +17,14 @@ private var _vlcAvailable: Boolean? = null
  */
 var vlcUnavailableReason: String = ""
 
-/** Returns true if VLC is installed and VLCJ can initialise. */
-val isVlcAvailable: Boolean get() = _vlcAvailable ?: checkVlcAvailable().also { _vlcAvailable = it }
+/**
+ * Returns true if VLC is installed and VLCJ can initialise. Checked once, under a lock, so the
+ * startup warm-up ([warmVlc]) and a composition asking at the same moment load VLC only once.
+ */
+val isVlcAvailable: Boolean
+    get() = _vlcAvailable ?: synchronized(vlcCheckLock) {
+        _vlcAvailable ?: checkVlcAvailable().also { _vlcAvailable = it }
+    }
 
 /**
  * True when VLC is present on disk but is the wrong CPU architecture

@@ -6,6 +6,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * A [Clipboard] that answers instead of throwing when the OS clipboard cannot be taken.
@@ -27,20 +29,27 @@ import androidx.compose.ui.platform.LocalClipboard
  *
  * A copy or paste that could not happen is one the operator repeats. It is not worth ending what
  * they were doing.
+ *
+ * Both run on the IO pool, not the caller's thread: Compose pastes from the event thread, and taking that
+ * lock waits on whichever application holds it -- Windows retries for as long as it is held.
  */
 internal class SafeClipboard(private val delegate: Clipboard) : Clipboard {
 
-    override suspend fun getClipEntry(): ClipEntry? = try {
-        delegate.getClipEntry()
-    } catch (_: IllegalStateException) {
-        null
+    override suspend fun getClipEntry(): ClipEntry? = withContext(Dispatchers.IO) {
+        try {
+            delegate.getClipEntry()
+        } catch (_: IllegalStateException) {
+            null
+        }
     }
 
     override suspend fun setClipEntry(clipEntry: ClipEntry?) {
-        try {
-            delegate.setClipEntry(clipEntry)
-        } catch (_: IllegalStateException) {
-            // Nothing to report and nothing to do: the operator presses the key again.
+        withContext(Dispatchers.IO) {
+            try {
+                delegate.setClipEntry(clipEntry)
+            } catch (_: IllegalStateException) {
+                // Nothing to report and nothing to do: the operator presses the key again.
+            }
         }
     }
 

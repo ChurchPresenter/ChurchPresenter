@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.media.composables.warmVlcInBackground
 import org.churchpresenter.sharedui.utils.LocalSimulateMissingOutputs
 import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import org.churchpresenter.dialogs.showAlreadyRunningDialog
@@ -370,6 +371,9 @@ fun main(args: Array<String>) {
     }.apply { isDaemon = true }.start()
 
     vlcCustomPath = startupSettings.projectionSettings.vlcPath
+    // Loading VLC takes a second or more on Windows; done here, off the event thread, the first
+    // composition that asks whether it is there and the first video opened find it loaded.
+    warmVlcInBackground()
     FfmpegBinary.customPath = startupSettings.projectionSettings.ffmpegPath
 
     LottieRenderCache.ensureForFolder(

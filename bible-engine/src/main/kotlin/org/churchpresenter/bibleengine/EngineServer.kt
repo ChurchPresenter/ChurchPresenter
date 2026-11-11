@@ -28,9 +28,10 @@ import org.churchpresenter.bibleengine.version.VersionScorer
 /**
  * Handle to a running engine instance; call [stop] to shut it (and its STT client) down.
  * [boundPort] is the port the WS server actually bound (may differ from the requested one when that
- * was taken) — local clients connect there.
+ * was taken) — local clients connect there. Public so a client's tests can stand one in for a real
+ * engine; only [EngineServer.start] makes one that runs.
  */
-class EngineHandle internal constructor(val boundPort: Int, private val stopFn: () -> Unit) {
+class EngineHandle(val boundPort: Int, private val stopFn: () -> Unit) {
     fun stop() { runCatching { stopFn() } }
 }
 

@@ -1,7 +1,6 @@
 package org.churchpresenter.media.composables
 
 import androidx.compose.runtime.Composable
-import org.churchpresenter.diagnostics.CrashReporter
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -9,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
@@ -31,26 +29,19 @@ internal class SoftwareVlc(
 )
 
 /**
- * Opens VLC for software rendering, or null when it cannot be: VLC is missing, its component will
- * not start, or the factory behind the callback surface will not load.
+ * Opens VLC for software rendering, or null when it cannot be: VLC is missing or its component will
+ * not start.
  *
- * The surface factory is used only to create the CallbackVideoSurface; the media player component
- * manages its own internal factory for the playback itself. On macOS,
- * factory.mediaPlayers().newEmbeddedMediaPlayer() does NOT deliver video frames to a callback
- * surface — that requires CallbackMediaPlayerComponent, which createMediaPlayerComponent() already
- * picks per platform.
+ * The callback surface comes from the same factory the player was made on ([SharedVlcFactory]);
+ * it used to be a second factory of its own, which loaded VLC a second time on every open and
+ * unloaded it on every release. On macOS, factory.mediaPlayers().newEmbeddedMediaPlayer() does NOT
+ * deliver video frames to a callback surface — that requires CallbackMediaPlayerComponent, which
+ * createMediaPlayerComponent() already picks per platform.
  */
 internal fun openSoftwareVlc(): SoftwareVlc? {
     if (!isVlcAvailable) return null
     val component = createMediaPlayerComponent() ?: return null
-    // Loads libvlc, whose failures are Errors rather than Exceptions.
-    val factory = try {
-        MediaPlayerFactory()
-    } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
-        CrashReporter.reportException(t, "VideoPlayer: VLC MediaPlayerFactory init failed")
-        component.releasePlayer()
-        return null
-    }
+    val factory = SharedVlcFactory.get()
     val mp = component.mediaPlayer()
     return SoftwareVlc(
         mp = mp,
@@ -59,10 +50,7 @@ internal fun openSoftwareVlc(): SoftwareVlc? {
         attachSurface = { format, render ->
             mp.videoSurface().set(factory.videoSurfaces().newVideoSurface(format, render, true))
         },
-        release = {
-            component.releasePlayer()
-            factory.release()
-        },
+        release = { component.releasePlayer() },
     )
 }
 
