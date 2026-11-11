@@ -51,7 +51,10 @@ import androidx.compose.ui.unit.sp
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** How long a status line stays on screen before it clears itself. */
 private const val STATUS_MESSAGE_MS = 3_000L
@@ -78,8 +81,10 @@ fun AdminApp() {
     val state = remember(scope) { AdminState(scope) }
 
     LaunchedEffect(Unit) {
-        PUZZLES_DIR.mkdirs()
-        ENCODED_DIR.mkdirs()
+        withContext(Dispatchers.IO) {
+            PUZZLES_DIR.mkdirs()
+            ENCODED_DIR.mkdirs()
+        }
         state.refreshLevels()
         state.levels.firstOrNull()?.let { state.loadLevel(it) }
     }
@@ -233,6 +238,7 @@ private fun BoxScope.ClueGutter(state: AdminState, editorStyle: TextStyle) {
 
 @Composable
 private fun ActionBar(state: AdminState) {
+    val scope = rememberCoroutineScope()
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -240,8 +246,10 @@ private fun ActionBar(state: AdminState) {
         Tip("Import a .txt plaintext puzzle file from disk into this level") {
             KeyButton(onClick = {
                 openFileDialog("Load Plaintext", listOf("txt"))?.let { file ->
-                    state.edit(file.readText(Charsets.UTF_8))
-                    state.say("Imported ${file.name}")
+                    scope.launch {
+                        state.edit(withContext(Dispatchers.IO) { file.readText(Charsets.UTF_8) })
+                        state.say("Imported ${file.name}")
+                    }
                 }
             }) { Text(Strings.importTxt) }
         }

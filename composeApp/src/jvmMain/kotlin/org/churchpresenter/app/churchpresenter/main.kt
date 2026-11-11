@@ -280,7 +280,7 @@ fun main(args: Array<String>) {
     // Every build says where the UI thread was stuck whenever it stops answering, and a release
     // build sends the stall to Sentry -- see UiWatchdog and UiStallReporter. After the reporter is
     // set up, so the first stall it counts can be sent.
-    UiWatchdog.start(budgetMs = uiStallReporter::budgetMs, onStall = uiStallReporter::stalled)
+    UiWatchdog.start(uiStallReporter::budgetMs, uiStallReporter::answered, uiStallReporter::stalled)
     // The same for the updater, which compares releases against this version.
     UpdateChecker.initialize(UpdaterIdentity(appVersion = BuildConfig.APP_VERSION, isRelease = BuildConfig.IS_RELEASE))
     // The installer a previous update ran is still in the temp directory: it could not be deleted

@@ -18,6 +18,7 @@ package org.churchpresenter.diagnostics
  *
  * Some stalls group with the rest of their kind instead, and say which in `stall.cause`, taken in
  * this order: any stall on a main window drawn in software ([renderApi], [STALL_CAUSE_SOFTWARE]);
+ * one most of whose samples are in Chromium ([STALL_CAUSE_CHROMIUM], grouped on [osFamily]);
  * one most of whose samples are loading code or a string for the first time
  * ([STALL_CAUSE_COLD_LOAD]); one whose first sample came far later than the watchdog's polling
  * allows, so the whole process was paused and the stack is from after it ([STALL_CAUSE_PAUSED]);
@@ -39,6 +40,7 @@ fun stallEvent(
     val screen = mostFrequent(cut.mapNotNull(::screenOf))
     val kind = when {
         isSoftwareRenderer(renderApi) -> STALL_CAUSE_SOFTWARE
+        cut.count { isInChromium(it, appFrameIndex(it)) } * 2 > cut.size -> STALL_CAUSE_CHROMIUM
         cut.count { isColdLoad(it, appFrameIndex(it)) } * 2 > cut.size -> STALL_CAUSE_COLD_LOAD
         stall.firstSampleMs > pausedPastMs(stall.budgetMs) -> STALL_CAUSE_PAUSED
         evidence.isEmpty() -> return null
@@ -48,7 +50,7 @@ fun stallEvent(
     val tags = buildMap {
         put("stall.live", live.toString())
         put("stall.length", lengthBucket(stall.lateMs))
-        kind?.let { put("stall.cause", it) }
+        kind?.let { put(STALL_CAUSE_TAG, it) }
         screen?.let { put("stall.screen", it) }
         modalCaller(shown)?.let { put("stall.modal", it) }
         if (kind == STALL_CAUSE_NO_APP_FRAME) put("stall.top", shown.firstOrNull()?.groupName ?: "no-frames")
@@ -56,6 +58,7 @@ fun stallEvent(
     val fingerprint = when (kind) {
         null -> listOfNotNull(screen, cause)
         STALL_CAUSE_NO_APP_FRAME -> listOf(kind, osFamily, renderApi)
+        STALL_CAUSE_CHROMIUM -> listOf(kind, osFamily)
         else -> listOf(kind)
     }
     return StallEvent(
@@ -92,9 +95,6 @@ internal val StackTraceElement.isAppFrame: Boolean
     get() = className.startsWith(APP_PACKAGE) && !isGeneratedResource
 
 private val StackTraceElement.isGeneratedResource: Boolean get() = GENERATED_RESOURCES in className
-
-/** What a stall groups on for this frame: its class and method, never its line. */
-internal val StackTraceElement.groupName: String get() = "$className.$methodName"
 
 /** The value seen most often in [values], the first seen winning a tie; null when there are none. */
 private fun mostFrequent(values: List<String>): String? =

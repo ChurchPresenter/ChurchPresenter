@@ -84,6 +84,18 @@ class ScheduleFileTest {
     // ── Round-trip ──────────────────────────────────────────────────────────────
 
     @Test
+    fun `the cipher round-trips with its key derived ahead, and never repeats a ciphertext`() {
+        ScheduleCipher.warm()
+
+        val first = ScheduleCipher.encrypt("[]")
+        val second = ScheduleCipher.encrypt("[]")
+
+        assertEquals("[]", ScheduleCipher.decrypt(first))
+        assertEquals("[]", ScheduleCipher.decrypt(second))
+        assertTrue(first != second, "each file gets an IV of its own")
+    }
+
+    @Test
     fun `a service survives save and reopen`() = runBlocking {
         val file = scheduleFile()
         chooseFile(file)

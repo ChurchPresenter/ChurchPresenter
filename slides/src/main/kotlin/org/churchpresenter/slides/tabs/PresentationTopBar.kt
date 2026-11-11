@@ -340,7 +340,9 @@ private fun PresentationTabScope.PresentationRecentFiles(viewModel: Presentation
                         isPinned = isPinned,
                         onOpen = {
                             val f = File(path)
-                            if (f.exists()) {
+                            // A recent file on a share can take seconds to answer: ask off the event thread.
+                            scope.launch {
+                                if (!withContext(Dispatchers.IO) { f.exists() }) return@launch
                                 viewModel.addPresentation(f)
                                 RecentPresentationFiles.add(path)
                             }

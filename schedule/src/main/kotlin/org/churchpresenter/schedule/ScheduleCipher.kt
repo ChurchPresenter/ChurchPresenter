@@ -17,15 +17,23 @@ internal object ScheduleCipher {
     private const val KEY_LEN = 256
     private const val SALT = "CPScheduleSalt01" // 16-byte fixed salt
 
-    private fun deriveKey(): SecretKeySpec {
+    /**
+     * The key, derived once a run: the passphrase and salt never change, and 65 536 rounds of
+     * PBKDF2 take long enough on a slow machine to stall the event thread every autosave.
+     */
+    private val key: SecretKeySpec by lazy {
         val factory = SecretKeyFactory.getInstance(KEY_ALGO)
         val spec = PBEKeySpec(PASS.toCharArray(), SALT.toByteArray(Charsets.UTF_8), ITERATIONS, KEY_LEN)
         val secret = factory.generateSecret(spec)
-        return SecretKeySpec(secret.encoded, "AES")
+        SecretKeySpec(secret.encoded, "AES")
+    }
+
+    /** Derives the key now -- call it off the event thread -- so the first save or open does not. */
+    fun warm() {
+        key
     }
 
     fun encrypt(plainText: String): String {
-        val key = deriveKey()
         val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
         val cipher = Cipher.getInstance(ALGO)
         cipher.init(Cipher.ENCRYPT_MODE, key, IvParameterSpec(iv))
@@ -36,7 +44,6 @@ internal object ScheduleCipher {
     }
 
     fun decrypt(cipherText: String): String {
-        val key = deriveKey()
         val combined = Base64.getDecoder().decode(cipherText)
         val iv = combined.copyOfRange(0, 16)
         val encrypted = combined.copyOfRange(16, combined.size)

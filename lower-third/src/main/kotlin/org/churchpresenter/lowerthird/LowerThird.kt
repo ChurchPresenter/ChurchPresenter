@@ -143,10 +143,11 @@ fun LowerThirdTab(
     // Status of an API/Companion-triggered upload, so the same bar reflects those too
     val remoteUploadState = AtemUploadStatus.state.collectAsState()
 
-    val jsonContent = remember(ui.selectedFile) {
-        val f = ui.selectedFile ?: return@remember ""
-        if (!f.exists()) return@remember ""
-        f.readText()
+    // Read off the event thread; the last preset's JSON stays until the new one is in, so the
+    // preview never flashes empty between two presets.
+    val selectedFile = ui.selectedFile
+    val jsonContent by produceState("", selectedFile) {
+        value = withContext(Dispatchers.IO) { selectedFile?.takeIf { it.exists() }?.readText().orEmpty() }
     }
 
     val compositionState = rememberLottieComposition(jsonContent) {
@@ -207,8 +208,8 @@ private fun WatchLowerThirdFolder(lottieFolder: String, ui: LowerThirdUiState) {
     LaunchedEffect(lottieFolder) {
         if (lottieFolder.isEmpty()) return@LaunchedEffect
         val folder = File(lottieFolder)
-        if (!folder.exists() || !folder.isDirectory) return@LaunchedEffect
         withContext(Dispatchers.IO) {
+            if (!folder.isDirectory) return@withContext
             try {
                 val watchService = FileSystems.getDefault().newWatchService()
                 folder.toPath().register(

@@ -121,7 +121,7 @@ internal fun PresentationTabScope.PresentationLoadEffects(viewModel: Presentatio
     LaunchedEffect(selectedPresentationItem, selectedPresentationItemVersion) {
         selectedPresentationItem?.let { item ->
             val file = File(item.filePath)
-            if (file.exists()) {
+            if (withContext(Dispatchers.IO) { file.exists() }) {
                 viewModel.loadPresentationByPath(item.filePath)
                 focusRequester.requestFocus()
             } else if (instanceLinkFetchPresentationSlideBytes != null) {

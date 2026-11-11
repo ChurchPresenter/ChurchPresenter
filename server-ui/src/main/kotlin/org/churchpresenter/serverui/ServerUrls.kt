@@ -11,9 +11,6 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
-import org.jetbrains.skia.Image as SkiaImage
 import org.churchpresenter.settings.ServerSettings
 import java.net.URLEncoder
 
@@ -62,9 +59,8 @@ internal fun connectionQrBitmap(content: String, sizePx: Int = 512): ImageBitmap
             img.setRGB(x, y, if (matrix.get(x, y)) black else white)
         }
     }
-    SkiaImage.makeFromEncoded(
-        ByteArrayOutputStream().also { ImageIO.write(img, "PNG", it) }.toByteArray()
-    ).toComposeImageBitmap()
+    // Straight to a bitmap: a PNG written and read back costs the event thread ImageIO's first use.
+    img.toComposeImageBitmap()
 } catch (_: Exception) {
     null
 }

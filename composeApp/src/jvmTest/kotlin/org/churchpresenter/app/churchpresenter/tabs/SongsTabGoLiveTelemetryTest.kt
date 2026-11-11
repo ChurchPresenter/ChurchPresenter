@@ -188,6 +188,7 @@ class SongsTabGoLiveTelemetryTest {
                 LiveHistoryLogger.logLiveState(
                     LiveHistoryEntry("LYRICS", songNumber = section.songNumber, songTitle = section.title),
                 )
+                LiveHistoryLogger.flush()
 
                 val line = File(tempHome, ".churchpresenter/bible-stt-logs/live-content-songs-tab-history.jsonl")
                     .readLines().last().let { Json.parseToJsonElement(it).jsonObject }

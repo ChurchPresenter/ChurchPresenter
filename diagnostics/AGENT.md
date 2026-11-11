@@ -28,7 +28,8 @@ owns — [CrashReporter] and [BuildIdentity].
 | `UiWatchdog.kt` | `StallDetector` and `object UiWatchdog` — pings the AWT event thread and logs its stack when a ping goes unanswered past the budget; runs in every build |
 | `EventThreadIoMonitor.kt` | Watches the AWT event thread through JFR for file, socket and sleep calls, each place once: failed on by the soak test, logged by a debug build that asks (`DevFlags.watchEventThreadIo`) (root AGENT.md, "Live-safe output paths") |
 | `UiStallReporter.kt` | Which stalls become Sentry events (the live budget, the startup settle window, ten a run), and the live minutes and live stalls a run reports to telemetry (`docs/SHOW_CONTROL.md`, Output isolation) |
-| `StallGrouping.kt` | `stallEvent` — what a stall's samples group on: its screen, the app frame most samples were in, or a cause of its own (software rendering, cold load, process paused, no app frame) |
+| `StallGrouping.kt` | `stallEvent` — what a stall's samples group on: its screen, the app frame most samples were in, or a cause of its own (software rendering, Chromium, cold load, process paused, no app frame) |
+| `StallNames.kt` | `groupName` — a frame's class and function without the compiler's lambda, anonymous-class and Compose mangle names, so a refactor does not open a new issue; `isInChromium` |
 | `StallSamples.kt` | What one sample says: the part above the innermost nested event loop, the modal dialog's caller below it, and whether the thread was idle |
 
 47 files across `:composeApp` call it, which is why it is its own module rather than part of
@@ -67,18 +68,33 @@ generated Compose resources. Those are one `./gradlew clean`, not ten bugs.
 **UI stalls are one issue per cause**, titled "UI thread stalled". The watchdog samples the event
 thread every 50 ms while it is stuck; a stall groups on `stall.screen` (the screen on the stack —
 a `…Page`, else a `…Tab`/`…Screen`, else a `…Dialog`/`…Window`) and the first frame of the app's own
-code that most samples were in. `stall.samples.top` counts what the samples saw. Filter `stall.live:true` for the ones an audience saw; `stall.length` says how
-long, in ranges. Only stalls of 250 ms or more are sent. Each sample is cut at the innermost nested
+code that most samples were in, named without the compiler's `$lambda$0`, `$1` and `-533V2PY`
+parts. `stall.samples.top` counts what the samples saw. Filter `stall.live:true` for the ones an
+audience saw; `stall.length` says how long, in ranges.
+
+**What is sent is judged against the machine.** Only stalls of 250 ms or more are sent, and a stall
+in the app's own code also has to last three times this run's 95th-percentile ping (`machine.p95`
+as a range, `machine.p95.ms` exact), so an old laptop whose every frame is slow does not report its
+ordinary frames. A stall that groups by its kind (below) is sent only from one second: under that
+it is a slow driver or machine, which no change to the app closes. Every stall is still counted.
+
+Each sample is cut at the innermost nested
 event loop first, so a stall inside a modal dialog's loop is not blamed on the code that opened the
 dialog (`stall.modal` names that caller), and a sample of the thread idle in
 `EventQueue.getNextEvent` is dropped; a stall whose every sample was idle is counted, not sent.
-Four kinds group by `stall.cause` instead, in this order: `software-renderer` (the main window
+Five kinds group by `stall.cause` instead, in this order: `software-renderer` (the main window
 draws in software — `render.api.actual`, the API it actually drew with, says so; `render.api` is
-only what was asked for), `cold-load` (the JVM loading code, or Compose reading a string, for the
+only what was asked for), `chromium` (JCEF starting Chromium, or the Win32 pump handing its windows
+their sent messages; per `os.family`), `cold-load` (the JVM loading code, or Compose reading a string, for the
 first time), `process-paused` (the first sample came more than a poll and two sample intervals past
 the budget — the watchdog itself was not running, so the whole process was paused by GC or the OS;
 `stall.first.sample.ms` says how late), and `no-app-frame` (no sample reached the app's code;
 grouped per `os.family` and actual render API, with `stall.top` naming the frame it was in).
+
+**Resolve a stall in the next release, never plainly.** A fix reaches users only with a release,
+and a plain resolve reopens as "regressed" on the first event from the version still out there.
+Use "resolved in next release" (`update_issue` with `inNextRelease`), and check `git merge-base
+--is-ancestor <fix> <latest tag>` before calling an issue fixed.
 
 **Not every issue is a crash.** `logback.xml` forwards every `ERROR` log line to Sentry as its own
 issue and every `WARN` as a breadcrumb, so an issue whose only frame is a log call came from

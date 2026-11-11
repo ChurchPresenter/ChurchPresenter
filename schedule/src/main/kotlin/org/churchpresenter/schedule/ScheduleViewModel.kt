@@ -109,6 +109,9 @@ class ScheduleViewModel(
         // so this loop could otherwise wake up mid-shutdown and try to classload ScheduleFileV2
         // after the installer has started overwriting the app's own files.
         shutdownHook = addGuardedShutdownHook("schedule") { scope.cancel() }
+        // Opening and saving a schedule run on the event thread; the key they need is derived
+        // here, off it, so neither pays for it.
+        scope.launch { ScheduleCipher.warm() }
         scope.launch {
             while (true) {
                 delay(autoSaveIntervalMs)

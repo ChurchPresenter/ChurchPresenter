@@ -123,7 +123,7 @@ class UiStallReporterTest {
         reporter.renderApi("SOFTWARE_FAST")
         now += 1_000
 
-        reporter.stalled(stall(600))
+        reporter.stalled(stall(UiStallReporter.KIND_SEND_MIN_MS))
 
         val event = sent.single()
         assertEquals(listOf("ui-stall", STALL_CAUSE_SOFTWARE), event.fingerprint)
@@ -271,9 +271,126 @@ class UiStallReporterTest {
         settled()
         now += 1_000
 
-        reporter.stalled(stall(600, listOf(jdkFrame)))
+        reporter.stalled(stall(1_200, listOf(jdkFrame)))
 
         assertEquals(RENDER_API_UNKNOWN, sent.single().fingerprint.last())
+    }
+
+    /** [count] ordinary pings of [lateMs] each, answered after the settle window. */
+    private fun pings(lateMs: Long, count: Int = UiStallReporter.MIN_PINGS) =
+        repeat(count) { reporter.answered(lateMs) }
+
+    @Test
+    fun `a stall that groups by its kind is sent only from a second`() {
+        settled()
+        now += 1_000
+
+        reporter.stalled(stall(UiStallReporter.KIND_SEND_MIN_MS - 1, listOf(jdkFrame)))
+        assertTrue(sent.isEmpty(), "under a second with no app frame is a slow driver or machine")
+
+        reporter.stalled(stall(UiStallReporter.KIND_SEND_MIN_MS, listOf(jdkFrame)))
+        assertEquals(STALL_CAUSE_NO_APP_FRAME, sent.single().cause)
+    }
+
+    @Test
+    fun `on a machine whose every ping is slow, a stall must be three of them to be sent`() {
+        settled()
+        pings(200)
+        now += 1_000
+
+        reporter.stalled(stall(599))
+        assertTrue(sent.isEmpty(), "three times this machine's ordinary 200 ms is 600 ms")
+
+        reporter.stalled(stall(600))
+        val event = sent.single()
+        assertEquals("100-250ms", event.tags["machine.p95"])
+        assertEquals("200", event.extras["machine.p95.ms"])
+    }
+
+    @Test
+    fun `on a fast machine the send minimum still holds`() {
+        settled()
+        pings(5)
+        now += 1_000
+
+        reporter.stalled(stall(UiStallReporter.SEND_MIN_MS))
+
+        assertEquals("under 16ms", sent.single().tags["machine.p95"])
+    }
+
+    @Test
+    fun `a machine's latency is its 95th percentile, over the last window, from the hundredth ping`() {
+        settled()
+        pings(10, count = UiStallReporter.MIN_PINGS - 1)
+        assertEquals(0, reporter.machineP95Ms(), "too few pings to judge the machine by")
+
+        pings(10, count = 81)
+        pings(500, count = 20)
+        assertEquals(500, reporter.machineP95Ms(), "200 pings, a tenth of them slow: the 95th percentile is slow")
+
+        pings(10, count = UiStallReporter.PING_WINDOW)
+        assertEquals(10, reporter.machineP95Ms(), "the slow ones have left the window")
+    }
+
+    @Test
+    fun `startup's pings are not the machine's`() {
+        reporter.firstFrame()
+        pings(900)
+
+        assertEquals(0, reporter.machineP95Ms())
+    }
+
+    @Test
+    fun `machine latencies fall into ranges`() {
+        assertEquals(
+            listOf("under 16ms", "16-50ms", "50-100ms", "100-250ms", "250ms or more"),
+            listOf(15L, 16L, 99L, 100L, 250L).map(::machineBucket),
+        )
+    }
+
+    @Test
+    fun `a stall in Chromium groups as one issue per OS`() {
+        val starting = listOf(frame("org.cef.CefApp", "N_Initialize"), frame("org.cef.CefApp\$3", "run"))
+        val pumped = listOf(
+            frame("com.sun.jna.Native", "invokeInt"),
+            frame("jdk.proxy2.\$Proxy6", "PeekMessage"),
+            frame("org.churchpresenter.web.offscreen.SentMessagePump", "start\$lambda\$0\$0"),
+        )
+
+        listOf(starting, pumped).forEach { stack ->
+            val event = eventOf(Stall(1_500, 500, stack), live = false)
+            assertEquals(listOf("ui-stall", STALL_CAUSE_CHROMIUM, "macos"), event.fingerprint)
+            assertEquals(STALL_CAUSE_CHROMIUM, event.cause)
+        }
+    }
+
+    @Test
+    fun `a stall groups on the function, not the names the compiler made for it`() {
+        fun name(className: String, method: String) = frame(className, method).groupName
+
+        val ring = "org.churchpresenter.theme.FocusRingKt"
+        assertEquals("$ring.keyboardFocusRing", name(ring, "keyboardFocusRing\$lambda\$0\$6\$0"))
+        assertEquals("$ring.keyboardFocusRing", name(ring, "keyboardFocusRing\$lambda\$0"))
+        val rows = "org.churchpresenter.songs.SongListRowsKt"
+        assertEquals("$rows.SongDataCell", name(rows, "SongDataCell-533V2PY"))
+        assertEquals(
+            "$rows.lambda",
+            name("org.churchpresenter.songs.ComposableSingletons\$SongListRowsKt", "lambda_1494010327\$lambda\$0"),
+        )
+        assertEquals(
+            "org.churchpresenter.bibletab.BibleColumnsKt.BibleBrowserColumn",
+            name(
+                "org.churchpresenter.bibletab.BibleColumnsKt\$BibleBrowserColumn_WH_ejsw" +
+                    "\$lambda\$4\$0\$0\$\$inlined\$itemsIndexed\$default\$3",
+                "invoke",
+            ),
+        )
+        val player = "org.churchpresenter.media.composables.SoftwareVideoPlayerKt"
+        assertEquals("$player.SoftwareMediaLoad", name("$player\$SoftwareMediaLoad\$1\$1", "invokeSuspend"))
+        val elevation = "org.churchpresenter.theme.ElevationKt"
+        assertEquals("$elevation.drawShiftedY", name(elevation, "drawShiftedY_3ABfNKs\$lambda\$0"))
+        assertEquals("x.StringsKt.getBook_genesis", name("x.StringsKt", "getBook_genesis"), "a lower-case word is kept")
+        assertEquals("jdk.proxy2.\$Proxy6.PeekMessage", name("jdk.proxy2.\$Proxy6", "PeekMessage"))
     }
 
     @Test
