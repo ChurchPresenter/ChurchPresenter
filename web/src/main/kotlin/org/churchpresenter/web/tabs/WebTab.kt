@@ -1,5 +1,8 @@
 package org.churchpresenter.web.tabs
 
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -231,6 +234,7 @@ internal fun WebEngineUnavailable(
 
 @Composable
 internal fun WebTabScope.NavButtons() {
+    val scope = rememberCoroutineScope()
     ActionIconButton(
         onClick = { goBack() },
         tooltipText = stringResource(Res.string.web_back),
@@ -253,7 +257,8 @@ internal fun WebTabScope.NavButtons() {
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
     ActionIconButton(
-        onClick = { clearWebCache() },
+        // Chromium's cache can be large: it is deleted off the event thread.
+        onClick = { scope.launch(Dispatchers.IO) { clearWebCache() } },
         tooltipText = stringResource(Res.string.web_clear_cache),
         painter = painterResource(IconRes.drawable.ic_clear_cache),
         containerColor = MaterialTheme.colorScheme.errorContainer,

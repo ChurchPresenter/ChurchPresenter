@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -72,6 +73,7 @@ fun App(
 ) {
     var selectedTab by remember { mutableStateOf(initialTab) }
     val tabs = listOf(Strings.tabBibles, Strings.tabSongs, Strings.tabDuplicates, Strings.tabRename)
+    LaunchedEffect(Unit) { FileChooserWarmUp.app.run() }
 
     Scaffold { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -236,6 +238,33 @@ internal fun approved(show: () -> Int): Boolean = try {
     show() == JFileChooser.APPROVE_OPTION
 } catch (_: NullPointerException) {
     false
+}
+
+/**
+ * Builds one throwaway [JFileChooser] off the event thread, once a run, on Windows.
+ *
+ * The first chooser a run builds asks the Windows shell for the places bar's folders and icons, and
+ * on a slow disk or a busy shell that takes seconds -- on the event thread, before the dialog even
+ * opens. Swing caches what the shell answered, so the real chooser a button builds later is quick.
+ * The chooser built here is never shown.
+ */
+internal class FileChooserWarmUp(
+    private val os: String = System.getProperty("os.name").orEmpty(),
+    private val build: () -> Unit = { JFileChooser(defaultDir) },
+) {
+    @Volatile private var done = false
+
+    /** Warms the chooser if this is Windows and it has not been warmed yet. */
+    suspend fun run() {
+        if (done || !os.startsWith("Windows")) return
+        done = true
+        withContext(Dispatchers.IO) { build() }
+    }
+
+    companion object {
+        /** The run's own warm-up, shared by every converter window it opens. */
+        val app = FileChooserWarmUp()
+    }
 }
 
 /** Where the tabs get the files and folders a person picks; the system file choosers in the app. */

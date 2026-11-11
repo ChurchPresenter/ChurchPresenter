@@ -38,7 +38,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpOffset
@@ -170,6 +174,7 @@ private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
 @Composable
 private fun PicturesTabScope.PicturesRecentBar(viewModel: PicturesViewModel) {
     // ── Recent folders bar ────────────────────────────────────────
+    val scope = rememberCoroutineScope()
     val recentOrdered =
         RecentPictureFolders.pinned + RecentPictureFolders.folders.filter { it !in RecentPictureFolders.pinned }
     if (recentOrdered.isNotEmpty()) {
@@ -230,7 +235,9 @@ private fun PicturesTabScope.PicturesRecentBar(viewModel: PicturesViewModel) {
                         isPinned = isPinned,
                         onOpen = {
                             val folder = File(path)
-                            if (folder.exists() && folder.isDirectory) {
+                            // A recent folder on a share can take seconds to answer: ask off the event thread.
+                            scope.launch {
+                                if (!withContext(Dispatchers.IO) { folder.isDirectory }) return@launch
                                 viewModel.selectFolder(folder)
                                 onSettingsChange { s -> s.copy(
                                     pictureSettings = s.pictureSettings.copy(storageDirectory = path),

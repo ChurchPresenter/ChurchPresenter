@@ -51,7 +51,9 @@ import org.churchpresenter.slides.SlidesOutput
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window as AwtWindow
 import java.io.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.composables.bibleListCard
 
 internal const val PICTURES_MILLIS_PER_SECOND = 1000
@@ -217,7 +219,7 @@ private fun PicturesEffects(
     LaunchedEffect(selectedPictureItem, selectedPictureItemVersion) {
         selectedPictureItem?.let { pictureItem ->
             val folder = File(pictureItem.folderPath)
-            if (folder.exists() && folder.isDirectory) {
+            if (withContext(Dispatchers.IO) { folder.isDirectory }) {
                 viewModel.selectFolder(folder)
                 // A single dropped picture opens on itself rather than on the folder's first (#652).
                 viewModel.selectImagePath(pictureItem.imagePath)

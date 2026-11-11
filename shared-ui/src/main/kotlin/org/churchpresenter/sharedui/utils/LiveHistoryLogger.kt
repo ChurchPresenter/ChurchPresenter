@@ -4,6 +4,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
 
 /**
  * What one line of the on-screen history says was showing. Identifiers only — never lyric, verse or
@@ -77,9 +78,9 @@ object LiveHistoryLogger {
      * Keyed by the STT session id when known, else by the process-start timestamp. The folder is
      * resolved from `user.home` on every write rather than once per JVM, as `CrashReporter` does.
      */
-    private fun path(): String {
+    private fun path(session: String?): String {
         val dir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
-        val suffix = TrainingDataLogger.sessionId?.let { sanitize(it) } ?: runStamp
+        val suffix = session?.let { sanitize(it) } ?: runStamp
         return File(dir, "$PREFIX$suffix.jsonl").absolutePath
     }
 
@@ -87,12 +88,29 @@ object LiveHistoryLogger {
         raw.map { if (it.isLetterOrDigit() || it in ".-_") it else '_' }
             .joinToString("")
 
+    /**
+     * One thread for every write, so a slow disk never holds the caller -- the go-live paths run on
+     * the event thread -- and the lines still land in the order they were asked for.
+     */
+    private val writer = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "live-history-writer").apply { isDaemon = true }
+    }
+
+    /** Waits until every write asked for so far is on disk. */
+    fun flush() {
+        writer.submit {}.get()
+    }
+
     /** Call on every on-screen change; writes only when the logged fields differ from the last line. */
     fun logLiveState(entry: LiveHistoryEntry) {
-        runCatching {
-            synchronized(lock) {
-                lastReported = entry
-                write(entry)
+        val at = System.currentTimeMillis()
+        val session = TrainingDataLogger.sessionId
+        writer.execute {
+            runCatching {
+                synchronized(lock) {
+                    lastReported = entry
+                    write(entry, at, session)
+                }
             }
         }
     }
@@ -104,42 +122,49 @@ object LiveHistoryLogger {
      * the song's identity.
      */
     fun noteLiveSong(songId: String, songbook: String, songNumber: Int, title: String, source: String) {
-        runCatching {
-            synchronized(lock) {
-                val song = NotedSong(songId, songbook, songNumber, title, source, sourcePending = true)
-                notedSong = song
-                lastReported?.takeIf(song::matches)?.let(::write)
+        val at = System.currentTimeMillis()
+        val session = TrainingDataLogger.sessionId
+        writer.execute {
+            runCatching {
+                synchronized(lock) {
+                    val song = NotedSong(songId, songbook, songNumber, title, source, sourcePending = true)
+                    notedSong = song
+                    lastReported?.takeIf(song::matches)?.let { write(it, at, session) }
+                }
             }
         }
     }
 
-    private fun write(entry: LiveHistoryEntry) {
+    /**
+     * Writes [entry] as the line for [at] in [session], both as they were when the caller asked --
+     * not when the disk got to it.
+     */
+    private fun write(entry: LiveHistoryEntry, at: Long, session: String?) {
         val song = notedSong?.takeIf { it.matches(entry) }
         val stamped = if (song == null) entry else entry.copy(songId = song.songId, songbook = song.songbook)
         TrainingDataLogger.cleanupOldLogsOnce()
-        val file = File(path())
+        val file = File(path(session))
         // An empty or missing file starts over: it gets its header, and its first line whatever it is.
         val fresh = file.length() == 0L
         if (!fresh && lastWritten[file.path] == stamped) return
         val source = song?.takeIf { it.sourcePending }?.source
-        if (fresh) file.appendText(sessionHeader() + "\n", Charsets.UTF_8)
-        file.appendText(lineOf(stamped, source) + "\n", Charsets.UTF_8)
+        if (fresh) file.appendText(sessionHeader(at, session) + "\n", Charsets.UTF_8)
+        file.appendText(lineOf(stamped, source, at, session) + "\n", Charsets.UTF_8)
         lastWritten[file.path] = stamped
         if (source != null) notedSong = song.copy(sourcePending = false)
     }
 
     /** The first line of every file: which session its rows belong to, so it stands on its own. */
-    private fun sessionHeader(): String = buildString {
+    private fun sessionHeader(now: Long, session: String?): String = buildString {
         append("{\"type\":\"session\"")
-        append(",\"ts_ms\":").append(System.currentTimeMillis())
-        appendSessionId()
+        append(",\"ts_ms\":").append(now)
+        appendSessionId(session)
         append("}")
     }
 
-    private fun lineOf(e: LiveHistoryEntry, source: String?): String = buildString {
-        val now = System.currentTimeMillis()
+    private fun lineOf(e: LiveHistoryEntry, source: String?, now: Long, session: String?): String = buildString {
         append("{\"ts_ms\":").append(now)
-        appendSessionId()
+        appendSessionId(session)
         appendField("sttSeconds", SttClock.secondsAt(now)?.let { Math.round(it * TENTHS) / TENTHS })
         appendField("contentType", e.contentType)
         appendField("source", source)
@@ -156,29 +181,28 @@ object LiveHistoryLogger {
         appendField("slideIndex", e.slideIndex)
         append("}")
     }
+}
 
-    private fun StringBuilder.appendSessionId() {
-        val id = TrainingDataLogger.sessionId
-        if (id != null) append(",\"sessionId\":\"").append(esc(id)).append("\"")
-        else append(",\"sessionId\":null")
+private fun StringBuilder.appendSessionId(id: String?) {
+    if (id != null) append(",\"sessionId\":\"").append(esc(id)).append("\"")
+    else append(",\"sessionId\":null")
+}
+
+/** `,"key":value` — a string quoted and escaped, a number bare; nothing at all when null. */
+private fun StringBuilder.appendField(key: String, value: Any?) {
+    when (value) {
+        null -> return
+        is Number -> append(",\"").append(key).append("\":").append(value)
+        else -> append(",\"").append(key).append("\":\"").append(esc(value.toString())).append("\"")
     }
+}
 
-    /** `,"key":value` — a string quoted and escaped, a number bare; nothing at all when null. */
-    private fun StringBuilder.appendField(key: String, value: Any?) {
-        when (value) {
-            null -> return
-            is Number -> append(",\"").append(key).append("\":").append(value)
-            else -> append(",\"").append(key).append("\":\"").append(esc(value.toString())).append("\"")
-        }
-    }
-
-    /** Escapes quotes and backslashes; any control character (a tab in a title) becomes a space. */
-    private fun esc(s: String): String = buildString(s.length) {
-        for (c in s) when {
-            c == '\\' -> append("\\\\")
-            c == '"' -> append("\\\"")
-            c < ' ' -> append(' ')
-            else -> append(c)
-        }
+/** Escapes quotes and backslashes; any control character (a tab in a title) becomes a space. */
+private fun esc(s: String): String = buildString(s.length) {
+    for (c in s) when {
+        c == '\\' -> append("\\\\")
+        c == '"' -> append("\\\"")
+        c < ' ' -> append(' ')
+        else -> append(c)
     }
 }

@@ -1,7 +1,9 @@
 package org.churchpresenter.converter.ui
 
+import kotlinx.coroutines.runBlocking
 import javax.swing.JFileChooser
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -16,6 +18,27 @@ class FilePickerTest {
     @Test
     fun `a cancelled chooser is not`() {
         assertFalse(approved { JFileChooser.CANCEL_OPTION })
+    }
+
+    @Test
+    fun `on Windows the chooser is warmed once, off the event thread`() = runBlocking {
+        val threads = mutableListOf<String>()
+        val warmUp = FileChooserWarmUp(os = "Windows 11") { threads += Thread.currentThread().name }
+
+        warmUp.run()
+        warmUp.run()
+
+        assertEquals(1, threads.size, "a run warms the chooser once")
+        assertTrue(threads.single().startsWith("DefaultDispatcher"), "on the IO pool, not ${threads.single()}")
+    }
+
+    @Test
+    fun `elsewhere the chooser is not warmed`() = runBlocking {
+        var built = false
+
+        FileChooserWarmUp(os = "Mac OS X") { built = true }.run()
+
+        assertFalse(built, "only the Windows shell is slow to answer the places bar")
     }
 
     @Test

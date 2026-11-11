@@ -31,7 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.AppShape
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -146,6 +148,7 @@ fun AboutDialogContent(
     /** How an issue-template address is copied, for when the browser opens on the wrong screen. */
     copyText: (String) -> Unit = { SystemClipboard.copy(it) },
 ) {
+    val scope = rememberCoroutineScope()
     AppWindowRoot(theme = theme) {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -209,8 +212,11 @@ fun AboutDialogContent(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
-                        crashDir.mkdirs()
-                        Desktop.getDesktop().open(crashDir)
+                        // Making the folder and asking the OS to open it both wait on the disk.
+                        scope.launch(Dispatchers.IO) {
+                            crashDir.mkdirs()
+                            Desktop.getDesktop().open(crashDir)
+                        }
                     }
                 ) {
                     Text(stringResource(Res.string.open_crash_logs), maxLines = 1, textAlign = TextAlign.Center)
@@ -278,7 +284,10 @@ private fun SaveDiagnosticInfoButton(appSettings: AppSettings, identity: Telemet
                         if (path.extension != "txt") {
                             path = path.resolveSibling("${path.nameWithoutExtension}.txt")
                         }
-                        path.writeText(DeviceInfoReport.generate(appSettings, identity))
+                        val target = path
+                        withContext(Dispatchers.IO) {
+                            target.writeText(DeviceInfoReport.generate(appSettings, identity))
+                        }
                         JOptionPane.showMessageDialog(
                             AwtWindow.getWindows().firstOrNull { it.isActive },
                             savedMsg,

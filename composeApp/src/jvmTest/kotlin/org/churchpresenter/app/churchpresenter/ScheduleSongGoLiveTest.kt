@@ -84,9 +84,11 @@ class ScheduleSongGoLiveTest {
         )
     }
 
-    private fun historyLines(): List<JsonObject> =
-        File(home, ".churchpresenter/bible-stt-logs/live-content-schedule-go-live.jsonl")
+    private fun historyLines(): List<JsonObject> {
+        LiveHistoryLogger.flush()
+        return File(home, ".churchpresenter/bible-stt-logs/live-content-schedule-go-live.jsonl")
             .readLines().map { Json.parseToJsonElement(it).jsonObject }
+    }
 
     @Test
     fun `a song taken live from the schedule is counted once and logged under its row`() = runComposeUiTest {

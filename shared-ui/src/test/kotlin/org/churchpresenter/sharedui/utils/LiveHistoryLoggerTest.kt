@@ -29,6 +29,7 @@ class LiveHistoryLoggerTest {
 
     @BeforeTest
     fun clearLogDir() {
+        LiveHistoryLogger.flush()
         logDir.listFiles()?.filter { it.name.startsWith(LiveHistoryLogger.PREFIX) }?.forEach { it.delete() }
     }
 
@@ -44,6 +45,7 @@ class LiveHistoryLoggerTest {
     }
 
     private fun rows(file: File): List<JsonObject> {
+        LiveHistoryLogger.flush()
         assertTrue(file.exists(), "expected log file ${file.absolutePath}")
         return file.readLines().filter { it.isNotBlank() }.map {
             runCatching { Json.parseToJsonElement(it) as JsonObject }
@@ -145,6 +147,7 @@ class LiveHistoryLoggerTest {
         TrainingDataLogger.sessionId = null
 
         LiveHistoryLogger.logLiveState(LiveHistoryEntry("WEBSITE"))
+        LiveHistoryLogger.flush()
 
         val file = logDir.listFiles().orEmpty()
             .singleOrNull { Regex("""live-content-\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d\.jsonl""").matches(it.name) }
@@ -170,6 +173,7 @@ class LiveHistoryLoggerTest {
         useSession("2026/09/30 service")
 
         LiveHistoryLogger.logLiveState(LiveHistoryEntry("NONE"))
+        LiveHistoryLogger.flush()
 
         assertTrue(File(logDir, "live-content-2026_09_30_service.jsonl").exists())
     }

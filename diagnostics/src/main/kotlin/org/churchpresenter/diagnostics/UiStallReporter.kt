@@ -13,6 +13,14 @@ import java.util.concurrent.Executors
  *   since a first launch stalls for a second or more while it loads.
  * - **Only stalls of [SEND_MIN_MS] or more are sent.** A frame a little over the live budget is
  *   ordinary drawing, and a single sample of it lands on whatever happened to be running.
+ * - **A stall is judged against the machine it ran on.** Every answered ping is kept ([answered],
+ *   the last [PING_WINDOW]); a stall in the app's own code is sent only when it is also
+ *   [SLOW_MACHINE_FACTOR] times this run's 95th-percentile ping ([machineP95Ms]), so an old laptop
+ *   whose every frame is slow does not send its ordinary frames.
+ * - **A stall that groups by kind rather than by app frame** (software rendering, a cold load, a
+ *   paused process, no app frame, Chromium) is sent only from [KIND_SEND_MIN_MS]: shorter ones are
+ *   a slow driver or machine, which no change to the app closes, and a freeze of a second is one
+ *   the operator saw.
  * - **At most [MAX_EVENTS] events a run**, one per stall. The live-stall count is kept whatever
  *   was sent.
  * - **A stall groups on its screen and the app frame most of its samples were in**
@@ -43,6 +51,9 @@ class UiStallReporter(
     private var liveMs = 0L
     private var liveStalls = 0
     private var sent = 0
+
+    private val pings = LongArray(PING_WINDOW)
+    private var pingCount = 0
 
     /** The budget for the ping going out now. */
     fun budgetMs(): Long = if (live) LIVE_BUDGET_MS else idleBudgetMs
@@ -81,9 +92,42 @@ class UiStallReporter(
         val wasLive = liveSince != NONE && liveSince <= startedAt
         if (wasLive && stall.lateMs > GATE_MS) liveStalls++
         if (stall.lateMs < SEND_MIN_MS || sent >= MAX_EVENTS || sampledAsItAnswered(stall)) return
-        val event = stallEvent(stall, wasLive, renderApi) ?: return
+        val p95 = machineP95Ms()
+        val event = stallEvent(stall, wasLive, renderApi)?.takeIf { stall.lateMs >= sendFloorMs(it, p95) } ?: return
         sent++
-        send(event)
+        send(
+            event.copy(
+                tags = event.tags + ("machine.p95" to machineBucket(p95)),
+                extras = event.extras + ("machine.p95.ms" to p95.toString()),
+            ),
+        )
+    }
+
+    /** How long [event]'s stall must have lasted to be sent, on a machine whose ordinary ping is [p95Ms]. */
+    private fun sendFloorMs(event: StallEvent, p95Ms: Long): Long =
+        if (event.cause == null) maxOf(SEND_MIN_MS, SLOW_MACHINE_FACTOR * p95Ms) else KIND_SEND_MIN_MS
+
+    /**
+     * The event thread answered a ping [lateMs] after it went out, stalled or not. Startup's pings
+     * are left out, as its stalls are: they say how slow loading is, not the machine.
+     */
+    @Synchronized
+    fun answered(lateMs: Long) {
+        if (clock() < countsFrom) return
+        pings[pingCount % PING_WINDOW] = lateMs
+        pingCount++
+    }
+
+    /**
+     * The 95th-percentile ping of the last [PING_WINDOW] -- how long this machine's event thread
+     * ordinarily takes to come round -- or 0 before [MIN_PINGS] have been answered.
+     */
+    @Synchronized
+    fun machineP95Ms(): Long {
+        val count = minOf(pingCount, PING_WINDOW)
+        if (count < MIN_PINGS) return 0
+        val sorted = pings.copyOf(count).apply { sort() }
+        return sorted[(count * P95_PERCENT / PERCENT).coerceAtMost(count - 1)]
     }
 
     /** Minutes an output has been live this run, an interval still open included. */
@@ -109,6 +153,21 @@ class UiStallReporter(
 
         /** The shortest stall sent; shorter ones are counted but not sent. */
         const val SEND_MIN_MS = 250L
+
+        /** The shortest stall sent that groups by its kind rather than by an app frame. */
+        const val KIND_SEND_MIN_MS = 1_000L
+
+        /** How many of this machine's ordinary 95th-percentile pings a stall in the app's code must last. */
+        const val SLOW_MACHINE_FACTOR = 3L
+
+        /** How many answered pings the machine's ordinary latency is taken over. */
+        const val PING_WINDOW = 1_200
+
+        /** How many pings must be answered before the machine's latency counts at all. */
+        const val MIN_PINGS = 100
+
+        private const val P95_PERCENT = 95
+        private const val PERCENT = 100
 
         /** The most stall events one run sends. */
         const val MAX_EVENTS = 10
@@ -147,7 +206,16 @@ data class StallEvent(
     val tags: Map<String, String>,
     val extras: Map<String, String>,
     val fingerprint: List<String>,
-)
+) {
+    /** The kind it groups as (`stall.cause`), or null when it groups on an app frame. */
+    val cause: String? get() = tags[STALL_CAUSE_TAG]
+}
+
+/** The tag naming the kind a stall groups as. */
+internal const val STALL_CAUSE_TAG = "stall.cause"
+
+/** `stall.cause` for a stall inside Chromium: starting it, or a message pumped to its windows. */
+const val STALL_CAUSE_CHROMIUM = "chromium"
 
 /** `stall.cause` for a stall on a main window that draws in software. */
 const val STALL_CAUSE_SOFTWARE = "software-renderer"
@@ -187,6 +255,18 @@ internal fun lengthBucket(lateMs: Long): String = when {
     else -> "2s or more"
 }
 
+/** This machine's ordinary 95th-percentile ping, as a few searchable ranges (`machine.p95`). */
+internal fun machineBucket(p95Ms: Long): String = when {
+    p95Ms < FRAME_MS -> "under 16ms"
+    p95Ms < FIFTY_MS -> "16-50ms"
+    p95Ms < HUNDRED_MS -> "50-100ms"
+    p95Ms < QUARTER_SECOND_MS -> "100-250ms"
+    else -> "250ms or more"
+}
+
+private const val FRAME_MS = 16L
+private const val FIFTY_MS = 50L
+private const val HUNDRED_MS = 100L
 private const val QUARTER_SECOND_MS = 250L
 private const val HALF_SECOND_MS = 500L
 private const val ONE_SECOND_MS = 1_000L
