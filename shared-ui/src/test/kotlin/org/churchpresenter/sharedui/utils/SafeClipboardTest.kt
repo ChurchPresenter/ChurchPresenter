@@ -89,6 +89,27 @@ class SafeClipboardTest {
     }
 
     @Test
+    fun `the clipboard is read and written off the caller's thread`() = runBlocking {
+        val threads = mutableListOf<String>()
+        val watching = object : Clipboard {
+            override suspend fun getClipEntry(): ClipEntry? = null.also { threads += Thread.currentThread().name }
+            override suspend fun setClipEntry(clipEntry: ClipEntry?) {
+                threads += Thread.currentThread().name
+            }
+
+            @Deprecated("Use platform-specific extension to get platform reference.")
+            override val nativeClipboard: Any get() = "native"
+        }
+        val caller = Thread.currentThread().name
+
+        SafeClipboard(watching).getClipEntry()
+        SafeClipboard(watching).setClipEntry(null)
+
+        assertEquals(2, threads.size)
+        assertTrue(threads.none { it == caller }, "taking the OS clipboard lock never waits on the caller: $threads")
+    }
+
+    @Test
     @Suppress("DEPRECATION")
     fun `the native clipboard is handed over as-is`() {
         // Wrapping it would misrepresent what the caller was given; the failure this class exists

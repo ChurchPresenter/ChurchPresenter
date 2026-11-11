@@ -102,15 +102,17 @@ internal fun SongsViewModel.searchLyricsOf(song: SongItem): String {
         lyricSearchText.clear()
         lyricSearchTextFor = allSongItemsState.value
     }
-    return lyricSearchText.getOrPut(song) {
-        song.translationList().asSequence()
-            .flatMap { it.lyrics.asSequence() }
-            .filterNot { isHeaderLine(it) || isSlideBreak(it) || isLyricDirective(it) }
-            .map { plainLyricLine(ChordTransposer.stripChords(it)) }
-            .joinToString(" ")
-            .replace(WHITESPACE_RUN, " ")
-    }
+    return lyricSearchText.getOrPut(song) { lyricSearchTextOf(song) }
 }
+
+/** [song]'s lyrics as the search reads them: every language, no chords, headers or breaks. */
+internal fun lyricSearchTextOf(song: SongItem): String =
+    song.translationList().asSequence()
+        .flatMap { it.lyrics.asSequence() }
+        .filterNot { isHeaderLine(it) || isSlideBreak(it) || isLyricDirective(it) }
+        .map { plainLyricLine(ChordTransposer.stripChords(it)) }
+        .joinToString(" ")
+        .replace(WHITESPACE_RUN, " ")
 
 /**
  * Where the current search found [song] -- a title, a named section, which language -- for the

@@ -1,6 +1,9 @@
 package org.churchpresenter.songs
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.IdentityHashMap
 import org.churchpresenter.core.models.songs.SongItem
 
 internal fun SongsViewModel.fetchRemoteDetailIfNeeded(index: Int) {
@@ -62,6 +65,26 @@ internal fun SongsViewModel.applySongList(songItems: List<SongItem>, songsObj: S
 
     allSongItemsState.value = songItems
     applyFilters()
+    warmLyricSearch(songItems)
 
     onSongsLoaded?.invoke(songItems)
+}
+
+/**
+ * Builds the lyric search's text for every song in [songItems] off the event thread, so the first
+ * search after a library loads does not strip the chords of the whole library while the operator
+ * types. Dropped if the library changed again in the meantime.
+ */
+internal fun SongsViewModel.warmLyricSearch(songItems: List<SongItem>) {
+    viewModelScope.launch {
+        val built = withContext(Dispatchers.Default) {
+            songItems.associateWithTo(IdentityHashMap()) { lyricSearchTextOf(it) }
+        }
+        if (allSongItemsState.value !== songItems) return@launch
+        if (lyricSearchTextFor !== songItems) {
+            lyricSearchText.clear()
+            lyricSearchTextFor = songItems
+        }
+        lyricSearchText.putAll(built)
+    }
 }

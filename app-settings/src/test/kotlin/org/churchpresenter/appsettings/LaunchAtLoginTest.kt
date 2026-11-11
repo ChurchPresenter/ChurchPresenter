@@ -16,6 +16,7 @@ import org.churchpresenter.settings.AppSettings
 import java.util.Collections
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * The Launch at login switch over a stand-in for the OS, through [LocalAutoStart]: a change that
@@ -50,6 +51,20 @@ class LaunchAtLoginTest {
 
     private fun ComposeUiTest.awaitText(text: String, shown: Boolean = true) = waitUntil(timeoutMillis = WAIT_MS) {
         onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty() == shown
+    }
+
+    @Test
+    fun `an entry already registered shows the switch on, asked off the event thread`() = runComposeUiTest {
+        val askedOn = Collections.synchronizedList(mutableListOf<String>())
+        val registered = object : AutoStartSwitch {
+            override fun isEnabled(): Boolean = true.also { askedOn += Thread.currentThread().name }
+            override fun setEnabled(enabled: Boolean) = AutoStartChange.DONE
+        }
+        showTab(registered)
+
+        waitUntil(timeoutMillis = WAIT_MS) { runCatching { onNode(launchSwitch).assertIsOn() }.isSuccess }
+        assertEquals(1, askedOn.size)
+        assertTrue(askedOn.none { it.startsWith("AWT-EventQueue") }, "the registry was read on ${askedOn.single()}")
     }
 
     @Test

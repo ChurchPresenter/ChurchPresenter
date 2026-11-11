@@ -62,6 +62,17 @@ class SongsFilteringTest {
     // ── Baseline ────────────────────────────────────────────────────────────────
 
     @Test
+    fun `a loaded library's lyric search is built before anyone searches`() {
+        val vm = vmWith(*defaultCatalog)
+
+        val deadline = System.currentTimeMillis() + WARM_WAIT_MS
+        while (vm.lyricSearchText.size < 5 && System.currentTimeMillis() < deadline) Thread.onSpinWait()
+
+        assertEquals(5, vm.lyricSearchText.size, "every song's searchable lyrics, built in the background")
+        assertTrue(vm.lyricSearchTextFor === vm.allSongItemsState.value, "and kept for the library as loaded")
+    }
+
+    @Test
     fun `all songs are listed with no filter applied`() {
         val vm = vmWith(*defaultCatalog)
         assertEquals(5, vm.filteredSongItems.value.size)
@@ -546,5 +557,9 @@ class SongsFilteringTest {
         assertTrue(vm.selectSongByDetails(0, "Abide With Me", "Supplement"))
         assertTrue(vm.addCurrentSongToSchedule { number, title, _, _ -> added += number to title })
         assertEquals(listOf(0 to "Abide With Me"), added)
+    }
+
+    private companion object {
+        const val WARM_WAIT_MS = 5_000L
     }
 }
