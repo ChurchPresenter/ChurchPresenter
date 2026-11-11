@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.strings.generated.resources.Res
@@ -24,6 +23,8 @@ fun ClearLayersMenuItems(
     onAir: Set<Layer>,
     onClearGroup: (ClearGroup) -> Unit,
     onClearLayer: (Layer) -> Unit,
+    /** The layers offered, in stack order -- see `clearableLayers`. */
+    layers: List<Layer>,
     onEdit: () -> Unit,
 ) {
     groups.forEach { group ->
@@ -34,7 +35,7 @@ fun ClearLayersMenuItems(
         )
     }
     if (groups.isNotEmpty()) HorizontalDivider()
-    CLEARABLE_LAYERS.forEach { layer ->
+    layers.forEach { layer ->
         DropdownMenuItem(
             text = { Text(stringResource(layer.clearLabel)) },
             onClick = { onClearLayer(layer) },

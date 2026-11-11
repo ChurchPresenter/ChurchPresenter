@@ -156,13 +156,12 @@ class CompanionServerMacroTest {
         val gated = listOf(
             "POST ${Constants.ENDPOINT_MACRO}/macro1",
             "POST ${Constants.ENDPOINT_TAKE}",
-            "POST ${Constants.ENDPOINT_CLEAR}?layer=slide",
-            "POST ${Constants.ENDPOINT_CLEAR}?group=anything",
+            "POST ${Constants.ENDPOINT_CLEAR}?layer=messages",
+            "POST ${Constants.ENDPOINT_CLEAR}?layer=props",
             "POST ${Constants.ENDPOINT_MESSAGE}",
             "POST ${Constants.ENDPOINT_PROPS}/logo/on",
             "GET ${Constants.ENDPOINT_MACROS}",
             "GET ${Constants.ENDPOINT_PROPS}",
-            "GET ${Constants.ENDPOINT_CLEAR_GROUPS}",
         )
         gated.forEach { request ->
             val (verb, path) = request.split(" ")
@@ -171,6 +170,11 @@ class CompanionServerMacroTest {
             assertTrue("dev mode only" in runBlocking { response.bodyAsText() }, request)
         }
         assertEquals(HttpStatusCode.OK, post(Constants.ENDPOINT_CLEAR).status, "clearing everything is not gated")
+        // Clearing one layer, a clear group, and listing the groups are production (#991).
+        assertEquals(HttpStatusCode.OK, post("${Constants.ENDPOINT_CLEAR}?layer=announcements").status)
+        val noSuchGroup = post("${Constants.ENDPOINT_CLEAR}?group=anything")
+        assertEquals(HttpStatusCode.NotFound, noSuchGroup.status, "no such group")
+        assertEquals(HttpStatusCode.OK, runBlocking { client.get(url(Constants.ENDPOINT_CLEAR_GROUPS)) }.status)
 
         val ack = acksFor(setOf("m"), command("""{"name":"Walk in"}""", "m")).single()
         assertFalse(ack.ok)

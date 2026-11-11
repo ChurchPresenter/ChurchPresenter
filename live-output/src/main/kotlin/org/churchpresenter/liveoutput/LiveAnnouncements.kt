@@ -283,6 +283,15 @@ internal class LiveAnnouncementsState(private val context: PresenterContext) : L
         }
     }
 
+    /**
+     * Lets go of the words of an announcement that came down, so the next one never shows them
+     * first. Reported to nobody: nothing is on air to report.
+     */
+    internal fun forgetAnnouncementText() {
+        _announcementText.value = ""
+        _displayedAnnouncementText.value = ""
+    }
+
     internal fun pushAnnouncementTextIfLive(text: String) {
         if (announcementIsLive()) setAnnouncementText(text)
     }

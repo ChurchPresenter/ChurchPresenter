@@ -42,7 +42,7 @@ import org.churchpresenter.showcontrol.Action
 
 /**
  * The dev mode only features on the root: the sidebar's box, preview mode and Take, and the macro
- * and clear-group keys.
+ * keys -- and the clear layers menu and the clear-group keys, which left it for production (#991).
  */
 class MainDesktopDevModeTest : MainDesktopComposeHarness() {
 
@@ -104,7 +104,7 @@ class MainDesktopDevModeTest : MainDesktopComposeHarness() {
     }
 
     @Test
-    fun `in dev mode a clear group's key clears its layers, and an empty slot's key does nothing`() {
+    fun `outside dev mode too a clear group's key clears its layers, and an empty slot's key does nothing`() {
         val keyed = withOneSong().let {
             it.copy(
                 clearGroups = listOf(ClearGroup("g1", "Graphics", listOf(Layer.GRAPHICS.name))),
@@ -117,7 +117,7 @@ class MainDesktopDevModeTest : MainDesktopComposeHarness() {
             )
         }
         val manager = cuedManager().apply { previewBus.take() }
-        root(keyed, presenterManager = manager) { _ ->
+        root(keyed, presenterManager = manager, devMode = false) { _ ->
             press(Key.F10, ctrl = true, shift = true)
             assertTrue(manager.isLive(Presenting.LOWER_THIRD), "slot 2 has no group")
             press(Key.F11, ctrl = true, shift = true)
@@ -199,6 +199,30 @@ class MainDesktopDevModeTest : MainDesktopComposeHarness() {
             assertFalse(again.isLive(Presenting.LOWER_THIRD), "the layer cleared on its own")
         }
     }
+
+    @Test
+    fun `outside dev mode the clear layers menu is there, without the messages and props layers`() {
+        val manager = cuedManager().apply { previewBus.take() }
+        root(withPreviewMode(false), presenterManager = manager, devMode = false) { _ ->
+            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).performClick()
+            waitForIdle()
+            onNodeWithTag(clearLayerItemTag(Layer.ANNOUNCEMENTS)).assertExists()
+            onAllNodesWithTag(clearLayerItemTag(Layer.MESSAGES)).assertCountEquals(0)
+            onAllNodesWithTag(clearLayerItemTag(Layer.PROPS)).assertCountEquals(0)
+            onNodeWithTag(clearLayerItemTag(Layer.GRAPHICS)).performClick()
+            waitForIdle()
+            assertFalse(manager.isLive(Presenting.LOWER_THIRD), "the layer cleared on its own")
+        }
+    }
+
+    @Test
+    fun `in dev mode the clear layers menu offers the messages and props layers too`() =
+        root(withPreviewMode(false)) { _ ->
+            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).performClick()
+            waitForIdle()
+            onNodeWithTag(clearLayerItemTag(Layer.MESSAGES)).assertExists()
+            onNodeWithTag(clearLayerItemTag(Layer.PROPS)).assertExists()
+        }
 
     @Test
     fun `Take is not in the sidebar while preview mode is off`() =

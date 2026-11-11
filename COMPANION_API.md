@@ -104,12 +104,12 @@ registers them; `{name}` is a path parameter.
 | `POST /api/schedule/add` | API key | — | *approval* |
 | `POST /api/schedule/add-batch` | API key | — | *approval* |
 | `POST /api/project` | API key | — | *approval* |
-| `POST /api/clear` | API key | `layer=` and `group=` only | Clearing everything is not dev mode |
+| `POST /api/clear` | API key | `layer=messages` and `layer=props` only | Clearing everything, a clear group or any other layer is not dev mode |
 | `POST /api/take` | API key | dev | |
 | `POST /api/message` | API key | dev | |
 | `GET /api/props` | API key | dev | |
 | `POST /api/props/{id}/{action}` | API key | dev | `{action}` is `on`, `off` or `toggle` |
-| `GET /api/clear-groups` | API key | dev | |
+| `GET /api/clear-groups` | API key | — | |
 | `GET /api/macros` | API key | dev | |
 | `POST /api/macro/{name}` | API key | dev | |
 
@@ -921,10 +921,10 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 { "ok": true }
 ```
 
-**Optional query param** (dev mode only, like `group=` below) — take down one layer and leave the rest up: `layer=slide` (Bible, songs,
+**Optional query param** — take down one layer and leave the rest up: `layer=slide` (Bible, songs,
 a presentation, a web page, a scene, Q&A or the dictionary), `media` (a video or pictures),
-`lowerthird`, `captions`, `announcements`, `props` or `messages`. A layer with nothing on it is left
-as it is, and an unknown name clears nothing.
+`lowerthird`, `captions`, `announcements`, `props` or `messages` (those last two in dev mode only, as
+their features are). A layer with nothing on it is left as it is, and an unknown name clears nothing.
 
 ```bash
 curl -k -X POST "https://192.168.1.10:8765/api/clear?layer=lowerthird"
@@ -932,7 +932,7 @@ curl -k -X POST "https://192.168.1.10:8765/api/clear?layer=lowerthird"
 
 Over the WebSocket, `clear` takes the same `{"layer": "..."}` in its payload.
 
-**Clear groups** (dev mode only, as is `GET /api/clear-groups`) — `group=` fires one of the operator's clear groups, named by its id or its name
+**Clear groups** — `group=` fires one of the operator's clear groups, named by its id or its name
 (any case), and takes down every layer in it: e.g. *Clear text* = slide + messages. An unknown group
 answers `404 {"ok":false,"reason":"no such clear group"}`. Over the WebSocket, `clear` takes
 `{"group": "..."}`, acked with `ok:false` and `no_such_group` for an unknown one.
@@ -1728,7 +1728,7 @@ Send a command with `ws.send(JSON.stringify({ type, payload }))`.
 | `media_seek_to` | the position in ms, as a bare number (`"90000"`) | Seeks media to that position | No |
 | `media_set_volume` | the volume `0.0`–`1.0`, as a bare number | Sets the media volume | No |
 | `media_mute_toggle` | — | Mutes or unmutes media | No |
-| `clear` | empty, `{"layer": "..."}` or `{"group": "..."}` | Clear / hide the projection display; a layer or a clear group is **dev mode only** | No |
+| `clear` | empty, `{"layer": "..."}` or `{"group": "..."}` | Clear / hide the projection display, one layer or a clear group; the `messages` and `props` layers are **dev mode only** | No |
 | `take` | — | Take, as `POST /api/take` — **dev mode only** | No |
 | `message` | as `POST /api/message` | Puts a message up — **dev mode only** | No |
 | `prop` | `{"id": "...", "on": true}` (`on` absent toggles) | Switches a prop — **dev mode only** | No |

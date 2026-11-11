@@ -279,6 +279,7 @@ internal fun MainDesktopScope.AnnouncementsTabPane() {
                 settings.liveClockFormat,
                 settings.backdrop,
                 settings.outline,
+                settings.showForSeconds,
             )
         },
         onSavePreset = { settings -> state.presetToSave = announcementPresetItem(settings) }

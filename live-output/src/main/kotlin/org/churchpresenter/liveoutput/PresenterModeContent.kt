@@ -3,6 +3,7 @@ package org.churchpresenter.liveoutput
 import org.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.presenter.LocalLottieBandClock
+import org.churchpresenter.presenter.LocalTitleSlideClock
 import org.churchpresenter.presenter.LowerThirdLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -53,6 +54,7 @@ fun PresenterModeContent(
     // animation frame.
     CompositionLocalProvider(
         LocalLottieBandClock provides presenterManager.lottieBandClock,
+        LocalTitleSlideClock provides presenterManager.titleSlideClock,
         LocalBandSongLineIndex provides bandSongLineIndex,
         LocalBandOutgoing provides bandOutgoing,
     ) {

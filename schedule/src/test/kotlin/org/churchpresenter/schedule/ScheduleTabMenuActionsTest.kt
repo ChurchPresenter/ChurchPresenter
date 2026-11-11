@@ -259,7 +259,7 @@ class ScheduleTabMenuActionsTest {
     @Test
     fun `addAnnouncement carries its whole argument list through`() =
         scheduleTab { vm, reports ->
-            // 29 parameters wide, and the ones that matter are deep in the middle of it: a shifted
+            // 31 parameters wide, and the ones that matter are deep in the middle of it: a shifted
             // argument here is how a countdown ends up the wrong colour or counting to the wrong time.
             registeredActions(reports).addAnnouncement(
                 "Service starts in", "#FFEEAA", "#101020", 64, "Georgia",
@@ -267,7 +267,7 @@ class ScheduleTabMenuActionsTest {
                 "left", "top", "FADE", 750, 3,
                 true, 1, 2, 3, "#00FF00", "We're starting!", "clock",
                 18, 30, 15, "hh:mm a", TextBackdrop(border = true, borderColor = "#ABCDEF"),
-                TextOutline(enabled = true, color = "#FEDCBA", width = 7),
+                TextOutline(enabled = true, color = "#FEDCBA", width = 7), 45,
             )
             waitForIdle()
 
@@ -295,6 +295,7 @@ class ScheduleTabMenuActionsTest {
             assertEquals("clock", item.timerMode)
             assertEquals(listOf(18, 30, 15), listOf(item.targetHour, item.targetMinute, item.targetSecond))
             assertEquals("hh:mm a", item.liveClockFormat)
+            assertEquals(45, item.showForSeconds)
         }
 
     // ── Editing in place ────────────────────────────────────────────────────────

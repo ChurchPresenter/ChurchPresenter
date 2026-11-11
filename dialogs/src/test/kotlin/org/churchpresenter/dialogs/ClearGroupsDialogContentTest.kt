@@ -2,6 +2,7 @@
 
 package org.churchpresenter.dialogs
 
+import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
@@ -38,7 +39,9 @@ class ClearGroupsDialogContentTest {
             val seen = Seen()
             setContent {
                 MaterialTheme {
-                    ClearGroupsDialogContent(groups, { seen.groups = it }, { seen.cleared += it }) { seen.dismissed++ }
+                    ClearGroupsDialogContent(groups, { seen.groups = it }, { seen.cleared += it }, CLEARABLE_LAYERS) {
+                        seen.dismissed++
+                    }
                 }
             }
             block(seen)
@@ -49,7 +52,9 @@ class ClearGroupsDialogContentTest {
         setContent {
             MaterialTheme {
                 Column {
-                    ClearLayersMenuItems(listOf(text), onAir, { seen.cleared += it }, { seen.cleared += it }) {
+                    ClearLayersMenuItems(
+                        listOf(text), onAir, { seen.cleared += it }, { seen.cleared += it }, CLEARABLE_LAYERS,
+                    ) {
                         seen.edits++
                     }
                 }
@@ -131,5 +136,24 @@ class ClearGroupsDialogContentTest {
         assertEquals("clear2", newClearGroupId(listOf(text)))
         assertEquals("clear3", newClearGroupId(listOf(text, text.copy(id = "clear2"))))
         assertEquals("clear3", newClearGroupId(listOf(text.copy(id = "clear2"))), "past an id already taken")
+    }
+
+    @Test
+    fun `the menu and the editor offer only the layers they are given`() = runComposeUiTest {
+        val offered = listOf(Layer.SLIDE, Layer.ANNOUNCEMENTS)
+        setContent {
+            MaterialTheme {
+                Column {
+                    ClearLayersMenuItems(listOf(text), setOf(Layer.SLIDE), {}, {}, offered) {}
+                    ClearGroupsDialogContent(emptyList(), {}, {}, offered) {}
+                }
+            }
+        }
+        onNodeWithTag(clearLayerItemTag(Layer.ANNOUNCEMENTS)).assertExists()
+        onNodeWithTag(clearLayerItemTag(Layer.PROPS)).assertDoesNotExist()
+        onNodeWithTag(CLEAR_GROUP_ADD_TAG).performClick()
+        waitForIdle()
+        onNodeWithTag(clearGroupLayerTag(Layer.SLIDE)).assertExists()
+        onNodeWithTag(clearGroupLayerTag(Layer.MESSAGES)).assertDoesNotExist()
     }
 }

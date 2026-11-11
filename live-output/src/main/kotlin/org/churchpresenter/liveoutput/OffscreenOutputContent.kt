@@ -3,6 +3,7 @@ package org.churchpresenter.liveoutput
 import org.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.presenter.LocalLottieBandClock
+import org.churchpresenter.presenter.LocalTitleSlideClock
 import org.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.presenter.MergedTile
@@ -144,6 +145,7 @@ fun OffscreenOutputContent(
                         if (mode != Presenting.NONE && showsContent) {
                             CompositionLocalProvider(
                                 LocalLottieBandClock provides presenterManager.lottieBandClock,
+                                LocalTitleSlideClock provides presenterManager.titleSlideClock,
                                 LocalBandSongLineIndex provides presenterManager.bandSongLineIndex.value,
                                 LocalBandOutgoing provides presenterManager.bandOutgoing.value,
                             ) {

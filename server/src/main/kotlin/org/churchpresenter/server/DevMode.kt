@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Whether the app is in dev mode, where the features not yet ready for production answer remote
- * clients (messages, props, macros, clear groups and single layers, Take). Answers 403 and returns
+ * clients (messages, props, macros, Take). Answers 403 and returns
  * false when it is not.
  */
 internal suspend fun ApplicationCall.requireDevMode(server: CompanionServer): Boolean {
@@ -27,3 +27,11 @@ internal suspend fun DefaultWebSocketServerSession.refusedOutsideDevMode(
     sendCommandAck(msg.commandId, ok = false, reason = "dev_mode_only", json = json)
     return true
 }
+
+/**
+ * Whether a remote clear names the messages or props layer, the two whose features are still dev
+ * mode only. Spelled as `layerForName` in the app reads them; every other layer clears in production.
+ */
+internal fun isDevOnlyLayer(name: String): Boolean = name.trim().lowercase() in DEV_ONLY_LAYER_NAMES
+
+private val DEV_ONLY_LAYER_NAMES = setOf("messages", "message", "props", "prop")

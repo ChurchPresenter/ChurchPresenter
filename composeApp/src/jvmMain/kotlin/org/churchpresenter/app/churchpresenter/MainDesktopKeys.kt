@@ -95,9 +95,9 @@ internal fun handleMainDesktopKey(keyEvent: KeyEvent, context: MainDesktopKeyCon
     val settings = context.settings
     val shortcutTab = shortcuts.actionFor(keyEvent, ShortcutScope.GLOBAL)?.targetTab
     val quickBackgroundSlot = quickBackgroundSlotFor(shortcuts, keyEvent)
-    // Dev mode only: outside it these keys do nothing, and fall through.
+    // Dev mode only: outside it the macro keys do nothing, and fall through.
     val macroSlot = macroSlotFor(shortcuts, keyEvent)?.takeIf { context.devMode }
-    val clearGroupSlot = clearGroupSlotFor(shortcuts, keyEvent)?.takeIf { context.devMode }
+    val clearGroupSlot = clearGroupSlotFor(shortcuts, keyEvent)
     val live = actions.presentationLive()
     return when {
         shortcuts.matches(ShortcutAction.REDO, keyEvent) -> {

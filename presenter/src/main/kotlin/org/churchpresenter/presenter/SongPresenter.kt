@@ -138,6 +138,13 @@ fun SongPresenter(
         resources = rememberSongLookResources(ss, isLowerThird, lookAheadEnabled, isKey),
     )
     with(look) {
+        // A title slide with a Lottie of its own plays it instead (#971): in the band's place on a
+        // lower third, over the song's background on a full screen.
+        val titleTemplate = rememberTitleSlideTemplate()
+        if (isLowerThird && titleTemplate != null) {
+            TitleSlideLottieBand(titleTemplate, modifier)
+            return
+        }
         // A Lottie band draws the whole band itself — text included — so it replaces everything
         // below; a file that is missing or is not a template falls through to the classic band.
         if (isLowerThird && usesBibleLottieBand(bgConfig)) {
@@ -177,9 +184,13 @@ fun SongPresenter(
             isLowerThird = isLowerThird,
             drawsBackground = drawsBackground,
         ) { blurRadius ->
-            // Everything but the background, in the region when the background stays full screen.
-            TextRegionBox(textRegion) {
-                SongFrameContent(look, backdrop, blurRadius)
+            if (titleTemplate != null) {
+                TitleSlideLottieFullScreen(titleTemplate)
+            } else {
+                // Everything but the background, in the region when the background stays full screen.
+                TextRegionBox(textRegion) {
+                    SongFrameContent(look, backdrop, blurRadius)
+                }
             }
         }
     }

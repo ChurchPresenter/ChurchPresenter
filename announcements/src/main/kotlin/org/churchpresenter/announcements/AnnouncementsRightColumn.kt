@@ -14,11 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -46,7 +41,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import org.churchpresenter.theme.AppShape
@@ -65,7 +62,6 @@ import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,18 +70,24 @@ import org.churchpresenter.strings.generated.resources.announcement_animation
 import org.churchpresenter.strings.generated.resources.announcement_animation_speed
 import org.churchpresenter.strings.generated.resources.announcement_loop_count
 import org.churchpresenter.strings.generated.resources.announcement_loop_tooltip
+import org.churchpresenter.strings.generated.resources.announcement_show_for
+import org.churchpresenter.strings.generated.resources.announcement_show_for_tooltip
 import org.churchpresenter.strings.generated.resources.preview
 import org.churchpresenter.strings.generated.resources.canvas_text_bg_color
 import org.churchpresenter.strings.generated.resources.transparent_default
 import org.churchpresenter.strings.generated.resources.position_on_screen
 import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.SlideAcross
+import org.churchpresenter.sharedui.utils.ANNOUNCEMENT_FADE_MS
+import org.churchpresenter.sharedui.utils.announcementSecondsAt
+import org.churchpresenter.sharedui.utils.announcementSecondsMs
+import org.churchpresenter.sharedui.utils.announcementSliderPosition
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.sharedui.utils.Utils
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.ScreenPositionPicker
-import androidx.compose.runtime.State
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import org.churchpresenter.sharedui.utils.PreviewOutput
@@ -171,19 +173,7 @@ private fun AnnouncementsTabScope.AnnouncementsPreview(
                     previewHeightPx = size.height
                 }
         ) {
-            val previewContainerWidthPx = previewWidthPx.toFloat()
-            val previewContainerHeightPx = previewHeightPx.toFloat()
-            key(viewModel.scrollDurationMs, viewModel.movesPositive) {
-                val infiniteTransition = rememberInfiniteTransition(label = "previewScroll")
-                val offsetFractionState = infiniteTransition.animateFloat(
-                        initialValue = if (viewModel.movesPositive) -1f else 1f,
-                        targetValue  = if (viewModel.movesPositive) 1f else -1f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(durationMillis = viewModel.scrollDurationMs, easing = LinearEasing),
-                            repeatMode = RepeatMode.Restart
-                        ),
-                        label = "previewOffset"
-                    )
+            run {
                 val look = AnnouncementPreviewLook(
                     text = viewModel.previewText,
                     textStyle = previewTextStyle,
@@ -193,12 +183,9 @@ private fun AnnouncementsTabScope.AnnouncementsPreview(
                     textAlign = viewModel.previewTextAlign,
                 )
                 if (viewModel.isDirectional) {
-                    DirectionalPreview(viewModel,
-                        look, viewModel.isHorizontal, viewModel.slideAlignment,
-                        previewContainerWidthPx, previewContainerHeightPx, offsetFractionState,
-                    )
+                    DirectionalPreview(viewModel, look, viewModel.isHorizontal, viewModel.slideAlignment)
                 } else {
-                    StaticPreview(viewModel, look, viewModel.isShowingLiveTimerValue, viewModel.durationMs)
+                    StaticPreview(viewModel, look, viewModel.isShowingLiveTimerValue)
                 }
             }
         } // end preview Box
@@ -222,11 +209,7 @@ private fun AnnouncementsTabScope.DirectionalPreview(
     look: AnnouncementPreviewLook,
     isHorizontal: Boolean,
     slideAlignment: Alignment,
-    previewContainerWidthPx: Float,
-    previewContainerHeightPx: Float,
-    offsetFractionState: State<Float>,
 ) {
-    val offsetFraction by offsetFractionState
     val previewText = look.text
     val previewTextStyle = look.textStyle
     val scaledFontSize = look.fontSize
@@ -264,24 +247,14 @@ private fun AnnouncementsTabScope.DirectionalPreview(
             )
         }
     }
-    Box(modifier = Modifier.fillMaxSize().clipToBounds()) {
-        if (isHorizontal) {
-            Box(
-                modifier = Modifier
-                    .align(slideAlignment)
-                    .graphicsLayer { translationX = previewContainerWidthPx * offsetFraction },
-                contentAlignment = Alignment.Center
-            ) { textComposable() }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .align(slideAlignment)
-                    .graphicsLayer { translationY = previewContainerHeightPx * offsetFraction },
-                contentAlignment = Alignment.Center
-            ) { textComposable() }
-        }
-    }
+    // The output's own slide over the preview's size, so the preview moves at the output's speed.
+    SlideAcross(
+        crossingMs = announcementSecondsMs(viewModel.durationMs),
+        horizontal = isHorizontal,
+        movesPositive = viewModel.movesPositive,
+        alignment = slideAlignment,
+        modifier = Modifier.clipToBounds(),
+    ) { textComposable() }
 }
 
 /** The text in its place on the preview, faded in and out where the animation fades. */
@@ -290,7 +263,6 @@ private fun AnnouncementsTabScope.StaticPreview(
     viewModel: AnnouncementsViewModel,
     look: AnnouncementPreviewLook,
     isShowingLiveTimerValue: Boolean,
-    durationMs: Int,
 ) {
     val previewText = look.text
     val previewTextStyle = look.textStyle
@@ -311,7 +283,7 @@ private fun AnnouncementsTabScope.StaticPreview(
         Constants.BOTTOM_RIGHT  -> Alignment.BottomEnd
         else                    -> Alignment.Center
     }
-    val previewDuration = durationMs.coerceAtLeast(50)
+    val previewDuration = ANNOUNCEMENT_FADE_MS
     val previewKey = Triple(previewText, viewModel.animationType, viewModel.position)
     AnimatedContent(
         targetState = previewKey,
@@ -487,9 +459,6 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Animation and loop count, with the speed slider under them
-        val sliderMin = 500f
-        val sliderMax = 30000f
-        val sliderSum = sliderMin + sliderMax
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -519,50 +488,96 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
                     viewModel.saveToSettings(onSettingsChange)
                 }
             )
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp,
-                    ) {
-                        Text(
-                            stringResource(Res.string.announcement_loop_tooltip),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp),
-                )
-            ) {
-                NumberSettingsTextField(
-                    label = stringResource(Res.string.announcement_loop_count),
-                    initialText = viewModel.loopCount,
-                    range = 0..99,
-                    onValueChange = { v ->
-                        viewModel.loopCount = v
+            HintedNumberField(
+                label = stringResource(Res.string.announcement_loop_count),
+                hint = stringResource(Res.string.announcement_loop_tooltip),
+                value = viewModel.loopCount,
+                range = 0..99,
+                tag = ANNOUNCEMENT_LOOP_COUNT_TAG,
+            ) { v ->
+                viewModel.loopCount = v
+                viewModel.saveToSettings(onSettingsChange)
+            }
+            HintedNumberField(
+                label = stringResource(Res.string.announcement_show_for),
+                hint = stringResource(Res.string.announcement_show_for_tooltip),
+                value = viewModel.showForSeconds,
+                range = 0..ANNOUNCEMENT_MAX_SHOW_FOR_SECONDS,
+                tag = ANNOUNCEMENT_SHOW_FOR_TAG,
+            ) { v ->
+                viewModel.showForSeconds = v
+                viewModel.saveToSettings(onSettingsChange)
+            }
+            } // end inner Row (animation, loop count, show for)
+            SectionLabel(stringResource(Res.string.announcement_animation_speed))
+            // Seconds across the screen (or up, for a still or fading one): longer, and slower, to
+            // the right, spaced so each bit of travel changes the speed by about the same amount.
+            val seconds = announcementSecondsMs(viewModel.durationMs)
+            SlimSlider(
+                value = announcementSliderPosition(seconds),
+                onValueChange = { v ->
+                    val picked = announcementSecondsAt(v)
+                    if (picked != viewModel.animationDuration) {
+                        viewModel.animationDuration = picked
                         viewModel.saveToSettings(onSettingsChange)
                     }
-                )
-            }
-            } // end inner Row (animation + loop count)
-            SectionLabel(stringResource(Res.string.announcement_animation_speed))
-            SlimSlider(
-                value = (sliderSum - viewModel.durationMs.toFloat()),
-                onValueChange = { v ->
-                    val dur = (sliderSum - v)
-                    val snapped = (dur / sliderMin).toInt() * sliderMin.toInt()
-                    viewModel.animationDuration = snapped.coerceIn(sliderMin.toInt(), sliderMax.toInt())
-                    viewModel.saveToSettings(onSettingsChange)
                 },
-                valueRange = sliderMin..sliderMax,
-                trailingLabel =
-                    "${"%.1f".format((sliderSum - viewModel.durationMs) / ANNOUNCEMENT_MILLIS_PER_SECOND_F)}s",
-                modifier = Modifier.fillMaxWidth()
+                valueRange = 0f..1f,
+                trailingLabel = "${"%.1f".format(seconds / ANNOUNCEMENT_MILLIS_PER_SECOND_F)}s",
+                modifier = Modifier.fillMaxWidth().testTag(ANNOUNCEMENT_SPEED_TAG)
             )
         }
+    }
+}
+
+/** The Speed slider. */
+const val ANNOUNCEMENT_SPEED_TAG = "announcement_speed"
+
+/** The Loop Count field. */
+const val ANNOUNCEMENT_LOOP_COUNT_TAG = "announcement_loop_count"
+
+/** The Show For field. */
+const val ANNOUNCEMENT_SHOW_FOR_TAG = "announcement_show_for"
+
+/** The longest an announcement can be set to stay up: a day, in seconds. */
+private const val ANNOUNCEMENT_MAX_SHOW_FOR_SECONDS = 86_400
+
+/** A number field with its meaning in a tooltip under it -- what "0" means, say. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun HintedNumberField(
+    label: String,
+    hint: String,
+    value: Int,
+    range: IntRange,
+    tag: String,
+    onValueChange: (Int) -> Unit,
+) {
+    TooltipArea(
+        tooltip = {
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp,
+            ) {
+                Text(
+                    hint,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp),
+        )
+    ) {
+        NumberSettingsTextField(
+            modifier = Modifier.widthIn(min = 60.dp).width(IntrinsicSize.Max).testTag(tag),
+            label = label,
+            initialText = value,
+            range = range,
+            onValueChange = onValueChange,
+        )
     }
 }

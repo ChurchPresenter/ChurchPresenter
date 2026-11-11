@@ -127,14 +127,12 @@ class ShortcutActionDefaultsTest {
     }
 
     @Test
-    fun `only Take, the macro slots and the clear-group slots are dev only`() {
+    fun `only Take and the macro slots are dev only`() {
         val devOnly = ShortcutAction.entries.filter { it.devOnly }.toSet()
 
-        assertEquals(
-            setOf(ShortcutAction.TAKE) + MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
-            devOnly,
-        )
+        assertEquals(setOf(ShortcutAction.TAKE) + MACRO_ACTIONS, devOnly)
         assertTrue(!ShortcutAction.SAVE_SCHEDULE.devOnly)
+        assertTrue(CLEAR_GROUP_ACTIONS.none { it.devOnly }, "the clear groups are in production")
     }
 
     @Test

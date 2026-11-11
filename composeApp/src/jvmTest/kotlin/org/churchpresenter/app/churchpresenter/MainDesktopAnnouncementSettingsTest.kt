@@ -43,6 +43,7 @@ class MainDesktopAnnouncementSettingsTest {
         liveClockFormat = "hh:mm a",
         backdrop = TextBackdrop(lineBackground = true, lineBackgroundColor = "#123456"),
         outline = TextOutline(enabled = true, color = "#123457", width = 6),
+        showForSeconds = 45,
     )
 
     @Test
@@ -68,6 +69,7 @@ class MainDesktopAnnouncementSettingsTest {
         assertEquals("clock", after.timerMode)
         assertEquals("hh:mm a", after.liveClockFormat)
         assertEquals(TextBackdrop(lineBackground = true, lineBackgroundColor = "#123456"), after.backdrop)
+        assertEquals(45, after.showForSeconds)
     }
 
     @Test
@@ -91,6 +93,7 @@ class MainDesktopAnnouncementSettingsTest {
             targetHour = 15, targetMinute = 16, targetSecond = 17, liveClockFormat = "stale",
             backdrop = TextBackdrop(border = true, borderColor = "#000005"),
             outline = TextOutline(enabled = true, color = "#000006", width = 19),
+            showForSeconds = 20,
         )
 
         val after = withAnnouncementFrom(

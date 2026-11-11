@@ -66,6 +66,8 @@ fun ClearGroupsDialog(
     onDismiss: () -> Unit,
     /** The window it opens in -- see [DialogFrame]. */
     frame: DialogFrame = appDialogFrame,
+    /** The layers a group may hold, in stack order -- see `clearableLayers`. */
+    layers: List<Layer>,
 ) {
     if (!isVisible) return
     val dialogState = rememberCenteredDialogState(LocalMainWindowState.current, CLEAR_DIALOG_WIDTH, CLEAR_DIALOG_HEIGHT)
@@ -78,7 +80,7 @@ fun ClearGroupsDialog(
         ),
     ) {
         ProvideUiScale {
-            ClearGroupsDialogContent(groups, onGroupsChange, onClearGroup, onDismiss)
+            ClearGroupsDialogContent(groups, onGroupsChange, onClearGroup, layers, onDismiss)
         }
     }
 }
@@ -89,6 +91,7 @@ internal fun ClearGroupsDialogContent(
     groups: List<ClearGroup>,
     onGroupsChange: (List<ClearGroup>) -> Unit,
     onClearGroup: (ClearGroup) -> Unit,
+    layers: List<Layer>,
     onDismiss: () -> Unit,
 ) {
     var editing by remember { mutableStateOf<ClearGroup?>(null) }
@@ -110,7 +113,7 @@ internal fun ClearGroupsDialogContent(
                 }
                 editing?.let { draft ->
                     HorizontalDivider()
-                    ClearGroupEditor(draft) { editing = it }
+                    ClearGroupEditor(draft, layers) { editing = it }
                 }
             }
             HorizontalDivider()
@@ -159,7 +162,7 @@ private fun ClearGroupRow(group: ClearGroup, editing: Boolean, onClear: () -> Un
 /** The name and the layers of the group being added or edited. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ClearGroupEditor(draft: ClearGroup, onChange: (ClearGroup) -> Unit) {
+private fun ClearGroupEditor(draft: ClearGroup, offered: List<Layer>, onChange: (ClearGroup) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         SettingsTextField(
             value = draft.name,
@@ -170,7 +173,7 @@ private fun ClearGroupEditor(draft: ClearGroup, onChange: (ClearGroup) -> Unit) 
         )
         Text(stringResource(Res.string.clear_groups_layers), style = MaterialTheme.typography.labelLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            CLEARABLE_LAYERS.forEach { layer ->
+            offered.forEach { layer ->
                 val selected = layer.name in draft.layers
                 FilterChip(
                     selected = selected,

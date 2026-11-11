@@ -68,8 +68,17 @@ internal suspend fun PresenterManager.applyBibleTarget(target: BibleBandTarget, 
     swapBandText(animating, BandOutgoing(verses = displayedVerses.value)) { setDisplayedVerses(target.verses) }
 }
 
-/** Moves the song band — and the classic band's displayed section — onto [target]. */
-internal suspend fun PresenterManager.applySongTarget(target: SongBandTarget, template: BibleLottieTemplate?) {
+/**
+ * Moves the song band — and the classic band's displayed section — onto [target]. Leaving a title
+ * slide that plays its own Lottie ([titleTemplate]) plays that out first, so the lyric that follows
+ * comes in on an empty screen.
+ */
+internal suspend fun PresenterManager.applySongTarget(
+    target: SongBandTarget,
+    template: BibleLottieTemplate?,
+    titleTemplate: BibleLottieTemplate? = null,
+) {
+    if (!target.section.isTitleSlide) playTitleSlideOut(titleTemplate)
     val animating = template?.takeIf {
         // A section re-sent with only its tuning changed reads the same, and swapping it plays the
         // band's text out and back in over identical words.

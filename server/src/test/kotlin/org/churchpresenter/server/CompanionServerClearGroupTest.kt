@@ -35,7 +35,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/** Firing a clear group from a remote client: `GET /api/clear-groups`, `POST /api/clear?group=` and WS `clear`. */
+/**
+ * Firing a clear group, or clearing one layer, from a remote client: `GET /api/clear-groups`,
+ * `POST /api/clear?group=` and WS `clear`. All of it is production (#991); only the messages and props
+ * layers, whose features are still dev mode only, are refused outside it.
+ */
 class CompanionServerClearGroupTest {
 
     private lateinit var client: HttpClient
@@ -71,8 +75,7 @@ class CompanionServerClearGroupTest {
 
     @BeforeTest
     fun reset() {
-        // These are dev mode only features (AGENT.md); off, they refuse -- see the dev mode test.
-        server.devMode = true
+        server.devMode = false
         client = HttpClient(CIO) { install(WebSockets) }
         server.updateApiKey(enabled = false, key = "")
         server.clearGroups = listOf(text, graphics)
@@ -143,6 +146,27 @@ class CompanionServerClearGroupTest {
         assertEquals("clear1", next.awaited())
         assertTrue(acks.first { it.commandId == "ok" }.ok)
         assertFalse(acks.first { it.commandId == "bad" }.ok)
+    }
+
+    @Test
+    fun `over the socket one layer clears outside dev mode, but not the messages or props layer`() {
+        val cleared = CompletableDeferred<String>()
+        val scope = CoroutineScope(Dispatchers.IO).also { collector = it }
+        scope.launch { server.onClearLayer.collect { cleared.complete(it) } }
+        runBlocking { withTimeoutOrNull(5_000) { server.onClearLayer.subscriptionCount.first { it > 0 } } }
+        val acks = acksFor(
+            setOf("ann", "msg", "prop"),
+            command("""{"layer":"messages"}""", "msg"),
+            command("""{"layer":"props"}""", "prop"),
+            command("""{"layer":"announcements"}""", "ann"),
+        )
+        assertEquals("announcements", cleared.awaited())
+        assertTrue(acks.first { it.commandId == "ann" }.ok)
+        listOf("msg", "prop").forEach { id ->
+            val ack = acks.first { it.commandId == id }
+            assertFalse(ack.ok, id)
+            assertEquals("dev_mode_only", ack.reason, id)
+        }
     }
 
     private fun command(payload: String, commandId: String): String = json.encodeToString(

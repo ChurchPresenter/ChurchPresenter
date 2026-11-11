@@ -19,6 +19,7 @@
 - **Favorites & play counts** — star the songs you use most and see how often each has been sung.
 - **Bring your existing library** — the bundled converter reads SongBeamer, OpenLP (the `songs.sqlite` database itself or an OpenLyrics export), OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm and SoftProjector libraries, plus lyrics pulled out of PDF, Word, PowerPoint and Keynote files — several files or a whole folder at a time — and ready-to-use sample songs ship with the app.
 - **Flexible display** — one verse or one line at a time, optional title slides, and full control over how numbers and titles appear.
+- **Animated title slides** — a profile can play a Lottie as a song's title slide, full screen or on the lower third, with the number, title and credits filled into its text layers.
 - **A background per song** — give a song, or one of its sections, its own colour, gradient, picture, video or camera, separately for full screen and lower third, with a look (dim, blur, opacity) on top — or let it follow the profile's background.
 
 **Source locations:**
@@ -33,7 +34,9 @@
   Transpose, the key's palette and the chord picker
 - `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor it opens and what a song going live
   records; `dialogs/SongEditorBackgroundButton.kt` — the editor's Background button;
-  `presenter/…/TitleSlideSection.kt` — the title slide the tab sends
+  `presenter/…/TitleSlideSection.kt` — the title slide the tab sends; `presenter/…/TitleSlideLottie.kt`
+  — a title slide played as its own Lottie, driven by `live-output/…/TitleSlideEffects.kt`, picked in
+  `profiles/…/TitleSlideLottieRow.kt`
 - `app-settings/…/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
@@ -151,7 +154,7 @@
 - `lottieGenerator/src/main/kotlin/.../band/` (the `:lottieGenerator` module) — the Bible band generator
 
 ## Announcements & Timers
-- **On-screen announcements** — show text anywhere on screen with a wide range of slide and scroll animations, custom colors, speed and looping. The tab is laid out around a full-height preview in the output's own shape, with the text and the timer side by side and their position, background and animation under the preview.
+- **On-screen announcements** — show text anywhere on screen with a wide range of slide and scroll animations, custom colors, speed and looping, for a set number of seconds or until cleared (`live-output/…/AnnouncementExpiry.kt`). The next song line or verse takes one put over it down. The tab is laid out around a full-height preview in the output's own shape, with the text and the timer side by side and their position, background and animation under the preview.
 - **Countdown timers** — count down to a duration or to a specific clock time, with custom colors and an end-of-countdown message — perfect for "service starts in…".
 
 **Source locations:**

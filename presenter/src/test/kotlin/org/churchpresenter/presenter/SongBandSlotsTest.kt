@@ -276,4 +276,18 @@ class SongBandSlotsTest {
         assertEquals("John Newton", two.text(REFERENCE_1))
         assertEquals("", two.text(REFERENCE_2))
     }
+
+    @Test
+    fun `a title slide drawn over a whole output takes the full screen's title look`() {
+        val title = verse.copy(type = Constants.SECTION_TYPE_TITLE_SLIDE, lines = emptyList())
+        val settings = SongSettings(titleFontSize = 90, titleLowerThirdFontSize = 30, titleColor = "#FF0000")
+        val page = SongBandPage(title, listOf(title, verse), 0, 0)
+        val band = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = false)
+        val whole = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = false, fullScreen = true)
+
+        assertEquals(30, band.getValue(TEXT_1).style.fontSizePt)
+        assertEquals(90, whole.getValue(TEXT_1).style.fontSizePt)
+        assertEquals(Color.Red, whole.getValue(TEXT_1).style.color)
+        assertEquals(band.getValue(TEXT_1).text, whole.getValue(TEXT_1).text, "the words are the same either way")
+    }
 }

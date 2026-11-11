@@ -106,7 +106,8 @@ internal fun AppSettings.withAnnouncement(item: ScheduleItem.AnnouncementItem): 
             targetHour          = item.targetHour,
             targetMinute        = item.targetMinute,
             targetSecond        = item.targetSecond,
-            liveClockFormat     = item.liveClockFormat
+            liveClockFormat     = item.liveClockFormat,
+            showForSeconds      = item.showForSeconds,
         )
     )
 

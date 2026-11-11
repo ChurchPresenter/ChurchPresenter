@@ -115,7 +115,7 @@ internal fun scheduleActionsFrom(
             item.timerMinutes, item.timerSeconds, item.timerTextColor,
             item.timerExpiredText, item.timerMode, item.targetHour,
             item.targetMinute, item.targetSecond, item.liveClockFormat,
-            item.backdrop, item.outline,
+            item.backdrop, item.outline, item.showForSeconds,
         )
     },
     addWebsite = actions.addWebsite,

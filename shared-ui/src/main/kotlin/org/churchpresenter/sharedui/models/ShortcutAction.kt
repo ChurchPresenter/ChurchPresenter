@@ -350,7 +350,7 @@ enum class ShortcutAction(
      * Whether this belongs to a feature that is not ready for production yet: it is offered, and
      * answers its key, only in dev mode (AGENT.md, "Dev mode only").
      */
-    val devOnly: Boolean get() = this == TAKE || this in MACRO_ACTIONS || this in CLEAR_GROUP_ACTIONS
+    val devOnly: Boolean get() = this == TAKE || this in MACRO_ACTIONS
 }
 
 /** The keys that run the first nine macros, in the order the macros are listed. */

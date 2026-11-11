@@ -7,7 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 
 // ── Reading and driving what was rendered ───────────────────────────────────────────────────────
@@ -47,17 +50,16 @@ private fun ComposeUiTest.sortedButton(label: String, position: Int): SemanticsN
 }
 
 /**
- * The loop count field's own increment button.
- *
- * "Increment"/"Decrement" also label the font-size field's arrows, so a bare lookup is ambiguous.
- * Loop count sits lower on screen (in the right column, below the preview), so it is the one with
- * the larger `top`.
+ * The loop count field's own increment button. "Increment"/"Decrement" also label the font-size and
+ * Show For fields' arrows, so it is found inside its own field.
  */
-fun ComposeUiTest.loopCountIncrement(): SemanticsNodeInteraction {
-    val nodes = onAllNodesWithContentDescription("Increment").fetchSemanticsNodes(atLeastOneRootRequired = false)
-    val lowest = nodes.indices.maxByOrNull { nodes[it].boundsInRoot.top } ?: error("no Increment button is on screen")
-    return onAllNodesWithContentDescription("Increment")[lowest]
-}
+fun ComposeUiTest.loopCountIncrement(): SemanticsNodeInteraction = incrementIn(ANNOUNCEMENT_LOOP_COUNT_TAG)
+
+/** The Show For field's own increment button -- see [loopCountIncrement]. */
+fun ComposeUiTest.showForIncrement(): SemanticsNodeInteraction = incrementIn(ANNOUNCEMENT_SHOW_FOR_TAG)
+
+private fun ComposeUiTest.incrementIn(fieldTag: String): SemanticsNodeInteraction =
+    onNode(hasContentDescription("Increment") and hasAnyAncestor(hasTestTag(fieldTag)))
 
 fun ComposeUiTest.hasAnnButton(label: String): Boolean =
     onAllNodesWithContentDescription(label)

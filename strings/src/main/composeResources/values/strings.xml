@@ -1278,6 +1278,12 @@
     <string name="announcement_animation_speed">Speed</string>
     <string name="announcement_loop_count">Loop Count</string>
     <string name="announcement_loop_tooltip">0 = infinite loop</string>
+    <string name="announcement_show_for">Show For (sec)</string>
+    <string name="announcement_show_for_tooltip">0 = stays up until cleared</string>
+    <string name="title_slide_animation">Animation</string>
+    <string name="title_slide_animation_sub">A Lottie that plays the title slide: the number and title go in its Text layers, the credits in its Reference layers. None draws it as usual.</string>
+    <string name="title_slide_animation_browse">Browse…</string>
+    <string name="title_slide_animation_files">Lottie animations (.json)</string>
     <string name="license_title">End User License Agreement (EULA)</string>
     <string name="license_accept_button">I Accept</string>
     <string name="license_decline_button">Decline &amp; Exit</string>

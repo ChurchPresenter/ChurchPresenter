@@ -9,6 +9,13 @@ import org.churchpresenter.settings.ClearGroup
  */
 val CLEARABLE_LAYERS: List<Layer> = Layer.entries - Layer.BACKGROUND - Layer.AUDIO
 
+/** The layers whose features are still dev mode only (AGENT.md, "Dev mode only"): messages and props. */
+val DEV_ONLY_LAYERS: Set<Layer> = setOf(Layer.MESSAGES, Layer.PROPS)
+
+/** The layers an operator is offered to clear, and to put in a clear group: all of them in [devMode]. */
+fun clearableLayers(devMode: Boolean): List<Layer> =
+    if (devMode) CLEARABLE_LAYERS else CLEARABLE_LAYERS - DEV_ONLY_LAYERS
+
 /** The layers [group] names that this build knows, in stack order. */
 fun ClearGroup.knownLayers(): List<Layer> =
     CLEARABLE_LAYERS.filter { it.name in layers }
