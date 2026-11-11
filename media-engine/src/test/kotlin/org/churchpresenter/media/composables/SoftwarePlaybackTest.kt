@@ -17,6 +17,7 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -65,6 +66,26 @@ class SoftwarePlaybackTest {
     }
 
     @Test
+    fun `the stop before each load runs where the player is released, not on the event thread`() = runComposeUiTest {
+        val player = Player()
+        val vm = MediaViewModel().apply { loadMedia(url, "url") }
+        val queued = mutableListOf<Runnable>()
+        setContent {
+            SoftwarePlayback(vm, player.mp, mutableStateOf(false), audioEnabled = false, stopOn = { queued += it })
+        }
+        waitForIdle()
+
+        verify(exactly = 0) { player.controls.stop() }
+        verify(exactly = 0) { player.media.play(any<String>(), *anyVararg()) }
+        assertEquals(1, queued.size, "the load waits on the release thread for its stop")
+
+        queued.removeAt(0).run()
+        waitForIdle()
+        verify { player.controls.stop() }
+        verify { player.media.play(url, *anyVararg()) }
+    }
+
+    @Test
     fun `nothing loaded clears the shared frame and opens nothing`() = runComposeUiTest {
         val player = Player()
         SharedVideoOutput.frame.value = androidx.compose.ui.graphics.ImageBitmap(1, 1)
@@ -88,7 +109,9 @@ class SoftwarePlaybackTest {
     fun `a subtitle VLC must burn in reopens the clip where the operator was`() = runComposeUiTest {
         val player = Player()
         val vm = MediaViewModel().apply { loadMedia(url, "url"); position.setDuration(60_000L) }
-        setContent { SoftwarePlayback(vm, player.mp, mutableStateOf(false), audioEnabled = false) }
+        setContent {
+            SoftwarePlayback(vm, player.mp, mutableStateOf(false), audioEnabled = false, stopOn = Runnable::run)
+        }
         waitForIdle()
         vm.position.setCurrentPosition(20_000L)
         val ass = File(dir, "styled.ass").apply { writeText("[Script Info]\n") }
@@ -102,7 +125,9 @@ class SoftwarePlaybackTest {
     fun `a new clip starts from the beginning`() = runComposeUiTest {
         val player = Player()
         val vm = MediaViewModel().apply { loadMedia(url, "url") }
-        setContent { SoftwarePlayback(vm, player.mp, mutableStateOf(false), audioEnabled = false) }
+        setContent {
+            SoftwarePlayback(vm, player.mp, mutableStateOf(false), audioEnabled = false, stopOn = Runnable::run)
+        }
         waitForIdle()
         vm.position.setCurrentPosition(20_000L)
         vm.loadMedia("https://example.org/next.mp4", "url")

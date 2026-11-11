@@ -83,6 +83,7 @@ class PlaybackRecomposeTest {
         setContent {
             SoftwarePlayback(
                 vm, mp, firstFrame, audioEnabled = false, audioDeviceId = device, reportsPlaybackEnd = reports,
+                stopOn = Runnable::run,
             )
         }
         waitForIdle()

@@ -56,8 +56,11 @@ internal fun isMacOS(): Boolean {
  */
 internal fun createMediaPlayerComponent(): Component? {
     return try {
-        if (isMacOS()) CallbackMediaPlayerComponent()
-        else EmbeddedMediaPlayerComponent()
+        // On the run's one libVLC (SharedVlcFactory), with the arguments the no-argument
+        // constructors pass, so making a player no longer loads VLC.
+        val factory = SharedVlcFactory.get()
+        if (isMacOS()) CallbackMediaPlayerComponent(factory, null, null, true, null, null, null, null)
+        else EmbeddedMediaPlayerComponent(factory, null, null, null, null)
     } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
         // The component loads libvlc: a missing or wrong-architecture library is an Error.
         val msg = e.message ?: e.toString()

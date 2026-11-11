@@ -1,7 +1,5 @@
 package org.churchpresenter.media.composables
 
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory
-
 data class VlcAudioDevice(val id: String, val description: String)
 
 /**
@@ -22,12 +20,11 @@ internal fun withoutVlcDefaultDevice(devices: List<VlcAudioDevice>): List<VlcAud
 fun listVlcAudioDevices(): List<VlcAudioDevice> {
     if (!isVlcAvailable) return emptyList()
     return try {
-        val factory = MediaPlayerFactory()
-        val mp = factory.mediaPlayers().newMediaPlayer()
+        // On the run's one libVLC: a factory of its own loaded and unloaded VLC on every listing.
+        val mp = SharedVlcFactory.get().mediaPlayers().newMediaPlayer()
         val devices = mp.audio().outputDevices()
             .map { VlcAudioDevice(it.deviceId, it.longName) }
         mp.release()
-        factory.release()
         withoutVlcDefaultDevice(devices)
     } catch (_: Throwable) { emptyList() }
 }

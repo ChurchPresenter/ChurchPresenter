@@ -6,6 +6,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import java.io.File
@@ -75,6 +77,23 @@ internal fun stopAndRelease(
         }
     )
 }
+
+/**
+ * Runs [block] on [on] -- [PlayerReleaseThread] -- behind whatever is queued there, and waits for it
+ * without holding the caller's thread. A callback player's stop goes through here so it can never
+ * run after, or beside, that player's release on the same thread.
+ */
+internal suspend fun awaitOnPlayerThread(on: (Runnable) -> Unit = PlayerReleaseThread, block: () -> Unit) =
+    suspendCancellableCoroutine { done ->
+        on(
+            Runnable {
+                try {
+                    block()
+                } catch (_: Throwable) { }
+                done.resume(Unit)
+            }
+        )
+    }
 
 /** The one thread callback players are stopped and released on, in the order they were left. */
 internal object PlayerReleaseThread : (Runnable) -> Unit {
