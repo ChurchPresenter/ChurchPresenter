@@ -303,7 +303,6 @@ internal class AnnouncementsTabScope(inputs: AnnouncementsTabInputs, environment
             else                                 -> Alignment.Center
         }
     }
-    val AnnouncementsViewModel.scrollDurationMs get() = durationMs.coerceAtLeast(500)
     val AnnouncementsViewModel.previewTextAlign get() = when (horizontalAlignment) {
         Constants.LEFT -> TextAlign.Left
         Constants.RIGHT -> TextAlign.Right

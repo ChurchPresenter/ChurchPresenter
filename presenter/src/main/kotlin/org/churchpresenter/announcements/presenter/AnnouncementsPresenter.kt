@@ -1,26 +1,14 @@
 package org.churchpresenter.announcements.presenter
 
 import org.churchpresenter.settings.AnnouncementsSettings
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.repeatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.sharedui.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.SlideAcross
+import org.churchpresenter.sharedui.utils.announcementSecondsMs
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
@@ -102,7 +92,7 @@ private fun AnnouncementsPresenterContent(
 
     val slideAlignment = slideAlignmentFor(settings.position, isHorizontal)
 
-    val scrollDurationMs = settings.animationDuration.coerceAtLeast(500)
+    val crossingMs = announcementSecondsMs(settings.animationDuration)
 
     BoxWithConstraints(
         modifier = Modifier
@@ -149,35 +139,15 @@ private fun AnnouncementsPresenterContent(
             }
         }
 
-        val loopCount = settings.loopCount
-
-        // Use the full container size for slide distance, not the text's own size
-        val containerWidthPx = constraints.maxWidth.toFloat()
-        val containerHeightPx = constraints.maxHeight.toFloat()
-
-        val slideContent: @Composable (Float) -> Unit = { fraction ->
-            if (isHorizontal) {
-                Box(
-                    modifier = Modifier
-                        .align(slideAlignment)
-                        .graphicsLayer { translationX = containerWidthPx * fraction },
-                    contentAlignment = Alignment.Center
-                ) { textBlock(false) }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .align(slideAlignment)
-                        .graphicsLayer { translationY = containerHeightPx * fraction },
-                    contentAlignment = Alignment.Center
-                ) { textBlock(true) }
-            }
-        }
-
         if (isDirectional) {
-            key(scrollDurationMs, movesPositive, settings.animationType, loopCount) {
-                SlideAnimation(scrollDurationMs, movesPositive, loopCount, onFinished, slideContent)
-            }
+            SlideAcross(
+                crossingMs = crossingMs,
+                horizontal = isHorizontal,
+                movesPositive = movesPositive,
+                alignment = slideAlignment,
+                loopCount = settings.loopCount,
+                onFinished = onFinished,
+            ) { textBlock(!isHorizontal) }
         } else {
             // Static or fade — animation driven centrally via transitionAlpha
             val boxAlignment = positionToAlignment(settings.position)
@@ -250,52 +220,6 @@ return if (isHorizontal) {
         else                                -> Alignment.Center
     }
 }
-}
-
-/**
- * Drives a slide from one edge to the other: [loopCount] times and then [onFinished], or for ever
- * when it is 0. [content] draws the text at a fraction of the container from -1 to 1.
- */
-@Composable
-private fun SlideAnimation(
-    scrollDurationMs: Int,
-    movesPositive: Boolean,
-    loopCount: Int,
-    onFinished: () -> Unit,
-    content: @Composable (Float) -> Unit,
-) {
-    if (loopCount > 0) {
-        val startVal = if (movesPositive) -1f else 1f
-        val endVal   = if (movesPositive) 1f else -1f
-        val animatable = remember { Animatable(startVal) }
-
-        LaunchedEffect(Unit) {
-            animatable.animateTo(
-                targetValue = endVal,
-                animationSpec = repeatable(
-                    iterations = loopCount,
-                    animation = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                )
-            )
-            onFinished()
-        }
-
-        content(animatable.value)
-    } else {
-        val infiniteTransition = rememberInfiniteTransition(label = "presenterScroll")
-        val offsetFraction by infiniteTransition.animateFloat(
-            initialValue = if (movesPositive) -1f else 1f,
-            targetValue  = if (movesPositive) 1f else -1f,
-            animationSpec = infiniteRepeatable(
-                animation  = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ),
-            label = "presenterOffset"
-        )
-
-        content(offsetFraction)
-    }
 }
 
 /**

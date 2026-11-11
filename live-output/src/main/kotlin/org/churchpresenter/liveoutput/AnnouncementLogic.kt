@@ -1,9 +1,7 @@
 package org.churchpresenter.liveoutput
 
 import org.churchpresenter.settings.utils.Constants
-
-/** The shortest an announcement stays up, however fast the speed slider is wound. */
-internal const val MIN_ANNOUNCEMENT_DISPLAY_MS = 500L
+import org.churchpresenter.sharedui.utils.announcementSecondsMs
 
 /** Whether an announcement fades between states, as opposed to cutting or sliding. */
 internal fun isFadeAnnouncement(animationType: String): Boolean =
@@ -31,10 +29,8 @@ internal fun shouldFadeOutAnnouncement(isFade: Boolean, wasEmpty: Boolean): Bool
 internal fun isFiniteAnnouncementLoop(loopCount: Int): Boolean = loopCount > 0
 
 /**
- * How long an announcement stays up in total.
- *
- * The speed slider reads the other way round — a higher value means faster — so the configured
- * duration is subtracted from the slider's span rather than used directly.
+ * How long a still or fading announcement stays up in total: its Speed seconds for each loop -- the
+ * same seconds a sliding one takes to cross the screen ([announcementSecondsMs]).
  */
-internal fun announcementDisplayMs(sliderSpan: Long, animationDuration: Long, loopCount: Int): Long =
-    (sliderSpan - animationDuration).coerceAtLeast(MIN_ANNOUNCEMENT_DISPLAY_MS) * loopCount
+internal fun announcementDisplayMs(animationDuration: Int, loopCount: Int): Long =
+    announcementSecondsMs(animationDuration).toLong() * loopCount

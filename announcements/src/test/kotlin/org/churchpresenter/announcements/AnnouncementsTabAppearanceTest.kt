@@ -2,6 +2,16 @@
 
 package org.churchpresenter.announcements
 
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasText
+import kotlin.test.assertSame
+import kotlin.test.assertNotNull
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.captureToImage
@@ -179,6 +189,41 @@ class AnnouncementsTabAppearanceTest {
 
         assertEquals(1, reports.settings?.loopCount)
     }
+
+    @Test
+    fun `the speed reads the seconds it is set to, and is longer to the right`() =
+        announcementsTab(initial = AnnouncementsSettings(animationDuration = 5_000)) { _, reports ->
+            onNodeWithText("5.0s").assertExists("the label is the seconds themselves")
+            // Well along the track, short of the label at the row's end.
+            onNodeWithTag(ANNOUNCEMENT_SPEED_TAG).performTouchInput { click(Offset(width * 0.7f, centerY)) }
+            waitForIdle()
+            val further = assertNotNull(reports.settings?.animationDuration)
+            assertTrue(further > 5_000, "to the right is longer, and slower: $further")
+            onNodeWithTag(ANNOUNCEMENT_SPEED_TAG).performTouchInput { click(Offset(1f, centerY)) }
+            waitForIdle()
+            assertEquals(1_000, reports.settings?.animationDuration, "and the far left the shortest")
+            val saved = reports.settings
+            onNodeWithTag(ANNOUNCEMENT_SPEED_TAG).performTouchInput { click(Offset(1f, centerY)) }
+            waitForIdle()
+            assertSame(saved, reports.settings, "picking the seconds it already has saves nothing")
+        }
+
+    @Test
+    fun `right-aligned text at a place the tab does not know is still previewed`() =
+        announcementsTab(
+            initial = AnnouncementsSettings(
+                text = "Welcome",
+                animationType = Constants.ANIMATION_NONE,
+                horizontalAlignment = Constants.RIGHT,
+                position = "Somewhere else",
+            ),
+        ) { _, _ ->
+            val previewed = onNode(hasText("Welcome") and hasAnyAncestor(hasTestTag(ANNOUNCEMENTS_PREVIEW_TAG)))
+            val preview = onNodeWithTag(ANNOUNCEMENTS_PREVIEW_TAG).getBoundsInRoot()
+            val text = previewed.getBoundsInRoot()
+            val middle = (preview.top + preview.bottom) / 2
+            assertTrue(text.top < middle && text.bottom > middle, "an unknown place falls back to the middle")
+        }
 
     @Test
     fun `how long it shows for can be edited, beside the loop count`() = announcementsTab { _, reports ->

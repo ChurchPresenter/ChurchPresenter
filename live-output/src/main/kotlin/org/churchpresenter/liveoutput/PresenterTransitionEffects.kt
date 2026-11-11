@@ -20,6 +20,7 @@ import org.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.presenter.BibleLottieTemplate
 import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.utils.ANNOUNCEMENT_FADE_MS
 import org.churchpresenter.presenter.rememberBibleLottieTemplate
 /**
  * The cross-fades and slide transitions that move selected content to displayed content: the fade
@@ -282,8 +283,7 @@ private suspend fun showAnnouncementText(
 ) {
         val isFade = isFadeAnnouncement(annSettings.animationType)
         val wasEmpty = presenterManager.displayedAnnouncementText.value.isEmpty()
-        val fadeDuration = 500
-        val sliderSum = 30500L // 500 + 30000, matches AnnouncementsTab speed slider
+        val fadeDuration = ANNOUNCEMENT_FADE_MS
         val loopCount = annSettings.loopCount
 
         if (isSlidingAnnouncement(annSettings.animationType)) {
@@ -312,7 +312,7 @@ private suspend fun showAnnouncementText(
             }
 
             if (isFiniteAnnouncementLoop(loopCount)) {
-                delay(announcementDisplayMs(sliderSum, annSettings.animationDuration.toLong(), loopCount))
+                delay(announcementDisplayMs(annSettings.animationDuration, loopCount))
 
                 if (isFade) {
                     val anim = Animatable(1f)

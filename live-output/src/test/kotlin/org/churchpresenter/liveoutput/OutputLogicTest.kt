@@ -154,22 +154,19 @@ class OutputLogicTest {
     }
 
     @Test
-    fun `the speed slider reads the other way round`() {
-        // A higher configured value means faster, so it is subtracted from the slider's span.
-        assertEquals(20_500L, announcementDisplayMs(sliderSpan = 30_500L, animationDuration = 10_000L, loopCount = 1))
+    fun `a still or fading announcement is up for its seconds`() {
+        assertEquals(5_000L, announcementDisplayMs(animationDuration = 5_000, loopCount = 1))
     }
 
     @Test
-    fun `each loop adds its own time on screen`() {
-        assertEquals(61_000L, announcementDisplayMs(sliderSpan = 30_500L, animationDuration = 0L, loopCount = 2))
+    fun `each loop adds its own seconds on screen`() {
+        assertEquals(10_000L, announcementDisplayMs(animationDuration = 5_000, loopCount = 2))
     }
 
     @Test
-    fun `an announcement is never on screen for less than the floor`() {
-        assertEquals(
-            MIN_ANNOUNCEMENT_DISPLAY_MS,
-            announcementDisplayMs(sliderSpan = 30_500L, animationDuration = 99_999L, loopCount = 1),
-        )
+    fun `a value saved outside the slider's range is held to it`() {
+        assertEquals(1_000L, announcementDisplayMs(animationDuration = 500, loopCount = 1))
+        assertEquals(30_000L, announcementDisplayMs(animationDuration = 99_999, loopCount = 1))
     }
 
     // ── Per-output rendering ────────────────────────────────────────────────────

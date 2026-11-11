@@ -11,6 +11,7 @@ import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -140,7 +141,7 @@ class AnnouncementsPresenterRenderTest {
                     appSettings = AppSettings(
                         announcementsSettings = AnnouncementsSettings(
                             animationType = Constants.ANIMATION_SLIDE_FROM_BOTTOM,
-                            animationDuration = 500,
+                            animationDuration = 1_000,
                             loopCount = 1,
                         )
                     ),
@@ -148,7 +149,11 @@ class AnnouncementsPresenterRenderTest {
                 )
             }
         }
-        mainClock.advanceTimeBy(600)
+        // One second for the text's leading edge to cross the screen, then its own height to leave:
+        // a pass is over 1 s and, the text being shorter than the screen, under 2 s.
+        mainClock.advanceTimeBy(900)
+        assertFalse(finished, "still crossing")
+        mainClock.advanceTimeBy(1_200)
         assertTrue(finished, "onFinished must fire once the single-iteration slide completes")
     }
 }
