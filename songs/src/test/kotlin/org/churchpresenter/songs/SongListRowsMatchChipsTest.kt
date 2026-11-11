@@ -73,6 +73,16 @@ class SongListRowsMatchChipsTest {
     }
 
     @Test
+    fun `a library loaded as the tab opens has its lyric search built before anyone searches`() =
+        // The view model loads the folder from its constructor, and the background build can land
+        // before the constructor has finished, so the cache is declared ahead of `init`. Whether
+        // the build wins that race is timing, so this checks the outcome, not the race.
+        songsTab(songs = wretched) { vm, _ ->
+            waitUntil(timeoutMillis = 5_000) { vm.lyricSearchText.size == wretched.size }
+            assertTrue(vm.lyricSearchTextFor === vm.allSongItemsState.value)
+        }
+
+    @Test
     fun `a match in a translation's title names that translation`() = songsTab(songs = bilingual) { _, _ ->
         val before = count("Translation 2")
         val titles = count("Title")
