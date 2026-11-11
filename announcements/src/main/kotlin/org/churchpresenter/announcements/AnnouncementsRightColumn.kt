@@ -46,7 +46,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import org.churchpresenter.theme.AppShape
@@ -74,6 +76,8 @@ import org.churchpresenter.strings.generated.resources.announcement_animation
 import org.churchpresenter.strings.generated.resources.announcement_animation_speed
 import org.churchpresenter.strings.generated.resources.announcement_loop_count
 import org.churchpresenter.strings.generated.resources.announcement_loop_tooltip
+import org.churchpresenter.strings.generated.resources.announcement_show_for
+import org.churchpresenter.strings.generated.resources.announcement_show_for_tooltip
 import org.churchpresenter.strings.generated.resources.preview
 import org.churchpresenter.strings.generated.resources.canvas_text_bg_color
 import org.churchpresenter.strings.generated.resources.transparent_default
@@ -519,36 +523,27 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
                     viewModel.saveToSettings(onSettingsChange)
                 }
             )
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp,
-                    ) {
-                        Text(
-                            stringResource(Res.string.announcement_loop_tooltip),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp),
-                )
-            ) {
-                NumberSettingsTextField(
-                    label = stringResource(Res.string.announcement_loop_count),
-                    initialText = viewModel.loopCount,
-                    range = 0..99,
-                    onValueChange = { v ->
-                        viewModel.loopCount = v
-                        viewModel.saveToSettings(onSettingsChange)
-                    }
-                )
+            HintedNumberField(
+                label = stringResource(Res.string.announcement_loop_count),
+                hint = stringResource(Res.string.announcement_loop_tooltip),
+                value = viewModel.loopCount,
+                range = 0..99,
+                tag = ANNOUNCEMENT_LOOP_COUNT_TAG,
+            ) { v ->
+                viewModel.loopCount = v
+                viewModel.saveToSettings(onSettingsChange)
             }
-            } // end inner Row (animation + loop count)
+            HintedNumberField(
+                label = stringResource(Res.string.announcement_show_for),
+                hint = stringResource(Res.string.announcement_show_for_tooltip),
+                value = viewModel.showForSeconds,
+                range = 0..ANNOUNCEMENT_MAX_SHOW_FOR_SECONDS,
+                tag = ANNOUNCEMENT_SHOW_FOR_TAG,
+            ) { v ->
+                viewModel.showForSeconds = v
+                viewModel.saveToSettings(onSettingsChange)
+            }
+            } // end inner Row (animation, loop count, show for)
             SectionLabel(stringResource(Res.string.announcement_animation_speed))
             SlimSlider(
                 value = (sliderSum - viewModel.durationMs.toFloat()),
@@ -564,5 +559,54 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+/** The Loop Count field. */
+const val ANNOUNCEMENT_LOOP_COUNT_TAG = "announcement_loop_count"
+
+/** The Show For field. */
+const val ANNOUNCEMENT_SHOW_FOR_TAG = "announcement_show_for"
+
+/** The longest an announcement can be set to stay up: a day, in seconds. */
+private const val ANNOUNCEMENT_MAX_SHOW_FOR_SECONDS = 86_400
+
+/** A number field with its meaning in a tooltip under it -- what "0" means, say. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun HintedNumberField(
+    label: String,
+    hint: String,
+    value: Int,
+    range: IntRange,
+    tag: String,
+    onValueChange: (Int) -> Unit,
+) {
+    TooltipArea(
+        tooltip = {
+            Surface(
+                color = MaterialTheme.colorScheme.inverseSurface,
+                shape = MaterialTheme.shapes.extraSmall,
+                tonalElevation = 4.dp,
+            ) {
+                Text(
+                    hint,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp),
+        )
+    ) {
+        NumberSettingsTextField(
+            modifier = Modifier.widthIn(min = 60.dp).width(IntrinsicSize.Max).testTag(tag),
+            label = label,
+            initialText = value,
+            range = range,
+            onValueChange = onValueChange,
+        )
     }
 }

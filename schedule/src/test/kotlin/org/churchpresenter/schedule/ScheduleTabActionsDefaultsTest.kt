@@ -48,7 +48,7 @@ class ScheduleTabActionsDefaultsTest {
             false, false, false, false, "#000000", 100, 78,
             "center", "center", "SLIDE_FROM_BOTTOM", 500, 0,
             false, 0, 0, 0, "#FFFFFF", "", "duration",
-            0, 0, 0, "HH:mm:ss", TextBackdrop(), TextOutline(),
+            0, 0, 0, "HH:mm:ss", TextBackdrop(), TextOutline(), 0,
         )
         actions.addWebsite("url", "title")
         actions.updateWebsiteTitle("url", "title")

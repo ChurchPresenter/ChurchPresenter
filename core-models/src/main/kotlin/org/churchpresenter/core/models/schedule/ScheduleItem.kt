@@ -149,6 +149,8 @@ sealed class ScheduleItem {
         /** The band and box drawn behind the text, kept with the rest of its look. */
         val backdrop: TextBackdrop = TextBackdrop(),
         val outline: TextOutline = TextOutline(),
+        /** How long it stays up once live, in seconds; 0 keeps it up. */
+        val showForSeconds: Int = 0,
         override val displayText: String = if (isTimer) {
             when (timerMode) {
                 TimerModes.CLOCK -> "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)

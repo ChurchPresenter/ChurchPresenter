@@ -29,8 +29,27 @@ internal fun SongSettings.lyricsSlotStyle(isKey: Boolean) = BandSlotStyle(
     shadowOpacityPercent = lyricsLowerThirdShadowOpacity,
 )
 
-/** The title's lower-third typography as a band slot draws it. */
-internal fun SongSettings.titleSlotStyle(isKey: Boolean) = BandSlotStyle(
+/**
+ * The title's typography as a band slot draws it: the lower third's, or with [fullScreen] the
+ * full screen's -- a title slide's own Lottie played over a whole output.
+ */
+internal fun SongSettings.titleSlotStyle(isKey: Boolean, fullScreen: Boolean = false) =
+    if (fullScreen) titleFullScreenSlotStyle(isKey) else titleLowerThirdSlotStyle(isKey)
+
+private fun SongSettings.titleFullScreenSlotStyle(isKey: Boolean) = BandSlotStyle(
+    font = BandFontKey(titleFontType, titleBold, titleItalic),
+    fontSizePt = titleFontSize,
+    color = if (isKey) Color.White else parseHexColor(titleColor),
+    letterSpacingPt = titleLetterSpacing,
+    transform = titleTransform,
+    justify = justifyOf(titleHorizontalAlignment),
+    shadow = titleShadow,
+    shadowColor = parseHexColor(titleShadowColor),
+    shadowSizePercent = titleShadowSize,
+    shadowOpacityPercent = titleShadowOpacity,
+)
+
+private fun SongSettings.titleLowerThirdSlotStyle(isKey: Boolean) = BandSlotStyle(
     font = BandFontKey(titleLowerThirdFontType, titleLowerThirdBold, titleLowerThirdItalic),
     fontSizePt = titleLowerThirdFontSize,
     color = if (isKey) Color.White else parseHexColor(titleLowerThirdColor),
@@ -92,13 +111,15 @@ internal fun songBandSlots(
     languageDisplay: String,
     availableSlots: Int,
     isKey: Boolean,
+    /** Drawn over a whole output -- a title slide's own Lottie -- so the title takes the full screen's look. */
+    fullScreen: Boolean = false,
 ): Map<String, BandSlotText> {
     val section = page.section
     val allSections = page.allSections
     val displaySectionIndex = page.displaySectionIndex
     val lineIndex = page.lineIndex
     val lyrics = settings.lyricsSlotStyle(isKey)
-    val title = settings.titleSlotStyle(isKey)
+    val title = settings.titleSlotStyle(isKey, fullScreen)
     val language = languageDisplay.ifBlank { settings.lowerThirdLanguageDisplay }
     val slots = BibleLottieTemplate.TEXT_SLOT_LAYERS
     // The title slide is its own thing, laid across the slots the template has: the titles in
@@ -226,17 +247,18 @@ internal fun BoxScope.SongLottieBand(
     isKey: Boolean,
     showBackground: Boolean,
     modifier: Modifier = Modifier,
+    fullScreen: Boolean = false,
 ) {
     val availableSlots = template.textSlotCount
     val page = SongBandPage(section, allSections, displaySectionIndex, lineIndex)
     val outgoingPage = outgoingSection?.let {
         SongBandPage(it, allSections, displaySectionIndex, outgoingLineIndex)
     }
-    val slots = remember(page, settings, languageDisplay, availableSlots, isKey) {
-        songBandSlots(page, settings, languageDisplay, availableSlots, isKey)
+    val slots = remember(page, settings, languageDisplay, availableSlots, isKey, fullScreen) {
+        songBandSlots(page, settings, languageDisplay, availableSlots, isKey, fullScreen)
     }
-    val outgoingSlots = remember(outgoingPage, settings, languageDisplay, availableSlots, isKey) {
-        outgoingPage?.let { songBandSlots(it, settings, languageDisplay, availableSlots, isKey) }
+    val outgoingSlots = remember(outgoingPage, settings, languageDisplay, availableSlots, isKey, fullScreen) {
+        outgoingPage?.let { songBandSlots(it, settings, languageDisplay, availableSlots, isKey, fullScreen) }
     }
     LottieBand(template, slots, outgoingSlots, bandFraction, bandClock, isKey, showBackground, modifier)
 }

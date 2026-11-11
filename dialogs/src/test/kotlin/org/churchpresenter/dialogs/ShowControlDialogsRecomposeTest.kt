@@ -2,6 +2,7 @@
 
 package org.churchpresenter.dialogs
 
+import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -109,7 +110,7 @@ class ShowControlDialogsRecomposeTest {
     fun `the clear group editor follows the groups`() = runComposeUiTest {
         val gfx = ClearGroup("g1", "Graphics", listOf(Layer.GRAPHICS.name))
         var groups by mutableStateOf(listOf(gfx))
-        framed { ClearGroupsDialogContent(groups, {}, {}, {}) }
+        framed { ClearGroupsDialogContent(groups, {}, {}, CLEARABLE_LAYERS) {} }
         waitForIdle()
         onNodeWithTag(clearGroupEditTag("g1")).performClick()
         waitForIdle()

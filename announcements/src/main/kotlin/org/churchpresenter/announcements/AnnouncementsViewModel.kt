@@ -121,6 +121,13 @@ class AnnouncementsViewModel private constructor(
             state.loopCount = value.coerceAtLeast(0)
         }
 
+    /** How long it stays up once live, in seconds; 0 keeps it up, and never below zero. */
+    var showForSeconds: Int
+        get() = state.showForSeconds
+        set(value) {
+            state.showForSeconds = value.coerceAtLeast(0)
+        }
+
     var timerExpiredText: String
         get() = state.timerExpiredText
         set(value) {
@@ -157,6 +164,7 @@ class AnnouncementsViewModel private constructor(
         animationType = settings.animationType
         animationDuration = settings.animationDuration
         loopCount = settings.loopCount
+        showForSeconds = settings.showForSeconds
         timerHours = settings.timerHours
         timerMinutes = settings.timerMinutes
         timerSeconds = settings.timerSeconds
@@ -212,7 +220,8 @@ class AnnouncementsViewModel private constructor(
             targetHour = targetHour,
             targetMinute = targetMinute,
             targetSecond = targetSecond,
-            liveClockFormat = liveClockFormat
+            liveClockFormat = liveClockFormat,
+            showForSeconds = showForSeconds,
         )
     }
 

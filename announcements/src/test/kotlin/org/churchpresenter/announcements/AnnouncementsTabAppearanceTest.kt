@@ -180,6 +180,24 @@ class AnnouncementsTabAppearanceTest {
         assertEquals(1, reports.settings?.loopCount)
     }
 
+    @Test
+    fun `how long it shows for can be edited, beside the loop count`() = announcementsTab { _, reports ->
+        showForIncrement().performClick()
+        waitForIdle()
+
+        assertEquals(1, reports.settings?.showForSeconds)
+        assertEquals(0, reports.settings?.loopCount, "the loop count is its own field")
+    }
+
+    @Test
+    fun `how long it shows for is read back from the settings`() =
+        announcementsTab(initial = AnnouncementsSettings(showForSeconds = 30)) { _, reports ->
+            showForIncrement().performClick()
+            waitForIdle()
+
+            assertEquals(31, reports.settings?.showForSeconds)
+        }
+
     // ── Backdrop ──────────────────────────────────────────────────────────────────
 
     @Test

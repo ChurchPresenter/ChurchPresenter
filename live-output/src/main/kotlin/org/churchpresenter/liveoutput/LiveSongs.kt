@@ -3,6 +3,8 @@ package org.churchpresenter.liveoutput
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.sharedui.models.Presenting
 
 /** The lyric section the operator chose, and the one the outputs draw. Part of [PresenterManager]. */
@@ -30,6 +32,12 @@ interface LiveSongs {
 
     /** Every section of the song chosen -- what auto-fit sizes against. */
     val allLyricSections: State<List<LyricSection>>
+
+    /**
+     * Where a title slide's own Lottie is in its life (#971), on a clock of its own beside the lyric
+     * band's -- see `TitleSlideEffects`. Read by every output's `LocalTitleSlideClock`.
+     */
+    val titleSlideClock: State<BibleBandClock>
 
     fun setLyricSection(section: LyricSection)
 
@@ -125,6 +133,10 @@ internal class LiveSongsState(private val context: PresenterContext) : LiveSongs
     override fun setAllLyricSections(sections: List<LyricSection>) {
         _allLyricSections.value = sections
     }
+
+    /** Written by `TitleSlideEffects` alone, through `setTitleSlideClock`. */
+    internal val titleSlideClockState = mutableStateOf(BibleBandClock(BibleBandPhase.IDLE, 0f))
+    override val titleSlideClock: State<BibleBandClock> = titleSlideClockState
 
     /** Puts back what a snapshot held, without reporting it -- see [PresenterManager.restoreLiveState]. */
     fun restore(snapshot: PresenterManager.LiveStateSnapshot) {

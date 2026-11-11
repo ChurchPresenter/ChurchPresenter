@@ -2,6 +2,7 @@
 
 package org.churchpresenter.dialogs
 
+import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.test.onNodeWithText
@@ -21,7 +22,7 @@ class HiddenDialogsTest {
                 MessageDialog(false, emptyList(), {}, null, {}, {}, {})
                 PropsDialog(false, emptyList(), {}, emptySet(), { _, _ -> }, { null }, {})
                 MacrosDialog(false, emptyList(), emptyList(), {}, {}, {})
-                ClearGroupsDialog(false, emptyList(), {}, {}, {})
+                ClearGroupsDialog(false, emptyList(), {}, {}, {}, layers = CLEARABLE_LAYERS)
                 AddLabelDialog(false, {}, { _, _, _ -> })
                 KeyboardShortcutsDialog(false, AppSettings(), {}, onDismiss = {})
                 AboutDialog(false, {}, AppSettings(), TEST_IDENTITY)

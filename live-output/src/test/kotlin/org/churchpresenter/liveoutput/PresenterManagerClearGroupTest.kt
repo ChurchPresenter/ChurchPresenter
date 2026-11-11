@@ -63,4 +63,10 @@ class PresenterManagerClearGroupTest {
         assertFalse(Layer.BACKGROUND in CLEARABLE_LAYERS)
         assertFalse(Layer.AUDIO in CLEARABLE_LAYERS)
     }
+
+    @Test
+    fun `outside dev mode the messages and props layers are not offered for clearing`() {
+        assertEquals(CLEARABLE_LAYERS, clearableLayers(devMode = true))
+        assertEquals(CLEARABLE_LAYERS - Layer.MESSAGES - Layer.PROPS, clearableLayers(devMode = false))
+    }
 }

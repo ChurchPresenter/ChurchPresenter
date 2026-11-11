@@ -70,6 +70,31 @@ class PresenterManager private constructor(
         context.notify = { source -> onLiveStateChanged?.invoke(this, source) }
         context.setPresentingMode = ::setPresentingMode
         context.requestClearDisplay = ::requestClearDisplay
+        context.onOverlaysDropped = { dropped ->
+            if (Presenting.ANNOUNCEMENTS in dropped) announcements.forgetAnnouncementText()
+        }
+    }
+
+    /** The song page the last [setLyricSection] put out -- see [SongPage]. */
+    private var lastSongPage: SongPage? = null
+
+    /** A new song page on air takes the overlays over it down -- see [slidePageTurned]. */
+    override fun setLyricSection(section: LyricSection) {
+        val page = SongPage(section, songDisplaySectionIndex.value, songDisplayLineIndex.value)
+        val turned = lastSongPage?.isSamePageAs(page) != true
+        lastSongPage = page
+        songs.setLyricSection(section)
+        if (turned) slidePageTurned(Presenting.LYRICS)
+    }
+
+    /**
+     * New verses on air take the overlays over them down -- see [slidePageTurned]. Verses chosen
+     * under a hold are not on air, so they leave them up.
+     */
+    override fun setSelectedVerses(verses: List<SelectedVerse>) {
+        val turned = verses != selectedVerses.value && !bibleHold.value
+        bible.setSelectedVerses(verses)
+        if (turned) slidePageTurned(Presenting.BIBLE)
     }
 
     /** What is cued, not yet on air, while preview mode is on -- see [PreviewBus]. */
@@ -157,6 +182,9 @@ class PresenterManager private constructor(
     /** How many times a message has been put up, so the same message sent again restarts its timer. */
     internal val messagesShown = mutableIntStateOf(0)
 
+    /** How many times an announcement has been sent live, so a new one restarts its Show For time. */
+    internal val announcementsShown = mutableIntStateOf(0)
+
     private val _showPresenterWindow = mutableStateOf(showPresenterWindowInitially)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow
 
@@ -182,12 +210,13 @@ class PresenterManager private constructor(
     fun setPresentingMode(mode: Presenting) {
         // An announcement's ticking text can't tell a new one from the old, so its arrival shows it.
         if (mode == Presenting.ANNOUNCEMENTS && textClearedFor.value != null && !isLive(mode)) restoreText()
+        if (mode == Presenting.ANNOUNCEMENTS) announcementsShown.intValue++
         if (mode.isOverlay) {
             overlayLayers.showOverlay(mode)
             return
         }
         // Slide content replaces the overlays over it; clearing takes everything down.
-        context.overlays.value = emptySet()
+        context.setOverlays(emptySet())
         // Clearing takes the whole layers down too; slide content takes a message down.
         if (mode == Presenting.NONE) liveShow.clearAll() else liveShow.clear(Layer.MESSAGES)
         putSlide(mode, lastLive = mode)

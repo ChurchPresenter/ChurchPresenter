@@ -43,7 +43,8 @@ data class ScheduleTabActions(
         timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String,
         timerExpiredText: String, timerMode: String, targetHour: Int, targetMinute: Int,
         targetSecond: Int, liveClockFormat: String, backdrop: TextBackdrop, outline: TextOutline,
-    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
+        showForSeconds: Int,
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
@@ -105,7 +106,7 @@ internal fun ScheduleViewModel.tabActions(files: ScheduleFileCommands) = Schedul
         shadow, shadowColor, shadowSize, shadowOpacity, horizontalAlignment, position,
         animationType, animationDuration, loopCount, isTimer, timerHours, timerMinutes,
         timerSeconds, timerTextColor, timerExpiredText, timerMode, targetHour,
-        targetMinute, targetSecond, liveClockFormat, backdrop, outline,
+        targetMinute, targetSecond, liveClockFormat, backdrop, outline, showForSeconds,
         ->
         addAnnouncement(
             text, textColor, backgroundColor, fontSize, fontType, bold, italic,
@@ -113,7 +114,7 @@ internal fun ScheduleViewModel.tabActions(files: ScheduleFileCommands) = Schedul
             horizontalAlignment, position, animationType, animationDuration, loopCount,
             isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor,
             timerExpiredText, timerMode, targetHour, targetMinute, targetSecond,
-            liveClockFormat, backdrop, outline,
+            liveClockFormat, backdrop, outline, showForSeconds,
         )
     },
     addWebsite       = { url, title -> addWebsite(url, title) },

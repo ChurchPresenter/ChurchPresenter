@@ -2,6 +2,7 @@
 
 package org.churchpresenter.dialogs
 
+import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -76,7 +77,7 @@ class RecomposedDialogsTest {
 
     @Test
     fun `the clear groups dialog`() = recomposes("Clear groups") { changed, _ ->
-        ClearGroupsDialog(true, emptyList(), {}, {}, if (changed) ({}) else DISMISS, inPlace)
+        ClearGroupsDialog(true, emptyList(), {}, {}, if (changed) ({}) else DISMISS, inPlace, CLEARABLE_LAYERS)
     }
 
     @Test

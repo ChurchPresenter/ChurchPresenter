@@ -105,6 +105,28 @@ data class SongLayoutExtras(
      * the part only some of the congregation sings. A song's own `voice2:` wins over it.
      */
     val secondVoiceColor: String = DEFAULT_SECOND_VOICE_COLOR,
+    /**
+     * The Lottie template the full-screen title slide plays instead of drawing its number, title and
+     * credits itself; empty, or a file that is gone, draws the title slide as it always was. The
+     * template fills its `TextN` layers with the number and title and its `ReferenceN` layers with
+     * the credits, as a lower-third band does with a title slide. The background is the song's own.
+     */
+    val titleSlideLottie: String = "",
+    /** [titleSlideLottie] for the lower third: played in the band's place while the title slide is up. */
+    val titleSlideLottieLowerThird: String = "",
+)
+
+/** The Lottie template the title slide plays on this output, or empty to draw it as it always was. */
+fun SongSettings.titleSlideLottie(lowerThird: Boolean): String =
+    if (lowerThird) layoutExtras.titleSlideLottieLowerThird else layoutExtras.titleSlideLottie
+
+/** These settings with [path] as the title slide's Lottie template on this output. */
+fun SongSettings.withTitleSlideLottie(lowerThird: Boolean, path: String): SongSettings = copy(
+    layoutExtras = if (lowerThird) {
+        layoutExtras.copy(titleSlideLottieLowerThird = path)
+    } else {
+        layoutExtras.copy(titleSlideLottie = path)
+    },
 )
 
 /** The second voice's colour until a profile picks its own: a warm yellow that reads on dark and light. */

@@ -44,5 +44,6 @@ fun announcementPresetItem(settings: AnnouncementsSettings): ScheduleItem.Announ
         liveClockFormat = settings.liveClockFormat,
         backdrop = settings.backdrop,
         outline = settings.outline,
+        showForSeconds = settings.showForSeconds,
     )
 }

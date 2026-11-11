@@ -39,15 +39,26 @@ internal class LiveOverlaysState(private val context: PresenterContext) : LiveOv
             CrashReporter.breadcrumb("Overlay: ${mode.name}", category = "presenter")
         }
         // Re-added at the end, so the set's order stays the order they went up in.
-        context.overlays.value = context.overlays.value - mode + mode
+        context.setOverlays(context.overlays.value - mode + mode)
         context.lastLive.value = mode
         context.clearDisplayRequested.value = false
         context.notify(mode)
     }
 
+    /**
+     * Takes every overlay down and leaves the slide: what slide content going live does, and the
+     * next page of the slide on air (see [slidePageTurned]).
+     */
+    internal fun clearAllOverlays() {
+        if (context.overlays.value.isEmpty()) return
+        context.setOverlays(emptySet())
+        context.lastLive.value = context.slideMode.value
+        context.notify(context.slideMode.value)
+    }
+
     override fun clearOverlay(mode: Presenting) {
         if (mode !in context.overlays.value) return
-        context.overlays.value = context.overlays.value - mode
+        context.setOverlays(context.overlays.value - mode)
         // The most recent of what is still up: the newest overlay left, else the slide.
         if (context.lastLive.value == mode) {
             context.lastLive.value = context.overlays.value.lastOrNull() ?: context.slideMode.value

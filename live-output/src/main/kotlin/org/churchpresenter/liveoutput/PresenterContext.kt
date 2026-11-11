@@ -53,4 +53,14 @@ internal class PresenterContext {
 
     /** Clears the display the way the manager does, for an overlay that ends on its own. */
     var requestClearDisplay: () -> Unit = {}
+
+    /** Told which overlays [setOverlays] took down, so what they leave behind can be let go. */
+    var onOverlaysDropped: (Set<Presenting>) -> Unit = {}
+
+    /** Puts [next] up as the overlays, telling [onOverlaysDropped] which of the old ones went. */
+    fun setOverlays(next: Set<Presenting>) {
+        val dropped = overlays.value - next
+        overlays.value = next
+        if (dropped.isNotEmpty()) onOverlaysDropped(dropped)
+    }
 }

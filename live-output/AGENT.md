@@ -15,7 +15,10 @@ What is on air, and everything that puts it on a screen or a wire:
   `LayerClearing`, drawn by `MessageCue` and `PropsCue`;
 - the output windows' content (`PresenterScreen`, `PresenterOutputContent`, `PresenterModeContent`,
   `OutputLayers`, `CueTextContent`/`CueMediaContent`) and the transitions that drive them
-  (`PresenterTransitionEffects`, `TransitionLogic`, `AnnouncementLogic`, `LottieBandEffects`);
+  (`PresenterTransitionEffects`, `TransitionLogic`, `AnnouncementLogic`, `LottieBandEffects`, and
+  `TitleSlideEffects` -- a song title slide's own Lottie on a clock of its own); `AnnouncementExpiry`
+  (an announcement's Show For seconds) and `SongPage` (the next song page or verses on air takes
+  the overlays over it down, as slide content going live does);
 - the stage monitor (`StageMonitorScreen`, `StageZoneContent`, `StageZoneStyle`);
 - the off-screen outputs on the shared `ComposeScenePump`: `BrowserSourceVideoRenderer`,
   `NdiVideoRenderer`/`NdiManager`, `OmtVideoRenderer`/`OmtManager`, `DeckLinkComposeOutput`, over

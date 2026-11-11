@@ -44,6 +44,7 @@ internal class AnnouncementsState {
     var animationType by mutableStateOf(Constants.ANIMATION_SLIDE_FROM_BOTTOM)
     var animationDuration by mutableStateOf(500)
     var loopCount by mutableStateOf(0)
+    var showForSeconds by mutableStateOf(0)
 
     // Timer — the configured duration.
     var timerHours by mutableStateOf(0)

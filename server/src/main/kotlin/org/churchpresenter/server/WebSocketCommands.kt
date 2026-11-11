@@ -246,8 +246,8 @@ internal fun clearLayerOf(payload: String, json: Json): String? = try {
 }
 
 /**
- * The WebSocket `clear` command: a clear group, one layer, or everything. A group or a layer is dev
- * mode only; clearing everything is not.
+ * The WebSocket `clear` command: a clear group, one layer, or everything. Only the messages and props
+ * layers, whose features are still dev mode only, are refused outside it.
  */
 private suspend fun DefaultWebSocketServerSession.clearCommand(
     msg: WebSocketMessage,
@@ -261,7 +261,7 @@ private suspend fun DefaultWebSocketServerSession.clearCommand(
     // With a "layer" in the payload, only that layer comes down.
     val layer = clearLayerOf(msg.payload, json)
     if (layer != null) {
-        if (refusedOutsideDevMode(msg, server, json)) return
+        if (isDevOnlyLayer(layer) && refusedOutsideDevMode(msg, server, json)) return
         scope.launch { server.onClearLayer.emit(layer) }
     } else {
         scope.launch { server.onClear.emit(Unit) }

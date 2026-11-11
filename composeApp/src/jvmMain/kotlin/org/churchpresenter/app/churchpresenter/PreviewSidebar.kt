@@ -12,6 +12,7 @@ import org.churchpresenter.dialogs.ClearGroupsDialog
 import org.churchpresenter.dialogs.ClearLayersMenuItems
 import org.churchpresenter.liveoutput.clearGroup
 import org.churchpresenter.liveoutput.clearLayer
+import org.churchpresenter.liveoutput.clearableLayers
 import org.churchpresenter.liveoutput.clearTextOnly
 import org.churchpresenter.liveoutput.restoreText
 import org.churchpresenter.liveoutput.textCleared
@@ -50,6 +51,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.settings.MessageTemplate
 import org.churchpresenter.settings.PropDefinition
@@ -278,6 +280,7 @@ internal interface SidebarDialogs {
         onGroupsChange: (List<ClearGroup>) -> Unit,
         onClearGroup: (ClearGroup) -> Unit,
         onDismiss: () -> Unit,
+        layers: List<Layer>,
     )
 }
 
@@ -312,7 +315,8 @@ internal object WindowedSidebarDialogs : SidebarDialogs {
         onGroupsChange: (List<ClearGroup>) -> Unit,
         onClearGroup: (ClearGroup) -> Unit,
         onDismiss: () -> Unit,
-    ) = ClearGroupsDialog(isVisible, groups, onGroupsChange, onClearGroup, onDismiss)
+        layers: List<Layer>,
+    ) = ClearGroupsDialog(isVisible, groups, onGroupsChange, onClearGroup, onDismiss, layers = layers)
 }
 
 /** Where the sidebar's editors open: in their own windows, unless a test says otherwise. */
@@ -358,6 +362,7 @@ internal fun SidebarButtons(
             onSettingsChange { s -> s.copy(projectionSettings = updated) }
         }
         ClearTextButton(presenterManager)
+        ClearLayersButton(presenterManager, appSettings, showControl.devMode, onSettingsChange)
         if (appSettings.projectionSettings.showsProfileSetsButton()) {
             ProfileSetsButton(appSettings.projectionSettings) { updated ->
                 onSettingsChange { s -> s.copy(projectionSettings = updated) }
@@ -371,7 +376,6 @@ internal fun SidebarButtons(
                 PropsButton(presenterManager, appSettings, onSettingsChange)
                 MacrosButton(appSettings, showControl, onSettingsChange)
                 LiveToolDivider()
-                ClearLayersButton(presenterManager, appSettings, onSettingsChange)
                 PreviewModeToggle(appSettings.projectionSettings.previewModeEnabled) { on ->
                     onSettingsChange { it.withPreviewMode(on) }
                 }
@@ -456,13 +460,18 @@ private fun PropsButton(
 
 internal const val PROPS_BUTTON_TAG = "preview_props"
 
-/** Drops down the clear groups and the layers to clear one by one, and opens the group editor. */
+/**
+ * Drops down the clear groups and the layers to clear one by one, and opens the group editor. The
+ * messages and props layers, whose features are dev mode only, are offered only in [devMode].
+ */
 @Composable
 private fun ClearLayersButton(
     presenterManager: PresenterManager,
     appSettings: AppSettings,
+    devMode: Boolean,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
+    val layers = clearableLayers(devMode)
     var menuOpen by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf(false) }
     Box {
@@ -480,6 +489,7 @@ private fun ClearLayersButton(
                 onClearGroup = { menuOpen = false; presenterManager.clearGroup(it) },
                 onClearLayer = { menuOpen = false; presenterManager.clearLayer(it) },
                 onEdit = { menuOpen = false; editing = true },
+                layers = layers,
             )
         }
     }
@@ -489,6 +499,7 @@ private fun ClearLayersButton(
         onGroupsChange = { groups -> onSettingsChange { it.copy(clearGroups = groups) } },
         onClearGroup = { presenterManager.clearGroup(it) },
         onDismiss = { editing = false },
+        layers = layers,
     )
 }
 

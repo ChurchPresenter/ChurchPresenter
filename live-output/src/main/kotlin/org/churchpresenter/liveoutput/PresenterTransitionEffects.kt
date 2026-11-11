@@ -45,6 +45,9 @@ fun PresenterTransitionEffects(
 // A null template means the classic band and the code it had.
 val bibleTemplate by rememberBibleLottieTemplate(lottieBandPath(appSettings, Presenting.BIBLE).orEmpty())
 val songTemplate by rememberBibleLottieTemplate(lottieBandPath(appSettings, Presenting.LYRICS).orEmpty())
+// A title slide's own Lottie, on a clock of its own (#971).
+val titleTemplate by rememberBibleLottieTemplate(titleSlideLottiePath(appSettings).orEmpty())
+TitleSlideEffects(presenterManager, titleTemplate)
 val slideContent by presenterManager.slideContent
 // Whether the selected line is part of what the song band shows. Outside line mode the band draws
 // the whole section, so picking a different line changes nothing on the output — and a swap driven
@@ -59,7 +62,9 @@ fun templateFor(mode: Presenting): BibleLottieTemplate? = when (mode) {
 
 val clearRequested by presenterManager.clearDisplayRequested
 LaunchedEffect(clearRequested) {
-    if (clearRequested) clearDisplay(presenterManager, appSettings, templateFor(presenterManager.slideContent.value))
+    if (clearRequested) {
+        clearDisplay(presenterManager, appSettings, templateFor(presenterManager.slideContent.value), titleTemplate)
+    }
 }
 
 LaunchedEffect(slideContent, bibleTemplate, songTemplate) {
@@ -108,7 +113,7 @@ LaunchedEffect(presenterManager, bibleTemplate) {
     }.collect { target -> presenterManager.applyBibleTarget(target, bibleTemplate) }
 }
 
-LaunchedEffect(presenterManager, songTemplate, songBandLineMode) {
+LaunchedEffect(presenterManager, songTemplate, titleTemplate, songBandLineMode) {
     var applied: SongBandTarget? = null
     snapshotFlow {
         SongBandTarget(
@@ -123,7 +128,7 @@ LaunchedEffect(presenterManager, songTemplate, songBandLineMode) {
         if (applied?.copy(position = target.position) == target) {
             presenterManager.setDisplayedSongPosition(target.position)
         } else {
-            presenterManager.applySongTarget(target, songTemplate)
+            presenterManager.applySongTarget(target, songTemplate, titleTemplate)
         }
         applied = target
     }
@@ -330,9 +335,15 @@ private suspend fun clearDisplay(
     presenterManager: PresenterManager,
     appSettings: AppSettings,
     template: BibleLottieTemplate?,
+    titleTemplate: BibleLottieTemplate?,
 ) {
     val mode = presenterManager.slideContent.value
     val modeIsLocked = isAnyScreenLockedTo(presenterManager.screenLocks.value, mode)
+    // A title slide playing its own Lottie leaves by that Lottie's way out, and nothing else fades.
+    if (!modeIsLocked && presenterManager.playTitleSlideOut(titleTemplate)) {
+        presenterManager.setPresentingMode(Presenting.NONE)
+        return
+    }
     // The fade is one clock for every output, so it follows the profile the main window does.
     val operatorBible = appSettings.operatorBibleSettings()
     val operatorSongs = appSettings.operatorSongSettings()

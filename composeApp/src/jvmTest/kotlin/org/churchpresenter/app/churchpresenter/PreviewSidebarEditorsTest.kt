@@ -12,6 +12,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.messageOnAir
 import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.dialogs.CLEAR_GROUPS_EDIT_TAG
 import org.churchpresenter.settings.AppSettings
@@ -94,6 +95,7 @@ class PreviewSidebarEditorsTest {
             onGroupsChange: (List<ClearGroup>) -> Unit,
             onClearGroup: (ClearGroup) -> Unit,
             onDismiss: () -> Unit,
+            layers: List<Layer>,
         ) {
             this.groups = if (isVisible) GroupsAnswers(onGroupsChange, onClearGroup, onDismiss) else null
         }

@@ -2,6 +2,7 @@
 
 package org.churchpresenter.dialogs
 
+import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -84,7 +85,7 @@ class DialogFramesTest {
 
     @Test
     fun `the clear groups dialog`() = opens("Clear groups") { f ->
-        ClearGroupsDialog(true, emptyList(), {}, {}, f.dismiss, frame = f.frame)
+        ClearGroupsDialog(true, emptyList(), {}, {}, f.dismiss, frame = f.frame, layers = CLEARABLE_LAYERS)
     }
 
     @Test
@@ -264,7 +265,7 @@ class DialogFramesTest {
             MessageDialog(false, emptyList(), {}, null, {}, {}, f.dismiss, frame = f.frame)
             PropsDialog(false, emptyList(), {}, emptySet(), { _, _ -> }, { null }, f.dismiss, frame = f.frame)
             MacrosDialog(false, emptyList(), emptyList(), {}, {}, f.dismiss, frame = f.frame)
-            ClearGroupsDialog(false, emptyList(), {}, {}, f.dismiss, frame = f.frame)
+            ClearGroupsDialog(false, emptyList(), {}, {}, f.dismiss, frame = f.frame, layers = CLEARABLE_LAYERS)
             AddLabelDialog(false, f.dismiss, { _, _, _ -> }, frame = f.frame)
             KeyboardShortcutsDialog(false, AppSettings(), {}, onDismiss = f.dismiss, frame = f.frame)
             AboutDialog(false, f.dismiss, AppSettings(), TEST_IDENTITY, frame = f.frame)

@@ -220,7 +220,10 @@ private fun SongTextGroup(
             )
         },
     ) {
-        if (titleSlideView) SlideElementRow(slideElement, targets.slideElement.onChange)
+        if (titleSlideView) {
+            TitleSlideLottieRow(song, lowerThird, updateSong)
+            SlideElementRow(slideElement, targets.slideElement.onChange)
+        }
         SongElementRow(draft, profile, styleElement, target, titleSlideView, onSettingsChange, onProfileChange)
         key(styleElement, editingLanguage) { CompositionLocalProvider(LocalStyleTarget provides edit.styleTarget()) {
             // One language picked: its own Auto-fit only means something while languages are

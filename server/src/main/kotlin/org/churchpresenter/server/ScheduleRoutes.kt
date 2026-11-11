@@ -137,8 +137,9 @@ private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineSco
                 /**
                  * POST /api/clear
                  * Instantly switches the presenter to display-none (Presenting.NONE).
-                 * With `?layer=lowerthird|captions|announcements`, takes down only that layer;
-                 * with `?group=`, the layers of that clear group (by id or name; 404 if none).
+                 * With `?layer=lowerthird|captions|announcements`, takes down only that layer
+                 * (`messages` and `props` in dev mode only); with `?group=`, the layers of that
+                 * clear group (by id or name; 404 if none).
                  * No request body or approval needed.
                  * Response: {"ok":true}
                  */
@@ -146,12 +147,12 @@ private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineSco
                     if (!call.allowedTo(server, DevicePermission.CONTROL_OUTPUT)) return@post
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     call.request.queryParameters["group"]?.let { group ->
-                        if (call.requireDevMode(server)) call.respondClearGroup(server, scope, group)
+                        call.respondClearGroup(server, scope, group)
                         return@post
                     }
                     val layer = call.request.queryParameters["layer"]
                     if (layer != null) {
-                        if (!call.requireDevMode(server)) return@post
+                        if (isDevOnlyLayer(layer) && !call.requireDevMode(server)) return@post
                         scope.launch { server.onClearLayer.emit(layer) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                         return@post
