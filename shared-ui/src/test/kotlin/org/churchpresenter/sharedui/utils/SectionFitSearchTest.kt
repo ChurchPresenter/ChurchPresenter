@@ -61,6 +61,33 @@ class SectionFitSearchTest {
         }
     }
 
+    /**
+     * The plain probe with word wrap on: every line laid out wrapped to [width] at every size, and a
+     * size that breaks a word in two refused.
+     */
+    @Suppress("LongParameterList")
+    private fun plainWrappedFits(
+        sections: List<LyricSection>,
+        style: TextStyle,
+        width: Int,
+        height: Int,
+        indicator: Boolean,
+        styleText: (String) -> AnnotatedString,
+    ): (Int) -> Boolean = { size ->
+        val sized = style.copy(fontSize = size.sp)
+        fun layout(text: AnnotatedString) = measurer.measure(
+            text = text, style = sized, constraints = Constraints(maxWidth = width), density = Density(1f),
+        )
+        sections.all { section ->
+            section.allLanguageLines().filter { it.isNotEmpty() }.all { lines ->
+                val laid = lines.map { layout(styleText(it)) }
+                val indicatorHeight = if (indicator) 4 + layout(AnnotatedString("* * *")).size.height else 0
+                laid.none { it.size.width > width || it.splitsWord() } &&
+                    laid.sumOf { it.size.height } + indicatorHeight <= height
+            }
+        }
+    }
+
     @Suppress("LongParameterList")
     private fun plainFit(
         sections: List<LyricSection>,
@@ -69,8 +96,13 @@ class SectionFitSearchTest {
         height: Int,
         indicator: Boolean = false,
         styleText: (String) -> AnnotatedString = { AnnotatedString(it) },
+        wrap: Boolean = false,
     ): Int {
-        val fits = plainFits(sections, style, width, height, indicator, styleText)
+        val fits = if (wrap) {
+            plainWrappedFits(sections, style, width, height, indicator, styleText)
+        } else {
+            plainFits(sections, style, width, height, indicator, styleText)
+        }
         var low = 8
         var high = 300
         while (high - low > 1) {
@@ -88,7 +120,8 @@ class SectionFitSearchTest {
         height: Int,
         indicator: Boolean = false,
         styleText: (String) -> AnnotatedString = { AnnotatedString(it) },
-    ) = SectionFitSearch(measurer, SectionFitLines.of(sections, indicator, styleText), style, width, height)
+        wrap: Boolean = false,
+    ) = SectionFitSearch(measurer, SectionFitLines.of(sections, indicator, styleText), style, width, height, wrap)
 
     /** Words in the style's own face: the lines the search predicts. */
     private val plainWords = listOf(
@@ -128,7 +161,7 @@ class SectionFitSearchTest {
     }
 
     /** [count] random songs in random styles and boxes, each held to the plain search. */
-    private fun assertMatchesPlainSearch(seed: Int, count: Int, words: List<String>) {
+    private fun assertMatchesPlainSearch(seed: Int, count: Int, words: List<String>, wrap: Boolean = false) {
         val random = Random(seed)
         repeat(count) { case ->
             val sections = List(1 + random.nextInt(6)) { randomSection(random, words) }
@@ -136,8 +169,8 @@ class SectionFitSearchTest {
             val width = 120 + random.nextInt(1800)
             val height = 60 + random.nextInt(1400)
             val indicator = random.nextBoolean()
-            val expected = plainFit(sections, style, width, height, indicator, styleText)
-            val actual = search(sections, style, width, height, indicator, styleText).result()
+            val expected = plainFit(sections, style, width, height, indicator, styleText, wrap)
+            val actual = search(sections, style, width, height, indicator, styleText, wrap).result()
             assertEquals(expected, actual, "seed $seed case $case: ${width}x$height, $style, $sections")
         }
     }
@@ -220,6 +253,93 @@ class SectionFitSearchTest {
         val key = SectionFitCache.Key(table, style(), 900, 500, table.probe(otherWindow, style()))
         assertEquals(first, SectionFitCache.get(key))
         assertEquals(first, calculateAutoFitForAllSections(otherWindow, sections, style(), 900, 500))
+    }
+
+    // ── Word wrap on (#999) ───────────────────────────────────────────────────────
+
+    @Test
+    fun `random wrapped songs fit at the plain wrapped search's size`() =
+        assertMatchesPlainSearch(seed = 5, count = 12, words = plainWords, wrap = true)
+
+    @Test
+    fun `random wrapped songs with fallback faces fit at the plain wrapped search's size`() =
+        assertMatchesPlainSearch(seed = 6, count = 8, words = mixedWords, wrap = true)
+
+    @Test
+    fun `every wrapped probe size is answered as the plain wrapped search answers it`() {
+        val sections = listOf(
+            LyricSection(
+                lines = listOf("Amazing grace how sweet the sound", "That saved a wretch like me 🙏"),
+                translations = listOf(SectionTranslation(lines = listOf("Благодать Господня", "恩典 奇异"))),
+            ),
+        )
+        listOf(400 to 300, 1600 to 900).forEach { (width, height) ->
+            val style = TextStyle(fontWeight = FontWeight.Bold)
+            val styleText = { line: String -> AnnotatedString(line) }
+            val plain = plainWrappedFits(sections, style, width, height, true, styleText)
+            val fast = search(sections, style, width, height, true, styleText, wrap = true)
+            (8 until 300 step 3).forEach { size ->
+                assertEquals(plain(size), fast.fits(size), "size $size in ${width}x$height")
+            }
+        }
+    }
+
+    @Test
+    fun `a long line wrapped is fitted larger than on one row`() {
+        val sections = listOf(LyricSection(lines = listOf("Amazing grace! How sweet the sound")))
+        val oneRow = search(sections, TextStyle(), 800, 900).result()
+        val wrapped = search(sections, TextStyle(), 800, 900, wrap = true).result()
+        assertTrue(wrapped > oneRow * 2, "one row $oneRow, wrapped $wrapped")
+        val rows = measurer.measure(
+            text = sections.single().lines.single(),
+            style = TextStyle(fontSize = wrapped.sp),
+            constraints = Constraints(maxWidth = 800),
+            density = Density(1f),
+        ).lineCount
+        assertTrue(rows > 1, "the fitted line takes more than one row: $rows")
+    }
+
+    @Test
+    fun `a word wider than the box is shrunk rather than split`() {
+        val sections = listOf(LyricSection(lines = listOf("Hallelujah")))
+        val size = search(sections, TextStyle(), 300, 1000, wrap = true).result()
+        val word = measurer.measure(
+            text = "Hallelujah",
+            style = TextStyle(fontSize = size.sp),
+            constraints = Constraints(),
+            density = Density(1f),
+        )
+        assertTrue(word.size.width <= 300, "the word is drawn on one row at $size: ${word.size.width}px")
+    }
+
+    @Test
+    fun `a break inside a word is a split and a break at a space or a hyphen is not`() {
+        fun layout(text: String, width: Int) = measurer.measure(
+            text = text, style = TextStyle(fontSize = 40.sp), constraints = Constraints(maxWidth = width),
+            density = Density(1f),
+        )
+        val narrow = layout("Hallelujah", 60)
+        assertTrue(narrow.lineCount > 1 && narrow.splitsWord(), "a word broken across rows")
+        val spaced = layout("Amazing grace", 200)
+        assertTrue(spaced.lineCount > 1 && !spaced.splitsWord(), "a break at a space")
+        // Wide enough for either half on its own row, too narrow for both on one.
+        fun widthOf(text: String) = measurer.measure(text, TextStyle(fontSize = 40.sp)).size.width
+        val hyphen = layout("well-known", maxOf(widthOf("well-"), widthOf("known")) + 4)
+        assertTrue(hyphen.lineCount > 1 && !hyphen.splitsWord(), "a break after a hyphen")
+        assertTrue(!layout("Amazing", 2000).splitsWord(), "a single row")
+    }
+
+    @Test
+    fun `wrapped and one-row fits are cached apart`() {
+        val sections = listOf(LyricSection(lines = listOf("Cached apart for wrapping", "and for one row")))
+        val style = TextStyle(fontFamily = FontFamily.Monospace)
+        val oneRow = calculateAutoFitForAllSections(measurer, sections, style, 600, 900)
+        val wrapped = calculateAutoFitForAllSections(measurer, sections, style, 600, 900, softWrap = true)
+        assertTrue(wrapped > oneRow, "one row $oneRow, wrapped $wrapped")
+        val table = SectionFitLines.of(sections, false) { AnnotatedString(it) }
+        val probe = table.probe(measurer, style)
+        assertEquals(oneRow, SectionFitCache.get(SectionFitCache.Key(table, style, 600, 900, probe, softWrap = false)))
+        assertEquals(wrapped, SectionFitCache.get(SectionFitCache.Key(table, style, 600, 900, probe, softWrap = true)))
     }
 
     @Test

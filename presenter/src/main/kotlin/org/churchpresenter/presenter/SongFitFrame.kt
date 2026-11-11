@@ -311,6 +311,8 @@ private fun SongLook.fitSections(
         // appears. Counting it on the last slide alone -- and whether or not it was on --
         // sized that slide smaller than the rest under Each slide (#671).
         includeEndIndicator = ss.showEndOfSongIndicator,
+        // Word wrap on: a long line takes a second row instead of shrinking the song to one (#999).
+        softWrap = ss.wordWrap,
         // Measure what `LyricLine` draws, not the stored line: an uppercase transform
         // and the word spacing below are both applied at render, and a fit that did not
         // include them chose a size whose lines then ran off the side of the output.
@@ -336,6 +338,7 @@ private fun SongLook.fitSections(
                 availableHeight = refHeight,
                 reservedHeight = reserved,
                 includeEndIndicator = ss.showEndOfSongIndicator,
+                softWrap = ss.wordWrap,
                 styleText = { voicedDisplayText(it, look.transform, letterEm, wordEm, null) },
             )
         }
