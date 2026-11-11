@@ -108,22 +108,32 @@ internal class SectionFitLines(
     }
 }
 
-/** Answers the search's probes for one table of lines, in one style, in one box. */
+/**
+ * Answers the search's probes for one table of lines, in one style, in one box.
+ *
+ * With [softWrap] the lines are measured as the presenter draws them when word wrap is on: broken
+ * onto as many rows as [availableWidth] needs, so only the height limits the size. A size at which
+ * a single word is wider than the box still fails -- the text would be broken mid-word.
+ */
 internal class SectionFitSearch(
     private val textMeasurer: TextMeasurer,
     private val table: SectionFitLines,
     private val baseStyle: TextStyle,
     private val availableWidth: Int,
     private val effectiveHeight: Int,
+    private val softWrap: Boolean = false,
 ) {
     private val referenceDensity = Density(1f)
-    private val unconstrained = Constraints()
+    private val constraints = if (softWrap) Constraints(maxWidth = availableWidth) else Constraints()
     private val referenceStyle = baseStyle.copy(fontSize = FIT_REFERENCE_SIZE.sp)
     private val reference: Array<IntSize>
 
     /** Whether each line's box scales with the size: one row, the face's own height. */
     private val predictable: BooleanArray
-    private val measured = HashMap<Long, IntSize>()
+    private val measured = HashMap<Long, LineMeasure>()
+
+    /** One line laid out at one size: its box, and whether wrapping it broke a word in two. */
+    private class LineMeasure(val size: IntSize, val splitsWord: Boolean)
 
     /** How many lines were laid out, the reference pass included. */
     var measureCount: Int = table.lines.size + 1
@@ -179,7 +189,9 @@ internal class SectionFitSearch(
             heightHigh += high(size.height, scale)
         }
         for (line in unit) {
-            if (predictable[line] && low(reference[line].width, scale) > availableWidth) return Prediction.FAILS
+            // Wrapped, a line too wide for one row takes more rows rather than failing: measure it.
+            val tooWide = predictable[line] && low(reference[line].width, scale) > availableWidth
+            if (tooWide && !softWrap) return Prediction.FAILS
             add(line)
         }
         if (table.indicator >= 0) {
@@ -194,29 +206,42 @@ internal class SectionFitSearch(
         }
     }
 
-    /** The plain test, on real measures: no line wider than the box, and the lines' heights inside it. */
+    /**
+     * The plain test, on real measures: no line wider than the box (wrapped, no word broken), and the
+     * lines' heights inside it.
+     */
     private fun unitFits(unit: IntArray, size: Int): Boolean {
         var height = 0
         for (line in unit) {
-            val box = measureAt(line, size)
-            if (box.width > availableWidth) return false
-            height += box.height
+            val measure = measureAt(line, size)
+            if (measure.size.width > availableWidth || measure.splitsWord) return false
+            height += measure.size.height
         }
-        if (table.indicator >= 0) height += SECTION_INDICATOR_SPACER_PX + measureAt(table.indicator, size).height
+        if (table.indicator >= 0) height += SECTION_INDICATOR_SPACER_PX + measureAt(table.indicator, size).size.height
         return height <= effectiveHeight
     }
 
-    private fun measureAt(line: Int, size: Int): IntSize =
+    private fun measureAt(line: Int, size: Int): LineMeasure =
         measured.getOrPut(line.toLong() * (MAX_AUTO_FIT_SEARCH_SIZE + 1) + size) {
             measureCount++
-            measure(line, size)
+            val layout = layout(table.lines[line], baseStyle.copy(fontSize = size.sp))
+            LineMeasure(layout.size, softWrap && layout.splitsWord())
         }
 
-    private fun measure(line: Int, size: Int): IntSize =
-        layout(table.lines[line], baseStyle.copy(fontSize = size.sp)).size
-
     private fun layout(text: AnnotatedString, style: TextStyle): TextLayoutResult =
-        textMeasurer.measure(text = text, style = style, constraints = unconstrained, density = referenceDensity)
+        textMeasurer.measure(text = text, style = style, constraints = constraints, density = referenceDensity)
+}
+
+/**
+ * Whether a row of this layout ends inside a word: the character before the break and the one after
+ * it are both part of a word. A break after a hyphen or a space is where wrapping is meant to break.
+ */
+internal fun TextLayoutResult.splitsWord(): Boolean {
+    val text = layoutInput.text.text
+    return (0 until lineCount - 1).any { row ->
+        val end = getLineEnd(row)
+        end in 1 until text.length && text[end - 1].isLetterOrDigit() && text[end].isLetterOrDigit()
+    }
 }
 
 /**
@@ -237,6 +262,7 @@ internal object SectionFitCache {
         val availableWidth: Int,
         val effectiveHeight: Int,
         val probe: IntSize,
+        val softWrap: Boolean = false,
     )
 
     private val entries = object : LinkedHashMap<Key, Int>(CAPACITY, LOAD_FACTOR, true) {
