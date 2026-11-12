@@ -1,7 +1,6 @@
 package org.churchpresenter.presenter
 
-import org.churchpresenter.sharedui.utils.Utils.parseHexColor
-import androidx.compose.ui.graphics.Color
+import org.churchpresenter.sharedui.utils.VoiceColors
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
@@ -71,8 +70,8 @@ internal class SongSlide(
     val titleColor get() = frame.titleColor
     val lyricsColor get() = frame.lyricsColor
 
-    /** The second voice's colour on the lyrics — none on a key, which is a matte drawn all white. */
-    val secondVoiceColor: Color? get() = if (isKey) null else parseHexColor(ss.layoutExtras.secondVoiceColor)
+    /** The other voices' colours on the lyrics — none on a key, which is a matte drawn all white. */
+    val voiceColors: VoiceColors? get() = if (isKey) null else ss.layoutExtras.voiceColors()
     val chordColor get() = frame.chordColor
     val laColor get() = frame.laColor
     val laFontFamily get() = frame.laFontFamily

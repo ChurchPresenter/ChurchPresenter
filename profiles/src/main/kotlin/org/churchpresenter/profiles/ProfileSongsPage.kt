@@ -276,7 +276,7 @@ private fun SongTextGroup(
                 },
                 extraBasic = {
                     SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong)
-                    if (styleElement == SongStyleElement.LYRICS) SecondVoiceColorRow(song, updateSong)
+                    if (styleElement == SongStyleElement.LYRICS) VoiceColorRows(song, updateSong)
                 },
             )
         } }

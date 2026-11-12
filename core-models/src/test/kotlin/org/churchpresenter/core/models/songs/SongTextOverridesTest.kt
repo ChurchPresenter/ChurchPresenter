@@ -60,10 +60,11 @@ class SongTextOverridesTest {
             size: 120%
             color: #A8D8FF
             voice2: #FF8A65
+            voice3: #4EA72E
             """.trimIndent(),
         )
 
-        assertEquals(SongTextOverrides("Georgia", 120, "#A8D8FF", "#FF8A65"), song!!.textOverrides)
+        assertEquals(SongTextOverrides("Georgia", 120, "#A8D8FF", "#FF8A65", "#4EA72E"), song!!.textOverrides)
     }
 
     @Test
@@ -80,6 +81,7 @@ class SongTextOverridesTest {
             size: big
             color: red
             voice2: #12345
+            voice3: green
             """.trimIndent(),
         )
 
@@ -124,7 +126,7 @@ class SongTextOverridesTest {
 
     @Test
     fun `every override survives a write and a read`() {
-        val look = SongTextOverrides("Georgia", 130, "#A8D8FF", "#FF8A65")
+        val look = SongTextOverrides("Georgia", 130, "#A8D8FF", "#FF8A65", "#4EA72E")
 
         val read = parser.parseSongContent(written(blank().copy(textOverrides = look)))
 

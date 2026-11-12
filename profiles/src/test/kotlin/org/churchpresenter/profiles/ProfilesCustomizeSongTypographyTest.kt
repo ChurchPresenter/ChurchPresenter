@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.DEFAULT_SECOND_VOICE_COLOR
+import org.churchpresenter.settings.DEFAULT_THIRD_VOICE_COLOR
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
@@ -91,6 +92,18 @@ class ProfilesCustomizeSongTypographyTest {
             recolor(DEFAULT_SECOND_VOICE_COLOR, "#FF8A65")
 
             assertEquals("#FF8A65", get().song().layoutExtras.secondVoiceColor)
+        }
+    }
+
+    /** The colour a song's `3>` lines and words are drawn in, on the row under the second voice's. */
+    @Test
+    fun `the lyrics carry a third voice colour, and it writes`() {
+        profilesTab(output()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            recolor(DEFAULT_THIRD_VOICE_COLOR, "#4EA72E")
+
+            assertEquals("#4EA72E", get().song().layoutExtras.thirdVoiceColor)
+            assertEquals(DEFAULT_SECOND_VOICE_COLOR, get().song().layoutExtras.secondVoiceColor)
         }
     }
 

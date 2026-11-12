@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 
 /**
  * One song's own changes to how its lyrics look, over whatever the output's profile says: its
- * font, its size, its text colour and its second voice's colour. Blank or 100% means the profile
+ * font, its size, its text colour and its second and third voices' colours. Blank or 100% means the profile
  * decides, so a song that sets nothing looks exactly as every other song does.
  *
- * Written in the `.song` header as `font:`, `size:`, `color:` and `voice2:` — see
+ * Written in the `.song` header as `font:`, `size:`, `color:`, `voice2:` and `voice3:` — see
  * [songTextOverridesFrom] and [songTextOverrideFields].
  */
 @Serializable
@@ -20,6 +20,8 @@ data class SongTextOverrides(
     val color: String = "",
     /** A `#RRGGBB` colour for the second voice, or blank for the profile's. */
     val secondVoiceColor: String = "",
+    /** A `#RRGGBB` colour for the third voice, or blank for the profile's. */
+    val thirdVoiceColor: String = "",
 ) {
     /** True when the song changes anything at all. */
     val isCustom: Boolean get() = this != SongTextOverrides()
@@ -39,9 +41,11 @@ internal const val SONG_FONT_KEY = "font"
 internal const val SONG_SIZE_KEY = "size"
 internal const val SONG_COLOR_KEY = "color"
 internal const val SONG_VOICE2_KEY = "voice2"
+internal const val SONG_VOICE3_KEY = "voice3"
 
 /** Every header key [songTextOverridesFrom] reads. */
-internal val SONG_TEXT_OVERRIDE_KEYS = setOf(SONG_FONT_KEY, SONG_SIZE_KEY, SONG_COLOR_KEY, SONG_VOICE2_KEY)
+internal val SONG_TEXT_OVERRIDE_KEYS =
+    setOf(SONG_FONT_KEY, SONG_SIZE_KEY, SONG_COLOR_KEY, SONG_VOICE2_KEY, SONG_VOICE3_KEY)
 
 private val HEX_COLOR = Regex("^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$")
 
@@ -55,9 +59,13 @@ fun songTextOverridesFrom(fields: Map<String, String>): SongTextOverrides = Song
     sizePercent = fields[SONG_SIZE_KEY]?.trim()?.removeSuffix("%")?.trim()?.toIntOrNull()
         ?.coerceIn(SongTextOverrides.MIN_SIZE_PERCENT, SongTextOverrides.MAX_SIZE_PERCENT)
         ?: SongTextOverrides.FULL_SIZE_PERCENT,
-    color = fields[SONG_COLOR_KEY].orEmpty().trim().takeIf { HEX_COLOR.matches(it) }.orEmpty(),
-    secondVoiceColor = fields[SONG_VOICE2_KEY].orEmpty().trim().takeIf { HEX_COLOR.matches(it) }.orEmpty(),
+    color = hexColorField(fields, SONG_COLOR_KEY),
+    secondVoiceColor = hexColorField(fields, SONG_VOICE2_KEY),
+    thirdVoiceColor = hexColorField(fields, SONG_VOICE3_KEY),
 )
+
+private fun hexColorField(fields: Map<String, String>, key: String): String =
+    fields[key].orEmpty().trim().takeIf { HEX_COLOR.matches(it) }.orEmpty()
 
 /** The header lines [overrides] is written as, in a fixed order; none for what the profile decides. */
 fun songTextOverrideFields(overrides: SongTextOverrides): List<Pair<String, String>> = buildList {
@@ -65,4 +73,5 @@ fun songTextOverrideFields(overrides: SongTextOverrides): List<Pair<String, Stri
     if (overrides.sizePercent != SongTextOverrides.FULL_SIZE_PERCENT) add(SONG_SIZE_KEY to "${overrides.sizePercent}%")
     if (overrides.color.isNotBlank()) add(SONG_COLOR_KEY to overrides.color)
     if (overrides.secondVoiceColor.isNotBlank()) add(SONG_VOICE2_KEY to overrides.secondVoiceColor)
+    if (overrides.thirdVoiceColor.isNotBlank()) add(SONG_VOICE3_KEY to overrides.thirdVoiceColor)
 }

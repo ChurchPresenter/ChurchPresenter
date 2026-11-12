@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -22,6 +23,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import org.churchpresenter.sharedui.utils.VoiceColors
+import org.churchpresenter.sharedui.utils.VoicedRange
+import org.churchpresenter.songchords.SecondVoice
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFontFamilyResolver
@@ -80,9 +84,8 @@ private data class SlotRender(
     val shadow: Boolean,
     val shadowColor: Color,
     val shadowOffset: Offset,
-    /** Where the second voice's words sit — null when the slot has none to colour. */
-    val voice: BandVoice? = null,
-    val voiceColor: Color = color,
+    /** Where each other voice's words sit, and its colour — empty when the slot has none to colour. */
+    val voices: List<BandVoice> = emptyList(),
     /**
      * What goes before each of the lines in [text] when they are drawn as whole lines: the player
      * is told to draw them from the left, and this puts each where [justify] would (see
@@ -103,8 +106,8 @@ internal data class BandSlotStyle(
     val shadowColor: Color,
     val shadowSizePercent: Int,
     val shadowOpacityPercent: Int,
-    /** What a song's second voice is drawn in; the text's own colour where there is none. */
-    val secondVoiceColor: Color = color,
+    /** What a song's second and third voices are drawn in; the text's own colour where there is none. */
+    val voiceColors: VoiceColors = VoiceColors(color, color),
 )
 
 internal fun justifyOf(alignment: String): TextJustify = when (alignment) {
@@ -120,13 +123,13 @@ private fun BandTextAlign.toJustify(): TextJustify = when (this) {
 }
 
 /**
- * A slot's text and the typography it is set in, and the ranges of [text] a song's second voice
- * sings — drawn in [BandSlotStyle.secondVoiceColor] by the band's voice pass.
+ * A slot's text and the typography it is set in, and the ranges of [text] a song's other voices
+ * sing — drawn in [BandSlotStyle.voiceColors] by the band's voice passes.
  */
 internal data class BandSlotText(
     val text: String,
     val style: BandSlotStyle,
-    val voiceRanges: List<IntRange> = emptyList(),
+    val voiceRanges: List<VoicedRange> = emptyList(),
 )
 
 /**
@@ -276,7 +279,9 @@ private fun BandLayer(
             val voiceRanges = if (lead < 0) {
                 emptyList()
             } else {
-                slots[name]?.voiceRanges.orEmpty().map { (it.first + lead)..(it.last + lead) }
+                slots[name]?.voiceRanges.orEmpty().map {
+                    it.copy(range = (it.range.first + lead)..(it.range.last + lead))
+                }
             }
             val render = remember(effectiveStyle, text, geometry, measurer, voiceRanges) {
                 layoutSlot(BandSlotText(text, effectiveStyle, voiceRanges), geometry, measurer)
@@ -328,44 +333,58 @@ private fun BandLayer(
             colorFilter = colorFilter,
             modifier = Modifier.fillMaxSize(),
         )
-        // Composed only for a page that has a second voice to colour — see BandSecondVoice.kt.
-        if (renders.values.any { it.value.voice != null }) {
-            VoicePass(template, composition, renders, progress, tickerState, groupsText, contentScale, colorFilter)
-        }
+        // One pass per voice, composed only for a page that has that voice to colour — see
+        // BandVoiceLayout.kt.
+        SecondVoice.VOICES.filter { v -> renders.values.any { r -> r.value.voices.any { it.voice == v } } }
+            .forEach { v ->
+                key(v) {
+                    VoicePass(
+                        VoicePassScene(template, composition, renders, progress, tickerState, groupsText),
+                        v,
+                        contentScale,
+                        colorFilter,
+                    )
+                }
+            }
     }
 }
 
+/** What every voice pass draws from: the band's template, its playback and its laid-out slots. */
+private class VoicePassScene(
+    val template: BibleLottieTemplate,
+    val composition: LottieComposition?,
+    val renders: Map<String, State<SlotRender>>,
+    val progress: () -> Float,
+    val tickerState: State<Float>,
+    val groupsText: Boolean,
+)
+
 /**
- * The band's text once more, in each slot's second-voice colour with everything else hidden, cut
- * to where the second voice's words sit — see BandSecondVoice.kt.
+ * The band's text once more, in each slot's [voice] colour with everything else hidden, cut to
+ * where that voice's words sit — see BandVoiceLayout.kt.
  */
 @OptIn(ExperimentalCompottieApi::class)
 @Composable
-private fun VoicePass(
-    template: BibleLottieTemplate,
-    composition: LottieComposition?,
-    renders: Map<String, State<SlotRender>>,
-    progress: () -> Float,
-    tickerState: State<Float>,
-    groupsText: Boolean,
-    contentScale: ContentScale,
-    colorFilter: ColorFilter?,
-) {
+private fun VoicePass(scene: VoicePassScene, voice: Int, contentScale: ContentScale, colorFilter: ColorFilter?) {
+    val template = scene.template
+    val renders = scene.renders
+    val progress = scene.progress
+    val tickerState = scene.tickerState
     val dynamic: LottieDynamicProperties = rememberLottieDynamicProperties(template, renders.keys) {
         template.layerNames
             // A matte is never drawn itself; hiding one would uncover or drop the text it cuts.
             .filter { it !in renders.keys && !it.endsWith(BandLayerNames.MATTE_SUFFIX) }
             .forEach { name -> layer(name) { hidden { true } } }
         renders.forEach { (name, state) ->
-            textLayer(name) { bindSlot(template, state, tickerState, shadow = false, voice = true) }
+            textLayer(name) { bindSlot(template, state, tickerState, shadow = false, voice = voice) }
         }
     }
     val painter = rememberLottiePainter(
-        composition = composition,
+        composition = scene.composition,
         progress = progress,
         fontManager = LottieFonts,
         dynamicProperties = dynamic,
-        enableTextGrouping = groupsText,
+        enableTextGrouping = scene.groupsText,
     )
     Image(
         painter = painter,
@@ -378,11 +397,11 @@ private fun VoicePass(
                 val frame = progress() * template.totalFrames
                 val shapes = renders.flatMap { (name, state) ->
                     val r = state.value
-                    val voice = r.voice ?: return@flatMap emptyList()
+                    val sung = r.voices.firstOrNull { it.voice == voice } ?: return@flatMap emptyList()
                     val shift =
                         if (r.ticker) tickerPosition(template, r, tickerState.value) - r.position else Offset.Zero
                     val matrix = template.textMotions[name]?.matrixAt(frame)
-                    voiceShapes(voice.rectsFor(revealedText(template, r.text, frame)), shift, matrix)
+                    voiceShapes(sung.rectsFor(revealedText(template, r.text, frame)), shift, matrix)
                 }
                 drawCutToVoices(template, shapes, contentScale)
             },
@@ -451,20 +470,28 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
     val top = box.y + ((box.h - blockHeight) / 2f).coerceAtLeast(0f)
     val shadowScale = style.shadowSizePercent / PERCENT
     val shadowPx = SHADOW_OFFSET_PX * pxPerPoint * shadowScale
-    val voiced = slot.voiceRanges.isNotEmpty() && style.secondVoiceColor != style.color
-    val voice = if (!voiced) null else BandVoice(
-        BandVoiceLayout(
-            text = text,
-            voiceRanges = slot.voiceRanges,
-            lines = if (isTicker) listOf(text) else fitted.lines,
-            justify = if (isTicker) TextJustify.Left else style.justify,
-            box = box,
-            top = top,
-            lineHeight = lineHeight,
-            lineLefts = placed?.lefts,
-        ),
-        voiceRunWidth(shaped, text, scale) { c -> charWidth(c) + trackingPx },
-    )
+    val voiceLines = if (isTicker) listOf(text) else fitted.lines
+    val runWidth = voiceRunWidth(shaped, text, scale) { c -> charWidth(c) + trackingPx }
+    val voices = SecondVoice.VOICES.mapNotNull { v ->
+        val color = style.voiceColors.of(v) ?: return@mapNotNull null
+        val ranges = slot.voiceRanges.filter { it.voice == v }.map { it.range }
+        if (ranges.isEmpty() || color == style.color) return@mapNotNull null
+        BandVoice(
+            v,
+            color,
+            BandVoiceLayout(
+                text = text,
+                voiceRanges = ranges,
+                lines = voiceLines,
+                justify = if (isTicker) TextJustify.Left else style.justify,
+                box = box,
+                top = top,
+                lineHeight = lineHeight,
+                lineLefts = placed?.lefts,
+            ),
+            runWidth,
+        )
+    }
     return SlotRender(
         text = if (isTicker) text else fitted.lines.joinToString("\n"),
         fontSize = fitted.fontSize,
@@ -480,8 +507,7 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
         shadow = style.shadow,
         shadowColor = style.shadowColor.copy(alpha = style.shadowOpacityPercent / PERCENT),
         shadowOffset = Offset(shadowPx, shadowPx),
-        voice = voice,
-        voiceColor = style.secondVoiceColor,
+        voices = voices,
         pads = placed?.pads.orEmpty(),
     )
 }
@@ -493,7 +519,7 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     state: State<SlotRender>,
     ticker: State<Float>,
     shadow: Boolean,
-    voice: Boolean = false,
+    voice: Int? = null,
 ) {
     val textIn = template.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
     val textOut = template.segment(BibleLottieTemplate.SEGMENT_TEXT_OUT)
@@ -506,7 +532,7 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     fillColor {
         when {
             shadow -> state.value.shadowColor
-            voice -> state.value.voiceColor
+            voice != null -> state.value.voices.firstOrNull { it.voice == voice }?.color ?: state.value.color
             else -> state.value.color
         }
     }

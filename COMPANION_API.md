@@ -348,8 +348,8 @@ a song with no number). Optional query params: `songbook=` narrows to one songbo
 matches by title (any case), and `id=N` looks the song up by its index in the library instead.
 `404 {"error":"song not found"}` when nothing matches.
 
-The `lines` are the words as sung: a song's second-voice markup (`2>`, `2>(…)`) and its directives
-(`[voice: 2]`, `[background: …]`) are taken out. `markup=true` sends the lines as the song file
+The `lines` are the words as sung: a song's voice markup (`2>`, `2>(…)`, `3>`, `3>(…)`) and its directives
+(`[voice: 2]`, `[voice: 3]`, `[background: …]`) are taken out. `markup=true` sends the lines as the song file
 writes them instead, which is what an Instance Link follower asks for.
 
 ```bash

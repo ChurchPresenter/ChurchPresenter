@@ -152,6 +152,14 @@ class ProfilesTabScreenshotTest {
     @Test
     fun `the Songs tab`() = shoot("style_songs") { tab(CustomizePane.SONGS) }
 
+    /** The lyrics' voice colours: the second voice's row and the third voice's under it. */
+    @Test
+    fun `the Songs tab's voice colour rows`() = shoot("songs_voice_colors") {
+        tab(CustomizePane.SONGS)
+        onNodeWithText("a second group answering", substring = true).performScrollTo()
+        waitForIdle()
+    }
+
     @Test
     fun `the Background tab`() = shoot("style_background") { tab(CustomizePane.BACKGROUND) }
 

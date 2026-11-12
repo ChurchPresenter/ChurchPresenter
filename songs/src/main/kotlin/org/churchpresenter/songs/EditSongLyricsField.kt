@@ -37,6 +37,7 @@ import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.songchords.ChordSheetImporter
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.semantic
 
 private val LyricsFieldShape = AppShape(10.dp)
 
@@ -51,8 +52,18 @@ internal fun rememberLyricsHighlight(): VisualTransformation {
     val chord = MaterialTheme.colorScheme.primary
     val divider = MaterialTheme.colorScheme.onSurfaceVariant
     val voice = MaterialTheme.colorScheme.tertiary
-    return remember(verse, chorus, chord, divider, voice) {
-        LyricsHighlighter(LyricsInks(verse = verse, chorus = chorus, chord = chord, divider = divider, voice = voice))
+    val thirdVoice = MaterialTheme.semantic.success
+    return remember(verse, chorus, chord, divider, voice, thirdVoice) {
+        LyricsHighlighter(
+            LyricsInks(
+                verse = verse,
+                chorus = chorus,
+                chord = chord,
+                divider = divider,
+                voice = voice,
+                thirdVoice = thirdVoice,
+            ),
+        )
     }
 }
 

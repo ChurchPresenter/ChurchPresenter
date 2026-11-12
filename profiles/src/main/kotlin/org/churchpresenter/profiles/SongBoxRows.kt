@@ -9,6 +9,8 @@ import org.churchpresenter.strings.generated.resources.profile_box
 import org.churchpresenter.strings.generated.resources.profile_box_pick_language
 import org.churchpresenter.strings.generated.resources.profile_second_voice_color
 import org.churchpresenter.strings.generated.resources.profile_second_voice_color_sub
+import org.churchpresenter.strings.generated.resources.profile_third_voice_color
+import org.churchpresenter.strings.generated.resources.profile_third_voice_color_sub
 import org.churchpresenter.presenter.boxedPerLanguage
 import org.churchpresenter.presenter.songBoxKey
 import org.churchpresenter.presenter.titleSlideBoxKey
@@ -199,9 +201,12 @@ internal fun SongSettings.offersPosition(element: SongStyleElement, lowerThird: 
     return placed && !elsewhere && !cornered
 }
 
-/** The colour a song's second voice -- its `2>` lines and words -- is drawn in on this profile. */
+/**
+ * The colours a song's second and third voices -- its `2>` and `3>` lines and words -- are drawn in
+ * on this profile, one row each.
+ */
 @Composable
-internal fun SecondVoiceColorRow(song: SongSettings, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
+internal fun VoiceColorRows(song: SongSettings, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
     SettingsRow(
         Res.string.profile_second_voice_color,
         sub = stringResource(Res.string.profile_second_voice_color_sub),
@@ -211,6 +216,16 @@ internal fun SecondVoiceColorRow(song: SongSettings, updateSong: ((SongSettings)
             updateSong { it.copy(layoutExtras = it.layoutExtras.copy(secondVoiceColor = v)) }
         })
     }
+    SettingsRow(
+        Res.string.profile_third_voice_color,
+        sub = stringResource(Res.string.profile_third_voice_color_sub),
+        paths = SONG_THIRD_VOICE_PATHS,
+    ) {
+        RowColor(song.layoutExtras.thirdVoiceColor, { v ->
+            updateSong { it.copy(layoutExtras = it.layoutExtras.copy(thirdVoiceColor = v)) }
+        })
+    }
 }
 
 private val SONG_SECOND_VOICE_PATHS = listOf("songSettings.layoutExtras.secondVoiceColor")
+private val SONG_THIRD_VOICE_PATHS = listOf("songSettings.layoutExtras.thirdVoiceColor")

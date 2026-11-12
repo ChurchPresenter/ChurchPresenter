@@ -86,7 +86,8 @@ fun isLyricDirective(line: String): Boolean =
 
 /**
  * [lines] as a slide built straight from a song shows them: directives gone, and the lines of a
- * `[voice: 2]` block written as `2>` lines, a block ending at `[voice: 1]` or the next header.
+ * `[voice: 2]` or `[voice: 3]` block written as `2>` or `3>` lines, a block ending at `[voice: 1]`
+ * or the next header.
  */
 fun presentableSongLines(lines: List<String>): List<String> {
     var voice = SecondVoice.MAIN
@@ -96,7 +97,7 @@ fun presentableSongLines(lines: List<String>): List<String> {
             switched != null -> { voice = switched; null }
             ChordTransposer.isBackgroundDirective(line) -> null
             isHeaderLine(line) -> { voice = SecondVoice.MAIN; line }
-            voice == SecondVoice.SECOND && line.isNotBlank() -> SecondVoice.asSecondVoiceLine(line)
+            voice != SecondVoice.MAIN && line.isNotBlank() -> SecondVoice.asVoiceLine(line, voice)
             else -> line
         }
     }

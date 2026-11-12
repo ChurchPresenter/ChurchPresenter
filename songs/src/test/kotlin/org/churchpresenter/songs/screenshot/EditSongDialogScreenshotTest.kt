@@ -212,6 +212,18 @@ class EditSongDialogScreenshotTest {
     @Test
     fun `a song with a second voice`() = shoot("second_voice", song = secondVoice())
 
+    /** A liturgy with `3>` answers beside `2>` ones, each voice tinted in its own ink. */
+    @Test
+    fun `a song with a third voice`() = shoot("third_voice", song = thirdVoice())
+
+    /** A line at a time on a liturgy: the question with both its voice-2 and voice-3 answers. */
+    @Test
+    fun `the output of a third voice a line at a time`() =
+        shoot("third_voice_output", song = thirdVoice(), appSettings = OUTPUTS) {
+            onNodeWithText("1 Line").performClick()
+            waitForIdle()
+        }
+
     /** The Output tab a verse at a time: the slide under the cursor on full screen and on the band. */
     @Test
     fun `the output a verse at a time`() = shoot("output_verse", song = secondVoice(), appSettings = OUTPUTS)
@@ -349,6 +361,21 @@ class EditSongDialogScreenshotTest {
             "Praise the Lord, praise the Lord",
             "[voice: 2]",
             "Let the earth hear His voice",
+        ),
+    )
+
+    private fun thirdVoice() = amazingGrace().copy(
+        title = "Liturgy",
+        lyrics = listOf(
+            "[Verse 1]",
+            "The Lord be with you.",
+            "2>And also with you.",
+            "3>Lift up your hearts.",
+            "Lord, have mercy. 2>(Christ, have mercy.) 3>(Lord, have mercy.)",
+            "",
+            "[Verse 2]",
+            "[voice: 3]",
+            "Amen. Amen.",
         ),
     )
 

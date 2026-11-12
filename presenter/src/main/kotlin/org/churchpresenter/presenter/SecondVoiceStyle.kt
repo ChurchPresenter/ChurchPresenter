@@ -1,7 +1,10 @@
 package org.churchpresenter.presenter
 
 import org.churchpresenter.core.models.songs.SongTextOverrides
+import org.churchpresenter.settings.SongLayoutExtras
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.VoiceColors
 import kotlin.math.roundToInt
 
 /**
@@ -24,6 +27,11 @@ internal fun SongSettings.withTextOverrides(overrides: SongTextOverrides): SongS
         lyricsLowerThirdColor = overrides.color.ifBlank { lyricsLowerThirdColor },
         layoutExtras = layoutExtras.copy(
             secondVoiceColor = overrides.secondVoiceColor.ifBlank { layoutExtras.secondVoiceColor },
+            thirdVoiceColor = overrides.thirdVoiceColor.ifBlank { layoutExtras.thirdVoiceColor },
         ),
     )
 }
+
+/** The colours the second and third voices are drawn in, as these settings pick them. */
+internal fun SongLayoutExtras.voiceColors(): VoiceColors =
+    VoiceColors(parseHexColor(secondVoiceColor), parseHexColor(thirdVoiceColor))
