@@ -1,5 +1,7 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.theme.semantic
+import org.churchpresenter.songchords.SecondVoice
 import androidx.compose.foundation.ExperimentalFoundationApi
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
@@ -66,6 +68,8 @@ import org.churchpresenter.strings.generated.resources.song_syntax_chord_hint
 import org.churchpresenter.strings.generated.resources.song_translation_label
 import org.churchpresenter.strings.generated.resources.song_insert_second_voice
 import org.churchpresenter.strings.generated.resources.song_insert_second_voice_hint
+import org.churchpresenter.strings.generated.resources.song_insert_third_voice
+import org.churchpresenter.strings.generated.resources.song_insert_third_voice_hint
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.churchpresenter.theme.elevationPalette
@@ -210,7 +214,12 @@ private fun SectionMarkerChips(state: EditSongState) {
         }
         HoverLabel(stringResource(Res.string.song_insert_second_voice_hint)) {
             InsertChip(stringResource(Res.string.song_insert_second_voice)) {
-                state.setPaneValue(toggleSecondVoice(state.paneValue))
+                state.setPaneValue(toggleVoice(state.paneValue, SecondVoice.SECOND))
+            }
+        }
+        HoverLabel(stringResource(Res.string.song_insert_third_voice_hint)) {
+            InsertChip(stringResource(Res.string.song_insert_third_voice)) {
+                state.setPaneValue(toggleVoice(state.paneValue, SecondVoice.THIRD))
             }
         }
     }
@@ -364,6 +373,7 @@ private fun SyntaxLegend(modifier: Modifier = Modifier) {
         LegendChip("[G]lyric", MaterialTheme.colorScheme.primary)
         LegendChip("2>line", MaterialTheme.colorScheme.tertiary)
         LegendChip("2>(words)", MaterialTheme.colorScheme.tertiary)
+        LegendChip("3>line", MaterialTheme.semantic.success)
         Text(
             text = stringResource(Res.string.song_syntax_chord_hint),
             style = MaterialTheme.typography.bodySmall,

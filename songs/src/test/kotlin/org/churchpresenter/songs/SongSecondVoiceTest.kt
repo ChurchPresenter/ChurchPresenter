@@ -1,5 +1,6 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.songchords.SecondVoice
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +37,7 @@ class SongSecondVoiceTest {
         val text = "Was blind, but now I see"
         val start = text.indexOf("now")
 
-        val out = toggleSecondVoice(value(text, start, text.length))
+        val out = toggleVoice(value(text, start, text.length), SecondVoice.SECOND)
 
         assertEquals("Was blind, but 2>(now I see)", out.text)
         assertEquals("now I see", out.text.substring(out.selection.start, out.selection.end))
@@ -47,11 +48,11 @@ class SongSecondVoiceTest {
         val text = "Amazing grace\nThat saved a wretch\nI once was lost"
         val caret = text.indexOf("saved")
 
-        val marked = toggleSecondVoice(value(text, caret))
+        val marked = toggleVoice(value(text, caret), SecondVoice.SECOND)
         assertEquals("Amazing grace\n2>That saved a wretch\nI once was lost", marked.text)
         assertEquals(caret + 2, marked.selection.start)
 
-        val unmarked = toggleSecondVoice(marked)
+        val unmarked = toggleVoice(marked, SecondVoice.SECOND)
         assertEquals(text, unmarked.text)
         assertEquals(caret, unmarked.selection.start)
     }
@@ -60,7 +61,7 @@ class SongSecondVoiceTest {
     fun `a selection across lines marks every line in it but the blank ones`() {
         val text = "one\n\ntwo\nthree"
 
-        val out = toggleSecondVoice(value(text, 1, text.indexOf("two") + 1))
+        val out = toggleVoice(value(text, 1, text.indexOf("two") + 1), SecondVoice.SECOND)
 
         assertEquals("2>one\n\n2>two\nthree", out.text)
         assertEquals(0, out.selection.start, "the selection covers the lines it marked")
@@ -68,14 +69,14 @@ class SongSecondVoiceTest {
 
     @Test
     fun `lines that are all marked are unmarked together`() {
-        val out = toggleSecondVoice(value("2>one\n  2> two", 0, 12))
+        val out = toggleVoice(value("2>one\n  2> two", 0, 12), SecondVoice.SECOND)
 
         assertEquals("one\ntwo", out.text)
     }
 
     @Test
     fun `a blank selection on one line marks the line rather than wrapping nothing`() {
-        assertEquals("2>a  b", toggleSecondVoice(value("a  b", 1, 3)).text)
+        assertEquals("2>a  b", toggleVoice(value("a  b", 1, 3), SecondVoice.SECOND).text)
     }
 
     // ── [voice: n] blocks into slides ───────────────────────────────────────────
@@ -113,6 +114,42 @@ class SongSecondVoiceTest {
 
         assertEquals(listOf("[G]one", "[C]two"), slides[0].chordLines)
         assertEquals(listOf("one", "2>two"), slides[0].lines)
+    }
+
+    // ── The third voice ─────────────────────────────────────────────────────────
+
+    @Test
+    fun `Voice 3 wraps selected words in its own mark`() {
+        val text = "Lord, have mercy"
+        val out = toggleVoice(value(text, 6, text.length), SecondVoice.THIRD)
+
+        assertEquals("Lord, 3>(have mercy)", out.text)
+        assertEquals("have mercy", out.text.substring(out.selection.min, out.selection.max))
+    }
+
+    @Test
+    fun `Voice 3 on a voice-2 line moves it to voice 3, and again takes the mark off`() {
+        val moved = toggleVoice(value("2>Amen", 0), SecondVoice.THIRD)
+        assertEquals("3>Amen", moved.text)
+
+        assertEquals("Amen", toggleVoice(moved, SecondVoice.THIRD).text)
+    }
+
+    @Test
+    fun `a voice-3 block's lines become voice-3 lines`() {
+        val slides = lyricSlidesOf(listOf("[Verse 1]", "Question", "[voice: 3]", "Answer"), "Song", "1")
+
+        assertEquals(listOf("Question", "3>Answer"), slides[0].lines)
+    }
+
+    @Test
+    fun `Next steps over a line and both of its answers together`() {
+        val vm = viewModelOn(
+            grace.copy(lyrics = listOf("[Verse 1]", "Lord be with you", "2>And with you", "3>Lift up", "Amen")),
+        )
+
+        assertTrue(vm.navigateNextLine())
+        assertEquals(3, vm.selectedLineIndex.value, "the voice-2 and voice-3 answers show with line 0")
     }
 
     // ── The slide under the caret ───────────────────────────────────────────────

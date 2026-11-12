@@ -43,6 +43,7 @@ class EditSongOutputPaneTest {
         const val LARGER = "Larger"
         const val SMALLER = "Smaller"
         const val VOICE_2 = "Voice 2"
+        const val VOICE_3 = "Voice 3"
         const val LOOK = "This song's look"
     }
 
@@ -216,22 +217,32 @@ class EditSongOutputPaneTest {
         onNodeWithContentDescription(Label.SMALLER).assertIsNotEnabled()
     }
 
+    private val ownLook = SongTextOverrides(
+        sizePercent = 90,
+        color = "#A8D8FF",
+        secondVoiceColor = "#FF8A65",
+        thirdVoiceColor = "#4EA72E",
+    )
+
     @Test
     fun `each of the song's own values has a reset, and each reset drops only its own`() = editor(
-        song = song(SongTextOverrides("Georgia", sizePercent = 90, color = "#A8D8FF", secondVoiceColor = "#FF8A65")),
+        song = song(ownLook.copy(font = "Georgia")),
     ) { saved ->
         reset("font")
         tap(Label.SAVE)
-        assertEquals(
-            SongTextOverrides(sizePercent = 90, color = "#A8D8FF", secondVoiceColor = "#FF8A65"),
-            saved()?.textOverrides,
-        )
+        assertEquals(ownLook, saved()?.textOverrides)
+
+        reset("voice3")
+        tap(Label.SAVE)
+        assertEquals("", saved()?.textOverrides?.thirdVoiceColor)
+        assertEquals("#FF8A65", saved()?.textOverrides?.secondVoiceColor, "the voice-2 colour stays")
 
         reset("color")
         reset("voice2")
         tap(Label.SAVE)
         assertEquals(SongTextOverrides(sizePercent = 90), saved()?.textOverrides)
         onNodeWithTag(SONG_LOOK_RESET_TAG + "voice2").assertDoesNotExist()
+        onNodeWithTag(SONG_LOOK_RESET_TAG + "voice3").assertDoesNotExist()
     }
 
     // ── The Voice 2 button ──────────────────────────────────────────────────────
@@ -250,8 +261,18 @@ class EditSongOutputPaneTest {
     }
 
     @Test
+    fun `Voice 3 marks the cursor's line in the third voice`() = editor { saved ->
+        caretAt(body.indexOf("once"))
+
+        tap(Label.VOICE_3)
+        tap(Label.SAVE)
+        assertEquals(listOf("[Verse 1]", "Amazing grace", "2>That saved", "3>I once was lost"), saved()?.lyrics)
+    }
+
+    @Test
     fun `the voice markup is in the legend`() = editor {
         onNodeWithText("2>line").assertExists()
         onNodeWithText("2>(words)").assertExists()
+        onNodeWithText("3>line").assertExists()
     }
 }

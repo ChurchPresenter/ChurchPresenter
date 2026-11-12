@@ -41,6 +41,7 @@ import org.churchpresenter.strings.generated.resources.song_look_sub
 import org.churchpresenter.strings.generated.resources.song_look_title
 import org.churchpresenter.strings.generated.resources.song_look_use_profile
 import org.churchpresenter.strings.generated.resources.song_look_voice2
+import org.churchpresenter.strings.generated.resources.song_look_voice3
 import org.churchpresenter.theme.AppShape
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -130,6 +131,18 @@ internal fun SongLookCard(state: EditSongState, appSettings: AppSettings, profil
             ColorPickerField(
                 color = own.secondVoiceColor.ifBlank { song.layoutExtras.secondVoiceColor },
                 onColorChange = { v -> edit { it.copy(secondVoiceColor = v) } },
+                modifier = Modifier.width(FIELD_WIDTH).height(FIELD_HEIGHT),
+            )
+        }
+        LookRow(
+            Res.string.song_look_voice3,
+            custom = own.thirdVoiceColor.isNotBlank(),
+            onReset = { edit { it.copy(thirdVoiceColor = "") } },
+            key = "voice3",
+        ) {
+            ColorPickerField(
+                color = own.thirdVoiceColor.ifBlank { song.layoutExtras.thirdVoiceColor },
+                onColorChange = { v -> edit { it.copy(thirdVoiceColor = v) } },
                 modifier = Modifier.width(FIELD_WIDTH).height(FIELD_HEIGHT),
             )
         }

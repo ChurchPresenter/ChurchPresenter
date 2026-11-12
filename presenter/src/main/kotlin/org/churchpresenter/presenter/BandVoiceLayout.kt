@@ -4,6 +4,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -14,12 +15,12 @@ import io.github.alexzhirkevich.compottie.internal.helpers.text.TextJustify
 import kotlin.math.roundToInt
 
 /*
- * A song's second voice on a Lottie band.
+ * A song's other voices on a Lottie band.
  *
  * The player draws a text layer in one colour — a range selector's colour, in the file, applies to
  * the whole layer — so a word in another colour cannot be asked of it. The band draws its text
- * twice instead: once as always, and once more in the second voice's colour with everything but
- * the text hidden, cut to where the second voice's words sit. Those places are known because the
+ * once as always, and once more per other voice on the page, in that voice's colour with
+ * everything but the text hidden, cut to where that voice's words sit. Those places are known because the
  * band lays its own text out — it wraps every line before the player sees it, measuring each
  * character in the layer's own font — so the cut follows the same arithmetic the words were set by.
  *
@@ -89,8 +90,16 @@ internal fun secondVoiceRuns(layout: BandVoiceLayout, runWidth: (String) -> Floa
     return rects
 }
 
-/** A slot's second voice: where its words sit and how wide a run of them is, to cut to at any frame. */
-internal class BandVoice(val layout: BandVoiceLayout, private val runWidth: (String) -> Float) {
+/**
+ * One of a slot's other voices — 2 or 3 — and the [color] it is drawn in: where its words sit and how
+ * wide a run of them is, to cut to at any frame.
+ */
+internal class BandVoice(
+    val voice: Int,
+    val color: Color,
+    val layout: BandVoiceLayout,
+    private val runWidth: (String) -> Float,
+) {
     /** The rectangles for [shown] — the part of the slot's text the player draws this frame. */
     fun rectsFor(shown: String): List<Rect> = secondVoiceRuns(layout.copy(lines = shown.split('\n')), runWidth)
 }

@@ -111,7 +111,7 @@ class BandSecondVoiceTest {
     fun `every override reaches full screen and the lower third`() {
         val base = SongSettings(lyricsFontSize = 60, lyricsLowerThirdFontSize = 40)
 
-        val out = base.withTextOverrides(SongTextOverrides("Georgia", 150, "#A8D8FF", "#FF8A65"))
+        val out = base.withTextOverrides(SongTextOverrides("Georgia", 150, "#A8D8FF", "#FF8A65", "#4EA72E"))
 
         assertEquals("Georgia", out.lyricsFontType)
         assertEquals("Georgia", out.lyricsLowerThirdFontType)
@@ -120,6 +120,7 @@ class BandSecondVoiceTest {
         assertEquals("#A8D8FF", out.lyricsColor)
         assertEquals("#A8D8FF", out.lyricsLowerThirdColor)
         assertEquals("#FF8A65", out.layoutExtras.secondVoiceColor)
+        assertEquals("#4EA72E", out.layoutExtras.thirdVoiceColor)
     }
 
     @Test
@@ -131,5 +132,6 @@ class BandSecondVoiceTest {
         assertEquals("Inter", out.lyricsFontType)
         assertEquals("#FFFFFF", out.lyricsColor)
         assertEquals(base.layoutExtras.secondVoiceColor, out.layoutExtras.secondVoiceColor)
+        assertEquals(base.layoutExtras.thirdVoiceColor, out.layoutExtras.thirdVoiceColor)
     }
 }

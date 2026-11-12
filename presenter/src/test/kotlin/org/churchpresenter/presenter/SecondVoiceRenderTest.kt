@@ -51,6 +51,7 @@ class SecondVoiceRenderTest {
     }
 
     private val red = "#FF0000"
+    private val blue = "#0000FF"
 
     private fun verse(vararg lines: String, look: SongTextOverrides = SongTextOverrides()) = LyricSection(
         header = "[Verse 1]",
@@ -61,7 +62,7 @@ class SecondVoiceRenderTest {
     )
 
     private fun settings(background: BackgroundSettings = BackgroundSettings()) = AppSettings(
-        songSettings = SongSettings(layoutExtras = SongLayoutExtras(secondVoiceColor = red)),
+        songSettings = SongSettings(layoutExtras = SongLayoutExtras(secondVoiceColor = red, thirdVoiceColor = blue)),
         backgroundSettings = background,
     )
 
@@ -104,6 +105,20 @@ class SecondVoiceRenderTest {
     }
 
     @Test
+    fun `a voice-3 line is drawn in the third voice's colour beside voice 2`() = runComposeUiTest {
+        draw {
+            SongPresenter(
+                lyricSection = verse("The Lord be with you", "2>And also with you", "3>Lift up your hearts"),
+                appSettings = settings(),
+            )
+        }
+
+        waitFor("the third voice is drawn in its colour") { it.count(::isBlue) }
+        assertTrue(pixels().count(::isRed) > 0, "the second voice keeps its own colour")
+        onNodeWithText("Lift up your hearts", substring = true).assertExists("the markup is not drawn")
+    }
+
+    @Test
     fun `a key output draws the second voice white`() = runComposeUiTest {
         draw {
             SongPresenter(
@@ -119,13 +134,16 @@ class SecondVoiceRenderTest {
 
     @Test
     fun `the song's own colours win over the profile's`() = runComposeUiTest {
-        val look = SongTextOverrides(color = "#00FF00", secondVoiceColor = "#0000FF")
+        val look = SongTextOverrides(color = "#00FF00", secondVoiceColor = "#0000FF", thirdVoiceColor = "#0000FF")
         draw {
-            SongPresenter(lyricSection = verse("Amazing grace", "2>That saved", look = look), appSettings = settings())
+            SongPresenter(
+                lyricSection = verse("Amazing grace", "2>That saved", "3>Amen", look = look),
+                appSettings = settings(),
+            )
         }
 
         waitFor("the song's text colour") { it.count(::isGreen) }
-        waitFor("the song's voice-2 colour") { it.count(::isBlue) }
+        waitFor("the song's voice colours") { it.count(::isBlue) }
         assertEquals(0, pixels().count(::isRed), "the profile's voice-2 colour is not used")
     }
 
@@ -166,6 +184,21 @@ class SecondVoiceRenderTest {
     }
 
     @Test
+    fun `a Lottie band draws a pass for each voice on the page`() = runComposeUiTest {
+        draw {
+            SongPresenter(
+                lyricSection = verse("Lord 2>(Christ, have mercy) 3>(Lord, have mercy)"),
+                appSettings = settings(lottieBand()),
+                isLowerThird = true,
+                displayLineIndex = 0,
+            )
+        }
+
+        waitFor("the voice-2 pass draws its words") { it.count(::isReddish) }
+        waitFor("the voice-3 pass draws its words") { it.count(::isBluish) }
+    }
+
+    @Test
     fun `a Lottie band on a key has no voice pass`() = runComposeUiTest {
         draw {
             SongPresenter(
@@ -191,6 +224,7 @@ private fun isRed(c: Color) = c.red > 0.7f && c.green < 0.3f && c.blue < 0.3f
 // A band's lines are small, and Linux smooths their edges in grey, so no pixel of a red word is
 // pure red there: red well ahead of green and blue is what marks one.
 private fun isReddish(c: Color) = c.red > 0.6f && c.red - c.green > 0.3f && c.red - c.blue > 0.3f
+private fun isBluish(c: Color) = c.blue > 0.6f && c.blue - c.red > 0.3f && c.blue - c.green > 0.3f
 private fun isGreen(c: Color) = c.green > 0.7f && c.red < 0.3f && c.blue < 0.3f
 private fun isBlue(c: Color) = c.blue > 0.7f && c.red < 0.3f && c.green < 0.3f
 private fun isWhite(c: Color) = c.red > 0.9f && c.green > 0.9f && c.blue > 0.9f

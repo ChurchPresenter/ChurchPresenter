@@ -106,6 +106,11 @@ data class SongLayoutExtras(
      */
     val secondVoiceColor: String = DEFAULT_SECOND_VOICE_COLOR,
     /**
+     * The colour a song's third voice is drawn in -- the lines and words written `3>` and `3>(…)`,
+     * a second group answering, as in a liturgy. A song's own `voice3:` wins over it.
+     */
+    val thirdVoiceColor: String = DEFAULT_THIRD_VOICE_COLOR,
+    /**
      * The Lottie template the full-screen title slide plays instead of drawing its number, title and
      * credits itself; empty, or a file that is gone, draws the title slide as it always was. The
      * template fills its `TextN` layers with the number and title and its `ReferenceN` layers with
@@ -131,6 +136,9 @@ fun SongSettings.withTitleSlideLottie(lowerThird: Boolean, path: String): SongSe
 
 /** The second voice's colour until a profile picks its own: a warm yellow that reads on dark and light. */
 const val DEFAULT_SECOND_VOICE_COLOR = "#FFD43B"
+
+/** The third voice's colour until a profile picks its own: a fresh green, set apart from the yellow. */
+const val DEFAULT_THIRD_VOICE_COLOR = "#69DB7C"
 
 /** The space between stacked languages while [SongLayoutExtras.languageGap] is not set. */
 const val DEFAULT_STACKED_LANGUAGE_GAP = 12

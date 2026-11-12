@@ -911,7 +911,10 @@
     <string name="song_look_size_up">Larger</string>
     <string name="song_look_color">Text color</string>
     <string name="song_look_voice2">Voice 2 color</string>
+    <string name="song_look_voice3">Voice 3 color</string>
     <string name="song_look_use_profile">Use the profile's</string>
+    <string name="song_insert_third_voice">Voice 3</string>
+    <string name="song_insert_third_voice_hint">Marks the selected words, or the lines the cursor is on, as the third voice. Again on marked lines takes it off.</string>
     <string name="song_insert_second_voice_hint">Marks the selected words, or the lines the cursor is on, as the second voice. Again on marked lines takes it off.</string>
     <string name="song_element_number">Number</string>
     <string name="song_element_lyrics">Lyrics</string>
@@ -2974,6 +2977,8 @@
     <string name="profile_language_gap_sub">The space between the languages, whether stacked or side by side.</string>
     <string name="profile_second_voice_color">Second voice color</string>
     <string name="profile_second_voice_color_sub">For the lines and words a song marks with 2&gt; — the part only some people sing.</string>
+    <string name="profile_third_voice_color">Third voice color</string>
+    <string name="profile_third_voice_color_sub">For the lines and words a song marks with 3&gt; — a second group answering, as in a liturgy.</string>
     <string name="profile_reference">Reference</string>
     <string name="profile_ref_after">After verse</string>
     <string name="profile_ref_above">Above verse</string>

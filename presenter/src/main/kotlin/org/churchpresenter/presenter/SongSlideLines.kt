@@ -57,7 +57,7 @@ internal fun SongSlide.LyricLine(lineIdx: Int, line: String, laStart: Int, langu
             lineProfile.transform,
             spacingEm(lineProfile.letterSpacing, lineProfile.fontSize),
             spacingEm(lineProfile.wordSpacing, lineProfile.fontSize),
-            secondVoiceColor = if (isLookAheadLine) null else secondVoiceColor,
+            voiceColors = if (isLookAheadLine) null else voiceColors,
         ),
         color = styling.color,
         style = styling.textStyle,

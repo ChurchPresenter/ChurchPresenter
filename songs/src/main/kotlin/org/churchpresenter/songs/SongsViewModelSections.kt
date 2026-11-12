@@ -101,8 +101,8 @@ internal fun lyricSlidesOf(
     // one slide of a section a background of its own.
     val backgroundFields = mutableMapOf<String, String>()
 
-    // The voice a `[voice: 2]` block puts its lines in, until `[voice: 1]` or the next header.
-    // Written onto each line as `2>`, so everything downstream reads one form of the markup.
+    // The voice a `[voice: 2]` or `[voice: 3]` block puts its lines in, until `[voice: 1]` or the
+    // next header. Written onto each line as `2>` or `3>`, so everything downstream reads one form of the markup.
     var voice = SecondVoice.MAIN
 
     // A header with no body under it is still a section — navigation steps over it and the
@@ -160,7 +160,7 @@ internal fun lyricSlidesOf(
             // The one place lyrics become presentable text, and so the one place chords have to
             // come off: everything downstream — presenter, stage monitor, companion server —
             // reads LyricSection.lines, and none of them should ever see a [G].
-            val voiced = if (voice == SecondVoice.SECOND) SecondVoice.asSecondVoiceLine(line) else line
+            val voiced = if (voice == SecondVoice.MAIN) line else SecondVoice.asVoiceLine(line, voice)
             val stripped = ChordTransposer.stripChords(voiced)
             // A line that was nothing but chords — an intro, a turnaround — has no words to
             // show, so it contributes no slide. A section left with none at all is folded into

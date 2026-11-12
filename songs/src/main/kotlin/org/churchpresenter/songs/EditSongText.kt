@@ -14,6 +14,7 @@ import org.churchpresenter.strings.generated.resources.song_title
 import org.churchpresenter.strings.generated.resources.song_translation_title
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.songchords.wholeLineVoiceOf
 
 private val SECTION_MARKER_LINE = Regex("""^[\[{][^\]}]*[\]}]$""")
 private val CHORD_MARKER = Regex("""\[[^\]]*]""")
@@ -70,22 +71,24 @@ internal fun insertSnippet(value: TextFieldValue, snippet: String, ownLine: Bool
 }
 
 /**
- * [value] with the second voice marked where the operator points:
+ * [value] with [voice] — 2 or 3 — marked where the operator points:
  * - words selected on one line are wrapped as `2>(…)`;
  * - a selection across lines, or no selection at all, marks each line it touches with `2>`, or —
- *   when every one of them is marked already — takes the mark off again.
+ *   when every one of them is marked with it already — takes the mark off again. A line marked
+ *   for the other voice is moved to this one.
  *
  * The selection follows the text it was on.
  */
-internal fun toggleSecondVoice(value: TextFieldValue): TextFieldValue {
+internal fun toggleVoice(value: TextFieldValue, voice: Int): TextFieldValue {
+    val mark = SecondVoice.markOf(voice)
     val text = value.text
     val start = value.selection.min
     val end = value.selection.max
     val firstLine = text.lastIndexOf('\n', start - 1) + 1
     val selected = text.substring(start, end)
     if (selected.isNotBlank() && '\n' !in selected) {
-        val wrapped = "${SecondVoice.MARK}($selected)"
-        val opening = SecondVoice.MARK.length + 1
+        val wrapped = "$mark($selected)"
+        val opening = mark.length + 1
         return TextFieldValue(
             text.take(start) + wrapped + text.drop(end),
             TextRange(start + opening, end + opening),
@@ -93,17 +96,18 @@ internal fun toggleSecondVoice(value: TextFieldValue): TextFieldValue {
     }
     val lastLineEnd = text.indexOf('\n', if (end > start) end - 1 else end).let { if (it < 0) text.length else it }
     val lines = text.substring(firstLine, lastLineEnd).split('\n')
-    val marked = lines.filter { it.isNotBlank() }.all { it.trimStart().startsWith(SecondVoice.MARK) }
+    val marked = lines.filter { it.isNotBlank() }.all { wholeLineVoiceOf(it) == voice }
     val rewritten = lines.map { line ->
+        val unmarked = wholeLineVoiceOf(line)?.let { line.trimStart().removePrefix(SecondVoice.markOf(it)).trimStart() }
         when {
             line.isBlank() -> line
-            marked -> line.trimStart().removePrefix(SecondVoice.MARK).trimStart()
-            else -> SecondVoice.MARK + line
+            marked -> unmarked ?: line
+            else -> mark + (unmarked ?: line)
         }
     }.joinToString("\n")
     val grown = rewritten.length - (lastLineEnd - firstLine)
     val newText = text.take(firstLine) + rewritten + text.drop(lastLineEnd)
-    val caret = if (marked) (end + grown).coerceAtLeast(firstLine) else end + grown
+    val caret = if (grown < 0) (end + grown).coerceAtLeast(firstLine) else end + grown
     return TextFieldValue(newText, TextRange(if (end > start) firstLine else caret, caret))
 }
 
