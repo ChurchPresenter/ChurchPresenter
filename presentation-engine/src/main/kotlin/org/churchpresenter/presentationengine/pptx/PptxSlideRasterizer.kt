@@ -176,13 +176,22 @@ internal object PptxSlideRasterizer {
      * (and through `DeckRasterizer.rasterizeSlideLayers`, the slide's entire layer list) for one
      * bad element. The same swallow-and-degrade choice the file already makes in
      * `extractVideoFile`.
+     *
+     * The shape's own rotation and flips are applied first, as POI's sheet drawing does for each
+     * shape before it draws it: `draw` alone assumes they are already on the graphics, so without
+     * them a picture turned upside down in PowerPoint came out upright on any slide with a build.
      */
     private fun drawShape(graphics: Graphics2D, shape: XSLFShape) {
+        val before = graphics.transform
         try {
             graphics.setRenderingHint(Drawable.GROUP_TRANSFORM, AffineTransform())
-            DrawFactory.getInstance(graphics).getDrawable(shape).draw(graphics)
+            val drawable = DrawFactory.getInstance(graphics).getDrawable(shape)
+            drawable.applyTransform(graphics)
+            drawable.draw(graphics)
         } catch (_: Throwable) {
             // Left out of this layer; the rest of the band still draws.
+        } finally {
+            graphics.transform = before
         }
     }
 
