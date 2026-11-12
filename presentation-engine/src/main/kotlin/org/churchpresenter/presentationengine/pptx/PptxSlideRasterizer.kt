@@ -8,6 +8,8 @@ import org.apache.poi.xslf.usermodel.XSLFSlide
 import org.apache.poi.xslf.usermodel.XSLFTextShape
 import org.apache.xmlbeans.XmlObject
 import org.openxmlformats.schemas.drawingml.x2006.main.CTColor
+import org.openxmlformats.schemas.drawingml.x2006.main.CTEffectList
+import org.openxmlformats.schemas.drawingml.x2006.main.CTLineProperties
 import org.openxmlformats.schemas.drawingml.x2006.main.CTRegularTextRun
 import org.openxmlformats.schemas.drawingml.x2006.main.CTSolidColorFillProperties
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextCharacterProperties
@@ -234,8 +236,9 @@ internal object PptxSlideRasterizer {
     }
 
     private fun paragraphHasVisibleBullet(pPr: CTTextParagraphProperties?): RunFillGuard? {
-        // Only paragraphs with an explicit bullet glyph need hiding; inherited bullets keep the
-        // list-style color, which is acceptable overdraw (rare, and only until WS6 polish).
+        // Only paragraphs with an explicit bullet glyph need hiding; an inherited bullet with no
+        // color of its own takes its first run's, which is already transparent, and one whose list
+        // style colors it is acceptable overdraw (rare, and only until WS6 polish).
         if (pPr == null || (!pPr.isSetBuChar && !pPr.isSetBuAutoNum)) return null
         return RunFillGuard.hideBullet(pPr)
     }
@@ -260,8 +263,10 @@ internal object PptxSlideRasterizer {
                     if (rPr.isSetSolidFill) rPr.solidFill.copy() as CTSolidColorFillProperties else null
                 if (rPr.isSetSolidFill) rPr.unsetSolidFill()
                 applyTransparentFill(rPr)
+                val restoreDecorations = hideDecorations(rPr)
                 return RunFillGuard {
                     if (rPr.isSetSolidFill) rPr.unsetSolidFill()
+                    restoreDecorations()
                     when {
                         originalSolid != null -> rPr.solidFill = originalSolid
                         !hadRPr -> when (runXml) {
@@ -269,6 +274,25 @@ internal object PptxSlideRasterizer {
                             is CTTextField -> if (runXml.isSetRPr) runXml.unsetRPr()
                         }
                     }
+                }
+            }
+
+            /**
+             * Takes away what a run draws in colors of its own — its outline, its glow and shadow,
+             * its highlight — which a transparent fill leaves standing, and returns what puts them
+             * back. Left in, every paragraph's effects showed in every other paragraph's layer.
+             */
+            private fun hideDecorations(rPr: CTTextCharacterProperties): () -> Unit {
+                val outline = if (rPr.isSetLn) rPr.ln.copy() as CTLineProperties else null
+                val effects = if (rPr.isSetEffectLst) rPr.effectLst.copy() as CTEffectList else null
+                val highlight = if (rPr.isSetHighlight) rPr.highlight.copy() as CTColor else null
+                if (outline != null) rPr.unsetLn()
+                if (effects != null) rPr.unsetEffectLst()
+                if (highlight != null) rPr.unsetHighlight()
+                return {
+                    if (outline != null) rPr.ln = outline
+                    if (effects != null) rPr.effectLst = effects
+                    if (highlight != null) rPr.highlight = highlight
                 }
             }
 

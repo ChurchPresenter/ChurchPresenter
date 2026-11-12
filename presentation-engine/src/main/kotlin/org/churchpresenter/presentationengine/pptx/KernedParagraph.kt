@@ -12,6 +12,7 @@ import org.apache.poi.common.usermodel.fonts.FontInfo
 import org.apache.poi.sl.draw.DrawFactory
 import org.apache.poi.sl.draw.DrawFontManager
 import org.apache.poi.sl.draw.DrawPaint
+import org.apache.poi.sl.draw.DrawTextFragment
 import org.apache.poi.sl.draw.DrawTextParagraph
 import org.apache.poi.sl.usermodel.HighlightColorSupport
 import org.apache.poi.sl.usermodel.TextParagraph
@@ -22,6 +23,7 @@ import java.awt.Graphics2D
 import java.awt.font.LineBreakMeasurer
 import java.awt.font.TextAttribute
 import java.awt.font.TextLayout
+import java.text.AttributedCharacterIterator
 import java.text.AttributedCharacterIterator.Attribute
 import java.text.AttributedString
 
@@ -140,6 +142,40 @@ internal class KernedParagraph(paragraph: TextParagraph<*, *, *>) : DrawTextPara
         return ranges
     }
 
+    /**
+     * POI's `getBullet`, with two changes: the style comes from [bulletStyleOf], so a numbered
+     * paragraph gets its number, and the bullet carries the outline, glow and shadow of the text it
+     * leads, as PowerPoint draws it.
+     */
+    override fun getBullet(graphics: Graphics2D, firstLineAttr: AttributedCharacterIterator): DrawTextFragment? {
+        val style = bulletStyleOf(paragraph) ?: return null
+        val numbering = style.autoNumberingScheme
+        val character = (if (numbering != null) numbering.format(autoNbrIdx) else style.bulletCharacter)
+            ?: return null
+        val fonts = DrawFactory.getInstance(graphics).getFontManager(graphics)
+        val named = PlainFontInfo(style.bulletFont ?: paragraph.defaultFontFamily)
+        val font = PlainFontInfo(mappedFamily(graphics, fonts, named))
+        val textSize = (firstLineAttr.getAttribute(TextAttribute.SIZE) as Number).toDouble()
+        // OOXML bullet size: positive is a percentage of the text's, negative is absolute points.
+        val relative = style.bulletFontSize ?: PERCENT
+        val size = if (relative > 0) textSize * relative / PERCENT else -relative
+        val att = mutableMapOf<Attribute, Any>(
+            TextAttribute.FAMILY to font.typeface,
+            TextAttribute.SIZE to size.toFloat(),
+        )
+        val color = style.bulletFontColor
+            ?.let { DrawPaint(paragraph.parentShape).getPaint(graphics, it) }
+            ?: firstLineAttr.getAttribute(TextAttribute.FOREGROUND)
+        color?.let { att[TextAttribute.FOREGROUND] = it }
+        att[TextAttribute.FONT] = Font(att)
+        firstLineAttr.getAttribute(TextEffectsKey)?.let { att[TextEffectsKey] = it }
+
+        val text = AttributedString(fonts.mapFontCharset(graphics, font, character))
+        att.forEach { (key, value) -> text.addAttribute(key, value) }
+        val layout = TextLayout(text.iterator, graphics.fontRenderContext)
+        return DrawFactory.getInstance(graphics).getTextFragment(layout, text)
+    }
+
     private fun mappedFamily(graphics: Graphics2D, fonts: DrawFontManager, font: FontInfo): String =
         fonts.getMappedFont(graphics, font)?.typeface ?: paragraph.defaultFontFamily
 
@@ -244,6 +280,9 @@ private fun LineBreakMeasurer.nextHangingLayout(
 
 /** The size POI probes a font at to ask which characters it can show; any size answers the same. */
 private const val FONT_PROBE_SIZE = 10.0
+
+/** A bullet with no size of its own is as large as its text: 100%. */
+private const val PERCENT = 100.0
 
 private val LINE_BREAKS = Regex("[\\r\\n]")
 
