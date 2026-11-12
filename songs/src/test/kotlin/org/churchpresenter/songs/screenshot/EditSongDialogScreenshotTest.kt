@@ -224,6 +224,14 @@ class EditSongDialogScreenshotTest {
             waitForIdle()
         }
 
+    /** Lines and words in colours of their own, the Color… button beside the voices, the slide in 1 Line. */
+    @Test
+    fun `a song with colours of its own`() =
+        shoot("colored_lines", song = wedding(), appSettings = OUTPUTS) {
+            onNodeWithText("1 Line").performClick()
+            waitForIdle()
+        }
+
     /** The Output tab a verse at a time: the slide under the cursor on full screen and on the band. */
     @Test
     fun `the output a verse at a time`() = shoot("output_verse", song = secondVoice(), appSettings = OUTPUTS)
@@ -376,6 +384,19 @@ class EditSongDialogScreenshotTest {
             "[Verse 2]",
             "[voice: 3]",
             "Amen. Amen.",
+        ),
+    )
+
+    private fun wedding() = amazingGrace().copy(
+        title = "Wedding vows",
+        lyrics = listOf(
+            "[Verse 1]",
+            "Ben, will you take Anna to be your wife?",
+            "#4DABF7>I will.",
+            "#F783AC>I, Anna, take you, Ben,",
+            "Will you all support them? 2>(We will.)",
+            "[color: #F783AC]",
+            "I give you this ring.",
         ),
     )
 

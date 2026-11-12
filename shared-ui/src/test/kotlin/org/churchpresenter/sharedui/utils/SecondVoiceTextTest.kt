@@ -144,4 +144,34 @@ class SecondVoiceTextTest {
             presentableSongLines(listOf("[Verse 1]", "[voice: 3]", "Amen", "Amen", "[Verse 2]", "plain")),
         )
     }
+
+    @Test
+    fun `a range in a colour of its own carries the colour`() {
+        val voiced = voicedLine("Will you? #F783AC>(I will.)", Constants.TEXT_TRANSFORM_NONE)
+
+        assertEquals(listOf(VoicedRange(10..16, SecondVoice.CUSTOM, "#F783AC")), voiced.voiceRanges)
+    }
+
+    @Test
+    fun `words in a colour of their own are drawn in it, or in the custom override`() {
+        val text = voicedDisplayText("#0000FF>I will.", Constants.TEXT_TRANSFORM_NONE, 0f, 0f, inks)
+        assertEquals(Color(0xFF0000FF), text.spanStyles.single().item.color)
+
+        val keyed = voicedDisplayText(
+            "#0000FF>I will.",
+            Constants.TEXT_TRANSFORM_NONE,
+            0f,
+            0f,
+            inks.copy(custom = Color.White),
+        )
+        assertEquals(Color.White, keyed.spanStyles.single().item.color)
+    }
+
+    @Test
+    fun `a color block's lines are written as coloured lines until it ends`() {
+        assertEquals(
+            listOf("#F783AC>Ring", "after"),
+            presentableSongLines(listOf("[color: #F783AC]", "Ring", "[color]", "after")),
+        )
+    }
 }

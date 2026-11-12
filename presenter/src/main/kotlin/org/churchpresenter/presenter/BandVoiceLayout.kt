@@ -6,6 +6,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Matrix
+import org.churchpresenter.songchords.VoiceKey
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -91,11 +92,11 @@ internal fun secondVoiceRuns(layout: BandVoiceLayout, runWidth: (String) -> Floa
 }
 
 /**
- * One of a slot's other voices — 2 or 3 — and the [color] it is drawn in: where its words sit and how
- * wide a run of them is, to cut to at any frame.
+ * One of a slot's other voices — 2, 3 or a colour of its own, by [key] — and the [color] it is drawn
+ * in: where its words sit and how wide a run of them is, to cut to at any frame.
  */
 internal class BandVoice(
-    val voice: Int,
+    val key: VoiceKey,
     val color: Color,
     val layout: BandVoiceLayout,
     private val runWidth: (String) -> Float,

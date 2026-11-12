@@ -44,6 +44,8 @@ class EditSongOutputPaneTest {
         const val SMALLER = "Smaller"
         const val VOICE_2 = "Voice 2"
         const val VOICE_3 = "Voice 3"
+        const val COLOR = "Color…"
+        const val OK = "OK"
         const val LOOK = "This song's look"
     }
 
@@ -270,9 +272,24 @@ class EditSongOutputPaneTest {
     }
 
     @Test
+    fun `Color picks a colour for the cursor's line, and again takes it off`() = editor { saved ->
+        caretAt(body.indexOf("once"))
+
+        tap(Label.COLOR)
+        tap(Label.OK)
+        tap(Label.SAVE)
+        assertEquals(listOf("[Verse 1]", "Amazing grace", "2>That saved", "#E91E63>I once was lost"), saved()?.lyrics)
+
+        tap(Label.COLOR)
+        tap(Label.SAVE)
+        assertEquals(lyrics, saved()?.lyrics, "on a coloured line it takes the colour off, with no picker")
+    }
+
+    @Test
     fun `the voice markup is in the legend`() = editor {
         onNodeWithText("2>line").assertExists()
         onNodeWithText("2>(words)").assertExists()
         onNodeWithText("3>line").assertExists()
+        onNodeWithText("#hex>line").assertExists()
     }
 }

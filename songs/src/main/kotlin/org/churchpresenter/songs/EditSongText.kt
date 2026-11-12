@@ -14,7 +14,9 @@ import org.churchpresenter.strings.generated.resources.song_title
 import org.churchpresenter.strings.generated.resources.song_translation_title
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.songchords.SecondVoice
-import org.churchpresenter.songchords.wholeLineVoiceOf
+import org.churchpresenter.songchords.VOICE_LINE_MARK
+import org.churchpresenter.songchords.VoiceKey
+import org.churchpresenter.songchords.wholeLineKeyOf
 
 private val SECTION_MARKER_LINE = Regex("""^[\[{][^\]}]*[\]}]$""")
 private val CHORD_MARKER = Regex("""\[[^\]]*]""")
@@ -71,20 +73,19 @@ internal fun insertSnippet(value: TextFieldValue, snippet: String, ownLine: Bool
 }
 
 /**
- * [value] with [voice] — 2 or 3 — marked where the operator points:
+ * [value] with [key] — voice 2, voice 3 or a colour of its own — marked where the operator points:
  * - words selected on one line are wrapped as `2>(…)`;
  * - a selection across lines, or no selection at all, marks each line it touches with `2>`, or —
  *   when every one of them is marked with it already — takes the mark off again. A line marked
- *   for the other voice is moved to this one.
+ *   for another voice or colour is moved to this one.
  *
  * The selection follows the text it was on.
  */
-internal fun toggleVoice(value: TextFieldValue, voice: Int): TextFieldValue {
-    val mark = SecondVoice.markOf(voice)
+internal fun toggleVoice(value: TextFieldValue, key: VoiceKey): TextFieldValue {
+    val mark = key.mark
     val text = value.text
     val start = value.selection.min
     val end = value.selection.max
-    val firstLine = text.lastIndexOf('\n', start - 1) + 1
     val selected = text.substring(start, end)
     if (selected.isNotBlank() && '\n' !in selected) {
         val wrapped = "$mark($selected)"
@@ -94,11 +95,11 @@ internal fun toggleVoice(value: TextFieldValue, voice: Int): TextFieldValue {
             TextRange(start + opening, end + opening),
         )
     }
-    val lastLineEnd = text.indexOf('\n', if (end > start) end - 1 else end).let { if (it < 0) text.length else it }
+    val (firstLine, lastLineEnd) = lineSpanOf(value)
     val lines = text.substring(firstLine, lastLineEnd).split('\n')
-    val marked = lines.filter { it.isNotBlank() }.all { wholeLineVoiceOf(it) == voice }
+    val marked = lines.filter { it.isNotBlank() }.all { wholeLineKeyOf(it) == key }
     val rewritten = lines.map { line ->
-        val unmarked = wholeLineVoiceOf(line)?.let { line.trimStart().removePrefix(SecondVoice.markOf(it)).trimStart() }
+        val unmarked = VOICE_LINE_MARK.find(line)?.let { line.substring(it.range.last + 1).trimStart() }
         when {
             line.isBlank() -> line
             marked -> unmarked ?: line
@@ -109,6 +110,32 @@ internal fun toggleVoice(value: TextFieldValue, voice: Int): TextFieldValue {
     val newText = text.take(firstLine) + rewritten + text.drop(lastLineEnd)
     val caret = if (grown < 0) (end + grown).coerceAtLeast(firstLine) else end + grown
     return TextFieldValue(newText, TextRange(if (end > start) firstLine else caret, caret))
+}
+
+/**
+ * The colour every line the cursor or selection of [value] touches is already marked with, when
+ * they all share one — what the Color… button takes off instead of asking for a new colour.
+ * Null when there is a selection inside one line, or the lines are not all in one colour.
+ */
+internal fun lineColorAt(value: TextFieldValue): VoiceKey? {
+    val selected = value.text.substring(value.selection.min, value.selection.max)
+    if (selected.isNotBlank() && '\n' !in selected) return null
+    val (firstLine, lastLineEnd) = lineSpanOf(value)
+    val keys = value.text.substring(firstLine, lastLineEnd).split('\n')
+        .filter { it.isNotBlank() }
+        .map { wholeLineKeyOf(it) }
+        .distinct()
+    return keys.singleOrNull()?.takeIf { it.voice == SecondVoice.CUSTOM }
+}
+
+/** Where the lines the cursor or selection of [value] touches start and end in its text. */
+private fun lineSpanOf(value: TextFieldValue): Pair<Int, Int> {
+    val text = value.text
+    val start = value.selection.min
+    val end = value.selection.max
+    val firstLine = text.lastIndexOf('\n', start - 1) + 1
+    val lastLineEnd = text.indexOf('\n', if (end > start) end - 1 else end).let { if (it < 0) text.length else it }
+    return firstLine to lastLineEnd
 }
 
 /**

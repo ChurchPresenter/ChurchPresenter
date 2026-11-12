@@ -915,6 +915,8 @@
     <string name="song_look_use_profile">Use the profile's</string>
     <string name="song_insert_third_voice">Voice 3</string>
     <string name="song_insert_third_voice_hint">Marks the selected words, or the lines the cursor is on, as the third voice. Again on marked lines takes it off.</string>
+    <string name="song_insert_color">Color…</string>
+    <string name="song_insert_color_hint">Puts the selected words, or the lines the cursor is on, in a color of their own — for a part no voice covers. Again on colored lines takes the color off.</string>
     <string name="song_insert_second_voice_hint">Marks the selected words, or the lines the cursor is on, as the second voice. Again on marked lines takes it off.</string>
     <string name="song_element_number">Number</string>
     <string name="song_element_lyrics">Lyrics</string>

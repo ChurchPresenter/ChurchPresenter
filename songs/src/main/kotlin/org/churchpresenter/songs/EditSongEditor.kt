@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -23,6 +22,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +71,10 @@ import org.churchpresenter.strings.generated.resources.song_translation_label
 import org.churchpresenter.strings.generated.resources.song_insert_second_voice
 import org.churchpresenter.strings.generated.resources.song_insert_second_voice_hint
 import org.churchpresenter.strings.generated.resources.song_insert_third_voice
+import org.churchpresenter.strings.generated.resources.song_insert_color
+import org.churchpresenter.strings.generated.resources.song_insert_color_hint
+import org.churchpresenter.songchords.VoiceKey
+import org.churchpresenter.sharedui.composables.ColorPickerDialog
 import org.churchpresenter.strings.generated.resources.song_insert_third_voice_hint
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedSwitch
@@ -152,10 +158,12 @@ internal fun EditSongToolbar(
     val scopeNames = listOf(stringResource(Res.string.song_background_whole_song)) +
         sectionSlots.map { it.label.ifBlank { untitledSection } }
 
-    Row(
+    // A flow, not a row: in a narrow column the tabs take their room first, and the background
+    // button and the chords switch move to a line of their own instead of being squeezed.
+    FlowRow(
         modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 9.dp),
-        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         PaneTabRow {
             val primaryName = names.names[0].trim()
@@ -177,11 +185,19 @@ internal fun EditSongToolbar(
                 }
             }
         }
-        Spacer(Modifier.weight(1f))
-        Box(Modifier.guideTarget(GuideTargets.SONG_BACKGROUND)) {
-            backgroundButton(EditorBackgroundButtonState(state, sectionSlots, scopeNames, onApplyBackgroundToSongbook))
+        // Kept together, and pushed to the end of whichever line they land on.
+        Row(
+            modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        ) {
+            Box(Modifier.guideTarget(GuideTargets.SONG_BACKGROUND)) {
+                backgroundButton(
+                    EditorBackgroundButtonState(state, sectionSlots, scopeNames, onApplyBackgroundToSongbook),
+                )
+            }
+            ChordsToggle(on = showChords, onToggle = onToggleChords)
         }
-        ChordsToggle(on = showChords, onToggle = onToggleChords)
     }
 }
 
@@ -214,16 +230,52 @@ private fun SectionMarkerChips(state: EditSongState) {
         }
         HoverLabel(stringResource(Res.string.song_insert_second_voice_hint)) {
             InsertChip(stringResource(Res.string.song_insert_second_voice)) {
-                state.setPaneValue(toggleVoice(state.paneValue, SecondVoice.SECOND))
+                state.setPaneValue(toggleVoice(state.paneValue, VoiceKey(SecondVoice.SECOND)))
             }
         }
         HoverLabel(stringResource(Res.string.song_insert_third_voice_hint)) {
             InsertChip(stringResource(Res.string.song_insert_third_voice)) {
-                state.setPaneValue(toggleVoice(state.paneValue, SecondVoice.THIRD))
+                state.setPaneValue(toggleVoice(state.paneValue, VoiceKey(SecondVoice.THIRD)))
+            }
+        }
+        ColorMarkChip(state)
+    }
+}
+
+/**
+ * The Color… button: words or lines in a colour of their own, for a part no voice covers. On lines
+ * already in one colour it takes the colour off; otherwise it asks for a colour and marks the
+ * selected words, or the lines the cursor is on, with it.
+ */
+@Composable
+private fun ColorMarkChip(state: EditSongState) {
+    var picking by remember { mutableStateOf(false) }
+    var lastColor by remember { mutableStateOf(DEFAULT_MARK_COLOR) }
+    HoverLabel(stringResource(Res.string.song_insert_color_hint)) {
+        InsertChip(stringResource(Res.string.song_insert_color)) {
+            val current = lineColorAt(state.paneValue)
+            if (current != null) {
+                state.setPaneValue(toggleVoice(state.paneValue, current))
+            } else {
+                picking = true
             }
         }
     }
+    if (picking) {
+        ColorPickerDialog(
+            initialHex = lastColor,
+            onDismiss = { picking = false },
+            onColorSelected = { hex ->
+                lastColor = hex
+                picking = false
+                state.setPaneValue(toggleVoice(state.paneValue, VoiceKey.color(hex)))
+            },
+        )
+    }
 }
+
+/** The colour the Color… button offers first, until one is picked: a rose that reads on dark and light. */
+private const val DEFAULT_MARK_COLOR = "#E91E63"
 
 /**
  * The open pane's language name: a small card like the metadata ones, with a line saying the name
@@ -302,6 +354,8 @@ private fun ChordsToggle(on: Boolean, onToggle: () -> Unit) {
             Text(
                 text = stringResource(Res.string.song_chords),
                 fontSize = 12.sp,
+                maxLines = 1,
+                softWrap = false,
                 fontWeight = FontWeight.SemiBold,
                 color = if (on) MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -374,6 +428,7 @@ private fun SyntaxLegend(modifier: Modifier = Modifier) {
         LegendChip("2>line", MaterialTheme.colorScheme.tertiary)
         LegendChip("2>(words)", MaterialTheme.colorScheme.tertiary)
         LegendChip("3>line", MaterialTheme.semantic.success)
+        LegendChip("#hex>line", MaterialTheme.colorScheme.secondary)
         Text(
             text = stringResource(Res.string.song_syntax_chord_hint),
             style = MaterialTheme.typography.bodySmall,

@@ -2,6 +2,8 @@ package org.churchpresenter.sharedui.utils
 
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.songchords.blockKeyOf
+import org.churchpresenter.songchords.VoiceKey
 import java.util.Locale
 
 /**
@@ -86,18 +88,19 @@ fun isLyricDirective(line: String): Boolean =
 
 /**
  * [lines] as a slide built straight from a song shows them: directives gone, and the lines of a
- * `[voice: 2]` or `[voice: 3]` block written as `2>` or `3>` lines, a block ending at `[voice: 1]`
+ * `[voice: 2]`, `[voice: 3]` or `[color: #hex]` block written as `2>`, `3>` or `#hex>` lines, a block
+ * ending at `[voice: 1]`, `[color]`
  * or the next header.
  */
 fun presentableSongLines(lines: List<String>): List<String> {
-    var voice = SecondVoice.MAIN
+    var voice = VoiceKey.MAIN
     return lines.mapNotNull { line ->
-        val switched = SecondVoice.voiceDirectiveOf(line)
+        val switched = blockKeyOf(line)
         when {
             switched != null -> { voice = switched; null }
             ChordTransposer.isBackgroundDirective(line) -> null
-            isHeaderLine(line) -> { voice = SecondVoice.MAIN; line }
-            voice != SecondVoice.MAIN && line.isNotBlank() -> SecondVoice.asVoiceLine(line, voice)
+            isHeaderLine(line) -> { voice = VoiceKey.MAIN; line }
+            voice != VoiceKey.MAIN && line.isNotBlank() -> SecondVoice.asVoiceLine(line, voice)
             else -> line
         }
     }
