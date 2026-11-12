@@ -20,9 +20,11 @@ class PresenterWebOutput(private val manager: PresenterManager) : WebOutput {
     override val liveBrowser: State<CefBrowser?> get() = manager.liveBrowser
     override val webSnapshot: State<ImageBitmap?> get() = manager.webSnapshot
     override val offscreenPage: State<OffscreenPage?> get() = manager.offscreenPage
+    override val webMobile: State<Boolean> get() = manager.webMobile
 
     override fun setPresentingMode(mode: Presenting) = manager.setPresentingMode(mode)
     override fun setWebsiteUrl(url: String) = manager.setWebsiteUrl(url)
     override fun setWebPageTitle(title: String) = manager.setWebPageTitle(title)
     override fun setWebSnapshot(bitmap: ImageBitmap?) = manager.setWebSnapshot(bitmap)
+    override fun setWebMobile(mobile: Boolean) = manager.setWebMobile(mobile)
 }

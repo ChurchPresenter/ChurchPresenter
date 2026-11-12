@@ -26,6 +26,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.WebPageView
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -258,6 +259,36 @@ class ProfilesRedesignTest {
             assertEquals(OutputScaleMode.FILL, get().profile().pictureScaleMode)
             assertEquals(OutputScaleMode.STRETCH, get().profile().mediaScaleMode)
             assertEquals(OutputScaleMode.FIT, get().pictureSettings.scaleMode, "the document is not touched")
+        }
+    }
+
+    @Test
+    fun `the Website layout row forces mobile or desktop on this profile, or follows the Web tab again`() {
+        profilesTab(profileDocument()) { get ->
+            openProfilePage(ProfilePage.Content)
+            onNodeWithText("Website layout").performScrollTo().assertExists()
+            onNode(hasText("scrolling and typing may not match", substring = true)).assertExists()
+
+            onNodeWithText("Mobile").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(WebPageView.MOBILE, get().profile().webPageView)
+
+            onNodeWithText("Desktop").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(WebPageView.DESKTOP, get().profile().webPageView)
+
+            onNodeWithText("Follow Web tab").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(WebPageView.FOLLOW_WEB_TAB, get().profile().webPageView)
+        }
+    }
+
+    @Test
+    fun `a profile that shows no websites has no Website layout row`() {
+        val noWeb = OutputProfile(look = OutputLook(slide = SlideLook(web = false)))
+        profilesTab(profileDocument(profile = noWeb)) { _ ->
+            openProfilePage(ProfilePage.Content)
+            onNodeWithText("Website layout").assertDoesNotExist()
         }
     }
 

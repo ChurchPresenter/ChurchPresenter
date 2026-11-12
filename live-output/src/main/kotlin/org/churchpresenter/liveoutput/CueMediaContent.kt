@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.testTag
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.media.presenter.MediaPresenter
+import org.churchpresenter.settings.WebPageView
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.slides.presenter.PicturePresenter
@@ -167,6 +168,7 @@ internal fun WebCue(surface: OutputSurface) {
         else -> WebsitePresenter(
             url = presenterManager.websiteUrl.value,
             modifier = Modifier.fillMaxSize(),
+            mobile = surface.showsMobileWeb(),
             onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
             onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) },
             onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
@@ -176,19 +178,26 @@ internal fun WebCue(surface: OutputSurface) {
     }
 }
 
+/** Whether this surface shows the website's mobile layout: its profile's choice, or the Web tab's button. */
+@Composable
+private fun OutputSurface.showsMobileWeb(): Boolean =
+    profile.webPageView.isMobile(presenterManager.webMobile.value)
+
 /**
- * The web cue drawn from the one off-screen page every output shares: an output window draws it at
- * its own size and tells the page that size, while an off-screen output or a merged tile draws the
- * same frames at whatever size it is. The page opens with the first surface that shows it.
+ * The web cue drawn from the off-screen page every output in its layout shares: an output window
+ * draws it at its own size and tells the page that size, while an off-screen output or a merged tile
+ * draws the same frames at whatever size it is. The page opens with the first surface that shows it;
+ * the desktop and mobile layouts are a page each (see [WebPageView]).
  */
 @Composable
 private fun OffscreenWebCue(surface: OutputSurface) {
     val presenterManager = surface.presenterManager
-    DisposableEffect(presenterManager) {
-        presenterManager.useOffscreenPage()
-        onDispose { presenterManager.releaseOffscreenPage() }
+    val mobile = surface.showsMobileWeb()
+    DisposableEffect(presenterManager, mobile) {
+        presenterManager.useOffscreenPage(mobile)
+        onDispose { presenterManager.releaseOffscreenPage(mobile) }
     }
-    val page = presenterManager.offscreenPage.value ?: return
+    val page = presenterManager.offscreenPageFor(mobile) ?: return
     val url = presenterManager.websiteUrl.value
     LaunchedEffect(page, url) { page.load(url) }
     val modifier = Modifier.fillMaxSize().testTag(WEB_OFFSCREEN_TAG)

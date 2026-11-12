@@ -148,8 +148,10 @@ internal fun PreviewMode(
  * Compose, so this mirrors the output's instead.
  */
 @Composable
-internal fun PreviewWebsiteMirror(presenterManager: PresenterManager) {
-    val page = presenterManager.offscreenPage.value
+internal fun PreviewWebsiteMirror(presenterManager: PresenterManager, profile: OutputProfile) {
+    // The tile's own layout's page, as its screen draws it; the other while that one is still opening.
+    val page = presenterManager.offscreenPageFor(profile.webPageView.isMobile(presenterManager.webMobile.value))
+        ?: presenterManager.offscreenPage.value
     val snapshot = presenterManager.webSnapshot.value
     if (page != null) {
         OffscreenWebView(page, Modifier.fillMaxSize(), small = true)

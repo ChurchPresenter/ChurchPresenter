@@ -264,7 +264,7 @@ private val SOURCE_PICKER_WIDTH = 260.dp
 
 private val BIBLE_SOURCE_PATHS = listOf("bibleMode", "bibleTranslations")
 private val SONG_SOURCE_PATHS = listOf("songMode", "songTranslations")
-private val SCALE_PATHS = listOf("pictureScaleMode", "mediaScaleMode")
+private val SCALE_PATHS = listOf("pictureScaleMode", "mediaScaleMode", WEB_PAGE_VIEW_PATH)
 
 /** Where a lower third's band-less content is placed, by kind. */
 internal const val PLACEMENTS_PATH = "lowerThirdPlacements"

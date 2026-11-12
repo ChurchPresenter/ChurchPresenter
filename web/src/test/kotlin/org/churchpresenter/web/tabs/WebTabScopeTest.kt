@@ -15,6 +15,7 @@ import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.web.presenter.WebNavController
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -107,14 +108,15 @@ class WebTabScopeTest {
     }
 
     @Test
-    fun `the mobile toggle reloads the live browser only while live`() {
+    fun `the mobile toggle reaches the outputs, live or not, and reloads only the tab's own page`() {
         val live = scope(isLive = true)
         live.onMobileToggle(true)
         assertTrue(live.isMobileView)
-        verify(exactly = 1) { liveBrowser.reload() }
+        assertTrue(output.webMobile.value)
 
         scope(isLive = false).onMobileToggle(false)
-        verify(exactly = 1) { liveBrowser.reload() }
+        assertFalse(output.webMobile.value)
+        verify(exactly = 0) { liveBrowser.reload() }
         verify(exactly = 2) { previewBrowser.reload() }
     }
 

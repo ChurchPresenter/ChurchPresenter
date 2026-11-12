@@ -21,6 +21,7 @@ import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -74,17 +75,27 @@ class WebTabBrowserBridgeTest {
     }
 
     @Test
-    fun `toggling desktop-mobile while live reloads the live browser`() = webTab { presenter, _ ->
-        val browser = mockk<CefBrowser>(relaxed = true)
+    fun `toggling desktop-mobile while live switches the outputs' layout`() = webTab { presenter, _ ->
         presenter.setPresentingMode(Presenting.WEBSITE)
-        presenter.setLiveBrowser(browser)
         waitForIdle()
 
         onNodeWithText(WebLabel.DESKTOP).performClick()
         waitForIdle()
 
-        verify { browser.reload() }
+        assertTrue(presenter.webMobile.value)
+        onNodeWithText(WebLabel.MOBILE).assertExists()
     }
+
+    @Test
+    fun `the button opens on the layout the outputs already show`() =
+        webTab(presenterManager = FakeWebOutput().apply { webMobile.value = true }) { presenter, _ ->
+            onNodeWithText(WebLabel.MOBILE).assertExists()
+
+            onNodeWithText(WebLabel.MOBILE).performClick()
+            waitForIdle()
+            assertFalse(presenter.webMobile.value)
+            onNodeWithText(WebLabel.DESKTOP).assertExists()
+        }
 
     // ── The "type to page" field with a live browser attached ───────────────────
 

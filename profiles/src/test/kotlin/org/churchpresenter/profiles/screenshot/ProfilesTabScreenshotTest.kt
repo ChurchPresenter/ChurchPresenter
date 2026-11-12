@@ -110,6 +110,13 @@ class ProfilesTabScreenshotTest {
     }
 
     @Test
+    fun `the Scale group, with the website layout row and its note`() = shoot("scale_website_layout") {
+        openProfilePage(ProfilePage.Content)
+        // In this narrow column the three choices wrap under the label and its note.
+        onNodeWithText("Follow Web tab").performScrollTo()
+    }
+
+    @Test
     fun `the Bible source menu open`() = shoot("bible_source_menu", rootIndex = 1) {
         openProfilePage(ProfilePage.Content)
         onNodeWithTag(BIBLE_SOURCE_TRIGGER_TAG).performClick()

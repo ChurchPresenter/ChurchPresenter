@@ -111,6 +111,8 @@ data class OutputProfile(
     val pictureScaleMode: OutputScaleMode = OutputScaleMode.FIT,
     /** How a video meets this output's shape: fit, fill or stretch. */
     val mediaScaleMode: OutputScaleMode = OutputScaleMode.FIT,
+    /** Whether a website shows here in its desktop or mobile layout, or as the Web tab's button says. */
+    val webPageView: WebPageView = WebPageView.FOLLOW_WEB_TAB,
     /**
      * Where each kind of band-less content sits when [isLowerThird]. Sparse: a kind not named here
      * is [LowerThirdPlacement.FULL_SCREEN], which is what every profile did before this existed, so

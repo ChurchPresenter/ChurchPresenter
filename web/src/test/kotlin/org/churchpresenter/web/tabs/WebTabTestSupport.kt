@@ -40,6 +40,7 @@ internal class FakeWebOutput : WebOutput {
     override val liveBrowser = mutableStateOf<CefBrowser?>(null)
     override val webSnapshot = mutableStateOf<ImageBitmap?>(null)
     override val offscreenPage = mutableStateOf<OffscreenPage?>(null)
+    override val webMobile = mutableStateOf(false)
 
     override fun setPresentingMode(mode: Presenting) {
         onAir.value = mode
@@ -55,6 +56,10 @@ internal class FakeWebOutput : WebOutput {
 
     override fun setWebSnapshot(bitmap: ImageBitmap?) {
         webSnapshot.value = bitmap
+    }
+
+    override fun setWebMobile(mobile: Boolean) {
+        webMobile.value = mobile
     }
 
     fun setLiveBrowser(browser: CefBrowser?) {

@@ -66,6 +66,8 @@ fun OwnOffscreenPage(
         return
     }
     LaunchedEffect(current, url) { current.load(url) }
+    val mobile = navController?.mobileMode == true
+    LaunchedEffect(current, mobile) { current.modeChanged() }
     OffscreenWebControl(current, modifier.background(Color.Black), drivesSize = true)
 }
 
