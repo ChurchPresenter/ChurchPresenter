@@ -24,17 +24,54 @@ private const val BOX_H = 3
  * document's wrap box — a hand-made file's `ps` is its box origin, a generated file's is where the
  * sample's baseline sits, which is why the generated one says so separately.
  */
-internal fun readSlots(meta: JsonObject?, layers: List<JsonObject>): Map<String, LottieSlotBox> {
+internal fun readSlots(
+    meta: JsonObject?,
+    layers: List<JsonObject>,
+    /** The frame the text settles on — the hold — where a moving text layer's place is read. */
+    settledFrame: Float = 0f,
+): Map<String, LottieSlotBox> {
     val declared = (meta?.get("slots") as? JsonObject)?.mapNotNull { (name, value) ->
         val box = (value as? JsonArray)?.mapNotNull { it.jsonPrimitive.floatOrNull } ?: return@mapNotNull null
         if (box.size < BOX_FIELDS) null else name to LottieSlotBox(box[BOX_X], box[BOX_Y], box[BOX_W], box[BOX_H])
     }?.toMap()
-    if (!declared.isNullOrEmpty()) return declared
+    if (!declared.isNullOrEmpty()) return declared.inLayerSpace(layers, settledFrame)
     val fromDocuments = readDocumentSlots(layers)
     // A file from before the metadata carried its boxes: where a slot has a matte, the matte is
     // the box (plus a hair of padding), and that is nearer the truth than the baseline `ps`.
-    val mattes = readMatteSlots(layers)
+    val mattes = readMatteSlots(layers).inLayerSpace(layers, settledFrame)
     return fromDocuments.mapValues { (name, box) -> mattes[name] ?: box }
+}
+
+/**
+ * Boxes in the composition's space -- declared, or a matte's -- moved into their text layer's own
+ * space, which is where the player places the words. A hand-made file whose text layer is not at
+ * the origin would otherwise have its words moved by the layer's position twice, and off the band.
+ * The generator's text layers sit at the origin, so their boxes come back unchanged.
+ */
+private fun Map<String, LottieSlotBox>.inLayerSpace(
+    layers: List<JsonObject>,
+    frame: Float,
+): Map<String, LottieSlotBox> {
+    val byName = layers.filter { it["ty"]?.jsonPrimitive?.intOrNull == TEXT_LAYER_TYPE }
+        .associateBy { it["nm"]?.jsonPrimitive?.contentOrNull }
+    return mapValues { (name, box) -> byName[name]?.let { box.intoLayer(it, frame) } ?: box }
+}
+
+private fun LottieSlotBox.intoLayer(layer: JsonObject, frame: Float): LottieSlotBox {
+    val ks = layer["ks"] as? JsonObject ?: return this
+    val time = frame - (layer["st"]?.jsonPrimitive?.floatOrNull ?: 0f)
+    fun at(key: String, default: Float): List<Float> =
+        (ks[key] as? JsonObject)?.let(::readTrack)?.at(time) ?: listOf(default, default)
+    val p = at("p", 0f)
+    val a = at("a", 0f)
+    val s = at("s", PERCENT)
+    val sx = (s.getOrElse(0) { PERCENT } / PERCENT).takeIf { it != 0f } ?: 1f
+    val sy = (s.getOrElse(1) { PERCENT } / PERCENT).takeIf { it != 0f } ?: 1f
+    val px = p.getOrElse(0) { 0f }
+    val py = p.getOrElse(1) { 0f }
+    val ax = a.getOrElse(0) { 0f }
+    val ay = a.getOrElse(1) { 0f }
+    return LottieSlotBox((x - px) / sx + ax, (y - py) / sy + ay, w / sx, h / sy)
 }
 
 /** A static property's numbers: `{"a": 0, "k": [..]}` → the list, or null when it is not shaped so. */

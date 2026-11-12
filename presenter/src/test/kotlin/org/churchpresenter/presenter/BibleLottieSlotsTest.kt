@@ -44,6 +44,55 @@ class BibleLottieSlotsTest {
         )
     }
 
+    /** A text layer whose own transform puts it at [p] about anchor [a], scaled [s]. */
+    private fun placedText(p: String = "[340, 185]", a: String = "[0, 0]", s: String = "[100, 100]") =
+        """{"ty": 5, "nm": "Text1", "ks": {"p": {"a": 0, "k": $p}, "a": {"a": 0, "k": $a}, "s": {"a": 0, "k": $s}}}"""
+
+    @Test
+    fun `a declared box is moved into its text layer's own space`() {
+        // The box is where the words sit on the canvas; the player places them inside the layer,
+        // which a hand-made file puts somewhere other than the origin (#1017).
+        val meta = obj("""{"slots": {"Text1": [340, 135, 1400, 100], "Reference1": [5, 6, 7, 8]}}""")
+
+        val slots = readSlots(meta, layers(placedText(a = "[10, 20]")))
+
+        assertEquals(LottieSlotBox(10f, -30f, 1400f, 100f), slots["Text1"])
+        assertEquals(LottieSlotBox(5f, 6f, 7f, 8f), slots["Reference1"], "a slot with no text layer keeps its box")
+    }
+
+    @Test
+    fun `a scaled text layer's box is scaled back, and a zero scale is taken as none`() {
+        val meta = obj("""{"slots": {"Text1": [100, 100, 400, 80]}}""")
+
+        val doubled = readSlots(meta, layers(placedText(p = "[100, 100]", s = "[200, 200]")))
+        val flat = readSlots(meta, layers(placedText(p = "[100, 100]", s = "[0, 0]")))
+
+        assertEquals(LottieSlotBox(0f, 0f, 200f, 40f), doubled["Text1"])
+        assertEquals(LottieSlotBox(0f, 0f, 400f, 80f), flat["Text1"])
+    }
+
+    @Test
+    fun `a moving text layer's box is read where the layer has settled`() {
+        val meta = obj("""{"slots": {"Text1": [300, 100, 500, 60]}}""")
+        val sliding = """{"ty": 5, "nm": "Text1", "st": 10, "ks": {"p": {"a": 1, "k": [
+            {"t": 0, "s": [0, 0], "h": 1}, {"t": 50, "s": [300, 100]}]}}}"""
+
+        val settled = readSlots(meta, layers(sliding), settledFrame = 70f)
+        val early = readSlots(meta, layers(sliding), settledFrame = 20f)
+
+        assertEquals(LottieSlotBox(0f, 0f, 500f, 60f), settled["Text1"])
+        assertEquals(LottieSlotBox(300f, 100f, 500f, 60f), early["Text1"])
+    }
+
+    @Test
+    fun `a matte's box is moved into its text layer's space, a document's box is not`() {
+        val text = """{"ty": 5, "nm": "Text1", "ks": {"p": {"a": 0, "k": [50, 10]}},
+            "t": {"d": {"k": [{"s": {"ps": [10, 20], "sz": [300, 40]}}]}}}"""
+
+        assertEquals(LottieSlotBox(100f, 65f, 100f, 50f), readSlots(null, layers(text, matteLayer()))["Text1"])
+        assertEquals(documentBox, readSlots(null, layers(text))["Text1"], "the document's box is the layer's own")
+    }
+
     @Test
     fun `a declared box that is not four numbers is left out`() {
         val meta = obj(

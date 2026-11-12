@@ -34,6 +34,8 @@ class TitleSlideLottieRowTest {
                     }
                 }
                 onNodeWithText("No template selected").performClick()
+                // The folder is listed off the event thread.
+                waitUntil { onAllNodesWithText("hymn").fetchSemanticsNodes().isNotEmpty() }
                 onAllNodesWithText("hymn").onLast().performClick()
                 assertEquals(File(folder, "hymn.json").absolutePath, song.titleSlideLottie(lowerThird = true))
                 assertEquals("", song.titleSlideLottie(lowerThird = false), "the full screen keeps its own")

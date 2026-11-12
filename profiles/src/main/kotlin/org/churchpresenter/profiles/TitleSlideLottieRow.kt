@@ -30,20 +30,25 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 
 /**
- * The Lottie template this output's title slide plays (#971): one of the band templates, or any
- * Lottie file browsed to. None draws the title slide as it always was.
+ * The Lottie template this output's title slide plays (#971): one of the band templates, one of the
+ * Lower Third tab's presets (#1017), or any Lottie file browsed to. None draws the title slide as it
+ * always was.
  */
 @Composable
 internal fun TitleSlideLottieRow(
     song: SongSettings,
     lowerThird: Boolean,
     updateSong: ((SongSettings) -> SongSettings) -> Unit,
+    /** The Lower Third tab's folder (System → Lower Third), whose presets are offered too; blank when unset. */
+    lowerThirdFolder: String = "",
     /** The folder the band templates are offered from. */
     templatesDir: File? = remember { SettingsManager.bibleLowerThirdsDir() },
     /** Asks for a file; the native chooser unless a test answers. */
     browse: suspend (filterLabel: String) -> String? = ::browseForLottie,
 ) {
     val path = song.titleSlideLottie(lowerThird)
+    val lowerThirdDir = lowerThirdFolder.takeIf { it.isNotBlank() }?.let(::File)
+    val folders = TitleSlideFolders(band = templatesDir, lowerThird = lowerThirdDir)
     val scope = rememberCoroutineScope()
     val filterLabel = stringResource(Res.string.title_slide_animation_files)
     val setPath: (String) -> Unit = { picked -> updateSong { it.withTitleSlideLottie(lowerThird, picked) } }
@@ -57,11 +62,10 @@ internal fun TitleSlideLottieRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            LottieBandPickerRow(
+            TitleSlideTemplatePicker(
                 path = path,
                 onPathChange = setPath,
-                templatesDir = templatesDir,
-                onGenerate = null,
+                folders = folders,
                 modifier = Modifier.weight(1f).testTag(TITLE_SLIDE_LOTTIE_PICKER_TAG),
             )
             GhostButton(

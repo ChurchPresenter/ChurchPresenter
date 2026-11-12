@@ -278,6 +278,23 @@ class SongBandSlotsTest {
     }
 
     @Test
+    fun `a title slide's credits go only to the reference lines the template has`() {
+        val titleSlide = LyricSection(
+            type = Constants.SECTION_TYPE_TITLE_SLIDE,
+            title = "Amazing Grace",
+            author = "John Newton",
+            composer = "Traditional",
+        )
+        // Text1 and Text2 but only Reference1 -- a hand-made file (#1017).
+        val page = SongBandPage(titleSlide, listOf(titleSlide, verse), 0, 0)
+        val band = songBandSlots(
+            page, lineMode, Constants.SONG_LANG_PRIMARY, availableSlots = 2, isKey = false, referenceSlots = 1,
+        )
+        assertEquals("John Newton  ·  Traditional", band.text(REFERENCE_1))
+        assertEquals("", band.text(REFERENCE_2))
+    }
+
+    @Test
     fun `a title slide drawn over a whole output takes the full screen's title look`() {
         val title = verse.copy(type = Constants.SECTION_TYPE_TITLE_SLIDE, lines = emptyList())
         val settings = SongSettings(titleFontSize = 90, titleLowerThirdFontSize = 30, titleColor = "#FF0000")
