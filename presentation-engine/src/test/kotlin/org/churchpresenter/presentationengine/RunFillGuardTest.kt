@@ -5,6 +5,7 @@ import org.openxmlformats.schemas.drawingml.x2006.main.CTRegularTextRun
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextField
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextLineBreak
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraphProperties
+import java.awt.Color
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -45,6 +46,28 @@ class RunFillGuardTest {
         assertTrue(run.isSetRPr)
         assertTrue(run.rPr.b)
         assertFalse(run.rPr.isSetSolidFill)
+    }
+
+    @Test
+    fun `a run's outline, effects and highlight go with its fill and come back as they were`() {
+        val run = CTRegularTextRun.Factory.newInstance().apply { t = "Hello" }
+        run.addNewRPr().apply {
+            b = true
+            glow(radiusPt = 10.0, rgb = Color.RED)
+            shadow(blurPt = 4.0, distancePt = 4.0, angleDeg = 45, rgb = Color.BLACK)
+            outline(widthPt = 2.0, rgb = Color.BLUE)
+            addNewHighlight().addNewSrgbClr().setVal(byteArrayOf(0, 0x7F, 0))
+        }
+        val before = run.xmlText()
+
+        val guard = assertNotNull(RunFillGuard.hide(run))
+        assertFalse(run.rPr.isSetLn, "an outline is drawn in its own color, whatever the fill")
+        assertFalse(run.rPr.isSetEffectLst, "and so are a glow and a shadow")
+        assertFalse(run.rPr.isSetHighlight, "and a highlight")
+        assertTrue(run.rPr.b, "what draws nothing of its own stays")
+
+        guard.restore()
+        assertEquals(before, run.xmlText())
     }
 
     @Test

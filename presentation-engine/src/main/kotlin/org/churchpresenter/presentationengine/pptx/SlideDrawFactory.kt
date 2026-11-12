@@ -235,7 +235,7 @@ private fun stackParagraphs(shape: TextShape<*, *>, graphics: Graphics2D, x: Dou
     while (paragraphs.hasNext()) {
         val paragraph = paragraphs.next()
         val drawable = KernedParagraph(paragraph)
-        val bullets = paragraph.bulletStyle
+        val bullets = bulletStyleOf(paragraph)
         if (bullets?.autoNumberingScheme == null) {
             autoNumberIndex = -1
         } else {
