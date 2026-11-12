@@ -66,8 +66,10 @@ fun calculateAutoFitFontSize(
 }
 
 /**
- * Finds the largest font size that fits ALL sections of a song without line wrapping.
+ * Finds the largest font size that fits ALL sections of a song.
  * Checks every line in every section against both width (no wrap) and height (fits vertically).
+ * With [softWrap] -- the profile's word wrap -- a line may take as many rows as the width needs, as
+ * the presenter then draws it, and only the height (and a word wider than the box) limits the size.
  *
  * [styleText] must turn a stored line into exactly what the presenter draws. A fit measured against
  * anything narrower is not a fit: an uppercase transform, letter spacing or word spacing all widen
@@ -91,6 +93,7 @@ fun calculateAutoFitForAllSections(
     availableHeight: Int,
     reservedHeight: Int = 0,
     includeEndIndicator: Boolean = false,
+    softWrap: Boolean = false,
     styleText: (String) -> AnnotatedString = { AnnotatedString(it) },
 ): Int {
     if (sections.isEmpty() || availableWidth <= 0 || availableHeight <= 0) return MIN_AUTO_FIT_FONT_SIZE
@@ -101,9 +104,9 @@ fun calculateAutoFitForAllSections(
     // One song in one style in one box is fitted once, by whichever output or preview asks first.
     val table = SectionFitLines.of(sections, includeEndIndicator, styleText)
     val probe = table.probe(textMeasurer, baseStyle)
-    val key = SectionFitCache.Key(table, baseStyle, availableWidth, effectiveHeight, probe)
+    val key = SectionFitCache.Key(table, baseStyle, availableWidth, effectiveHeight, probe, softWrap)
     SectionFitCache.get(key)?.let { return it }
-    return SectionFitSearch(textMeasurer, table, baseStyle, availableWidth, effectiveHeight).result()
+    return SectionFitSearch(textMeasurer, table, baseStyle, availableWidth, effectiveHeight, softWrap).result()
         .also { SectionFitCache.put(key, it) }
 }
 
