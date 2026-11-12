@@ -3,16 +3,22 @@
 package org.churchpresenter.presenter.screenshot
 
 import org.churchpresenter.core.models.songs.SectionTranslation
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
+import org.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.presenter.titleSlideSection
 import org.churchpresenter.core.models.songs.SongItem
@@ -22,6 +28,7 @@ import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.withTitleSlideBackground
 import org.churchpresenter.settings.utils.Constants
 import java.awt.Color
 import java.awt.GradientPaint
@@ -168,6 +175,30 @@ class PresenterTitleSlideScreenshotTest {
         )
     }
 
+    /**
+     * The title slide set to no background (#1016) on an output that keys: the number and credits
+     * alone over what is behind the output -- here a gradient standing in for the video -- while
+     * the Songs background is a photograph it no longer draws.
+     */
+    @Test
+    fun `the intro slide over no background`() = shoot("intro_slide_no_background") {
+        Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(BEHIND_TOP, BEHIND_BOTTOM)))) {
+            CompositionLocalProvider(LocalTransparentBlanking provides true) {
+                val settings = titleSlideSettings()
+                SongPresenter(
+                    lyricSection = introSlide(),
+                    appSettings = settings.copy(
+                        songSettings = settings.songSettings.withTitleSlideBackground(
+                            lowerThird = false,
+                            value = Constants.TITLE_SLIDE_BACKGROUND_NONE,
+                        ),
+                        backgroundSettings = BackgroundSettings(songBackground = imageBackground()),
+                    ),
+                )
+            }
+        }
+    }
+
     /** The song with every credit filled in, so each of the slide's elements has something to draw. */
     private fun fullIntroSlide() = titleSlideSection(
         SongItem(
@@ -244,5 +275,9 @@ class PresenterTitleSlideScreenshotTest {
     private companion object {
         const val SECTION = "presenterTitleSlide"
         val FIXTURES = File("build/screenshot-fixtures/presenter")
+
+        /** What is behind a keyed output in [the intro slide over no background]: the video, as it were. */
+        val BEHIND_TOP = ComposeColor(0xFF5A3E2B)
+        val BEHIND_BOTTOM = ComposeColor(0xFF9C2F2F)
     }
 }

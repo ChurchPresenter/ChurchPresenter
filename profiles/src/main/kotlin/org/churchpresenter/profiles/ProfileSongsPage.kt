@@ -451,6 +451,7 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
                 )
             }
         }
+        if (song.titleSlideEnabled) TitleSlideBackgroundRow(song, lowerThird, updateSong)
         SettingsSwitchRow(
             Res.string.profile_word_wrap,
             song.wordWrap,
@@ -558,7 +559,8 @@ private const val SECTION_LABEL_PATH = "songSettings.layoutExtras.sectionLabel"
 
 /** Everything the Slides group writes. */
 private val SLIDES_PATHS = listOf(
-    "songSettings.titleSlideEnabled", "songSettings.titleSlideVerticalAlignment", "songSettings.wordWrap",
+    "songSettings.titleSlideEnabled", "songSettings.titleSlideVerticalAlignment",
+    titleSlideBackgroundPath(lowerThird = false), titleSlideBackgroundPath(lowerThird = true), "songSettings.wordWrap",
     "songSettings.autoRepeatChorus", "songSettings.showEndOfSongIndicator",
     "songSettings.endOfSongIndicatorSpacing", "$SECTION_LABEL_PATH.enabled",
 )

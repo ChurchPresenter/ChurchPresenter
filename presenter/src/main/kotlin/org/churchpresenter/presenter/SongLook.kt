@@ -24,6 +24,7 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.songLanguageSelection
+import org.churchpresenter.settings.titleSlideHidesBackground
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.SongSettings
 
@@ -62,6 +63,10 @@ internal class SongLook(
     // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val ss = appSettings.songSettings
+
+    /** The title slide, on an output whose profile draws it over no background (#1016). */
+    val titleSlideBare: Boolean =
+        lyricSection.type == Constants.SECTION_TYPE_TITLE_SLIDE && ss.titleSlideHidesBackground(isLowerThird)
     val effectiveLangDisplay = if (languageOverride.isNotBlank()) languageOverride else {
         if (lookAheadEnabled) {
             if (isLowerThird) ss.lowerThirdLookAheadLanguageDisplay else ss.lookAheadLanguageDisplay

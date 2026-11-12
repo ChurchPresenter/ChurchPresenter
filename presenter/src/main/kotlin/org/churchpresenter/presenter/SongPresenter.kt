@@ -167,6 +167,7 @@ fun SongPresenter(
             showBackground = showBackground,
             transparentWhenBlank = LocalTransparentBlanking.current,
             ownBackground = if (isLowerThird) lyricSection.lowerThirdBackground else lyricSection.background,
+            hideOwnBackground = titleSlideBare,
         )
         // The picture is decoded only where it is drawn: on the band, or full screen when this draws
         // the background itself rather than leaving it to the background layer.

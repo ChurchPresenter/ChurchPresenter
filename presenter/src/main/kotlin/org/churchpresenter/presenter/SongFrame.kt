@@ -248,7 +248,7 @@ internal fun BoxWithConstraintsScope.SongFrameContent(look: SongLook, backdrop: 
         }
     }
     val frame = SongFrame(look, backdrop, blurRadius, maxWidth, maxHeight, songFit)
-    if (look.isLowerThird) SongLowerThirdBand(frame)
+    if (look.isLowerThird && !frame.resolvedBg.bare) SongLowerThirdBand(frame)
     frame.SongTextArea()
 }
 

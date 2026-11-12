@@ -2991,6 +2991,10 @@
     <string name="profile_title_slide">Title slide</string>
     <string name="profile_title_slide_sub">Opens each song with its title and credits.</string>
     <string name="profile_title_slide_valign">Title slide position</string>
+    <string name="profile_title_slide_background">Title slide background</string>
+    <string name="profile_title_slide_background_sub">None leaves only the number and credits, over whatever is behind the output: see-through where the output keys, black on a window.</string>
+    <string name="title_slide_background_song">Same as the song</string>
+    <string name="title_slide_background_none">None</string>
     <string name="profile_word_wrap">Word wrap</string>
     <string name="profile_repeat_chorus">Repeat chorus after each verse</string>
     <string name="profile_end_marker">End-of-song marker</string>

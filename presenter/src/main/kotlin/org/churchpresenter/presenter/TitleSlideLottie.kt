@@ -77,7 +77,7 @@ internal fun SongLook.TitleSlideLottieBand(template: BibleLottieTemplate, modifi
     BoxWithConstraints(modifier.fillMaxSize()) {
         AboveBandFill(
             above = above,
-            show = showBackground,
+            show = showBackground && !titleSlideBare,
             bandFraction = effectiveBandFraction(
                 canvasAspectRatio = maxWidth / maxHeight,
                 bandFraction = lowerThirdFraction,
@@ -97,7 +97,8 @@ internal fun SongLook.TitleSlideLottieBand(template: BibleLottieTemplate, modifi
             bandFraction = lowerThirdFraction,
             bandClock = LocalTitleSlideClock.current,
             isKey = isKey,
-            showBackground = showBackground,
+            // No background on the title slide leaves out the template's band shapes too.
+            showBackground = showBackground && !titleSlideBare,
         )
     }
 }

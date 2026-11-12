@@ -24,6 +24,7 @@ import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.presenter.titleSlideSection
+import org.churchpresenter.settings.withTitleSlideBackground
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.settings.SongCreditStyle
@@ -562,6 +563,19 @@ class PresenterLowerThirdScreenshotTest {
         introSlide(),
         titleSlideSettings(titleSlideShowCcli = true, titleSlideShowTempo = true),
         languageOverride = Constants.SONG_LANG_BOTH,
+    )
+
+    /** Set to no background (#1016): no band, the number and credits alone over the camera. */
+    @Test
+    fun `the intro slide with no band`() = shootSong(
+        "song_intro_slide_no_band",
+        introSlide(),
+        titleSlideSettings(shadowed = true).let {
+            it.copy(
+                songSettings = it.songSettings.withTitleSlideBackground(true, Constants.TITLE_SLIDE_BACKGROUND_NONE),
+            )
+        },
+        overlayPhoto = true,
     )
 
     /** Over a camera feed, with the band's profiles shadowed. */

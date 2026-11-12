@@ -153,6 +153,12 @@ object Constants {
     /** The synthetic section the Songs tab puts in front of a song when title slides are on. */
     const val SECTION_TYPE_TITLE_SLIDE = "title_slide"
 
+    /** The title slide is drawn over the song's background, as every other slide is. */
+    const val TITLE_SLIDE_BACKGROUND_SONG = "song"
+
+    /** The title slide is drawn over no background: transparent where the output keys, else black. */
+    const val TITLE_SLIDE_BACKGROUND_NONE = "none"
+
     /**
      * The section markers the song editor offers on its Insert row, in the order shown.
      *

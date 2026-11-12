@@ -119,6 +119,15 @@ data class SongLayoutExtras(
     val titleSlideLottie: String = "",
     /** [titleSlideLottie] for the lower third: played in the band's place while the title slide is up. */
     val titleSlideLottieLowerThird: String = "",
+    /**
+     * What the full-screen title slide is drawn over: [Constants.TITLE_SLIDE_BACKGROUND_SONG], the
+     * song's background as every other slide has it, or [Constants.TITLE_SLIDE_BACKGROUND_NONE] --
+     * nothing, so the number and credits sit over whatever is behind the output (#1016). The quick
+     * tray's live pick still wins over None.
+     */
+    val titleSlideBackground: String = Constants.TITLE_SLIDE_BACKGROUND_SONG,
+    /** [titleSlideBackground] for the lower third: None draws no band under the title slide. */
+    val titleSlideBackgroundLowerThird: String = Constants.TITLE_SLIDE_BACKGROUND_SONG,
 )
 
 /** The Lottie template the title slide plays on this output, or empty to draw it as it always was. */
@@ -131,6 +140,23 @@ fun SongSettings.withTitleSlideLottie(lowerThird: Boolean, path: String): SongSe
         layoutExtras.copy(titleSlideLottieLowerThird = path)
     } else {
         layoutExtras.copy(titleSlideLottie = path)
+    },
+)
+
+/** What the title slide is drawn over on this output -- see [SongLayoutExtras.titleSlideBackground]. */
+fun SongSettings.titleSlideBackground(lowerThird: Boolean): String =
+    if (lowerThird) layoutExtras.titleSlideBackgroundLowerThird else layoutExtras.titleSlideBackground
+
+/** Whether the title slide is drawn over no background on this output. */
+fun SongSettings.titleSlideHidesBackground(lowerThird: Boolean): Boolean =
+    titleSlideBackground(lowerThird) == Constants.TITLE_SLIDE_BACKGROUND_NONE
+
+/** These settings with [value] as what the title slide is drawn over on this output. */
+fun SongSettings.withTitleSlideBackground(lowerThird: Boolean, value: String): SongSettings = copy(
+    layoutExtras = if (lowerThird) {
+        layoutExtras.copy(titleSlideBackgroundLowerThird = value)
+    } else {
+        layoutExtras.copy(titleSlideBackground = value)
     },
 )
 
