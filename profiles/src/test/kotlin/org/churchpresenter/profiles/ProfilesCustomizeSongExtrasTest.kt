@@ -19,6 +19,9 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import org.churchpresenter.settings.SongNumberOffset
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.assertCountEquals
+import org.churchpresenter.settings.titleSlideHidesBackground
 import androidx.compose.ui.test.performTextReplacement
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -65,6 +68,56 @@ class ProfilesCustomizeSongExtrasTest {
 
             assertFalse(get().song().titleSlideEnabled, "it started on and must have gone off")
         }
+    }
+
+    @Test
+    fun `the title slide's background is chosen for the full screen alone`() {
+        profilesTab(output()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
+            pickTitleSlideBackground("None")
+
+            assertTrue(get().song().titleSlideHidesBackground(lowerThird = false))
+            assertFalse(get().song().titleSlideHidesBackground(lowerThird = true), "the band keeps its own")
+
+            pickTitleSlideBackground("Same as the song")
+            assertFalse(get().song().titleSlideHidesBackground(lowerThird = false))
+        }
+    }
+
+    @Test
+    fun `a band stores its own title slide background`() {
+        profilesTab(output(band)) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
+            pickTitleSlideBackground("None")
+
+            assertTrue(get().song().titleSlideHidesBackground(lowerThird = true))
+            assertFalse(get().song().titleSlideHidesBackground(lowerThird = false), "the full screen keeps its own")
+        }
+    }
+
+    @Test
+    fun `the title slide's background is offered only while there is a title slide`() {
+        profilesTab(output(song = SongSettings(titleSlideEnabled = false))) { _ ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
+            onNodeWithTag("song_titleSlideEnabled").assertExists("the Slides group is open")
+            onAllNodesWithTag(TITLE_SLIDE_BACKGROUND_TAG).assertCountEquals(0)
+        }
+    }
+
+    @Test
+    fun `each output names its own title slide background path`() {
+        assertEquals("songSettings.layoutExtras.titleSlideBackground", titleSlideBackgroundPath(lowerThird = false))
+        assertEquals(
+            "songSettings.layoutExtras.titleSlideBackgroundLowerThird",
+            titleSlideBackgroundPath(lowerThird = true),
+        )
+    }
+
+    private fun SkikoComposeUiTest.pickTitleSlideBackground(option: String) {
+        onNode(hasText(option) and hasAnyAncestor(hasTestTag(TITLE_SLIDE_BACKGROUND_TAG)))
+            .performScrollTo()
+            .performClick()
+        waitForIdle()
     }
 
     @Test

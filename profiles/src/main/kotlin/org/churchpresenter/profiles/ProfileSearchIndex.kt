@@ -81,6 +81,7 @@ import org.churchpresenter.strings.generated.resources.profile_text_shadow
 import org.churchpresenter.strings.generated.resources.profile_text_size
 import org.churchpresenter.strings.generated.resources.profile_text_style
 import org.churchpresenter.strings.generated.resources.profile_title_slide
+import org.churchpresenter.strings.generated.resources.profile_title_slide_background
 import org.churchpresenter.strings.generated.resources.profile_translation_divider
 import org.churchpresenter.strings.generated.resources.profile_vertical_alignment
 import org.churchpresenter.strings.generated.resources.profile_word_wrap
@@ -145,7 +146,8 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
             Res.string.bible_split_long_verses,
         )
         CustomizePane.SONGS -> TEXT_ROWS + PLACE_ROWS + listOf(
-            Res.string.profile_text_autofit, Res.string.profile_title_slide, Res.string.profile_word_wrap,
+            Res.string.profile_text_autofit, Res.string.profile_title_slide,
+            Res.string.profile_title_slide_background, Res.string.profile_word_wrap,
             Res.string.profile_repeat_chorus, Res.string.profile_end_marker, Res.string.profile_section_label,
         )
         CustomizePane.BACKGROUND -> listOf(

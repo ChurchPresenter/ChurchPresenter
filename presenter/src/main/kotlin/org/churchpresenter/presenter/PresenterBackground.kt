@@ -136,6 +136,11 @@ data class ResolvedBackground(
     val blurReferencePx: Int = 0,
     /** The device a camera background draws. Unset for every other type. */
     val camera: CameraDeviceRef = CameraDeviceRef(),
+    /**
+     * Nothing was chosen to be drawn here: a title slide set to no background (#1016). A lower
+     * third draws no band at all for it, rather than a band of the blank colour.
+     */
+    val bare: Boolean = false,
 ) {
     val usesVideo: Boolean get() = type == Constants.BACKGROUND_VIDEO && videoPath.isNotEmpty()
     val usesCamera: Boolean get() = type == Constants.BACKGROUND_CAMERA && camera.isSet
@@ -162,6 +167,11 @@ internal fun resolveBackground(
     transparentWhenBlank: Boolean,
     /** The background this content carries itself, if any. Bible verses carry none. */
     ownBackground: SongBackground = SongBackground(),
+    /**
+     * Draw nothing unless the quick tray has a pick: a title slide its profile sets to no
+     * background (#1016). Beats [ownBackground] and [config] alike.
+     */
+    hideOwnBackground: Boolean = false,
     /** The cameras this machine has; see [songBackgroundResolves]. Passed explicitly only by tests. */
     knownCameras: List<CameraDevice>? = CameraDeviceCatalog.devices.value,
 ): ResolvedBackground {
@@ -182,18 +192,17 @@ internal fun resolveBackground(
     val live = when {
         !showBackground -> null
         overrideDraws -> override
+        hideOwnBackground -> null
         ownDraws -> ownBackground
         else -> null
     }
 
     return when {
         // Browser Source scenes blank to transparent (OBS keying); projector windows to black.
-        !showBackground -> ResolvedBackground(
-            type = if (transparentWhenBlank) Constants.BACKGROUND_TRANSPARENT else Constants.BACKGROUND_COLOR,
-            imagePath = "",
-            videoPath = "",
-            color = Color.Black,
-        )
+        !showBackground -> blankBackground(transparentWhenBlank)
+        // A band can always be left out, whatever the output keys.
+        hideOwnBackground && live == null ->
+            blankBackground(transparentWhenBlank || isLowerThird).copy(bare = true)
         live != null -> ResolvedBackground(
             type = songBackgroundTypeConstant(live.type),
             imagePath = live.image,
@@ -418,6 +427,14 @@ internal fun rememberBackgroundBitmap(background: ResolvedBackground, isLowerThi
     }
     return bitmap
 }
+
+/** What a blanked background draws: transparent where the output keys, black on a window. */
+private fun blankBackground(transparent: Boolean) = ResolvedBackground(
+    type = if (transparent) Constants.BACKGROUND_TRANSPARENT else Constants.BACKGROUND_COLOR,
+    imagePath = "",
+    videoPath = "",
+    color = Color.Black,
+)
 
 /** The modifier that paints [background] — the colour, the gradient or the picture itself. */
 internal fun backgroundModifier(background: ResolvedBackground, bitmap: ImageBitmap?): Modifier = when {

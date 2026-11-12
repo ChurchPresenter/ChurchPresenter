@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.titleSlideHidesBackground
+import org.churchpresenter.settings.utils.Constants
 
 // The full-screen backgrounds Bible and song slides draw, alone, for an output's background layer.
 //
@@ -89,6 +91,8 @@ fun SongSlideBackground(
         showBackground = showBackground,
         transparentWhenBlank = LocalTransparentBlanking.current,
         ownBackground = lyricSection.background,
+        hideOwnBackground = lyricSection.type == Constants.SECTION_TYPE_TITLE_SLIDE &&
+            appSettings.songSettings.titleSlideHidesBackground(lowerThird = false),
     )
     val enterAlpha = rememberSongEnterAlpha(appSettings)
     PersistentBackground(
