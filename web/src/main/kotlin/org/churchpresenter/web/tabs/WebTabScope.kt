@@ -73,8 +73,10 @@ internal class WebTabScope(
     var zoomLevel: Double
         get() = state.zoomLevel
         set(value) { state.zoomLevel = value }
+
+    /** The Desktop/Mobile button: the live output's, which outlives the tab, or the tab's own without one. */
     var isMobileView: Boolean
-        get() = state.isMobileView
+        get() = output?.webMobile?.value ?: state.isMobileView
         set(value) { state.isMobileView = value }
     var typeBuffer: String
         get() = state.typeBuffer
@@ -108,16 +110,14 @@ internal class WebTabScope(
         browser?.setZoomLevel(level)
     }
 
+    /**
+     * The Desktop/Mobile button: the tab's own page, and every output that follows the button (see
+     * `WebPageView`), switch layout. The outputs take the change whether or not the page is live.
+     */
     fun onMobileToggle(mobile: Boolean) {
         isMobileView = mobile
         navController.setMobileEmulation(mobile)
-        // Also toggle on the live browser if presenting
-        if (isLive) {
-            output?.liveBrowser?.value?.let { liveBrowser ->
-                // The live browser uses a separate NavController, so override UA + reload directly
-                liveBrowser.reload()
-            }
-        }
+        output?.setWebMobile(mobile)
     }
 }
 

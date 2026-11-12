@@ -27,8 +27,10 @@ import kotlin.math.roundToInt
  *
  * The page is laid out [LAYOUT_WIDTH] DIPs wide on any output at least that wide, at a device scale
  * that makes its pixels the largest output's (a 4K projector gets a sharp 1080p-shaped page, not a
- * 4K-wide one); an output of another shape draws it letterboxed. Built and closed on the AWT event
- * thread, which with windowless rendering is Chromium's own.
+ * 4K-wide one); an output of another shape draws it letterboxed. A desktop page is always landscape
+ * and a mobile page always portrait, [MOBILE_LAYOUT_WIDTH] DIPs wide: a screen of the other shape
+ * draws it fitted (see [shapeFor]). Built and closed on the AWT event thread, which with windowless
+ * rendering is Chromium's own.
  */
 class OffscreenPage internal constructor(
     private val client: CefClient,
@@ -56,7 +58,12 @@ class OffscreenPage internal constructor(
     private val clock = options.clock
     internal val stats = OffscreenStats()
     private val rgba = os.startsWith("Linux")
-    private var pixels = IntSize(LAYOUT_WIDTH, DEFAULT_HEIGHT)
+    private val mobileMode = options.mobileMode
+    private var mobile = options.mobileMode()
+
+    /** The largest surface asking for the page, as it is; [pixels] is the page's own shape on it. */
+    private var surface = IntSize(LAYOUT_WIDTH, DEFAULT_HEIGHT)
+    private var pixels = shapeFor(surface, mobile)
     private var density = 1.0
     private val reporter = OffscreenReporter(
         tags = ::tags,
@@ -75,7 +82,7 @@ class OffscreenPage internal constructor(
         client.addDisplayHandler(ConsoleClipboardHandler(onUrlChanged, onTitleChanged, os))
         client.addLifeSpanHandler(PopupsInPlace)
         client.addRequestHandler(MobileUserAgentHandler(options.mobileMode, ::rendererEnded))
-        val (view, scale) = layoutFor(pixels)
+        val (view, scale) = layoutFor(pixels, mobile = mobile)
         val settings = CefBrowserSettings().apply { windowless_frame_rate = FRAME_RATE }
         CefBrowserHeadless(client, url, settings, view.width, view.height, scale, store)
     }
@@ -123,15 +130,26 @@ class OffscreenPage internal constructor(
         if (requested.remove(surface) != null && !closed) resizeTimer.restart()
     }
 
+    /**
+     * The page's mode changed between desktop and mobile: it takes the new shape now, and the reload
+     * that sends the new User-Agent is the caller's.
+     */
+    fun modeChanged() = applySize()
+
     /** Renders at the largest requested size; run by the resize timer once requests have settled. */
     internal fun applySize() {
         if (closed) return
-        val (largest, largestDensity) = requested.values.maxByOrNull { (size, _) -> size.width.toLong() * size.height }
-            ?: return
-        if (largest == pixels && largestDensity == density) return
+        val nowMobile = mobileMode()
+        val (largestSurface, largestDensity) = requested.values
+            .maxByOrNull { (size, _) -> shapeFor(size, nowMobile).let { it.width.toLong() * it.height } }
+            ?: (if (nowMobile != mobile) surface to density else return)
+        val largest = shapeFor(largestSurface, nowMobile)
+        if (largest == pixels && largestDensity == density && nowMobile == mobile) return
+        surface = largestSurface
         pixels = largest
         density = largestDensity
-        val (view, scale) = layoutFor(largest, largestDensity)
+        mobile = nowMobile
+        val (view, scale) = layoutFor(largest, largestDensity, nowMobile)
         headless.resize(view.width, view.height, scale)
         CrashReporter.breadcrumb("Off-screen web page resized to ${largest.width}x${largest.height}", category = "web")
     }
@@ -183,6 +201,9 @@ class OffscreenPage internal constructor(
     companion object {
         /** The page is laid out this many DIPs wide on any output at least this wide. */
         const val LAYOUT_WIDTH = 1920
+
+        /** A mobile page is laid out this many DIPs wide, a large phone's, whatever the output. */
+        const val MOBILE_LAYOUT_WIDTH = 430
         private const val DEFAULT_HEIGHT = 1080
         private const val RESIZE_SETTLE_MS = 250
         private const val TICK_MS = 1000
@@ -238,11 +259,37 @@ class OffscreenPage internal constructor(
                 .getOrNull()
         }
 
-        /** The page's size in DIPs, and the device scale, for an output of [pixels] on a screen of [density]. */
-        internal fun layoutFor(pixels: IntSize, density: Double = 1.0): Pair<IntSize, Double> {
+        /**
+         * The page's size in DIPs, and the device scale, for a page of [pixels] (already its own shape,
+         * see [shapeFor]) on a screen of [density]. A [mobile] page is [MOBILE_LAYOUT_WIDTH] DIPs wide
+         * however small the surface, so a site never lays out narrower than a phone.
+         */
+        internal fun layoutFor(pixels: IntSize, density: Double = 1.0, mobile: Boolean = false): Pair<IntSize, Double> {
+            if (mobile) {
+                val scale = maxOf(1.0, pixels.width.toDouble() / MOBILE_LAYOUT_WIDTH)
+                val height = (MOBILE_LAYOUT_WIDTH.toDouble() * pixels.height / pixels.width).roundToInt()
+                return IntSize(MOBILE_LAYOUT_WIDTH, height) to scale
+            }
             val scale = maxOf(1.0, density, pixels.width.toDouble() / LAYOUT_WIDTH)
             return IntSize((pixels.width / scale).roundToInt(), (pixels.height / scale).roundToInt()) to scale
         }
+
+        /**
+         * The page's shape in pixels on a surface of [size]: the surface itself when it is the
+         * page's own orientation, or else the largest 16:9 page (9:16 for [mobile]) that fits in it,
+         * which the surface then draws fitted. A square surface counts as landscape.
+         */
+        internal fun shapeFor(size: IntSize, mobile: Boolean): IntSize {
+            val portrait = size.height > size.width
+            return when {
+                mobile == portrait -> size
+                mobile -> IntSize((size.height * SHORT_SIDE / LONG_SIDE).coerceAtMost(size.width), size.height)
+                else -> IntSize(size.width, (size.width * SHORT_SIDE / LONG_SIDE).coerceAtMost(size.height))
+            }
+        }
+
+        private const val SHORT_SIDE = 9
+        private const val LONG_SIDE = 16
     }
 }
 

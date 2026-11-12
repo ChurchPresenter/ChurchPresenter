@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -525,7 +526,9 @@ class WebNavController(browser: CefBrowser? = null) {
     /** The page this controller drives, once the view has created it. Only the view sets it. */
     var browser: CefBrowser? = browser
         internal set
-    var mobileMode: Boolean = false
+
+    /** Whether this page asks for mobile pages; state, so a page drawn off screen can take the shape. */
+    var mobileMode: Boolean by mutableStateOf(false)
     fun goBack() { browser?.goBack() }
     fun goForward() { browser?.goForward() }
     fun canGoBack(): Boolean = browser?.canGoBack() ?: false
@@ -720,6 +723,7 @@ fun WebsitePresenter(
     audioDeviceId: String = "",
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     offscreenPage: OffscreenPage? = null,
+    mobile: Boolean = false,
 ) {
     // Key mode: solid white frame (mixer sees "fully visible")
     if (outputRole == Constants.OUTPUT_ROLE_KEY) {
@@ -742,11 +746,14 @@ fun WebsitePresenter(
         OffscreenWebView(offscreenPage, modifier.fillMaxSize().background(Color.Black), drivesSize = true)
         return
     }
-    // The windowed browser here is the fallback for a page that failed to start off screen.
+    // The windowed browser here is the fallback for a page that failed to start off screen. It is
+    // this window's own, so it already takes the window's shape; [mobile] only sets the User-Agent.
+    val nav = rememberMobileNavController(mobile)
     EmbeddedWebView(
         url = url,
         modifier = modifier.fillMaxSize(),
         offscreen = false,
+        navController = nav,
         onSnapshot = onSnapshot,
         onBrowserCreated = onBrowserCreated,
         onUrlChanged = onUrlChanged,

@@ -1652,6 +1652,9 @@
     <string name="aspect_ratio_mismatch">Aspect ratio mismatch: file is %1$dx%2$d (%3$s) but output is %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobile</string>
     <string name="desktop_view">Desktop</string>
+    <string name="profile_web_page_view">Website layout</string>
+    <string name="profile_web_page_view_follow">Follow Web tab</string>
+    <string name="profile_web_page_view_note">When screens show different layouts, each layout is its own copy of the page: scrolling and typing may not match between them, and results may be unexpected.</string>
     <string name="interactive_mode">Interactive</string>
     <string name="mirror_mode">Mirror</string>
 

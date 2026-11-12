@@ -29,8 +29,12 @@ interface WebOutput {
     /** The live page every output draws when the engine renders off screen; the tab draws and controls it. */
     val offscreenPage: State<OffscreenPage?>
 
+    /** Whether the Desktop/Mobile button says mobile: what the outputs that follow it show. */
+    val webMobile: State<Boolean>
+
     fun setPresentingMode(mode: Presenting)
     fun setWebsiteUrl(url: String)
     fun setWebPageTitle(title: String)
     fun setWebSnapshot(bitmap: ImageBitmap?)
+    fun setWebMobile(mobile: Boolean)
 }

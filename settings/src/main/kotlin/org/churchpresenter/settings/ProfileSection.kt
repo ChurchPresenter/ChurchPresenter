@@ -45,6 +45,6 @@ const val OWN_SECTION = ""
 val CONTENT_PATHS = listOf(
     "bibleMode", "bibleTranslations", "songMode", "songTranslations", "songLookAhead", "showChords",
     "showTransposeControls", "look", "pictureScaleMode",
-    "mediaScaleMode", "lowerThirdPlacements",
+    "mediaScaleMode", "webPageView", "lowerThirdPlacements",
     "lowerThirdOverContent", "announcementsOverContent", "captionsOverContent",
 )

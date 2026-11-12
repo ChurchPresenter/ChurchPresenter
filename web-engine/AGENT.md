@@ -19,7 +19,9 @@ unchanged, so no import moved with them.
 
 **Off-screen rendering** (`offscreen/`, on unless *Smooth web output* is turned off in System
 settings) renders the live page once in a windowless Chromium and draws the same frames on every
-output, the previews and the Web tab: `OffscreenPage` (one page, built off composition),
+output, the previews and the Web tab — once per layout: a desktop page (landscape) and a mobile
+page (portrait, `MOBILE_LAYOUT_WIDTH` DIPs wide), each open only while an output's profile
+(`WebPageView`) or the Web tab's Desktop/Mobile button asks for it: `OffscreenPage` (one page, built off composition),
 `OffscreenFrames` (the copy out of Chromium's buffer and the level pyramid for small surfaces),
 `OffscreenWebView`/`OffscreenWebControl` (drawing, and the operator's mouse and keys), the per-platform
 key fixes (`PageKeys`, `LinuxKeys`, `LinuxClipboard`, Windows' `SentMessagePump`) and the Sentry

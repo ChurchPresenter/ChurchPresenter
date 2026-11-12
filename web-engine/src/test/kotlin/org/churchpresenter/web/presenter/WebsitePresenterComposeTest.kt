@@ -4,6 +4,9 @@ package org.churchpresenter.web.presenter
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
@@ -21,7 +24,9 @@ import org.cef.network.CefRequest
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.testing.assertColorAt
 
 class WebsitePresenterComposeTest {
@@ -106,6 +111,31 @@ class WebsitePresenterComposeTest {
         lateinit var controller: WebNavController
         setContent { controller = rememberWebNavController() }
         controller.goBack()
+    }
+
+    @Test
+    fun `an output's own browser starts in its layout and reloads only when the layout changes`() = runComposeUiTest {
+        var mobile by mutableStateOf(true)
+        lateinit var controller: WebNavController
+        setContent { controller = rememberMobileNavController(mobile) }
+        waitForIdle()
+        assertTrue(controller.mobileMode)
+        val browser = mockk<CefBrowser>(relaxed = true)
+        controller.browser = browser
+
+        mobile = false
+        waitForIdle()
+        assertFalse(controller.mobileMode)
+        verify(exactly = 1) { browser.reload() }
+    }
+
+    @Test
+    fun `a windowed output in the mobile layout does not crash without an engine`() = runComposeUiTest {
+        setContent {
+            Box(Modifier.size(200.dp, 200.dp)) {
+                WebsitePresenter(url = "https://example.com", mobile = true)
+            }
+        }
     }
 
     @Test

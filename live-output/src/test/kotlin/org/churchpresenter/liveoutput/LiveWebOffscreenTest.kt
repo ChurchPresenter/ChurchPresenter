@@ -8,6 +8,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.presenter.LocalInMergedTile
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.WebPageView
 import org.churchpresenter.web.offscreen.OffscreenPage
 import org.churchpresenter.web.offscreen.stubOffscreenPage
 import javax.swing.SwingUtilities
@@ -30,7 +31,7 @@ class LiveWebOffscreenTest {
     private val pages = mutableListOf<OffscreenPage>()
     private val urls = mutableListOf<String>()
 
-    private fun state(opens: Boolean = true) = LiveWebState(context, offscreen = true) { url, _, _ ->
+    private fun state(opens: Boolean = true) = LiveWebState(context, offscreen = true) { url, _ ->
         urls += url
         if (opens) stubOffscreenPage().also { pages += it } else null
     }
@@ -40,12 +41,24 @@ class LiveWebOffscreenTest {
         pages.forEach(OffscreenPage::close)
     }
 
-    private fun surface(kind: OutputSurfaceKind, manager: PresenterManager) =
-        OutputSurface(kind, OutputProfile(), AppSettings(), manager, outputRole = "", showBg = true)
+    private val modes = mutableListOf<Boolean>()
+    private val callbacks = mutableListOf<PageCallbacks>()
+
+    private fun twoLayouts() = LiveWebState(context, offscreen = true) { _, page ->
+        modes += page.mobileMode()
+        callbacks += page
+        stubOffscreenPage().also { pages += it }
+    }
+
+    private fun surface(
+        kind: OutputSurfaceKind,
+        manager: PresenterManager,
+        view: WebPageView = WebPageView.FOLLOW_WEB_TAB,
+    ) = OutputSurface(kind, OutputProfile(webPageView = view), AppSettings(), manager, outputRole = "", showBg = true)
 
     /** Runs what the close timer would, once it has fired. */
-    private fun LiveWebState.afterCloseDelay() {
-        SwingUtilities.invokeAndWait { closeUnusedPage() }
+    private fun LiveWebState.afterCloseDelay(mobile: Boolean = false) {
+        SwingUtilities.invokeAndWait { closeUnusedPage(mobile) }
     }
 
     @Test
@@ -107,7 +120,7 @@ class LiveWebOffscreenTest {
 
     @Test
     fun `a windowed engine never opens a page`() {
-        val web = LiveWebState(context, offscreen = false) { _, _, _ -> error("not called") }
+        val web = LiveWebState(context, offscreen = false) { _, _ -> error("not called") }
         web.useOffscreenPage()
         web.releaseOffscreenPage()
         web.releaseOffscreenPage()
@@ -148,5 +161,99 @@ class LiveWebOffscreenTest {
             onAllNodes(hasTestTag(WEB_OFFSCREEN_TAG)).assertCountEquals(0)
         }
         assertTrue(pages.isEmpty())
+    }
+
+    // ── The desktop and mobile layouts ──────────────────────────────────────────
+
+    @Test
+    fun `each layout is a page of its own, asking for its own User-Agent`() {
+        val web = twoLayouts()
+        web.useOffscreenPage(mobile = false)
+        web.useOffscreenPage(mobile = true)
+
+        assertEquals(listOf(false, true), modes)
+        assertSame(pages[0], web.offscreenPageFor(false))
+        assertSame(pages[1], web.offscreenPageFor(true))
+    }
+
+    @Test
+    fun `the Web tab steers the page in its button's layout, or the other when that one is not open`() {
+        val web = twoLayouts()
+        web.useOffscreenPage(mobile = true)
+        val mobile = pages.single()
+        assertSame(mobile, web.offscreenPage.value, "only the mobile page is open")
+        assertSame(mobile.browser, web.liveBrowser.value)
+
+        web.useOffscreenPage(mobile = false)
+        val desktop = pages[1]
+        assertSame(desktop, web.offscreenPage.value, "the button says desktop")
+        assertSame(desktop.browser, web.liveBrowser.value)
+
+        web.setWebMobile(true)
+        assertTrue(web.webMobile.value)
+        assertSame(mobile, web.offscreenPage.value)
+        assertSame(mobile.browser, web.liveBrowser.value)
+        web.setWebMobile(true)
+        assertSame(mobile.browser, web.liveBrowser.value, "pressing the same layout again changes nothing")
+
+        web.releaseOffscreenPage(mobile = true)
+        web.afterCloseDelay(mobile = true)
+        assertNull(web.offscreenPageFor(true))
+        assertSame(desktop, web.offscreenPage.value, "with the mobile page gone, the tab steers the desktop one")
+        assertSame(desktop.browser, web.liveBrowser.value)
+    }
+
+    @Test
+    fun `only the page the Web tab steers moves the address and the title`() {
+        val web = twoLayouts()
+        web.useOffscreenPage(mobile = false)
+        web.useOffscreenPage(mobile = true)
+        val (desktop, mobile) = callbacks
+
+        mobile.onUrlChanged("https://m.example.org")
+        mobile.onTitleChanged("Mobile")
+        assertEquals("", web.websiteUrl.value)
+        assertEquals("", web.webPageTitle.value)
+
+        desktop.onUrlChanged("https://example.org")
+        desktop.onTitleChanged("Desktop")
+        assertEquals("https://example.org", web.websiteUrl.value)
+        assertEquals("Desktop", web.webPageTitle.value)
+    }
+
+    @Test
+    fun `closing one layout leaves the other open`() {
+        val web = twoLayouts()
+        web.useOffscreenPage(mobile = false)
+        web.useOffscreenPage(mobile = true)
+        web.releaseOffscreenPage(mobile = false)
+        web.afterCloseDelay(mobile = false)
+        web.afterCloseDelay(mobile = false)
+
+        assertNull(web.offscreenPageFor(false))
+        assertSame(pages[1], web.offscreenPageFor(true))
+        assertSame(pages[1].browser, web.liveBrowser.value)
+    }
+
+    @Test
+    fun `each screen draws the page its profile asks for, and a following screen moves with the button`() {
+        val web = twoLayouts()
+        val manager = PresenterManager(context, web)
+        manager.setWebsiteUrl("https://example.org")
+        runComposeUiTest {
+            setContent {
+                WebCue(surface(OutputSurfaceKind.OFFSCREEN, manager))
+                WebCue(surface(OutputSurfaceKind.OFFSCREEN, manager, WebPageView.MOBILE))
+                WebCue(surface(OutputSurfaceKind.OFFSCREEN, manager, WebPageView.DESKTOP))
+            }
+            waitForIdle()
+            onAllNodes(hasTestTag(WEB_OFFSCREEN_TAG)).assertCountEquals(3)
+            assertEquals(listOf(false, true), modes, "one page per layout, however many screens show it")
+
+            manager.setWebMobile(true)
+            waitForIdle()
+            onAllNodes(hasTestTag(WEB_OFFSCREEN_TAG)).assertCountEquals(3)
+            assertEquals(listOf(false, true), modes, "the following screen joined the open mobile page")
+        }
     }
 }

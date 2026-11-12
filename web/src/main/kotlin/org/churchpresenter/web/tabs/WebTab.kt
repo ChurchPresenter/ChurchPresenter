@@ -133,6 +133,11 @@ fun WebTab(
     val isLive = output?.isLive(Presenting.WEBSITE) == true
 
     val navController = rememberWebNavController()
+    // The button outlives the tab on the output; the tab's own page starts in its layout.
+    LaunchedEffect(navController) {
+        val mobile = output?.webMobile?.value ?: return@LaunchedEffect
+        if (mobile != navController.mobileMode) navController.setMobileEmulation(mobile)
+    }
     val canShowOutput = hasSecondaryDisplay || devOutputWindows
     val webCapable = remember(appSettings.projectionSettings, devOutputWindows) {
         hasWebCapableOutput(appSettings.projectionSettings, devOutputWindows)
