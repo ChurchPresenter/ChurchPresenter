@@ -13,6 +13,12 @@ import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.composables.sectionKindOf
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.songchords.VOICE_LINE_MARK
+import org.churchpresenter.songchords.VOICE_RUN_OPEN
+import org.churchpresenter.songchords.VoiceKey
+import org.churchpresenter.songchords.blockKeyOf
+import org.churchpresenter.songchords.keyOfMark
+import org.churchpresenter.sharedui.utils.Utils
 
 /** The colours the lyrics box marks its lines in. */
 internal data class LyricsInks(
@@ -25,8 +31,12 @@ internal data class LyricsInks(
     /** The third voice's words and its `3>` marks. */
     val thirdVoice: Color = voice,
 ) {
-    /** The ink [voice]'s words and marks are drawn in. */
-    fun voiceInk(voice: Int): Color = if (voice == SecondVoice.THIRD) thirdVoice else this.voice
+    /** The ink [key]'s words and marks are drawn in: a voice's ink, or a colour's own. */
+    fun voiceInk(key: VoiceKey): Color = when (key.voice) {
+        SecondVoice.THIRD -> thirdVoice
+        SecondVoice.CUSTOM -> Utils.parseHexColor(key.color)
+        else -> voice
+    }
 }
 
 /** A `[...]` marker in a line, which is a chord when [ChordTransposer.isChord] says so. */
@@ -48,21 +58,21 @@ private const val KEPT_LINES = 2_000
  */
 internal class LyricsHighlighter(private val inks: LyricsInks) : VisualTransformation {
 
-    private val lines = HashMap<Pair<String, Int>, AnnotatedString>()
+    private val lines = HashMap<Pair<String, VoiceKey>, AnnotatedString>()
     private var lastText: AnnotatedString? = null
     private var lastResult: TransformedText? = null
 
     override fun filter(text: AnnotatedString): TransformedText {
         if (text == lastText) lastResult?.let { return it }
         if (lines.size > KEPT_LINES) lines.clear()
-        // The voice an open `[voice: n]` block puts its lines in: it ends at `[voice: 1]` or the
-        // next header.
-        var blockVoice = SecondVoice.MAIN
+        // The voice or colour an open `[voice: n]` / `[color: …]` block puts its lines in: it ends
+        // at `[voice: 1]`, `[color]` or the next header.
+        var blockVoice = VoiceKey.MAIN
         val annotated = buildAnnotatedString {
             text.text.split("\n").forEachIndexed { i, line ->
                 if (i > 0) append("\n")
-                SecondVoice.voiceDirectiveOf(line)?.let { blockVoice = it }
-                if (ChordTransposer.isSectionHeader(line)) blockVoice = SecondVoice.MAIN
+                blockKeyOf(line)?.let { blockVoice = it }
+                if (ChordTransposer.isSectionHeader(line)) blockVoice = VoiceKey.MAIN
                 val voice = blockVoice
                 append(lines.getOrPut(line to voice) { highlight(line, voice) })
             }
@@ -73,8 +83,8 @@ internal class LyricsHighlighter(private val inks: LyricsInks) : VisualTransform
         }
     }
 
-    /** One line, coloured for what it is — [blockVoice] being the voice of a `[voice: n]` block holding it. */
-    internal fun highlight(line: String, blockVoice: Int = SecondVoice.MAIN): AnnotatedString = buildAnnotatedString {
+    /** One line, coloured for what it is — [blockVoice] being the key of a block holding it. */
+    internal fun highlight(line: String, blockVoice: VoiceKey = VoiceKey.MAIN): AnnotatedString = buildAnnotatedString {
         if (ChordTransposer.isSlideBreak(line) || ChordTransposer.isBackgroundDirective(line) ||
             SecondVoice.isVoiceDirective(line)
         ) {
@@ -90,17 +100,13 @@ internal class LyricsHighlighter(private val inks: LyricsInks) : VisualTransform
             pushStyle(SpanStyle(color = ink, background = ink.copy(alpha = 0.16f), fontWeight = FontWeight.Bold))
             append(line)
             pop()
-        } else if (blockVoice != SecondVoice.MAIN) {
+        } else if (blockVoice != VoiceKey.MAIN) {
             withStyle(SpanStyle(color = inks.voiceInk(blockVoice))) { appendChordHighlighted(line, inks.chord) }
         } else {
             appendVoiceHighlighted(line, inks)
         }
     }
 }
-
-/** A whole-line `2>` / `3>` mark, and a `2>(` / `3>(` run opening, as the highlighter finds them. */
-private val LINE_MARK = Regex("^\\s*([${SecondVoice.SECOND}-${SecondVoice.THIRD}])>(?!\\()")
-private val RUN_OPEN = Regex("([${SecondVoice.SECOND}-${SecondVoice.THIRD}])>\\(")
 
 /**
  * Appends [line] with its voice markup shown for what it is: the `2>` / `3>` marks and a run's
@@ -115,9 +121,9 @@ private fun AnnotatedString.Builder.appendVoiceHighlighted(line: String, inks: L
     }
     fun markStyle(ink: Color) =
         SpanStyle(color = ink, fontWeight = FontWeight.Bold, background = ink.copy(alpha = 0.16f))
-    LINE_MARK.find(line)?.let { whole ->
-        val ink = inks.voiceInk(whole.groupValues[1].toInt())
-        val markStart = whole.range.last + 1 - SecondVoice.MARK.length
+    VOICE_LINE_MARK.find(line)?.let { whole ->
+        val ink = inks.voiceInk(keyOfMark(whole.groupValues[1]))
+        val markStart = whole.groups[1]!!.range.first
         append(line.take(markStart))
         withStyle(markStyle(ink)) { append(line.substring(markStart, whole.range.last + 1)) }
         withStyle(SpanStyle(color = ink)) { appendChordHighlighted(line.drop(whole.range.last + 1), chordInk) }
@@ -125,8 +131,8 @@ private fun AnnotatedString.Builder.appendVoiceHighlighted(line: String, inks: L
     }
     var cursor = 0
     while (cursor < line.length) {
-        val open = RUN_OPEN.find(line, cursor) ?: break
-        val ink = inks.voiceInk(open.groupValues[1].toInt())
+        val open = VOICE_RUN_OPEN.find(line, cursor) ?: break
+        val ink = inks.voiceInk(keyOfMark(open.groupValues[1]))
         appendChordHighlighted(line.substring(cursor, open.range.first), chordInk)
         val inner = open.range.last + 1
         val close = line.indexOf(')', inner).takeIf { it >= 0 } ?: line.length

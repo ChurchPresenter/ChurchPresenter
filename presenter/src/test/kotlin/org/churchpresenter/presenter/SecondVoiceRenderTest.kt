@@ -119,6 +119,30 @@ class SecondVoiceRenderTest {
     }
 
     @Test
+    fun `a line in a colour of its own is drawn in that colour`() = runComposeUiTest {
+        draw {
+            SongPresenter(lyricSection = verse("Will you take her?", "#00FF00>I will."), appSettings = settings())
+        }
+
+        waitFor("the line's own colour") { it.count(::isGreen) }
+        onNodeWithText("I will.", substring = true).assertExists("the mark is not drawn")
+    }
+
+    @Test
+    fun `a key output draws a coloured line white`() = runComposeUiTest {
+        draw {
+            SongPresenter(
+                lyricSection = verse("Will you take her?", "#00FF00>I will."),
+                appSettings = settings(),
+                outputRole = Constants.OUTPUT_ROLE_KEY,
+            )
+        }
+
+        waitFor("the key draws its matte") { it.count(::isWhite) }
+        assertEquals(0, pixels().count(::isGreen))
+    }
+
+    @Test
     fun `a key output draws the second voice white`() = runComposeUiTest {
         draw {
             SongPresenter(
@@ -196,6 +220,21 @@ class SecondVoiceRenderTest {
 
         waitFor("the voice-2 pass draws its words") { it.count(::isReddish) }
         waitFor("the voice-3 pass draws its words") { it.count(::isBluish) }
+    }
+
+    @Test
+    fun `a Lottie band draws a pass for each colour written in the lyrics`() = runComposeUiTest {
+        draw {
+            SongPresenter(
+                lyricSection = verse("Vows #FF0000>(I will) #0000FF>(I will too)"),
+                appSettings = settings(lottieBand()),
+                isLowerThird = true,
+                displayLineIndex = 0,
+            )
+        }
+
+        waitFor("the red colour's pass draws its words") { it.count(::isReddish) }
+        waitFor("the blue colour's pass draws its words") { it.count(::isBluish) }
     }
 
     @Test

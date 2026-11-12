@@ -97,22 +97,29 @@ fun styledDisplayText(
     }
 }
 
-/** A stretch of a [VoicedLine]'s text that one of the other voices — 2 or 3 — says or sings. */
-data class VoicedRange(val range: IntRange, val voice: Int)
+/**
+ * A stretch of a [VoicedLine]'s text that one of the other voices — 2 or 3 — says or sings, or that
+ * is written in a colour of its own ([SecondVoice.CUSTOM], with the hex in [color]).
+ */
+data class VoicedRange(val range: IntRange, val voice: Int, val color: String = "")
 
-/** What a lyric's other voices are drawn in: voice 2's colour and voice 3's. */
-data class VoiceColors(val second: Color, val third: Color) {
-    /** [voice]'s colour, or null for the main voice. */
-    fun of(voice: Int): Color? = when (voice) {
+/**
+ * What a lyric's other voices are drawn in: voice 2's colour and voice 3's. Words written in a
+ * colour of their own take that colour, or [custom] when it is set — a key output's white.
+ */
+data class VoiceColors(val second: Color, val third: Color, val custom: Color? = null) {
+    /** The colour of [voice] — or, for [SecondVoice.CUSTOM], of the hex [color] — or null for the main voice. */
+    fun of(voice: Int, color: String = ""): Color? = when (voice) {
         SecondVoice.SECOND -> second
         SecondVoice.THIRD -> third
+        SecondVoice.CUSTOM -> custom ?: Utils.parseHexColor(color)
         else -> null
     }
 }
 
 /**
- * A lyric line as drawn: its voice markup (`2>`, `3>(…)`) taken out, cased by [transform], and the
- * ranges of [text] the other voices sing, for their colours to go on.
+ * A lyric line as drawn: its voice markup (`2>`, `3>(…)`, `#E91E63>`) taken out, cased by
+ * [transform], and the ranges of [text] the other voices sing, for their colours to go on.
  *
  * The line is cased whole rather than run by run, so a capitalised run mid-line is not mistaken for
  * the start of a word; when casing changes the length (`ß` → `SS`) the ranges no longer line up, and
@@ -130,7 +137,7 @@ fun voicedLine(line: String, transform: String): VoicedLine {
     var at = 0
     runs.forEach { run ->
         if (run.voice != SecondVoice.MAIN && run.text.isNotEmpty()) {
-            ranges += VoicedRange(at until at + run.text.length, run.voice)
+            ranges += VoicedRange(at until at + run.text.length, run.voice, run.color)
         }
         at += run.text.length
     }
@@ -156,8 +163,8 @@ fun voicedDisplayText(
     if (voiceColors == null || styled.length != voiced.text.length) return styled
     return buildAnnotatedString {
         append(styled)
-        voiced.voiceRanges.forEach { (range, voice) ->
-            voiceColors.of(voice)?.let { addStyle(SpanStyle(color = it), range.first, range.last + 1) }
+        voiced.voiceRanges.forEach { (range, voice, color) ->
+            voiceColors.of(voice, color)?.let { addStyle(SpanStyle(color = it), range.first, range.last + 1) }
         }
     }
 }

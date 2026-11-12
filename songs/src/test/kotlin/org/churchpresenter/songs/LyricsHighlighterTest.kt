@@ -106,6 +106,18 @@ class LyricsHighlighterTest {
     }
 
     @Test
+    fun `a coloured line, run and block are drawn in their own colour`() {
+        val out = highlighter.filter(AnnotatedString("#0000FF>Groom\nAll #FF0000>(Bride)\n[color: #00FF00]\nRing")).text
+
+        fun inkOf(words: String) = out.spanStyles.firstOrNull { out.text.substring(it.start, it.end) == words }?.item
+        assertEquals(Color(0xFF0000FF), inkOf("Groom")?.color)
+        assertEquals(Color(0xFF0000FF), inkOf("#0000FF>")?.color, "the mark is drawn in its colour")
+        assertEquals(Color(0xFFFF0000), inkOf("Bride")?.color)
+        assertEquals(Color.Gray, inkOf("[color: #00FF00]")?.color, "a directive reads as one")
+        assertEquals(Color(0xFF00FF00), inkOf("Ring")?.color)
+    }
+
+    @Test
     fun `text after the last marked words is left plain`() {
         val line = highlighter.highlight("2>(Now) I see")
 

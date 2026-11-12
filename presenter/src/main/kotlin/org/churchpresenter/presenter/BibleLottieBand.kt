@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import org.churchpresenter.sharedui.utils.VoiceColors
 import org.churchpresenter.sharedui.utils.VoicedRange
-import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.songchords.VoiceKey
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFontFamilyResolver
@@ -333,19 +333,18 @@ private fun BandLayer(
             colorFilter = colorFilter,
             modifier = Modifier.fillMaxSize(),
         )
-        // One pass per voice, composed only for a page that has that voice to colour — see
+        // One pass per voice or colour, composed only for a page that has it to colour — see
         // BandVoiceLayout.kt.
-        SecondVoice.VOICES.filter { v -> renders.values.any { r -> r.value.voices.any { it.voice == v } } }
-            .forEach { v ->
-                key(v) {
-                    VoicePass(
-                        VoicePassScene(template, composition, renders, progress, tickerState, groupsText),
-                        v,
-                        contentScale,
-                        colorFilter,
-                    )
-                }
+        renders.values.flatMap { r -> r.value.voices.map { it.key } }.distinct().forEach { voiceKey ->
+            key(voiceKey) {
+                VoicePass(
+                    VoicePassScene(template, composition, renders, progress, tickerState, groupsText),
+                    voiceKey,
+                    contentScale,
+                    colorFilter,
+                )
             }
+        }
     }
 }
 
@@ -360,12 +359,12 @@ private class VoicePassScene(
 )
 
 /**
- * The band's text once more, in each slot's [voice] colour with everything else hidden, cut to
+ * The band's text once more, in each slot's colour for [voice] with everything else hidden, cut to
  * where that voice's words sit — see BandVoiceLayout.kt.
  */
 @OptIn(ExperimentalCompottieApi::class)
 @Composable
-private fun VoicePass(scene: VoicePassScene, voice: Int, contentScale: ContentScale, colorFilter: ColorFilter?) {
+private fun VoicePass(scene: VoicePassScene, voice: VoiceKey, contentScale: ContentScale, colorFilter: ColorFilter?) {
     val template = scene.template
     val renders = scene.renders
     val progress = scene.progress
@@ -397,7 +396,7 @@ private fun VoicePass(scene: VoicePassScene, voice: Int, contentScale: ContentSc
                 val frame = progress() * template.totalFrames
                 val shapes = renders.flatMap { (name, state) ->
                     val r = state.value
-                    val sung = r.voices.firstOrNull { it.voice == voice } ?: return@flatMap emptyList()
+                    val sung = r.voices.firstOrNull { it.key == voice } ?: return@flatMap emptyList()
                     val shift =
                         if (r.ticker) tickerPosition(template, r, tickerState.value) - r.position else Offset.Zero
                     val matrix = template.textMotions[name]?.matrixAt(frame)
@@ -472,12 +471,12 @@ private fun layoutSlot(slot: BandSlotText, geometry: SlotGeometry, measurer: Tex
     val shadowPx = SHADOW_OFFSET_PX * pxPerPoint * shadowScale
     val voiceLines = if (isTicker) listOf(text) else fitted.lines
     val runWidth = voiceRunWidth(shaped, text, scale) { c -> charWidth(c) + trackingPx }
-    val voices = SecondVoice.VOICES.mapNotNull { v ->
-        val color = style.voiceColors.of(v) ?: return@mapNotNull null
-        val ranges = slot.voiceRanges.filter { it.voice == v }.map { it.range }
-        if (ranges.isEmpty() || color == style.color) return@mapNotNull null
+    val voices = slot.voiceRanges.groupBy { VoiceKey(it.voice, it.color) }.mapNotNull { (key, sung) ->
+        val color = style.voiceColors.of(key.voice, key.color) ?: return@mapNotNull null
+        if (color == style.color) return@mapNotNull null
+        val ranges = sung.map { it.range }
         BandVoice(
-            v,
+            key,
             color,
             BandVoiceLayout(
                 text = text,
@@ -519,7 +518,7 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     state: State<SlotRender>,
     ticker: State<Float>,
     shadow: Boolean,
-    voice: Int? = null,
+    voice: VoiceKey? = null,
 ) {
     val textIn = template.segment(BibleLottieTemplate.SEGMENT_TEXT_IN)
     val textOut = template.segment(BibleLottieTemplate.SEGMENT_TEXT_OUT)
@@ -532,7 +531,7 @@ private fun io.github.alexzhirkevich.compottie.dynamic.DynamicTextLayer.bindSlot
     fillColor {
         when {
             shadow -> state.value.shadowColor
-            voice != null -> state.value.voices.firstOrNull { it.voice == voice }?.color ?: state.value.color
+            voice != null -> state.value.voices.firstOrNull { it.key == voice }?.color ?: state.value.color
             else -> state.value.color
         }
     }

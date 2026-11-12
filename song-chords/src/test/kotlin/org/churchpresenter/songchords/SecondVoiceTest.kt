@@ -124,12 +124,13 @@ class SecondVoiceTest {
 
     @Test
     fun `asVoiceLine marks a line once`() {
-        assertEquals("2>Amazing grace", SecondVoice.asVoiceLine("Amazing grace", SecondVoice.SECOND))
+        val two = VoiceKey(SecondVoice.SECOND)
+        assertEquals("2>Amazing grace", SecondVoice.asVoiceLine("Amazing grace", two))
         assertEquals(
             "2>Was blind, but now I see",
-            SecondVoice.asVoiceLine("Was blind, but 2>(now I see)", SecondVoice.SECOND),
+            SecondVoice.asVoiceLine("Was blind, but 2>(now I see)", VoiceKey(SecondVoice.SECOND)),
         )
-        assertEquals("2>already", SecondVoice.asVoiceLine("2>already", SecondVoice.SECOND))
+        assertEquals("2>already", SecondVoice.asVoiceLine("2>already", VoiceKey(SecondVoice.SECOND)))
     }
 
     // ── Line-mode groups ────────────────────────────────────────────────────────
@@ -176,10 +177,10 @@ class SecondVoiceTest {
             listOf(VoiceRun("By the grace of God", SecondVoice.THIRD)),
             SecondVoice.runs(" 3> By the grace of God"),
         )
-        assertEquals(SecondVoice.THIRD, wholeLineVoiceOf("3>words"))
-        assertEquals(SecondVoice.SECOND, wholeLineVoiceOf("  2>words"))
-        assertNull(wholeLineVoiceOf("3>(words)"), "a bracket after the mark makes it a run, not a line")
-        assertNull(wholeLineVoiceOf("4>words"), "there is no fourth voice")
+        assertEquals(SecondVoice.THIRD, wholeLineKeyOf("3>words")?.voice)
+        assertEquals(SecondVoice.SECOND, wholeLineKeyOf("  2>words")?.voice)
+        assertNull(wholeLineKeyOf("3>(words)")?.voice, "a bracket after the mark makes it a run, not a line")
+        assertNull(wholeLineKeyOf("4>words")?.voice, "there is no fourth voice")
     }
 
     @Test
@@ -221,8 +222,8 @@ class SecondVoiceTest {
 
     @Test
     fun `asVoiceLine marks a line in voice 3 and leaves an answer as it is`() {
-        assertEquals("3>Amen", SecondVoice.asVoiceLine("Amen", SecondVoice.THIRD))
-        assertEquals("2>Already", SecondVoice.asVoiceLine("2>Already", SecondVoice.THIRD))
+        assertEquals("3>Amen", SecondVoice.asVoiceLine("Amen", VoiceKey(SecondVoice.THIRD)))
+        assertEquals("2>Already", SecondVoice.asVoiceLine("2>Already", VoiceKey(SecondVoice.THIRD)))
     }
 
     @Test
@@ -230,5 +231,80 @@ class SecondVoiceTest {
         val lines = listOf("The Lord be with you", "2>And also with you", "3>Lift up your hearts", "Amen", "3>Amen")
         assertEquals(listOf(0..2, 3..4), SecondVoice.lineGroups(lines))
         assertEquals(0..2, SecondVoice.lineGroupAt(lines, 2))
+    }
+
+    // ── A colour of its own ─────────────────────────────────────────────────────
+
+    @Test
+    fun `a hex mark puts a whole line in that colour`() {
+        assertEquals(
+            listOf(VoiceRun("I will.", SecondVoice.CUSTOM, "#4DABF7")),
+            SecondVoice.runs(" #4DABF7> I will."),
+        )
+        assertEquals(VoiceKey.color("#4DABF7"), wholeLineKeyOf("#4DABF7>I will."))
+        assertEquals(VoiceKey.color("#804DABF7"), wholeLineKeyOf("#804DABF7>with alpha"))
+    }
+
+    @Test
+    fun `a hex run colours just its words, beside voice runs`() {
+        assertEquals(
+            listOf(
+                VoiceRun("Will you? ", SecondVoice.MAIN),
+                VoiceRun("I will.", SecondVoice.CUSTOM, "#F783AC"),
+                VoiceRun(" ", SecondVoice.MAIN),
+                VoiceRun("We will.", SecondVoice.SECOND),
+            ),
+            SecondVoice.runs("Will you? #F783AC>(I will.) 2>(We will.)"),
+        )
+    }
+
+    @Test
+    fun `runs of different colours stay apart and runs of one colour merge`() {
+        assertEquals(
+            listOf(VoiceRun("ab", SecondVoice.CUSTOM, "#111111"), VoiceRun("c", SecondVoice.CUSTOM, "#222222")),
+            SecondVoice.runs("#111111>(a)#111111>(b)#222222>(c)"),
+        )
+    }
+
+    @Test
+    fun `something that is not a hex colour is not a mark`() {
+        assertFalse(SecondVoice.hasMarkup("#12345>short"))
+        assertFalse(SecondVoice.hasMarkup("#GGGGGG>not hex"))
+        assertFalse(SecondVoice.hasMarkup("We're #1> the rest"))
+        assertNull(wholeLineKeyOf("#E91E63>(a run)"), "a bracket after the mark makes it a run")
+    }
+
+    @Test
+    fun `a coloured line comes off in plain text and counts as an answer`() {
+        assertEquals("I will.", SecondVoice.plain("#4DABF7>I will."))
+        assertTrue(SecondVoice.isAnswerLine("#4DABF7>I will."))
+        assertTrue(SecondVoice.isAnswerLine("#4DABF7>(I) #F783AC>(will)"))
+        assertEquals(
+            listOf(0..2, 3..3),
+            SecondVoice.lineGroups(listOf("Will you?", "#4DABF7>I will.", "#F783AC>I will.", "Amen")),
+        )
+    }
+
+    @Test
+    fun `a color directive opens a block in that colour, and color or voice 1 closes it`() {
+        assertEquals(VoiceKey.color("#F783AC"), blockKeyOf("[color: #F783AC]"))
+        assertEquals(VoiceKey.color("#F783AC"), blockKeyOf("  [Colour:#F783AC]  "))
+        assertEquals(VoiceKey.MAIN, blockKeyOf("[color]"))
+        assertEquals(VoiceKey.MAIN, blockKeyOf("[color: red]"), "a colour that is not hex ends the block")
+        assertEquals(VoiceKey(SecondVoice.THIRD), blockKeyOf("[voice: 3]"))
+        assertEquals(VoiceKey.MAIN, blockKeyOf("[voice: 1]"))
+        assertNull(blockKeyOf("[Verse 1]"))
+        assertTrue(SecondVoice.isVoiceDirective("[color: #F783AC]"))
+        assertFalse(ChordTransposer.isSectionHeader("[color: #F783AC]"), "a directive is not a section")
+    }
+
+    @Test
+    fun `a block line is written with the block's mark`() {
+        val pink = VoiceKey.color("#F783AC")
+        assertEquals("#F783AC>I give you this ring.", SecondVoice.asVoiceLine("I give you this ring.", pink))
+        assertEquals("#F783AC>", VoiceKey.color("#F783AC").mark)
+        assertEquals("3>", VoiceKey(SecondVoice.THIRD).mark)
+        assertEquals(VoiceKey.color("#ABCDEF"), keyOfMark("#ABCDEF"))
+        assertEquals(VoiceKey(SecondVoice.SECOND), keyOfMark("2"))
     }
 }

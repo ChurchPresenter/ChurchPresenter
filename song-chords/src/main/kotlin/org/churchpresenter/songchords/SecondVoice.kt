@@ -1,18 +1,44 @@
 package org.churchpresenter.songchords
 
-/** One run of a lyric line and the voice that sings it: 1, the main voice, 2 or 3. */
-data class VoiceRun(val text: String, val voice: Int)
+/**
+ * One run of a lyric line and who says it: 1, the main voice, 2 or 3 — or [SecondVoice.CUSTOM],
+ * a colour of its own, written as the hex [color].
+ */
+data class VoiceRun(val text: String, val voice: Int, val color: String = "") {
+    /** The voice or colour this run is in. */
+    val key: VoiceKey get() = VoiceKey(voice, color)
+}
+
+/**
+ * What a mark names: a voice — [SecondVoice.MAIN], [SecondVoice.SECOND], [SecondVoice.THIRD] — or,
+ * with [SecondVoice.CUSTOM], a colour of its own written as `#RRGGBB` / `#AARRGGBB` in [color].
+ */
+data class VoiceKey(val voice: Int, val color: String = "") {
+    /** What opens a line or a run in this key: `2>`, `3>`, `#E91E63>`. */
+    val mark: String get() = if (voice == SecondVoice.CUSTOM) "$color>" else "$voice>"
+
+    companion object {
+        /** The main voice: no mark at all. */
+        val MAIN = VoiceKey(SecondVoice.MAIN)
+
+        /** A colour of its own, written as [hex]. */
+        fun color(hex: String) = VoiceKey(SecondVoice.CUSTOM, hex)
+    }
+}
 
 /**
  * The voice markup songs are written in, for parts only some of the people say or sing — the men
  * on one line and the women answering on the next, or a leader and two groups responding in a
- * liturgy — each drawn in a colour of its own. Voice 1 is the main voice; 2 and 3 are the others.
+ * liturgy — each drawn in a colour of its own. Voice 1 is the main voice; 2 and 3 are the others,
+ * coloured as the profile or the song says. A hex colour in a voice's place colours the words
+ * that colour, for as many parts as a service needs — a wedding's two voices and its leader.
  *
- * Three ways to write it, all inside the lyrics, with `2` or `3` as the voice:
+ * Three ways to write it, all inside the lyrics, with `2`, `3` or a colour such as `#E91E63`:
  * - `2>` at the start of a line puts the whole line in voice 2.
  * - `2>(…)` anywhere in a line puts just the words inside the brackets in voice 2.
  * - `[voice: 2]` on a line of its own puts every line after it in voice 2, until `[voice: 1]` or
- *   the next section. It is a directive, like `[background: …]`, not a section.
+ *   the next section; `[color: #E91E63]` does the same in a colour, until `[color]`, `[voice: 1]`
+ *   or the next section. Both are directives, like `[background: …]`, not sections.
  *
  * Chords pass through untouched: `2>([G]now I see)` is voice-2 words with a chord on them, and
  * stripping the chords and stripping the voice markup can happen in either order.
@@ -33,6 +59,9 @@ object SecondVoice {
     /** The third voice. */
     const val THIRD = 3
 
+    /** Not a voice: words in a colour of their own, the colour carried with them as hex. */
+    const val CUSTOM = 0
+
     /** The voices besides the main one that markup can name. */
     val VOICES: IntRange = SECOND..THIRD
 
@@ -41,23 +70,21 @@ object SecondVoice {
 
     private val VOICE_DIRECTIVE = Regex("^\\[\\s*voice\\s*:\\s*([^\\[\\]]*)]$", RegexOption.IGNORE_CASE)
 
-    /** A `2>(` or `3>(` — where a run in another voice opens. */
-    private val SPAN_OPEN = Regex("([$SECOND-$THIRD])>\\(")
-
     /**
      * The voice a `[voice: n]` line switches to — n for a voice in [VOICES], [MAIN] for anything
-     * else — or null when [line] is not one.
+     * else — or null when [line] is not one. `[color: …]` lines are read by [blockKeyOf].
      */
     fun voiceDirectiveOf(line: String): Int? {
         val match = VOICE_DIRECTIVE.matchEntire(line.trim()) ?: return null
         return match.groupValues[1].trim().toIntOrNull()?.takeIf { it in VOICES } ?: MAIN
     }
 
-    /** True when [line] is a `[voice: n]` directive — see [voiceDirectiveOf]. */
-    fun isVoiceDirective(line: String): Boolean = voiceDirectiveOf(line) != null
+    /** True when [line] is a `[voice: n]` or `[color: …]` directive — see [blockKeyOf]. */
+    fun isVoiceDirective(line: String): Boolean =
+        voiceDirectiveOf(line) != null || COLOR_DIRECTIVE.matches(line.trim())
 
     /** True when [line] carries any voice markup. */
-    fun hasMarkup(line: String): Boolean = wholeLineVoiceOf(line) != null || SPAN_OPEN.containsMatchIn(line)
+    fun hasMarkup(line: String): Boolean = wholeLineKeyOf(line) != null || VOICE_RUN_OPEN.containsMatchIn(line)
 
     /**
      * [line] split into runs by voice, the markup gone. Runs of one voice are merged, and empty
@@ -66,26 +93,27 @@ object SecondVoice {
      * An unclosed `2>(` runs to the end of the line, which is what someone typing it meant.
      */
     fun runs(line: String): List<VoiceRun> {
-        val whole = wholeLineVoiceOf(line)
+        val whole = VOICE_LINE_MARK.find(line)
         if (whole != null) {
-            val rest = line.trimStart().removePrefix(markOf(whole)).trimStart()
+            val key = keyOfMark(whole.groupValues[1])
+            val rest = line.substring(whole.range.last + 1).trimStart()
             // A `3>` line can still hold `2>(…)` runs: those keep their own voice, and the rest of
             // the line is the line's.
             val out = mutableListOf<VoiceRun>()
-            runs(rest).forEach { addRun(out, it.text, if (it.voice == MAIN) whole else it.voice) }
-            return out.ifEmpty { listOf(VoiceRun("", whole)) }
+            runs(rest).forEach { addRun(out, it.text, if (it.voice == MAIN) key else it.key) }
+            return out.ifEmpty { listOf(VoiceRun("", key.voice, key.color)) }
         }
         val out = mutableListOf<VoiceRun>()
         var cursor = 0
         while (cursor < line.length) {
-            val open = SPAN_OPEN.find(line, cursor) ?: break
-            addRun(out, line.substring(cursor, open.range.first), MAIN)
+            val open = VOICE_RUN_OPEN.find(line, cursor) ?: break
+            addRun(out, line.substring(cursor, open.range.first), VoiceKey.MAIN)
             val start = open.range.last + 1
             val close = closingBracket(line, start)
-            addRun(out, line.substring(start, close), open.groupValues[1].toInt())
+            addRun(out, line.substring(start, close), keyOfMark(open.groupValues[1]))
             cursor = (close + 1).coerceAtMost(line.length)
         }
-        addRun(out, line.substring(cursor), MAIN)
+        addRun(out, line.substring(cursor), VoiceKey.MAIN)
         return out.ifEmpty { listOf(VoiceRun("", MAIN)) }
     }
 
@@ -94,8 +122,8 @@ object SecondVoice {
         if (!hasMarkup(line)) line else runs(line).joinToString("") { it.text }
 
     /**
-     * True when no word of [line] is the main voice's: a `2>` or `3>` line, or one whose words all
-     * sit inside `2>(…)` / `3>(…)` runs. A line with only some words in another voice is still a
+     * True when no word of [line] is the main voice's: a `2>`, `3>` or coloured line, or one whose
+     * words all sit inside runs like those. A line with only some words marked is still a
      * main-voice line.
      */
     fun isAnswerLine(line: String): Boolean {
@@ -105,16 +133,16 @@ object SecondVoice {
     }
 
     /**
-     * [line] written as a whole [voice] line — what a `[voice: n]` block makes of each line in it.
-     * A line that is already all another voice's is left as it is.
+     * [line] written as a whole [key] line — what a `[voice: n]` or `[color: …]` block makes of
+     * each line in it. A line that is already all another voice's is left as it is.
      */
-    fun asVoiceLine(line: String, voice: Int): String =
-        if (isAnswerLine(line)) line else "${markOf(voice)}${plain(line)}"
+    fun asVoiceLine(line: String, key: VoiceKey): String =
+        if (isAnswerLine(line)) line else "${key.mark}${plain(line)}"
 
     /**
      * The lines that show together in line mode, one range per press of Next. A main-voice line
-     * and the answer lines straight after it — in voice 2, voice 3 or both — are one group; every
-     * other line shows alone.
+     * and the answer lines straight after it — in voice 2, voice 3, a colour, or several — are one
+     * group; every other line shows alone.
      */
     fun lineGroups(lines: List<String>): List<IntRange> {
         val groups = mutableListOf<IntRange>()
@@ -135,26 +163,52 @@ object SecondVoice {
         lineGroups(lines).firstOrNull { index in it } ?: index..index
 }
 
+/** A colour as a mark writes it: `#RRGGBB` or `#AARRGGBB`. */
+private const val HEX = "#(?:[0-9A-Fa-f]{8}|[0-9A-Fa-f]{6})"
+
+/** What a mark names before its `>`: a voice's number or a colour. */
+private const val MARK_NAME = "([${SecondVoice.SECOND}-${SecondVoice.THIRD}]|$HEX)"
+
 /**
- * The voice a whole-line mark — `2>` or `3>` not followed by a bracket — at the start of [line]
- * gives it, or null when it has none.
+ * A whole-line mark at the start of a line — `2>`, `3>` or `#E91E63>`, not followed by a bracket.
+ * Group 1 is what it names; read it with [keyOfMark].
  */
-fun wholeLineVoiceOf(line: String): Int? {
-    val trimmed = line.trimStart()
-    return SecondVoice.VOICES.firstOrNull { v ->
-        val mark = SecondVoice.markOf(v)
-        trimmed.startsWith(mark) && !trimmed.startsWith("$mark(")
-    }
+val VOICE_LINE_MARK = Regex("^\\s*$MARK_NAME>(?!\\()")
+
+/** Where a run opens — `2>(`, `3>(` or `#E91E63>(`. Group 1 is what it names; read it with [keyOfMark]. */
+val VOICE_RUN_OPEN = Regex("$MARK_NAME>\\(")
+
+private val HEX_COLOR = Regex("^$HEX$")
+
+private val COLOR_DIRECTIVE = Regex("^\\[\\s*colou?r\\s*(?::\\s*([^\\[\\]]*))?]$", RegexOption.IGNORE_CASE)
+
+/** The key a mark's name — group 1 of [VOICE_LINE_MARK] or [VOICE_RUN_OPEN] — stands for. */
+fun keyOfMark(name: String): VoiceKey =
+    if (name.startsWith("#")) VoiceKey.color(name) else VoiceKey(name.toInt())
+
+/** The key a whole-line mark at the start of [line] gives it, or null when it has none. */
+fun wholeLineKeyOf(line: String): VoiceKey? = VOICE_LINE_MARK.find(line)?.let { keyOfMark(it.groupValues[1]) }
+
+/**
+ * The key a block directive switches to — a voice for `[voice: n]`, a colour for
+ * `[color: #E91E63]`, and the main voice for `[voice: 1]`, `[color]` or a colour that is not hex —
+ * or null when [line] is not one.
+ */
+fun blockKeyOf(line: String): VoiceKey? {
+    SecondVoice.voiceDirectiveOf(line)?.let { return VoiceKey(it) }
+    val match = COLOR_DIRECTIVE.matchEntire(line.trim()) ?: return null
+    val hex = match.groupValues[1].trim()
+    return if (HEX_COLOR.matches(hex)) VoiceKey.color(hex) else VoiceKey.MAIN
 }
 
-/** Appends [text] to [out] in [voice], merged into the last run when that is the same voice. */
-private fun addRun(out: MutableList<VoiceRun>, text: String, voice: Int) {
+/** Appends [text] to [out] in [key], merged into the last run when that is in the same key. */
+private fun addRun(out: MutableList<VoiceRun>, text: String, key: VoiceKey) {
     if (text.isEmpty()) return
     val last = out.lastOrNull()
-    if (last != null && last.voice == voice) {
-        out[out.lastIndex] = VoiceRun(last.text + text, voice)
+    if (last != null && last.key == key) {
+        out[out.lastIndex] = last.copy(text = last.text + text)
     } else {
-        out.add(VoiceRun(text, voice))
+        out.add(VoiceRun(text, key.voice, key.color))
     }
 }
 

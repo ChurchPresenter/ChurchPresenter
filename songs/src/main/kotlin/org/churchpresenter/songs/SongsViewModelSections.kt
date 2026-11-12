@@ -14,6 +14,8 @@ import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.songchords.blockKeyOf
+import org.churchpresenter.songchords.VoiceKey
 import org.churchpresenter.sharedui.utils.isChorusHeader
 import org.churchpresenter.sharedui.utils.isHeaderLine
 import org.churchpresenter.sharedui.utils.isSlideBreak
@@ -103,7 +105,7 @@ internal fun lyricSlidesOf(
 
     // The voice a `[voice: 2]` or `[voice: 3]` block puts its lines in, until `[voice: 1]` or the
     // next header. Written onto each line as `2>` or `3>`, so everything downstream reads one form of the markup.
-    var voice = SecondVoice.MAIN
+    var voice = VoiceKey.MAIN
 
     // A header with no body under it is still a section — navigation steps over it and the
     // editor shows it — but only once. Past the first slide the header has already been
@@ -137,12 +139,12 @@ internal fun lyricSlidesOf(
 
     lyrics.forEach { line ->
         val directive = songBackgroundDirectiveOf(line)
-        val voiceDirective = SecondVoice.voiceDirectiveOf(line)
+        val voiceDirective = blockKeyOf(line)
         if (isHeaderLine(line)) {
             flushSection()
             slideOfSection = 0
             backgroundFields.clear()
-            voice = SecondVoice.MAIN
+            voice = VoiceKey.MAIN
             currentHeader = line
             sectionType = if (isChorusHeader(line)) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
         } else if (directive != null) {
@@ -160,7 +162,7 @@ internal fun lyricSlidesOf(
             // The one place lyrics become presentable text, and so the one place chords have to
             // come off: everything downstream — presenter, stage monitor, companion server —
             // reads LyricSection.lines, and none of them should ever see a [G].
-            val voiced = if (voice == SecondVoice.MAIN) line else SecondVoice.asVoiceLine(line, voice)
+            val voiced = if (voice == VoiceKey.MAIN) line else SecondVoice.asVoiceLine(line, voice)
             val stripped = ChordTransposer.stripChords(voiced)
             // A line that was nothing but chords — an intro, a turnaround — has no words to
             // show, so it contributes no slide. A section left with none at all is folded into

@@ -1,6 +1,7 @@
 package org.churchpresenter.songs
 
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.songchords.VoiceKey
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +38,7 @@ class SongSecondVoiceTest {
         val text = "Was blind, but now I see"
         val start = text.indexOf("now")
 
-        val out = toggleVoice(value(text, start, text.length), SecondVoice.SECOND)
+        val out = toggleVoice(value(text, start, text.length), VoiceKey(SecondVoice.SECOND))
 
         assertEquals("Was blind, but 2>(now I see)", out.text)
         assertEquals("now I see", out.text.substring(out.selection.start, out.selection.end))
@@ -48,11 +49,11 @@ class SongSecondVoiceTest {
         val text = "Amazing grace\nThat saved a wretch\nI once was lost"
         val caret = text.indexOf("saved")
 
-        val marked = toggleVoice(value(text, caret), SecondVoice.SECOND)
+        val marked = toggleVoice(value(text, caret), VoiceKey(SecondVoice.SECOND))
         assertEquals("Amazing grace\n2>That saved a wretch\nI once was lost", marked.text)
         assertEquals(caret + 2, marked.selection.start)
 
-        val unmarked = toggleVoice(marked, SecondVoice.SECOND)
+        val unmarked = toggleVoice(marked, VoiceKey(SecondVoice.SECOND))
         assertEquals(text, unmarked.text)
         assertEquals(caret, unmarked.selection.start)
     }
@@ -61,7 +62,7 @@ class SongSecondVoiceTest {
     fun `a selection across lines marks every line in it but the blank ones`() {
         val text = "one\n\ntwo\nthree"
 
-        val out = toggleVoice(value(text, 1, text.indexOf("two") + 1), SecondVoice.SECOND)
+        val out = toggleVoice(value(text, 1, text.indexOf("two") + 1), VoiceKey(SecondVoice.SECOND))
 
         assertEquals("2>one\n\n2>two\nthree", out.text)
         assertEquals(0, out.selection.start, "the selection covers the lines it marked")
@@ -69,14 +70,14 @@ class SongSecondVoiceTest {
 
     @Test
     fun `lines that are all marked are unmarked together`() {
-        val out = toggleVoice(value("2>one\n  2> two", 0, 12), SecondVoice.SECOND)
+        val out = toggleVoice(value("2>one\n  2> two", 0, 12), VoiceKey(SecondVoice.SECOND))
 
         assertEquals("one\ntwo", out.text)
     }
 
     @Test
     fun `a blank selection on one line marks the line rather than wrapping nothing`() {
-        assertEquals("2>a  b", toggleVoice(value("a  b", 1, 3), SecondVoice.SECOND).text)
+        assertEquals("2>a  b", toggleVoice(value("a  b", 1, 3), VoiceKey(SecondVoice.SECOND)).text)
     }
 
     // ── [voice: n] blocks into slides ───────────────────────────────────────────
@@ -121,7 +122,7 @@ class SongSecondVoiceTest {
     @Test
     fun `Voice 3 wraps selected words in its own mark`() {
         val text = "Lord, have mercy"
-        val out = toggleVoice(value(text, 6, text.length), SecondVoice.THIRD)
+        val out = toggleVoice(value(text, 6, text.length), VoiceKey(SecondVoice.THIRD))
 
         assertEquals("Lord, 3>(have mercy)", out.text)
         assertEquals("have mercy", out.text.substring(out.selection.min, out.selection.max))
@@ -129,10 +130,10 @@ class SongSecondVoiceTest {
 
     @Test
     fun `Voice 3 on a voice-2 line moves it to voice 3, and again takes the mark off`() {
-        val moved = toggleVoice(value("2>Amen", 0), SecondVoice.THIRD)
+        val moved = toggleVoice(value("2>Amen", 0), VoiceKey(SecondVoice.THIRD))
         assertEquals("3>Amen", moved.text)
 
-        assertEquals("Amen", toggleVoice(moved, SecondVoice.THIRD).text)
+        assertEquals("Amen", toggleVoice(moved, VoiceKey(SecondVoice.THIRD)).text)
     }
 
     @Test
@@ -150,6 +151,41 @@ class SongSecondVoiceTest {
 
         assertTrue(vm.navigateNextLine())
         assertEquals(3, vm.selectedLineIndex.value, "the voice-2 and voice-3 answers show with line 0")
+    }
+
+    // ── A colour of its own ─────────────────────────────────────────────────────
+
+    private val pink = VoiceKey.color("#F783AC")
+
+    @Test
+    fun `a colour wraps selected words and marks lines like a voice`() {
+        val text = "Will you? I will."
+        assertEquals("Will you? #F783AC>(I will.)", toggleVoice(value(text, 10, text.length), pink).text)
+
+        val marked = toggleVoice(value("2>I will.", 0), pink)
+        assertEquals("#F783AC>I will.", marked.text, "a voice-2 line moves to the colour")
+        assertEquals("I will.", toggleVoice(marked, pink).text)
+    }
+
+    @Test
+    fun `the Color button knows the colour the cursor's lines share`() {
+        assertEquals(pink, lineColorAt(value("#F783AC>one\n#F783AC>two", 0, 15)))
+        assertEquals(null, lineColorAt(value("#F783AC>one\n#4DABF7>two", 0, 15)), "two colours share none")
+        assertEquals(null, lineColorAt(value("2>voice line", 0)), "a voice is not a colour")
+        assertEquals(null, lineColorAt(value("plain", 0)))
+        assertEquals(
+            null,
+            lineColorAt(value("#F783AC>one", 9, 11)),
+            "words selected in one line are wrapped instead",
+        )
+    }
+
+    @Test
+    fun `a color block's lines become coloured lines`() {
+        val lyrics = listOf("[Verse 1]", "Leader", "[color: #F783AC]", "Bride", "[color]", "All")
+        val slides = lyricSlidesOf(lyrics, "Song", "1")
+
+        assertEquals(listOf("Leader", "#F783AC>Bride", "All"), slides[0].lines)
     }
 
     // ── The slide under the caret ───────────────────────────────────────────────
