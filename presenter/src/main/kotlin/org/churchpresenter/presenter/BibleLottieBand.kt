@@ -155,6 +155,11 @@ internal fun BoxScope.LottieBand(
     isKey: Boolean,
     showBackground: Boolean,
     modifier: Modifier = Modifier,
+    /**
+     * Words for text layers outside the band's slots, by layer name -- a Lower Third preset's
+     * `Name`/`Info`/`Detail` on a title slide. Only the words change; the file keeps its own look.
+     */
+    presetTexts: Map<String, String> = emptyMap(),
 ) {
     // The faces go into the file itself, so the composition is rebuilt only when a face changes.
     // Both layers of a swap share it: the outgoing words are one settings change at most behind.
@@ -203,6 +208,7 @@ internal fun BoxScope.LottieBand(
         colorFilter = keyFilter,
         showBackground = showBackground,
         modifier = layerModifier,
+        presetTexts = presetTexts,
     )
     BandLayer(
         template = template,
@@ -223,6 +229,7 @@ internal fun BoxScope.LottieBand(
             val swapping = clockState.value.phase == BibleBandPhase.TEXT_SWAP
             if (swapping && hasOutgoing.value) drawContent()
         },
+        presetTexts = presetTexts,
     )
 }
 
@@ -244,6 +251,7 @@ private fun BandLayer(
     colorFilter: ColorFilter?,
     showBackground: Boolean,
     modifier: Modifier,
+    presetTexts: Map<String, String>,
 ) {
     val styles = slots.mapValues { it.value.style }
     // A ticker carries its reference at the head of the scrolling line; the reference slot itself
@@ -254,8 +262,8 @@ private fun BandLayer(
     }
 
     // Judged on the words being shown, not the file's sample: those are the player's to replace.
-    val groupsText = remember(template.meta.textShaping, texts) {
-        LottieTextShaping.groupsText(template.meta.textShaping, texts.values)
+    val groupsText = remember(template.meta.textShaping, texts, presetTexts) {
+        LottieTextShaping.groupsText(template.meta.textShaping, texts.values + presetTexts.values)
     }
     val pxPerPoint = template.height / (bandFraction * REFERENCE_OUTPUT_HEIGHT)
     val measurer = rememberBandTextMeasurer()
@@ -302,10 +310,14 @@ private fun BandLayer(
     }
     val tickerState = rememberUpdatedState(tickerSeconds)
 
-    val dynamic: LottieDynamicProperties = rememberLottieDynamicProperties(template, renders.keys) {
+    val presetTextsState = rememberUpdatedState(presetTexts)
+    val dynamic: LottieDynamicProperties = rememberLottieDynamicProperties(template, renders.keys, presetTexts.keys) {
         template.layerNames
             .filter { it.startsWith(BibleLottieTemplate.BAND_PREFIX) }
             .forEach { name -> layer(name) { hidden { !showBackgroundState.value } } }
+        presetTexts.keys.filter(template::hasLayer).forEach { name ->
+            textLayer(name) { text { presetTextsState.value[name].orEmpty() } }
+        }
         renders.forEach { (name, state) ->
             textLayer(name) { bindSlot(template, state, tickerState, shadow = false) }
             if (template.hasLayer(name + BibleLottieTemplate.SHADOW_SUFFIX)) {

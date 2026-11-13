@@ -1286,7 +1286,9 @@
     <string name="announcement_show_for">Show For (sec)</string>
     <string name="announcement_show_for_tooltip">0 = stays up until cleared</string>
     <string name="title_slide_animation">Animation</string>
-    <string name="title_slide_animation_sub">A Lottie that plays the title slide: the number and title go in its Text layers, the credits in its Reference layers. None draws it as usual.</string>
+    <string name="title_slide_animation_sub">A Lottie that plays the title slide. A band template gets the number and title in its Text layers and the credits in its Reference layers; a Lower Third preset gets the number and title in Name and the credits in Info and Detail. None draws it as usual.</string>
+    <string name="title_slide_animation_kind_band">Band</string>
+    <string name="title_slide_animation_kind_lower_third">Lower Third</string>
     <string name="title_slide_animation_browse">Browse…</string>
     <string name="title_slide_animation_files">Lottie animations (.json)</string>
     <string name="license_title">End User License Agreement (EULA)</string>

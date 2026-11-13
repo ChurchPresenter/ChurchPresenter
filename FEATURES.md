@@ -19,7 +19,7 @@
 - **Favorites & play counts** — star the songs you use most and see how often each has been sung.
 - **Bring your existing library** — the bundled converter reads SongBeamer, OpenLP (the `songs.sqlite` database itself or an OpenLyrics export), OpenSong, FreeShow, Free Worship, EasySlides, Quelea, VideoPsalm and SoftProjector libraries, plus lyrics pulled out of PDF, Word, PowerPoint and Keynote files — several files or a whole folder at a time — and ready-to-use sample songs ship with the app.
 - **Flexible display** — one verse or one line at a time, optional title slides, and full control over how numbers and titles appear.
-- **Animated title slides** — a profile can play a Lottie as a song's title slide, full screen or on the lower third, with the number, title and credits filled into its text layers.
+- **Animated title slides** — a profile can play a Lottie as a song's title slide, full screen or on the lower third, with the number, title and credits filled into its text layers: a band template's `Text`/`Reference` layers, or a Lower Third preset's `Name`/`Info`/`Detail`. The picker lists both folders, each file tagged with where it came from.
 - **A background per song** — give a song, or one of its sections, its own colour, gradient, picture, video or camera, separately for full screen and lower third, with a look (dim, blur, opacity) on top — or let it follow the profile's background.
 
 **Source locations:**
@@ -36,7 +36,8 @@
   records; `dialogs/SongEditorBackgroundButton.kt` — the editor's Background button;
   `presenter/…/TitleSlideSection.kt` — the title slide the tab sends; `presenter/…/TitleSlideLottie.kt`
   — a title slide played as its own Lottie, driven by `live-output/…/TitleSlideEffects.kt`, picked in
-  `profiles/…/TitleSlideLottieRow.kt`
+  `profiles/…/TitleSlideLottieRow.kt` and `TitleSlideTemplatePicker.kt`; `presenter/…/TitleSlidePresetText.kt`
+  — what a Lower Third preset's layers are filled with
 - `app-settings/…/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`

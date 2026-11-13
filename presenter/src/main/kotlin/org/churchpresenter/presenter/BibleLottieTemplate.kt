@@ -247,11 +247,13 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
     } else {
         val layers = obj["layers"]?.jsonArray.orEmpty().mapNotNull { it as? JsonObject }
         val meta = obj[METADATA_KEY] as? JsonObject
+        val segments = readSegments(obj["markers"] as? JsonArray, size.totalFrames)
+        val settledFrame = segments.getValue(BibleLottieTemplate.SEGMENT_HOLD).startFrame
         BibleLottieTemplate(
             json = json,
             size = size,
-            segments = readSegments(obj["markers"] as? JsonArray, size.totalFrames),
-            slots = readSlots(meta, layers),
+            segments = segments,
+            slots = readSlots(meta, layers, settledFrame),
             layerNames = layers.mapNotNull { it["nm"]?.jsonPrimitive?.contentOrNull }.toSet(),
             textAscents = readTextAscents(obj["fonts"] as? JsonObject, layers),
             textMotions = readTextMotions(layers),

@@ -221,7 +221,7 @@ private fun SongTextGroup(
         },
     ) {
         if (titleSlideView) {
-            TitleSlideLottieRow(song, lowerThird, updateSong)
+            TitleSlideLottieRow(song, lowerThird, updateSong, draft.streamingSettings.lowerThirdFolder)
             SlideElementRow(slideElement, targets.slideElement.onChange)
         }
         SongElementRow(draft, profile, styleElement, target, titleSlideView, onSettingsChange, onProfileChange)

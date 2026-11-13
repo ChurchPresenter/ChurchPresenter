@@ -117,6 +117,8 @@ internal fun songBandSlots(
     isKey: Boolean,
     /** Drawn over a whole output -- a title slide's own Lottie -- so the title takes the full screen's look. */
     fullScreen: Boolean = false,
+    /** How many `ReferenceN` lines the template has; a title slide's credits are split across them. */
+    referenceSlots: Int = availableSlots,
 ): Map<String, BandSlotText> {
     val section = page.section
     val allSections = page.allSections
@@ -130,16 +132,10 @@ internal fun songBandSlots(
     // the text slots — one language each — and the credits split across the reference lines, so
     // it fits a design made for lyrics and their title rather than needing one of its own.
     if (section.type == Constants.SECTION_TYPE_TITLE_SLIDE) {
-        val languages = songLanguageSelection(language, emptyList(), section.translations.size + 1)
-        val lines = titleSlideLines(section, settings, languages)
-        // TITLE_SLIDE_NUMBER, because `titleSlideLines` is what produced these: the lyric slides'
-        // NUMBER never appears in them.
-        val headings = lines.filter {
-            it.element == SongStyleElement.TITLE || it.element == SongStyleElement.TITLE_SLIDE_NUMBER
-        }
-        val credits = lines.filter { it !in headings }.map { it.plainText }
-        val headingSlots = spreadAcrossSlots(headings.map { it.plainText }, availableSlots)
-        val creditSlots = spreadAcrossSlots(splitEvenly(credits, availableSlots), availableSlots)
+        val (headings, credits) = titleSlideHeadingsAndCredits(section, settings, language)
+        val headingSlots = spreadAcrossSlots(headings, availableSlots)
+        // Across the reference lines the template has, which can be fewer than its text lines.
+        val creditSlots = spreadAcrossSlots(splitEvenly(credits, referenceSlots), referenceSlots)
         return buildMap {
             slots.forEachIndexed { i, (textLayer, refLayer) ->
                 put(textLayer, title.slot(headingSlots.getOrElse(i) { "" }))
@@ -227,7 +223,7 @@ private fun spreadAcrossSlots(items: List<String>, count: Int): List<String> =
  * [items] joined across [count] slots as evenly as they fit -- one bucket when there is one slot
  * or nothing to split, otherwise as many buckets as there are items, up to [count].
  */
-private fun splitEvenly(items: List<String>, count: Int): List<String> {
+internal fun splitEvenly(items: List<String>, count: Int): List<String> {
     if (count <= 1 || items.size <= 1) return listOf(items.joinToString(CREDIT_SEPARATOR))
     val buckets = count.coerceAtMost(items.size)
     val perBucket = (items.size + buckets - 1) / buckets
@@ -254,17 +250,23 @@ internal fun BoxScope.SongLottieBand(
     fullScreen: Boolean = false,
 ) {
     val availableSlots = template.textSlotCount
+    val referenceSlots = template.referenceSlotCount
     val page = SongBandPage(section, allSections, displaySectionIndex, lineIndex)
     val outgoingPage = outgoingSection?.let {
         SongBandPage(it, allSections, displaySectionIndex, outgoingLineIndex)
     }
-    val slots = remember(page, settings, languageDisplay, availableSlots, isKey, fullScreen) {
-        songBandSlots(page, settings, languageDisplay, availableSlots, isKey, fullScreen)
+    val slots = remember(page, settings, languageDisplay, availableSlots, isKey, fullScreen, referenceSlots) {
+        songBandSlots(page, settings, languageDisplay, availableSlots, isKey, fullScreen, referenceSlots)
     }
     val outgoingSlots = remember(outgoingPage, settings, languageDisplay, availableSlots, isKey, fullScreen) {
-        outgoingPage?.let { songBandSlots(it, settings, languageDisplay, availableSlots, isKey, fullScreen) }
+        outgoingPage?.let {
+            songBandSlots(it, settings, languageDisplay, availableSlots, isKey, fullScreen, referenceSlots)
+        }
     }
-    LottieBand(template, slots, outgoingSlots, bandFraction, bandClock, isKey, showBackground, modifier)
+    val presetTexts = remember(section, settings, languageDisplay, template) {
+        titleSlidePresetTexts(section, settings, languageDisplay, template.layerNames)
+    }
+    LottieBand(template, slots, outgoingSlots, bandFraction, bandClock, isKey, showBackground, modifier, presetTexts)
 }
 
 /** Between credits sharing one reference line. */

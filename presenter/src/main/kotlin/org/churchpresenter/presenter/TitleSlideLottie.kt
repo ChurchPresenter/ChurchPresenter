@@ -68,11 +68,12 @@ internal fun SongLook.TitleSlideLottieFullScreen(template: BibleLottieTemplate) 
 
 /**
  * The title slide as its own Lottie on a lower third, in the band's place: the wash above the band
- * as the lyric band has it, then this template, on the title slide's clock.
+ * as the lyric band has it, then this template, on the title slide's clock. A Lower Third preset is
+ * made for the whole output, so it takes the whole output, as on the Lower Third tab.
  */
 @Composable
 internal fun SongLook.TitleSlideLottieBand(template: BibleLottieTemplate, modifier: Modifier) {
-    val lowerThirdFraction = ss.lowerThirdHeightPercent / PERCENT
+    val lowerThirdFraction = if (template.isLowerThirdPreset) 1f else ss.lowerThirdHeightPercent / PERCENT
     val above = resolveAboveBand(appSettings.backgroundSettings, bgConfig)
     BoxWithConstraints(modifier.fillMaxSize()) {
         AboveBandFill(
