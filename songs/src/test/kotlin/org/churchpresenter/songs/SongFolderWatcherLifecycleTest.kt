@@ -7,6 +7,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import java.io.File
 import java.nio.file.Files
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -74,6 +76,28 @@ class SongFolderWatcherLifecycleTest {
         assertTrue(first.isCancelled)
         watcher.dispose()
         awaitChildren()
+    }
+
+    /** Watches [folder] until it is waiting, then stops it and checks the watch ended. */
+    private fun watchThenStop(folder: File) {
+        val waiting = CountDownLatch(1)
+        val watcher = SongFolderWatcher(scope, onWatching = { waiting.countDown() }) {}
+        watcher.watchDirectory(folder)
+        assertTrue(waiting.await(5, TimeUnit.SECONDS), "the watch registered its folders and began waiting")
+        watcher.dispose()
+        awaitChildren()
+        assertTrue(parent.children.none { it.isActive }, "closing the service ends a watch blocked waiting on it")
+    }
+
+    @Test
+    fun `a watch waiting on a folder tree ends when stopped`() {
+        File(dir, "Hymnal/Extra").mkdirs()
+        watchThenStop(dir)
+    }
+
+    @Test
+    fun `a watch waiting for a missing folder ends when stopped`() {
+        watchThenStop(File(dir, "not-yet/songs"))
     }
 
     @Test

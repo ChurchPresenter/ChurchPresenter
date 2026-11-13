@@ -22,7 +22,9 @@ private const val DEBOUNCE_MS = 300L
 
 class SongFolderWatcher(
     private val scope: CoroutineScope,
-    private val onSongsChanged: () -> Unit
+    /** Called on the watch's thread once its folders are registered and it starts waiting. */
+    private val onWatching: () -> Unit = {},
+    private val onSongsChanged: () -> Unit,
 ) {
     private var watchJob: Job? = null
 
@@ -78,6 +80,7 @@ class SongFolderWatcher(
                 }
             }
             registerDir(rootDir)
+            onWatching()
 
             while (isActive) {
                 val key = watchService.take()
@@ -150,6 +153,7 @@ class SongFolderWatcher(
             watching.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
             // Asked once before waiting: the folder may have appeared since the check above.
             var step = awaitStep(rootDir, watching)
+            onWatching()
             while (isActive && step !is AwaitStep.Appeared) {
                 if (step is AwaitStep.WatchNearer) {
                     watching = step.folder
