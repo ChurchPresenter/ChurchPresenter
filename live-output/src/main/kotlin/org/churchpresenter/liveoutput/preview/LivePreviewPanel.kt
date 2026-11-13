@@ -1,5 +1,6 @@
 package org.churchpresenter.liveoutput.preview
 
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import org.churchpresenter.canvas.DeckLinkManager
@@ -89,7 +90,7 @@ fun LivePreviewPanel(
     isRelease: Boolean = false,
 ) {
     val proj = appSettings.projectionSettings
-    val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
+    val deckLinkCount = DeckLinkManager.knownDevices.collectAsState().value?.size ?: 0
     val realWindowCount = ((rememberScreenDevices().size - 1) + deckLinkCount).coerceAtLeast(0)
     // Mirror main.kt's dev-fallback: with no real output, preview the dev fallback window(s) so the
     // right-pane preview matches what's actually opened. devWindowCount lets several be previewed.

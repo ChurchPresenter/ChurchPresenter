@@ -41,7 +41,7 @@ object SystemJoinCodeIo : JoinCodeIo {
     }
 
     override fun email(url: String) {
-        UrlOpener.open(url)
+        UrlOpener.launch(url)
     }
 }
 

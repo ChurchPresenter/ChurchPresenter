@@ -48,7 +48,9 @@ class SongFolderWatcherLifecycleTest {
     fun `a file is not watched as a folder`() {
         val file = File(dir, "a.song").apply { writeText("x") }
         SongFolderWatcher(scope) {}.watchDirectory(file)
-        assertEquals(0, parent.children.count())
+        // The file/folder check runs in the watch's own IO job, which ends at once for a file.
+        awaitChildren()
+        assertTrue(parent.children.none { it.isActive })
     }
 
     @Test

@@ -58,6 +58,7 @@ class BibleViewModelTrainingLogTest {
 
     @BeforeTest
     fun setUp() {
+        TrainingDataLogger.flush()
         logDir.listFiles()?.forEach { it.delete() }
         dir = Files.createTempDirectory("cp-bible-training-log-test").toFile()
         SpbFixture.spbFile(dir, name = "synodal.spb", content = synodalShapedContent())
@@ -87,6 +88,7 @@ class BibleViewModelTrainingLogTest {
     }
 
     private fun rows(prefix: String): List<JsonObject> {
+        TrainingDataLogger.flush()
         val file = assertNotNull(
             logDir.listFiles()?.firstOrNull { it.name.startsWith(prefix) },
             "expected a $prefix log in ${logDir.absolutePath}",

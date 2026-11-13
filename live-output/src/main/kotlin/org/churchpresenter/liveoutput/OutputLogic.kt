@@ -5,10 +5,6 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.sharedui.models.Presenting
 
-/** How many DeckLink outputs are available, which is none at all when the driver is not present. */
-fun deckLinkOutputCount(available: Boolean, deviceCount: () -> Int): Int =
-    if (available) deviceCount() else 0
-
 /** Whether going live with [mode] should also raise the output windows — clearing must not. */
 fun shouldShowPresenterWindowFor(mode: Presenting): Boolean = mode != Presenting.NONE
 

@@ -261,13 +261,20 @@ internal fun buildOptions(request: DialogRequest, token: String): Map<String, Va
     val options = mutableMapOf<String, Variant<*>>()
     options[Constants.DBus.Options.MULTIPLE] = Variant(request.multiple)
     options[Constants.DBus.Options.DIRECTORY] = Variant(request.selectDirectory)
-    options[Constants.DBus.Options.CURRENT_FOLDER] = Variant(request.path.toString())
+    options[Constants.DBus.Options.CURRENT_FOLDER] = Variant(portalPathBytes(request.path), "ay")
     options[Constants.DBus.Options.FILTERS] = Variant(toDBusFilters(request.filters))
     // Only a save dialog suggests a name; an open dialog must not send the key at all
     request.suggestedName?.let { options[Constants.DBus.Options.CURRENT_NAME] = Variant(it) }
     options[Constants.DBus.Options.HANDLE_TOKEN] = Variant(token)
     return options
 }
+
+/**
+ * A path as the portal's `current_folder` takes it: the bytes of the path ending in a NUL, D-Bus
+ * type `ay`. Sent as a string (`s`), a portal that checks types refuses the whole request, and every
+ * dialog falls back to the Swing chooser (CHURCH-PRESENTER-DESKTOP-10V).
+ */
+internal fun portalPathBytes(path: Path): ByteArray = (path.toString() + "\u0000").toByteArray(Charsets.UTF_8)
 
 /**
  * The object path the portal will emit its Response signal on.

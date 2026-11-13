@@ -299,8 +299,12 @@ private fun BatchFilePanel(
                         }
                         KeyButton(shape = ButtonShape, onClick = {
                             val dir = pickers.directory() ?: return@KeyButton
-                            val picked = findFormatInputs(dir, format)
-                            choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
+                            // Walked on IO: a big or network folder held the window while it was searched
+                            // (CHURCH-PRESENTER-DESKTOP-ZD).
+                            scope.launch {
+                                val picked = withContext(Dispatchers.IO) { findFormatInputs(dir, format) }
+                                choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
+                            }
                         }) {
                             Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
                             Text(Strings.selectFolder)
@@ -463,8 +467,12 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
                         }
                         KeyButton(shape = ButtonShape, onClick = {
                             val dir = pickers.directory() ?: return@KeyButton
-                            val picked = findFormatInputs(dir, SoftProjectorFormat)
-                            choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
+                            // Walked on IO: a big or network folder held the window while it was searched
+                            // (CHURCH-PRESENTER-DESKTOP-ZD).
+                            scope.launch {
+                                val picked = withContext(Dispatchers.IO) { findFormatInputs(dir, SoftProjectorFormat) }
+                                choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
+                            }
                         }) {
                             Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
                             Text(Strings.selectFolder)
@@ -656,8 +664,10 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
                         }
                         KeyButton(shape = ButtonShape, onClick = {
                             val dir = pickers.directory() ?: return@KeyButton
-                            val picked = findFormatInputs(dir, DocumentFormat)
-                            if (picked.isNotEmpty()) { files = picked; clearResults() }
+                            scope.launch {
+                                val picked = withContext(Dispatchers.IO) { findFormatInputs(dir, DocumentFormat) }
+                                if (picked.isNotEmpty()) { files = picked; clearResults() }
+                            }
                         }) {
                             Icon(Icons.Default.Folder, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
                             Text(Strings.selectFolder)

@@ -79,6 +79,7 @@ class UsageEventsTest {
     @Test
     fun `the file holds counts and nothing about the occurrence`() {
         repeat(2) { store.record(event) }
+        store.flush()
         val text = file().readText().replace(" ", "")
 
         assertTrue("\"${event.name}\":2" in text, text)

@@ -34,6 +34,7 @@ class TrainingDataLoggerTest {
      */
     @BeforeTest
     fun clearLogDir() {
+        TrainingDataLogger.flush()
         logDir.listFiles()?.forEach { it.delete() }
     }
 
@@ -50,6 +51,7 @@ class TrainingDataLoggerTest {
     /** All rows in the named file, parsed — fails loudly if any line is not valid JSON. */
     private fun rows(prefix: String, suffix: String): List<JsonObject> {
         val file = File(logDir, "$prefix$suffix.jsonl")
+        TrainingDataLogger.flush()
         assertTrue(file.exists(), "expected log file ${file.absolutePath}")
         return file.readLines().filter { it.isNotBlank() }.map {
             runCatching { Json.parseToJsonElement(it) as JsonObject }
@@ -155,6 +157,7 @@ class TrainingDataLoggerTest {
         val s = useSession("live-one-header")
         repeat(3) {
             TrainingDataLogger.logLiveReference(1, 1, 1, 1, "manual")
+        TrainingDataLogger.flush()
         }
         val headers = rows("live-references-", s).count { it.str("type") == "session" }
         assertEquals(1, headers, "a re-attached file must not gain a second header")
@@ -184,6 +187,7 @@ newline""",
         // Session ids come from STT (a db base name), so they can contain path separators.
         TrainingDataLogger.sessionId = "a/b:c*d?e session"
         TrainingDataLogger.logLiveReference(1, 1, 1, 1, "manual")
+        TrainingDataLogger.flush()
 
         val expected = File(logDir, "live-references-a_b_c_d_e_session.jsonl")
         assertTrue(expected.exists(), "expected sanitised filename ${expected.name}")
@@ -196,6 +200,7 @@ newline""",
     fun `with no session id the row records sessionId null`() {
         TrainingDataLogger.sessionId = null
         TrainingDataLogger.logLiveReference(1, 1, 1, 1, "manual")
+        TrainingDataLogger.flush()
         // Falls back to the process-start timestamp filename; find it by prefix.
         val file = assertNotNull(
             logDir.listFiles()?.filter { it.name.startsWith("live-references-") }
@@ -280,6 +285,7 @@ newline""",
     fun `an operator flag with no session id records sessionId null`() {
         TrainingDataLogger.sessionId = null
         TrainingDataLogger.logOperatorFlag(kind = "premature", book = 1, chapter = 1)
+        TrainingDataLogger.flush()
         val file = assertNotNull(
             logDir.listFiles()?.filter { it.name.startsWith("operator-flags-") }
                 ?.maxByOrNull { it.lastModified() },
@@ -306,6 +312,7 @@ newline""",
     fun `the three log kinds go to three separate files`() {
         val s = useSession("three-kinds")
         TrainingDataLogger.logLiveReference(1, 1, 1, 1, "manual")
+        TrainingDataLogger.flush()
         TrainingDataLogger.logSuggestionOutcome(1, 1, 1, "accepted")
         TrainingDataLogger.logOperatorFlag("premature", book = 1, chapter = 1)
 

@@ -192,7 +192,7 @@ internal fun StockMediaBrowserDialogContent(
      * when AWT declines, which a headless test JVM does not stop -- clicking the link under test
      * really did open pexels.com on macOS.
      */
-    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    openUrl: (String) -> Unit = { UrlOpener.launch(it) },
     /** How the signup address is copied, for the same reason [openUrl] is a parameter. */
     copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {

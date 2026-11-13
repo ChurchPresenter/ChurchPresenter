@@ -3,6 +3,7 @@ package org.churchpresenter.songs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -27,62 +28,82 @@ class SongFolderWatcher(
 
     @Volatile private var watchService: WatchService? = null
 
+    /**
+     * Watches [rootDir] and every folder under it, or waits for it if it is not there yet.
+     *
+     * Everything that touches the disk -- telling a file from a folder, making the watch service,
+     * registering the folders -- happens in the watch's own IO job: this is called from the event
+     * thread when the songs load, and on a slow or network drive those checks alone held it
+     * (CHURCH-PRESENTER-DESKTOP-17F).
+     */
     fun watchDirectory(rootDir: File) {
         stop()
-        if (rootDir.isFile) return
-        if (!rootDir.isDirectory) {
-            awaitFolder(rootDir)
-            return
-        }
-
-        val watchService = FileSystems.getDefault().newWatchService()
-        this.watchService = watchService
         watchJob = scope.launch(Dispatchers.IO) {
-            try {
-                // Recursively watch root and all subdirectories
-                fun registerDir(dir: File) {
-                    try {
-                        dir.toPath().register(
-                            watchService,
-                            StandardWatchEventKinds.ENTRY_CREATE,
-                            StandardWatchEventKinds.ENTRY_DELETE,
-                            StandardWatchEventKinds.ENTRY_MODIFY
-                        )
-                    } catch (_: Exception) {
-                    }
-                    val subdirs = dir.listFiles { file -> file.isDirectory } ?: emptyArray()
-                    for (subdir in subdirs) {
-                        registerDir(subdir)
-                    }
+            if (rootDir.isFile) return@launch
+            if (rootDir.isDirectory) watchFolderTree(rootDir) else awaitFolder(rootDir)
+        }
+    }
+
+    /**
+     * Takes [service] as this watcher's, or closes it at once when the watch was stopped while it
+     * was being made. [stop] cancels the job before it reads [watchService], so one of the two
+     * always sees the other: either [stop] finds the service and closes it, or this finds the job
+     * cancelled -- and a service nobody closes would leave its thread blocked in `take()` for good.
+     */
+    private fun CoroutineScope.adopt(service: WatchService): Boolean {
+        watchService = service
+        if (isActive) return true
+        runCatching { service.close() }
+        return false
+    }
+
+    private suspend fun watchFolderTree(rootDir: File) = coroutineScope {
+        val watchService = FileSystems.getDefault().newWatchService()
+        if (!adopt(watchService)) return@coroutineScope
+        try {
+            // Recursively watch root and all subdirectories
+            fun registerDir(dir: File) {
+                try {
+                    dir.toPath().register(
+                        watchService,
+                        StandardWatchEventKinds.ENTRY_CREATE,
+                        StandardWatchEventKinds.ENTRY_DELETE,
+                        StandardWatchEventKinds.ENTRY_MODIFY
+                    )
+                } catch (_: Exception) {
                 }
-                registerDir(rootDir)
-
-                while (isActive) {
-                    val key = watchService.take()
-                    var relevant = false
-
-                    for (event in key.pollEvents()) {
-                        if (event.kind() == StandardWatchEventKinds.OVERFLOW) continue
-                        if (isRelevantEvent(event, key, watchService)) relevant = true
-                    }
-
-                    if (relevant) {
-                        // Debounce: wait a bit for batch operations to settle
-                        delay(DEBOUNCE_MS)
-                        withContext(Dispatchers.Main) {
-                            onSongsChanged()
-                        }
-                    }
-
-                    if (!key.reset()) break
+                val subdirs = dir.listFiles { file -> file.isDirectory } ?: emptyArray()
+                for (subdir in subdirs) {
+                    registerDir(subdir)
                 }
-            } catch (_: ClosedWatchServiceException) {
-                // Expected on dispose
-            } catch (_: InterruptedException) {
-                // Expected on cancel
-            } finally {
-                watchService.close()
             }
+            registerDir(rootDir)
+
+            while (isActive) {
+                val key = watchService.take()
+                var relevant = false
+
+                for (event in key.pollEvents()) {
+                    if (event.kind() == StandardWatchEventKinds.OVERFLOW) continue
+                    if (isRelevantEvent(event, key, watchService)) relevant = true
+                }
+
+                if (relevant) {
+                    // Debounce: wait a bit for batch operations to settle
+                    delay(DEBOUNCE_MS)
+                    withContext(Dispatchers.Main) {
+                        onSongsChanged()
+                    }
+                }
+
+                if (!key.reset()) break
+            }
+        } catch (_: ClosedWatchServiceException) {
+            // Expected on dispose
+        } catch (_: InterruptedException) {
+            // Expected on cancel
+        } finally {
+            watchService.close()
         }
     }
 
@@ -120,38 +141,36 @@ class SongFolderWatcher(
      * started — by watching the nearest folder above it that is, and loads the songs once it
      * appears. Giving up instead left the Songs tab empty until the app was restarted.
      */
-    private fun awaitFolder(rootDir: File) {
-        val start = nearestExistingFolder(rootDir) ?: return
+    private suspend fun awaitFolder(rootDir: File) = coroutineScope {
+        val start = nearestExistingFolder(rootDir) ?: return@coroutineScope
         val watchService = FileSystems.getDefault().newWatchService()
-        this.watchService = watchService
-        watchJob = scope.launch(Dispatchers.IO) {
-            try {
-                var watching = start
-                watching.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
-                // Asked once before waiting: the folder may have appeared since the check above.
-                var step = awaitStep(rootDir, watching)
-                while (isActive && step !is AwaitStep.Appeared) {
-                    if (step is AwaitStep.WatchNearer) {
-                        watching = step.folder
-                        watching.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
-                    } else {
-                        val key = watchService.take()
-                        key.pollEvents()
-                        key.reset()
-                    }
-                    step = awaitStep(rootDir, watching)
+        if (!adopt(watchService)) return@coroutineScope
+        try {
+            var watching = start
+            watching.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
+            // Asked once before waiting: the folder may have appeared since the check above.
+            var step = awaitStep(rootDir, watching)
+            while (isActive && step !is AwaitStep.Appeared) {
+                if (step is AwaitStep.WatchNearer) {
+                    watching = step.folder
+                    watching.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
+                } else {
+                    val key = watchService.take()
+                    key.pollEvents()
+                    key.reset()
                 }
-                if (step is AwaitStep.Appeared) {
-                    // Loading the songs watches the folder itself again, through watchDirectory.
-                    withContext(Dispatchers.Main) { onSongsChanged() }
-                }
-            } catch (_: ClosedWatchServiceException) {
-                // Expected on dispose
-            } catch (_: InterruptedException) {
-                // Expected on cancel
-            } finally {
-                watchService.close()
+                step = awaitStep(rootDir, watching)
             }
+            if (step is AwaitStep.Appeared) {
+                // Loading the songs watches the folder itself again, through watchDirectory.
+                withContext(Dispatchers.Main) { onSongsChanged() }
+            }
+        } catch (_: ClosedWatchServiceException) {
+            // Expected on dispose
+        } catch (_: InterruptedException) {
+            // Expected on cancel
+        } finally {
+            watchService.close()
         }
     }
 

@@ -2,6 +2,7 @@ package org.churchpresenter.calendar
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -9,6 +10,7 @@ import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
+import java.nio.file.WatchService
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.coroutineContext
@@ -62,17 +64,10 @@ class CalendarFileWatcher(
      * the other machine. Editing on one machine at a time is what most of them do anyway.
      */
     suspend fun run(onChanged: suspend () -> Unit, onPresetsChanged: suspend () -> Unit = {}) {
-        if (!folder.isDirectory) return
-        val service = runCatching { FileSystems.getDefault().newWatchService() }.getOrNull() ?: return
+        // Made on [io]: the caller is the window's composition scope, on the event thread, and
+        // checking the folder and registering it touch the disk (CHURCH-PRESENTER-DESKTOP-R5).
+        val service = withContext(io) { openWatch() } ?: return
         try {
-            runCatching {
-                folder.toPath().register(
-                    service,
-                    StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_MODIFY,
-                )
-            }.getOrElse { return }
-
             while (coroutineContext.isActive) {
                 val key = withContext(io) { service.poll(POLL_MS, TimeUnit.MILLISECONDS) } ?: continue
                 val events = key.pollEvents()
@@ -80,8 +75,24 @@ class CalendarFileWatcher(
                 report(events, onChanged, onPresetsChanged)
             }
         } finally {
-            runCatching { service.close() }
+            // Closing waits for the watch's own thread to stop, hundreds of milliseconds on Windows.
+            withContext(NonCancellable + io) { runCatching { service.close() } }
         }
+    }
+
+    /** A watch on [folder], or null when there is no folder or it cannot be watched. */
+    private fun openWatch(): WatchService? {
+        if (!folder.isDirectory) return null
+        val service = runCatching { FileSystems.getDefault().newWatchService() }.getOrNull() ?: return null
+        val registered = runCatching {
+            folder.toPath().register(
+                service,
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY,
+            )
+        }.isSuccess
+        if (!registered) runCatching { service.close() }
+        return service.takeIf { registered }
     }
 
     /** What one batch of events means; the loop above hands it what the watch delivered. */
@@ -95,8 +106,8 @@ class CalendarFileWatcher(
         if (!calendar && !presets) return
         // Let a sync client finish writing before reading what it wrote.
         delay(QUIET_PERIOD_MS)
-        if (calendar && changedElsewhere(CALENDAR_FILE)) onChanged()
-        if (presets && changedElsewhere(PRESET_FILE)) onPresetsChanged()
+        if (calendar && withContext(io) { changedElsewhere(CALENDAR_FILE) }) onChanged()
+        if (presets && withContext(io) { changedElsewhere(PRESET_FILE) }) onPresetsChanged()
     }
 
     private fun WatchEvent<*>.touches(file: String): Boolean {

@@ -303,40 +303,76 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
  *
  * The names come back rather than a count so the caller can say *which* file it could not take;
  * "one of these four did not work" is barely better than silence.
+ *
+ * Reads the disk: the app calls [readDroppedFiles] off the event thread and [addDroppedFiles] on it.
  */
-internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel): List<String> {
-    val skipped = mutableListOf<String>()
-    for (file in files) {
-        if (file.isDirectory) {
-            val imageCount = file.listFiles()?.count { child ->
-                child.isFile && child.extension.lowercase() in IMAGE_EXTENSIONS
-            } ?: 0
-            if (imageCount > 0) {
-                viewModel.addPicture(file.absolutePath, file.name, imageCount)
-            } else {
-                skipped += file.name
-            }
-            continue
-        }
+internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel): List<String> =
+    addDroppedFiles(readDroppedFiles(files), viewModel)
 
-        val ext = file.extension.lowercase()
-        when (classifyDroppedFile(ext)) {
-            DroppedFileAction.PRESENTATION ->
-                viewModel.addPresentation(file.absolutePath, file.nameWithoutExtension, 0, ext)
-            DroppedFileAction.MEDIA ->
-                viewModel.addMedia(file.absolutePath, file.nameWithoutExtension, "local")
-            DroppedFileAction.PICTURE -> {
-                // The picture that was dropped, not its whole folder: a row for the folder presented
-                // the folder's first picture, whichever one was dropped (#652).
-                val imageCount = file.parentFile?.listFiles()?.count { child ->
-                    child.isFile && child.extension.lowercase() in IMAGE_EXTENSIONS
-                } ?: 1
-                viewModel.addSinglePicture(file, imageCount)
-            }
-            DroppedFileAction.LOWER_THIRD ->
-                viewModel.addLowerThird(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
-            DroppedFileAction.NONE -> skipped += file.name
+/** What one dropped file turns into, worked out with the disk so adding it needs none. */
+internal sealed interface DroppedItem {
+    val file: File
+
+    /** A folder of pictures, and how many it holds. */
+    data class PictureFolder(override val file: File, val imageCount: Int) : DroppedItem
+
+    /** One picture, and how many pictures its folder holds. */
+    data class Picture(override val file: File, val imageCount: Int) : DroppedItem
+
+    /** A file whose kind is known from its extension alone. */
+    data class ByType(override val file: File, val action: DroppedFileAction) : DroppedItem
+
+    /** A file or folder the schedule cannot use. */
+    data class Skipped(override val file: File) : DroppedItem
+}
+
+private fun imageCountIn(folder: File?): Int? =
+    folder?.listFiles()?.count { child -> child.isFile && child.extension.lowercase() in IMAGE_EXTENSIONS }
+
+/**
+ * The disk half of a drop: which dropped folders hold pictures, and how many each picture's folder
+ * holds. A folder on a network drive can take seconds to list, so this runs on IO
+ * (CHURCH-PRESENTER-DESKTOP-JY).
+ */
+internal fun readDroppedFiles(files: List<File>): List<DroppedItem> = files.map { file ->
+    if (file.isDirectory) {
+        val imageCount = imageCountIn(file) ?: 0
+        if (imageCount > 0) DroppedItem.PictureFolder(file, imageCount) else DroppedItem.Skipped(file)
+    } else {
+        when (val action = classifyDroppedFile(file.extension.lowercase())) {
+            // The picture that was dropped, not its whole folder: a row for the folder presented
+            // the folder's first picture, whichever one was dropped (#652).
+            DroppedFileAction.PICTURE -> DroppedItem.Picture(file, imageCountIn(file.parentFile) ?: 1)
+            DroppedFileAction.NONE -> DroppedItem.Skipped(file)
+            else -> DroppedItem.ByType(file, action)
+        }
+    }
+}
+
+/** Adds what [readDroppedFiles] found, returning the names of those it could not use. */
+internal fun addDroppedFiles(items: List<DroppedItem>, viewModel: ScheduleViewModel): List<String> {
+    val skipped = mutableListOf<String>()
+    for (item in items) {
+        val file = item.file
+        when (item) {
+            is DroppedItem.PictureFolder -> viewModel.addPicture(file.absolutePath, file.name, item.imageCount)
+            is DroppedItem.Picture -> viewModel.addSinglePicture(file, item.imageCount)
+            is DroppedItem.Skipped -> skipped += file.name
+            is DroppedItem.ByType -> addByType(file, item.action, viewModel)
         }
     }
     return skipped
+}
+
+private fun addByType(file: File, action: DroppedFileAction, viewModel: ScheduleViewModel) {
+    val ext = file.extension.lowercase()
+    when (action) {
+        DroppedFileAction.PRESENTATION ->
+            viewModel.addPresentation(file.absolutePath, file.nameWithoutExtension, 0, ext)
+        DroppedFileAction.MEDIA ->
+            viewModel.addMedia(file.absolutePath, file.nameWithoutExtension, "local")
+        DroppedFileAction.LOWER_THIRD ->
+            viewModel.addLowerThird(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
+        DroppedFileAction.PICTURE, DroppedFileAction.NONE -> Unit
+    }
 }

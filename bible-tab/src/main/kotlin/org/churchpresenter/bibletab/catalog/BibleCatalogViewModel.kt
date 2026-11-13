@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -212,17 +213,23 @@ class BibleCatalogViewModel(
      * Re-reads which modules are already present. Only the flat installed name counts — a Bible the
      * user obtained elsewhere and filed under a folder of their own is left alone rather than
      * guessed at by title.
+     *
+     * The folder is listed on IO: the download browser calls this as it opens, on the event thread,
+     * and a Bible folder on a network drive held it (CHURCH-PRESENTER-DESKTOP-183).
      */
-    fun refreshInstalled() {
+    suspend fun refreshInstalled() {
         if (storageDirectory.isBlank()) {
             installedFiles = emptySet()
             return
         }
-        installedFiles = File(storageDirectory)
-            .listFiles { file -> file.isFile && file.extension.equals(Constants.EXTENSION_SPB, ignoreCase = true) }
-            ?.map { it.name }
-            ?.toSet()
-            ?: emptySet()
+        val folder = File(storageDirectory)
+        installedFiles = withContext(Dispatchers.IO) {
+            folder
+                .listFiles { file -> file.isFile && file.extension.equals(Constants.EXTENSION_SPB, ignoreCase = true) }
+                ?.map { it.name }
+                ?.toSet()
+                ?: emptySet()
+        }
     }
 
     fun isInstalled(module: BibleModule): Boolean = module.fileName in installedFiles

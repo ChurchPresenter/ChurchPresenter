@@ -62,9 +62,9 @@ internal fun MainWindowScope.AppMenuBar() {
             },
             onSongLibrary = { showSongLibraryWindow = true },
             onCalendar = { showCalendarWindow = true },
-            onHelp = { UrlOpener.open("https://churchpresenter.org/wiki") },
-            onHowToBlog = { UrlOpener.open("https://churchpresenter.org/blog") },
-            onTutorialVideos = { UrlOpener.open("https://www.churchpresenter.org/tutorials/") },
+            onHelp = { UrlOpener.launch("https://churchpresenter.org/wiki") },
+            onHowToBlog = { UrlOpener.launch("https://churchpresenter.org/blog") },
+            onTutorialVideos = { UrlOpener.launch("https://www.churchpresenter.org/tutorials/") },
             onCheckForUpdates = {
                 coroutineScope.launch {
                     pendingUpdateResult = UpdateChecker.checkForUpdate(

@@ -15,6 +15,7 @@ import kotlin.io.path.Path
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -546,8 +547,14 @@ class XdgPortalRequestTest {
         assertEquals(true, options["directory"]?.value)
         // Derived through Path so the expectation matches on Windows too: the portal request is
         // built from Path.toString(), which separates with backslashes there. The XDG portal itself
-        // is Linux-only, but this suite runs on every platform.
-        assertEquals(Path("/home/leader/Songs").toString(), options["current_folder"]?.value)
+        // is Linux-only, but this suite runs on every platform. The portal takes the folder as a
+        // NUL-terminated byte array (`ay`); a string makes it refuse the request.
+        val folder = options["current_folder"]
+        assertEquals("ay", folder?.sig)
+        assertContentEquals(
+            (Path("/home/leader/Songs").toString() + "\u0000").toByteArray(),
+            folder?.value as? ByteArray,
+        )
         assertEquals("deadbeef", options["handle_token"]?.value)
     }
 
@@ -701,7 +708,10 @@ class XdgPortalRequestTest {
             null
         }
 
-        assertEquals(Path("/home/leader/Songs").toString(), seenOptions?.get("current_folder")?.value)
+        assertContentEquals(
+            portalPathBytes(Path("/home/leader/Songs")),
+            seenOptions?.get("current_folder")?.value as? ByteArray,
+        )
         assertEquals(true, seenOptions?.get("multiple")?.value)
         assertEquals("deadbeef", seenOptions?.get("handle_token")?.value)
         assertEquals(

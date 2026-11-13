@@ -1,5 +1,7 @@
 package org.churchpresenter.schedule
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.calendar.model.UpcomingLoad
 import org.churchpresenter.calendar.ScheduleServiceLink
 import org.churchpresenter.core.models.songs.SongItem
@@ -266,7 +268,8 @@ private fun ScheduleTabFooter(
                     )
                     if (picked != null) {
                         // Picked by hand or dragged in, an unusable file gets the same answer.
-                        fileDrop.skippedFiles = handleDroppedFiles(picked.map(Path::toFile), viewModel)
+                        val items = withContext(Dispatchers.IO) { readDroppedFiles(picked.map(Path::toFile)) }
+                        fileDrop.skippedFiles = addDroppedFiles(items, viewModel)
                     }
                 }
             },
@@ -384,7 +387,8 @@ private fun rememberLiveDrift(viewModel: ScheduleViewModel, rowClocks: Map<Strin
 @Composable
 private fun rememberScheduleFileDrop(viewModel: ScheduleViewModel): ScheduleFileDrop {
     val viewModelState = rememberUpdatedState(viewModel)
-    val drop = remember { ScheduleFileDrop { viewModelState.value } }
+    val scope = rememberCoroutineScope()
+    val drop = remember { ScheduleFileDrop(scope) { viewModelState.value } }
     // A message about a drop is stale the moment the next one lands, and keying on the list
     // restarts the countdown when it does.
     LaunchedEffect(drop.skippedFiles) {

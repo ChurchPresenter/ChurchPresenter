@@ -5,7 +5,6 @@ import org.churchpresenter.liveoutput.PresenterModeContent
 import org.churchpresenter.liveoutput.PresenterOutputContent
 import org.churchpresenter.liveoutput.PresenterScreen
 import org.churchpresenter.liveoutput.PresenterTransitionEffects
-import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.liveoutput.effectiveOutputMode
 import org.churchpresenter.liveoutput.hasDeckLinkKeyOutput
 import org.churchpresenter.liveoutput.hasScreenKeyOutput
@@ -28,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
@@ -180,7 +180,8 @@ internal fun PresenterWindows(
     // Profiles that merge their outputs into one picture -- see OutputMerge.kt.
     val merges = remember(proj) { proj.liveMerges() }
 
-    val deckLinkDeviceCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
+    // As last listed: AppRootState lists them once at startup, the settings page again when opened.
+    val deckLinkDeviceCount = DeckLinkManager.knownDevices.collectAsState().value?.size ?: 0
     val windowCount = presenterWindowCount(availableScreens.size, deckLinkDeviceCount)
     // Outputs with nothing real behind them, opened as windows -- see simulatedOutputCount. Each
     // keeps its own slot number, so it is the same output with or without its monitor.
