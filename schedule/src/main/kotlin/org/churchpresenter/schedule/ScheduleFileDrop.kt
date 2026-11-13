@@ -9,6 +9,10 @@ import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.awtTransferable
 import androidx.compose.ui.geometry.Offset
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.utils.carriesScheduleItem
 import org.churchpresenter.sharedui.utils.scheduleItemOrNull
 import java.awt.dnd.DropTargetDragEvent
@@ -23,7 +27,14 @@ import java.awt.datatransfer.Transferable
  * where it was let go.
  */
 @Stable
-internal class ScheduleFileDrop(private val viewModel: () -> ScheduleViewModel) : DragAndDropTarget {
+internal class ScheduleFileDrop(
+    /**
+     * Where a file drop reads the disk before adding its rows; null adds them at once, on the caller.
+     * The app passes the panel's scope, so listing a dropped folder is never done on the event thread.
+     */
+    private val scope: CoroutineScope? = null,
+    private val viewModel: () -> ScheduleViewModel,
+) : DragAndDropTarget {
     /** True while a file, or a row from another tab, is being dragged over this panel. */
     var dragOver by mutableStateOf(false)
 
@@ -66,7 +77,14 @@ internal class ScheduleFileDrop(private val viewModel: () -> ScheduleViewModel) 
             return true
         }
         val files = readOrNull { data?.fileListOrNull() } ?: return false
-        vm.insertingAt(at) { skippedFiles = handleDroppedFiles(files, vm) }
+        if (scope == null) {
+            vm.insertingAt(at) { skippedFiles = handleDroppedFiles(files, vm) }
+        } else {
+            scope.launch {
+                val items = withContext(Dispatchers.IO) { readDroppedFiles(files) }
+                vm.insertingAt(at) { skippedFiles = addDroppedFiles(items, vm) }
+            }
+        }
         return true
     }
 

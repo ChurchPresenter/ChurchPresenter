@@ -8,6 +8,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -50,6 +51,21 @@ class FontFileIndexTest {
         index.find("arial")
 
         assertEquals(1, scans.get())
+    }
+
+    @Test
+    fun `a lookup after the startup scan walks nothing again`() {
+        val arial = font("Arial.ttf")
+        val scans = AtomicInteger()
+        val index = index(scans)
+        val handed = mutableListOf<File>()
+
+        assertTrue(index.scanAll { handed += it }, "the first scan walks")
+
+        assertEquals(arial, index.find("arial"))
+        assertEquals(listOf(arial), handed, "every file found is handed on")
+        assertEquals(1, scans.get(), "the lookup is answered from the startup scan")
+        assertFalse(index.scanAll { handed += it }, "a second scan walks nothing")
     }
 
     @Test

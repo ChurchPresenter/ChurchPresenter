@@ -13,6 +13,9 @@ import org.churchpresenter.canvas.DeckLinkManager.DeviceStatus
 import org.churchpresenter.canvas.DeckLinkManager.InputMode
 import org.churchpresenter.canvas.DeckLinkManager.OutputInfo
 import org.churchpresenter.canvas.DeckLinkManager.VideoConnection
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.churchpresenter.diagnostics.Log
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -94,16 +97,36 @@ open class DeckLinkBridge internal constructor(
         return available ?: false
     }
 
-    fun listDevices(): List<DeckLinkDevice> {
-        if (!isAvailable()) return emptyList()
-        return try {
-            natives.nativeListDevices().mapIndexed { index, name ->
-                DeckLinkDevice(index, name)
-            }
-        } catch (_: Throwable) {
+    private val knownDevicesState = MutableStateFlow<List<DeckLinkDevice>?>(null)
+    private val listLock = Any()
+
+    /**
+     * The devices as [listDevices] last found them, or null before it has run. This is what a
+     * composable reads: listing asks the driver, which held the event thread for up to a second on
+     * every recomposition of the outputs and every opening of the settings page
+     * (CHURCH-PRESENTER-DESKTOP-GJ, -PC). Refresh it with [listDevices] off the event thread.
+     */
+    val knownDevices: StateFlow<List<DeckLinkDevice>?> = knownDevicesState.asStateFlow()
+
+    /** Asks the driver for the devices now, and remembers the answer in [knownDevices]. */
+    fun listDevices(): List<DeckLinkDevice> = synchronized(listLock) {
+        val devices = if (!isAvailable()) {
             emptyList()
+        } else {
+            try {
+                natives.nativeListDevices().mapIndexed { index, name ->
+                    DeckLinkDevice(index, name)
+                }
+            } catch (_: Throwable) {
+                emptyList()
+            }
         }
+        knownDevicesState.value = devices
+        devices
     }
+
+    /** [knownDevices], asking the driver only if nothing has yet -- once, at startup. */
+    fun devices(): List<DeckLinkDevice> = knownDevicesState.value ?: listDevices()
 
     fun open(deviceIndex: Int, width: Int = 1920, height: Int = 1080): Boolean {
         if (!isAvailable()) return false

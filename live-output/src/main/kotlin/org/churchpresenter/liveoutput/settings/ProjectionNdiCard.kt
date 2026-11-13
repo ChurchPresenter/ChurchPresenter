@@ -158,7 +158,7 @@ internal fun NdiOutputsCard(
      */
     receiverCount: (Int) -> Int = NdiManager::connectionCount,
     /** How the runtime download page is opened. A parameter so a test does not launch a browser. */
-    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    openUrl: (String) -> Unit = { UrlOpener.launch(it) },
     /** How the runtime download address is copied. A parameter so a test does not take the clipboard. */
     copyText: (String) -> Unit = { SystemClipboard.copy(it) },
 ) {

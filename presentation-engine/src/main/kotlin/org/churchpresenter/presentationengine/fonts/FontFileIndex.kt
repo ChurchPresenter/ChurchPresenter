@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentHashMap
  * Font files by key, for every font file under [dirs], that answers a lookup only once its own scan
  * has run to the end.
  *
- * The scan is lazy and shared, and another scan ([SlideFontRegistry.initialize]) adds to it as it
- * walks. An "is anything in it yet" check therefore let a lookup trust a half-built index: it missed
- * an installed family and came back empty, and the Lottie font loader caches that answer for the
- * rest of the run, so a lower third drew its band with no text on it. Here the first lookup walks
- * every directory under a lock and the others wait for it.
+ * The scan is shared: [SlideFontRegistry.initialize] runs it at startup through [scanAll], and
+ * otherwise the first lookup does. An "is anything in it yet" check let a lookup trust a half-built
+ * index: it missed an installed family and came back empty, and the Lottie font loader caches that
+ * answer for the rest of the run, so a lower third drew its band with no text on it. Here a scan
+ * walks every directory under a lock and lookups wait for it.
  *
  * @param dirs the directories to scan, read when the first lookup needs them
  * @param maxDepth how deep below each directory to look
@@ -41,16 +41,29 @@ internal class FontFileIndex(
 
     private fun ensureComplete() {
         if (complete) return
-        synchronized(lock) {
-            if (complete) return
-            for (dir in dirs()) {
-                if (!dir.isDirectory) continue
-                dir.walkTopDown().maxDepth(maxDepth)
-                    .filter { it.isFile && it.extension.lowercase() in FONT_FILE_EXTENSIONS }
-                    .forEach(::add)
-            }
-            complete = true
+        scanAll {}
+    }
+
+    /**
+     * Walks every directory now, unless a scan already has, indexing each font file and handing it
+     * to [onFile]; true when this call did the walk. [SlideFontRegistry.initialize] runs it on its
+     * startup thread, so the first lookup -- a Lottie band laying out its text on the live output --
+     * finds the index already complete instead of walking the font folders on the event thread
+     * (CHURCH-PRESENTER-DESKTOP-K9).
+     */
+    fun scanAll(onFile: (File) -> Unit): Boolean = synchronized(lock) {
+        if (complete) return false
+        for (dir in dirs()) {
+            if (!dir.isDirectory) continue
+            dir.walkTopDown().maxDepth(maxDepth)
+                .filter { it.isFile && it.extension.lowercase() in FONT_FILE_EXTENSIONS }
+                .forEach { file ->
+                    add(file)
+                    onFile(file)
+                }
         }
+        complete = true
+        true
     }
 
     companion object {

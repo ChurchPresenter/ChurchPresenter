@@ -15,20 +15,6 @@ import kotlin.test.assertTrue
 
 class OutputLogicTest {
 
-    // ── DeckLink ────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `outputs are counted only when the driver is there`() {
-        assertEquals(3, deckLinkOutputCount(available = true) { 3 })
-    }
-
-    @Test
-    fun `no driver means no outputs, and the count is never asked for`() {
-        var asked = false
-        assertEquals(0, deckLinkOutputCount(available = false) { asked = true; 3 })
-        assertFalse(asked, "listing devices without the driver is what crashes")
-    }
-
     // ── Transitions on the output ───────────────────────────────────────────────
 
     @Test

@@ -287,8 +287,28 @@ internal object SwingPickers : ConverterPickers {
 /** The pickers the converter's tabs use; a test or a demo recording provides its own. */
 val LocalConverterPickers = staticCompositionLocalOf<ConverterPickers> { SwingPickers }
 
+/**
+ * The one [JFileChooser] every pick reuses, set back to a plain single-file chooser each time.
+ *
+ * Building a chooser on Windows installs its look and asks the shell for its folders, which took
+ * seconds on the event thread on every pick (CHURCH-PRESENTER-DESKTOP-GN, -K1) -- the warm-up only
+ * saved the first. Kept, the second pick costs nothing to build, and opens where the last one left.
+ */
+private var sharedChooser: JFileChooser? = null
+
+private fun freshChooser(): JFileChooser {
+    val chooser = sharedChooser ?: JFileChooser(defaultDir).also { sharedChooser = it }
+    chooser.resetChoosableFileFilters()
+    chooser.isAcceptAllFileFilterUsed = true
+    chooser.fileSelectionMode = JFileChooser.FILES_ONLY
+    chooser.isMultiSelectionEnabled = false
+    chooser.selectedFiles = emptyArray()
+    chooser.selectedFile = null
+    return chooser
+}
+
 internal fun pickFiles(description: String, vararg extensions: String, multiSelection: Boolean): List<File> {
-    val chooser = JFileChooser(defaultDir).apply {
+    val chooser = freshChooser().apply {
         fileFilter = FileNameExtensionFilter(description, *extensions)
         isMultiSelectionEnabled = multiSelection
         dialogTitle = Strings.selectDialog(description)
@@ -299,7 +319,7 @@ internal fun pickFiles(description: String, vararg extensions: String, multiSele
 }
 
 internal fun pickDirectory(): File? {
-    val chooser = JFileChooser(defaultDir).apply {
+    val chooser = freshChooser().apply {
         fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
         dialogTitle = Strings.selectFolder
     }
@@ -331,7 +351,7 @@ private fun findFilesRecursive(dir: File, extension: String): List<File> =
  */
 internal fun pickSourceFiles(source: SongSource, format: SongFormatConverter): List<File> {
     val label = pickerLabel(source)
-    val chooser = JFileChooser(defaultDir).apply {
+    val chooser = freshChooser().apply {
         fileFilter = object : FileFilter() {
             override fun accept(file: File): Boolean = file.isDirectory || matchesFormat(file, format)
             override fun getDescription(): String = label

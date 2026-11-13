@@ -237,7 +237,10 @@ fun ProjectionSettingsTab(
     // Detect physical screens; exclude the primary monitor from presenter targets.
     val screenDevicesAll = remember { detectScreens() }
     val detectedScreens = screenDevicesAll.size
-    val deckLinkDeviceCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
+    // Listed again off the event thread each time the page opens, so a card plugged in since shows up.
+    val deckLinkDevices = DeckLinkManager.knownDevices.collectAsState().value.orEmpty()
+    LaunchedEffect(Unit) { withContext(Dispatchers.IO) { DeckLinkManager.listDevices() } }
+    val deckLinkDeviceCount = deckLinkDevices.size
     val realWindowCount = screenDevicesAll.count { !it.isPrimary } + deckLinkDeviceCount
     // Dev convenience: mirrors main.kt's devWindowedFallback — on a single-monitor dev machine
     // with no DeckLink device, main.kt opens an extra windowed "dev" output at assignment slot 0.
@@ -277,7 +280,7 @@ fun ProjectionSettingsTab(
 
     val noneLabel = stringResource(Res.string.key_output_none)
     val notUsedLabel = stringResource(Res.string.display_not_used)
-    val displayOptions = rememberDisplayOptions(screenDevicesAll, noneLabel, notUsedLabel, proj)
+    val displayOptions = rememberDisplayOptions(screenDevicesAll, deckLinkDevices, noneLabel, notUsedLabel, proj)
 
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
@@ -688,13 +691,14 @@ private fun VlcPathRow(
 @Composable
 private fun rememberDisplayOptions(
     screenDevicesAll: List<DetectedScreen>,
+    deckLinkDevices: List<DeckLinkManager.DeckLinkDevice>,
     noneLabel: String,
     notUsedLabel: String,
     proj: ProjectionSettings,
 ): List<DisplayOption> {
     val screenNames = proj.screenNames
     val unusedScreens = proj.unusedScreens
-    return remember(screenDevicesAll, noneLabel, notUsedLabel, screenNames, unusedScreens) {
+    return remember(screenDevicesAll, deckLinkDevices, noneLabel, notUsedLabel, screenNames, unusedScreens) {
         val options = mutableListOf<DisplayOption>()
         options.add(
             DisplayOption(
@@ -728,18 +732,16 @@ private fun rememberDisplayOptions(
             )
             displayNum++
         }
-        // Add DeckLink devices if available
-        if (DeckLinkManager.isAvailable()) {
-            DeckLinkManager.listDevices().forEachIndexed { i, device ->
-                options.add(
-                    DisplayOption(
-                        label = "DeckLink ${i + 1}: ${device.name}",
-                        shortLabel = "DK${i + 1}: ${device.name}",
-                        targetDisplay = device.index,
-                        targetType = Constants.TARGET_TYPE_DECKLINK
-                    )
+        // The DeckLink devices as last listed -- the page lists them again off the event thread when it opens.
+        deckLinkDevices.forEachIndexed { i, device ->
+            options.add(
+                DisplayOption(
+                    label = "DeckLink ${i + 1}: ${device.name}",
+                    shortLabel = "DK${i + 1}: ${device.name}",
+                    targetDisplay = device.index,
+                    targetType = Constants.TARGET_TYPE_DECKLINK
                 )
-            }
+            )
         }
         options.toList()
     }

@@ -325,7 +325,7 @@ internal class SmugMugAccess(
     val apiKey: String = "",
     val onApiKey: (String) -> Unit = {},
     val lookUp: suspend (site: String, key: String) -> SmugMugSite = { _, _ -> throw IOException("No lookup") },
-    val openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    val openUrl: (String) -> Unit = { UrlOpener.launch(it) },
 )
 
 /**
@@ -335,7 +335,7 @@ internal class SmugMugAccess(
  */
 class SignageDesktop(
     val fileChooser: FileChooser = FileChooser.platformInstance,
-    val openFolder: (Path) -> Unit = { UrlOpener.open(it.toString()) },
+    val openFolder: (Path) -> Unit = { UrlOpener.launch(it.toString()) },
     val canTrash: () -> Boolean = SignageTrash::canTrash,
 )
 

@@ -54,7 +54,7 @@ internal fun cameraPrivacyUri(osName: String): String? {
 @Composable
 fun CameraPrivacyHint(
     osName: String = System.getProperty("os.name", ""),
-    openUri: (String) -> Unit = { UrlOpener.open(it) },
+    openUri: (String) -> Unit = { UrlOpener.launch(it) },
 ) {
     val uri = cameraPrivacyUri(osName) ?: return
     RaisedButton(onClick = { openUri(uri) }, modifier = Modifier.fillMaxWidth()) {

@@ -1,5 +1,6 @@
 package org.churchpresenter.bibletab.catalog
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.CompletableDeferred
 import org.churchpresenter.bibleformats.catalog.BibleCatalogOutcome
 import org.churchpresenter.bibleformats.catalog.BibleInstallOutcome
@@ -442,7 +443,7 @@ class BibleCatalogViewModelTest {
         File(dir, "nested").apply { mkdirs() }.resolve("RUS_SYN.spb").writeText("##Title:\tSynodal")
         val model = vm(FakeSource())
 
-        model.refreshInstalled()
+        runBlocking { model.refreshInstalled() }
 
         assertEquals(setOf("ENG_ACV.spb"), model.installedFiles)
         assertTrue(model.isInstalled(module("ENG_ACV")))
@@ -452,10 +453,10 @@ class BibleCatalogViewModelTest {
     @Test
     fun `a folder named like a Bible is not an installed Bible, nor is a storage folder that is gone`() {
         File(dir, "KJV.spb").mkdirs()
-        assertTrue(vm(FakeSource()).apply { refreshInstalled() }.installedFiles.isEmpty())
+        assertTrue(vm(FakeSource()).apply { runBlocking { refreshInstalled() } }.installedFiles.isEmpty())
 
         val gone = vm(FakeSource(), storageDirectory = File(dir, "unplugged-drive").absolutePath)
-        gone.refreshInstalled()
+        runBlocking { gone.refreshInstalled() }
 
         assertTrue(gone.installedFiles.isEmpty(), "a missing folder lists nothing rather than throwing")
     }
@@ -464,7 +465,7 @@ class BibleCatalogViewModelTest {
     fun `with no storage folder nothing is reported as installed`() {
         val model = vm(FakeSource(), storageDirectory = "")
 
-        model.refreshInstalled()
+        runBlocking { model.refreshInstalled() }
 
         assertTrue(model.installedFiles.isEmpty())
     }

@@ -3,6 +3,8 @@ package org.churchpresenter.sharedui.utils
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import org.churchpresenter.core.models.io.writeTextAtomically
 
 /**
@@ -208,18 +210,38 @@ internal fun UsageEventLog.markingReported(counts: Map<UsageEvent, Int>): UsageE
  */
 open class UsageEventStore(private val fileProvider: () -> File) {
 
-    private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
     private val lock = Any()
 
     /**
-     * Records one occurrence of [event].
+     * Applies [change] to the file on the store's writer thread.
      *
-     * Written on the calling thread: events are human-paced — a song going live — and the file is a
-     * handful of integers, so the write costs less than handing it to another thread would, and
-     * callers (and their tests) can read the count back immediately afterwards.
+     * Recording is called from the event thread -- a song going live, a window opening -- and each
+     * one reads and rewrites the file, which on a slow disk held the UI for over a second
+     * (CHURCH-PRESENTER-DESKTOP-144). The file is resolved here, on the caller, so a write lands
+     * where `user.home` pointed when the event happened.
      */
-    fun record(event: UsageEvent, times: Int = 1): Unit = synchronized(lock) {
-        if (times > 0) save(load().recording(event, times))
+    private fun write(change: (UsageEventLog) -> UsageEventLog?) {
+        val file = fileProvider()
+        WRITER.execute {
+            synchronized(lock) { change(loadUsageLog(file))?.let { saveUsageLog(file, it) } }
+        }
+    }
+
+    /** Waits for every write handed to the writer so far, by any store, to land. */
+    internal fun flush() {
+        WRITER.submit {}.get()
+    }
+
+    /** The file as it stands once every write before this read has landed, so a read sees them. */
+    private val current: UsageEventLog
+        get() {
+            flush()
+            return synchronized(lock) { loadUsageLog(fileProvider()) }
+        }
+
+    /** Records one occurrence of [event]. */
+    fun record(event: UsageEvent, times: Int = 1) {
+        if (times > 0) write { it.recording(event, times) }
     }
 
     /**
@@ -230,8 +252,9 @@ open class UsageEventStore(private val fileProvider: () -> File) {
      * every occurrence would measure network flakiness. Counting one per run makes the number
      * "services where this was connected", which is the question actually being asked.
      */
-    fun recordOncePerRun(event: UsageEvent): Unit = synchronized(lock) {
-        if (recordedThisRun.add(event)) save(load().recording(event))
+    fun recordOncePerRun(event: UsageEvent) {
+        val first = synchronized(recordedThisRun) { recordedThisRun.add(event) }
+        if (first) write { it.recording(event) }
     }
 
     private val recordedThisRun = mutableSetOf<UsageEvent>()
@@ -242,39 +265,37 @@ open class UsageEventStore(private val fileProvider: () -> File) {
      * For a milestone rather than an activity — "this install has managed to do X at all" — where
      * the count is meaningless and only the first time says anything.
      */
-    fun recordOncePerInstall(event: UsageEvent): Unit = synchronized(lock) {
-        val log = load()
-        if ((log.total[event.name] ?: 0) == 0) save(log.recording(event))
+    fun recordOncePerInstall(event: UsageEvent) {
+        write { log -> if ((log.total[event.name] ?: 0) == 0) log.recording(event) else null }
     }
 
     /**
-     * Stores what the run that is now ending reports about itself. Called from a shutdown hook. A run
-     * with nothing to report -- under a minute, nothing live -- leaves the last one's record waiting.
+     * Stores what the run that is now ending reports about itself. Called from a shutdown hook, so it
+     * waits for the write: the process is about to end. A run with nothing to report -- under a
+     * minute, nothing live -- leaves the last one's record waiting.
      */
-    fun recordRun(run: RunRecord): Unit = synchronized(lock) {
-        if (!run.isEmpty) {
-            save(
-                load().copy(
-                    lastSessionMinutes = run.sessionMinutes,
-                    lastLiveMinutes = run.liveMinutes,
-                    lastLiveStalls = run.liveStalls,
-                )
+    fun recordRun(run: RunRecord) {
+        if (run.isEmpty) return
+        write {
+            it.copy(
+                lastSessionMinutes = run.sessionMinutes,
+                lastLiveMinutes = run.liveMinutes,
+                lastLiveStalls = run.liveStalls,
             )
         }
+        flush()
     }
 
     /** The previous run's record; empty if unknown or already reported. */
-    fun lastRun(): RunRecord = synchronized(lock) {
-        load().let { RunRecord(it.lastSessionMinutes, it.lastLiveMinutes, it.lastLiveStalls) }
-    }
+    fun lastRun(): RunRecord = current.let { RunRecord(it.lastSessionMinutes, it.lastLiveMinutes, it.lastLiveStalls) }
 
     /** Clears the previous run's record once it has been delivered, so it is reported once. */
-    fun clearLastRun(): Unit = synchronized(lock) {
-        save(load().copy(lastSessionMinutes = 0, lastLiveMinutes = 0, lastLiveStalls = 0))
+    fun clearLastRun() {
+        write { it.copy(lastSessionMinutes = 0, lastLiveMinutes = 0, lastLiveStalls = 0) }
     }
 
     /** What has happened since the last [markReported], per event. */
-    fun unreported(): Map<UsageEvent, Int> = synchronized(lock) { load().unreported() }
+    fun unreported(): Map<UsageEvent, Int> = current.unreported()
 
     /**
      * Marks [counts] as delivered, so the next launch reports only what happened after them.
@@ -282,26 +303,34 @@ open class UsageEventStore(private val fileProvider: () -> File) {
      * Call only once the server has actually taken them: anything not marked is simply reported
      * again next time, which is the behaviour a failed send needs.
      */
-    fun markReported(counts: Map<UsageEvent, Int>): Unit =
-        synchronized(lock) { if (counts.isNotEmpty()) save(load().markingReported(counts)) }
-
-    private fun load(): UsageEventLog = try {
-        val file = fileProvider()
-        if (file.exists()) json.decodeFromString(UsageEventLog.serializer(), file.readText())
-        else UsageEventLog()
-    } catch (_: Exception) {
-        UsageEventLog()
+    fun markReported(counts: Map<UsageEvent, Int>) {
+        if (counts.isNotEmpty()) write { it.markingReported(counts) }
     }
 
-    private fun save(log: UsageEventLog) {
-        try {
-            val file = fileProvider()
-            file.parentFile?.mkdirs()
-            file.writeTextAtomically(json.encodeToString(UsageEventLog.serializer(), log))
-        } catch (_: Exception) {
-            // Usage counting must never break a live service — a read-only home directory or a
-            // full disk simply means this install reports nothing.
+    private companion object {
+        /** One writer for every store, so a read on any of them waits for all of them. */
+        val WRITER: ExecutorService = Executors.newSingleThreadExecutor { task ->
+            Thread(task, "usage-events-writer").apply { isDaemon = true }
         }
+    }
+}
+
+private val usageJson = Json { ignoreUnknownKeys = true; prettyPrint = false }
+
+private fun loadUsageLog(file: File): UsageEventLog = try {
+    if (file.exists()) usageJson.decodeFromString(UsageEventLog.serializer(), file.readText())
+    else UsageEventLog()
+} catch (_: Exception) {
+    UsageEventLog()
+}
+
+private fun saveUsageLog(file: File, log: UsageEventLog) {
+    try {
+        file.parentFile?.mkdirs()
+        file.writeTextAtomically(usageJson.encodeToString(UsageEventLog.serializer(), log))
+    } catch (_: Exception) {
+        // Usage counting must never break a live service — a read-only home directory or a
+        // full disk simply means this install reports nothing.
     }
 }
 

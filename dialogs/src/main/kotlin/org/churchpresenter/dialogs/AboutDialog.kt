@@ -144,7 +144,7 @@ fun AboutDialogContent(
      */
     versionDisplay: String = identity.versionDisplay,
     /** How an issue template is opened. A parameter so a test does not launch a real browser. */
-    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    openUrl: (String) -> Unit = { UrlOpener.launch(it) },
     /** How an issue-template address is copied, for when the browser opens on the wrong screen. */
     copyText: (String) -> Unit = { SystemClipboard.copy(it) },
 ) {

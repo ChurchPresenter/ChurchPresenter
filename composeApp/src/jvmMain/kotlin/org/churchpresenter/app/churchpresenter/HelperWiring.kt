@@ -58,7 +58,6 @@ import org.churchpresenter.helper.suggest.suggestionsFor
 import org.churchpresenter.helper.ui.HelperInputs
 import org.churchpresenter.helper.ui.HelperOverlay
 import org.churchpresenter.helper.ui.WickIntro
-import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.HelperSettings
@@ -402,7 +401,7 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
 
     private fun assign(screen: HelperScreen): ActionOutcome {
         val nonPrimary = runCatching { detectScreensFromAwt() }.getOrDefault(emptyList()).count { !it.isPrimary }
-        val deckLinks = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
+        val deckLinks = DeckLinkManager.devices().size
         val slots = maxOf(1, presenterWindowCount(nonPrimary, deckLinks))
         val option = DisplayOption(
             label = "",

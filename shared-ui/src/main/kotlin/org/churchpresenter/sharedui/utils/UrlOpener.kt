@@ -90,4 +90,13 @@ object UrlOpener {
         if (opened) return true
         return fallbackCommands(osName, url).any { exec(it) }
     }
+
+    /**
+     * [open] on a thread of its own, for a button. Handing a link to the browser can take a second
+     * or more on Windows while the shell starts it, and every caller is on the event thread
+     * (CHURCH-PRESENTER-DESKTOP-G4); none of them does anything with the answer.
+     */
+    fun launch(url: String) {
+        Thread({ open(url) }, "open-url").apply { isDaemon = true }.start()
+    }
 }

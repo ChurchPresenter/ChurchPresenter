@@ -55,6 +55,23 @@ class DeckLinkBridgeTest {
     }
 
     @Test
+    fun `the devices last listed are kept for composition to read`() {
+        assertNull(bridge.knownDevices.value, "nothing is known before the driver has been asked")
+
+        val listed = bridge.devices()
+
+        assertEquals(listed, bridge.knownDevices.value)
+        assertEquals(listed, bridge.devices(), "asked once; after that the kept list is the answer")
+    }
+
+    @Test
+    fun `with no driver the kept list is empty, not unknown`() {
+        absent.listDevices()
+
+        assertEquals(emptyList(), absent.knownDevices.value)
+    }
+
+    @Test
     fun `an opened output is active until it is closed`() {
         assertTrue(bridge.open(1, 1280, 720))
         assertTrue(bridge.isOutputActive(1))

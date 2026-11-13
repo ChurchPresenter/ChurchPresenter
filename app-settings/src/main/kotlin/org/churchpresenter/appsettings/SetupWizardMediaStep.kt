@@ -68,7 +68,7 @@ internal fun VlcStep(
     osName: String = System.getProperty("os.name", "").lowercase(),
     arch: String = System.getProperty("os.arch", "").lowercase(),
     onRecheck: suspend () -> VlcCheckResult = { vlcCheckResultFromRecheck() },
-    onOpenDownloadPage: (String) -> Unit = { UrlOpener.open(it) },
+    onOpenDownloadPage: (String) -> Unit = { UrlOpener.launch(it) },
     /**
      * How the download address is copied.
      *

@@ -10,7 +10,6 @@ import kotlinx.coroutines.SupervisorJob
 import org.churchpresenter.controlin.ControlHub
 import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
-import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.server.InstanceLinkCommandFailure
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
@@ -142,7 +141,7 @@ internal class AppRootState(
     var activeQuickBackground by mutableStateOf<QuickBackground?>(null)
     val screenCountForUsage = LiveMapReporter.detectScreenCount()
     val deckLinkCountForUsage =
-        deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
+        DeckLinkManager.devices().size
 
     val prevTunnelWasConnected = mutableStateOf(false)
     var qaDisplayUrl by mutableStateOf("")
@@ -273,7 +272,7 @@ internal class AppRootState(
     /** Fits the saved screen assignments to the displays and DeckLink devices this machine has now. */
     private fun reconcileScreenAssignmentsAtStartup() {
         val nonPrimaryDisplays = secondaryDisplays()
-        val deckLinkCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
+        val deckLinkCount = DeckLinkManager.devices().size
 
         val proj = appSettings.projectionSettings
         val assignments = reconcileScreenAssignments(

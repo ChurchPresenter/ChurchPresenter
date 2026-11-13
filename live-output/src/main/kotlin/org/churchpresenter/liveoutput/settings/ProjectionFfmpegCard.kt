@@ -98,7 +98,7 @@ internal fun FfmpegCard(
     onSettingsChange: (((AppSettings) -> AppSettings) -> Unit),
     onProbe: () -> FfmpegStatus = ::probeFfmpeg,
     onApply: (String) -> FfmpegStatus = ::applyFfmpegPath,
-    openUrl: (String) -> Unit = { UrlOpener.open(it) },
+    openUrl: (String) -> Unit = { UrlOpener.launch(it) },
     copyText: (String) -> Unit = { SystemClipboard.copy(it) },
 ) {
     val path = settings.projectionSettings.ffmpegPath

@@ -3,6 +3,7 @@ package org.churchpresenter.sharedui.utils
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -60,9 +61,50 @@ object TrainingDataLogger {
     private val logDir: File
         get() = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
 
-    /** Session-keyed suffix when STT has provided an id, else the process-start timestamp. */
-    private fun suffix(): String = sessionId?.let { sanitize(it) } ?: runStamp
-    private fun pathFor(prefix: String) = File(logDir, "$prefix${suffix()}.jsonl").absolutePath
+    /** [logDir] without making it: resolved on the caller, made on the writer. */
+    private val unmadeLogDir: File
+        get() = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs")
+
+    /** The [prefix] file: session-keyed when STT has provided an id, else the process-start timestamp. */
+    private fun pathFor(dir: File, prefix: String, session: String?): String {
+        val suffix = session?.let { sanitize(it) } ?: runStamp
+        return File(dir, "$prefix$suffix.jsonl").absolutePath
+    }
+
+    /**
+     * One thread for every write. The go-live paths call in on the event thread, and an append --
+     * plus the first one's retention sweep of the whole folder -- held it on a slow disk
+     * (CHURCH-PRESENTER-DESKTOP-12P). Lines still land in the order they were asked for.
+     */
+    private val writer = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "training-log-writer").apply { isDaemon = true }
+    }
+
+    /** Waits until every write asked for so far is on disk. */
+    fun flush() {
+        writer.submit {}.get()
+    }
+
+    /**
+     * Appends the line [build] makes to the [prefix] file, on the writer. The time, the session and
+     * the folder are taken here, on the caller, so a row says when it happened and lands where
+     * `user.home` pointed then.
+     */
+    private fun writeLine(prefix: String, build: (at: Long, session: String?) -> String) {
+        val at = System.currentTimeMillis()
+        val session = sessionId
+        val dir = unmadeLogDir
+        writer.execute {
+            runCatching {
+                dir.mkdirs()
+                cleanupOldLogsOnce()
+                val p = pathFor(dir, prefix, session)
+                ensureSessionHeader(p, at, session)
+                val line = build(at, session)
+                synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
+            }
+        }
+    }
 
     /** Keeps `[A-Za-z0-9._-]`, replacing anything else with `_`, so any session id is filename-safe. */
     private fun sanitize(raw: String): String =
@@ -74,15 +116,15 @@ object TrainingDataLogger {
      * first line, so the file ties back to the STT db + engine detection-log even in isolation. Keyed
      * per file: a CP restart re-attaching to an existing file does not add a second header.
      */
-    private fun ensureSessionHeader(path: String) {
+    private fun ensureSessionHeader(path: String, at: Long, session: String?) {
         if (!headerWritten.add(path)) return
         val file = File(path)
         if (file.exists() && file.length() > 0L) return
         runCatching {
             val line = buildString {
                 append("{\"type\":\"session\"")
-                append(",\"ts_ms\":").append(System.currentTimeMillis())
-                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+                append(",\"ts_ms\":").append(at)
+                if (session != null) append(",\"sessionId\":\"").append(esc(session)).append("\"")
                 else append(",\"sessionId\":null")
                 append("}")
             }
@@ -150,12 +192,9 @@ object TrainingDataLogger {
         displayVerseStart: Int? = null,
         displayVerseEnd: Int? = null,
     ) {
-        cleanupOldLogsOnce()
-        val p = pathFor(LIVE_REF_PREFIX)
-        ensureSessionHeader(p)
-        runCatching {
-            val line = buildString {
-                append("{\"ts_ms\":").append(System.currentTimeMillis())
+        writeLine(LIVE_REF_PREFIX) { at, session ->
+            buildString {
+                append("{\"ts_ms\":").append(at)
                 append(",\"book\":").append(book)
                 append(",\"chapter\":").append(chapter)
                 if (verseStart != null) append(",\"verseStart\":").append(verseStart)
@@ -170,7 +209,7 @@ object TrainingDataLogger {
                 if (displayVerseEnd != null) append(",\"displayVerseEnd\":").append(displayVerseEnd)
                 else append(",\"displayVerseEnd\":null")
                 // Stable per-service session id — exact join key to the STT db + engine detection-log.
-                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+                if (session != null) append(",\"sessionId\":\"").append(esc(session)).append("\"")
                 else append(",\"sessionId\":null")
                 // Clock-free correlation key back to the STT transcript + engine detection (no NTP).
                 if (segmentId != null) append(",\"segmentId\":\"").append(esc(segmentId)).append("\"")
@@ -180,7 +219,6 @@ object TrainingDataLogger {
                 else append(",\"matchType\":null")
                 append(",\"source\":\"").append(source).append("\"}")
             }
-            synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
         }
     }
 
@@ -210,13 +248,10 @@ object TrainingDataLogger {
         displayChapter: Int? = null,
         displayVerse: Int? = null,
     ) {
-        cleanupOldLogsOnce()
-        val p = pathFor(OUTCOME_PREFIX)
-        ensureSessionHeader(p)
-        runCatching {
-            val line = buildString {
-                append("{\"ts_ms\":").append(System.currentTimeMillis())
-                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+        writeLine(OUTCOME_PREFIX) { at, session ->
+            buildString {
+                append("{\"ts_ms\":").append(at)
+                if (session != null) append(",\"sessionId\":\"").append(esc(session)).append("\"")
                 else append(",\"sessionId\":null")
                 append(",\"suggestedBook\":").append(suggestedBook)
                 append(",\"suggestedChapter\":").append(suggestedChapter)
@@ -232,7 +267,6 @@ object TrainingDataLogger {
                 else append(",\"matchType\":null")
                 append("}")
             }
-            synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
         }
     }
 
@@ -262,13 +296,10 @@ object TrainingDataLogger {
         displayVerseStart: Int? = null,
         displayVerseEnd: Int? = null,
     ) {
-        cleanupOldLogsOnce()
-        val p = pathFor(FLAG_PREFIX)
-        ensureSessionHeader(p)
-        runCatching {
-            val line = buildString {
-                append("{\"ts_ms\":").append(System.currentTimeMillis())
-                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+        writeLine(FLAG_PREFIX) { at, session ->
+            buildString {
+                append("{\"ts_ms\":").append(at)
+                if (session != null) append(",\"sessionId\":\"").append(esc(session)).append("\"")
                 else append(",\"sessionId\":null")
                 append(",\"kind\":\"").append(esc(kind)).append("\"")
                 if (book != null) append(",\"book\":").append(book) else append(",\"book\":null")
@@ -291,7 +322,6 @@ object TrainingDataLogger {
                 else append(",\"matchType\":null")
                 append("}")
             }
-            synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
         }
     }
 }

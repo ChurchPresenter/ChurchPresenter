@@ -181,7 +181,7 @@ fun UpdateAvailableDialog(
                 onCancelDownload = flow::cancel,
                 onInstall = flow::install,
                 onSkipVersion = onSkipVersion,
-                onOpenReleasePage = { UrlOpener.open(it) },
+                onOpenReleasePage = { UrlOpener.launch(it) },
                 onDismiss = onDismiss
             )
         }

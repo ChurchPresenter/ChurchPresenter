@@ -136,14 +136,14 @@ object SlideFontRegistry {
         if (!initialized.compareAndSet(false, true)) return
         refreshAvailableFamilies()
         if (!scanSystemDirs) return
+        // One walk completes the file index and registers the families; only when a lookup has
+        // already completed the index does this walk the folders again, to register.
+        if (systemFontFileIndex.scanAll(::registerFileIfUnknown)) return
         for (dir in systemFontDirs) {
             if (!dir.isDirectory) continue
             dir.walkTopDown().maxDepth(FONT_SCAN_DEPTH)
                 .filter { it.isFile && it.extension.lowercase() in FontFileIndex.FONT_FILE_EXTENSIONS }
-                .forEach { fontFile ->
-                    systemFontFileIndex.add(fontFile)
-                    registerFileIfUnknown(fontFile)
-                }
+                .forEach(::registerFileIfUnknown)
         }
     }
 
