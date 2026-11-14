@@ -5,6 +5,7 @@ import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlinx.serialization.decodeFromString
+import org.churchpresenter.core.models.io.LatestWriteQueue
 import org.churchpresenter.settings.AppSettings.Companion.CURRENT_SETTINGS_VERSION
 import org.churchpresenter.settings.utils.AppDataDir
 import kotlinx.serialization.encodeToString
@@ -28,11 +29,19 @@ private const val VERSION_SIGNAGE_TAB = 25
 // in
 // the Settings*Migrations.kt files beside it, the repairs in SettingsRepair.kt and the backups in
 // SettingsBackups.kt.
-class SettingsManager internal constructor(private val writer: SettingsWriter) {
-    /** Saves through the app's one background writer -- see [SettingsWriter]. */
-    constructor() : this(SettingsWriter.shared)
+class SettingsManager internal constructor(
+    private val writer: LatestWriteQueue,
+    private val appDataDir: File,
+) {
+    /** The app's settings, saved through its one background writer -- see [LatestWriteQueue]. */
+    constructor() : this(LatestWriteQueue.shared, AppDataDir.resolve())
 
-    private val appDataDir = AppDataDir.resolve()
+    /**
+     * Settings kept in [appDataDir] rather than the app data folder: for a test that must not
+     * share the one file with every other test in its JVM, whose saves land in the background.
+     */
+    constructor(appDataDir: File) : this(LatestWriteQueue.shared, appDataDir)
+
     private val settingsFile = File(appDataDir, "settings.json")
     private val settingsTmpFile = File(appDataDir, "settings.json.tmp")
     val lottiePresetsDir: File = File(appDataDir, "lottie_presets")
@@ -248,7 +257,7 @@ class SettingsManager internal constructor(private val writer: SettingsWriter) {
          * starting the new process, which would otherwise read the file before the old one's
          * shutdown hook writes it.
          */
-        fun flushAllSaves() = SettingsWriter.shared.flushAll()
+        fun flushAllSaves() = LatestWriteQueue.shared.flushAll()
 
         /**
          * The band templates folder under [appDataDir], for a caller with no manager at hand —

@@ -1,24 +1,22 @@
-package org.churchpresenter.settings
+package org.churchpresenter.core.models.io
 
 import java.io.File
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 /**
- * Writes settings files off the caller's thread, which is almost always the event thread: encoding
- * the document and stripping what the profiles own takes seconds on a slow machine with many
- * profiles, and the window froze for all of it on every change.
+ * Writes files off the caller's thread, which is almost always the event thread: encoding a
+ * document and writing it took seconds on a slow machine, and the window froze for all of it.
  *
- * Only the newest document for a file is written: a save that arrives while an older one is still
- * waiting replaces it. [flush] waits until what was saved for a file is on disk, and every reader
- * of a settings file calls it first, so a load straight after a save -- by this instance or a fresh
- * one -- reads what was saved. A shutdown hook flushes everything, so `exitProcess` and a normal
- * quit lose nothing.
+ * Only the newest write for a file runs: one that arrives while an older one is still waiting
+ * replaces it. [flush] waits until what was submitted for a file is on disk, and every reader of
+ * such a file calls it first, so a read straight after a write -- by the same owner or a fresh
+ * one -- reads what was written. [shared]'s shutdown hook flushes everything, so `exitProcess`
+ * and a normal quit lose nothing.
  *
- * Process-wide rather than per [SettingsManager], because the app makes several managers over the
- * same file.
+ * Process-wide rather than per owner, because the app makes several managers over the same file.
  */
-internal class SettingsWriter(private val executor: Executor) {
+class LatestWriteQueue(private val executor: Executor) {
     private val lock = Object()
 
     /** The document still to be written for each file, by absolute path. */
@@ -73,11 +71,11 @@ internal class SettingsWriter(private val executor: Executor) {
 
     companion object {
         /** The app's one writer: a single daemon thread, flushed by a shutdown hook. */
-        val shared: SettingsWriter by lazy {
-            val writer = SettingsWriter(
-                Executors.newSingleThreadExecutor { task -> Thread(task, "settings-writer").apply { isDaemon = true } },
+        val shared: LatestWriteQueue by lazy {
+            val writer = LatestWriteQueue(
+                Executors.newSingleThreadExecutor { task -> Thread(task, "file-writer").apply { isDaemon = true } },
             )
-            Runtime.getRuntime().addShutdownHook(Thread({ writer.flushAll() }, "settings-writer-flush"))
+            Runtime.getRuntime().addShutdownHook(Thread({ writer.flushAll() }, "file-writer-flush"))
             writer
         }
     }

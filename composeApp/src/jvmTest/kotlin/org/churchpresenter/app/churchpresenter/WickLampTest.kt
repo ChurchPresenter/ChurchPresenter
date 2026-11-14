@@ -19,6 +19,9 @@ import org.churchpresenter.helper.suggest.SuggestionIds
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.sharedui.models.Presenting
 import java.util.concurrent.Executor
+import java.io.File
+import java.nio.file.Files
+import org.churchpresenter.settings.SettingsManager
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,17 +34,24 @@ class WickLampTest {
     // Launched work is never run: nothing here reaches the network.
     private val scope = CoroutineScope(SupervisorJob() + Executor { }.asCoroutineDispatcher())
 
+    // Settings of its own: what Wick suggests follows the saved settings (a finished setup wizard
+    // lets suggestions in), and the shared app data folder takes other tests' background saves.
+    private val settingsDir: File = Files.createTempDirectory("wick-lamp").toFile()
+
     private val root = AppRootState(
         object : ApplicationScope {
             override fun exitApplication() = Unit
         },
         scope,
         secondaryDisplays = { emptyList() },
+        SettingsManager(settingsDir),
     )
 
     @AfterTest
     fun tearDown() {
         scope.cancel()
+        SettingsManager.flushAllSaves()
+        settingsDir.deleteRecursively()
     }
 
     /** Past the panel's open and close animations, with the clock held. */

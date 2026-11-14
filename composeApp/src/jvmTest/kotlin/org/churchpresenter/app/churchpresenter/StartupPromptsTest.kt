@@ -10,10 +10,10 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.StartupPromptPacing
 import org.churchpresenter.settings.StoryPromptState
-import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.updater.UpdateCheckResult
 import org.churchpresenter.updater.UpdateInfo
 import java.io.File
+import java.nio.file.Files
 import java.util.concurrent.Executor
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -33,8 +33,10 @@ class StartupPromptsTest {
 
     // Launched work is never run: nothing here reaches the network.
     private val scope = CoroutineScope(SupervisorJob() + Executor { }.asCoroutineDispatcher())
-    private val settingsFile = File(AppDataDir.resolve(), "settings.json")
-    private var savedBefore: ByteArray? = null
+
+    // A folder of its own: the app data folder is shared with every other test in this JVM, and a
+    // save one of them started can land there in the background after this test began.
+    private val settingsDir: File = Files.createTempDirectory("startup-prompts").toFile()
 
     private val application = object : ApplicationScope {
         override fun exitApplication() = Unit
@@ -44,23 +46,18 @@ class StartupPromptsTest {
     fun setUp() {
         TestSingletons.latchSkikoHostOs()
         TestSingletons.latchToTestHome()
-        // Saves land on a background writer; one still pending from an earlier test must not
-        // arrive after the file is cleared below.
-        SettingsManager.flushAllSaves()
-        savedBefore = settingsFile.takeIf { it.exists() }?.readBytes()
-        settingsFile.delete()
     }
 
     @AfterTest
     fun tearDown() {
         scope.cancel()
         SettingsManager.flushAllSaves()
-        savedBefore?.let { settingsFile.writeBytes(it) } ?: settingsFile.delete()
+        settingsDir.deleteRecursively()
     }
 
     /** One start: the app comes up, its startup prompts run, and what is left open is read. */
     private fun start(update: UpdateCheckResult = UpdateCheckResult.UpToDate): AppRootState {
-        val root = AppRootState(application, scope, secondaryDisplays = { emptyList() }, SettingsManager())
+        val root = AppRootState(application, scope, secondaryDisplays = { emptyList() }, SettingsManager(settingsDir))
         root.beginStartupPrompts()
         root.appReady = true
         runBlocking { root.openStartupPrompts(checkForUpdate = { update }, storyDelayMs = 0) }
@@ -119,7 +116,7 @@ class StartupPromptsTest {
     @Test
     fun `the licence and the wizard are the first start's, and the first update check waits`() {
         var checks = 0
-        val root = AppRootState(application, scope, secondaryDisplays = { emptyList() }, SettingsManager())
+        val root = AppRootState(application, scope, secondaryDisplays = { emptyList() }, SettingsManager(settingsDir))
         root.beginStartupPrompts()
         root.appReady = true
         runBlocking { root.openStartupPrompts(checkForUpdate = { checks++; UpdateCheckResult.UpToDate }) }
@@ -133,7 +130,7 @@ class StartupPromptsTest {
     @Test
     fun `an available update shows on a start the pacing keeps quiet, and takes it`() {
         // Past its first update check, and the start before this one showed a dialog.
-        SettingsManager().saveSettings(
+        SettingsManager(settingsDir).saveSettings(
             AppSettings(
                 eulaAcceptedVersion = CURRENT_EULA_VERSION,
                 setupWizardShown = true,
@@ -153,7 +150,7 @@ class StartupPromptsTest {
         val now = System.currentTimeMillis()
         val week = now / WEEK_MS
         // Set up as a month-old install used every week, past its first-run dialogs.
-        SettingsManager().saveSettings(
+        SettingsManager(settingsDir).saveSettings(
             AppSettings(
                 eulaAcceptedVersion = CURRENT_EULA_VERSION,
                 setupWizardShown = true,

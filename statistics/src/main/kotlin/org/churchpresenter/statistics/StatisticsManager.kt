@@ -1,5 +1,6 @@
 package org.churchpresenter.statistics
 
+import org.churchpresenter.core.models.io.LatestWriteQueue
 import org.churchpresenter.core.models.io.writeTextAtomically
 import java.io.File
 import kotlinx.serialization.Serializable
@@ -165,6 +166,9 @@ class StatisticsManager {
     private var statistics: DisplayStatistics = files.loadStatistics()
     private var eventLog: PlayEventLog = files.loadEventLog()
 
+    /** Blocks until every recording so far is on disk. Never call it on the event thread. */
+    fun flush() = files.flush()
+
     /** The all-time counters as they stand; [getTopSongsBySongbook] and its verse twin read these. */
     internal val counters: DisplayStatistics get() = statistics
 
@@ -303,7 +307,7 @@ class StatisticsManager {
 }
 
 /** Where the counters and the event log are kept: `~/.churchpresenter/statistics.json` and `play_log.json`. */
-private class StatisticsFiles {
+private class StatisticsFiles(private val writer: LatestWriteQueue = LatestWriteQueue.shared) {
     private val userHome = System.getProperty("user.home")
     private val appDataDir = File(userHome, ".churchpresenter")
     private val statsFile = File(appDataDir, "statistics.json")
@@ -311,17 +315,35 @@ private class StatisticsFiles {
 
     private val jsonFormat = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
+    // Each load waits for a write to the same file still on its way -- this manager's or another's.
     fun loadStatistics(): DisplayStatistics = try {
+        writer.flush(statsFile)
         if (statsFile.exists()) jsonFormat.decodeFromString(statsFile.readText()) else DisplayStatistics()
     } catch (_: Exception) { DisplayStatistics() }
 
     fun loadEventLog(): PlayEventLog = try {
+        writer.flush(logFile)
         if (logFile.exists()) jsonFormat.decodeFromString(logFile.readText()) else PlayEventLog()
     } catch (_: Exception) { PlayEventLog() }
 
-    /** Writes both files, each whole or not at all; a failed write leaves the last good copy. */
+    /**
+     * Writes both files on [writer], each whole or not at all; a failed write leaves the last good
+     * copy. Recording happens as a song or verse goes live, on the event thread, and encoding and
+     * writing the whole log there held a live service for up to two seconds. Only the newest
+     * snapshot of each file is written.
+     */
     fun save(statistics: DisplayStatistics, eventLog: PlayEventLog) {
-        try { statsFile.writeTextAtomically(jsonFormat.encodeToString(statistics)) } catch (_: Exception) {}
-        try { logFile.writeTextAtomically(jsonFormat.encodeToString(eventLog)) } catch (_: Exception) {}
+        writer.submit(statsFile) {
+            try { statsFile.writeTextAtomically(jsonFormat.encodeToString(statistics)) } catch (_: Exception) {}
+        }
+        writer.submit(logFile) {
+            try { logFile.writeTextAtomically(jsonFormat.encodeToString(eventLog)) } catch (_: Exception) {}
+        }
+    }
+
+    /** Blocks until every [save] so far is on disk. */
+    fun flush() {
+        writer.flush(statsFile)
+        writer.flush(logFile)
     }
 }

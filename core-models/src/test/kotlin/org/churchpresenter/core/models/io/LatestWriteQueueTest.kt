@@ -1,4 +1,4 @@
-package org.churchpresenter.settings
+package org.churchpresenter.core.models.io
 
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -8,13 +8,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class SettingsWriterTest {
+class LatestWriteQueueTest {
     private val file = File("unused-settings.json")
 
     @Test
     fun `a save waiting behind another is replaced by the newer one`() {
         val queued = mutableListOf<Runnable>()
-        val writer = SettingsWriter { queued += it }
+        val writer = LatestWriteQueue { queued += it }
         val written = mutableListOf<String>()
 
         writer.submit(file) { written += "first" }
@@ -29,7 +29,7 @@ class SettingsWriterTest {
     @Test
     fun `flush writes what is waiting on the caller's thread, so nothing is left for the writer`() {
         val queued = mutableListOf<Runnable>()
-        val writer = SettingsWriter { queued += it }
+        val writer = LatestWriteQueue { queued += it }
         val written = mutableListOf<String>()
 
         writer.submit(file) { written += "saved" }
@@ -43,7 +43,7 @@ class SettingsWriterTest {
     fun `flush waits for a write the writer thread has already started`() {
         val pool = Executors.newSingleThreadExecutor()
         try {
-            val writer = SettingsWriter(pool)
+            val writer = LatestWriteQueue(pool)
             val started = CountDownLatch(1)
             val release = CountDownLatch(1)
             var done = false
@@ -65,7 +65,7 @@ class SettingsWriterTest {
 
     @Test
     fun `flushAll writes every file that has something waiting`() {
-        val writer = SettingsWriter { }
+        val writer = LatestWriteQueue { }
         val written = mutableListOf<String>()
 
         writer.submit(File("a.json")) { written += "a" }
@@ -77,7 +77,7 @@ class SettingsWriterTest {
 
     @Test
     fun `a write that throws does not leave the file marked as being written`() {
-        val writer = SettingsWriter { }
+        val writer = LatestWriteQueue { }
 
         writer.submit(file) { error("disk full") }
         runCatching { writer.flush(file) }
