@@ -530,4 +530,16 @@ class SongsTest {
         assertEquals(listOf("Amazing Grace"), songs.getSongs().map { it.title })
         assertEquals(1, songs.getSongCount())
     }
+
+    @Test
+    fun `an edit finds its song by its file when another in the book shares its number`() {
+        val songs = Songs()
+        val first = SongItem(number = "1", title = "First", songbook = "Hymnal", sourceFile = "first.song")
+        val second = SongItem(number = "1", title = "Second", songbook = "Hymnal", sourceFile = "second.song")
+        songs.addSongs(listOf(first, second))
+
+        songs.updateSong(second, second.copy(title = "Second, edited"))
+
+        assertEquals(listOf("First", "Second, edited"), songs.getSongs().map { it.title })
+    }
 }

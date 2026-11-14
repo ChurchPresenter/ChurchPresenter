@@ -1,6 +1,7 @@
 package org.churchpresenter.songs
 
 import kotlinx.coroutines.Dispatchers
+import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.AppSettings
@@ -10,6 +11,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -145,6 +147,42 @@ class SongsViewModelEditDeleteTest {
         assertTrue(vm.updateSong(renumbered, renumbered.copy(number = "")))
         assertTrue(File(dir, "Hymnal/How Great Thou Art.song").exists())
         assertFalse(File(dir, "Hymnal/0007 - How Great Thou Art.song").exists())
+    }
+
+    @Test
+    fun `an edit is shown at once and stays selected, without reading the songs folder again`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Amazing Grace")
+        writeSong("Hymnal", "0009", "Written Behind Its Back")
+
+        assertTrue(vm.updateSong(song, song.copy(lyrics = listOf("[Verse 1]", "edited line"))))
+
+        val shown = vm.filteredSongItems.value
+        assertTrue(vm.songTitled("Amazing Grace").lyrics.contains("edited line"), "the edit is on screen")
+        assertEquals("Amazing Grace", shown[vm.selectedSongIndexState.value].title, "and still selected")
+        assertFalse(shown.any { it.title == "Written Behind Its Back" }, "the folder was not read again")
+    }
+
+    @Test
+    fun `a reload never puts the songs cached before an edit back on screen`() {
+        val shown = mutableListOf<List<SongItem>>()
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+            onSongsLoaded = { shown += it },
+        )
+        created.add(vm)
+        val song = vm.songTitled("Amazing Grace")
+        val stale = song.copy(title = "Stale")
+        SongFileParser.saveSongCache(dir.absolutePath, listOf(CachedSong(stale, lastModified = 0L, fileSize = 0L)))
+        shown.clear()
+
+        vm.loadSongs()
+
+        assertFalse(shown.any { list -> list.any { it.title == "Stale" } }, "the cache is for startup only")
+        assertTrue(vm.filteredSongItems.value.any { it.title == "Amazing Grace" })
     }
 
     // ── createSong ───────────────────────────────────────────────────────────────
