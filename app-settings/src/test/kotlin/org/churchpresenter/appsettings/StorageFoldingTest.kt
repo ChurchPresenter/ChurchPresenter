@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import java.io.File
 import java.nio.file.Files
 import kotlin.math.abs
@@ -52,7 +53,11 @@ class StorageFoldingTest {
     fun `Download Bibles starts where the Bible row's Browse button starts`() = runDesktopComposeUiTest(1400, 900) {
         val bibles = tempDir()
         File(bibles, "kjv.spb").writeText("x")
-        setContent { MaterialTheme { SystemSettingsTab(settings = biblesIn(bibles), onSettingsChange = {}) } }
+        // Pinned fonts: the system font is wider on Linux, where the label no longer fits beside the
+        // folder chips and the button gives way to stay on one line rather than lining up.
+        setContent {
+            PinnedFonts { MaterialTheme { SystemSettingsTab(settings = biblesIn(bibles), onSettingsChange = {}) } }
+        }
         waitUntil { onAllNodesWithText("Download Bibles…").fetchSemanticsNodes().isNotEmpty() }
         val browse = onAllNodesWithText("Browse...").onFirst().fetchSemanticsNode().boundsInRoot
         val download = onAllNodesWithText("Download Bibles…").onFirst().fetchSemanticsNode().boundsInRoot

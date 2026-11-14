@@ -43,7 +43,6 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.defaultBaseline
 import org.churchpresenter.settings.defaultChanges
 import org.churchpresenter.settings.changesFrom
-import org.churchpresenter.settings.plainText
 import org.churchpresenter.settings.valueAt
 import org.churchpresenter.settings.withDefaultAt
 import org.churchpresenter.settings.withValueAt
@@ -121,6 +120,7 @@ private fun DefaultsCard(
     val defaults = stringResource(Res.string.profile_defaults)
     val source = stringResource(Res.string.profile_default_value)
     val all = stringResource(Res.string.content_bible_translations_all)
+    val names = rememberSettingNames()
     PreviewSideCard(Modifier.testTag(DEFAULTS_CARD_TAG)) {
         CardTitle(stringResource(Res.string.profile_different_from, defaults), changes.size)
         if (changes.isEmpty()) {
@@ -134,7 +134,7 @@ private fun DefaultsCard(
         shown.forEach { paths ->
             val path = paths.first()
             if (paths.size == 1) {
-                ChangeRow(path, profile, source, baseline.valueAt(path), onOpenPage, onValueChange) {
+                ChangeRow(path, profile, source, baseline.valueAt(path), names, onOpenPage, onValueChange) {
                     onProfileChange(profile.withDefaultAt(path))
                 }
             } else {
@@ -144,11 +144,12 @@ private fun DefaultsCard(
                     profile = profile,
                     sourceName = source,
                     sourceValue = baseline.valueAt(path),
+                    names = names,
                     onOpenPage = onOpenPage,
                     onValueChange = { _, value ->
                         onProfileChange(paths.fold(profile) { p, at -> p.withValueAt(at, value) })
                     },
-                    label = "${settingPathLabel(path.replace(TRANSLATION_ENTRY, "translations"))} · $all",
+                    label = "${settingPathLabel(path.replace(TRANSLATION_ENTRY, "translations"), names)} · $all",
                     onRevert = { onProfileChange(paths.fold(profile) { p, at -> p.withDefaultAt(at) }) },
                 )
             }
@@ -199,6 +200,7 @@ private fun DifferencesCard(
     // Worked out once per profile and masters, not on every frame: each line reads its master's
     // value by path, and the card recomposes with every edit made on the page beside it.
     val changes = remember(link.profile, link.sectionMasters, master) { link.changeLines(master) }
+    val names = rememberSettingNames()
     // Named for the master while there is one; a profile following several says so rather than
     // naming one of them for changes made against another.
     val title = if (link.sectionMasters.values.all { it.id == master.id }) {
@@ -222,6 +224,7 @@ private fun DifferencesCard(
                 profile = link.profile,
                 sourceName = line.sourceName,
                 sourceValue = line.sourceValue,
+                names = names,
                 onOpenPage = onOpenPage,
                 onValueChange = onValueChange,
                 page = line.page,
@@ -253,10 +256,11 @@ private fun ChangeRow(
     profile: OutputProfile,
     sourceName: String,
     sourceValue: JsonElement?,
+    names: SettingNames,
     onOpenPage: (ProfilePage) -> Unit,
     onValueChange: (String, JsonElement) -> Unit,
     /** What the row is called -- the setting's own name, unless it stands for several. */
-    label: String = settingPathLabel(path),
+    label: String = settingPathLabel(path, names),
     /** The page [path] is edited on, which its name opens; null for one no page shows. */
     page: ProfilePage? = pageForPath(path),
     onRevert: () -> Unit,
@@ -275,10 +279,12 @@ private fun ChangeRow(
                     .weight(1f)
                     .then(if (page != null) Modifier.clickable { onOpenPage(page) } else Modifier),
             )
-            sourceValue?.plainText(on, off)?.takeIf { it.isNotBlank() }?.let { MasterValueText(sourceName, it) }
+            sourceValue?.let { names.value(it, on, off) }
+                ?.takeIf { it.isNotBlank() }
+                ?.let { MasterValueText(sourceName, it) }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            InlineValue(profile, path, on, off, onValueChange, Modifier.weight(1f))
+            InlineValue(profile, path, names, on, off, onValueChange, Modifier.weight(1f))
             RevertLink(onRevert)
         }
     }
@@ -289,6 +295,7 @@ private fun ChangeRow(
 private fun InlineValue(
     profile: OutputProfile,
     path: String,
+    names: SettingNames,
     on: String,
     off: String,
     onValueChange: (String, JsonElement) -> Unit,
@@ -308,7 +315,7 @@ private fun InlineValue(
                 range = INLINE_NUMBER_RANGE,
             )
             else -> Text(
-                value?.plainText(on, off).orEmpty(),
+                value?.let { names.value(it, on, off) }.orEmpty(),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
