@@ -213,8 +213,10 @@ class SongsViewModel(
             isLoadingState.value = true
             val storageDir = appSettings.songSettings.storageDirectory
             try {
-                // Phase 1: Try loading from cache for instant display
-                if (storageDir.isNotEmpty()) {
+                // Phase 1: the cache, for instant display at startup -- only while nothing is shown.
+                // On a reload the cache is older than what is on screen, and showing it put an
+                // edit's old text back until the folder had been read again.
+                if (storageDir.isNotEmpty() && allSongItemsState.value.isEmpty()) {
                     val cached = withContext(ioDispatcher) {
                         SongFileParser.loadSongCache(storageDir)
                     }

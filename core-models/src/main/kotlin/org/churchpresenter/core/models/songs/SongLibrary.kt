@@ -32,9 +32,14 @@ class SongLibrary(private val root: File, private val parser: SongFileParser = S
      */
     val isConfigured: Boolean get() = root.path.isNotBlank()
 
-    /** Every song under the root, in the order a person reads them: by songbook, then by number. */
+    /**
+     * Every song under the root, in the order a person reads them: by songbook, then by number.
+     *
+     * A file the Songs tab's cache holds unchanged -- same modified time, same size -- is taken from
+     * there instead of parsed again: a large library parsed in full took the window most of a minute.
+     */
     fun load(): List<SongItem> =
-        parser.loadSongsFromDirectory(root.absolutePath)
+        parser.loadSongsFromDirectory(root.absolutePath, SongFileParser.loadCachedSongMap(root.path))
             .map { it.song }
             .sortedWith(compareBy({ it.songbook.lowercase() }, { it.sortKey }, { it.title.lowercase() }))
 
