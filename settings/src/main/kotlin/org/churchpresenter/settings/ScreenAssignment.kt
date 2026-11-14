@@ -1,6 +1,7 @@
 package org.churchpresenter.settings
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.utils.Constants
 
 /**
@@ -181,19 +182,40 @@ data class ScreenAssignment(
 }
 
 /**
- * Which of a song's [available] languages to draw, given a profile's [songMode] and
- * [songTranslations].
+ * One language an output draws: [slot] is the song's own language -- `0` the first written in the
+ * song file -- and [look] the index of the look it is drawn with, which is its place in the display
+ * order where the profile's looks follow the place, and the slot itself where they follow the
+ * language.
+ */
+data class SongLanguagePick(val slot: Int, val look: Int)
+
+/**
+ * Which of a song's [available] languages to draw, and with which look, given a profile's
+ * [songMode] and [songTranslations].
+ *
+ * A profile names **places**, not languages: place 0 is whichever language is first in the Songs
+ * tab's display order ([order], `SongSettings.languageDisplayOrder`), just as a profile's
+ * `bibleTranslations` names places in the Bible stack. Moving Yoruba to the top makes every output
+ * showing place 0 show Yoruba (#1029). The places count among the song's own languages -- the
+ * order with the slots this song does not have taken out -- which is what the Songs tab's
+ * Languages menu lists for it.
  *
  * Free-standing because `SongPresenter` resolves the same question from what it was handed rather
- * than from an [OutputProfile] -- the preview and the offscreen outputs pass the two values
- * straight in. One implementation, so an output and its preview can never disagree.
+ * than from an [OutputProfile] -- the preview and the offscreen outputs pass the values straight
+ * in. One implementation, so an output and its preview can never disagree.
  *
  * [songTranslations] wins whenever it has anything in it; [songMode] is the fallback that keeps
  * every profile written before songs had more than two languages presenting exactly as it did.
  */
-fun songLanguageSelection(songMode: String, songTranslations: List<Int>, available: Int): List<Int> {
+fun songLanguagePicks(
+    songMode: String,
+    songTranslations: List<Int>,
+    available: Int,
+    order: List<Int> = IDENTITY_LANGUAGE_ORDER,
+    looksFollowPlace: Boolean = true,
+): List<SongLanguagePick> {
     if (songMode == Constants.SONG_LANG_OFF || available <= 0) return emptyList()
-    val chosen = when {
+    val places = when {
         songTranslations.isNotEmpty() -> songTranslations
         songMode == Constants.SONG_LANG_PRIMARY -> listOf(0)
         songMode == Constants.SONG_LANG_SECONDARY -> listOf(1)
@@ -202,10 +224,36 @@ fun songLanguageSelection(songMode: String, songTranslations: List<Int>, availab
         // "both" reaching past two is deliberate: an output left on the default should show a
         // four-language song's four languages, not silently drop two of them.
         else -> List(available) { it }
+    }.distinct()
+    val songOrder = songLanguageOrder(order, available)
+    val picks = places.mapNotNull { place ->
+        songOrder.getOrNull(place)?.let { slot -> SongLanguagePick(slot, if (looksFollowPlace) place else slot) }
     }
-    // A "secondary" output handed a monolingual song falls back to the primary rather than going
-    // blank -- `SongPresenter` has always done this (`mainSecondaryLines.ifEmpty { … }`), and a
-    // screen showing nothing because the song was never translated is a worse answer than one
-    // showing the words.
-    return chosen.filter { it in 0 until available }.distinct().ifEmpty { listOf(0) }
+    // An output set to a place this song has no language for falls back to the first language
+    // rather than going blank -- `SongPresenter` has always done this, and a screen showing nothing
+    // because the song was never translated is a worse answer than one showing the words. It keeps
+    // the look of the place it asked for, so a one-language screen does not jump to another look.
+    return picks.ifEmpty {
+        listOf(SongLanguagePick(0, if (looksFollowPlace) places.firstOrNull() ?: 0 else 0))
+    }
 }
+
+/** The slots [songLanguagePicks] draws, in order -- where the look does not matter. */
+fun songLanguageSelection(
+    songMode: String,
+    songTranslations: List<Int>,
+    available: Int,
+    order: List<Int> = IDENTITY_LANGUAGE_ORDER,
+): List<Int> = songLanguagePicks(songMode, songTranslations, available, order).map { it.slot }
+
+/**
+ * A song's own languages in display order: [order] with the slots past this song's [available]
+ * taken out, and any it does not name after them. Position `n` here is place `n`.
+ */
+fun songLanguageOrder(order: List<Int>, available: Int): List<Int> {
+    val named = order.filter { it in 0 until available }.distinct()
+    return named + (0 until available).filterNot { it in named }
+}
+
+/** The display order a settings file with none reads as: every slot in turn. */
+val IDENTITY_LANGUAGE_ORDER: List<Int> = List(MAX_SONG_TRANSLATIONS) { it }

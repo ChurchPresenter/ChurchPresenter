@@ -57,6 +57,7 @@ import org.churchpresenter.strings.generated.resources.tab_qa
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.languageDisplayOrder
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.changedPaths
 import org.churchpresenter.settings.withBackground
@@ -359,12 +360,15 @@ internal fun bibleTranslationChoices(settings: AppSettings): List<TranslationCho
         )
     }
 
-/** A song's four language slots as pickable choices, named as the Song settings name them. */
+/**
+ * A song's four places in the Songs tab's display order as pickable choices, each named by the
+ * language in it now -- a profile shows places, as it does Bible translations (#1029).
+ */
 @Composable
 internal fun songLanguageChoices(settings: AppSettings): List<TranslationChoiceDisplay> =
-    List(MAX_SONG_TRANSLATIONS) { slot ->
+    settings.songSettings.languageDisplayOrder().take(MAX_SONG_TRANSLATIONS).mapIndexed { place, slot ->
         TranslationChoiceDisplay(
-            code = (slot + 1).toString(),
+            code = (place + 1).toString(),
             title = songLanguageName(settings.songSettings, slot),
             portion = "",
         )

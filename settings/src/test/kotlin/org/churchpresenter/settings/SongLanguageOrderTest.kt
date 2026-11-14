@@ -6,8 +6,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 /**
- * The Songs tab's Display order: one order for a song's languages, which every profile showing more
- * than one of them follows (#650).
+ * The Songs tab's Display order: one order for a song's languages. Every profile names places in it,
+ * so a move changes what each one shows without changing the profile (#650, #1029).
  */
 class SongLanguageOrderTest {
 
@@ -51,45 +51,43 @@ class SongLanguageOrderTest {
         assertSame(before, before.moveSongLanguage(index = 7, offset = -1))
     }
 
-    // ── The profiles follow ─────────────────────────────────────────────────────────────────────
+    // ── The profiles keep their places ──────────────────────────────────────────────────────────
+
+    @Test
+    fun `a move leaves every profile as it was`() {
+        val profiles = arrayOf(
+            OutputProfile(id = "two", songTranslations = listOf(0, 1)),
+            OutputProfile(id = "all", songMode = Constants.SONG_LANG_BOTH),
+            OutputProfile(id = "one", songTranslations = listOf(0)),
+            OutputProfile(id = "primary", songMode = Constants.SONG_LANG_PRIMARY),
+        )
+
+        val after = settings(*profiles).moveSongLanguage(index = 1, offset = -1)
+
+        assertEquals(profiles.toList(), after.projectionSettings.outputProfiles)
+    }
+
+    @Test
+    fun `a profile showing the first place shows whichever language is first now`() {
+        val after = settings(OutputProfile(id = "screen", songTranslations = listOf(0)))
+            .moveSongLanguage(index = 1, offset = -1)
+
+        assertEquals(listOf(1), after.profile("screen").songLanguages(2, after.songSettings.languageDisplayOrder()))
+    }
 
     @Test
     fun `a profile showing several languages shows them in the new order`() {
         val after = settings(OutputProfile(id = "screen", songTranslations = listOf(0, 1)))
             .moveSongLanguage(index = 1, offset = -1)
 
-        assertEquals(listOf(1, 0), after.profile("screen").songTranslations)
-    }
-
-    @Test
-    fun `a profile showing every language is given the whole order`() {
-        val after = settings(OutputProfile(id = "screen", songMode = Constants.SONG_LANG_BOTH))
-            .moveSongLanguage(index = 1, offset = -1)
-
-        assertEquals(listOf(1, 0, 2, 3), after.profile("screen").songTranslations)
-        assertEquals(listOf(1, 0), after.profile("screen").songLanguages(available = 2), "a two-language song")
-    }
-
-    @Test
-    fun `a profile showing one language, or no songs, is left alone`() {
-        val one = OutputProfile(id = "one", songTranslations = listOf(1))
-        val primaryOnly = OutputProfile(id = "primary", songMode = Constants.SONG_LANG_PRIMARY)
-        val off = OutputProfile(id = "off", songMode = Constants.SONG_LANG_OFF, songTranslations = listOf(0, 1))
-
-        val after = settings(one, primaryOnly, off).moveSongLanguage(index = 1, offset = -1)
-
-        assertEquals(one, after.profile("one"))
-        assertEquals(primaryOnly, after.profile("primary"))
-        assertEquals(off, after.profile("off"))
+        assertEquals(listOf(1, 0), after.profile("screen").songLanguages(2, after.songSettings.languageDisplayOrder()))
     }
 
     @Test
     fun `a move builds on the order already stored`() {
-        val after = settings(OutputProfile(id = "screen", songTranslations = listOf(0, 1, 2)), order = listOf(2, 0, 1))
-            .moveSongLanguage(index = 2, offset = -2)
+        val after = settings(order = listOf(2, 0, 1)).moveSongLanguage(index = 2, offset = -2)
 
         assertEquals(listOf(1, 2, 0, 3), after.songSettings.languageDisplayOrder())
-        assertEquals(listOf(1, 2, 0), after.profile("screen").songTranslations)
     }
 
     // ── As the Songs tab moves them: among the selected song's languages ────────────────────────

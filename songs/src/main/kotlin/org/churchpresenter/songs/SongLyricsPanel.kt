@@ -10,7 +10,7 @@ import org.churchpresenter.settings.languageDisplayOrder
 import org.churchpresenter.sharedui.utils.defaultSongLanguageName
 import org.churchpresenter.settings.languageLabel
 import org.churchpresenter.strings.generated.resources.profile_box_languages
-import org.churchpresenter.strings.generated.resources.song_language_order_subtitle
+import org.churchpresenter.strings.generated.resources.song_language_places_subtitle
 import org.churchpresenter.strings.generated.resources.move_language_up
 import org.churchpresenter.strings.generated.resources.move_language_down
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -310,7 +310,7 @@ private fun LyricsActionBar(
                         placeholder = defaultSongLanguageName(slot),
                     )
                 },
-            subtitle = stringResource(Res.string.song_language_order_subtitle),
+            subtitle = stringResource(Res.string.song_language_places_subtitle),
             moveUpLabel = stringResource(Res.string.move_language_up),
             moveDownLabel = stringResource(Res.string.move_language_down),
             onMove = { index, offset -> onMoveLanguage(languages, index, offset) },

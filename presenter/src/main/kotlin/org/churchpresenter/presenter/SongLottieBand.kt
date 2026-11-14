@@ -12,6 +12,8 @@ import org.churchpresenter.sharedui.utils.VoicedRange
 import org.churchpresenter.sharedui.utils.voicedLine
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.languageDisplayOrder
+import org.churchpresenter.settings.songLanguageOrder
 import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.SecondVoice
@@ -107,8 +109,13 @@ internal data class SongBandPage(
  * rule the Bible band already lived by before this had a third or fourth slot to reach for -- no
  * cramming two languages' lines into one box.
  */
-private fun slottedLanguages(languageDisplay: String, available: Int, availableSlots: Int): List<Int> =
-    songLanguageSelection(languageDisplay, emptyList(), available).take(availableSlots.coerceAtLeast(1))
+private fun slottedLanguages(
+    languageDisplay: String,
+    available: Int,
+    availableSlots: Int,
+    order: List<Int>,
+): List<Int> =
+    songLanguageSelection(languageDisplay, emptyList(), available, order).take(availableSlots.coerceAtLeast(1))
 
 internal fun songBandSlots(
     page: SongBandPage,
@@ -153,26 +160,32 @@ internal fun songBandSlots(
     }
     val allLines = section.allLanguageLines()
     val allTitles = section.allLanguageTitles()
-    val primary = pick(section.lines)
+    // The modes name places in the Songs tab's display order, as a profile's languages do (#1029):
+    // "primary" is whichever language is first there, "secondary" the one after it.
+    val displayOrder = settings.languageDisplayOrder()
+    val places = songLanguageOrder(displayOrder, allLines.size.coerceAtLeast(1))
+    val first = places.first()
+    val primary = pick(allLines.getOrElse(first) { emptyList() }).ifEmpty { pick(section.lines) }
     val showTitle = shouldShowText(settings.titleLowerThirdDisplay, section, allSections, displaySectionIndex)
     val showNumber = section.shownNumber() != null &&
         shouldShowText(settings.showNumberLowerThird, section, allSections, displaySectionIndex)
     val primaryTitleText = if (!showTitle) "" else listOfNotNull(
         // A plain number reads "25. Title"; an alias is drawn as written.
         section.shownNumber()?.takeIf { showNumber }?.let { if (section.alias.isBlank()) "$it." else it },
-        section.title.takeIf { it.isNotBlank() },
+        allTitles.getOrElse(first) { "" }.ifBlank { section.title }.takeIf { it.isNotBlank() },
     ).joinToString(" ")
-    // Language[0] is always the primary; every mode falls back to it when its own pick has nothing.
+    // The first place is the fallback: every mode falls back to it when its own pick has nothing.
     val languageTexts: List<String>
     val languageTitles: List<String>
     when (language) {
         Constants.SONG_LANG_SECONDARY, Constants.SONG_LANG_THIRD, Constants.SONG_LANG_FOURTH -> {
-            val index = when (language) {
+            val place = when (language) {
                 Constants.SONG_LANG_SECONDARY -> 1
                 Constants.SONG_LANG_THIRD -> 2
                 else -> 3
             }
-            val chosen = pick(allLines.getOrElse(index) { emptyList() }).ifEmpty { primary }
+            val index = places.getOrNull(place)
+            val chosen = index?.let { pick(allLines.getOrElse(it) { emptyList() }) }.orEmpty().ifEmpty { primary }
             languageTexts = listOf(chosen.joinToString("\n"))
             languageTitles = listOf(primaryTitleText)
         }
@@ -184,12 +197,18 @@ internal fun songBandSlots(
             // nothing to show (an untranslated line, in line mode) must contribute no blank line of
             // its own, the same as `primary + secondary` never did for the original two.
             val everyActive =
-                songLanguageSelection(Constants.SONG_LANG_BOTH, emptyList(), allLines.size.coerceAtLeast(1))
+                songLanguageSelection(
+                    Constants.SONG_LANG_BOTH,
+                    emptyList(),
+                    allLines.size.coerceAtLeast(1),
+                    displayOrder,
+                )
             val flatLines = everyActive.flatMap { pick(allLines.getOrElse(it) { emptyList() }) }
             languageTexts = listOf(flatLines.joinToString("\n"))
             languageTitles = listOf(primaryTitleText)
         } else {
-            val active = slottedLanguages(Constants.SONG_LANG_BOTH, allLines.size.coerceAtLeast(1), availableSlots)
+            val active =
+                slottedLanguages(Constants.SONG_LANG_BOTH, allLines.size.coerceAtLeast(1), availableSlots, displayOrder)
             languageTexts = active.map { pick(allLines.getOrElse(it) { emptyList() }).joinToString("\n") }
             languageTitles = active.mapIndexed { position, index ->
                 if (position == 0) {

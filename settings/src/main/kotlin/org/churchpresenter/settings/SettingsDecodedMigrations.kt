@@ -2,9 +2,10 @@ package org.churchpresenter.settings
 
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
+import org.churchpresenter.settings.utils.Constants
 
 // The migration steps that work on the decoded [AppSettings] rather than the raw text (5, 11, 17,
-// 20).
+// 20, 26).
 
 /** What the tray's old constructor seeded both halves of a tile with: opaque black, nothing else. */
 private val SEEDED_BLACK = SongBackground(type = SongBackgroundType.COLOR, color = "#000000")
@@ -69,5 +70,47 @@ internal fun migrateQuickBackgroundLowerThird(settings: AppSettings): AppSetting
                 tile
             }
         },
+    )
+}
+
+/** The single-language song modes, by the language they named before places -- primary first. */
+private val SINGLE_SONG_MODES = listOf(
+    Constants.SONG_LANG_PRIMARY,
+    Constants.SONG_LANG_SECONDARY,
+    Constants.SONG_LANG_THIRD,
+    Constants.SONG_LANG_FOURTH,
+)
+
+/**
+ * Version 26. A profile's song languages became places in the display order rather than the song's
+ * own slots (#1029, `songLanguagePicks`). Where the stored order is still the slots in turn, a
+ * place is its slot and nothing changes. Otherwise each profile's languages are rewritten as the
+ * places they hold now, and its looks set to go with the language, as they did -- so every output
+ * draws exactly what it drew before. A profile showing every language is left as it is: that
+ * already meant the display order, which is what the Songs tab's menu promised it.
+ */
+internal fun migrateSongLanguagesToPlaces(settings: AppSettings): AppSettings {
+    val order = settings.songSettings.languageDisplayOrder()
+    if (order == IDENTITY_LANGUAGE_ORDER) return settings
+    val projection = settings.projectionSettings
+    return settings.copy(
+        projectionSettings = projection.copy(
+            outputProfiles = projection.outputProfiles.map { it.withSongLanguagesAsPlaces(order) },
+        ),
+    )
+}
+
+private fun OutputProfile.withSongLanguagesAsPlaces(order: List<Int>): OutputProfile {
+    val slots = when {
+        songTranslations.isNotEmpty() -> songTranslations
+        songMode in SINGLE_SONG_MODES -> listOf(SINGLE_SONG_MODES.indexOf(songMode))
+        else -> emptyList()
+    }
+    val extras = songSettings.layoutExtras.copy(languageLooksFollowPlace = false)
+    val kept = copy(songSettings = songSettings.copy(layoutExtras = extras))
+    if (slots.isEmpty() || songMode == Constants.SONG_LANG_OFF) return kept
+    return kept.copy(
+        songMode = Constants.SONG_LANG_BOTH,
+        songTranslations = slots.map { order.indexOf(it) }.filter { it >= 0 },
     )
 }

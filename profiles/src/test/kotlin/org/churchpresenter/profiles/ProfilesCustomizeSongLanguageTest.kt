@@ -6,11 +6,15 @@ import org.churchpresenter.presenter.SongStyleElement
 import org.churchpresenter.presenter.SongStyleTarget
 import org.churchpresenter.presenter.elementStyle
 import androidx.compose.ui.test.SkikoComposeUiTest
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.SongLayoutExtras
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.SongTextStyle
 import org.churchpresenter.settings.SongTranslationSettings
@@ -67,9 +71,10 @@ class ProfilesCustomizeSongLanguageTest {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             // The header's picker names both, and so does the pane's switch -- the first beside All,
-            // which every language follows, rather than standing for it.
-            assertEquals(2, countOf("Language 1"))
-            assertEquals(2, countOf("Language 2"))
+            // which every language follows, rather than standing for it. The switch names each look
+            // by its place, since a look stays with its place when another language moves in.
+            assertEquals(1, countOf("1 · Language 1"))
+            assertEquals(1, countOf("2 · Language 2"))
         }
     }
 
@@ -145,7 +150,7 @@ class ProfilesCustomizeSongLanguageTest {
     fun `the title also carries a second language`() {
         profilesTab(doc()) { _ ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE)
-            assertEquals(2, countOf("Language 2"), "the title has a second language too")
+            assertEquals(1, countOf("2 · Language 2"), "the title has a second language too")
         }
     }
 
@@ -155,6 +160,50 @@ class ProfilesCustomizeSongLanguageTest {
             // The song number is one number whichever language is showing.
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NUMBER)
             assertEquals(1, countOf("Language 2"), "only the header's picker names it")
+        }
+    }
+
+    // ── Looks that follow the place (#1029) ───────────────────────────────────────────────────
+
+    private fun spanishFirst(followsPlace: Boolean = true) = profileDocument(
+        profile = OutputProfile(songMode = Constants.SONG_LANG_BOTH),
+        song = SongSettings(
+            languageNames = listOf("English", "Español"),
+            languageOrder = listOf(1, 0),
+            layoutExtras = SongLayoutExtras(languageLooksFollowPlace = followsPlace),
+        ),
+    )
+
+    @Test
+    fun `each look is named by its place and the language in it now`() {
+        profilesTab(spanishFirst()) { _ ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            assertEquals(1, countOf("1 · Español"))
+            assertEquals(1, countOf("2 · English"))
+        }
+    }
+
+    @Test
+    fun `following the language, each look is named by its language`() {
+        profilesTab(spanishFirst(followsPlace = false)) { _ ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            assertEquals(0, countOf("1 · Español"))
+            assertEquals(1, onAllNodesWithTag(songLanguageTag(SongStyleLanguage.SECONDARY)).fetchSemanticsNodes().size)
+            onNodeWithTag(songLanguageTag(SongStyleLanguage.SECONDARY)).assertTextEquals("Español")
+        }
+    }
+
+    @Test
+    fun `the Follow row turns a profile's looks over to the language and back`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
+            onNodeWithText("Language").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(false, get().song().layoutExtras.languageLooksFollowPlace)
+
+            onNodeWithText("Place").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(true, get().song().layoutExtras.languageLooksFollowPlace)
         }
     }
 }

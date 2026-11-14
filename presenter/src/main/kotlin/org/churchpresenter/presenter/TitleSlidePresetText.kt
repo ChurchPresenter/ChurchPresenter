@@ -2,6 +2,7 @@ package org.churchpresenter.presenter
 
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.languageDisplayOrder
 import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 
@@ -47,7 +48,12 @@ internal fun titleSlideHeadingsAndCredits(
     settings: SongSettings,
     language: String,
 ): Pair<List<String>, List<String>> {
-    val languages = songLanguageSelection(language, emptyList(), section.translations.size + 1)
+    val languages = songLanguageSelection(
+        language,
+        emptyList(),
+        section.translations.size + 1,
+        settings.languageDisplayOrder(),
+    )
     val lines = titleSlideLines(section, settings, languages)
     // TITLE_SLIDE_NUMBER, because `titleSlideLines` is what produced these: the lyric slides'
     // NUMBER never appears in them.

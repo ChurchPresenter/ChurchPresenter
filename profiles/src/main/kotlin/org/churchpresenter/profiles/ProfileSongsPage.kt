@@ -25,17 +25,9 @@ import org.churchpresenter.strings.generated.resources.songs
 import org.churchpresenter.strings.generated.resources.middle
 import org.churchpresenter.strings.generated.resources.profile_end_marker
 import org.churchpresenter.strings.generated.resources.profile_end_marker_spacing
-import org.churchpresenter.strings.generated.resources.profile_fit_languages
-import org.churchpresenter.strings.generated.resources.profile_fit_languages_each
-import org.churchpresenter.strings.generated.resources.profile_fit_languages_same
-import org.churchpresenter.strings.generated.resources.profile_fit_languages_sub
 import org.churchpresenter.strings.generated.resources.profile_box_languages
 import org.churchpresenter.strings.generated.resources.profile_group_slides
 import org.churchpresenter.strings.generated.resources.profile_group_text
-import org.churchpresenter.strings.generated.resources.profile_language_gap
-import org.churchpresenter.strings.generated.resources.profile_language_gap_sub
-import org.churchpresenter.strings.generated.resources.profile_layout
-import org.churchpresenter.strings.generated.resources.unit_px
 import org.churchpresenter.strings.generated.resources.profile_repeat_chorus
 import org.churchpresenter.strings.generated.resources.profile_section_label
 import org.churchpresenter.strings.generated.resources.profile_section_label_sub
@@ -53,8 +45,6 @@ import org.churchpresenter.strings.generated.resources.top
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
-import org.churchpresenter.settings.DEFAULT_STACKED_LANGUAGE_GAP
-import org.churchpresenter.settings.LANGUAGE_GAP_RANGE
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.profilePaths
 import org.churchpresenter.settings.utils.Constants
@@ -110,48 +100,16 @@ internal fun ProfileSongsPage(
         onProfileChange,
         targets,
     )
-    if (profile.songMode == Constants.SONG_LANG_BOTH) {
-        SettingsGroup(stringResource(Res.string.profile_box_languages), key = "languages", paths = SONG_LAYOUT_PATHS) {
-            SettingsRow(Res.string.profile_layout, paths = SONG_LAYOUT_PATHS) {
-                RowSegmented(
-                    options = bilingualLayoutRowOptions(),
-                    selected = song.bilingualLayout,
-                    onSelect = { v -> updateSong { it.copy(bilingualLayout = v) } },
-                )
+    if (profile.showSongs) {
+        SettingsGroup(
+            stringResource(Res.string.profile_box_languages),
+            key = "languages",
+            paths = SONG_LOOKS_FOLLOW_PATHS + SONG_LAYOUT_PATHS,
+        ) {
+            SongLooksFollowRow(song.layoutExtras.languageLooksFollowPlace) { v ->
+                updateSong { it.copy(layoutExtras = it.layoutExtras.copy(languageLooksFollowPlace = v)) }
             }
-            SettingsRow(
-                Res.string.profile_language_gap,
-                sub = stringResource(Res.string.profile_language_gap_sub),
-                paths = SONG_GAP_PATHS,
-            ) {
-                RowStepper(
-                    value = song.layoutExtras.languageGap ?: DEFAULT_STACKED_LANGUAGE_GAP,
-                    onValueChange = { v ->
-                        updateSong { it.copy(layoutExtras = it.layoutExtras.copy(languageGap = v)) }
-                    },
-                    range = LANGUAGE_GAP_RANGE,
-                    step = LANGUAGE_GAP_STEP,
-                    unit = stringResource(Res.string.unit_px),
-                    testTag = SONG_LANGUAGE_GAP_TAG,
-                )
-            }
-            SettingsRow(
-                Res.string.profile_fit_languages,
-                sub = stringResource(Res.string.profile_fit_languages_sub),
-                advanced = true,
-                paths = SONG_FIT_LANGUAGES_PATHS,
-            ) {
-                RowSegmented(
-                    options = listOf(
-                        RowOption(false, stringResource(Res.string.profile_fit_languages_same)),
-                        RowOption(true, stringResource(Res.string.profile_fit_languages_each)),
-                    ),
-                    selected = song.layoutExtras.fitLanguagesSeparately,
-                    onSelect = { v ->
-                        updateSong { it.copy(layoutExtras = it.layoutExtras.copy(fitLanguagesSeparately = v)) }
-                    },
-                )
-            }
+            if (profile.songMode == Constants.SONG_LANG_BOTH) SongLanguageLayoutRows(song, updateSong)
         }
     }
     SlidesGroup(song, lowerThird, updateSong)
@@ -187,7 +145,7 @@ private fun SongTextGroup(
     val titleSlideView = element == CustomizeElement.SONG_TITLE_SLIDE
     val slideElement = targets.slideElement.value
     val styleElement = if (titleSlideView) slideElement else element.toSongStyleElement()
-    val offered = songLanguagesOffered(profile, styleElement)
+    val offered = songLanguagesOffered(profile, styleElement, song)
     val perLanguage = offered.isNotEmpty()
     val editingLanguage = targets.language.value?.takeIf { it in offered }
     val edit = SongEdit(song, styleElement, target, editingLanguage, perLanguage, updateSong)
@@ -541,15 +499,15 @@ internal const val SONG_ALL_LANGUAGES_TAG = "profile_song_language_all"
 /** Test handle for the lyrics block's own positioning switch. */
 internal const val LYRICS_OFFSET_TAG = "song_lyrics_offset"
 
-private val SONG_FIT_LANGUAGES_PATHS = listOf("songSettings.layoutExtras.fitLanguagesSeparately")
+internal val SONG_FIT_LANGUAGES_PATHS = listOf("songSettings.layoutExtras.fitLanguagesSeparately")
 
 /** Where the languages' layout is stored. */
-private val SONG_LAYOUT_PATHS =
+internal val SONG_LAYOUT_PATHS =
     listOf("songSettings.bilingualLayout", "songSettings.layoutExtras.languageGap") + SONG_FIT_LANGUAGES_PATHS
-private val SONG_GAP_PATHS = listOf("songSettings.layoutExtras.languageGap")
+internal val SONG_GAP_PATHS = listOf("songSettings.layoutExtras.languageGap")
 
 /** Where the second voice's colour is stored. */
-private const val LANGUAGE_GAP_STEP = 4
+internal const val LANGUAGE_GAP_STEP = 4
 
 /** Test handle for the Gap between languages field. */
 internal const val SONG_LANGUAGE_GAP_TAG = "profile_song_language_gap"

@@ -118,6 +118,13 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
   translation a profile has no look for takes its All look. Never resolve looks by position instead;
   boxes, linked paths and the presenters all read them by name. What a profile shows
   (`bibleTranslations`) is positions, and stack edits leave them alone.
+- **A profile's song languages are places** (`songTranslations` and the one-language `songMode`s), in
+  the Songs tab's display order (`languageDisplayOrder`), counted among the song's own languages:
+  `songLanguagePicks` turns them into the song's slots, and nothing else may. A language move writes
+  only `languageOrder`. Each language is drawn with its place's look where the profile's
+  `layoutExtras.languageLooksFollowPlace` is on (the default), its own otherwise -- chosen at draw
+  time, so no stored look, box or override path ever moves. **Version 26** rewrote older slot
+  selections as places (`migrateSongLanguagesToPlaces`).
 - **A song's All layer is stored only where the first language has values of its own**
   (`SongLayoutExtras.allLanguages`): everywhere else All *is* the first language's look, so settings
   written before it read unchanged. New song settings go in `SongLayoutExtras`, never on `SongSettings`

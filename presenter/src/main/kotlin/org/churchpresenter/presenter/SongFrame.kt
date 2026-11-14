@@ -59,6 +59,7 @@ internal class SongFrame(
     val isKey get() = look.isKey
     val ss get() = look.ss
     val activeLanguages get() = look.activeLanguages
+    fun lookOf(slot: Int): Int = look.lookOf(slot)
     val laFontSize get() = look.laFontSize
     val laBold get() = look.laBold
     val laItalic get() = look.laItalic
@@ -231,6 +232,9 @@ internal fun BoxWithConstraintsScope.SongFrameContent(look: SongLook, backdrop: 
             isLowerThird,
             lookAheadEnabled,
             languageOverride,
+            // What is drawn and in which look: a language move changes these without changing
+            // the profile that asked for them.
+            languagePicks,
             appSettings.songSettings,
             appSettings.projectionSettings,
             // The fit now measures against the real output's own aspect ratio (see referenceBoxWidth/
