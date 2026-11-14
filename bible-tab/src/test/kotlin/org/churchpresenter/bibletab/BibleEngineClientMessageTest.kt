@@ -502,6 +502,9 @@ class BibleEngineClientMessageTest {
         )
         c.start(start)
         awaitUntil("the first engine to start") { synchronized(starts) { starts.size == 1 } }
+        // Asked to start is not yet held: until startEngine returns there is no engine for the
+        // restart to wait on, and it would start the second one straight away.
+        awaitUntil("the client to hold the first engine") { c.engineRunning }
 
         c.start(start)
         assertEquals(1, synchronized(starts) { starts.size }, "the second engine waits for the first to stop")
