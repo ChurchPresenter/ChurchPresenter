@@ -237,16 +237,21 @@ class PresentationPlayer(
     fun close() {
         closed = true
         scope.cancel()
-        movieDecoder?.close()
+        val decoder = movieDecoder
         movieDecoder = null
-        synchronized(rasterLock) {
-            try {
-                rasterizer.close()
-            } catch (_: Exception) {
-            }
-        }
         slideCache.clear()
         posterCanvases.clear()
+        // A slide being drawn holds rasterLock for as long as it takes to draw, and the decoder's
+        // close waits on its own thread: neither is worth freezing the output windows for.
+        offEventThread("presentation-close") {
+            decoder?.close()
+            synchronized(rasterLock) {
+                try {
+                    rasterizer.close()
+                } catch (_: Exception) {
+                }
+            }
+        }
     }
 
     /** Lazily (re)builds the decoder for [movieLayerId] once this slide's poster is rasterized. */

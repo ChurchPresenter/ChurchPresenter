@@ -17,6 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -32,6 +35,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextRange
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.composables.SectionInk
 import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.utils.SystemClipboard
@@ -68,12 +75,32 @@ internal fun rememberLyricsHighlight(): VisualTransformation {
 }
 
 /**
- * The clipboard's text, or null when it holds none.
- *
- * Read straight from AWT rather than through a Compose clipboard API: this runs inside a key
- * handler that has to decide, before the keystroke is consumed, whether the paste is a chord sheet.
+ * [value] with [text] pasted over its selection and the cursor after it, as the field's own paste
+ * would leave it.
  */
-private fun clipboardText(): String? = SystemClipboard.paste()
+internal fun pastedInto(value: TextFieldValue, text: String): TextFieldValue {
+    val start = value.selection.min
+    val end = value.selection.max
+    val newText = value.text.substring(0, start) + text + value.text.substring(end)
+    return TextFieldValue(newText, TextRange(start + text.length))
+}
+
+/**
+ * What a Ctrl+V in the lyrics does with the clipboard's [text]: a chords-over-lyrics sheet goes to
+ * [onPasteChordSheet] to be converted, anything else is pasted over the selection of [current].
+ */
+internal fun pasteLyrics(
+    text: String?,
+    current: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    onPasteChordSheet: (String) -> Unit,
+) {
+    when {
+        text.isNullOrEmpty() -> Unit
+        ChordSheetImporter.looksLikeChordSheet(text) -> onPasteChordSheet(text)
+        else -> onValueChange(pastedInto(current, text))
+    }
+}
 
 /**
  * Dedicated multi-line, scrollable lyrics editor — kept separate from SettingsTextField
@@ -92,22 +119,28 @@ internal fun LyricsTextField(
 ) {
     val scrollState = rememberScrollState()
     val interactionSource = remember { MutableInteractionSource() }
+    val scope = rememberCoroutineScope()
+    val currentValue by rememberUpdatedState(value)
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val currentOnPasteChordSheet by rememberUpdatedState(onPasteChordSheet)
 
     Box(
         modifier = modifier
             // A pasted chords-over-lyrics sheet is converted on the way in; anything else pastes
-            // as it always has, so this is invisible until it is wanted.
+            // as it always has. Deciding which needs the clipboard's text, and reading it waits on
+            // whichever application holds the clipboard -- seconds on Windows -- so the keystroke
+            // is taken here and the clipboard read off the event thread.
             .onPreviewKeyEvent { event ->
                 val paste = event.type == KeyEventType.KeyDown &&
                     event.key == Key.V &&
                     (event.isCtrlPressed || event.isMetaPressed)
-                val sheet = if (paste) clipboardText() else null
-                if (sheet != null && ChordSheetImporter.looksLikeChordSheet(sheet)) {
-                    onPasteChordSheet(sheet)
-                    true
-                } else {
-                    false
+                if (paste) {
+                    scope.launch {
+                        val text = withContext(Dispatchers.IO) { SystemClipboard.paste() }
+                        pasteLyrics(text, currentValue, currentOnValueChange, currentOnPasteChordSheet)
+                    }
                 }
+                paste
             }
             .background(MaterialTheme.colorScheme.surfaceContainerHigh, LyricsFieldShape)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, LyricsFieldShape)

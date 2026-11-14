@@ -1,6 +1,7 @@
 package org.churchpresenter.core.models.io
 
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.charset.Charset
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
@@ -33,7 +34,15 @@ fun File.writeBytesAtomically(bytes: ByteArray) {
     parentFile?.mkdirs()
     val scratch = scratchFor(this)
     try {
-        scratch.writeBytes(bytes)
+        try {
+            scratch.writeBytes(bytes)
+        } catch (_: FileNotFoundException) {
+            // The folder lets this file be written but no new one be made beside it -- a Google
+            // Drive shortcut folder does this. Writing in place is what the file had before atomic
+            // writes; a failure here is the caller's, as it always was.
+            writeBytes(bytes)
+            return
+        }
         try {
             Files.move(
                 scratch.toPath(), toPath(),

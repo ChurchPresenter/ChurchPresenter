@@ -118,6 +118,8 @@ internal object SwingSettingsActionUi : SettingsActionUi {
     override fun restart(companionServer: CompanionServer?) = stopThenRelaunch(companionServer, ::relaunch)
 
     private fun relaunch() {
+        // The settings just saved must be on disk before the new process reads them.
+        SettingsManager.flushAllSaves()
         val javaBin = System.getProperty("java.home") + "/bin/java"
         val command = ProcessHandle.current().info().command().orElse(javaBin)
         val args = ProcessHandle.current().info().arguments().orElse(emptyArray())

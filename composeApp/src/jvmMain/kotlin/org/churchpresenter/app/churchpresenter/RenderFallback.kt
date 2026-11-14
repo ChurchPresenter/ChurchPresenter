@@ -7,6 +7,7 @@ import java.io.File
 import java.io.IOException
 import java.util.Properties
 import java.util.concurrent.TimeUnit
+import org.churchpresenter.settings.SettingsManager
 import kotlin.system.exitProcess
 
 /*
@@ -101,6 +102,7 @@ internal fun switchRenderApiAndRelaunch(
 
 /** Starts [command] and exits this process, which the new one waits for. */
 private fun replaceThisProcess(command: List<String>) {
+    SettingsManager.flushAllSaves()
     ProcessBuilder(command).inheritIO().start()
     Log.warn("Startup", "Restarting with a different render API")
     exitProcess(0)

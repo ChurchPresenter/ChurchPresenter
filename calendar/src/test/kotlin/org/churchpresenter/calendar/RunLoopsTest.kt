@@ -3,6 +3,7 @@ package org.churchpresenter.calendar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.CalendarPreferences
@@ -178,7 +179,11 @@ class RunLoopsTest {
     @Test
     fun `the loader waits for the schedule to be ready, then loads and keeps checking`() = runTest {
         val outputs = Outputs()
-        val loader = ServiceAutoLoader(document = { calendar(planned()) }, host = outputs.host(), now = { at(9, 57) })
+        val loader = ServiceAutoLoader(
+            document = { calendar(planned()) }, host = outputs.host(), now = { at(9, 57) },
+            // The loop runs on virtual time, so its passes must too.
+            compute = UnconfinedTestDispatcher(testScheduler),
+        )
 
         val job = launch { loader.run(tickMillis = 1_000, startupMillis = 100) }
         advanceTimeBy(50)
@@ -197,6 +202,7 @@ class RunLoopsTest {
             document = { if (calls++ == 0) error("folder not mounted") else calendar(planned()) },
             host = outputs.host(),
             now = { at(9, 57) },
+            compute = UnconfinedTestDispatcher(testScheduler),
         )
 
         val job = launch { loader.run(tickMillis = 1_000, startupMillis = 0) }

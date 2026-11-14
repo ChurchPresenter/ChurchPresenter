@@ -40,6 +40,26 @@ object FileKitFileChooser : FileChooser() {
         )
 
     /**
+     * Runs [open] with [dialogSettings] for [title], and once more without an owner when FileKit
+     * cannot turn the owner into a native handle -- an `IllegalArgumentException` from
+     * `resolveAwtNativeIdentifier`, for a window whose native peer is going or gone. An unowned
+     * dialog centred on the screen beats the Swing fallback, and a second failure goes to it as before.
+     */
+    internal suspend fun <T> withOwnerRetry(
+        title: String,
+        settingsFor: (String) -> FileKitDialogSettings = ::dialogSettings,
+        open: suspend (FileKitDialogSettings) -> T,
+    ): T {
+        val owned = settingsFor(title)
+        return try {
+            open(owned)
+        } catch (e: IllegalArgumentException) {
+            if (owned.parent == null) throw e
+            open(FileKitDialogSettings(title = title))
+        }
+    }
+
+    /**
      * The whole open interaction: work out which picker the request needs, hand [openNative] the
      * mode, the type and the folder, and shape whatever comes back for the base class.
      *
@@ -94,24 +114,25 @@ object FileKitFileChooser : FileChooser() {
     ): List<Path>? = withNativeDialog(
         context = "FileKitFileChooser.chooseImpl",
         attempt = {
-            val settings = dialogSettings(title)
             openWith(path, filters, selectDirectory, multiple) { mode, type, directory ->
-                when (mode) {
-                    PickerMode.DIRECTORY -> FileKit
-                        .openDirectoryPicker(directory = directory, dialogSettings = settings)
-                        ?.file?.let { listOf(it) }
-                    PickerMode.MULTIPLE_FILES -> FileKit.openFilePicker(
-                        type = type,
-                        mode = FileKitMode.Multiple(),
-                        directory = directory,
-                        dialogSettings = settings
-                    )?.map { it.file }
-                    PickerMode.SINGLE_FILE -> FileKit.openFilePicker(
-                        type = type,
-                        mode = FileKitMode.Single,
-                        directory = directory,
-                        dialogSettings = settings
-                    )?.file?.let { listOf(it) }
+                withOwnerRetry(title) { settings ->
+                    when (mode) {
+                        PickerMode.DIRECTORY -> FileKit
+                            .openDirectoryPicker(directory = directory, dialogSettings = settings)
+                            ?.file?.let { listOf(it) }
+                        PickerMode.MULTIPLE_FILES -> FileKit.openFilePicker(
+                            type = type,
+                            mode = FileKitMode.Multiple(),
+                            directory = directory,
+                            dialogSettings = settings
+                        )?.map { it.file }
+                        PickerMode.SINGLE_FILE -> FileKit.openFilePicker(
+                            type = type,
+                            mode = FileKitMode.Single,
+                            directory = directory,
+                            dialogSettings = settings
+                        )?.file?.let { listOf(it) }
+                    }
                 }
             }
         },
@@ -126,15 +147,16 @@ object FileKitFileChooser : FileChooser() {
     ): Path? = withNativeDialog(
         context = "FileKitFileChooser.saveImpl",
         attempt = {
-            val settings = dialogSettings(title)
             saveWith(location, suggestedName, filters) { baseName, extension, allowed, directory ->
-                FileKit.openFileSaver(
-                    suggestedName = baseName,
-                    defaultExtension = extension,
-                    allowedExtensions = allowed,
-                    directory = directory,
-                    dialogSettings = settings
-                )?.file
+                withOwnerRetry(title) { settings ->
+                    FileKit.openFileSaver(
+                        suggestedName = baseName,
+                        defaultExtension = extension,
+                        allowedExtensions = allowed,
+                        directory = directory,
+                        dialogSettings = settings
+                    )?.file
+                }
             }
         },
         fallback = { SwingFileChooser.fallbackSave(location, suggestedName, filters, title) }

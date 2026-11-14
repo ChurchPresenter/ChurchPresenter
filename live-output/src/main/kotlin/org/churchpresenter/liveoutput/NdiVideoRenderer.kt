@@ -164,6 +164,7 @@ class NdiVideoRenderer(
      */
     fun stop() {
         pump.stop()
-        sender.close()
+        // The runtime's destroy waits on its network threads.
+        offEventThread("ndi-close") { sender.close() }
     }
 }

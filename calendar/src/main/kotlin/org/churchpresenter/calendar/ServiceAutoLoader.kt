@@ -1,6 +1,9 @@
 package org.churchpresenter.calendar
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +22,7 @@ import org.churchpresenter.calendar.model.rowsForSchedule
 import org.churchpresenter.calendar.model.serviceToAutoLoad
 import org.churchpresenter.calendar.model.storedDate
 import org.churchpresenter.calendar.model.timingForSchedule
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.time.LocalDateTime
 
 /**
@@ -53,6 +57,12 @@ class ServiceAutoLoader(
     private val host: CalendarHost,
     private val now: () -> LocalDateTime = { LocalDateTime.now() },
     private val save: suspend (CalendarDocument) -> Unit = {},
+    /**
+     * Where the passes over the calendar run -- every service, its rows and their timing, once a
+     * minute. Not the caller's thread, which is the event thread: only the [host] calls, which
+     * read and change the Schedule, stay there.
+     */
+    private val compute: CoroutineDispatcher = Dispatchers.Default,
 ) {
     /**
      * Every plan whose rows have been seen in the Schedule today -- see [loadKey].
@@ -108,7 +118,9 @@ class ServiceAutoLoader(
         val calendar = document().also { lastDocument = it }
         val at = now()
         try {
-            loadIfDue(calendar, at)
+            val schedule = host.currentSchedule()
+            withContext(compute) { dueLoad(calendar, at, schedule) }
+                ?.let { load(it, replace = calendar.holdsOnlyPlannedRows(schedule)) }
         } finally {
             announce(calendar, at)
         }
@@ -160,18 +172,23 @@ class ServiceAutoLoader(
         }
     }
 
-    private fun announce(calendar: CalendarDocument, at: LocalDateTime) {
+    private suspend fun announce(calendar: CalendarDocument, at: LocalDateTime) {
         val schedule = host.currentSchedule()
-        _upcoming.value = if (calendar.preferences.autoLoadService) {
-            calendar.nextAutoLoad(at, calendar.preferences.autoLoadLead()) { it.isInSchedule(schedule) }
-        } else {
-            null
+        val (upcoming, link) = withContext(compute) {
+            val upcoming = if (calendar.preferences.autoLoadService) {
+                calendar.nextAutoLoad(at, calendar.preferences.autoLoadLead()) { it.isInSchedule(schedule) }
+            } else {
+                null
+            }
+            val link = calendar.serviceInSchedule(schedule)?.let { service ->
+                val saved = service.items.map { it.id }
+                val now = service.withScheduleRows(schedule).items.map { it.id }
+                ScheduleServiceLink(service.id, service.name, hasChanges = now != saved)
+            }
+            upcoming to link
         }
-        _scheduleService.value = calendar.serviceInSchedule(schedule)?.let { service ->
-            val saved = service.items.map { it.id }
-            val now = service.withScheduleRows(schedule).items.map { it.id }
-            ScheduleServiceLink(service.id, service.name, hasChanges = now != saved)
-        }
+        _upcoming.value = upcoming
+        _scheduleService.value = link
     }
 
     private fun load(service: PlannedService, replace: Boolean) {
@@ -180,27 +197,30 @@ class ServiceAutoLoader(
         )
     }
 
-    private fun loadIfDue(calendar: CalendarDocument, at: LocalDateTime) {
-        if (!calendar.preferences.autoLoadService) return
+    /**
+     * The service to load into [current] now, or null -- and every plan seen to have landed is
+     * recorded on the way. Touches nothing but [landed], so it can run off the event thread.
+     */
+    private fun dueLoad(calendar: CalendarDocument, at: LocalDateTime, current: List<ScheduleItem>): PlannedService? {
+        if (!calendar.preferences.autoLoadService) return null
         startDay(at)
-        val service = calendar.serviceToAutoLoad(at, calendar.preferences.autoLoadLead()) ?: return
+        val service = calendar.serviceToAutoLoad(at, calendar.preferences.autoLoadLead()) ?: return null
         val key = service.loadKey()
-        val current = host.currentSchedule()
-        when {
-            key in landed -> Unit
+        return when {
+            key in landed -> null
             // Nothing to put in the Schedule: loading it would only clear what is there.
-            service.rowsForSchedule().isEmpty() -> landed += key
+            service.rowsForSchedule().isEmpty() -> null.also { landed += key }
             // Its rows are in the Schedule, so the load arrived: record it and leave the Schedule
             // alone from here, whatever the operator does to it. Asking whether *these* rows are
             // there, rather than whether the Schedule holds anything, is what tells a load that
             // arrived from one that called into a no-op while last week's schedule sat there.
-            service.isInSchedule(current) -> landed += key
+            service.isInSchedule(current) -> null.also { landed += key }
             // Once the service is under way, what the Schedule holds is what is being presented:
             // an automatic load never replaces or adds to it -- not after a plan edit, a sync or a
             // restart. Only an empty Schedule still takes the service.
-            current.isNotEmpty() && service.hasStarted(at) -> landed += key
+            current.isNotEmpty() && service.hasStarted(at) -> null.also { landed += key }
             // Last week's service goes; the operator's own rows stay, and this goes under them.
-            else -> load(service, replace = calendar.holdsOnlyPlannedRows(current))
+            else -> service
         }
     }
 }

@@ -383,7 +383,10 @@ class SharedBrowserFrameCacheTest {
 
         SharedBrowserFrameCache.release("shared")
         assertTrue(job.isCancelled, "the last layer letting go stops the capture")
-        assertFalse(process.isAlive)
+        // The browser is ended, and its profile deleted, on a thread of their own.
+        assertTrue(process.waitFor(5, TimeUnit.SECONDS), "the browser is ended")
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+        while (profile.exists() && System.nanoTime() < deadline) Thread.yield()
         assertFalse(profile.exists(), "the browser's temporary profile is deleted with it")
         assertNull(entry.cdpConnection)
         assertNull(entry.browserProcess)

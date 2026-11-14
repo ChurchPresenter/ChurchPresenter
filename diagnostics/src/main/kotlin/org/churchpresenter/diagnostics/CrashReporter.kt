@@ -363,11 +363,16 @@ object CrashReporter {
         if (file != null && file.parentFile != crashDir) {
             try { file.copyTo(File(crashDir, file.name), overwrite = true) } catch (_: Exception) {}
         }
+        val kind = if (file != null) UncleanExit.NATIVE_CRASH else UncleanExit.NO_CRASH_FILE
+        val cause = UncleanExit.cause(summary)
         val tags = buildMap {
-            put("exit.kind", if (file != null) UncleanExit.NATIVE_CRASH else UncleanExit.NO_CRASH_FILE)
+            put("exit.kind", kind)
             UncleanExit.module(summary["crash.problematic_frame"])?.let { put("exit.module", it) }
+            cause?.let { put("exit.cause", it) }
         }
-        reportWarning(UncleanExit.TITLE, tags = tags, extras = summary)
+        reportWarning(
+            UncleanExit.TITLE, tags = tags, extras = summary, fingerprint = UncleanExit.fingerprint(kind, cause),
+        )
     }
 
     /** Re-enable video backgrounds (user override from the warning banner). */
