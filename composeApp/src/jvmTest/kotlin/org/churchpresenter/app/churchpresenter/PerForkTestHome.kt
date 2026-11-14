@@ -4,6 +4,8 @@ import org.churchpresenter.diagnostics.CrashReportSweep
 import org.junit.platform.launcher.LauncherSession
 import org.junit.platform.launcher.LauncherSessionListener
 import java.io.File
+import java.io.RandomAccessFile
+import java.nio.channels.FileLock
 
 /**
  * Gives every test fork its own `user.home` and its own port band, before any test class loads.
@@ -41,11 +43,15 @@ class PerForkTestHome : LauncherSessionListener {
         // whole task -- so the N forks of one run get N consecutive ids. The counter does NOT reset
         // between builds, though: a warm daemon was handing out worker-9 after three runs. Left raw
         // that grows without limit, and offset * band would eventually push a port past 65535 (and
-        // leave a new home directory behind every run). Folding it into SLOTS keeps both bounded,
-        // and stays collision-free because the ids within a run are consecutive and there are never
-        // more forks than slots -- maxParallelForks is capped at 4.
+        // leave a new home directory behind every run). Folding it into SLOTS keeps both bounded;
+        // there are never more forks than slots -- maxParallelForks is capped at 4.
         val worker = System.getProperty(GRADLE_WORKER_PROPERTY)?.toIntOrNull() ?: 1
-        val slot = (worker - 1).mod(SLOTS)
+        // The worker id says which slot to try first; the slot is then claimed with a lock held for
+        // the life of this fork, so two forks running at once never share one. The ids are a
+        // daemon-wide counter, so they are not guaranteed consecutive within a run: two forks eight
+        // apart would fold into the same slot, and one fork's settings.json then turned up in the
+        // other's "fresh install" (StartupPromptsTest).
+        val slot = claimSlot(File(base), preferred = (worker - 1).mod(SLOTS))
 
         val home = File(base, "worker-$slot")
         home.mkdirs()
@@ -54,7 +60,30 @@ class PerForkTestHome : LauncherSessionListener {
         System.setProperty(PORT_OFFSET_PROPERTY, (slot * PORT_BAND).toString())
     }
 
+    /**
+     * The first slot from [preferred] on that no other running fork holds, locked for as long as this
+     * fork lives. The lock is the OS's, so it is let go when the fork exits however it exits.
+     */
+    private fun claimSlot(base: File, preferred: Int): Int {
+        base.mkdirs()
+        for (step in 0 until SLOTS) {
+            val slot = (preferred + step).mod(SLOTS)
+            val channel = RandomAccessFile(File(base, "worker-$slot.lock"), "rw").channel
+            val lock = runCatching { channel.tryLock() }.getOrNull()
+            if (lock != null) {
+                heldSlotLock = lock
+                return slot
+            }
+            channel.close()
+        }
+        return preferred
+    }
+
     companion object {
+        /** This fork's claim on its slot: kept reachable so the lock is held until the fork exits. */
+        @Volatile
+        private var heldSlotLock: FileLock? = null
+
         /** Set by the Test task; the parent directory the per-fork homes are created under. */
         const val HOME_BASE_PROPERTY = "churchpresenter.test.homeBase"
 
