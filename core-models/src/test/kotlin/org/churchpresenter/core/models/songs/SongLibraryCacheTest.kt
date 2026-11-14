@@ -64,6 +64,26 @@ class SongLibraryCacheTest {
     private fun scan(cache: Map<String, CachedSong> = emptyMap()) =
         parser.loadSongsFromDirectory(library.absolutePath, cache)
 
+    // ── The Song Library window ─────────────────────────────────────────────────
+
+    @Test
+    fun `the library window takes an unchanged file from the cache instead of parsing it`() {
+        val file = song("0001 - Amazing Grace")
+        val cached = SongItem(number = "", title = "From the cache", sourceFile = file.absolutePath)
+        SongFileParser.saveSongCache(library.path, listOf(CachedSong(cached, file.lastModified(), file.length())))
+
+        assertEquals(listOf("From the cache"), SongLibrary(library).load().map { it.title })
+    }
+
+    @Test
+    fun `the library window parses a file again once it has changed since it was cached`() {
+        val file = song("0001 - Amazing Grace")
+        val cached = SongItem(number = "", title = "From the cache", sourceFile = file.absolutePath)
+        SongFileParser.saveSongCache(library.path, listOf(CachedSong(cached, file.lastModified() - 1, file.length())))
+
+        assertEquals(listOf("0001 - Amazing Grace"), SongLibrary(library).load().map { it.title })
+    }
+
     // ── Scanning a library ──────────────────────────────────────────────────────
 
     @Test
