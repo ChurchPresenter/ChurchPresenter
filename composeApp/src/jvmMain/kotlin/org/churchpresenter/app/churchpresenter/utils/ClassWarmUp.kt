@@ -148,9 +148,9 @@ internal val WARM_CLASSES = listOf(
  * dialogs, the shared components they are built from, and the material3 and foundation controls
  * they draw. A first opening of any of them was seen stalling on class loading after
  * [WARM_CLASSES] had run -- the song editor, the System and Profiles settings, the Announcements
- * tab's font picker. About 5,600 classes: half a second of a low-priority thread, and at most
- * 36 MB of metaspace on a cold JVM (less in the app, which has loaded many of them by then).
- * Engines, converters and the off-screen outputs are left out: they load on their own threads.
+ * tab's font picker. About 6,700 classes: under a second of a low-priority thread, and at most
+ * 44 MB of metaspace on a cold JVM (less in the app, which has loaded many of them by then).
+ * The engines are left out: they load on their own threads.
  */
 internal val WARM_PACKAGES = listOf(
     "org/churchpresenter/songs/",
@@ -167,6 +167,13 @@ internal val WARM_PACKAGES = listOf(
     "org/churchpresenter/app/churchpresenter/dialogs/",
     "org/churchpresenter/app/churchpresenter/tabs/",
     "org/churchpresenter/converter/ui/",
+    // What the outputs and the preview draw, Wick, the Calendar Manager and the chord grammar:
+    // first uses of each were still seen stalling once the screens above were warm.
+    "org/churchpresenter/presenter/",
+    "org/churchpresenter/liveoutput/",
+    "org/churchpresenter/helper/",
+    "org/churchpresenter/calendar/ui/",
+    "org/churchpresenter/songchords/",
     "androidx/compose/material3/",
     "androidx/compose/foundation/",
     // The native file dialogs every Open and Save goes through.

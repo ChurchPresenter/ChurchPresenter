@@ -516,6 +516,7 @@ class StatisticsManagerTest {
         stats.sing("Amazing Grace")
 
         assertEquals(1, stats.getSongPlayCount("Hymnal::1"), "the in-memory tally is fine")
+        stats.flush()
         assertTrue(statsFile.exists(), "the folder must be created rather than the write dropped")
         assertEquals(
             1,

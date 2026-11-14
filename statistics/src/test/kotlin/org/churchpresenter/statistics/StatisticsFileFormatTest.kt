@@ -1,6 +1,7 @@
 package org.churchpresenter.statistics
 
 import kotlinx.serialization.json.Json
+import org.churchpresenter.core.models.io.LatestWriteQueue
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -100,7 +101,7 @@ class StatisticsFileFormatTest {
         repeat(2) { first.recordSongDisplay("Hymnal::42", 42, "Amazing Grace", "Hymnal") }
         first.recordVerseDisplay("KJV", "John", 3, 16)
 
-        val decoded = json.decodeFromString(DisplayStatistics.serializer(), statsFile.readText())
+        val decoded = json.decodeFromString(DisplayStatistics.serializer(), statsFile.writtenText())
 
         assertEquals(
             SongDisplayEntry(songNumber = 42, title = "Amazing Grace", songbook = "Hymnal", count = 2),
@@ -118,7 +119,7 @@ class StatisticsFileFormatTest {
         stats.recordSongDisplay("Hymnal::1", 1, "Amazing Grace", "Hymnal")
         stats.recordSongDisplay("Songs of Praise::1", 1, "Amazing Grace", "Songs of Praise")
 
-        val keys = json.decodeFromString(DisplayStatistics.serializer(), statsFile.readText()).songDisplayCounts.keys
+        val keys = json.decodeFromString(DisplayStatistics.serializer(), statsFile.writtenText()).songDisplayCounts.keys
 
         assertEquals(
             setOf("Hymnal::1", "Songs of Praise::1"),
@@ -196,7 +197,7 @@ class StatisticsFileFormatTest {
         stats.recordSongDisplay("Hymnal::42", 42, "Amazing Grace", "Hymnal", "John Newton")
         stats.recordVerseDisplay("KJV", "John", 3, 16)
 
-        val log = json.decodeFromString(PlayEventLog.serializer(), logFile.readText())
+        val log = json.decodeFromString(PlayEventLog.serializer(), logFile.writtenText())
 
         val song = log.songEvents.single()
         assertEquals(42, song.songNumber)
@@ -216,7 +217,7 @@ class StatisticsFileFormatTest {
 
         assertEquals(
             3,
-            json.decodeFromString(PlayEventLog.serializer(), logFile.readText()).songEvents.size,
+            json.decodeFromString(PlayEventLog.serializer(), logFile.writtenText()).songEvents.size,
             "a report for one month has to be able to count showings inside it",
         )
     }
@@ -231,12 +232,21 @@ class StatisticsFileFormatTest {
 
         stats.clearStatistics()
 
-        assertEquals(DisplayStatistics(), json.decodeFromString(DisplayStatistics.serializer(), statsFile.readText()))
+        assertEquals(
+            DisplayStatistics(),
+            json.decodeFromString(DisplayStatistics.serializer(), statsFile.writtenText()),
+        )
         assertEquals(
             PlayEventLog(),
-            json.decodeFromString(PlayEventLog.serializer(), logFile.readText()),
+            json.decodeFromString(PlayEventLog.serializer(), logFile.writtenText()),
             "a cleared history that comes back on the next launch is worse than not clearing at all",
         )
         assertTrue(!StatisticsManager().hasEventLog())
     }
+}
+
+/** The file's text once the manager's background write of it has landed. */
+private fun File.writtenText(): String {
+    LatestWriteQueue.shared.flush(this)
+    return readText()
 }
