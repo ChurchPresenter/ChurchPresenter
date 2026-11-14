@@ -28,8 +28,10 @@ import org.churchpresenter.sharedui.utils.UsageEventStore
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.CalendarSyncSettings
 import java.io.File
+import java.io.IOException
 import java.util.UUID
 import java.time.Instant
 import kotlin.coroutines.coroutineContext
@@ -298,11 +300,19 @@ class CalendarSyncService(
             } catch (e: RelayFailure) {
                 _status.value = failure(e)
                 false
+            } catch (e: IOException) {
+                // The calendar folder is the operator's own and may be on a drive that comes and
+                // goes (a cloud-drive mount, a network share): a round that cannot read or write it
+                // is a failed round, retried on the next save or timer, never the app going down.
+                Log.warn(TAG, "Calendar sync could not reach the calendar folder: ${e.message}")
+                _status.value = CalendarSyncStatus.Failed(e.message.orEmpty())
+                false
             }
         }
     }
 
     private companion object {
+        const val TAG = "CalendarSync"
         const val NAME_CHARS = 120
         const val STARTUP_TIMEOUT_MS = 5_000L
         const val PULL_INTERVAL_MS = 5 * 60 * 1_000L
