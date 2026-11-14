@@ -3,6 +3,15 @@
 // a module asks for them by id (`id("cp.jvm-module")`) like any other plugin. See AGENT.md.
 rootProject.name = "build-logic"
 
+// Where `kotlin-dsl` and the Kotlin it pins resolve from. Without this only the plugin portal is
+// searched, and its mirror of Maven Central does not always answer for org.jetbrains.kotlin.
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 dependencyResolutionManagement {
     repositories {
         google {
