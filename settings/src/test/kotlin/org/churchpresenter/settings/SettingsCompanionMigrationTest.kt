@@ -183,6 +183,7 @@ class SettingsCompanionMigrationTest {
         )
 
         manager.saveSettings(manager.loadSettings())
+        manager.flushSettings()
 
         val saved = File(home, ".churchpresenter/settings.json").readText()
         assertTrue("tabStartRow" !in saved, "a dead field left in the file would be migrated again on every load")
@@ -214,7 +215,7 @@ class SettingsCompanionMigrationTest {
             """{"companionSatelliteConnections":[{"rows":2,"columns":6,"tabStartRow":0,"tabEndRow":1}]}""",
         )
 
-        val json = SettingsManager().let { it.saveSettings(once); File(
+        val json = SettingsManager().let { it.saveSettings(once); it.flushSettings(); File(
             home,
             ".churchpresenter/settings.json",
         ).readText() }

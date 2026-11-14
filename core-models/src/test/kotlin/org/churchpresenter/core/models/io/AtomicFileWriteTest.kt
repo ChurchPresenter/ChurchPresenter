@@ -98,4 +98,17 @@ class AtomicFileWriteTest {
 
         assertEquals(setOf(old.length), seen, "a partial read means the swap was not atomic")
     }
+
+    @Test
+    fun `a folder that will not take a new file beside the target is written in place`() {
+        val target = File(root, "calendar.json")
+        target.writeTextAtomically("old")
+        // A directory where the scratch file goes makes creating it fail as Google Drive's
+        // shortcut folders do: FileNotFoundException.
+        File(root, "calendar.json.writing").mkdirs()
+
+        target.writeTextAtomically("new")
+
+        assertEquals("new", target.readText())
+    }
 }

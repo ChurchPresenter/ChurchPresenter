@@ -107,6 +107,7 @@ class BibleSongProfileMigrationTest {
     fun `a save writes only the install-wide keys`() {
         val manager = SettingsManager()
         manager.saveSettings(manager.migrateAndDecode(v21))
+        manager.flushSettings()
 
         val saved = root(File(home, ".churchpresenter/settings.json").readText())
         val song = saved.getValue("songSettings").jsonObject

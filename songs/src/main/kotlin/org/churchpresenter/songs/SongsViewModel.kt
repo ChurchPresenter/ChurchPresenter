@@ -2,6 +2,7 @@ package org.churchpresenter.songs
 
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -107,10 +108,16 @@ class SongsViewModel(
         favoritesState.value = emptySet()
     }
 
-    fun getFavoriteSongs(): List<SongItem> {
+    /**
+     * The favourite songs, worked out again only when the library or the favourites change -- not on
+     * every recomposition of the Songs tab, which walked the whole library each time.
+     */
+    private val favoriteSongsState = derivedStateOf {
         val favIds = favoritesState.value
-        return allSongItemsState.value.filter { it.songId in favIds }
+        if (favIds.isEmpty()) emptyList() else allSongItemsState.value.filter { it.songId in favIds }
     }
+
+    fun getFavoriteSongs(): List<SongItem> = favoriteSongsState.value
 
     // Statistics — used for play-count sorting
     internal var playCounts: SongPlayCounts? = null

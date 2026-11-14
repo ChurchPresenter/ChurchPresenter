@@ -28,7 +28,10 @@ private const val VERSION_SIGNAGE_TAB = 25
 // in
 // the Settings*Migrations.kt files beside it, the repairs in SettingsRepair.kt and the backups in
 // SettingsBackups.kt.
-class SettingsManager {
+class SettingsManager internal constructor(private val writer: SettingsWriter) {
+    /** Saves through the app's one background writer -- see [SettingsWriter]. */
+    constructor() : this(SettingsWriter.shared)
+
     private val appDataDir = AppDataDir.resolve()
     private val settingsFile = File(appDataDir, "settings.json")
     private val settingsTmpFile = File(appDataDir, "settings.json.tmp")
@@ -118,6 +121,8 @@ class SettingsManager {
     fun loadSettings(): AppSettings {
         cachedSettings?.let { return it }
         pruneBackupsOnce(appDataDir)
+        // A save still on its way to disk -- from this manager or another -- lands before the read.
+        writer.flush(settingsFile)
         return try {
             if (settingsFile.exists()) {
                 val raw = settingsFile.readText()
@@ -202,8 +207,20 @@ class SettingsManager {
     /** Keeps the newest few of each settings-backup family -- see [pruneBackupsOnce]. */
     internal fun pruneBackups() = pruneBackups(appDataDir)
 
+    /**
+     * Makes [settings] the current settings at once and writes them to disk on the settings writer,
+     * off the caller's thread: encoding and stripping the document takes seconds on a slow machine.
+     * A newer save replaces one not yet written. [flushSettings] waits for the write.
+     */
     fun saveSettings(settings: AppSettings) {
         cachedSettings = settings
+        writer.submit(settingsFile) { writeSettings(settings) }
+    }
+
+    /** Blocks until every save so far is on disk. Never call it on the event thread. */
+    fun flushSettings() = writer.flush(settingsFile)
+
+    private fun writeSettings(settings: AppSettings) {
         try {
             val json = stripProfileOwnedStyling(settingsJson.encodeToString(settings))
             // Write to a temp file first, then atomically swap it into place — a process kill
@@ -226,6 +243,13 @@ class SettingsManager {
     }
 
     companion object {
+        /**
+         * Blocks until every settings save in this process is on disk. A relaunch calls it before
+         * starting the new process, which would otherwise read the file before the old one's
+         * shutdown hook writes it.
+         */
+        fun flushAllSaves() = SettingsWriter.shared.flushAll()
+
         /**
          * The band templates folder under [appDataDir], for a caller with no manager at hand —
          * the per-output customise dialog sits several composables away from the one that has it.

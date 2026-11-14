@@ -325,19 +325,20 @@ object SharedBrowserFrameCache {
         entry.cdpConnection = null
 
         val process = entry.browserProcess
-        if (process != null) {
-            BrowserProcesses.killProcess(process)
-            entry.browserProcess = null
-        }
-
-        // Clean up temp user-data-dir
+        entry.browserProcess = null
         val dataDir = entry.userDataDir
-        if (dataDir != null) {
-            try { dataDir.deleteRecursively() } catch (_: Throwable) {}
-            entry.userDataDir = null
-        }
-
+        entry.userDataDir = null
         entry.frame.value = null
+
+        // Ending the browser waits for it (taskkill on Windows, up to seconds), and its profile
+        // folder can only go once it has: both on a thread of their own, since this is reached from
+        // a source being removed on the event thread.
+        if (process != null || dataDir != null) {
+            runInBackground("browser-stop") {
+                process?.let(BrowserProcesses::killProcess)
+                try { dataDir?.deleteRecursively() } catch (_: Throwable) {}
+            }
+        }
     }
 
     // ── CDP WebSocket Connection ───────────────────────────────────

@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import org.churchpresenter.diagnostics.Log
+import java.io.File
+import java.io.IOException
+import java.util.jar.JarFile
 
 /**
  * Loads the classes behind the screens an operator opens first, so the JVM does not read them from
@@ -43,9 +46,47 @@ internal fun warmClasses(
     return names.size - failed
 }
 
+/**
+ * Every class under each of [prefixes] (`/`-separated package paths, subpackages included) in the
+ * jars and class folders of [classPath] -- so the lambdas, `ComposableSingletons` and small helper
+ * classes a screen loads one at a time on its first opening are found without naming each one.
+ * A location that cannot be read is skipped.
+ */
+internal fun classesUnder(
+    prefixes: List<String>,
+    classPath: String = System.getProperty("java.class.path").orEmpty(),
+): List<String> = classPath.split(File.pathSeparator)
+    .filter { it.isNotBlank() }
+    .map(::File)
+    .filter { it.isDirectory || it.name.endsWith(".jar") }
+    .flatMap { location -> prefixes.flatMap { classNamesUnder(location, it) } }
+    .distinct()
+
+/** The class names under [prefix] (a `/`-separated package path) in [location], a jar or a class folder. */
+internal fun classNamesUnder(location: File, prefix: String): List<String> = try {
+    val paths = if (location.isDirectory) {
+        val root = File(location, prefix)
+        root.walkTopDown().filter { it.isFile }.map { prefix + it.relativeTo(root).invariantSeparatorsPath }.toList()
+    } else if (location.isFile) {
+        JarFile(location).use { jar ->
+            jar.entries().asSequence().map { it.name }.filter { it.startsWith(prefix) }.toList()
+        }
+    } else {
+        emptyList()
+    }
+    paths.filter { it.endsWith(CLASS_SUFFIX) && it.substringAfterLast('/') !in NOT_CLASSES }
+        .map { it.removeSuffix(CLASS_SUFFIX).replace('/', '.') }
+} catch (e: IOException) {
+    Log.info(TAG, "could not list ${location.name}: ${e::class.simpleName}")
+    emptyList()
+}
+
 /** Runs [warmClasses] on a daemon thread of its own at the lowest priority, so it never competes with drawing. */
 internal fun startClassWarmUp() {
-    Thread({ warmClasses() }, "class-warm-up").apply {
+    Thread({
+        warmClasses()
+        warmClasses(classesUnder(WARM_PACKAGES))
+    }, "class-warm-up").apply {
         isDaemon = true
         priority = Thread.MIN_PRIORITY
         start()
@@ -102,4 +143,38 @@ internal val WARM_CLASSES = listOf(
     "io.ktor.server.websocket.WebSockets",
 )
 
+/**
+ * The packages whose every class [startClassWarmUp] loads: the operator's tabs, settings pages and
+ * dialogs, the shared components they are built from, and the material3 and foundation controls
+ * they draw. A first opening of any of them was seen stalling on class loading after
+ * [WARM_CLASSES] had run -- the song editor, the System and Profiles settings, the Announcements
+ * tab's font picker. About 5,600 classes: half a second of a low-priority thread, and at most
+ * 36 MB of metaspace on a cold JVM (less in the app, which has loaded many of them by then).
+ * Engines, converters and the off-screen outputs are left out: they load on their own threads.
+ */
+internal val WARM_PACKAGES = listOf(
+    "org/churchpresenter/songs/",
+    "org/churchpresenter/bibletab/",
+    "org/churchpresenter/announcements/",
+    "org/churchpresenter/schedule/",
+    "org/churchpresenter/slides/tabs/",
+    "org/churchpresenter/appsettings/",
+    "org/churchpresenter/profiles/",
+    "org/churchpresenter/dialogs/",
+    "org/churchpresenter/serverui/",
+    "org/churchpresenter/sharedui/",
+    "org/churchpresenter/theme/",
+    "org/churchpresenter/app/churchpresenter/dialogs/",
+    "org/churchpresenter/app/churchpresenter/tabs/",
+    "org/churchpresenter/converter/ui/",
+    "androidx/compose/material3/",
+    "androidx/compose/foundation/",
+    // The native file dialogs every Open and Save goes through.
+    "io/github/vinceglb/filekit/",
+)
+
+private const val CLASS_SUFFIX = ".class"
+
+/** Entries that end in `.class` and are not classes to load. */
+private val NOT_CLASSES = setOf("module-info.class", "package-info.class")
 private const val TAG = "ClassWarmUp"

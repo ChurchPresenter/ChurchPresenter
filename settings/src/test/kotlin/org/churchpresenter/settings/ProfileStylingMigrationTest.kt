@@ -209,6 +209,7 @@ class ProfileStylingMigrationTest {
         val manager = SettingsManager()
         val settings = manager.migrateAndDecode(v20)
         manager.saveSettings(settings)
+        manager.flushSettings()
 
         val saved = root(File(home, ".churchpresenter/settings.json").readText())
         assertEquals(STT_GLOBAL_KEYS, saved.getValue("sttSettings").jsonObject.keys)

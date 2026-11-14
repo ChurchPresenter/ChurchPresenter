@@ -138,7 +138,10 @@ class OmtVideoRenderer(
      */
     fun stop() {
         pump.stop()
-        if (sender.isOpen && sender.receiverCount() > 0) sender.sendBlank(width, height)
-        sender.close()
+        // The blank frame's encode and the library's destroy both wait; neither on the event thread.
+        offEventThread("omt-close") {
+            if (sender.isOpen && sender.receiverCount() > 0) sender.sendBlank(width, height)
+            sender.close()
+        }
     }
 }
