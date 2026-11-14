@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
+import org.churchpresenter.helper.suggest.SuggestionIds
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.sharedui.models.Presenting
 import java.util.concurrent.Executor
@@ -51,7 +52,17 @@ class WickLampTest {
 
     @Test
     fun `the lamp opens Wick, and putting it away from the panel hides it`() = runComposeUiTest {
-        root.appSettings = root.appSettings.copy(helper = HelperSettings(tipsEnabled = false, startedByUser = true))
+        // No suggestion card either: whether one applies depends on what earlier tests left on disk.
+        val noSuggestions = setOf(
+            SuggestionIds.NO_AUDIENCE,
+            SuggestionIds.OUTPUTS_HIDDEN,
+            SuggestionIds.BIBLE_NONE,
+            SuggestionIds.SONGS_EMPTY,
+            SuggestionIds.SCHEDULE_EMPTY,
+        )
+        root.appSettings = root.appSettings.copy(
+            helper = HelperSettings(tipsEnabled = false, startedByUser = true, dismissedSuggestions = noSuggestions),
+        )
         // The lamp flickers for ever: with the clock held, idle means nothing left to compose.
         mainClock.autoAdvance = false
         setContent { MaterialTheme { root.WickLamp(Modifier, devices = emptyArray()) } }
