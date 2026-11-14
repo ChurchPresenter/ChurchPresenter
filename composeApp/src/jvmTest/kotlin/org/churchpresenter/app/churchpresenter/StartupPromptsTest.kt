@@ -44,6 +44,9 @@ class StartupPromptsTest {
     fun setUp() {
         TestSingletons.latchSkikoHostOs()
         TestSingletons.latchToTestHome()
+        // Saves land on a background writer; one still pending from an earlier test must not
+        // arrive after the file is cleared below.
+        SettingsManager.flushAllSaves()
         savedBefore = settingsFile.takeIf { it.exists() }?.readBytes()
         settingsFile.delete()
     }
@@ -51,6 +54,7 @@ class StartupPromptsTest {
     @AfterTest
     fun tearDown() {
         scope.cancel()
+        SettingsManager.flushAllSaves()
         savedBefore?.let { settingsFile.writeBytes(it) } ?: settingsFile.delete()
     }
 

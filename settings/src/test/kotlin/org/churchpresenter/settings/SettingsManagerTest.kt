@@ -68,6 +68,7 @@ class SettingsManagerTest {
         val manager = SettingsManager()
         manager.saveSettings(manager.loadSettings().copy(theme = "dark", language = "ru", windowWidth = 1600))
 
+        // No flush: a fresh manager's load waits for the save still on its way to disk.
         val reloaded = SettingsManager().loadSettings()
         assertEquals("dark", reloaded.theme)
         assertEquals("ru", reloaded.language)
@@ -245,6 +246,7 @@ class SettingsManagerTest {
     fun `a file already at the current version is not rewritten or backed up`() {
         val manager = SettingsManager()
         manager.saveSettings(manager.loadSettings().copy(theme = "dark"))
+        manager.flushSettings()
         val before = settingsFile.readText()
 
         SettingsManager().loadSettings()
@@ -344,6 +346,7 @@ class SettingsManagerTest {
 
         val manager = SettingsManager()
         manager.saveSettings(manager.loadSettings())
+        manager.flushSettings()
 
         assertTrue(
             "\"settingsVersion\":$future" in settingsFile.readText(),
@@ -492,6 +495,7 @@ class SettingsManagerTest {
         // version field on save. The next load must then produce an identical document.
         val manager = SettingsManager()
         manager.saveSettings(manager.loadSettings().copy(theme = "dark", language = "ru"))
+        manager.flushSettings()
         val current = settingsFile.readText()
 
         val withoutVersion = current.replace(Regex(""""settingsVersion":\d+,?"""), "")
@@ -699,6 +703,8 @@ class SettingsManagerTest {
         )
 
         manager.saveSettings(configured)
+        manager.flushSettings()
+
         val reloaded = SettingsManager().loadSettings().projectionSettings
 
         assertEquals("/opt/ndi", reloaded.ndiRuntimePath)

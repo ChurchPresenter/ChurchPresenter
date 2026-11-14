@@ -165,7 +165,9 @@ object SharedCameraFrameCache {
                     it.startsWith("ffmpeg:$devicePath:")
                 }
                 if (!deviceStillActive) {
-                    killFfmpegProcess(p)
+                    // Waits for ffmpeg to exit (taskkill on Windows); this is reached from a source
+                    // being removed on the event thread.
+                    runInBackground("ffmpeg-stop") { killFfmpegProcess(p) }
                 }
                 entry.ffmpegProcess = null
             }

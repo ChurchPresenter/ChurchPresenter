@@ -137,4 +137,19 @@ class SongsViewModelEditingTest {
     @Test
     fun `a section of blank lines is dropped from parsed lyrics`() =
         assertEquals(listOf("[Verse 1]", "a"), parseLyrics("Verse 1@%a@\$ @% @$"))
+
+    @Test
+    fun `an edit run in the background writes the file and reports its result`() {
+        val file = write("0007", "Old")
+        val v = vm()
+        val old = SongItem(number = "0007", title = "Old", songbook = "Hymnal", sourceFile = file.absolutePath)
+        val results = mutableListOf<Boolean>()
+
+        v.editInBackground({
+            updateSong(old, old.copy(lyrics = listOf("[Verse 1]", "new words")))
+        }) { results += it }
+
+        assertEquals(listOf(true), results)
+        assertTrue("new words" in file.readText())
+    }
 }

@@ -26,4 +26,9 @@ class AppWindowIconsTest {
             assertEquals(true, frame.colorModel.hasAlpha(), "icon-$size.png keeps its rounded corners transparent")
         }
     }
+
+    @Test
+    fun `the warm-up scales a frame for each size the system asks for`() {
+        assertEquals(2, AppWindowIcons.warmScaling(listOf(16, 32)))
+    }
 }

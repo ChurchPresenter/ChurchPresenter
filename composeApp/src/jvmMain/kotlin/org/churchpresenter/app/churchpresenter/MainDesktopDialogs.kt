@@ -2,6 +2,9 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.dialogs.CrashFeedbackDialog
@@ -70,11 +73,13 @@ internal fun MainDesktopScope.MainDesktopDialogs() {
         onDismiss = { state.showKonamiEasterEgg = false },
     )
 
+    val feedbackScope = rememberCoroutineScope()
     if (state.showCrashFeedback) {
         CrashFeedbackDialog(
             onDismiss = { state.showCrashFeedback = false },
             onSend = { comment, email ->
-                CrashReporter.sendUserFeedback(comment, email = email)
+                // Sending waits for the network (Sentry's flush), so it never runs on this thread.
+                feedbackScope.launch(Dispatchers.IO) { CrashReporter.sendUserFeedback(comment, email = email) }
                 state.showCrashFeedback = false
             }
         )

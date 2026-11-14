@@ -68,6 +68,26 @@ internal object UncleanExit {
     fun module(problematicFrame: String?): String? =
         problematicFrame?.let { Regex("""\[([^+\]]+)""").find(it)?.groupValues?.get(1)?.trim() }
 
+    /** `exit.cause` for a JVM that ran out of native memory -- the machine, not a library, gave out. */
+    const val OUT_OF_MEMORY = "out_of_memory"
+
+    /**
+     * What a native crash comes down to, for its own tag and its own issue: the JVM running out of
+     * memory, or the library its problematic frame names; null when the file says neither.
+     */
+    fun cause(summary: Map<String, String>): String? = when {
+        summary["crash.error"]?.contains("insufficient memory", ignoreCase = true) == true -> OUT_OF_MEMORY
+        else -> module(summary["crash.problematic_frame"])
+    }
+
+    /**
+     * How Sentry groups an unclean exit: one issue for the exits that left nothing to read, and one
+     * per [cause] of a native crash -- a driver's crash and a machine out of memory are different
+     * problems, and one issue for both hid each behind the other.
+     */
+    fun fingerprint(kind: String, cause: String?): List<String> =
+        listOfNotNull("unclean-exit", kind, cause.takeIf { kind == NATIVE_CRASH })
+
     /** The first [MAX_FRAMES] lines under [heading], up to the blank line that ends the list. */
     private fun frames(lines: List<String>, heading: String): String? {
         val start = lines.indexOfFirst { it.startsWith(heading) }

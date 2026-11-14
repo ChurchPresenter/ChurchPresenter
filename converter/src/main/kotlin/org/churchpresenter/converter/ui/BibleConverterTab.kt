@@ -83,8 +83,11 @@ fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
             KeyButton(shape = ButtonShape, onClick = {
                 val dir = pickers.directory()
                 if (dir != null) {
-                    val files = findXmlFilesRecursive(dir)
-                    inputFiles = files; state = ConvertState.SELECT; previewItems = emptyList(); logMessages = emptyList()
+                    // A folder of Bibles can be a whole tree, on a network share: walked off the event thread.
+                    scope.launch {
+                        val files = withContext(Dispatchers.IO) { findXmlFilesRecursive(dir) }
+                        inputFiles = files; state = ConvertState.SELECT; previewItems = emptyList(); logMessages = emptyList()
+                    }
                 }
             }) {
                 Icon(Icons.Default.Folder, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))

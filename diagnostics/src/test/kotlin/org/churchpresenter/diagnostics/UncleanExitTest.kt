@@ -119,4 +119,24 @@ class UncleanExitTest {
 
         """.trimIndent()
     }
+
+    @Test
+    fun `a machine out of memory and a crashing library are causes of their own`() {
+        val oom = mapOf("crash.error" to "There is insufficient memory for the Java Runtime Environment to continue.")
+        val driver = mapOf("crash.problematic_frame" to "C  [amdxx64.dll+0x1234]")
+
+        assertEquals(UncleanExit.OUT_OF_MEMORY, UncleanExit.cause(oom))
+        assertEquals("amdxx64.dll", UncleanExit.cause(driver))
+        assertEquals(null, UncleanExit.cause(emptyMap()))
+    }
+
+    @Test
+    fun `native crashes group by cause, and exits with nothing to read group together`() {
+        assertEquals(
+            listOf("unclean-exit", "native_crash", "out_of_memory"),
+            UncleanExit.fingerprint("native_crash", "out_of_memory"),
+        )
+        assertEquals(listOf("unclean-exit", "native_crash"), UncleanExit.fingerprint("native_crash", null))
+        assertEquals(listOf("unclean-exit", "no_crash_file"), UncleanExit.fingerprint("no_crash_file", "ignored"))
+    }
 }
