@@ -268,6 +268,39 @@ class SongSlideScenarioTest {
     )
 
     @Test
+    fun `an alias is drawn in the number's corner in place of the number`() = slide(
+        SongSettings(songNumberCorner = Constants.TOP_LEFT, showNumber = Constants.EVERY_PAGE),
+        section("Amazing grace").copy(alias = "Ch 42"),
+        expect = "Ch 42",
+    )
+
+    @Test
+    fun `an alias is drawn in the number's row, and reserves it, when the number has no corner`() = slide(
+        SongSettings(
+            songNumberCorner = Constants.NONE,
+            songNumberPosition = Constants.ABOVE_VERSE,
+            showNumber = Constants.EVERY_PAGE,
+        ),
+        section("Amazing grace").copy(songNumber = 0, alias = "Intro"),
+        expect = "Intro",
+    )
+
+    @Test
+    fun `an alias is drawn in the number's own text box`() = slide(
+        SongSettings(
+            songNumberCorner = Constants.NONE,
+            showNumber = Constants.EVERY_PAGE,
+            layoutExtras = SongLayoutExtras(
+                textBoxes = mapOf(
+                    "NUMBER" to TextBox(enabled = true, xPercent = 60f, yPercent = 0f, widthPercent = 30f, 20f),
+                ),
+            ),
+        ),
+        section("Amazing grace").copy(alias = "Ch 42"),
+        expect = "Ch 42",
+    )
+
+    @Test
     fun `two languages one above the other draw both`() = slide(
         SongSettings(bilingualLayout = Constants.BILINGUAL_TOP_BOTTOM),
         section("Amazing grace", languages = 2),

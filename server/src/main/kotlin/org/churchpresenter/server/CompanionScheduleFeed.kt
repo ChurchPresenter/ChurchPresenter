@@ -129,6 +129,7 @@ fun CompanionServer.updateLiveState(content: LiveContent) = with(content) {
         verseCodeVerse = verseCode?.third,
         songTitle = lyricSection?.title?.ifEmpty { null },
         songNumber = lyricSection?.songNumber,
+        songAlias = lyricSection?.alias?.ifBlank { null },
         sectionType = lyricSection?.type?.ifEmpty { null },
         sectionLabel = lyricSection?.header?.let(::sectionLabelOf)?.ifEmpty { null },
         // What is on screen, so the words without the second voice's markup.

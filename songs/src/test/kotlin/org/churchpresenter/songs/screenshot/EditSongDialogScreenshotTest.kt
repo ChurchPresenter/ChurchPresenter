@@ -83,7 +83,6 @@ class EditSongDialogScreenshotTest {
                                 chordsVisible = chordsVisible,
                                 onChordsVisibleChange = {},
                                 languageNames = languageNames.orEmpty(),
-                                onLanguageNamesChange = if (languageNames != null) ({}) else null,
                                 appSettings = appSettings,
                                 onDismiss = {},
                                 onSave = { _, _ -> },
@@ -107,9 +106,10 @@ class EditSongDialogScreenshotTest {
     @Test
     fun `a brand new song`() = shoot("new_song", song = blankSong(), isNewSong = true)
 
-    /** Every field a song can carry — author, composer, CCLI number, tune. */
+    /** Every field a song can carry — alias, author, composer, CCLI number, tune. */
     @Test
-    fun `a song filled in as completely as it can be`() = shoot("fully_filled")
+    fun `a song filled in as completely as it can be`() =
+        shoot("fully_filled", song = amazingGrace().copy(alias = "H 42"))
 
     /** Chords in the lyrics, previewed beside them and coloured by section. */
     @Test

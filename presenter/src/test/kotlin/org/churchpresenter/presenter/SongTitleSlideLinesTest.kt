@@ -86,6 +86,22 @@ class SongTitleSlideLinesTest {
         assertEquals(0, lines.count { it.element == SongStyleElement.TITLE_SLIDE_NUMBER })
     }
 
+    @Test
+    fun `an alias is shown in place of the number`() {
+        val first = titleSlideLines(section.copy(alias = "Ch 427"), SongSettings()).first()
+        assertEquals("Ch 427", first.number)
+        assertEquals("Ch 427 – Amazing Grace", first.plainText)
+    }
+
+    @Test
+    fun `an alias gives a song with no numeric number a number line`() {
+        val lines = titleSlideLines(
+            section.copy(songNumber = 0, alias = "Intro"),
+            SongSettings(titleSlideNumberBeforeTitle = false),
+        )
+        assertEquals(TitleSlideLine(SongStyleElement.TITLE_SLIDE_NUMBER, "Intro"), lines[0])
+    }
+
     // ── The number's place ────────────────────────────────────────────────────
 
     @Test

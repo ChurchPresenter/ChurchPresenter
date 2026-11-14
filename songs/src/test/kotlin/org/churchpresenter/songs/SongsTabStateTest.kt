@@ -115,7 +115,7 @@ class SongsTabStateTest {
     fun `an editor request offers sensible defaults`() {
         val request = SongEditorRequest(
             isVisible = true, song = song, songbooks = listOf("Hymnal"), existingSongs = emptyList(),
-            onChordsVisibleChange = {}, languageNames = emptyList(), onLanguageNamesChange = {},
+            onChordsVisibleChange = {}, languageNames = emptyList(),
             onDismiss = {}, onSave = { _, _ -> },
         )
         assertFalse(request.isNewSong)

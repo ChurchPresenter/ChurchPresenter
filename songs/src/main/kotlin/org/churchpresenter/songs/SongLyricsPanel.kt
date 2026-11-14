@@ -3,10 +3,12 @@ package org.churchpresenter.songs
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.OrderEntry
+import org.churchpresenter.sharedui.composables.OrderRename
 import org.churchpresenter.sharedui.composables.OrderSelector
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageDisplayOrder
-import org.churchpresenter.sharedui.utils.songLanguageName
+import org.churchpresenter.sharedui.utils.defaultSongLanguageName
+import org.churchpresenter.settings.languageLabel
 import org.churchpresenter.strings.generated.resources.profile_box_languages
 import org.churchpresenter.strings.generated.resources.song_language_order_subtitle
 import org.churchpresenter.strings.generated.resources.move_language_up
@@ -83,6 +85,8 @@ import org.churchpresenter.strings.generated.resources.songs_browse_paused_hint
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
 import org.churchpresenter.strings.generated.resources.song_title_slide
 import org.churchpresenter.strings.generated.resources.title
+import org.churchpresenter.strings.generated.resources.song_language_name_hint
+import org.churchpresenter.strings.generated.resources.song_translation_label
 import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import org.churchpresenter.sharedui.composables.finalPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
@@ -99,6 +103,10 @@ import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.strings.generated.resources.song_add_translation
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
 
 /**
  * The lyrics panel down the right of the Songs tab.
@@ -140,6 +148,8 @@ internal fun RowScope.SongLyricsPanel(
     sendToPresenter: (goLive: Boolean) -> Unit,
     /** Moves one of the selected song's [available] languages in the install's Display order. */
     onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit = { _, _, _ -> },
+    /** Names language [slot] install-wide -- blank goes back to "Language N". */
+    onRenameLanguage: (slot: Int, name: String) -> Unit = { _, _ -> },
 ) {
     val density = LocalDensity.current
     // Right panel — Lyrics display (fixed width, resizable via drag handle)
@@ -162,6 +172,7 @@ internal fun RowScope.SongLyricsPanel(
             sendToPresenter = sendToPresenter,
             songSettings = appSettings.operatorSongSettings(),
             onMoveLanguage = onMoveLanguage,
+            onRenameLanguage = onRenameLanguage,
         )
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
@@ -266,6 +277,7 @@ private fun LyricsActionBar(
     sendToPresenter: (goLive: Boolean) -> Unit,
     songSettings: SongSettings,
     onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit,
+    onRenameLanguage: (slot: Int, name: String) -> Unit,
 ) {
     val editSongStr    = stringResource(Res.string.edit_song)
     val goLiveStr      = stringResource(Res.string.go_live)
@@ -280,22 +292,37 @@ private fun LyricsActionBar(
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
     ) {
-        // The order a song's languages are shown in, on every output showing more than one -- only
-        // while there is more than one to order.
-        val languages = currentSong?.let { 1 + it.extraTranslations().size } ?: 0
-        if (languages > 1) {
-            OrderSelector(
-                label = stringResource(Res.string.profile_box_languages),
-                entries = songSettings.languageDisplayOrder()
-                    .filter { it < languages }
-                    .map { slot -> OrderEntry(slot.toString(), songLanguageName(songSettings, slot)) },
-                subtitle = stringResource(Res.string.song_language_order_subtitle),
-                moveUpLabel = stringResource(Res.string.move_language_up),
-                moveDownLabel = stringResource(Res.string.move_language_down),
-                onMove = { index, offset -> onMoveLanguage(languages, index, offset) },
-                modifier = Modifier.widthIn(min = 127.dp, max = 174.dp),
-            )
-        }
+        // The install's song languages: their names and the order every output showing more than one
+        // follows. Always here, so a language can be added and named before any song is written in
+        // it -- the selected song's languages, every named one, and any just added to be named.
+        val songLanguages = currentSong?.let { 1 + it.extraTranslations().size } ?: 1
+        val named = songSettings.languageNames.indexOfLast { it.isNotBlank() } + 1
+        var added by remember { mutableIntStateOf(0) }
+        val languages = maxOf(songLanguages, named, added).coerceIn(1, MAX_SONG_TRANSLATIONS)
+        OrderSelector(
+            label = stringResource(Res.string.profile_box_languages),
+            entries = songSettings.languageDisplayOrder()
+                .filter { it < languages }
+                .map { slot ->
+                    OrderEntry(
+                        key = slot.toString(),
+                        name = songSettings.languageLabel(slot),
+                        placeholder = defaultSongLanguageName(slot),
+                    )
+                },
+            subtitle = stringResource(Res.string.song_language_order_subtitle),
+            moveUpLabel = stringResource(Res.string.move_language_up),
+            moveDownLabel = stringResource(Res.string.move_language_down),
+            onMove = { index, offset -> onMoveLanguage(languages, index, offset) },
+            rename = OrderRename(
+                label = stringResource(Res.string.song_translation_label),
+                hint = stringResource(Res.string.song_language_name_hint),
+                onRename = { key, name -> onRenameLanguage(key.toInt(), name) },
+                addLabel = stringResource(Res.string.song_add_translation),
+                onAdd = { added = languages + 1 }.takeIf { languages < MAX_SONG_TRANSLATIONS },
+            ),
+            modifier = Modifier.widthIn(min = 127.dp, max = 174.dp),
+        )
 
         if (currentSong != null) {
             ActionIconButton(

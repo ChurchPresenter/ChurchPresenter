@@ -21,7 +21,6 @@ data class SongEditorRequest(
     val onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground,
                                        lowerThirdBackground: SongBackground) -> Unit)? = null,
     val languageNames: List<String>,
-    val onLanguageNamesChange: (List<String>) -> Unit,
     val onDismiss: () -> Unit,
     val onSave: (SongItem, SongTuning) -> Unit,
 )

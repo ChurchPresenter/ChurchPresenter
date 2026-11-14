@@ -28,6 +28,7 @@ import org.churchpresenter.settings.utils.bilingualGrid
 import org.churchpresenter.sharedui.composables.TextBlockBackdrop
 import org.churchpresenter.sharedui.presenter.BoxMargins
 import org.churchpresenter.sharedui.presenter.textBoxArea
+import org.churchpresenter.core.models.songs.shownNumber
 
 /**
  * One slide of a song as the frame draws it: which lines of which languages, the chart rows, and
@@ -121,11 +122,11 @@ internal class SongSlide(
             !titleBoxed
     val shouldShowSongNumber =
         shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex) &&
-            section.songNumber > 0 && !isTitleSlide && !numberBoxed
+            section.shownNumber() != null && !isTitleSlide && !numberBoxed
 
     // "Configured" means not set to "None" — title/number could appear on some slides
     val titleConfigured = titleDisplay != Constants.NONE && !titleBoxed
-    val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0 && !numberBoxed
+    val numberConfigured = numberDisplay != Constants.NONE && section.shownNumber() != null && !numberBoxed
     val effectiveTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
     val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
 
@@ -488,9 +489,9 @@ internal fun SongFrame.SlideBoxes(section: LyricSection, lineIndex: Int, alpha: 
                 title = titleText.takeIf {
                     shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex)
                 },
-                number = section.songNumber.takeIf {
-                    it > 0 && shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex)
-                }?.toString(),
+                number = section.shownNumber()?.takeIf {
+                    shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex)
+                },
                     label = sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide = false),
                 ),
             ),

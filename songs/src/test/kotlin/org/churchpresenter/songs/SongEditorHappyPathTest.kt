@@ -28,7 +28,7 @@ private const val EDITOR_TAG = "happy-path-editor"
 
 /** Ordinals among the editor's typed fields; `EditSongContentTest` pins the order. */
 private const val TITLE_FIELD = 0
-private const val LYRICS_FIELD = 7
+private const val LYRICS_FIELD = 8
 
 /**
  * Writing and changing songs from the Songs tab, with the real editor in the tab's editor slot --

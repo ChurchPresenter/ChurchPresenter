@@ -62,6 +62,7 @@ object ConverterTab {
     const val SONGS = 1
     const val DUPLICATES = 2
     const val RENAME = 3
+    const val ALIAS = 4
 }
 
 @Composable
@@ -72,7 +73,7 @@ fun App(
     onConverted: (sourceId: String) -> Unit = {},
 ) {
     var selectedTab by remember { mutableStateOf(initialTab) }
-    val tabs = listOf(Strings.tabBibles, Strings.tabSongs, Strings.tabDuplicates, Strings.tabRename)
+    val tabs = listOf(Strings.tabBibles, Strings.tabSongs, Strings.tabDuplicates, Strings.tabRename, Strings.tabAlias)
     LaunchedEffect(Unit) { FileChooserWarmUp.app.run() }
 
     Scaffold { padding ->
@@ -84,6 +85,7 @@ fun App(
                 1 -> SongsTab(onConverted, initialSongSource)
                 2 -> DuplicateFinderTab()
                 3 -> BulkRenameTab()
+                4 -> SongAliasTab()
             }
         }
     }

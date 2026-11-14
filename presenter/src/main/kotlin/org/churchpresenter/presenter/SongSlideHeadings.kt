@@ -21,6 +21,7 @@ import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.sharedui.utils.styledDisplayText
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.core.models.songs.shownNumber
 
 /* A song slide's title, number and section label, and the lyrics with what is held on them. */
 
@@ -45,7 +46,7 @@ internal fun SongSlide.NumberPart(
         fontFamily = songNumberFontFamily,
         fontSize = scaledSongNumberFontSize,
         text = styledDisplayText(
-            section.songNumber.toString(),
+            section.shownNumber().orEmpty(),
             numberStyleProfile.transform,
             spacingEm(numberStyleProfile.letterSpacing, numberStyleProfile.fontSize),
             spacingEm(numberStyleProfile.wordSpacing, numberStyleProfile.fontSize),

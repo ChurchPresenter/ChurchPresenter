@@ -81,6 +81,18 @@ class SongBandSlotsTest {
     }
 
     @Test
+    fun `an alias leads the title as written, with no dot after it`() {
+        val settings = lineMode.copy(
+            titleLowerThirdDisplay = Constants.FIRST_PAGE,
+            showNumberLowerThird = Constants.FIRST_PAGE,
+        )
+        val aliased = verse.copy(alias = "Ch 12")
+
+        val band = slots(section = aliased, all = listOf(aliased, chorus), settings = settings)
+        assertEquals("Ch 12 Amazing Grace", band.text(REFERENCE_1))
+    }
+
+    @Test
     fun `the title follows the title display rule and carries the number when it shows`() {
         val firstPage = slots(
             settings = lineMode.copy(

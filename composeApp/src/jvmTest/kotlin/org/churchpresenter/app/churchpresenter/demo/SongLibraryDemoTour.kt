@@ -72,7 +72,6 @@ class SongLibraryDemoTour {
                                     isNewSong = false,
                                     theme = ThemeMode.DARK,
                                     languageNames = listOf("English", "Español", "Deutsch", ""),
-                                    onLanguageNamesChange = {},
                                     appSettings = settings,
                                     onDismiss = editing.onDismiss,
                                     onSave = { _, _ -> editing.onDismiss() },

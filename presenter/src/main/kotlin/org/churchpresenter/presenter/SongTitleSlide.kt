@@ -35,6 +35,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.core.models.songs.shownNumber
 
 /** In the presenter's 1920x1080 reference space: between the heading and the credits, and between credits. */
 private const val HEADING_GAP_PX = 22
@@ -84,7 +85,7 @@ internal fun titleSlideLines(
     languages: List<Int> = listOf(0),
 ): List<TitleSlideLine> {
     fun shown(element: SongStyleElement) = settings.shownOnTitleSlide(element) == true
-    val number = section.songNumber.takeIf { it > 0 && shown(SongStyleElement.TITLE_SLIDE_NUMBER) }?.toString()
+    val number = section.shownNumber()?.takeIf { shown(SongStyleElement.TITLE_SLIDE_NUMBER) }
     val titles = titleSlideTitles(section, languages)
         .takeIf { shown(SongStyleElement.TITLE) }
         .orEmpty()

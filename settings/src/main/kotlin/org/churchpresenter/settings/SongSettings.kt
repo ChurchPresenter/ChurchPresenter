@@ -556,6 +556,10 @@ fun SongSettings.languageLabel(slot: Int): String = languageNames.getOrNull(slot
 fun SongSettings.withLanguageNames(names: List<String>): SongSettings =
     copy(languageNames = names.map { it.trim() }.dropLastWhile { it.isEmpty() })
 
+/** These settings with language [slot] -- `0` being the primary -- named [name]; blank unnames it. */
+fun SongSettings.withLanguageName(slot: Int, name: String): SongSettings =
+    withLanguageNames(List(maxOf(languageNames.size, slot + 1)) { if (it == slot) name else languageLabel(it) })
+
 /**
  * What language [translation] draws [element] with on this output -- `0` is the primary.
  *

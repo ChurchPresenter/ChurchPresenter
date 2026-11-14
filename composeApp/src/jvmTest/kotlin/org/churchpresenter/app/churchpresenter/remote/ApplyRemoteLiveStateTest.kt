@@ -112,6 +112,15 @@ class ApplyRemoteLiveStateTest {
     }
 
     @Test
+    fun `a song's alias reaches the follower, and a primary that sends none leaves it blank`() {
+        val aliased = apply(LiveStateDto(contentType = "LYRICS", songTitle = "T", songNumber = 42, songAlias = "Ch 42"))
+        assertEquals("Ch 42", aliased.lyricSection.value.alias)
+
+        val older = apply(LiveStateDto(contentType = "LYRICS", songTitle = "T", songNumber = 42))
+        assertEquals("", older.lyricSection.value.alias)
+    }
+
+    @Test
     fun `a song with no title switches mode but shows nothing`() {
         val presenter = apply(LiveStateDto(contentType = "LYRICS"))
 

@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 class AppTest {
 
     @Test
-    fun `the window opens on the Bibles tab and switches between all four`() {
+    fun `the window opens on the Bibles tab and switches between all five`() {
         runComposeUiTest {
             setConverterContent(FakePickers()) { App() }
             assertTrue(isShowing(Strings.bibleTitle))
@@ -24,6 +24,8 @@ class AppTest {
             assertTrue(isShowing(Strings.dupesTitle))
             click(Strings.tabRename)
             assertTrue(isShowing(Strings.renameTitle))
+            click(Strings.tabAlias)
+            assertTrue(isShowing(Strings.aliasTitle))
             click(Strings.tabBibles)
             assertTrue(isShowing(Strings.fixVersesTitle))
         }

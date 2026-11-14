@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -46,12 +47,21 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.BasicTextField
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_translation_order_hint
 import org.churchpresenter.strings.generated.resources.bible_translation_order_more
 import org.churchpresenter.strings.generated.resources.bible_translation_order_panel_title
 import org.churchpresenter.strings.generated.resources.drag_to_reorder_translation
+import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.churchpresenter.icons.generated.resources.ic_drag_dots
@@ -60,13 +70,37 @@ import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.dropdownField
+import org.churchpresenter.theme.keyboardFocusRing
 
 private const val EXPANDED_ROTATION = 180f
 
 private val TRANSLATION_ORDER_ROW_HEIGHT = 46.dp
 
 /** One row of a Display order panel: [key] follows it through a drag, [detail] is its second line. */
-data class OrderEntry(val key: String, val name: String, val detail: String = "")
+data class OrderEntry(
+    val key: String,
+    val name: String,
+    val detail: String = "",
+    /** Shown in place of a blank [name] -- what an entry is called until it is named. */
+    val placeholder: String = "",
+) {
+    /** What the entry reads as: its [name], or the [placeholder] while it has none. */
+    val shownName: String get() = name.ifBlank { placeholder }
+}
+
+/**
+ * Renaming the entries of an [OrderSelector] in place: each row's name becomes a field, written
+ * back through [onRename] when it loses focus or the panel closes. [label] names the field for a
+ * screen reader; [hint] says, under the rows, what renaming one changes. With [onAdd], a button
+ * labelled [addLabel] under the rows adds one more entry to name.
+ */
+data class OrderRename(
+    val label: String,
+    val hint: String,
+    val onRename: (key: String, name: String) -> Unit,
+    val addLabel: String = "",
+    val onAdd: (() -> Unit)? = null,
+)
 
 /**
  * A header button naming the first of [entries], opening a Display order panel that reorders them
@@ -81,14 +115,18 @@ fun OrderSelector(
     moveDownLabel: String,
     onMove: (index: Int, offset: Int) -> Unit,
     modifier: Modifier = Modifier,
+    /** Null keeps the names fixed, which is every caller but the Songs tab's languages. */
+    rename: OrderRename? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val primaryName = entries.first().name
+    val primaryName = entries.first().shownName
     val extraCount = entries.size - 1
 
     Box(modifier = modifier) {
         Row(
             modifier = Modifier
+                // First, ahead of the field: dropdownField clips, which would cut the ring off.
+                .keyboardFocusRing(AppShape(10.dp))
                 .fillMaxWidth()
                 .height(34.dp)
                 .dropdownField(AppShape(10.dp), open = expanded)
@@ -157,6 +195,7 @@ fun OrderSelector(
                 moveUpLabel = moveUpLabel,
                 moveDownLabel = moveDownLabel,
                 onMove = onMove,
+                rename = rename,
             )
         }
     }
@@ -169,6 +208,7 @@ private fun OrderPanel(
     moveUpLabel: String,
     moveDownLabel: String,
     onMove: (index: Int, offset: Int) -> Unit,
+    rename: OrderRename?,
 ) {
     Column(modifier = Modifier.width(320.dp)) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
@@ -201,8 +241,20 @@ private fun OrderPanel(
 
         Column(modifier = Modifier.padding(6.dp)) {
             entries.forEachIndexed { index, entry ->
-                OrderRow(entry, index, entries.lastIndex, drag, moveUpLabel, moveDownLabel, onMove, onDragEnd)
+                OrderRow(entry, index, entries.lastIndex, drag, moveUpLabel, moveDownLabel, onMove, onDragEnd, rename)
                 if (index != entries.lastIndex) Spacer(Modifier.height(4.dp))
+            }
+            rename?.onAdd?.let { onAdd ->
+                Spacer(Modifier.height(4.dp))
+                TextButton(onClick = onAdd, modifier = Modifier.fillMaxWidth()) {
+                    Icon(
+                        painterResource(IconRes.drawable.ic_add),
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(rename.addLabel, style = MaterialTheme.typography.labelMedium)
+                }
             }
         }
 
@@ -218,11 +270,20 @@ private fun OrderPanel(
                 modifier = Modifier.size(12.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             )
-            Text(
-                text = stringResource(Res.string.bible_translation_order_hint),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            )
+            Column {
+                Text(
+                    text = stringResource(Res.string.bible_translation_order_hint),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                )
+                rename?.let {
+                    Text(
+                        text = it.hint,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    )
+                }
+            }
         }
     }
 }
@@ -262,6 +323,7 @@ private fun OrderRow(
     moveDownLabel: String,
     onMove: (index: Int, offset: Int) -> Unit,
     onDragEnd: () -> Unit,
+    rename: OrderRename?,
 ) {
     val isPrimary = index == 0
     Row(
@@ -304,17 +366,22 @@ private fun OrderRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = entry.name,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 13.sp,
-                        fontWeight = if (isPrimary) FontWeight.SemiBold else FontWeight.Medium,
-                    ),
+                val nameStyle = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 13.sp,
+                    fontWeight = if (isPrimary) FontWeight.SemiBold else FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
                 )
+                if (rename != null) {
+                    OrderNameField(entry, nameStyle, rename, Modifier.weight(1f))
+                } else {
+                    Text(
+                        text = entry.shownName,
+                        style = nameStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                }
             }
             if (entry.detail.isNotEmpty()) {
                 Text(
@@ -369,4 +436,55 @@ private fun OrderIndexBadge(index: Int, isPrimary: Boolean) {
             },
         )
     }
+}
+
+/**
+ * An entry's name, typed over in place. Held here while it is typed and handed to
+ * [OrderRename.onRename] only when the field loses focus or the panel closes, so a stored setting
+ * is written once per rename rather than once per keystroke.
+ */
+@Composable
+private fun OrderNameField(entry: OrderEntry, style: TextStyle, rename: OrderRename, modifier: Modifier) {
+    var text by remember(entry.key, entry.name) { mutableStateOf(entry.name) }
+    // Read at commit time, not captured: the panel closing disposes the field long after it was
+    // first composed, and it must write what was typed against the entry as it is now.
+    val typed = rememberUpdatedState(text)
+    val current = rememberUpdatedState(entry)
+    val onRename = rememberUpdatedState(rename.onRename)
+    // Closing the panel mid-edit both blurs and disposes the field; the name is written once.
+    val written = remember(entry.key, entry.name) { arrayOf(entry.name.trim()) }
+    val commit = remember(written) {
+        {
+            val name = typed.value.trim()
+            if (name != written[0]) {
+                written[0] = name
+                onRename.value(current.value.key, name)
+            }
+        }
+    }
+    val latestCommit = rememberUpdatedState(commit)
+    DisposableEffect(entry.key) { onDispose { latestCommit.value() } }
+    BasicTextField(
+        value = text,
+        onValueChange = { text = it },
+        singleLine = true,
+        textStyle = style,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        keyboardActions = KeyboardActions(onDone = { commit() }),
+        modifier = modifier
+            .semantics { contentDescription = rename.label }
+            .onFocusChanged { if (!it.isFocused) commit() },
+        decorationBox = { field ->
+            Box {
+                if (text.isEmpty()) {
+                    Text(
+                        text = entry.placeholder,
+                        style = style.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)),
+                        maxLines = 1,
+                    )
+                }
+                field()
+            }
+        },
+    )
 }

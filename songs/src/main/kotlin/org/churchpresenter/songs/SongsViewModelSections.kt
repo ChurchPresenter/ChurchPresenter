@@ -9,6 +9,7 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.songBackgroundFrom
+import org.churchpresenter.core.models.songs.withAliasOf
 import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
@@ -72,7 +73,7 @@ fun SongsViewModel.getLyricSections(song: SongItem): List<LyricSection> {
     val lastSung = sections.indexOfLast { !it.skipped }.takeIf { it >= 0 } ?: sections.lastIndex
     return sections.mapIndexed { index, section ->
         (if (index == lastSung) section.copy(isLastSection = true) else section)
-            .withBackgroundsOf(song).withTextOverridesOf(song)
+            .withBackgroundsOf(song).withTextOverridesOf(song).withAliasOf(song)
     }
 }
 
