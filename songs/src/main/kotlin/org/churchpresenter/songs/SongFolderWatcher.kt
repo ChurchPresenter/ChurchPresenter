@@ -28,7 +28,10 @@ class SongFolderWatcher(
 ) {
     private var watchJob: Job? = null
 
-    @Volatile private var watchService: WatchService? = null
+    /** Held while [watchService] is taken or let go, so a stopped watch can never take it after a newer one. */
+    private val serviceLock = Any()
+
+    private var watchService: WatchService? = null
 
     /**
      * Watches [rootDir] and every folder under it, or waits for it if it is not there yet.
@@ -48,15 +51,17 @@ class SongFolderWatcher(
 
     /**
      * Takes [service] as this watcher's, or closes it at once when the watch was stopped while it
-     * was being made. [stop] cancels the job before it reads [watchService], so one of the two
-     * always sees the other: either [stop] finds the service and closes it, or this finds the job
-     * cancelled -- and a service nobody closes would leave its thread blocked in `take()` for good.
+     * was being made. Both this and [stop] hold [serviceLock], so one always sees the other: either
+     * [stop] finds the service and closes it, or this finds the job cancelled. A stopped watch
+     * finishing late must not take the field either -- it would put a newer watch's service out of
+     * [stop]'s reach, and a service nobody closes leaves its thread blocked in `take()` for good.
      */
     private fun CoroutineScope.adopt(service: WatchService): Boolean {
-        watchService = service
-        if (isActive) return true
-        runCatching { service.close() }
-        return false
+        val taken = synchronized(serviceLock) {
+            isActive.also { active -> if (active) watchService = service }
+        }
+        if (!taken) runCatching { service.close() }
+        return taken
     }
 
     private suspend fun watchFolderTree(rootDir: File) = coroutineScope {
@@ -189,12 +194,14 @@ class SongFolderWatcher(
      * nothing reads the old service once it is let go.
      */
     private fun stop() {
-        watchJob?.cancel()
-        watchJob = null
-        watchService?.let { old ->
-            Thread({ runCatching { old.close() } }, "song-watch-close").apply { isDaemon = true }.start()
+        val old = synchronized(serviceLock) {
+            watchJob?.cancel()
+            watchJob = null
+            watchService.also { watchService = null }
         }
-        watchService = null
+        old?.let {
+            Thread({ runCatching { it.close() } }, "song-watch-close").apply { isDaemon = true }.start()
+        }
     }
 }
 

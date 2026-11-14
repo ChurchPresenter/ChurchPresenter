@@ -148,7 +148,14 @@ class Songs {
     }
 
     fun updateSong(oldSong: SongItem, newSong: SongItem) {
-        val index = items.indexOfFirst { it.number == oldSong.number && it.songbook == oldSong.songbook }
+        // By its file where it has one: two songs in a book may share a number, or have none.
+        val byFile = if (oldSong.sourceFile.isEmpty()) {
+            -1
+        } else {
+            items.indexOfFirst { it.sourceFile == oldSong.sourceFile }
+        }
+        val index = byFile.takeIf { it >= 0 }
+            ?: items.indexOfFirst { it.number == oldSong.number && it.songbook == oldSong.songbook }
         if (index >= 0) {
             items[index] = newSong
         }

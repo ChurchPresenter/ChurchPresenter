@@ -92,12 +92,13 @@ fun SongsViewModel.updateSong(
         val saved = songsDataState.value.saveSongToFile(oldSong, songToSave, storageDir)
 
         if (saved) {
-            // Remember which song to re-select after async reload
+            // Re-selected by applyFilters once the list is shown again.
             pendingSelectSourceFile = songToSave.sourceFile
-            // Reload songs to reflect changes
-            loadSongs()
-            // Re-apply current filters to update the filtered list
-            applyFilters()
+            // The library in memory already holds the edit: show it now, rather than re-reading
+            // every song file to find the one just written -- seconds to minutes on a large library.
+            // The folder watcher still notices the write and checks the folder behind it.
+            val edited = songsDataState.value
+            viewModelScope.launch { applySongList(edited.getSongs(), edited) }
             return true
         }
 
