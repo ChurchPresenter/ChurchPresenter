@@ -44,6 +44,12 @@ class TitleSlideSectionTest {
         assertEquals(90, section.bpm)
     }
 
+    @Test fun `a title slide carries the song's alias and leads its heading with it`() {
+        val section = titleSlideSection(song().copy(alias = "Ch 123"), SongTuning())
+        assertEquals("Ch 123", section.alias)
+        assertEquals(listOf("Ch 123 – Amazing Grace"), section.lines)
+    }
+
     @Test fun `a title slide with no credit has only the heading line`() =
         assertEquals(listOf("123 – Amazing Grace"), titleSlideSection(song(), SongTuning(bpm = 0)).lines)
 

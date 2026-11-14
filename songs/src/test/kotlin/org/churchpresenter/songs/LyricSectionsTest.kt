@@ -590,4 +590,16 @@ class LyricSectionsTest {
         assertEquals(1, sections.size, "extra secondary sections must not invent primary ones")
         assertFalse(sections.single().secondaryLines.isEmpty())
     }
+
+    // ── The alias ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `every section carries the song's alias to the presenter`() {
+        val sections = vm.getLyricSections(
+            song(listOf("[Verse 1]", "one", "[Chorus]", "two", "[Verse 2]", "three")).copy(alias = "Ch 12"),
+        )
+
+        assertTrue(sections.size > 1)
+        assertTrue(sections.all { it.alias == "Ch 12" && it.songNumber == 12 })
+    }
 }

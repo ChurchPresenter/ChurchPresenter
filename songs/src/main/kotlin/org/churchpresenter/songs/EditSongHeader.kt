@@ -56,6 +56,7 @@ import org.churchpresenter.strings.generated.resources.song_book
 import org.churchpresenter.strings.generated.resources.song_book_new
 import org.churchpresenter.strings.generated.resources.song_book_none
 import org.churchpresenter.strings.generated.resources.song_capo
+import org.churchpresenter.strings.generated.resources.song_alias
 import org.churchpresenter.strings.generated.resources.song_number
 import org.churchpresenter.strings.generated.resources.song_tempo
 import org.churchpresenter.strings.generated.resources.tune
@@ -73,7 +74,7 @@ internal val EditSongCardShape = AppShape(9.dp)
 @Composable
 internal fun EditSongMetadata(
     state: EditSongState,
-    names: SongLanguageNames,
+    names: List<String>,
     tuning: EditSongTuning?,
     songbooks: List<String>,
     isVisible: Boolean,
@@ -101,13 +102,13 @@ internal fun EditSongMetadata(
 @Composable
 private fun EditSongTitleRow(
     state: EditSongState,
-    names: SongLanguageNames,
+    names: List<String>,
     songbooks: List<String>,
     isVisible: Boolean,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         FieldCard(
-            label = primaryTitleLabel(names.names[0].trim()),
+            label = primaryTitleLabel(names[0].trim()),
             value = state.title,
             onValueChange = { state.editTitle(it) },
             weight = 2.4f,
@@ -120,7 +121,7 @@ private fun EditSongTitleRow(
         // Secondary card it always did, since it has exactly one pane.
         repeat(state.visibleTranslations) { slot ->
             FieldCard(
-                label = translationTitleLabel(slot, state.languageName(slot, names.names)),
+                label = translationTitleLabel(slot, state.languageName(slot, names)),
                 value = state.translations[slot].title,
                 onValueChange = { value -> state.editTranslationTitle(slot, value) },
                 weight = 1f,
@@ -147,6 +148,12 @@ private fun EditSongDetailsRow(state: EditSongState, tuning: EditSongTuning?) {
             onValueChange = { v -> if (v.all { it.isDigit() }) state.number = v },
             weight = 0.8f,
             modifier = Modifier.guideTarget(GuideTargets.SONG_NUMBER),
+        )
+        FieldCard(
+            label = stringResource(Res.string.song_alias),
+            value = state.alias,
+            onValueChange = { state.alias = it },
+            weight = 0.8f,
         )
         FieldCard(
             label = stringResource(Res.string.author),

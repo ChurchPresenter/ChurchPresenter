@@ -38,7 +38,6 @@ class EditSongsDemoTour {
                     theme = ThemeMode.DARK,
                     typicalSeconds = TYPICAL_SECONDS,
                     languageNames = listOf("English", "", "", ""),
-                    onLanguageNamesChange = {},
                     appSettings = settings,
                     onDismiss = {},
                     onSave = { _, _ -> },

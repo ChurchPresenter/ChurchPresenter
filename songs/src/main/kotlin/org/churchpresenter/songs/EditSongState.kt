@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
-import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SongBackground
@@ -80,6 +79,7 @@ internal class EditSongState(private val song: SongItem) {
     var author by mutableStateOf(song.author)
     var composer by mutableStateOf(song.composer)
     var ccli by mutableStateOf(song.ccliNumber)
+    var alias by mutableStateOf(song.alias)
     var notes by mutableStateOf(song.notes)
 
     /** A cue per section, by key. */
@@ -240,6 +240,7 @@ internal class EditSongState(private val song: SongItem) {
         lyrics = lyrics.text.split("\n"),
         sourceFile = song.sourceFile,
         ccliNumber = ccli,
+        alias = alias.trim(),
         background = background,
         lowerThirdBackground = lowerThirdBackground,
         textOverrides = textOverrides,
@@ -274,24 +275,4 @@ internal class EditSongTuning(tuning: SongTuning) {
         bpm = bpm.toIntOrNull()?.coerceIn(0, MAX_BPM) ?: 0,
         capo = capo.toIntOrNull()?.coerceIn(0, MAX_CAPO) ?: 0,
     )
-}
-
-/**
- * The install-wide language names, one per pane, edited here and stored only on Save. [stored] is
- * what they were when the editor opened.
- */
-@Stable
-internal class SongLanguageNames(private val stored: List<String>) {
-    var names by mutableStateOf(List(MAX_SONG_TRANSLATIONS) { stored.getOrElse(it) { "" } })
-        private set
-
-    fun rename(pane: Int, value: String) {
-        names = names.mapIndexed { index, old -> if (index == pane) value else old }
-    }
-
-    /** The trimmed names when they differ from the stored ones, or null when nothing was renamed. */
-    fun changed(): List<String>? {
-        val trimmed = names.map { it.trim() }
-        return trimmed.takeIf { it != List(MAX_SONG_TRANSLATIONS) { stored.getOrElse(it) { "" }.trim() } }
-    }
 }

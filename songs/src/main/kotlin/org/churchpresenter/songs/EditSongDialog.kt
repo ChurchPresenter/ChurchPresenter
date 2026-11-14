@@ -52,6 +52,7 @@ import org.churchpresenter.strings.generated.resources.song_pane_output
 import org.churchpresenter.strings.generated.resources.song_chords
 import org.churchpresenter.strings.generated.resources.song_pane_in_order
 import org.churchpresenter.settings.operatorSongSettings
+import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 
 /** The Background button's slot: the app draws `:profiles`' `SongBackgroundButton` in it. */
 typealias SongBackgroundButtonSlot = @Composable (SongBackgroundButtonState) -> Unit
@@ -84,8 +85,6 @@ fun EditSongDialog(
      * and the output language switch show too.
      */
     languageNames: List<String> = emptyList(),
-    /** Stores renamed [languageNames] on Save. Null leaves the names out of the editor. */
-    onLanguageNamesChange: ((List<String>) -> Unit)? = null,
     /**
      * The settings the outputs draw by, for the Output tab's previews of the slide being edited.
      * Null leaves the tab out, and the right-hand pane is the chord preview alone.
@@ -124,7 +123,6 @@ fun EditSongDialog(
                 isVisible = isVisible,
                 onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
                 languageNames = languageNames,
-                onLanguageNamesChange = onLanguageNamesChange,
                 appSettings = appSettings,
                 onDismiss = onDismiss,
                 onSave = onSave
@@ -173,7 +171,6 @@ fun EditSongContent(
                                   lowerThirdBackground: SongBackground) -> Unit)? = null,
     /** What each language is called install-wide -- see [EditSongDialog]. */
     languageNames: List<String> = emptyList(),
-    onLanguageNamesChange: ((List<String>) -> Unit)? = null,
     /** What the outputs draw by -- see [EditSongDialog]. */
     appSettings: AppSettings? = null,
     onDismiss: () -> Unit,
@@ -182,7 +179,8 @@ fun EditSongContent(
     val state = remember(isVisible, song) { EditSongState(song) }
     state.isNewSong = isNewSong
     val tuningDraft = remember(isVisible, song, tuning) { EditSongTuning(tuning) }
-    val names = remember(isVisible, song, languageNames) { SongLanguageNames(languageNames) }
+    // Read only: the names are renamed from the Songs tab's Languages menu, not per song.
+    val names = remember(languageNames) { List(MAX_SONG_TRANSLATIONS) { languageNames.getOrElse(it) { "" } } }
     // Keyed on the setting rather than on the song: the switch is remembered across songs, so it
     // resyncs when the stored preference changes and survives opening the next song.
     var showChords by remember(chordsVisible) { mutableStateOf(chordsVisible) }
@@ -215,8 +213,6 @@ fun EditSongContent(
                 Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     EditSongEditorColumn(
                         state = state,
-                        names = names,
-                        showLanguageNames = onLanguageNamesChange != null,
                         toolbar = {
                             EditSongToolbar(
                                 state = state,
@@ -250,7 +246,6 @@ fun EditSongContent(
                     onDismiss = onDismiss,
                     onSave = {
                         val updatedSong = state.toSongItem()
-                        names.changed()?.let { changed -> onLanguageNamesChange?.invoke(changed) }
                         onSave(updatedSong, tuningDraft.toSongTuning())
                     },
                 )

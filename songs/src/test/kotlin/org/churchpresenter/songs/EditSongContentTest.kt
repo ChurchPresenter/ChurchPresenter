@@ -70,24 +70,25 @@ class EditSongContentTest {
         const val TITLE = 0
         const val SECONDARY_TITLE = 1
         const val NUMBER = 2
-        const val AUTHOR = 3
-        const val COMPOSER = 4
-        const val CCLI = 5
-        const val TUNE = 6
-        const val LYRICS = 7
-        const val NOTES = 8
-        const val COUNT = 9
+        const val ALIAS = 3
+        const val AUTHOR = 4
+        const val COMPOSER = 5
+        const val CCLI = 6
+        const val TUNE = 7
+        const val LYRICS = 8
+        const val NOTES = 9
+        const val COUNT = 10
 
         /** Where the songbook lands once Add New turns it into a typed field. */
         const val SONGBOOK_TYPED = 2
 
         // With a stage monitor configured, capo and tempo are inserted after Tune and before the
-        // lyrics box and the comments under the editor, which move down to 9 and 10. Verified
+        // lyrics box and the comments under the editor, which move down to 10 and 11. Verified
         // against the rendered tree, not assumed — the constant that used to live here put TEMPO at
-        // 7, which is where capo actually is.
-        const val CAPO = 7
-        const val TEMPO = 8
-        const val COUNT_WITH_TUNING = 11
+        // 7, which is where capo actually was before the alias field came in after the number.
+        const val CAPO = 8
+        const val TEMPO = 9
+        const val COUNT_WITH_TUNING = 12
     }
 
     private object Label {
@@ -212,7 +213,7 @@ class EditSongContentTest {
         assertEquals(
             Field.COUNT,
             fieldCount(),
-            "the editor offers nine typed fields; the other tests address them by position",
+            "the editor offers ten typed fields; the other tests address them by position",
         )
         field(Field.NUMBER).assertTextContains("42")
         field(Field.TITLE).assertTextContains("Amazing Grace")
@@ -220,6 +221,31 @@ class EditSongContentTest {
     }
 
     // ── What it opens with ──────────────────────────────────────────────────────
+
+    @Test
+    fun `the alias opens as the song has it and saves as typed, without stray spaces`() =
+        editor(aSong().copy(alias = "Ch 42")) { saved ->
+            field(Field.ALIAS).assertTextContains("Ch 42")
+            type(Field.ALIAS, "  A 42  ")
+            save()
+            assertEquals("A 42", saved.song?.alias)
+            assertEquals("42", saved.song?.number, "the alias leaves the number alone")
+        }
+
+    @Test
+    fun `the editor says where language names are set, and offers no field for them`() = editor { _ ->
+        onNodeWithText("Language names are set and edited in the Songs tab's Languages menu.").assertExists()
+        assertEquals(Field.COUNT, fieldCount(), "no language-name field among the typed ones")
+    }
+
+    @Test
+    fun `the alias takes any text, where the number takes only digits`() = editor { saved ->
+        type(Field.ALIAS, "Chorus 5b")
+        type(Field.NUMBER, "5b")
+        save()
+        assertEquals("Chorus 5b", saved.song?.alias)
+        assertEquals("42", saved.song?.number, "a number with a letter in it is refused, as before")
+    }
 
     @Test
     fun `a song number carrying punctuation is reduced to its digits`() =

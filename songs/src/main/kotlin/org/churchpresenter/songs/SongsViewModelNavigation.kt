@@ -1,6 +1,7 @@
 package org.churchpresenter.songs
 
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.withAliasOf
 import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
@@ -24,7 +25,7 @@ fun SongsViewModel.getSelectedSong(): LyricSection? {
         lines = presentableSongLines(song.lyrics),
         translations = song.presentableTranslations(),
         type = Constants.SECTION_TYPE_SONG
-    ).withBackgroundsOf(song).withTextOverridesOf(song)
+    ).withBackgroundsOf(song).withTextOverridesOf(song).withAliasOf(song)
 }
 
 fun SongsViewModel.getSelectedLyricSection(): LyricSection? {

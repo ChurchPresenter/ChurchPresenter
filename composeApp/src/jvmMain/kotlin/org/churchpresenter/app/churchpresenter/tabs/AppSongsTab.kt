@@ -43,7 +43,6 @@ fun AppSongEditor(request: SongEditorRequest, theme: ThemeMode, appSettings: App
         onChordsVisibleChange = request.onChordsVisibleChange,
         onApplyBackgroundToSongbook = request.onApplyBackgroundToSongbook,
         languageNames = request.languageNames,
-        onLanguageNamesChange = request.onLanguageNamesChange,
         appSettings = appSettings,
         onDismiss = request.onDismiss,
         onSave = request.onSave,

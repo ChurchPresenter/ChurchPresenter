@@ -107,6 +107,7 @@ private suspend fun applyRemoteContent(
                 LyricSection(
                     title = state.songTitle.orEmpty(),
                     songNumber = state.songNumber ?: 0,
+                    alias = state.songAlias.orEmpty(),
                     type = state.sectionType ?: "",
                     lines = state.lines ?: emptyList(),
                     header = state.sectionLabel?.let { rawHeader(state.sectionType.orEmpty(), it) },

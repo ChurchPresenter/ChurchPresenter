@@ -353,6 +353,7 @@
 
     <!-- Song Settings Strings -->
     <string name="song_number">Song Number</string>
+    <string name="song_alias">Alias</string>
     <string name="top">Top</string>
     <string name="middle">Middle</string>
     <string name="bottom">Bottom</string>
@@ -1798,6 +1799,7 @@
     <string name="song_language_order_subtitle">Every output showing more than one language follows this order</string>
     <string name="move_language_up">Move language up</string>
     <string name="move_language_down">Move language down</string>
+    <string name="song_language_names_where">Language names are set and edited in the Songs tab's Languages menu.</string>
     <string name="song_language_name_hint">Names this language in every song, and in each profile's song languages.</string>
     <string name="song_chords">Chords</string>
     <string name="stage_monitor_show_chords">Show Chords</string>

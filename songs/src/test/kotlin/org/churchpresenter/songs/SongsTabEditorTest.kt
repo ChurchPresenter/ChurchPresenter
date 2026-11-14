@@ -14,7 +14,6 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.settings.languageLabel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -187,19 +186,6 @@ class SongsTabEditorTest {
             runOnIdle { spy.edit!!.onChordsVisibleChange(false) }
 
             assertEquals(false, reports.settingsAfterChange?.songSettings?.editorShowChords)
-        }
-    }
-
-    @Test
-    fun `renaming the languages in the editor writes their names`() {
-        val spy = EditorSpy()
-        songsTab(songEditor = spy.slot) { _, reports ->
-            openEditorOn("Amazing Grace")
-            runOnIdle { spy.edit!!.onLanguageNamesChange(listOf("English", "Deutsch")) }
-
-            val songs = assertNotNull(reports.settingsAfterChange).songSettings
-            assertEquals("English", songs.languageLabel(0))
-            assertEquals("Deutsch", songs.languageLabel(1))
         }
     }
 

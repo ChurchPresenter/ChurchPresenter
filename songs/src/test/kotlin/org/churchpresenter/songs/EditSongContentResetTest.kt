@@ -42,7 +42,6 @@ class EditSongContentResetTest {
                     showTuningFields = true,
                     isVisible = visible,
                     languageNames = names,
-                    onLanguageNamesChange = {},
                     onDismiss = {},
                     onSave = { _, _ -> },
                 )

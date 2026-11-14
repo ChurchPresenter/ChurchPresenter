@@ -229,6 +229,8 @@ data class LiveStateDto(
     // song section
     val songTitle: String? = null,
     val songNumber: Int? = null,
+    // What the output shows in place of the number ("Ch 25"), when the song has an alias.
+    val songAlias: String? = null,
     val sectionType: String? = null,
     // The live section's header without its brackets ("Chorus 1"), when it has one.
     val sectionLabel: String? = null,

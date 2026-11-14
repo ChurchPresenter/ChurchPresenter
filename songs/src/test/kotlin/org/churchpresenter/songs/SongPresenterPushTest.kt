@@ -135,6 +135,22 @@ class SongPresenterPushTest {
         assertEquals(70, push.section.bpm, "the tuning is still stamped alongside it")
     }
 
+    @Test fun `an edit sends the edited song's alias out with the section`() {
+        val sections = listOf(LyricSection(songNumber = 123, alias = "old", lines = listOf("a")))
+
+        val push = resolveEditedSongPush(sections, 0, 0, song().copy(alias = "Ch 123"), SongTuning())
+
+        assertEquals("Ch 123", push.section.alias)
+    }
+
+    @Test fun `the fallback section built from the edited song carries its alias`() {
+        val edited = song(lyrics = listOf("x")).copy(alias = "Ch 123")
+
+        val push = resolveEditedSongPush(emptyList(), 0, 0, edited, SongTuning())
+
+        assertEquals("Ch 123", push.section.alias)
+    }
+
     @Test fun `the fallback section built from the edited song carries its backgrounds too`() {
         val edited = song(lyrics = listOf("line one"), background = dusk)
 

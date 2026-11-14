@@ -4,6 +4,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
+import org.churchpresenter.core.models.songs.withAliasOf
 import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.core.models.songs.withTextOverridesOf
 import org.churchpresenter.settings.utils.Constants
@@ -56,7 +57,8 @@ internal fun resolveEditedSongPush(
         lineIndex,
         section.copy(bpm = tuning.bpm, capo = tuning.capo)
             .withBackgroundsOf(editedSong)
-            .withTextOverridesOf(editedSong),
+            .withTextOverridesOf(editedSong)
+            .withAliasOf(editedSong),
     )
 }
 

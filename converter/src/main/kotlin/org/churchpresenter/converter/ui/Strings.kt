@@ -40,6 +40,7 @@ object Strings {
     val tabSongs: String get() = bundle.getString("tab_songs")
     val tabDuplicates: String get() = bundle.getString("tab_duplicates")
     val tabRename: String get() = bundle.getString("tab_rename")
+    val tabAlias: String get() = bundle.getString("tab_alias")
 
     // Common buttons/actions
     val selectFolder: String get() = bundle.getString("select_folder")
@@ -147,6 +148,19 @@ object Strings {
     val deleteDupesTitle: String get() = bundle.getString("delete_dupes_title")
     val filesToDeleteLabel: String get() = bundle.getString("files_to_delete")
     val deleteFilesTitle: String get() = bundle.getString("delete_files_title")
+
+    // Song alias section
+    val aliasTitle: String get() = bundle.getString("alias_title")
+    val aliasDesc: String get() = bundle.getString("alias_desc")
+    val aliasPattern: String get() = bundle.getString("alias_pattern")
+    val aliasPatternHint: String get() = bundle.getString("alias_pattern_hint")
+    val aliasPatternHelp: String get() = bundle.getString("alias_pattern_help")
+    val aliasNone: String get() = bundle.getString("alias_none")
+    fun aliasApplyN(n: Int): String = bundle.getString("alias_apply_n").format(n)
+    fun aliasClearN(n: Int): String = bundle.getString("alias_clear_n").format(n)
+    fun aliasSummary(change: Int, same: Int, noNumber: Int): String =
+        bundle.getString("alias_summary").format(change, same, noNumber)
+    fun aliasDone(ok: Int, failed: Int): String = bundle.getString("alias_done").format(ok, failed)
 
     // Bulk rename section
     val renameTitle: String get() = bundle.getString("rename_title")

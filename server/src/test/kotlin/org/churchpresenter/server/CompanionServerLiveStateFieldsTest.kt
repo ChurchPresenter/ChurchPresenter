@@ -120,6 +120,16 @@ class CompanionServerLiveStateFieldsTest {
     }
 
     @Test
+    fun `a song's alias goes out with its number, and a song without one sends none`() {
+        val aliased = goLive(mode = "LYRICS", section = LyricSection(title = "T", songNumber = 42, alias = "Ch 42"))
+        assertEquals("Ch 42", aliased.songAlias)
+        assertEquals(42, aliased.songNumber, "the number still goes out for clients that read it")
+
+        val plain = goLive(mode = "LYRICS", section = LyricSection(title = "T", songNumber = 42, alias = " "))
+        assertNull(plain.songAlias)
+    }
+
+    @Test
     fun `a song section carries its title, number and position`() {
         val state = goLive(
             mode = "LYRICS",

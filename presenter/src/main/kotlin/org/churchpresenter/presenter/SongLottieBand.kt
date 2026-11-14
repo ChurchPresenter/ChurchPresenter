@@ -15,6 +15,7 @@ import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.core.models.songs.shownNumber
 
 /** The lyrics' lower-third typography as a band slot draws it. */
 internal fun SongSettings.lyricsSlotStyle(isKey: Boolean) = BandSlotStyle(
@@ -154,10 +155,11 @@ internal fun songBandSlots(
     val allTitles = section.allLanguageTitles()
     val primary = pick(section.lines)
     val showTitle = shouldShowText(settings.titleLowerThirdDisplay, section, allSections, displaySectionIndex)
-    val showNumber = section.songNumber > 0 &&
+    val showNumber = section.shownNumber() != null &&
         shouldShowText(settings.showNumberLowerThird, section, allSections, displaySectionIndex)
     val primaryTitleText = if (!showTitle) "" else listOfNotNull(
-        section.songNumber.takeIf { showNumber }?.let { "$it." },
+        // A plain number reads "25. Title"; an alias is drawn as written.
+        section.shownNumber()?.takeIf { showNumber }?.let { if (section.alias.isBlank()) "$it." else it },
         section.title.takeIf { it.isNotBlank() },
     ).joinToString(" ")
     // Language[0] is always the primary; every mode falls back to it when its own pick has nothing.

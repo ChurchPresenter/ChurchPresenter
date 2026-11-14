@@ -21,6 +21,7 @@ import org.churchpresenter.settings.stackedLanguageGap
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualGrid
 import androidx.compose.ui.text.TextMeasurer
+import org.churchpresenter.core.models.songs.shownNumber
 
 /*
  * The song's auto-fit: the largest lyric size at which every slide (or, slide by slide, the one on
@@ -247,9 +248,8 @@ private fun SongLook.reservedNumberHeight(autoFitTextMeasurer: TextMeasurer, ref
         !ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
     ) {
         val numStyle = TextStyle(fontSize = fitNumberFontSize.sp, fontFamily = titleFontFamily)
-        val maxNum = allLyricSections.maxOfOrNull { it.songNumber } ?: 0
-        if (maxNum > 0) {
-            reserved += autoFitTextMeasurer.measure(maxNum.toString(), numStyle, density = referenceDensity).size.height
+        allLyricSections.firstNotNullOfOrNull { it.shownNumber() }?.let { number ->
+            reserved += autoFitTextMeasurer.measure(number, numStyle, density = referenceDensity).size.height
         }
     }
     return reserved
