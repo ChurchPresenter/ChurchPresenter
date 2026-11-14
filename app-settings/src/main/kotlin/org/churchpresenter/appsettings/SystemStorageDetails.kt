@@ -145,7 +145,9 @@ private fun StorageDetail(
                 (it + STORAGE_ROW_PADDING - STORAGE_DETAIL_INDENT - STORAGE_ROW_GAP).coerceAtLeast(0.dp)
             }
             Box(
-                modifier = (if (width != null) Modifier.width(width) else Modifier.weight(1f, fill = false))
+                // Weighted, so the action is measured first and never wraps; the chips give way instead.
+                modifier = Modifier.weight(1f, fill = false)
+                    .then(if (width != null) Modifier.width(width) else Modifier)
                     .heightIn(min = DETAIL_ACTION_HEIGHT),
                 contentAlignment = Alignment.CenterStart,
             ) { contents() }
@@ -197,6 +199,8 @@ private fun DetailAction(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier.padding(start = 7.dp),
         )
     }
