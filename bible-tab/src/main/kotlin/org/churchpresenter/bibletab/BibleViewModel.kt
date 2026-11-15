@@ -141,6 +141,7 @@ class BibleViewModel(
     val loadErrors: State<List<BibleLoadError>> = _loadErrors
 
     internal val _verseSelectionToken = mutableStateOf(0)
+    internal var mouseRangeSelectionToken: Int? = null
 
     val verseSelectionToken: State<Int> = _verseSelectionToken
 

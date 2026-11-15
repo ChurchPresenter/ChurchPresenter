@@ -18,6 +18,9 @@ internal class PresentationState(appSettings: AppSettings?) {
 
     val presentations: SnapshotStateList<File> = mutableStateListOf()
     val selectedPresentation = mutableStateOf<File?>(null)
+    val discoveredDocuments = mutableStateOf<List<File>>(emptyList())
+    val documentRefreshToken = mutableStateOf(0)
+    val previewOnly = mutableStateOf(false)
 
     /**
      * The primary's own file path when this deck came from

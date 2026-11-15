@@ -34,9 +34,12 @@ internal fun devFallbackWindowOffsetDp(index: Int): Int = DEV_WINDOW_BASE_OFFSET
 internal fun <T> nonPrimaryIndices(all: List<T>, primary: T): List<Int> =
     all.indices.filter { all[it] != primary }
 
-/** How many real outputs there are to drive: every non-primary display, plus every SDI device. */
-internal fun presenterWindowCount(nonPrimaryScreens: Int, deckLinkDevices: Int): Int =
-    nonPrimaryScreens + deckLinkDevices
+/** Output slots for audience displays and SDI devices, with at least one for windowed projection. */
+internal fun presenterWindowCount(
+    nonPrimaryScreens: Int,
+    deckLinkDevices: Int,
+    windowedProjection: Boolean = false,
+): Int = (nonPrimaryScreens + deckLinkDevices).coerceAtLeast(if (windowedProjection) 1 else 0)
 
 /** Whether the slot at [index] is one of the fallback windows rather than a real output. */
 internal fun isFallbackWindowSlot(

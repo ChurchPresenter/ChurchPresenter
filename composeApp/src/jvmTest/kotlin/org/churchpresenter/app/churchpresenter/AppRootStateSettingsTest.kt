@@ -46,5 +46,6 @@ class AppRootStateSettingsTest {
         )
         assertEquals(read, unchangedParts)
         assertEquals(false, root.appSettings.presentationRemoteSettings.remoteControlEnabled)
+        assertEquals(!read.projectionSettings.startOutputsHidden, root.presenterManager.showPresenterWindow.value)
     }
 }

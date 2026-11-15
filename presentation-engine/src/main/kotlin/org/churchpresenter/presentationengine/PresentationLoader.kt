@@ -47,13 +47,16 @@ object PresentationLoader {
      * presentation with a different label on its main part — and choir decks saved as templates
      * by mistake are still the decks people mean to show. Macros are never run: POI reads none.
      */
-    val SUPPORTED_EXTENSIONS = setOf("pdf", "key") + POWERPOINT_XML_EXTENSIONS + POWERPOINT_BINARY_EXTENSIONS
+    val WORD_EXTENSIONS = setOf("doc", "docx")
+    val SUPPORTED_EXTENSIONS =
+        setOf("pdf", "key") + POWERPOINT_XML_EXTENSIONS + POWERPOINT_BINARY_EXTENSIONS + WORD_EXTENSIONS
 
     fun load(file: File): LoadResult {
         if (!file.exists()) return LoadResult.Failure(DeckLoadError.PARSE_FAILED, "File not found: ${file.path}")
         return try {
             when (val extension = file.extension.lowercase()) {
                 "pdf" -> loadPdf(file)
+                in WORD_EXTENSIONS -> loadWord(file)
                 in POWERPOINT_XML_EXTENSIONS -> loadPowerPoint(file, isPptx = true)
                 in POWERPOINT_BINARY_EXTENSIONS -> loadPowerPoint(file, isPptx = false)
                 "key" -> loadKeynote(file)
@@ -63,6 +66,13 @@ object PresentationLoader {
             // A deck is parsed by POI and PDFBox, which throw whatever their internals do (NPEs and
             // class-cast errors from a malformed file included) -- not a set this code can enumerate.
             LoadResult.Failure(DeckLoadError.PARSE_FAILED, e.message)
+        }
+    }
+
+    private fun loadWord(file: File): LoadResult = when (val result = loadPdf(WordDocumentPdf.convert(file))) {
+        is LoadResult.Failure -> result
+        is LoadResult.Success -> with(result.deck) {
+            LoadResult.Success(Deck(file, format, slideWidthPt, slideHeightPt, slides, warnings, source))
         }
     }
 

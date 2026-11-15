@@ -122,6 +122,41 @@ class PresenterWindowsLayoutTest {
     }
 
     @Test
+    fun `quick play can target the primary monitor on a single screen machine`() =
+        rig(
+            ProjectionSettings(quickPlayDisplay = 0, hideCursorOnOutputs = false),
+            screens = arrayOf(operator),
+        ) { rig ->
+            assertEquals(1, rig.windows.size)
+            assertTrue(rig.windows.values.single().undecorated)
+        }
+
+    @Test
+    fun `windowed projection opens one resizable output on a single monitor`() =
+        rig(
+            ProjectionSettings(windowedProjection = true, devWindowCount = 3, hideCursorOnOutputs = false),
+            screens = arrayOf(operator),
+        ) { rig ->
+            assertEquals(1, rig.windows.size)
+            val output = rig.windows.getValue("Presenter View 1")
+            assertTrue(output.visible)
+            assertTrue(output.resizable)
+            assertFalse(output.undecorated)
+            output.onClose()
+            assertFalse(rig.manager.showPresenterWindow.value)
+        }
+
+    @Test
+    fun `windowed projection uses decorated windows for audience displays`() =
+        rig(ProjectionSettings(windowedProjection = true, hideCursorOnOutputs = false)) { rig ->
+            assertEquals(2, rig.windows.size)
+            rig.windows.values.forEach { output ->
+                assertTrue(output.resizable)
+                assertFalse(output.undecorated)
+            }
+        }
+
+    @Test
     fun `each audience display gets a borderless window over its whole area`() =
         rig(ProjectionSettings(hideCursorOnOutputs = false)) { rig ->
             val first = rig.windows.getValue("Presenter View 1")

@@ -23,6 +23,7 @@ private const val VERSION_PREVIEW_LAYOUTS = 20
 
 /** Version 25: the Signage tab came out of dev mode and starts hidden, as STT does. */
 private const val VERSION_SIGNAGE_TAB = 25
+private const val VERSION_OUTPUTS_START_HIDDEN = 26
 
 // Load, migrate, save, import and export, all against one file. The per-version steps it runs are
 // in
@@ -185,6 +186,9 @@ class SettingsManager {
             settings = migrateQuickBackgroundLowerThird(settings)
         }
         if (fromVersion < VERSION_PREVIEW_LAYOUTS) settings = migratePreviewGroupsToLayout(settings)
+        if (fromVersion < VERSION_OUTPUTS_START_HIDDEN) {
+            settings = settings.copy(projectionSettings = settings.projectionSettings.copy(startOutputsHidden = true))
+        }
         if (fromVersion < VERSION_SIGNAGE_TAB) {
             // A file written before it existed has an explicit hidden list that cannot mention it,
             // so without this every existing install would open with a tab nobody asked for.

@@ -55,6 +55,8 @@ private fun navigationTopBar(
     showDeveloperMenu: Boolean = false,
     isPresenterWindowVisible: Boolean = true,
     onSetPresenterWindowVisible: (Boolean) -> Unit = {},
+    isWindowedProjection: Boolean = false,
+    onSetWindowedProjection: (Boolean) -> Unit = {},
     isDevWindowAlwaysOnTop: Boolean = false,
     onSetDevWindowAlwaysOnTop: (Boolean) -> Unit = {},
     isSimulatingMissingOutputs: Boolean = false,
@@ -110,6 +112,8 @@ private fun navigationTopBar(
                 showDeveloperMenu = showDeveloperMenu,
                 isPresenterWindowVisible = isPresenterWindowVisible,
                 onSetPresenterWindowVisible = onSetPresenterWindowVisible,
+                isWindowedProjection = isWindowedProjection,
+                onSetWindowedProjection = onSetWindowedProjection,
                 isDevWindowAlwaysOnTop = isDevWindowAlwaysOnTop,
                 onSetDevWindowAlwaysOnTop = onSetDevWindowAlwaysOnTop,
                 isSimulatingMissingOutputs = isSimulatingMissingOutputs,
@@ -148,7 +152,7 @@ class NavigationTopBarTest {
         waitForIdle()
 
         val menuBar = menuBarSlot.captured
-        assertEquals(7, menuBar.menuCount)
+        assertEquals(8, menuBar.menuCount)
         val view = menuBar.getMenu(4)
         assertTrue((view.getItem(2) as JRadioButtonMenuItem).isSelected)
         val connect = menuBar.getMenu(3)
@@ -536,8 +540,31 @@ class NavigationTopBarTest {
     @Test
     fun `developer menu is absent by default`() {
         navigationTopBar {
-            assertEquals(7, menuCount)
+            assertEquals(8, menuCount)
             for (i in 0 until menuCount) assertFalse(getMenu(i).text == "Developer")
+        }
+    }
+
+    @Test
+    fun `projection menu is available without developer mode and toggles windowed output`() {
+        val windowedCalls = mutableListOf<Boolean>()
+        val visibleCalls = mutableListOf<Boolean>()
+        navigationTopBar(
+            isWindowedProjection = false,
+            onSetWindowedProjection = { windowedCalls.add(it) },
+            isPresenterWindowVisible = true,
+            onSetPresenterWindowVisible = { visibleCalls.add(it) },
+        ) {
+            val projection = getMenu(7)
+            assertEquals("Projection", projection.text)
+            val windowed = projection.getItem(0) as JCheckBoxMenuItem
+            assertFalse(windowed.state)
+            windowed.doClick(0)
+            assertEquals(listOf(true), windowedCalls)
+            val visible = projection.getItem(1) as JCheckBoxMenuItem
+            assertTrue(visible.state)
+            visible.doClick(0)
+            assertEquals(listOf(false), visibleCalls)
         }
     }
 
@@ -555,7 +582,7 @@ class NavigationTopBarTest {
             isSimulatingMissingOutputs = false,
             onSetSimulatingMissingOutputs = { simulateCalls.add(it) },
         ) {
-            assertEquals(8, menuCount)
+            assertEquals(9, menuCount)
             val developer = getMenu(7)
             assertEquals("Developer", developer.text)
             assertEquals(5, developer.itemCount)

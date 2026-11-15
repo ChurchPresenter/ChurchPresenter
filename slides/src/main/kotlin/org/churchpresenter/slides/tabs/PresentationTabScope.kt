@@ -193,7 +193,7 @@ internal fun PresentationTabScope.PresentationLiveEffects(viewModel: Presentatio
         val anyScreenOnPresentation = presenterManager?.isLive(Presenting.PRESENTATION) == true ||
             presenterManager?.presentationCued == true ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
-        if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty()) {
+        if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty() && !viewModel.previewOnly) {
             val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
                 withContext(Dispatchers.IO) {
                     try {
@@ -230,7 +230,7 @@ internal fun PresentationTabScope.PresentationLiveEffects(viewModel: Presentatio
         val onPresentation = presenterManager?.isLive(Presenting.PRESENTATION) == true ||
             presenterManager?.presentationCued == true ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
-        if (!onPresentation) return@LaunchedEffect
+        if (!onPresentation || viewModel.previewOnly) return@LaunchedEffect
         val nextFile = viewModel.nextShownSlideIndex()?.let { viewModel.slideFiles.getOrNull(it) }
         val nextBitmap = nextFile?.let { f ->
             withContext(Dispatchers.IO) {

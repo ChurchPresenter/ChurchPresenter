@@ -140,6 +140,7 @@ fun MainDesktop(
         )
     }
     with(scope) {
+        OutputStepEffects()
         LeadingEffects()
         ContentPublishWiring()
         InstanceLinkMirrorWiring()

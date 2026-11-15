@@ -58,6 +58,41 @@ class BibleViewModelClickSelectionTest {
         throw AssertionError("timed out after ${timeoutMs}ms waiting for $what")
     }
 
+    @Test
+    fun `two plain clicks select an inclusive range and the third starts again`() {
+        vm.clickVerse(1)
+        assertEquals(1, vm.selectedVerseIndex.value)
+        assertFalse(vm.multiVerseEnabled.value)
+        vm.clickVerse(4)
+        assertEquals(listOf(1, 2, 3, 4), vm.selectedVerseIndices.sorted())
+        vm.clickVerse(2)
+        assertEquals(2, vm.selectedVerseIndex.value)
+        assertFalse(vm.multiVerseEnabled.value)
+        vm.clickVerse(0)
+        assertEquals(listOf(0, 1, 2), vm.selectedVerseIndices.sorted())
+    }
+
+    @Test
+    fun `clicking the same verse twice keeps a single verse selected`() {
+        vm.clickVerse(2)
+        vm.clickVerse(2)
+        assertEquals(2, vm.selectedVerseIndex.value)
+        assertFalse(vm.multiVerseEnabled.value)
+    }
+
+    @Test
+    fun `other selection changes invalidate the pending mouse range`() {
+        vm.clickVerse(0)
+        vm.selectVerse(1)
+        vm.clickVerse(4)
+        assertEquals(4, vm.selectedVerseIndex.value)
+        assertFalse(vm.multiVerseEnabled.value)
+        vm.ctrlClickVerse(2)
+        vm.clickVerse(3)
+        assertEquals(3, vm.selectedVerseIndex.value)
+        assertFalse(vm.multiVerseEnabled.value)
+    }
+
     // ── ctrlClickVerse ──────────────────────────────────────────────────────────
 
     @Test

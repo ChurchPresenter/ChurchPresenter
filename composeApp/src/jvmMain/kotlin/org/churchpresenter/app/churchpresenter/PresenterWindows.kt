@@ -45,13 +45,10 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.churchpresenter.strings.generated.resources.key_output_title
 import org.churchpresenter.strings.generated.resources.presenter_view_title
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -60,7 +57,6 @@ import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import kotlinx.coroutines.CancellationException
 import org.churchpresenter.canvas.DeckLinkManager
-import org.churchpresenter.sharedui.composables.HideOutputWindowCursor
 import org.churchpresenter.sharedui.composables.LocalOutputCursorHidden
 import org.churchpresenter.sharedui.composables.hiddenOutputCursor
 import org.churchpresenter.liveoutput.DeckLinkComposeOutput
@@ -93,7 +89,6 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val NANOS_PER_MILLI = 1_000_000
@@ -173,6 +168,7 @@ internal fun PresenterWindows(
         }
     }
 
+    val commandWindow = window.withOutputSteps(presenterManager.requestOutputStep)
     val availableScreens = nonPrimaryIndices(screens.toList(), defaultScreenDevice())
     // A monitor marked "Don't use" still counts as a slot, but is never handed to one by position.
     val screenKeys = screens.map { it.defaultConfiguration.bounds.asDisplayRect().key }
@@ -182,10 +178,12 @@ internal fun PresenterWindows(
 
     // As last listed: AppRootState lists them once at startup, the settings page again when opened.
     val deckLinkDeviceCount = DeckLinkManager.knownDevices.collectAsState().value?.size ?: 0
-    val windowCount = presenterWindowCount(availableScreens.size, deckLinkDeviceCount)
+    val quickDisplay = proj.quickPlayDisplay?.takeIf { it in screens.indices }
+    val windowCount = if (quickDisplay != null) 1 else
+        presenterWindowCount(availableScreens.size, deckLinkDeviceCount, proj.windowedProjection)
     // Outputs with nothing real behind them, opened as windows -- see simulatedOutputCount. Each
     // keeps its own slot number, so it is the same output with or without its monitor.
-    val devFallbackCount = simulatedOutputCount(
+    val devFallbackCount = if (proj.windowedProjection || quickDisplay != null) 0 else simulatedOutputCount(
         windowCount, proj.devWindowCount,
         developmentFallback = !BuildConfig.IS_RELEASE || DevFlags.forceDevWindow,
         simulateMissing = LocalSimulateMissingOutputs.current,
@@ -197,7 +195,7 @@ internal fun PresenterWindows(
     for (i in 0 until (windowCount + devFallbackCount)) {
         val isFallback = isFallbackWindowSlot(devWindowedFallback, i, windowCount)
         val slotIndex = i
-        val screenAssignment = proj.getAssignment(slotIndex)
+        val screenAssignment = proj.getAssignment(slotIndex).forQuickDisplay(quickDisplay)
         // The profile this output is assigned to -- everything about how it looks and what it
         // shows, used below wherever this file itself (not `PresenterOutputContent`, which
         // resolves its own) needs to know the output's display mode or background switches.
@@ -220,15 +218,16 @@ internal fun PresenterWindows(
         )
 
         when {
-            isFallback -> DevFallbackWindow(
-                slot, slotIndex, showPresenterWindow, identifyingScreen, presenterManager, presenterOutputContent,
-                window, displays, onSimulatedWindowMoved,
-            )
+            isFallback || (proj.windowedProjection && !isDeckLinkPrimaryOutput(screenAssignment)) ->
+                WindowedOutputWindow(
+                    slot, slotIndex, showPresenterWindow, identifyingScreen, presenterManager, presenterOutputContent,
+                    commandWindow, displays, onSimulatedWindowMoved,
+                )
             isDeckLinkPrimaryOutput(screenAssignment) ->
-                DeckLinkOutputs(slot, screens, showPresenterWindow, hideCursor, env, window)
+                DeckLinkOutputs(slot, screens, showPresenterWindow, hideCursor, env, commandWindow)
             else -> ScreenOutputs(
                 slot, screens, positionalScreens.getOrNull(i), showPresenterWindow, hideCursor, env,
-                presenterOutputContent, window,
+                presenterOutputContent, commandWindow,
             )
         }
     }
@@ -420,7 +419,7 @@ private data class OutputSlot(
 
 /** The dev build's stand-in for an output: an ordinary window on the operator's own screen. */
 @Composable
-private fun DevFallbackWindow(
+private fun WindowedOutputWindow(
     slot: OutputSlot,
     slotIndex: Int,
     showPresenterWindow: Boolean,
@@ -719,6 +718,7 @@ internal data class OutputWindowSpec(
     val undecorated: Boolean = true,
     val resizable: Boolean = false,
     val alwaysOnTop: Boolean = true,
+    val onStep: (Boolean) -> Unit = {},
 )
 
 /** Opens the window [OutputWindowSpec] describes and draws [content] in it. */
@@ -726,19 +726,5 @@ internal typealias OutputWindowHost = @Composable (spec: OutputWindowSpec, conte
 
 /** The app's output windows: real AWT windows with the app icon. */
 internal val awtOutputWindow: OutputWindowHost = { spec, content ->
-    Window(
-        visible = spec.visible,
-        title = spec.title,
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        onCloseRequest = spec.onClose,
-        state = spec.state,
-        undecorated = spec.undecorated,
-        resizable = spec.resizable,
-        alwaysOnTop = spec.alwaysOnTop,
-    ) {
-        spec.hideCursor?.let { HideOutputWindowCursor(window, it) }
-        // The output guard keeps this window's last still under it, while the guard is on.
-        LocalOutputGuard.current?.let { guard -> GuardedOutputWindow(guard, window) }
-        content()
-    }
+    OutputWindowWithMenu(spec, content)
 }

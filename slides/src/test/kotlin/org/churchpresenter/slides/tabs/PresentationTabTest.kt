@@ -3,6 +3,7 @@
 package org.churchpresenter.slides.tabs
 
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -39,7 +40,7 @@ class PresentationTabTest {
     fun `with no deck loaded the tab says so and offers to pick one`() = presentationTab { vm, _ ->
         assertTrue(vm.slideFiles.isEmpty(), "the fixture starts with no deck")
         onNodeWithText(PresentationLabel.NO_FILE).assertExists("the tab must say nothing is loaded")
-        onNodeWithText(PresentationLabel.SELECT_FILE).assertExists("and offer a way to load one")
+        onNodeWithText("Choose resources ▾").assertExists("and offer a way to load one")
     }
 
     @Test
@@ -76,7 +77,8 @@ class PresentationTabTest {
         presentationTab { vm, reports ->
             onNodeWithText("AUTO-SCROLL INTERVAL", substring = true).performClick()
             waitForIdle()
-            onAllNodes(hasSetTextAction())[0].performTextReplacement("12")
+            onNode(hasSetTextAction() and !hasText("Song title, pinyin initials or number"))
+                .performTextReplacement("12")
             onNodeWithText("OK").performClick()
             waitForIdle()
 
@@ -93,7 +95,8 @@ class PresentationTabTest {
         presentationTab { vm, reports ->
             onNodeWithText("TRANSITION DURATION", substring = true).performClick()
             waitForIdle()
-            onAllNodes(hasSetTextAction())[0].performTextReplacement("250")
+            onNode(hasSetTextAction() and !hasText("Song title, pinyin initials or number"))
+                .performTextReplacement("250")
             onNodeWithText("OK").performClick()
             waitForIdle()
 

@@ -45,7 +45,7 @@ internal fun BibleTabScope.selectFilteredBook(viewModel: BibleViewModel, index: 
 internal fun BibleTabScope.clickFilteredVerse(viewModel: BibleViewModel, index: Int) {
     filteredVerses.getOrNull(index)?.let {
         val realIndex = verses.indexOf(it)
-        if (realIndex >= 0) viewModel.selectVerse(realIndex)
+        if (realIndex >= 0) viewModel.clickVerse(realIndex)
     }
     crossRefs.restartFrom()
     crossRefs.closePopover()

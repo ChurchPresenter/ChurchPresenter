@@ -30,6 +30,18 @@ class BibleTabVerseClickTest {
     }
 
     @Test
+    fun `two ordinary mouse clicks select the passage between them`() = bibleTab { vm, _ ->
+        verse(verseThree).performMouseInput { click() }
+        waitForIdle()
+        assertEquals(2, vm.selectedVerseIndex.value)
+        assertFalse(vm.multiVerseEnabled.value)
+        verse(verseTwo).performMouseInput { click() }
+        waitForIdle()
+        assertEquals(listOf(1, 2), vm.selectedVerseIndices.sorted())
+        assertTrue(vm.multiVerseEnabled.value)
+    }
+
+    @Test
     fun `ctrl-clicking a second verse selects both`() = bibleTab { vm, _ ->
         clickHolding(Key.CtrlLeft, verseTwo)
 

@@ -110,6 +110,14 @@ internal fun MainWindowScope.AppMenuBar() {
             showDeveloperMenu = devMode,
             isPresenterWindowVisible = presenterManager.showPresenterWindow.value,
             onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
+            isWindowedProjection = appSettings.projectionSettings.windowedProjection,
+            onSetWindowedProjection = { enabled ->
+                appSettings = appSettings.copy(
+                    projectionSettings = appSettings.projectionSettings.copy(windowedProjection = enabled)
+                )
+                settingsManager.saveSettings(appSettings)
+                if (enabled) presenterManager.setShowPresenterWindow(true)
+            },
             isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
             onSetDevWindowAlwaysOnTop = { presenterManager.setDevWindowAlwaysOnTop(it) },
             isSimulatingMissingOutputs = appSettings.projectionSettings.simulateMissingOutputs,

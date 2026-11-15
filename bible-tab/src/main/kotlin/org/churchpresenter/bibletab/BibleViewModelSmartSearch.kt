@@ -41,6 +41,10 @@ internal fun BibleViewModel.rankedBookMatches(token: String): List<Pair<Int, Int
         if (prev == null || score > prev) scored[index] = score
     }
 
+    ChineseBookInitials.bookId(norm)?.let { bookId ->
+        consider(canonicalBookIdToIndex(bookId), SCORE_EXACT)
+    }
+
     books.forEachIndexed { i, name ->
         consider(i, scoreNameMatch(name.lowercase(), norm, normNoSpace))
     }
@@ -58,7 +62,10 @@ internal fun BibleViewModel.rankedBookMatches(token: String): List<Pair<Int, Int
         .map { it.key to it.value }
 }
 
-internal fun BibleViewModel.resolveBook(token: String): Int = rankedBookMatches(token).firstOrNull()?.first ?: -1
+internal fun BibleViewModel.resolveBook(token: String): Int {
+    ChineseBookInitials.bookId(token)?.let { return canonicalBookIdToIndex(it) ?: -1 }
+    return rankedBookMatches(token).firstOrNull()?.first ?: -1
+}
 
 internal fun BibleViewModel.resolveBookForLiveNav(token: String): Int {
     val norm = token.trim().lowercase()
@@ -78,12 +85,15 @@ internal fun BibleViewModel.navigateToReference(
     goLive: Boolean = false,
     goLiveSource: String = "auto",
     matchType: String? = null,
+    requireExactVerses: Boolean = false,
 ) {
     val bible = _primaryBible.value ?: return
     val bookCount = minOf(bible.getBookCount(), BibleViewModel.CANONICAL_BOOK_COUNT)
     if (bookCount == 0) return
+    if (requireExactVerses && ref.bookIndex !in 0 until bookCount) return
     val idx = ref.bookIndex.coerceIn(0, bookCount - 1)
     val targetChapter = (ref.chapter ?: 1).coerceAtLeast(1)
+    if (requireExactVerses && (ref.chapter ?: 1) <= 0) return
 
     searchJob?.cancel()
     _isSearchMode.value = false
@@ -101,6 +111,7 @@ internal fun BibleViewModel.navigateToReference(
         val chapterVerses = withContext(ioDispatcher) {
             bible.getChapter(bookId, targetChapter).verses
         }
+        if (requireExactVerses && !containsRequestedVerses(chapterVerses, ref)) return@launch
         _verses.value = chapterVerses
 
         val verseStart = ref.verseStart
@@ -126,6 +137,15 @@ internal fun BibleViewModel.navigateToReference(
         }
         refreshFilteredLists()
     }
+}
+
+private fun containsRequestedVerses(chapterVerses: List<String>, ref: SmartReference): Boolean {
+    val start = ref.verseStart ?: 1
+    val end = ref.verseEnd ?: start
+    if (start <= 0 || end < start) return false
+    val available = chapterVerses.mapNotNull { it.substringBefore(". ").toIntOrNull() }.toSet()
+    val requestedCount = end.toLong() - start + 1
+    return requestedCount <= available.size && (start..end).all { it in available }
 }
 
 internal fun BibleViewModel.onSmartQueryChanged(query: String) {
@@ -161,6 +181,12 @@ internal fun BibleViewModel.submitSmartQuery() {
     val trimmed = _searchQuery.value.trim()
     if (trimmed.isEmpty()) {
         clearSearch()
+        return
+    }
+    if (_searchMode.value != BibleSearchMode.TEXT && isChineseQuickReference(trimmed)) {
+        parseReference(trimmed)?.takeIf { it.verseStart != null }?.let {
+            navigateToReference(it, goLive = true, goLiveSource = "manual", requireExactVerses = true)
+        }
         return
     }
     when (_searchMode.value) {

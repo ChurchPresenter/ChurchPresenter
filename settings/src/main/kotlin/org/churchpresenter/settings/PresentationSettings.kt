@@ -14,5 +14,7 @@ data class PresentationSettings(
      * presentation engine's keynote package); this switch drops .key files back to the
      * static-image path if a document ever renders wrong.
      */
-    val animateKeynote: Boolean = true
+    val animateKeynote: Boolean = true,
+    val quickPlayFormat: String = "pptx",
+    val quickPlayBook: String = "",
 )

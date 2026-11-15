@@ -78,6 +78,9 @@ import org.churchpresenter.strings.generated.resources.menu_actual_size
 import org.churchpresenter.strings.generated.resources.menu_zoom_out
 import org.churchpresenter.strings.generated.resources.menu_zoom_in
 import org.churchpresenter.strings.generated.resources.menu_view
+import org.churchpresenter.strings.generated.resources.menu_projection
+import org.churchpresenter.strings.generated.resources.menu_projection_windowed
+import org.churchpresenter.strings.generated.resources.menu_projection_show
 import org.churchpresenter.strings.generated.resources.tooltip_new_schedule
 import org.churchpresenter.strings.generated.resources.tooltip_open_schedule
 import org.churchpresenter.strings.generated.resources.menu_remove_from_schedule
@@ -144,6 +147,8 @@ fun FrameWindowScope.NavigationTopBar(
     onOpenMemoryMonitor: () -> Unit = {},
     onOpenStoryPrompt: () -> Unit = {},
     onOpenWickIntro: () -> Unit = {},
+    isWindowedProjection: Boolean = false,
+    onSetWindowedProjection: (Boolean) -> Unit = {},
 ) {
     val fileLabel = stringResource(Res.string.menu_file)
     val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
@@ -184,6 +189,18 @@ fun FrameWindowScope.NavigationTopBar(
                     onSetDevWindowAlwaysOnTop, isSimulatingMissingOutputs, onSetSimulatingMissingOutputs,
                 ),
                 onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt, onOpenWickIntro,
+            )
+        }
+        Menu(stringResource(Res.string.menu_projection), mnemonic = 'P') {
+            CheckboxItem(
+                text = stringResource(Res.string.menu_projection_windowed),
+                checked = isWindowedProjection,
+                onCheckedChange = onSetWindowedProjection,
+            )
+            CheckboxItem(
+                text = stringResource(Res.string.menu_projection_show),
+                checked = isPresenterWindowVisible,
+                onCheckedChange = onSetPresenterWindowVisible,
             )
         }
     }

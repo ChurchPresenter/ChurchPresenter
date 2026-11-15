@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.assertNull
 
 class BibleViewModelReferenceJumpTest {
 
@@ -42,6 +43,39 @@ class BibleViewModelReferenceJumpTest {
             if (System.currentTimeMillis() > deadline) throw AssertionError("timed out")
             Thread.yield()
         }
+    }
+
+    @Test
+    fun `pinyin initials and space separated range resolve by canonical book id`() {
+        assertEquals(SmartReference(0, 1, 12, 16), vm.parseReference("csj 1 12 16"))
+        assertEquals(SmartReference(2, 3, 16, null), vm.parseReference("YHFY 3 16"))
+        assertEquals(SmartReference(0, 1, 1, 3), vm.parseReference("csj 1:1-3"))
+        assertNull(vm.parseReference("csj 1 3 2"))
+        assertNull(vm.parseReference("csj 1 0"))
+    }
+
+    @Test
+    fun `pinyin quick references work while text search is scoped to the current book`() {
+        vm.updateSelectedScopeIndex(SCOPE_CURRENT_BOOK)
+        assertEquals(SmartReference(2, 3, 16, null), vm.referenceFor("yhfy 3 16"))
+    }
+
+    @Test
+    fun `submitting a pinyin range selects it and goes live`() {
+        val before = vm.autoFollowLiveToken.value
+        vm.onSmartQueryChanged("csj 1 1 3")
+        vm.submitSmartQuery()
+        awaitUntil { vm.autoFollowLiveToken.value > before }
+        assertEquals(listOf(0, 1, 2), vm.selectedVerseIndices)
+        assertTrue(vm.multiVerseEnabled.value)
+    }
+
+    @Test
+    fun `missing verses never trigger live output`() {
+        val before = vm.autoFollowLiveToken.value
+        vm.onSmartQueryChanged("csj 1 12 16")
+        vm.submitSmartQuery()
+        assertEquals(before, vm.autoFollowLiveToken.value)
     }
 
     private fun jump(ref: SmartReference, goLive: Boolean = false) {

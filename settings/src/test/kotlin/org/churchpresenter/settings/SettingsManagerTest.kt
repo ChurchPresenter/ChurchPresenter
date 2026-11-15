@@ -57,6 +57,32 @@ class SettingsManagerTest {
     // ── Fresh install ───────────────────────────────────────────────────────────
 
     @Test
+    fun `fresh settings keep output windows hidden at startup`() {
+        assertEquals(true, SettingsManager().loadSettings().projectionSettings.startOutputsHidden)
+    }
+
+    @Test
+    fun `legacy settings migrate saved full screen output targets to hidden startup`() {
+        writeSettings("""{
+            "settingsVersion":25,
+            "projectionSettings":{"startOutputsHidden":false,"quickPlayDisplay":1}
+        }""")
+        val settings = SettingsManager().loadSettings()
+        assertEquals(true, settings.projectionSettings.startOutputsHidden)
+        assertEquals(1, settings.projectionSettings.quickPlayDisplay)
+        assertEquals(AppSettings.CURRENT_SETTINGS_VERSION, settings.settingsVersion)
+    }
+
+    @Test
+    fun `an explicit startup visibility preference in the current schema remains configurable`() {
+        writeSettings("""{
+            "settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
+            "projectionSettings":{"startOutputsHidden":false}
+        }""")
+        assertEquals(false, SettingsManager().loadSettings().projectionSettings.startOutputsHidden)
+    }
+
+    @Test
     fun `a fresh install loads defaults stamped at the current version`() {
         val settings = SettingsManager().loadSettings()
         assertEquals(AppSettings.CURRENT_SETTINGS_VERSION, settings.settingsVersion)

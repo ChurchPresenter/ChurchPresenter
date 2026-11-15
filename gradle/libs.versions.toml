@@ -48,6 +48,7 @@ pitest = "1.30.0"
 pitestJunit5 = "1.2.3"
 
 [libraries]
+pinyin4j = { module = "com.belerweb:pinyin4j", version = "2.5.1" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-core" }
 # The embedded Chromium the Web tab and the output window browse with; its natives are per
 # platform, in :composeApp.

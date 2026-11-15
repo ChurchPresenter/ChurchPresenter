@@ -8,20 +8,35 @@ package org.churchpresenter.bibletab
 /** The search scope that limits a text search to the selected book (`selectedScopeIndex`). */
 internal const val SCOPE_CURRENT_BOOK = 1
 
-private val CHAPTER_VERSE_REGEX = Regex("^(.*?)\\s*(\\d+)(?:\\s*[:. ]\\s*(\\d+)(?:\\s*-\\s*(\\d+))?)?\\s*$")
+private val CHAPTER_VERSE_REGEX = Regex("^(.*?)\\s*(\\d+)(?:\\s*[:. ]\\s*(\\d+)(?:\\s*(?:-|\\s)\\s*(\\d+))?)?\\s*$")
+private const val VERSE_START_GROUP = 3
+private const val VERSE_END_GROUP = 4
 
 /** "John 3:16-18" split up: the book as typed (maybe empty), the chapter and the verse span. */
 private data class ChapterVerse(val bookToken: String, val chapter: Int?, val verseStart: Int?, val verseEnd: Int?)
 
 private fun matchChapterVerse(input: String): ChapterVerse? {
-    val groups = CHAPTER_VERSE_REGEX.find(input)?.groupValues ?: return null
+    val normalized = input.trim().replace('：', ':').replace('，', ':').replace(',', ':')
+        .replace('－', '-').replace('–', '-').replace('章', ':').removeSuffix("节")
+    val match = CHAPTER_VERSE_REGEX.matchEntire(normalized) ?: return null
+    val bookToken = match.groupValues[1]
+    val chapter = match.groupValues[2].toIntOrNull() ?: return null
+    val startToken = match.groupValues[VERSE_START_GROUP]
+    val endToken = match.groupValues[VERSE_END_GROUP]
+    val verseStart = startToken.toIntOrNull()
+    val verseEnd = endToken.toIntOrNull()
+    val validStart = startToken.isEmpty() || (verseStart != null && verseStart > 0)
+    val validEnd = endToken.isEmpty() || (verseEnd != null && verseEnd >= (verseStart ?: 1))
     return ChapterVerse(
-        bookToken = groups[1].trim(),
-        chapter = groups[2].toIntOrNull(),
-        verseStart = groups[3].toIntOrNull(),
-        verseEnd = groups[4].toIntOrNull(),
-    )
+        bookToken = bookToken.trim(),
+        chapter = chapter,
+        verseStart = verseStart,
+        verseEnd = verseEnd,
+    ).takeIf { chapter > 0 && validStart && validEnd }
 }
+
+internal fun isChineseQuickReference(input: String): Boolean =
+    matchChapterVerse(input)?.let { ChineseBookInitials.bookId(it.bookToken) != null } == true
 
 internal fun BibleViewModel.parseReference(input: String): SmartReference? {
     val match = matchChapterVerse(input)
@@ -52,6 +67,9 @@ internal fun BibleViewModel.parseBooklessReference(input: String): SmartReferenc
 internal fun BibleViewModel.referenceFor(query: String): SmartReference? = when (_searchMode.value) {
     BibleSearchMode.TEXT -> null
     BibleSearchMode.REFERENCE -> parseReference(query)
-    BibleSearchMode.AUTO ->
-        if (_selectedScopeIndex.value == SCOPE_CURRENT_BOOK) parseBooklessReference(query) else parseReference(query)
+    BibleSearchMode.AUTO -> when {
+        isChineseQuickReference(query) -> parseReference(query)
+        _selectedScopeIndex.value == SCOPE_CURRENT_BOOK -> parseBooklessReference(query)
+        else -> parseReference(query)
+    }
 }

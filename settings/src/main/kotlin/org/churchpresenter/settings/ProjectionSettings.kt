@@ -113,7 +113,7 @@ data class ProjectionSettings(
     val unusedScreens: List<String> = emptyList(),
     // Launch with the output windows hidden; the operator reveals them with the toolbar's display
     // toggle when ready to present.
-    val startOutputsHidden: Boolean = false,
+    val startOutputsHidden: Boolean = true,
     // Never show the mouse pointer over a full-screen output, so the congregation does not see it
     // crossing the projector while the operator works on the main screen. On unless turned off.
     val hideCursorOnOutputs: Boolean = true,
@@ -148,6 +148,9 @@ data class ProjectionSettings(
      * before the operator has made anything of their own.
      */
     val outputProfiles: List<OutputProfile> = listOf(factoryOutputProfile()),
+    /** Display screen outputs in movable, resizable windows, including on a single monitor. */
+    val windowedProjection: Boolean = false,
+    val quickPlayDisplay: Int? = null,
 ) {
     /** [key]'s name as the operator typed it, or blank for a monitor never renamed. */
     fun screenName(key: String): String = screenNames[key]?.trim().orEmpty()

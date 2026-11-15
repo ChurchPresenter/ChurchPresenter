@@ -2,6 +2,18 @@ package org.churchpresenter.bibletab
 
 import kotlinx.coroutines.cancel
 
+/** Two ordinary clicks choose a passage, then the next click starts a new passage. */
+fun BibleViewModel.clickVerse(verseIndex: Int) {
+    if (verseIndex !in _verses.value.indices) return
+    if (mouseRangeSelectionToken == _verseSelectionToken.value && verseIndex != _selectedVerseIndex.value) {
+        shiftClickVerse(verseIndex)
+        mouseRangeSelectionToken = null
+    } else {
+        selectVerse(verseIndex)
+        mouseRangeSelectionToken = _verseSelectionToken.value
+    }
+}
+
 fun BibleViewModel.ctrlClickVerse(verseIndex: Int) {
     if (verseIndex < 0 || verseIndex >= _verses.value.size) return
     if (_selectedVerseIndices.contains(verseIndex)) {

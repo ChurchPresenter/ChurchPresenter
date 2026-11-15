@@ -1,5 +1,7 @@
 package org.churchpresenter.liveoutput
 
+import kotlinx.coroutines.flow.asSharedFlow
+
 import kotlinx.serialization.Serializable
 import androidx.compose.runtime.IntState
 import androidx.compose.runtime.mutableIntStateOf
@@ -59,6 +61,10 @@ class PresenterManager private constructor(
     LiveWeb by web,
     LiveScreens by screens,
     LiveOverlays by overlayLayers {
+
+    private val outputStepRequests = kotlinx.coroutines.flow.MutableSharedFlow<Boolean>(extraBufferCapacity = 16)
+    val outputSteps = outputStepRequests.asSharedFlow()
+    val requestOutputStep: (Boolean) -> Unit = { forward -> outputStepRequests.tryEmit(forward) }
 
     constructor(showPresenterWindowInitially: Boolean = true) :
         this(showPresenterWindowInitially, PresenterContext())

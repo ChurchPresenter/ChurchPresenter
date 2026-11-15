@@ -11,6 +11,8 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +44,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.presentation_documents_folder
+import org.churchpresenter.strings.generated.resources.presentation_resources
+import org.churchpresenter.strings.generated.resources.toolbar_remote
+import org.churchpresenter.strings.generated.resources.toolbar_unfreeze
+import org.churchpresenter.strings.generated.resources.toolbar_freeze
+import org.churchpresenter.strings.generated.resources.toolbar_preset
+import org.churchpresenter.strings.generated.resources.toolbar_schedule
+import org.churchpresenter.strings.generated.resources.toolbar_clear
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.save_preset
 import org.churchpresenter.icons.generated.resources.ic_folder
@@ -56,7 +66,6 @@ import org.churchpresenter.strings.generated.resources.presentation_clear
 import org.churchpresenter.strings.generated.resources.presentation_freeze_output
 import org.churchpresenter.strings.generated.resources.presentation_unfreeze_output
 import org.churchpresenter.strings.generated.resources.recent
-import org.churchpresenter.strings.generated.resources.select_presentation_file_button
 import org.churchpresenter.strings.generated.resources.loading_slides_progress
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SettingsRemote
@@ -89,6 +98,7 @@ internal fun PresentationTabScope.PresentationTopBar(viewModel: PresentationView
     Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
         PresentationFileBar(viewModel)
         PresentationRecentFiles(viewModel)
+        PresentationDocuments(viewModel)
         PresentationControlsBar(viewModel)
     }
 }
@@ -97,12 +107,11 @@ internal fun PresentationTabScope.PresentationTopBar(viewModel: PresentationView
 @Composable
 private fun PresentationTabScope.PresentationFileBar(viewModel: PresentationViewModel) {
     // ── File bar ──────────────────────────────────────────────────
-    Row(
+    FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
             .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         OpenPresentationButton(viewModel)
@@ -111,10 +120,11 @@ private fun PresentationTabScope.PresentationFileBar(viewModel: PresentationView
                 ?: stringResource(Res.string.no_file_selected_presentation),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.widthIn(min = 100.dp, max = 180.dp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+        PresentationLibraryFilters(viewModel.discoveredDocuments)
         if (viewModel.isLoading) {
             CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
         }
@@ -131,35 +141,39 @@ private fun PresentationTabScope.PresentationFileBar(viewModel: PresentationView
         }
         PresentationOutputButtons(viewModel)
         if (onSavePreset != null) {
-            SavePresetButton(
-                onClick = {
-                    val f = viewModel.selectedPresentation ?: return@SavePresetButton
-                    onSavePreset(
-                        f.absolutePath,
-                        f.nameWithoutExtension,
-                        viewModel.slideFiles.size,
-                        f.extension.lowercase(),
-                    )
-                },
-                enabled = viewModel.selectedPresentation != null,
-                tooltipText = stringResource(Res.string.save_preset)
-            )
+            PresentationActionLabel(stringResource(Res.string.toolbar_preset)) {
+                SavePresetButton(
+                    onClick = {
+                        val f = viewModel.selectedPresentation ?: return@SavePresetButton
+                        onSavePreset(
+                            f.absolutePath,
+                            f.nameWithoutExtension,
+                            viewModel.slideFiles.size,
+                            f.extension.lowercase(),
+                        )
+                    },
+                    enabled = viewModel.selectedPresentation != null,
+                    tooltipText = stringResource(Res.string.save_preset)
+                )
+            }
         }
         if (onAddToSchedule != null) {
-            AddToScheduleButton(
-                onClick = {
-                    val f = viewModel.selectedPresentation ?: return@AddToScheduleButton
-                    onAddToSchedule(
-                        f.absolutePath,
-                        f.nameWithoutExtension,
-                        viewModel.slideFiles.size,
-                        f.extension.lowercase(),
-                    )
-                },
-                enabled = viewModel.selectedPresentation != null,
-                tooltipText = stringResource(Res.string.add_to_schedule),
-                modifier = Modifier.guideTarget(GuideTargets.PRESENTATION_ADD_TO_SCHEDULE),
-            )
+            PresentationActionLabel(stringResource(Res.string.toolbar_schedule)) {
+                AddToScheduleButton(
+                    onClick = {
+                        val f = viewModel.selectedPresentation ?: return@AddToScheduleButton
+                        onAddToSchedule(
+                            f.absolutePath,
+                            f.nameWithoutExtension,
+                            viewModel.slideFiles.size,
+                            f.extension.lowercase(),
+                        )
+                    },
+                    enabled = viewModel.selectedPresentation != null,
+                    tooltipText = stringResource(Res.string.add_to_schedule),
+                    modifier = Modifier.guideTarget(GuideTargets.PRESENTATION_ADD_TO_SCHEDULE),
+                )
+            }
         }
         if (presenterManager != null) {
             PresentationGoLiveButton(viewModel, presenterManager)
@@ -169,49 +183,74 @@ private fun PresentationTabScope.PresentationFileBar(viewModel: PresentationView
 
 @Composable
 private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationViewModel) {
-    RaisedButton(
-        onClick = {
+    val folderTitle = stringResource(Res.string.presentation_documents_folder)
+    PresentationResourceMenu(
+        onFiles = { scope.launch { choosePresentationFiles(viewModel) } },
+        onFolder = {
             scope.launch {
-                // The forms PresentationLoader reads: templates and slideshows open like presentations.
-                val allFilter = FileNameExtensionFilter(
-                    "All Presentation Files",
-                    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot", "key", "pdf",
-                )
-                val pptFilter = FileNameExtensionFilter(
-                    "PowerPoint Files (*.pptx, *.ppt, *.ppsx, *.potx, *.pptm)",
-                    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot",
-                )
-                val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
-                val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
-                val files = FileChooser.platformInstance.chooseMultiple(
-                    path = Path(appSettings.presentationStorageDirectory),
-                    filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),
-                    title = presentationFileDialogTitle,
-                    selectDirectory = false
-                )
-                files?.forEach { file ->
-                    viewModel.addPresentation(file.toFile())
-                    RecentPresentationFiles.add(file.toFile().absolutePath)
+                val folder = FileChooser.platformInstance.chooseSingle(
+                    path = Path(appSettings.presentationStorageDirectory), filters = emptyList(),
+                    title = folderTitle, selectDirectory = true,
+                ) ?: return@launch
+                val path = folder.toFile().absolutePath
+                onSettingsChange {
+                    val presentation = if (it.presentationStorageDirectory == path) it.presentationSettings else
+                        it.presentationSettings.copy(quickPlayBook = "")
+                    it.copy(presentationStorageDirectory = path, presentationSettings = presentation)
                 }
+                viewModel.refreshDocumentLibrary()
             }
         },
-        modifier = Modifier.height(32.dp).guideTarget(GuideTargets.PRESENTATION_SELECT_FILE),
-        shape = AppShape(7.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ),
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-    ) {
-        Icon(painterResource(IconRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
-        Spacer(Modifier.width(7.dp))
-        Text(
-            stringResource(Res.string.select_presentation_file_button),
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontSize = 12.5.sp,
-                fontWeight = FontWeight.SemiBold
+    ) { openMenu ->
+        RaisedButton(
+            onClick = openMenu,
+            modifier = Modifier.height(32.dp).guideTarget(GuideTargets.PRESENTATION_SELECT_FILE),
+            shape = AppShape(7.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+        ) {
+            Icon(
+                painterResource(IconRes.drawable.ic_folder), contentDescription = null,
+                modifier = Modifier.size(13.dp),
             )
-        )
+            Spacer(Modifier.width(7.dp))
+            Text(
+                stringResource(Res.string.presentation_resources),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
+}
+
+private suspend fun PresentationTabScope.choosePresentationFiles(viewModel: PresentationViewModel) {
+    // The forms PresentationLoader reads: templates and slideshows open like presentations.
+    val allFilter = FileNameExtensionFilter(
+        "All Presentation Files",
+        "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot", "key", "pdf", "doc", "docx",
+    )
+    val pptFilter = FileNameExtensionFilter(
+        "PowerPoint Files (*.pptx, *.ppt, *.ppsx, *.potx, *.pptm)",
+        "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot",
+    )
+    val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
+    val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
+    val wordFilter = FileNameExtensionFilter("Word Files (*.doc, *.docx)", "doc", "docx")
+    val files = FileChooser.platformInstance.chooseMultiple(
+        path = Path(appSettings.presentationStorageDirectory),
+        filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter, wordFilter),
+        title = presentationFileDialogTitle,
+        selectDirectory = false
+    )
+    if (!files.isNullOrEmpty()) viewModel.refreshDocumentLibrary()
+    files?.forEach { file ->
+        viewModel.addPresentation(file.toFile())
+        RecentPresentationFiles.add(file.toFile().absolutePath)
     }
 }
 
@@ -220,17 +259,20 @@ private fun PresentationTabScope.PresentationGoLiveButton(
     viewModel: PresentationViewModel,
     presenterManager: SlidesOutput,
 ) {
-    GoLiveButton(
-        modifier = Modifier.guideTarget(GuideTargets.PRESENTATION_GO_LIVE),
-        onClick = { goLive(viewModel, presenterManager) },
-        enabled = viewModel.slideFiles.isNotEmpty(),
-        tooltipText = stringResource(Res.string.go_live),
-        showsShortcut = true,
-    )
+    PresentationActionLabel(stringResource(Res.string.go_live)) {
+        GoLiveButton(
+            modifier = Modifier.guideTarget(GuideTargets.PRESENTATION_GO_LIVE),
+            onClick = { goLive(viewModel, presenterManager) },
+            enabled = viewModel.slideFiles.isNotEmpty(),
+            tooltipText = stringResource(Res.string.go_live),
+            showsShortcut = true,
+        )
+    }
 }
 
 /** Puts the selected slide of the selected presentation on screen. */
 internal fun PresentationTabScope.goLive(viewModel: PresentationViewModel, presenterManager: SlidesOutput) {
+    viewModel.previewOnly = false
     val idx = viewModel.selectedSlideIndex
     scope.launch {
         val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
@@ -358,43 +400,51 @@ private fun PresentationTabScope.PresentationRecentFiles(viewModel: Presentation
 /** Remote, blank and clear. */
 @Composable
 private fun PresentationTabScope.PresentationOutputButtons(viewModel: PresentationViewModel) {
-    ActionIconButton(
-        onClick = { showRemoteDialog = true },
-        tooltipText = stringResource(Res.string.tooltip_presentation_remote),
-        icon = Icons.Default.SettingsRemote,
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-    )
-    if (presenterManager != null) {
+    PresentationActionLabel(stringResource(Res.string.toolbar_remote)) {
         ActionIconButton(
-            onClick = onFreezeToggle,
-            enabled = viewModel.slideFiles.isNotEmpty(),
-            tooltipText = stringResource(
-                if (presentationFrozen) {
-                    Res.string.presentation_unfreeze_output
-                } else {
-                    Res.string.presentation_freeze_output
-                }
-            ),
-            icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-            containerColor = if (presentationFrozen) {
-                MaterialTheme.colorScheme.errorContainer
-            } else {
-                MaterialTheme.colorScheme.secondaryContainer
-            },
-            contentColor = if (presentationFrozen) {
-                MaterialTheme.colorScheme.onErrorContainer
-            } else {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            }
+            onClick = { showRemoteDialog = true },
+            tooltipText = stringResource(Res.string.tooltip_presentation_remote),
+            icon = Icons.Default.SettingsRemote,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
-    ActionIconButton(
-        onClick = { viewModel.clearPresentations(); onClearPresentation() },
-        enabled = viewModel.slideFiles.isNotEmpty(),
-        tooltipText = stringResource(Res.string.presentation_clear),
-        painter = painterResource(IconRes.drawable.ic_stop),
-        containerColor = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer
-    )
+    if (presenterManager != null) {
+        PresentationActionLabel(stringResource(
+            if (presentationFrozen) Res.string.toolbar_unfreeze else Res.string.toolbar_freeze
+        )) {
+            ActionIconButton(
+                onClick = onFreezeToggle,
+                enabled = viewModel.slideFiles.isNotEmpty(),
+                tooltipText = stringResource(
+                    if (presentationFrozen) {
+                        Res.string.presentation_unfreeze_output
+                    } else {
+                        Res.string.presentation_freeze_output
+                    }
+                ),
+                icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                containerColor = if (presentationFrozen) {
+                    MaterialTheme.colorScheme.errorContainer
+                } else {
+                    MaterialTheme.colorScheme.secondaryContainer
+                },
+                contentColor = if (presentationFrozen) {
+                    MaterialTheme.colorScheme.onErrorContainer
+                } else {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                }
+            )
+        }
+    }
+    PresentationActionLabel(stringResource(Res.string.toolbar_clear)) {
+        ActionIconButton(
+            onClick = { viewModel.clearPresentations(); onClearPresentation() },
+            enabled = viewModel.slideFiles.isNotEmpty(),
+            tooltipText = stringResource(Res.string.presentation_clear),
+            painter = painterResource(IconRes.drawable.ic_stop),
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer
+        )
+    }
 }

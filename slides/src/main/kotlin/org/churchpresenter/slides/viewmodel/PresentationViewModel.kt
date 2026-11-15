@@ -59,6 +59,20 @@ class PresentationViewModel private constructor(
     private var activeLoadJob: Job? = null
 
     val presentations: List<File> = state.presentations
+    var discoveredDocuments: List<File>
+        get() = state.discoveredDocuments.value
+        set(value) { state.discoveredDocuments.value = value }
+    val documentRefreshToken: Int get() = state.documentRefreshToken.value
+    val refreshDocumentLibrary: () -> Unit = { state.documentRefreshToken.value++ }
+    var previewOnly: Boolean
+        get() = state.previewOnly.value
+        set(value) { state.previewOnly.value = value }
+
+    fun previewPresentation(file: File) {
+        previewOnly = true
+        state.isPlaying.value = false
+        addPresentation(file)
+    }
 
     val selectedPresentation: File?
         get() = state.selectedPresentation.value
@@ -243,6 +257,10 @@ class PresentationViewModel private constructor(
     fun selectPresentation(file: File) {
         val existingFile = state.presentations.find { it.absolutePath == file.absolutePath }
         if (existingFile != null) {
+            if (state.selectedPresentation.value != existingFile) {
+                previewOnly = true
+                state.isPlaying.value = false
+            }
             state.selectedPresentation.value = existingFile
             // Only when the selection actually moves elsewhere: re-selecting the mirrored deck
             // itself must keep showing the primary's path, not fall back to the mangled one.

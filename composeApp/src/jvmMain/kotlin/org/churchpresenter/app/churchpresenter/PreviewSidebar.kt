@@ -342,7 +342,11 @@ internal fun SidebarButtons(
         TooltipIconButton(
             painter = rememberVectorPainter(Icons.Default.Monitor),
             text = stringResource(Res.string.tooltip_toggle_displays),
-            onClick = { presenterManager.togglePresenterWindow() },
+            onClick = {
+                val count = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
+                onSettingsChange { it.copy(projectionSettings = nextProjectionTarget(it.projectionSettings, count)) }
+                presenterManager.setShowPresenterWindow(true)
+            },
             buttonSize = 36.dp,
             modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
             iconTint = if (presenterManager.showPresenterWindow.value)
