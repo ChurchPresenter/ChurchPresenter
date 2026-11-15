@@ -2,11 +2,13 @@ package org.churchpresenter.converter.song
 
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.core.models.songs.SongFileParser
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -299,6 +301,52 @@ class VideoPsalmConverterTest {
     fun `a title the filesystem would refuse is made safe`() {
         val file = book("""{Verses:[${verse("line")}],Text:"Song"}""", title = "Book: 1/2")
         assertEquals("Book 1 2", VideoPsalmConverter.targetFolderName(file))
+    }
+
+    @Test
+    fun `a printed number with the book's name in front numbers the song by its digits`() {
+        val file = book(
+            """{ID:1,Alias:"WP Scores 001",Verses:[${verse("one")}],Text:"Watch and pray"},
+               |{ID:236,Alias:"WP Scores 236",Verses:[${verse("two")}],Text:"Faith of our fathers"},
+               |{ID:237,Alias:"WP Scores 236",Verses:[${verse("three")}],Text:"Faith of our mothers"},
+               |{ID:238,Alias:"WP Scores 237",Verses:[${verse("four")}],Text:"Come to Jesus"}""".trimMargin(),
+            title = "WP Scores",
+        )
+        val result = VideoPsalmConverter.convert(file, temp)
+
+        assertEquals(
+            listOf(
+                "0001 - Watch and pray.song",
+                "0236 - Faith of our fathers.song",
+                "0236 - Faith of our mothers.song",
+                "0237 - Come to Jesus.song",
+            ),
+            result.outputFiles.map { it.name },
+        )
+        assertTrue(result.outputFiles.none { it.readText().contains("alias:") })
+    }
+
+    @Test
+    fun `a printed number that is not a number becomes the alias, and the position the number`() {
+        val file = book("""{ID:3,Alias:"12a",Verses:[${verse("one")}],Text:"Song"}""")
+        val written = VideoPsalmConverter.convert(file, temp).outputFiles.single()
+
+        assertEquals("0003 - Song.song", written.name)
+        assertTrue(written.readText().contains("alias: 12a"), written.readText())
+    }
+
+    @Test
+    fun `the app reads back the number and alias the converter wrote`() {
+        val file = book(
+            """{ID:1,Alias:"WP Scores 001",Verses:[${verse("one")}],Text:"First"},
+               |{ID:2,Alias:"12a",Verses:[${verse("two")}],Text:"Second"},
+               |{ID:3,Alias:"104",Verses:[${verse("three")}],Text:"Third"}""".trimMargin()
+        )
+        val parser = SongFileParser()
+        val songs = VideoPsalmConverter.convert(file, temp).outputFiles
+            .map { assertNotNull(parser.parseSongFile(it.absolutePath)) }
+
+        assertEquals(listOf("1" to "", "2" to "12a", "104" to ""), songs.map { it.number.trimStart('0') to it.alias })
     }
 
     @Test

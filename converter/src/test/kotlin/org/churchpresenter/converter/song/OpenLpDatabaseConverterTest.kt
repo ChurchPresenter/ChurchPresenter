@@ -40,7 +40,7 @@ class OpenLpDatabaseConverterTest {
         return file
     }
 
-    private fun fullLibrary(name: String, lyrics: String, verseOrder: String = ""): File =
+    private fun fullLibrary(name: String, lyrics: String, verseOrder: String = "", entry: String = "12"): File =
         database(name) { statement ->
             statement.executeUpdate(
                 "CREATE TABLE songs (id INTEGER PRIMARY KEY, title TEXT, lyrics TEXT, " +
@@ -56,8 +56,18 @@ class OpenLpDatabaseConverterTest {
             )
             statement.executeUpdate("INSERT INTO authors VALUES (1, 'John', 'Newton', 'John Newton')")
             statement.executeUpdate("INSERT INTO authors_songs VALUES (1, 1)")
-            statement.executeUpdate("INSERT INTO songs_songbooks VALUES (1, 1, '12')")
+            statement.executeUpdate("INSERT INTO songs_songbooks VALUES (1, 1, '$entry')")
         }
+
+    @Test
+    fun `a song-book entry that is not a number becomes the song's alias`() {
+        val file = fullLibrary("songs.sqlite", lyricsXml(Triple("v", "1", "Amazing grace")), entry = "5b")
+
+        val written = OpenLpDatabaseConverter.convert(file, File(temp, "out")).outputFiles.single()
+
+        assertEquals("Amazing Grace.song", written.name)
+        assertTrue(written.readText().contains("alias: 5b"), written.readText())
+    }
 
     @Test
     fun `a song comes back with the author the bridging table points at`() {

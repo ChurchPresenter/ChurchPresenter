@@ -47,6 +47,9 @@ Built with Kotlin Multiplatform and Compose Desktop.
 - **VideoPsalm** — one `.json` file from the `SongBooks` folder is a whole numbered book
   - Read directly rather than repaired into valid JSON: the file has unquoted keys and real line
     breaks inside its strings
+  - The number the book prints (`Alias`) numbers the song, with the book's name in front of it
+    dropped (`WP Scores 012` is 12); one that is not a number (`12a`) becomes the song's alias and
+    the song's place in the book its number — this holds for every library's numbers
   - A chorus stored once per singing becomes one section — the repeats are matched on their lyrics,
     because a book writes the same chorus as `C1` several times and then as `C2`
   - Verses past the ninth, which books stop numbering, keep counting up instead of stacking
