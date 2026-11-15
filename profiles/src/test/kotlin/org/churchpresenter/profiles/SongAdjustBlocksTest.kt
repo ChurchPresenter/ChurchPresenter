@@ -44,7 +44,7 @@ class SongAdjustBlocksTest {
         assertEquals(
             setOf(
                 CustomizeElement.SONG_NUMBER, CustomizeElement.SONG_TITLE, CustomizeElement.SONG_SECTION_LABEL,
-                CustomizeElement.SONG_LYRICS, CustomizeElement.SONG_LOOK_AHEAD, CustomizeElement.SONG_NEXT_SECTION,
+                CustomizeElement.SONG_LYRICS, CustomizeElement.SONG_NEXT_SECTION,
             ),
             pickedElements,
         )

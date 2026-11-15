@@ -32,8 +32,7 @@ import org.churchpresenter.sharedui.presenter.rectIn
 
 /** The song elements drawn once per language, and so boxed once per language unless they share a box. */
 val SongStyleElement.boxedPerLanguage: Boolean
-    get() = this == SongStyleElement.LYRICS || this == SongStyleElement.LOOK_AHEAD ||
-        this == SongStyleElement.NEXT_SECTION
+    get() = this == SongStyleElement.LYRICS || this == SongStyleElement.NEXT_SECTION
 
 /**
  * The key [element]'s box is stored under on [lowerThird]'s output -- with [language] for an element

@@ -484,7 +484,6 @@ private fun SongPositionRow(selected: String, onSelect: (String) -> Unit) {
 internal fun CustomizeElement.toSongStyleElement(): SongStyleElement = when (this) {
     CustomizeElement.SONG_TITLE -> SongStyleElement.TITLE
     CustomizeElement.SONG_NUMBER -> SongStyleElement.NUMBER
-    CustomizeElement.SONG_LOOK_AHEAD -> SongStyleElement.LOOK_AHEAD
     CustomizeElement.SONG_NEXT_SECTION -> SongStyleElement.NEXT_SECTION
     CustomizeElement.SONG_SECTION_LABEL -> SongStyleElement.SECTION_LABEL
     else -> SongStyleElement.LYRICS

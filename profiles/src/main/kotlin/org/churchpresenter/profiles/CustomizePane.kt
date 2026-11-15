@@ -86,7 +86,7 @@ internal fun pickedDisplayMode(picked: String, current: String): String =
 internal fun styleElementsFor(pane: CustomizePane, profile: OutputProfile): List<CustomizeElement> =
     customizeElements(pane).filter { element ->
         when (element) {
-            CustomizeElement.SONG_LOOK_AHEAD -> profile.songLookAhead
+            CustomizeElement.SONG_NEXT_SECTION -> profile.songLookAhead
             CustomizeElement.BACKGROUND_DEFAULT ->
                 if (profile.isLowerThird) profile.look.background.lowerThird else profile.look.background.fullscreen
             CustomizeElement.BACKGROUND_BIBLE -> profile.showBible && profile.look.background.bible

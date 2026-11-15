@@ -162,28 +162,6 @@ class ProfilesCustomizeSongControlsTest {
     }
 
     @Test
-    fun `the look-ahead element writes its size, colour, styling and alignment`() {
-        profilesTab(output()) { get ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LOOK_AHEAD)
-            retypeNumberField(51, 46)
-            toggleCheckbox("Auto-fit")
-            recolor("#445566", "#667788")
-            styleButton(group = 0, name = "Italic").performScrollTo().performClick()
-            waitForIdle()
-            segment("Right").performScrollTo().performClick()
-            waitForIdle()
-
-            val stored = get().song()
-            assertEquals(46, stored.lookAheadFontSize)
-            assertFalse(stored.lookAheadFontSizeAutoFit)
-            assertEquals("#667788", stored.lookAheadColor)
-            assertTrue(stored.lookAheadItalic)
-            assertEquals(Constants.RIGHT, stored.lookAheadHorizontalAlignment)
-            assertEquals(52, stored.lowerThirdLookAheadFontSize, "the band's look-ahead must be untouched")
-        }
-    }
-
-    @Test
     fun `the next-section element writes its own size, colour and styling`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
@@ -201,19 +179,14 @@ class ProfilesCustomizeSongControlsTest {
     }
 
     @Test
-    fun `the look-ahead elements write the band's own profile`() {
+    fun `the next-section element writes the band's own profile`() {
         profilesTab(output(band)) { get ->
-            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LOOK_AHEAD)
-            retypeNumberField(52, 25)
-            recolor("#556677", "#998877")
-            openElement(CustomizeElement.SONG_NEXT_SECTION)
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
             retypeNumberField(58, 23)
 
             val stored = get().song()
-            assertEquals(25, stored.lowerThirdLookAheadFontSize)
-            assertEquals("#998877", stored.lowerThirdLookAheadColor)
             assertEquals(23, stored.lowerThirdLookAheadNextFontSize)
-            assertEquals(51, stored.lookAheadFontSize, "the full screen's look-ahead must be untouched")
+            assertEquals(57, stored.lookAheadNextFontSize, "the full screen's next section must be untouched")
         }
     }
 

@@ -48,12 +48,12 @@ data class SongTextStyle(
 /**
  * Which of a song slide's elements can be styled per language.
  *
- * All four are the *words of a language*: the lyrics, that language's own title, and the two
- * look-ahead elements, which are the next section's lyrics in the same language. The song number is
+ * All three are the *words of a language*: the lyrics, that language's own title, and the next
+ * section's lyrics in the same language, drawn under them on a look-ahead output. The song number is
  * deliberately absent — a number is the same digits in every language, and giving it four profiles
  * would offer a choice with nothing behind it.
  */
-enum class SongTranslationElement { TITLE, LYRICS, LOOK_AHEAD, NEXT_SECTION }
+enum class SongTranslationElement { TITLE, LYRICS, NEXT_SECTION }
 
 /**
  * How one language of a song is presented.
@@ -78,7 +78,9 @@ data class SongTranslationSettings(
     val titleLowerThird: SongTextStyle = SongTextStyle(),
     val lyrics: SongTextStyle = SongTextStyle(),
     val lyricsLowerThird: SongTextStyle = SongTextStyle(),
+    /** Read only by [migrateLookAheadIntoLyrics]: the current lines on a look-ahead output are [lyrics] now. */
     val lookAhead: SongTextStyle = SongTextStyle(),
+    /** Read only by [migrateLookAheadIntoLyrics], as [lookAhead]. */
     val lookAheadLowerThird: SongTextStyle = SongTextStyle(),
     val nextSection: SongTextStyle = SongTextStyle(),
     val nextSectionLowerThird: SongTextStyle = SongTextStyle(),
@@ -87,7 +89,6 @@ data class SongTranslationSettings(
     fun style(element: SongTranslationElement, lowerThird: Boolean): SongTextStyle = when (element) {
         SongTranslationElement.TITLE -> if (lowerThird) titleLowerThird else title
         SongTranslationElement.LYRICS -> if (lowerThird) lyricsLowerThird else lyrics
-        SongTranslationElement.LOOK_AHEAD -> if (lowerThird) lookAheadLowerThird else lookAhead
         SongTranslationElement.NEXT_SECTION -> if (lowerThird) nextSectionLowerThird else nextSection
     }
 
@@ -101,8 +102,6 @@ data class SongTranslationSettings(
             if (lowerThird) copy(titleLowerThird = value) else copy(title = value)
         SongTranslationElement.LYRICS ->
             if (lowerThird) copy(lyricsLowerThird = value) else copy(lyrics = value)
-        SongTranslationElement.LOOK_AHEAD ->
-            if (lowerThird) copy(lookAheadLowerThird = value) else copy(lookAhead = value)
         SongTranslationElement.NEXT_SECTION ->
             if (lowerThird) copy(nextSectionLowerThird = value) else copy(nextSection = value)
     }

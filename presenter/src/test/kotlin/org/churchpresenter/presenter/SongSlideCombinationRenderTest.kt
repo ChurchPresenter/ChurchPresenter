@@ -111,7 +111,6 @@ class SongSlideCombinationRenderTest {
             fullscreenDisplayMode = line,
             lookAheadDisplayMode = line,
             lyricsFontSizeAutoFit = true,
-            lookAheadFontSizeAutoFit = true,
             layoutExtras = SongLayoutExtras(autoFitEachSlide = true),
         ),
         lookAhead = true,

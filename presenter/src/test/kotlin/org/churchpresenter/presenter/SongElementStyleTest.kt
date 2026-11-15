@@ -44,10 +44,10 @@ class SongElementStyleTest {
     )
 
     @Test
-    fun `there are twenty-two profiles`() {
-        // Ten elements on two outputs, plus the title slide's own number, which used to share the
+    fun `there are twenty profiles`() {
+        // Nine elements on two outputs, plus the title slide's own number, which used to share the
         // lyric slides' profile and now has one of its own -- see #609.
-        assertEquals(22, combinations.size)
+        assertEquals(20, combinations.size)
     }
 
     @Test
@@ -100,9 +100,9 @@ class SongElementStyleTest {
     }
 
     @Test
-    fun `the look-ahead slide is where two of the elements live`() {
+    fun `the next section is the element only the look-ahead slide draws`() {
         assertEquals(
-            listOf(SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION),
+            listOf(SongStyleElement.NEXT_SECTION),
             elements.filter { it.onLookAheadSlide },
         )
     }
@@ -134,7 +134,7 @@ class SongElementStyleTest {
     // ── Chunk: per element, because the look-ahead slide keeps its own ───────────────────────────
 
     @Test
-    fun `the look-ahead elements read and write the look-ahead chunk`() {
+    fun `the next section reads and writes the look-ahead chunk`() {
         val settings = SongSettings().withChunk(
             SongStyleElement.NEXT_SECTION,
             SongStyleTarget.FULL_SCREEN,
@@ -144,8 +144,7 @@ class SongElementStyleTest {
         assertEquals(Constants.SONG_DISPLAY_MODE_LINE, settings.lookAheadDisplayMode)
         assertEquals(
             Constants.SONG_DISPLAY_MODE_LINE,
-            settings.chunkFor(SongStyleElement.LOOK_AHEAD, SongStyleTarget.FULL_SCREEN),
-            "both look-ahead elements share the one slide's setting",
+            settings.chunkFor(SongStyleElement.NEXT_SECTION, SongStyleTarget.FULL_SCREEN),
         )
         assertEquals(
             SongSettings().fullscreenDisplayMode,
@@ -181,7 +180,6 @@ class SongElementStyleTest {
         listOf(
             SongStyleElement.NUMBER,
             SongStyleElement.LYRICS,
-            SongStyleElement.LOOK_AHEAD,
             SongStyleElement.NEXT_SECTION,
         ).forEach {
             assertTrue(!it.onTitleSlide && !it.isCredit, "$it")

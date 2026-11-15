@@ -137,48 +137,6 @@ internal fun SongSettings.withLyricsLowerThird(s: SongElementStyle) = copy(
     outlines = outlines.copy(lyricsLowerThird = s.outline),
 )
 
-internal fun SongSettings.withLookAhead(s: SongElementStyle) = copy(
-    lookAheadColor = s.color,
-    lookAheadFontType = s.fontType,
-    lookAheadFontSize = s.fontSize,
-    lookAheadBold = s.bold,
-    lookAheadItalic = s.italic,
-    lookAheadUnderline = s.underline,
-    lookAheadStrikethrough = s.strikethrough,
-    lookAheadShadow = s.shadow,
-    lookAheadShadowColor = s.shadowColor,
-    lookAheadShadowSize = s.shadowSize,
-    lookAheadShadowOpacity = s.shadowOpacity,
-    lookAheadHorizontalAlignment = s.horizontalAlignment,
-    lookAheadLetterSpacing = s.letterSpacing,
-    lookAheadWordSpacing = s.wordSpacing,
-    lookAheadTransform = s.transform,
-    lookAheadFontSizeAutoFit = s.autoFit,
-    lookAheadBackdrop = s.backdrop,
-    outlines = outlines.copy(lookAhead = s.outline),
-)
-
-internal fun SongSettings.withLookAheadLowerThird(s: SongElementStyle) = copy(
-    lowerThirdLookAheadColor = s.color,
-    lowerThirdLookAheadFontType = s.fontType,
-    lowerThirdLookAheadFontSize = s.fontSize,
-    lowerThirdLookAheadBold = s.bold,
-    lowerThirdLookAheadItalic = s.italic,
-    lowerThirdLookAheadUnderline = s.underline,
-    lowerThirdLookAheadStrikethrough = s.strikethrough,
-    lowerThirdLookAheadShadow = s.shadow,
-    lowerThirdLookAheadShadowColor = s.shadowColor,
-    lowerThirdLookAheadShadowSize = s.shadowSize,
-    lowerThirdLookAheadShadowOpacity = s.shadowOpacity,
-    lowerThirdLookAheadHorizontalAlignment = s.horizontalAlignment,
-    lowerThirdLookAheadLetterSpacing = s.letterSpacing,
-    lowerThirdLookAheadWordSpacing = s.wordSpacing,
-    lowerThirdLookAheadTransform = s.transform,
-    lowerThirdLookAheadFontSizeAutoFit = s.autoFit,
-    lowerThirdLookAheadBackdrop = s.backdrop,
-    outlines = outlines.copy(lookAheadLowerThird = s.outline),
-)
-
 internal fun SongSettings.withNextSection(s: SongElementStyle) = copy(
     lookAheadNextColor = s.color,
     lookAheadNextFontType = s.fontType,

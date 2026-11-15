@@ -49,7 +49,7 @@ class SongElementVisibilityTest {
 
     @Test
     fun `the lyrics and the look-ahead lines have no such setting`() {
-        for (element in listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION)) {
+        for (element in listOf(SongStyleElement.LYRICS, SongStyleElement.NEXT_SECTION)) {
             for (target in SongStyleTarget.entries) {
                 assertNull(settings.showFor(element, target), "$element on $target must offer no Show control")
             }
@@ -88,7 +88,7 @@ class SongElementVisibilityTest {
 
     @Test
     fun `writing an element with no such setting changes nothing`() {
-        for (element in listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION)) {
+        for (element in listOf(SongStyleElement.LYRICS, SongStyleElement.NEXT_SECTION)) {
             assertSame(
                 settings,
                 settings.withShow(element, full, Constants.EVERY_PAGE),
@@ -239,7 +239,7 @@ class SongElementVisibilityTest {
 
     @Test
     fun `an element the title slide never draws has no switch`() {
-        listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION).forEach {
+        listOf(SongStyleElement.LYRICS, SongStyleElement.NEXT_SECTION).forEach {
             assertEquals(null, SongSettings().shownOnTitleSlide(it), "$it")
             assertEquals(SongSettings(), SongSettings().withShownOnTitleSlide(it, false), "$it is a no-op to write")
         }

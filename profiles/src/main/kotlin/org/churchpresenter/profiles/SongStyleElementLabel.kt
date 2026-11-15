@@ -8,7 +8,6 @@ import org.churchpresenter.strings.generated.resources.song_element_ccli
 import org.churchpresenter.strings.generated.resources.composer
 import org.churchpresenter.strings.generated.resources.song_element_look_ahead
 import org.churchpresenter.strings.generated.resources.song_element_lyrics
-import org.churchpresenter.strings.generated.resources.shortcut_description_next_section
 import org.churchpresenter.strings.generated.resources.song_element_number
 import org.churchpresenter.strings.generated.resources.song_element_section_label
 import org.churchpresenter.strings.generated.resources.song_element_tempo
@@ -24,8 +23,7 @@ internal fun SongStyleElement.label(): String = stringResource(
         SongStyleElement.NUMBER, SongStyleElement.TITLE_SLIDE_NUMBER -> Res.string.song_element_number
         SongStyleElement.TITLE -> Res.string.title
         SongStyleElement.LYRICS -> Res.string.song_element_lyrics
-        SongStyleElement.LOOK_AHEAD -> Res.string.song_element_look_ahead
-        SongStyleElement.NEXT_SECTION -> Res.string.shortcut_description_next_section
+        SongStyleElement.NEXT_SECTION -> Res.string.song_element_look_ahead
         SongStyleElement.SECTION_LABEL -> Res.string.song_element_section_label
         SongStyleElement.AUTHOR -> Res.string.author
         SongStyleElement.COMPOSER -> Res.string.composer

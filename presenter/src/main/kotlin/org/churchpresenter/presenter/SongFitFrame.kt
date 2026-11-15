@@ -59,7 +59,7 @@ private fun SongLook.songFitFrame(maxWidth: Dp, maxHeight: Dp, scaleFactor: Floa
     // How many blocks the frame is actually divided into. One language fills it; more
     // split it, in whichever direction the layout says.
     // A language whose lyrics have a box of their own is fitted in it, not here.
-    val fitLyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+    val fitLyricsElement = SongStyleElement.LYRICS
     val drawnLanguages = activeLanguages
         .count { !ss.isBoxed(fitLyricsElement, isLowerThird, lookOf(it)) }
         .coerceAtLeast(1)
@@ -267,7 +267,7 @@ private fun SongLook.fitSections(
     val drawnLanguages = fitFrame.drawnLanguages
     val refWidth = fitFrame.refWidth
     val refHeight = fitFrame.refHeight
-    val fitLyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+    val fitLyricsElement = SongStyleElement.LYRICS
     // The same tracking the lines are drawn with. Spacing is stored in pixels against
     // the profile's own font size and converted to `em`, so the value does not change
     // as the search tries sizes -- it scales with whichever one it settles on, exactly
@@ -320,9 +320,8 @@ private fun SongLook.fitSections(
     )
     // Each language on its own: its own lines, in its own font, in the same room.
     val perLanguage = if (ss.layoutExtras.fitLanguagesSeparately && drawnLanguages > 1) {
-        val fitElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
-        activeLanguages.associateWith { language ->
-            val look = ss.elementStyle(fitElement, songTarget, lookOf(language))
+                activeLanguages.associateWith { language ->
+            val look = ss.elementStyle(SongStyleElement.LYRICS, songTarget, lookOf(language))
             val letterEm = spacingEm(look.letterSpacing, look.fontSize)
             val wordEm = spacingEm(look.wordSpacing, look.fontSize)
             calculateAutoFitForAllSections(

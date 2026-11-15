@@ -22,7 +22,7 @@ class SongElementChunkTest {
     private val band = SongStyleTarget.LOWER_THIRD
 
     private val ordinary = listOf(SongStyleElement.NUMBER, SongStyleElement.TITLE, SongStyleElement.LYRICS)
-    private val lookAhead = listOf(SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION)
+    private val lookAhead = listOf(SongStyleElement.NEXT_SECTION)
 
     private val tuned = SongSettings(
         fullscreenDisplayMode = verse,
@@ -81,15 +81,15 @@ class SongElementChunkTest {
     }
 
     @Test
-    fun `a look-ahead element writes the look-ahead slide's chunk alone`() {
-        val out = tuned.withChunk(SongStyleElement.LOOK_AHEAD, full, verse)
+    fun `the next section writes the look-ahead slide's chunk alone`() {
+        val out = tuned.withChunk(SongStyleElement.NEXT_SECTION, full, verse)
         assertEquals(verse, out.lookAheadDisplayMode)
         assertEquals(verse, out.fullscreenDisplayMode, "the ordinary slide's own is untouched")
         assertEquals(verse, out.lowerThirdLookAheadDisplayMode)
     }
 
     @Test
-    fun `the next section writes the same field the look-ahead line does`() {
+    fun `the next section on a band writes the band's look-ahead chunk`() {
         val out = tuned.withChunk(SongStyleElement.NEXT_SECTION, band, line)
         assertEquals(line, out.lowerThirdLookAheadDisplayMode)
         assertEquals(line, out.lowerThirdDisplayMode, "the band's ordinary slide is untouched")

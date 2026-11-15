@@ -20,7 +20,7 @@ class SongStyleAccessTest {
         val cases = listOf(
             SongStyleElement.LYRICS to SongStyleTarget.FULL_SCREEN,
             SongStyleElement.LYRICS to SongStyleTarget.LOWER_THIRD,
-            SongStyleElement.LOOK_AHEAD to SongStyleTarget.FULL_SCREEN,
+            SongStyleElement.NEXT_SECTION to SongStyleTarget.FULL_SCREEN,
             SongStyleElement.NEXT_SECTION to SongStyleTarget.LOWER_THIRD,
         )
         cases.forEach { (element, target) ->

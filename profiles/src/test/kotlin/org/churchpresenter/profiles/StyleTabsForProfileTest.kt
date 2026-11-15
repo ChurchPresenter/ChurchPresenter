@@ -61,8 +61,8 @@ class StyleTabsForProfileTest {
 
     @Test
     fun `the look-ahead chip follows the look-ahead switch`() {
-        assertTrue(CustomizeElement.SONG_LOOK_AHEAD in styleElementsFor(CustomizePane.SONGS, allOn))
-        assertFalse(CustomizeElement.SONG_LOOK_AHEAD in styleElementsFor(CustomizePane.SONGS, OutputProfile()))
+        assertTrue(CustomizeElement.SONG_NEXT_SECTION in styleElementsFor(CustomizePane.SONGS, allOn))
+        assertFalse(CustomizeElement.SONG_NEXT_SECTION in styleElementsFor(CustomizePane.SONGS, OutputProfile()))
     }
 
     @Test
