@@ -2,8 +2,6 @@ package org.churchpresenter.presenter
 
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.settings.languageDisplayOrder
-import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 
 /*
@@ -41,19 +39,13 @@ internal val BibleLottieTemplate.referenceSlotCount: Int
 
 /**
  * A title slide's lines, split into its headings -- the number and each language's title -- and
- * its credits, as plain text. [language] is the languages the output shows.
+ * its credits, as plain text. [languages] are the song's own slots the output shows, in order.
  */
 internal fun titleSlideHeadingsAndCredits(
     section: LyricSection,
     settings: SongSettings,
-    language: String,
+    languages: List<Int>,
 ): Pair<List<String>, List<String>> {
-    val languages = songLanguageSelection(
-        language,
-        emptyList(),
-        section.translations.size + 1,
-        settings.languageDisplayOrder(),
-    )
     val lines = titleSlideLines(section, settings, languages)
     // TITLE_SLIDE_NUMBER, because `titleSlideLines` is what produced these: the lyric slides'
     // NUMBER never appears in them.
@@ -71,15 +63,14 @@ internal fun titleSlideHeadingsAndCredits(
 internal fun titleSlidePresetTexts(
     section: LyricSection,
     settings: SongSettings,
-    languageDisplay: String,
+    languages: List<Int>,
     layerNames: Set<String>,
 ): Map<String, String> {
     if (section.type != Constants.SECTION_TYPE_TITLE_SLIDE) return emptyMap()
     val creditLayers = listOf(PRESET_LAYER_INFO, PRESET_LAYER_DETAIL).filter { it in layerNames }
     val hasName = PRESET_LAYER_NAME in layerNames
     if (!hasName && creditLayers.isEmpty()) return emptyMap()
-    val language = languageDisplay.ifBlank { settings.lowerThirdLanguageDisplay }
-    val (headings, credits) = titleSlideHeadingsAndCredits(section, settings, language)
+    val (headings, credits) = titleSlideHeadingsAndCredits(section, settings, languages)
     val creditLines = splitEvenly(credits, creditLayers.size)
     return buildMap {
         if (hasName) put(PRESET_LAYER_NAME, headings.joinToString(HEADING_SEPARATOR))

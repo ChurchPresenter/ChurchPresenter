@@ -5,6 +5,8 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.SongLayoutExtras
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.languageDisplayOrder
+import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,10 +31,11 @@ class SongLanguagePlacesTest {
         languageOrder = listOf(1, 0),
     )
 
-    private fun band(language: String, slots: Int = 1) = songBandSlots(
+    private fun band(language: String, slots: Int = 1, translations: List<Int> = emptyList()) = songBandSlots(
         SongBandPage(verse, listOf(verse), 0, 0),
         spanishFirst,
-        language,
+        // As `SongLook` resolves the output's languages before handing them to the band.
+        songLanguageSelection(language, translations, available = 2, order = spanishFirst.languageDisplayOrder()),
         slots,
         isKey = false,
     )
@@ -55,6 +58,15 @@ class SongLanguagePlacesTest {
 
         assertEquals("Sublime gracia del Señor", both.getValue(BibleLottieTemplate.LAYER_TEXT_1).text)
         assertEquals("Amazing grace, how sweet the sound", both.getValue(BibleLottieTemplate.LAYER_TEXT_2).text)
+    }
+
+    @Test
+    fun `the band shows only the places the profile picked`() {
+        // Picked in Content & sources: the first place alone, on a template with room for two.
+        val first = band(Constants.SONG_LANG_BOTH, slots = 2, translations = listOf(0))
+
+        assertEquals("Sublime gracia del Señor", first.getValue(BibleLottieTemplate.LAYER_TEXT_1).text)
+        assertEquals("", first.getValue(BibleLottieTemplate.LAYER_TEXT_2).text)
     }
 
     @Test

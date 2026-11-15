@@ -4,6 +4,8 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.languageDisplayOrder
+import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,7 +56,20 @@ class SongBandSlotsTest {
         availableSlots: Int = 1,
         all: List<LyricSection> = listOf(verse, chorus),
         index: Int = 0,
-    ) = songBandSlots(SongBandPage(section, all, index, line), settings, language, availableSlots, isKey = false)
+    ) = songBandSlots(
+        SongBandPage(section, all, index, line),
+        settings,
+        // What `SongLook` hands the band: the output's mode -- the lower third's own setting where
+        // the output names none -- resolved against this song's languages.
+        songLanguageSelection(
+            language.ifBlank { settings.lowerThirdLanguageDisplay },
+            emptyList(),
+            section.translations.size + 1,
+            settings.languageDisplayOrder(),
+        ),
+        availableSlots,
+        isKey = false,
+    )
 
     private fun Map<String, BandSlotText>.text(name: String) = getValue(name).text
 
@@ -150,11 +165,11 @@ class SongBandSlotsTest {
             lyricsLowerThirdTransform = Constants.TEXT_TRANSFORM_UPPERCASE,
         )
         val page = SongBandPage(verse, listOf(verse), 0, 0)
-        val normal = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = false)
+        val normal = songBandSlots(page, settings, listOf(0), 1, isKey = false)
         assertEquals(44, normal.getValue(TEXT_1).style.fontSizePt)
         assertEquals("AMAZING GRACE, HOW SWEET THE SOUND", normal.text(TEXT_1))
         assertEquals("Georgia", normal.getValue(REFERENCE_1).style.font.family)
-        val key = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = true)
+        val key = songBandSlots(page, settings, listOf(0), 1, isKey = true)
         assertEquals(Color.White, key.getValue(TEXT_1).style.color)
     }
 
@@ -300,7 +315,7 @@ class SongBandSlotsTest {
         // Text1 and Text2 but only Reference1 -- a hand-made file (#1017).
         val page = SongBandPage(titleSlide, listOf(titleSlide, verse), 0, 0)
         val band = songBandSlots(
-            page, lineMode, Constants.SONG_LANG_PRIMARY, availableSlots = 2, isKey = false, referenceSlots = 1,
+            page, lineMode, listOf(0), availableSlots = 2, isKey = false, referenceSlots = 1,
         )
         assertEquals("John Newton  ·  Traditional", band.text(REFERENCE_1))
         assertEquals("", band.text(REFERENCE_2))
@@ -311,8 +326,8 @@ class SongBandSlotsTest {
         val title = verse.copy(type = Constants.SECTION_TYPE_TITLE_SLIDE, lines = emptyList())
         val settings = SongSettings(titleFontSize = 90, titleLowerThirdFontSize = 30, titleColor = "#FF0000")
         val page = SongBandPage(title, listOf(title, verse), 0, 0)
-        val band = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = false)
-        val whole = songBandSlots(page, settings, Constants.SONG_LANG_PRIMARY, 1, isKey = false, fullScreen = true)
+        val band = songBandSlots(page, settings, listOf(0), 1, isKey = false)
+        val whole = songBandSlots(page, settings, listOf(0), 1, isKey = false, fullScreen = true)
 
         assertEquals(30, band.getValue(TEXT_1).style.fontSizePt)
         assertEquals(90, whole.getValue(TEXT_1).style.fontSizePt)
