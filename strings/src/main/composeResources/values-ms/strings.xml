@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">Kod %1$s — benarkan hanya jika telefon memaparkan kod yang sama</string>
     <string name="calendar_enroll_qr_title">Imbas dengan telefon</string>
     <string name="calendar_enroll_invite_failed">Tidak dapat mencipta jemputan — komputer ini tidak dapat mencapai relay.</string>
-    <string name="calendar_enroll_qr_body">Imbas kod ini dengan telefon yang baru anda benarkan untuk selesai.</string>
+    <string name="calendar_enroll_qr_body">Imbas kod ini dengan aplikasi ChurchPresenter untuk mendaftarkan telefon. Ia sah selama 8 jam, dari mana-mana sahaja.</string>
     <string name="remote_api_calendar_enroll_detail">Sebuah telefon atau tablet mahu merancang ibadat dalam kalendar dari mana-mana sahaja.</string>
     <string name="remote_activity_calendar_enroll">Didaftar untuk merancang kalendar</string>
     <string name="start_outputs_hidden">Mula dengan skrin output tersembunyi</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Saiz zon</string>
     <string name="setting_field_zone_styles">Gaya zon</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Setiap output menunjukkan bahasa dalam kedudukan ini, satu bahasa atau beberapa</string>
+    <string name="song_language_names_where">Nama bahasa ditetapkan dan disunting dalam menu Bahasa pada tab Lagu.</string>
+    <string name="profile_song_looks_follow_language">Bahasa</string>
+    <string name="profile_song_looks_follow_place_hint">Setiap kedudukan mengekalkan rupanya walau bahasa apa pun yang masuk ke dalamnya</string>
+    <string name="profile_song_looks_follow_language_hint">Setiap bahasa mengekalkan rupanya sendiri ke mana sahaja ia dialihkan</string>
 </resources>

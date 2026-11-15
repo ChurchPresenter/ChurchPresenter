@@ -2603,7 +2603,7 @@
     <string name="remote_api_calendar_enroll_code">Kood %1$s — luba ainult siis, kui telefon näitab sama koodi</string>
     <string name="calendar_enroll_qr_title">Skanni telefoniga</string>
     <string name="calendar_enroll_invite_failed">Kutset ei õnnestunud luua — see arvuti ei jõudnud releeni.</string>
-    <string name="calendar_enroll_qr_body">Lõpetamiseks skanni see kood telefoniga, mille just lubasid.</string>
+    <string name="calendar_enroll_qr_body">Telefoni liitmiseks skanni see kood ChurchPresenteri rakendusega. Kood kehtib 8 tundi ja töötab igal pool.</string>
     <string name="remote_api_calendar_enroll_detail">Telefon või tahvelarvuti soovib kalendris teenistusi planeerida ükskõik kust.</string>
     <string name="remote_activity_calendar_enroll">Registreeritud kalendrit planeerima</string>
     <string name="start_outputs_hidden">Käivita väljundekraanid peidetuna</string>
@@ -4812,4 +4812,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Tsoonide suurused</string>
     <string name="setting_field_zone_styles">Tsoonide stiilid</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Iga väljund näitab nendes kohtades olevaid keeli, üht või mitut</string>
+    <string name="song_language_names_where">Keelte nimesid määratakse ja muudetakse vahekaardi Laulud menüüs Keeled.</string>
+    <string name="profile_song_looks_follow_language">Keel</string>
+    <string name="profile_song_looks_follow_place_hint">Iga koht säilitab oma välimuse, ükskõik milline keel sinna liigub</string>
+    <string name="profile_song_looks_follow_language_hint">Iga keel säilitab oma välimuse, kuhu iganes see liigub</string>
 </resources>

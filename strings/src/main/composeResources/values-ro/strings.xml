@@ -2600,7 +2600,7 @@
     <string name="remote_api_calendar_enroll_code">Cod %1$s — permite doar dacă telefonul afișează același cod</string>
     <string name="calendar_enroll_qr_title">Scanează cu telefonul</string>
     <string name="calendar_enroll_invite_failed">Nu s-a putut crea o invitație — acest computer nu a putut contacta releul.</string>
-    <string name="calendar_enroll_qr_body">Scanează acest cod cu telefonul pe care tocmai l-ai permis pentru a finaliza.</string>
+    <string name="calendar_enroll_qr_body">Scanează acest cod cu aplicația ChurchPresenter pentru a înscrie telefonul. Funcționează 8 ore, de oriunde.</string>
     <string name="remote_api_calendar_enroll_detail">Un telefon sau o tabletă vrea să planifice servicii în calendar de oriunde.</string>
     <string name="remote_activity_calendar_enroll">Înscris pentru planificarea calendarului</string>
     <string name="start_outputs_hidden">Pornește cu ecranele de ieșire ascunse</string>
@@ -4809,4 +4809,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Dimensiuni zone</string>
     <string name="setting_field_zone_styles">Stiluri zone</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Fiecare ieșire afișează limbile din aceste poziții, una sau mai multe</string>
+    <string name="song_language_names_where">Numele limbilor se setează și se editează în meniul Limbi din fila Cântări.</string>
+    <string name="profile_song_looks_follow_language">Limba</string>
+    <string name="profile_song_looks_follow_place_hint">Fiecare poziție își păstrează aspectul, oricare limbă ar ajunge în ea</string>
+    <string name="profile_song_looks_follow_language_hint">Fiecare limbă își păstrează aspectul oriunde s-ar muta</string>
 </resources>

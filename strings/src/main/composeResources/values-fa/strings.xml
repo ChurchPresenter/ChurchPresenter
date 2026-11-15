@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">کد %1$s — فقط در صورتی اجازه دهید که تلفن همین کد را نشان دهد</string>
     <string name="calendar_enroll_qr_title">با تلفن اسکن کنید</string>
     <string name="calendar_enroll_invite_failed">ایجاد دعوت‌نامه ممکن نشد — این رایانه نتوانست به رله دسترسی پیدا کند.</string>
-    <string name="calendar_enroll_qr_body">برای پایان، این کد را با تلفنی که هم‌اکنون اجازه دادید اسکن کنید.</string>
+    <string name="calendar_enroll_qr_body">این کد را با برنامهٔ ChurchPresenter اسکن کنید تا تلفن ثبت شود. تا ۸ ساعت و از هر جایی کار می‌کند.</string>
     <string name="remote_api_calendar_enroll_detail">یک تلفن یا تبلت می‌خواهد خدمات را از هر جا در تقویم برنامه‌ریزی کند.</string>
     <string name="remote_activity_calendar_enroll">برای برنامه‌ریزی تقویم ثبت‌نام شد</string>
     <string name="start_outputs_hidden">شروع با صفحه‌های خروجی پنهان</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">اندازه نواحی</string>
     <string name="setting_field_zone_styles">سبک نواحی</string>
+    <string name="song_alias">نام مستعار</string>
+    <string name="song_language_places_subtitle">هر خروجی زبان‌ها را در این جایگاه‌ها نشان می‌دهد، یک زبان یا چند زبان</string>
+    <string name="song_language_names_where">نام زبان‌ها در منوی زبان‌ها در زبانهٔ سرودها تعیین و ویرایش می‌شود.</string>
+    <string name="profile_song_looks_follow_language">زبان</string>
+    <string name="profile_song_looks_follow_place_hint">هر جایگاه ظاهر خود را نگه می‌دارد، هر زبانی که به آن بیاید</string>
+    <string name="profile_song_looks_follow_language_hint">هر زبان ظاهر خود را هر جا برود نگه می‌دارد</string>
 </resources>

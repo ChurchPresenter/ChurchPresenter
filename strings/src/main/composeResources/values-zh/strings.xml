@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">代码 %1$s — 仅当手机显示相同代码时才允许</string>
     <string name="calendar_enroll_qr_title">用手机扫描</string>
     <string name="calendar_enroll_invite_failed">无法创建邀请——这台电脑无法连接到中继。</string>
-    <string name="calendar_enroll_qr_body">用刚才允许的手机扫描此码以完成。</string>
+    <string name="calendar_enroll_qr_body">用 ChurchPresenter 应用扫描此码以登记这部手机。此码 8 小时内有效，在任何地方都可使用。</string>
     <string name="remote_api_calendar_enroll_detail">一部手机或平板想要随时随地在日历中规划聚会。</string>
     <string name="remote_activity_calendar_enroll">已注册以规划日历</string>
     <string name="start_outputs_hidden">启动时隐藏输出屏幕</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y（%）</string>
     <string name="setting_field_zone_sizes">区域大小</string>
     <string name="setting_field_zone_styles">区域样式</string>
+    <string name="song_alias">别名</string>
+    <string name="song_language_places_subtitle">每个输出都在这些位置显示语言，一种或多种</string>
+    <string name="song_language_names_where">语言名称在“歌曲”标签页的“语言”菜单中设置和编辑。</string>
+    <string name="profile_song_looks_follow_language">语言</string>
+    <string name="profile_song_looks_follow_place_hint">无论哪种语言移入，每个位置都保留自己的外观</string>
+    <string name="profile_song_looks_follow_language_hint">每种语言无论移到哪里都保留自己的外观</string>
 </resources>

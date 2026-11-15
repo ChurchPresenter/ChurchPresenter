@@ -2570,7 +2570,7 @@
     <string name="remote_api_calendar_enroll_code">Код %1$s — дозволяйте лише якщо телефон показує той самий код</string>
     <string name="calendar_enroll_qr_title">Скануйте телефоном</string>
     <string name="calendar_enroll_invite_failed">Не вдалося створити запрошення — цей комп’ютер не зміг зв’язатися з ретранслятором.</string>
-    <string name="calendar_enroll_qr_body">Щоб завершити, відскануйте цей код телефоном, який ви щойно дозволили.</string>
+    <string name="calendar_enroll_qr_body">Відскануйте цей код у застосунку ChurchPresenter, щоб підключити телефон. Він діє 8 годин, звідусіль.</string>
     <string name="remote_api_calendar_enroll_detail">Телефон або планшет хоче планувати служіння в календарі звідусіль.</string>
     <string name="remote_activity_calendar_enroll">Зареєстровано для планування календаря</string>
     <string name="start_outputs_hidden">Запускати з прихованими екранами виводу</string>
@@ -4779,4 +4779,10 @@
     <string name="setting_field_y_percent">Y, %</string>
     <string name="setting_field_zone_sizes">Розміри зон</string>
     <string name="setting_field_zone_styles">Стилі зон</string>
+    <string name="song_alias">Псевдонім</string>
+    <string name="song_language_places_subtitle">Кожен вихід показує мови в цих місцях — одну мову або кілька</string>
+    <string name="song_language_names_where">Назви мов задаються й редагуються в меню «Мови» на вкладці «Пісні».</string>
+    <string name="profile_song_looks_follow_language">Мова</string>
+    <string name="profile_song_looks_follow_place_hint">Кожне місце зберігає свій вигляд, яка б мова в нього не перейшла</string>
+    <string name="profile_song_looks_follow_language_hint">Кожна мова зберігає власний вигляд, куди б її не перемістили</string>
 </resources>
