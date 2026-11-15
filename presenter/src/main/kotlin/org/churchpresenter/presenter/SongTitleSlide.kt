@@ -58,7 +58,10 @@ internal data class TitleSlideLine(
     val element: SongStyleElement,
     val text: String,
     val number: String? = null,
-    /** Which of the song's languages a title line is in, `0` the primary; the credits have none. */
+    /**
+     * The look a title line is drawn with -- its box, its style and its move -- which is the look of
+     * the language it is in (`SongLook.lookOf`); the credits have none.
+     */
     val language: Int = 0,
 ) {
     /** The line as plain text, for the stage monitor and the companion app. */
@@ -77,19 +80,21 @@ internal data class TitleSlideLine(
  * says so, and otherwise has a row of its own above. The title is given in the language(s) the
  * output shows -- [languages] are positions into the song's languages, `0` the primary, the same
  * list `SongPresenter` draws the lyrics by -- so a bilingual song opens with both its titles on an
- * output showing both languages; the number joins the first of them.
+ * output showing both languages; the number joins the first of them. [lookOf] gives each the look it
+ * is drawn with.
  */
 internal fun titleSlideLines(
     section: LyricSection,
     settings: SongSettings,
     languages: List<Int> = listOf(0),
+    lookOf: (Int) -> Int = { it },
 ): List<TitleSlideLine> {
     fun shown(element: SongStyleElement) = settings.shownOnTitleSlide(element) == true
     val number = section.shownNumber()?.takeIf { shown(SongStyleElement.TITLE_SLIDE_NUMBER) }
     val titles = titleSlideTitles(section, languages)
         .takeIf { shown(SongStyleElement.TITLE) }
         .orEmpty()
-        .map { (language, title) -> TitleSlideLine(SongStyleElement.TITLE, title, language = language) }
+        .map { (language, title) -> TitleSlideLine(SongStyleElement.TITLE, title, language = lookOf(language)) }
     val heading = when {
         number == null -> titles
         settings.titleSlideNumberBeforeTitle && titles.isNotEmpty() ->
@@ -150,8 +155,9 @@ internal fun SongTitleSlideContent(
     scaleFactor: Float,
     contentAlignment: Alignment,
     modifier: Modifier = Modifier,
+    lookOf: (Int) -> Int = { it },
 ) {
-    val allLines = titleSlideLines(section, settings, languages)
+    val allLines = titleSlideLines(section, settings, languages, lookOf)
     val titleSlideNumber = settings.layoutExtras.titleSlideNumber
     val numberCorner = titleSlideNumber.cornerFor(target.isLowerThird)
     val cornered = numberCorner != Constants.NONE

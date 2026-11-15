@@ -62,6 +62,17 @@ data class SongLayoutExtras(
     val autoFitEachSlide: Boolean = false,
     /** [autoFitEachSlide] for the lower third. */
     val autoFitEachSlideLowerThird: Boolean = false,
+    /**
+     * Whether each language's look stays with its place in the Songs tab's display order (true, the
+     * default) or goes with the language (false).
+     *
+     * A profile names the places it shows, not the languages (`songLanguagePicks`), so moving
+     * Yoruba to the top puts Yoruba on every output showing the first place. Following the place,
+     * it is drawn there with the first place's look -- the look stored as language 1 -- just as a
+     * Bible translation takes its place's look ([BibleSettings.looksFollowPosition]). Following the
+     * language, it keeps its own. Read at draw time, so no stored look ever moves.
+     */
+    val languageLooksFollowPlace: Boolean = true,
     /** The All look of a song's languages, where the first language has values of its own -- see [SongAllLanguages]. */
     val allLanguages: SongAllLanguages = SongAllLanguages(),
     /**

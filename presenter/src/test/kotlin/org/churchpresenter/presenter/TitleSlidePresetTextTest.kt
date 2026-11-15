@@ -3,6 +3,7 @@ package org.churchpresenter.presenter
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.SongSettings
+import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,7 +33,12 @@ class TitleSlidePresetTextTest {
         section: LyricSection = titleSlide,
         layers: Set<String> = presetLayers,
         language: String = Constants.SONG_LANG_PRIMARY,
-    ) = titleSlidePresetTexts(section, settings, language, layers)
+    ) = titleSlidePresetTexts(
+        section,
+        settings,
+        songLanguageSelection(language, emptyList(), section.translations.size + 1),
+        layers,
+    )
 
     @Test
     fun `the number and title go in Name, the credits across Info and Detail`() {

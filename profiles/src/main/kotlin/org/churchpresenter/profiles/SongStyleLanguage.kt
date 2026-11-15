@@ -10,13 +10,19 @@ import org.churchpresenter.presenter.translationElement
 import androidx.compose.runtime.Composable
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.settings.songLanguageSelection
+import org.churchpresenter.settings.languageDisplayOrder
+import org.churchpresenter.settings.songLanguagePicks
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_bible_translation_place
+import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.settings.translationSettings
 import org.churchpresenter.settings.withTranslationSettings
 import org.churchpresenter.sharedui.utils.songLanguageName
 
 /**
- * Which language of a bilingual song the tab is styling.
+ * Which look of a song's languages the tab is styling -- a place's look in the Songs tab's display
+ * order where the profile's looks follow the place, a language's own where they follow the language
+ * (`SongLayoutExtras.languageLooksFollowPlace`).
  *
  * The Bible tab has one of these per translation, each with a full profile of its own; a song has
  * two languages rather than a list, so this is a pair rather than an index -- but it is the same
@@ -31,19 +37,40 @@ internal enum class SongStyleLanguage(val translation: Int) { PRIMARY(0), SECOND
 /** True for every language beside the first, each of which has a look of its own to edit. */
 internal val SongStyleLanguage.isTranslation: Boolean get() = translation > 0
 
-/** The switch's label in the per-output dialog, which names them. */
+/**
+ * The switch's label in the per-output dialog, which names them: a place's look by its number and
+ * the language in it now, since the look stays when another language moves in -- as the Bible page
+ * labels a translation's place -- and a language's own look by its name.
+ */
 @Composable
-internal fun SongStyleLanguage.nameLabel(song: SongSettings): String = songLanguageName(song, translation)
+internal fun SongStyleLanguage.nameLabel(song: SongSettings): String =
+    if (song.layoutExtras.languageLooksFollowPlace) {
+        stringResource(Res.string.profile_bible_translation_place, translation + 1, placeName(song))
+    } else {
+        songLanguageName(song, translation)
+    }
+
+/** The name of the language in this place of the display order now. */
+@Composable
+internal fun SongStyleLanguage.placeName(song: SongSettings): String =
+    songLanguageName(song, song.languageDisplayOrder().getOrElse(translation) { translation })
 
 /**
- * The languages an output offers to style, given what it has been told to show.
+ * The looks an output offers to style, given what it has been told to show and [song]'s display
+ * order and looks switch.
  *
- * Read through the same [songLanguageSelection] the presenter draws by, so the switch can never
- * offer a language the output does not show, or miss one it does.
+ * Read through the same [songLanguagePicks] the presenter draws by, so the switch can never offer a
+ * look the output does not draw, or miss one it does.
  */
-internal fun styleLanguagesFor(songMode: String, selection: List<Int>): List<SongStyleLanguage> =
-    songLanguageSelection(songMode, selection, MAX_SONG_TRANSLATIONS)
-        .mapNotNull { index -> SongStyleLanguage.entries.firstOrNull { it.translation == index } }
+internal fun styleLanguagesFor(songMode: String, selection: List<Int>, song: SongSettings): List<SongStyleLanguage> =
+    songLanguagePicks(
+        songMode,
+        selection,
+        MAX_SONG_TRANSLATIONS,
+        song.languageDisplayOrder(),
+        song.layoutExtras.languageLooksFollowPlace,
+    )
+        .mapNotNull { pick -> SongStyleLanguage.entries.firstOrNull { it.translation == pick.look } }
         .ifEmpty { listOf(SongStyleLanguage.PRIMARY) }
 
 /**

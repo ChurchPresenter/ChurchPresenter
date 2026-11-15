@@ -47,6 +47,7 @@ internal class SongSlide(
     val isKey get() = frame.isKey
     val ss get() = frame.ss
     val activeLanguages get() = frame.activeLanguages
+    fun lookOf(slot: Int): Int = frame.lookOf(slot)
     val laFontSize get() = frame.laFontSize
     val laBold get() = frame.laBold
     val laItalic get() = frame.laItalic
@@ -189,9 +190,9 @@ internal class SongSlide(
     val boxLyricsElement =
         if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
     val languageBlocks = slideBlocks
-        .filterNot { ss.isBoxed(boxLyricsElement, isLowerThird, it.index) }
+        .filterNot { ss.isBoxed(boxLyricsElement, isLowerThird, lookOf(it.index)) }
         .map { block ->
-            if (ss.isBoxed(SongStyleElement.NEXT_SECTION, isLowerThird, block.index)) {
+            if (ss.isBoxed(SongStyleElement.NEXT_SECTION, isLowerThird, lookOf(block.index))) {
                 block.copy(lookAheadLines = emptyList())
             } else {
                 block
@@ -234,7 +235,7 @@ internal class SongSlide(
     // The title is drawn in the leading language's own title profile once that
     // language has a look of its own, and in the primary's otherwise -- the same
     // rule the lyric lines follow.
-    val titleLanguage = slideBlocks.firstOrNull()?.index ?: 0
+    val titleLanguage = lookOf(slideBlocks.firstOrNull()?.index ?: 0)
     val titleOwnStyling = if (ss.languageOverridesStyle(titleLanguage)) {
         songLineStyling(
             profile = ss.elementStyle(SongStyleElement.TITLE, songTarget, titleLanguage),
@@ -312,14 +313,17 @@ internal class SongSlide(
         textStyle = lookAheadTextStyle,
     )
     val lyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
-    val languageLyricStyling = List(MAX_SONG_TRANSLATIONS) { language ->
+
+    // Indexed by the language drawn, styled by the look it is drawn with (`lookOf`).
+    val languageLyricStyling = List(MAX_SONG_TRANSLATIONS) { slot ->
+        val language = lookOf(slot)
         if (languageFitSizes.isNotEmpty()) {
             // Fitted one by one: every language at its own size, its own Auto-fit
             // switch deciding whether it takes it.
             val look = ss.elementStyle(lyricsElement, songTarget, language)
             songLineStyling(
                 profile = look,
-                autoFitFontSize = languageFitSizes[language]?.takeIf { look.autoFit },
+                autoFitFontSize = languageFitSizes[slot]?.takeIf { look.autoFit },
                 scaleFactor = scaleFactor,
                 isKey = isKey,
                 shadowOf = this::scaleElementShadow,
@@ -333,11 +337,12 @@ internal class SongSlide(
             shadowOf = this::scaleElementShadow,
         )
     }
-    val languageLaStyling = List(MAX_SONG_TRANSLATIONS) { language ->
+    val languageLaStyling = List(MAX_SONG_TRANSLATIONS) { slot ->
+        val language = lookOf(slot)
         if (languageFitSizes.isNotEmpty()) {
             songLineStyling(
                 profile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget, language),
-                autoFitFontSize = languageFitSizes[language]?.takeIf { laAutoFitEnabled },
+                autoFitFontSize = languageFitSizes[slot]?.takeIf { laAutoFitEnabled },
                 scaleFactor = scaleFactor,
                 isKey = isKey,
                 shadowOf = this::scaleElementShadow,
@@ -389,6 +394,7 @@ internal fun SongFrame.TextContent(section: LyricSection, lineIndex: Int, innerM
                 settings = ss,
                 target = songTarget,
                 languages = activeLanguages,
+                lookOf = ::lookOf,
                 isKey = isKey,
                 scaleFactor = scaleFactor,
                 contentAlignment = if (isLowerThird) {
@@ -476,12 +482,13 @@ internal fun SongFrame.SlideBoxes(section: LyricSection, lineIndex: Int, alpha: 
         ?.takeIf { it.isNotEmpty() }
         ?: section.title
     val items = if (isTitleSlide) {
-        titleSlideBoxItems(ss, isLowerThird, titleSlideLines(section, ss, activeLanguages))
+        titleSlideBoxItems(ss, isLowerThird, titleSlideLines(section, ss, activeLanguages, ::lookOf))
     } else {
         songBoxItems(
             settings = ss,
             lowerThird = isLowerThird,
             lyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS,
+            lookOf = ::lookOf,
             slide = SongBoxSlide(
                 blocks = blocks,
                 songBlocks = songBlocks,

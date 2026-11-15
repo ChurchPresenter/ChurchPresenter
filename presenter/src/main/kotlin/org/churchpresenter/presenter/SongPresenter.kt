@@ -217,7 +217,7 @@ private fun SongLook.SongLottieBandLayer(loaded: BibleLottieTemplate, modifier: 
             template = loaded,
             section = lyricSection,
             settings = ss,
-            languageDisplay = effectiveLangDisplay,
+            languages = activeLanguages,
             lineIndex = LocalBandSongLineIndex.current.takeIf { it >= 0 } ?: displayLineIndex,
             outgoingSection = outgoing.lyricSection,
             outgoingLineIndex = outgoing.lyricLineIndex,

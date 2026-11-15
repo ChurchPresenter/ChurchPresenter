@@ -102,10 +102,10 @@ internal fun SongLanguageScopeButtons(
     SegmentedButton(
         items = listOf(
             SegmentedButtonItem(Constants.SONG_LANG_BOTH, stringResource(Res.string.song_language_both)),
-            SegmentedButtonItem(Constants.SONG_LANG_PRIMARY, SongStyleLanguage.PRIMARY.nameLabel(song)),
-            SegmentedButtonItem(Constants.SONG_LANG_SECONDARY, SongStyleLanguage.SECONDARY.nameLabel(song)),
-            SegmentedButtonItem(Constants.SONG_LANG_THIRD, SongStyleLanguage.THIRD.nameLabel(song)),
-            SegmentedButtonItem(Constants.SONG_LANG_FOURTH, SongStyleLanguage.FOURTH.nameLabel(song)),
+            SegmentedButtonItem(Constants.SONG_LANG_PRIMARY, SongStyleLanguage.PRIMARY.placeName(song)),
+            SegmentedButtonItem(Constants.SONG_LANG_SECONDARY, SongStyleLanguage.SECONDARY.placeName(song)),
+            SegmentedButtonItem(Constants.SONG_LANG_THIRD, SongStyleLanguage.THIRD.placeName(song)),
+            SegmentedButtonItem(Constants.SONG_LANG_FOURTH, SongStyleLanguage.FOURTH.placeName(song)),
         ),
         selectedValue = outputMode ?: settings.songLanguageFor(target),
         onValueChange = { lang ->

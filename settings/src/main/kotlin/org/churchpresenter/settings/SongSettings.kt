@@ -292,8 +292,9 @@ data class SongSettings(
      * The languages beside the primary, in order -- how each is labelled and, where it asks for it,
      * how it is drawn. Up to [MAX_SONG_EXTRA_TRANSLATIONS] of them.
      *
-     * Position `n` here is language `n + 1` of the song, which is the index an output's
-     * [ScreenAssignment.songTranslations] names. Absent or short is normal and means "no styling of
+     * Position `n` here is look `n + 1`: language `n + 1`'s own look, or the look of place `n + 1`
+     * in the display order on a profile whose looks follow the place
+     * ([SongLayoutExtras.languageLooksFollowPlace]). Absent or short is normal and means "no styling of
      * its own": a language with no entry draws exactly like the primary, which is what every
      * bilingual song did before this list existed.
      */
@@ -312,9 +313,10 @@ data class SongSettings(
 
     /**
      * The order a song's languages are shown in, by slot -- `0` the primary -- as the Songs tab's
-     * Display order sets it. One order for the install, in [SONG_GLOBAL_KEYS]; each profile's own
-     * `songTranslations` is rewritten to follow it when it changes. Read through
-     * [languageDisplayOrder], which fills in whatever this leaves out.
+     * Languages menu sets it. One order for the install, in [SONG_GLOBAL_KEYS]. A profile's own
+     * `songTranslations` names places in it (`songLanguagePicks`), so moving a language changes what
+     * every output shows without changing any profile. Read through [languageDisplayOrder], which
+     * fills in whatever this leaves out.
      */
     val languageOrder: List<Int> = emptyList(),
 

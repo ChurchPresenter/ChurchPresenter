@@ -102,7 +102,7 @@ internal fun SongSlide.EndOfSongIndicator(afterHeld: Boolean = false) {
 @Composable
 internal fun SongSlide.NextSectionPlaceholder(block: SongLanguageBlock, gapAfter: Boolean) {
     val holdsNext = lookAheadEnabled && block.lookAheadLines.isEmpty() && block.lines.isNotEmpty()
-    if (holdsNext && !ss.isBoxed(SongStyleElement.NEXT_SECTION, isLowerThird, block.index)) {
+    if (holdsNext && !ss.isBoxed(SongStyleElement.NEXT_SECTION, isLowerThird, lookOf(block.index))) {
         if (!laIsLineMode && !gapAfter) {
             Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
         }
@@ -171,7 +171,7 @@ internal fun SongSlide.NextSectionOf(block: SongLanguageBlock, gapAfter: Boolean
     }
     val next = SongStyleElement.NEXT_SECTION
     Column(Modifier.fillMaxWidth()) {
-        SongElementLines(ss, next, isLowerThird, block.index, scaleFactor) {
+        SongElementLines(ss, next, isLowerThird, lookOf(block.index), scaleFactor) {
             if (!gapAfter) LookAheadSpacer(laStart, laStart)
             block.allLines.drop(laStart).forEachIndexed { offset, line ->
                 LyricLine(laStart + offset, line, laStart, block.index)
@@ -202,7 +202,7 @@ internal fun SongSlide.LanguageLines(block: SongLanguageBlock) {
         if (block.index != 0 || mainChartRows.isEmpty()) {
             val laStart = block.lookAheadStart
             val lyricCount = if (laStart >= 0) laStart else block.allLines.size
-            SongElementLines(ss, lyricsElement, isLowerThird, block.index, scaleFactor) {
+            SongElementLines(ss, lyricsElement, isLowerThird, lookOf(block.index), scaleFactor) {
                 block.allLines.take(lyricCount).forEachIndexed { idx, line ->
                     LyricLine(idx, line, laStart, block.index)
                 }

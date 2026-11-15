@@ -38,7 +38,7 @@ data class LyricSection(
      *
      * A list rather than the single `secondaryLines` it replaced, because a song may be sung in up
      * to [MAX_SONG_TRANSLATIONS] languages at once. Position `n` here is language `n + 1` of
-     * [SongItem.translationList], which is what an output's `songTranslations` indexes into — so a
+     * [SongItem.translationList], the slot an output's places resolve to — so a
      * language the song does not have is a gap in the list, never a shifted entry.
      */
     val translations: List<SectionTranslation> = emptyList(),
@@ -98,7 +98,7 @@ data class LyricSection(
     val secondaryTitle: String get() = translations.firstOrNull()?.title.orEmpty()
     val secondaryLines: List<String> get() = translations.firstOrNull()?.lines ?: emptyList()
 
-    /** This slide in every language, the primary first — the order `songTranslations` indexes. */
+    /** This slide in every language, the primary first — indexed by slot, as `songLanguagePicks` gives them. */
     fun allLanguageLines(): List<List<String>> = listOf(lines) + translations.map { it.lines }
 
     /** The title in every language, the primary first, aligned with [allLanguageLines]. */

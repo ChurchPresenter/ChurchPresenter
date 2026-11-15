@@ -159,8 +159,12 @@ data class OutputProfile(
     val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
     val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
 
-    /** The languages this profile draws, in order, for a song carrying [available] of them. */
-    fun songLanguages(available: Int): List<Int> = songLanguageSelection(songMode, songTranslations, available)
+    /**
+     * The languages this profile draws, in order, for a song carrying [available] of them, with the
+     * install's display [order] deciding which language is in each place.
+     */
+    fun songLanguages(available: Int, order: List<Int> = IDENTITY_LANGUAGE_ORDER): List<Int> =
+        songLanguageSelection(songMode, songTranslations, available, order)
 
     /**
      * True if [displayMode] is a lower-third band.

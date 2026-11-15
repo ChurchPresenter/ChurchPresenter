@@ -23,7 +23,8 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.songLanguageSelection
+import org.churchpresenter.settings.languageDisplayOrder
+import org.churchpresenter.settings.songLanguagePicks
 import org.churchpresenter.settings.titleSlideHidesBackground
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.SongSettings
@@ -90,7 +91,26 @@ internal class SongLook(
         lyricSection.translations.indexOfLast { it.isDrawn() },
         allLyricSections.maxOfOrNull { section -> section.translations.indexOfLast { it.isDrawn() } } ?: -1,
     ) + 2
-    val activeLanguages = songLanguageSelection(effectiveLangDisplay, languageSelection, availableLanguages)
+
+    // The selection names places in the Songs tab's display order, so this is where they become the
+    // song's own languages (#1029); each comes with the look it is drawn in.
+    val languagePicks = songLanguagePicks(
+        effectiveLangDisplay,
+        languageSelection,
+        availableLanguages,
+        ss.languageDisplayOrder(),
+        ss.layoutExtras.languageLooksFollowPlace,
+    )
+    val activeLanguages = languagePicks.map { it.slot }
+    private val lookBySlot = languagePicks.associate { it.slot to it.look }
+
+    /**
+     * The look language [slot] is drawn with on this output: its place's where looks follow the
+     * place, its own otherwise. Every style, box and move is read by this index, and every line by
+     * the slot. A slot this output does not pick is only ever drawn as the fallback for a slide with
+     * none of the picked languages in it, so it takes the first pick's look.
+     */
+    fun lookOf(slot: Int): Int = lookBySlot[slot] ?: languagePicks.firstOrNull()?.look ?: slot
 
     /**
      * The element's outline as this output draws it.
