@@ -94,6 +94,16 @@ class EasySlidesConverterTest {
     }
 
     @Test
+    fun `a song number that is not a number becomes the song's alias`() {
+        val file = exportFile(item("Amazing Grace", "[V1]\nLine", number = "5b"))
+
+        val written = EasySlidesConverter.convert(file, File(temp, "out")).outputFiles.single()
+
+        assertEquals("Amazing Grace.song", written.name)
+        assertTrue(written.readText().contains("alias: 5b"), written.readText())
+    }
+
+    @Test
     fun `two songs sharing a title both survive instead of one overwriting the other`() {
         val file = exportFile(item("Grace", "[V1]\nOne"), item("Grace", "[V1]\nTwo"))
         val out = File(temp, "out-dupes")

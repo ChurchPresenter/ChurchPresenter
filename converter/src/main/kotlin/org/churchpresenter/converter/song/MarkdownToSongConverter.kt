@@ -17,6 +17,8 @@ data class ParsedSong(
      * no lines rather than being left out.
      */
     val secondarySections: List<SongSection> = emptyList(),
+    /** What the library prints where it is not a plain number (`12a`), shown by the app in its place. */
+    val alias: String = "",
 )
 
 data class SongSection(
@@ -99,13 +101,14 @@ object MarkdownToSongConverter {
 
         // Frontmatter
         val hasMeta = song.author.isNotBlank() || song.copyright.isNotBlank() ||
-            song.composer.isNotBlank() || song.ccli.isNotBlank()
+            song.composer.isNotBlank() || song.ccli.isNotBlank() || song.alias.isNotBlank()
         if (hasMeta) {
             sb.appendLine("---")
             if (song.author.isNotBlank()) sb.appendLine("author: ${song.author}")
             if (song.composer.isNotBlank()) sb.appendLine("composer: ${song.composer}")
             if (song.copyright.isNotBlank()) sb.appendLine("copyright: ${song.copyright}")
             if (song.ccli.isNotBlank()) sb.appendLine("ccli: ${song.ccli}")
+            if (song.alias.isNotBlank()) sb.appendLine("alias: ${song.alias}")
             sb.appendLine("---")
             sb.appendLine()
         }

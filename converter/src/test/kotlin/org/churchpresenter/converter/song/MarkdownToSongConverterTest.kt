@@ -176,6 +176,9 @@ class MarkdownToSongConverterTest {
         val withMeta = MarkdownToSongConverter.buildSongContent(ParsedSong(title = "T", author = "A"))
         assertTrue(withMeta.startsWith("---"))
         assertTrue(withMeta.contains("author: A"))
+
+        val aliasOnly = MarkdownToSongConverter.buildSongContent(ParsedSong(title = "T", alias = "12a"))
+        assertTrue(aliasOnly.startsWith("---\nalias: 12a\n---"), aliasOnly)
     }
 
     @Test

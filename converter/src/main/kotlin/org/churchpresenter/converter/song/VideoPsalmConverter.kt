@@ -3,6 +3,7 @@ package org.churchpresenter.converter.song
 import java.io.File
 
 data class VideoPsalmSong(
+    /** What the book prints as the number, or the song's [position] when it prints none. */
     val number: String,
     val title: String,
     val author: String = "",
@@ -13,6 +14,8 @@ data class VideoPsalmSong(
     val sections: List<SongSection> = emptyList(),
     /** The book's second language, one section per entry of [sections]; empty for a book with one. */
     val secondarySections: List<SongSection> = emptyList(),
+    /** The song's place in the book (`ID`), which numbers it when [number] holds no number. */
+    val position: String = "",
 )
 
 /** A song's sections in each of its languages; [secondary] is empty for a book that has only one. */
@@ -124,6 +127,7 @@ object VideoPsalmConverter {
                 ),
                 taken,
                 song.number,
+                song.position,
             )
         }
         return SongConversionResult(written)
@@ -140,9 +144,11 @@ object VideoPsalmConverter {
         val typed = VideoPsalmText.typedFor(node, legacyFont)
         val sections = sectionsOf(node.children("Verses"), font, typed)
         return VideoPsalmSong(
-            // `Alias` is the number the book prints; `ID` is its position, and they differ in a book
-            // that numbers from something other than one.
+            // `Alias` is what the book prints, often with the book's name in front (`WP Scores 012`);
+            // `ID` is the song's position, which drifts from the printed number wherever a book skips
+            // or repeats one. `SongOutput.write` takes the number out of the alias, or falls back to `ID`.
             number = node.text("Alias").ifBlank { node.text("ID") }.trim(),
+            position = node.text("ID").trim(),
             title = flattened(node.text("Text"), font, typed),
             author = flattened(node.text("Author"), font, typed),
             composer = flattened(node.text("Composer"), font, typed),
