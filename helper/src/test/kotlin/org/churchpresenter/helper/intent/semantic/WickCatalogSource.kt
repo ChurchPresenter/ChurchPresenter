@@ -227,6 +227,7 @@ internal class WickCatalogSource(private val root: File) {
             "ProfileContentPage.kt" to listOf("CONTENT"),
             "ProfileScaleRow.kt" to listOf("CONTENT"),
             "ProfileSongsPage.kt" to listOf("SONGS"),
+            "ProfileSongLanguages.kt" to listOf("SONGS"),
             "SongBoxRows.kt" to listOf("SONGS"),
             "SongElementMove.kt" to listOf("SONGS"),
             "ProfileBiblePage.kt" to listOf("BIBLE"),
