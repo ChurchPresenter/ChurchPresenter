@@ -1,0 +1,22 @@
+name: Build Integrated App
+
+on:
+  push:
+    branches:
+      - 'builds/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  packages:
+    uses: ./.github/workflows/build.yml
+    with:
+      windows: true
+      macos_arm64: true
+      macos_x64: true
+      linux: false
+      release: false
+      prerelease: false
+    secrets: inherit

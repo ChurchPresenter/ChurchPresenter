@@ -168,7 +168,7 @@ jobs:
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
           CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
-        run: ./gradlew :composeApp:signWindowsMsi
+        run: ./gradlew --quiet :composeApp:signWindowsMsi
 
       # Its own step, bounded and allowed to fail: the MSIX is only for the Store (store-submit.yml),
       # and a makeappx that stalls must not hold back the signed MSI, the release or the nightly.
@@ -302,7 +302,7 @@ jobs:
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
           CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
-        run: ./gradlew :composeApp:packageDmg
+        run: ./gradlew --quiet :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
@@ -511,7 +511,7 @@ jobs:
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
           CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
-        run: ./gradlew :composeApp:packageDmg
+        run: ./gradlew --quiet :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
@@ -700,7 +700,7 @@ jobs:
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
           CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
-        run: ./gradlew :composeApp:signLinuxDeb
+        run: ./gradlew --quiet :composeApp:signLinuxDeb
 
       # The runner's Ubuntu names some libraries differently from 22.04 (libasound2t64, not
       # libasound2), and jpackage writes the runner's names. Installing it on 22.04 here is what
