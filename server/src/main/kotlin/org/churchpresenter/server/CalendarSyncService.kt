@@ -221,7 +221,7 @@ class CalendarSyncService(
 
     /**
      * An invite: a fresh device, enrolled now with no name, as a QR anyone may scan wherever they
-     * are. The relay forgets a device that never checks in within its first minutes, so a code that
+     * are. The relay forgets a device that never checks in within 8 hours, so a code that
      * was photographed or never scanned dies by itself; the phone that does scan it names itself.
      */
     suspend fun invitePhone(): CalendarEnrollment? =
