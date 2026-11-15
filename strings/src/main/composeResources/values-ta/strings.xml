@@ -2621,7 +2621,7 @@
     <string name="remote_api_calendar_enroll_code">குறியீடு %1$s — தொலைபேசி இதே குறியீட்டைக் காட்டினால் மட்டும் அனுமதிக்கவும்</string>
     <string name="calendar_enroll_qr_title">தொலைபேசியால் ஸ்கேன் செய்யவும்</string>
     <string name="calendar_enroll_invite_failed">அழைப்பை உருவாக்க முடியவில்லை — இந்தக் கணினியால் ரிலேயை அடைய முடியவில்லை.</string>
-    <string name="calendar_enroll_qr_body">முடிக்க, நீங்கள் இப்போது அனுமதித்த தொலைபேசியால் இந்தக் குறியீட்டை ஸ்கேன் செய்யவும்.</string>
+    <string name="calendar_enroll_qr_body">தொலைபேசியைப் பதிவு செய்ய ChurchPresenter செயலியால் இந்தக் குறியீட்டை ஸ்கேன் செய்யவும். இது 8 மணி நேரம், எங்கிருந்தும் செயல்படும்.</string>
     <string name="remote_api_calendar_enroll_detail">ஒரு தொலைபேசி அல்லது டேப்லெட் எங்கிருந்தும் நாட்காட்டியில் சேவைகளைத் திட்டமிட விரும்புகிறது.</string>
     <string name="remote_activity_calendar_enroll">நாட்காட்டியைத் திட்டமிடப் பதிவு செய்யப்பட்டது</string>
     <string name="start_outputs_hidden">வெளியீட்டுத் திரைகள் மறைந்த நிலையில் தொடங்கு</string>
@@ -4830,4 +4830,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">மண்டல அளவுகள்</string>
     <string name="setting_field_zone_styles">மண்டலப் பாணிகள்</string>
+    <string name="song_alias">மாற்றுப்பெயர்</string>
+    <string name="song_language_places_subtitle">ஒவ்வொரு வெளியீடும் இந்த இடங்களில் உள்ள மொழிகளைக் காட்டும் — ஒரு மொழியோ பலவோ</string>
+    <string name="song_language_names_where">மொழிப் பெயர்கள் பாடல்கள் தாவலின் மொழிகள் மெனுவில் அமைக்கப்பட்டுத் திருத்தப்படும்.</string>
+    <string name="profile_song_looks_follow_language">மொழி</string>
+    <string name="profile_song_looks_follow_place_hint">எந்த மொழி வந்தாலும் ஒவ்வொரு இடமும் தன் தோற்றத்தை வைத்திருக்கும்</string>
+    <string name="profile_song_looks_follow_language_hint">ஒவ்வொரு மொழியும் எங்கு நகர்ந்தாலும் தன் தோற்றத்தை வைத்திருக்கும்</string>
 </resources>

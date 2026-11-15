@@ -401,7 +401,7 @@ class CalendarDemoTour {
         say("invite-qr")
         screen.value = "qr"
         openPanel("Invite a phone", QR_W, QR_H)
-        point("Scan this code", "Works for 15 minutes, from anywhere", hasText("Scan this code", substring = true))
+        point("Scan this code", "Works for 8 hours, from anywhere", hasText("Scan this code", substring = true))
         closePanel()
         say("enrolled")
         screen.value = "server"

@@ -127,6 +127,19 @@ class ProjectionTest {
     }
 
     @Test
+    fun `a songbook remembered as a deleted service is never sent as a deletion`() {
+        val document = CalendarDocument(
+            deletedServices = mapOf(
+                "${CATALOG_PREFIX}Hymns-0e2819ca" to "2026-09-23T11:06:52.014Z",
+                "${CATALOG_PREFIX}Hymns-0e2819ca:1" to "2026-09-23T11:06:52.090Z",
+                "y" to "2026-09-02T00:00:00Z",
+            ),
+        )
+
+        assertEquals(listOf("y"), Projection.deletions(document).map { it.id })
+    }
+
+    @Test
     fun `presets are projected by id and kind only`() {
         val presets = listOf(ItemPreset("p1", "Countdown", ScheduleItem.AnnouncementItem("a", "5:00", isTimer = true)))
 

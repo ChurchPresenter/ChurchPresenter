@@ -2599,7 +2599,7 @@
     <string name="remote_api_calendar_enroll_code">Código %1$s — permita apenas se o telemóvel mostrar o mesmo código</string>
     <string name="calendar_enroll_qr_title">Digitalizar com o telemóvel</string>
     <string name="calendar_enroll_invite_failed">Não foi possível criar um convite — este computador não conseguiu contactar o relay.</string>
-    <string name="calendar_enroll_qr_body">Digitalize este código com o telemóvel que acabou de permitir para concluir.</string>
+    <string name="calendar_enroll_qr_body">Escaneie este código com o app ChurchPresenter para inscrever o telefone. Ele vale por 8 horas, de qualquer lugar.</string>
     <string name="remote_api_calendar_enroll_detail">Um telemóvel ou tablet quer planear cultos no calendário a partir de qualquer lugar.</string>
     <string name="remote_activity_calendar_enroll">Inscrito para planear o calendário</string>
     <string name="start_outputs_hidden">Iniciar com os ecrãs de saída ocultos</string>
@@ -4808,4 +4808,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Tamanhos das zonas</string>
     <string name="setting_field_zone_styles">Estilos das zonas</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Toda saída mostra os idiomas nestas posições, um idioma ou vários</string>
+    <string name="song_language_names_where">Os nomes dos idiomas são definidos e editados no menu Idiomas da aba Músicas.</string>
+    <string name="profile_song_looks_follow_language">Idioma</string>
+    <string name="profile_song_looks_follow_place_hint">Cada posição mantém sua aparência, seja qual for o idioma que entrar nela</string>
+    <string name="profile_song_looks_follow_language_hint">Cada idioma mantém sua própria aparência onde quer que esteja</string>
 </resources>

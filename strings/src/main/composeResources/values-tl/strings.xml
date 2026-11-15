@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">Code %1$s — payagan lang kung pareho ang code na ipinapakita ng telepono</string>
     <string name="calendar_enroll_qr_title">I-scan gamit ang telepono</string>
     <string name="calendar_enroll_invite_failed">Hindi makagawa ng imbitasyon — hindi maabot ng computer na ito ang relay.</string>
-    <string name="calendar_enroll_qr_body">I-scan ang code na ito gamit ang teleponong kapapayag mo lang para matapos.</string>
+    <string name="calendar_enroll_qr_body">I-scan ang code na ito gamit ang ChurchPresenter app para iparehistro ang telepono. Gumagana ito nang 8 oras, saanman.</string>
     <string name="remote_api_calendar_enroll_detail">Gustong magplano ng mga serbisyo sa kalendaryo ng isang telepono o tablet mula saanman.</string>
     <string name="remote_activity_calendar_enroll">Naka-enroll para magplano ng kalendaryo</string>
     <string name="start_outputs_hidden">Magsimula nang nakatago ang mga output screen</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">Mga laki ng zone</string>
     <string name="setting_field_zone_styles">Mga estilo ng zone</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Ipinapakita ng bawat output ang mga wika sa mga puwestong ito, isang wika o higit pa</string>
+    <string name="song_language_names_where">Itinatakda at ine-edit ang mga pangalan ng wika sa menu na Mga Wika ng tab na Mga Awit.</string>
+    <string name="profile_song_looks_follow_language">Wika</string>
+    <string name="profile_song_looks_follow_place_hint">Pinapanatili ng bawat puwesto ang itsura nito, anumang wika ang lumipat dito</string>
+    <string name="profile_song_looks_follow_language_hint">Pinapanatili ng bawat wika ang sarili nitong itsura saanman ito lumipat</string>
 </resources>

@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">Koodi %1$s — salli vain, jos puhelin näyttää saman koodin</string>
     <string name="calendar_enroll_qr_title">Skannaa puhelimella</string>
     <string name="calendar_enroll_invite_failed">Kutsua ei voitu luoda — tämä tietokone ei tavoittanut välitintä.</string>
-    <string name="calendar_enroll_qr_body">Skannaa tämä koodi juuri sallimallasi puhelimella viimeistelläksesi.</string>
+    <string name="calendar_enroll_qr_body">Skannaa tämä koodi ChurchPresenter-sovelluksella liittääksesi puhelimen. Koodi toimii 8 tuntia, mistä tahansa.</string>
     <string name="remote_api_calendar_enroll_detail">Puhelin tai tabletti haluaa suunnitella tilaisuuksia kalenteriin mistä tahansa.</string>
     <string name="remote_activity_calendar_enroll">Rekisteröity suunnittelemaan kalenteria</string>
     <string name="start_outputs_hidden">Käynnistä ulostulonäytöt piilotettuina</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">Alueiden koot</string>
     <string name="setting_field_zone_styles">Alueiden tyylit</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Jokainen lähtö näyttää kielet näissä paikoissa, yhden tai useamman</string>
+    <string name="song_language_names_where">Kielten nimet asetetaan ja muokataan Laulut-välilehden Kielet-valikossa.</string>
+    <string name="profile_song_looks_follow_language">Kieli</string>
+    <string name="profile_song_looks_follow_place_hint">Kukin paikka säilyttää ulkoasunsa, mikä kieli siihen siirtyykin</string>
+    <string name="profile_song_looks_follow_language_hint">Kukin kieli säilyttää oman ulkoasunsa, minne se siirtyykin</string>
 </resources>

@@ -1671,7 +1671,7 @@
     <string name="remote_api_calendar_enroll_code">Code %1$s — faʻatiʻa ana mai te mea e faʻaʻite te niuniu i te code hōʻē ā</string>
     <string name="calendar_enroll_qr_title">Scanner na roto i te niuniu</string>
     <string name="calendar_enroll_invite_failed">ʻAita i nehenehe e hāmani i te hōʻē titauraʻa — ʻaita teie roro uira i naʻea i te relais.</string>
-    <string name="calendar_enroll_qr_body">Scanner i teie code na roto i te porōtarama ChurchPresenter no te tāpaʻo i te niuniu. E ohipa teie e 15 minuti, mai te mau vāhi atoa mai.</string>
+    <string name="calendar_enroll_qr_body">Scanner i teie code na roto i te porōtarama ChurchPresenter no te tāpaʻo i te niuniu. E ohipa teie e 8 hora, mai te mau vāhi atoa mai.</string>
     <string name="remote_api_calendar_enroll_detail">Te hinaʻaro nei te hōʻē niuniu pūtē aore ra tablette e faʻanaho i te mau pureraʻa i roto i te tārena mahana mai te mau vāhi atoa mai.</string>
     <string name="remote_api_qa_add">Uiraʻa: Tāpiʻi i te hōʻē Uiraʻa</string>
     <string name="remote_api_qa_edit">Uiraʻa: Taui i te Uiraʻa</string>
@@ -4943,4 +4943,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Te mau rahi o te mau vāhi</string>
     <string name="setting_field_zone_styles">Te mau huru o te mau vāhi</string>
+    <string name="song_alias">Iʻoa piʻiraʻa</string>
+    <string name="song_language_places_subtitle">E faʻaʻite te mau sortie atoa i te mau reo i teie mau vāhi, hōʻē reo ʻaore rā e rave rahi</string>
+    <string name="song_language_names_where">E faʻatanohia e e tauihia te mau iʻoa reo i roto i te tāpura Reo o te ʻāpi Hīmene.</string>
+    <string name="profile_song_looks_follow_language">Reo</string>
+    <string name="profile_song_looks_follow_place_hint">E vaiiho te vāhi tātaʻitahi i tōna huru, noa atu te reo e haere mai i roto</string>
+    <string name="profile_song_looks_follow_language_hint">E vaiiho te reo tātaʻitahi i tōna iho huru i te vāhi atoʻa e haere ai</string>
 </resources>

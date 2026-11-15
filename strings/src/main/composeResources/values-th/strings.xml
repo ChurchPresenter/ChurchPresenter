@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">รหัส %1$s — อนุญาตเฉพาะเมื่อโทรศัพท์แสดงรหัสเดียวกัน</string>
     <string name="calendar_enroll_qr_title">สแกนด้วยโทรศัพท์</string>
     <string name="calendar_enroll_invite_failed">สร้างคำเชิญไม่ได้ — คอมพิวเตอร์เครื่องนี้เชื่อมต่อรีเลย์ไม่ได้</string>
-    <string name="calendar_enroll_qr_body">สแกนรหัสนี้ด้วยโทรศัพท์ที่คุณเพิ่งอนุญาตเพื่อดำเนินการให้เสร็จ</string>
+    <string name="calendar_enroll_qr_body">สแกนรหัสนี้ด้วยแอป ChurchPresenter เพื่อลงทะเบียนโทรศัพท์ ใช้ได้ 8 ชั่วโมง จากที่ใดก็ได้</string>
     <string name="remote_api_calendar_enroll_detail">โทรศัพท์หรือแท็บเล็ตต้องการวางแผนพิธีในปฏิทินจากที่ใดก็ได้</string>
     <string name="remote_activity_calendar_enroll">ลงทะเบียนเพื่อวางแผนปฏิทินแล้ว</string>
     <string name="start_outputs_hidden">เริ่มโดยซ่อนหน้าจอเอาต์พุต</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">ขนาดโซน</string>
     <string name="setting_field_zone_styles">รูปแบบโซน</string>
+    <string name="song_alias">ชื่อแทน</string>
+    <string name="song_language_places_subtitle">ทุกเอาต์พุตแสดงภาษาในตำแหน่งเหล่านี้ ภาษาเดียวหรือหลายภาษา</string>
+    <string name="song_language_names_where">ตั้งและแก้ไขชื่อภาษาได้ในเมนูภาษาของแท็บเพลง</string>
+    <string name="profile_song_looks_follow_language">ภาษา</string>
+    <string name="profile_song_looks_follow_place_hint">แต่ละตำแหน่งคงรูปลักษณ์ของตนไว้ ไม่ว่าภาษาใดจะย้ายเข้ามา</string>
+    <string name="profile_song_looks_follow_language_hint">แต่ละภาษาคงรูปลักษณ์ของตนไว้ ไม่ว่าจะย้ายไปที่ใด</string>
 </resources>

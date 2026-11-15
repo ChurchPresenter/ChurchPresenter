@@ -2571,7 +2571,7 @@
     <string name="remote_api_calendar_enroll_code">Код %1$s — телефон дәл осы кодты көрсетсе ғана рұқсат етіңіз</string>
     <string name="calendar_enroll_qr_title">Телефонмен сканерлеу</string>
     <string name="calendar_enroll_invite_failed">Шақыру жасау мүмкін болмады — бұл компьютер релеге қосыла алмады.</string>
-    <string name="calendar_enroll_qr_body">Аяқтау үшін осы кодты жаңа ғана рұқсат етілген телефонмен сканерлеңіз.</string>
+    <string name="calendar_enroll_qr_body">Телефонды тіркеу үшін осы кодты ChurchPresenter қолданбасымен сканерлеңіз. Код 8 сағат бойы кез келген жерден жұмыс істейді.</string>
     <string name="remote_api_calendar_enroll_detail">Телефон немесе планшет күнтізбедегі қызметтерді кез келген жерден жоспарлағысы келеді.</string>
     <string name="remote_activity_calendar_enroll">Күнтізбені жоспарлауға тіркелді</string>
     <string name="start_outputs_hidden">Шығыс экрандары жасырын күйде іске қосу</string>
@@ -4780,4 +4780,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">Аймақ өлшемдері</string>
     <string name="setting_field_zone_styles">Аймақ стильдері</string>
+    <string name="song_alias">Балама атау</string>
+    <string name="song_language_places_subtitle">Әр шығыс тілдерді осы орындарда көрсетеді — бір тіл немесе бірнеше</string>
+    <string name="song_language_names_where">Тіл атаулары Әндер қойындысының Тілдер мәзірінде орнатылады және өңделеді.</string>
+    <string name="profile_song_looks_follow_language">Тіл</string>
+    <string name="profile_song_looks_follow_place_hint">Қай тіл орнына келсе де, әр орын өз көрінісін сақтайды</string>
+    <string name="profile_song_looks_follow_language_hint">Әр тіл қайда ауысса да өз көрінісін сақтайды</string>
 </resources>

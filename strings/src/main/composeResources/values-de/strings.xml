@@ -2571,7 +2571,7 @@
     <string name="remote_api_calendar_enroll_code">Code %1$s — nur erlauben, wenn das Telefon denselben Code anzeigt</string>
     <string name="calendar_enroll_qr_title">Mit dem Telefon scannen</string>
     <string name="calendar_enroll_invite_failed">Einladung konnte nicht erstellt werden — dieser Computer konnte das Relay nicht erreichen.</string>
-    <string name="calendar_enroll_qr_body">Scanne diesen Code mit dem soeben erlaubten Telefon, um abzuschließen.</string>
+    <string name="calendar_enroll_qr_body">Scanne diesen Code mit der ChurchPresenter-App, um das Telefon anzumelden. Er gilt 8 Stunden, von überall.</string>
     <string name="remote_api_calendar_enroll_detail">Ein Telefon oder Tablet möchte Gottesdienste im Kalender von überall aus planen.</string>
     <string name="remote_activity_calendar_enroll">Zum Planen des Kalenders angemeldet</string>
     <string name="start_outputs_hidden">Mit ausgeblendeten Ausgabebildschirmen starten</string>
@@ -4780,4 +4780,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Zonengrößen</string>
     <string name="setting_field_zone_styles">Zonenstile</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Jeder Ausgang zeigt die Sprachen an diesen Plätzen, eine Sprache oder mehrere</string>
+    <string name="song_language_names_where">Sprachnamen werden im Menü Sprachen des Lieder-Tabs festgelegt und bearbeitet.</string>
+    <string name="profile_song_looks_follow_language">Sprache</string>
+    <string name="profile_song_looks_follow_place_hint">Jeder Platz behält sein Aussehen, welche Sprache auch hineinwandert</string>
+    <string name="profile_song_looks_follow_language_hint">Jede Sprache behält ihr eigenes Aussehen, wohin sie auch wandert</string>
 </resources>

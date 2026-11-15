@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">Kods %1$s — atļaujiet tikai tad, ja tālrunī redzams tas pats kods</string>
     <string name="calendar_enroll_qr_title">Skenēt ar tālruni</string>
     <string name="calendar_enroll_invite_failed">Neizdevās izveidot uzaicinājumu — šis dators nevarēja sasniegt releju.</string>
-    <string name="calendar_enroll_qr_body">Lai pabeigtu, skenējiet šo kodu ar tikko atļauto tālruni.</string>
+    <string name="calendar_enroll_qr_body">Lai pievienotu tālruni, noskenējiet šo kodu ar lietotni ChurchPresenter. Tas darbojas 8 stundas no jebkuras vietas.</string>
     <string name="remote_api_calendar_enroll_detail">Tālrunis vai planšetdators vēlas plānot dievkalpojumus kalendārā no jebkuras vietas.</string>
     <string name="remote_activity_calendar_enroll">Reģistrēts kalendāra plānošanai</string>
     <string name="start_outputs_hidden">Sākt ar paslēptiem izvades ekrāniem</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Zonu izmēri</string>
     <string name="setting_field_zone_styles">Zonu stili</string>
+    <string name="song_alias">Aizstājvārds</string>
+    <string name="song_language_places_subtitle">Katrs izvads rāda valodas šajās vietās — vienu vai vairākas</string>
+    <string name="song_language_names_where">Valodu nosaukumus iestata un rediģē cilnes Dziesmas izvēlnē Valodas.</string>
+    <string name="profile_song_looks_follow_language">Valodai</string>
+    <string name="profile_song_looks_follow_place_hint">Katra vieta saglabā savu izskatu neatkarīgi no tā, kura valoda tajā nonāk</string>
+    <string name="profile_song_looks_follow_language_hint">Katra valoda saglabā savu izskatu, lai kur tā pārvietotos</string>
 </resources>

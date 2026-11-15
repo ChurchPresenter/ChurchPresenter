@@ -2598,7 +2598,7 @@
     <string name="remote_api_calendar_enroll_code">Code %1$s — sta alleen toe als de telefoon dezelfde code toont</string>
     <string name="calendar_enroll_qr_title">Scannen met de telefoon</string>
     <string name="calendar_enroll_invite_failed">Kan geen uitnodiging maken — deze computer kan de relay niet bereiken.</string>
-    <string name="calendar_enroll_qr_body">Scan deze code met de telefoon die je zojuist hebt toegestaan om af te ronden.</string>
+    <string name="calendar_enroll_qr_body">Scan deze code met de ChurchPresenter-app om de telefoon aan te melden. De code werkt 8 uur, overal vandaan.</string>
     <string name="remote_api_calendar_enroll_detail">Een telefoon of tablet wil overal vandaan diensten in de kalender plannen.</string>
     <string name="remote_activity_calendar_enroll">Aangemeld om de kalender te plannen</string>
     <string name="start_outputs_hidden">Starten met verborgen uitvoerschermen</string>
@@ -4807,4 +4807,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">Zonegroottes</string>
     <string name="setting_field_zone_styles">Zonestijlen</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Elke uitvoer toont de talen op deze plaatsen, één taal of meerdere</string>
+    <string name="song_language_names_where">Taalnamen stel je in en bewerk je in het menu Talen van het tabblad Liederen.</string>
+    <string name="profile_song_looks_follow_language">Taal</string>
+    <string name="profile_song_looks_follow_place_hint">Elke plaats houdt zijn uiterlijk, welke taal er ook naartoe gaat</string>
+    <string name="profile_song_looks_follow_language_hint">Elke taal houdt een eigen uiterlijk, waar die ook komt te staan</string>
 </resources>

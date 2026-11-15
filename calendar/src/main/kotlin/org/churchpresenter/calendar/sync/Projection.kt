@@ -74,7 +74,9 @@ object Projection {
     fun deletions(document: CalendarDocument): List<RemoteService> {
         val live = document.services.mapTo(HashSet()) { it.id }
         return document.deletedServices.entries
-            .filter { it.key !in live }
+            // Never a songbook: an old build remembered `catalog:` records as deleted services, and
+            // the relay keeps those rows through a push, so sending one failed every push.
+            .filter { it.key !in live && !it.key.startsWith(CATALOG_PREFIX) }
             .sortedByDescending { it.value }
             .take(WireLimits.DELETIONS_PER_PUSH)
             .map { (id, at) ->

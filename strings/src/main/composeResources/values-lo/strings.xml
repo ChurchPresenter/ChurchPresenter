@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">ລະຫັດ %1$s — ອະນຸຍາດສະເພາະເມື່ອໂທລະສັບສະແດງລະຫັດດຽວກັນ</string>
     <string name="calendar_enroll_qr_title">ສະແກນດ້ວຍໂທລະສັບ</string>
     <string name="calendar_enroll_invite_failed">ບໍ່ສາມາດສ້າງຄຳເຊີນໄດ້ — ຄອມພິວເຕີນີ້ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບ relay ໄດ້.</string>
-    <string name="calendar_enroll_qr_body">ສະແກນລະຫັດນີ້ດ້ວຍໂທລະສັບທີ່ທ່ານຫາກໍອະນຸຍາດເພື່ອສຳເລັດ.</string>
+    <string name="calendar_enroll_qr_body">ສະແກນລະຫັດນີ້ດ້ວຍແອັບ ChurchPresenter ເພື່ອລົງທະບຽນໂທລະສັບ. ໃຊ້ໄດ້ 8 ຊົ່ວໂມງ ຈາກທຸກບ່ອນ.</string>
     <string name="remote_api_calendar_enroll_detail">ໂທລະສັບ ຫຼື ແທັບເລັດຕ້ອງການວາງແຜນພິທີໃນປະຕິທິນຈາກທຸກບ່ອນ.</string>
     <string name="remote_activity_calendar_enroll">ລົງທະບຽນເພື່ອວາງແຜນປະຕິທິນແລ້ວ</string>
     <string name="start_outputs_hidden">ເລີ່ມໂດຍເຊື່ອງໜ້າຈໍຜົນອອກ</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">ຂະໜາດເຂດ</string>
     <string name="setting_field_zone_styles">ຮູບແບບເຂດ</string>
+    <string name="song_alias">ຊື່ແທນ</string>
+    <string name="song_language_places_subtitle">ທຸກຊ່ອງອອກສະແດງພາສາໃນຕຳແໜ່ງເຫຼົ່ານີ້ ໜຶ່ງພາສາ ຫຼື ຫຼາຍພາສາ</string>
+    <string name="song_language_names_where">ຕັ້ງ ແລະ ແກ້ໄຂຊື່ພາສາໄດ້ໃນເມນູພາສາຂອງແທັບເພງ.</string>
+    <string name="profile_song_looks_follow_language">ພາສາ</string>
+    <string name="profile_song_looks_follow_place_hint">ແຕ່ລະຕຳແໜ່ງຮັກສາຮູບແບບຂອງມັນ ບໍ່ວ່າພາສາໃດຈະຍ້າຍເຂົ້າມາ</string>
+    <string name="profile_song_looks_follow_language_hint">ແຕ່ລະພາສາຮັກສາຮູບແບບຂອງຕົນ ບໍ່ວ່າຈະຍ້າຍໄປໃສ</string>
 </resources>

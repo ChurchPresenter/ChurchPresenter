@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">Kod %1$s — yalnızca telefon aynı kodu gösteriyorsa izin verin</string>
     <string name="calendar_enroll_qr_title">Telefonla tarayın</string>
     <string name="calendar_enroll_invite_failed">Davet oluşturulamadı — bu bilgisayar röleye ulaşamadı.</string>
-    <string name="calendar_enroll_qr_body">Bitirmek için bu kodu az önce izin verdiğiniz telefonla tarayın.</string>
+    <string name="calendar_enroll_qr_body">Telefonu kaydetmek için bu kodu ChurchPresenter uygulamasıyla tarayın. Kod 8 saat boyunca, her yerden çalışır.</string>
     <string name="remote_api_calendar_enroll_detail">Bir telefon veya tablet, takvimdeki hizmetleri her yerden planlamak istiyor.</string>
     <string name="remote_activity_calendar_enroll">Takvimi planlamak üzere kaydedildi</string>
     <string name="start_outputs_hidden">Çıkış ekranları gizli olarak başlat</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">Bölge boyutları</string>
     <string name="setting_field_zone_styles">Bölge stilleri</string>
+    <string name="song_alias">Takma ad</string>
+    <string name="song_language_places_subtitle">Her çıkış bu yerlerdeki dilleri gösterir; bir dil ya da birkaç dil</string>
+    <string name="song_language_names_where">Dil adları, Şarkılar sekmesinin Diller menüsünden ayarlanır ve düzenlenir.</string>
+    <string name="profile_song_looks_follow_language">Dil</string>
+    <string name="profile_song_looks_follow_place_hint">Her yer, içine hangi dil gelirse gelsin kendi görünümünü korur</string>
+    <string name="profile_song_looks_follow_language_hint">Her dil nereye taşınırsa taşınsın kendi görünümünü korur</string>
 </resources>

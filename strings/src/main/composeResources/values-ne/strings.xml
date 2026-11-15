@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">कोड %1$s — फोनले उही कोड देखाएमा मात्र अनुमति दिनुहोस्</string>
     <string name="calendar_enroll_qr_title">फोनले स्क्यान गर्नुहोस्</string>
     <string name="calendar_enroll_invite_failed">निमन्त्रणा बनाउन सकिएन — यो कम्प्युटर रिलेसम्म पुग्न सकेन।</string>
-    <string name="calendar_enroll_qr_body">पूरा गर्न यो कोड भर्खर अनुमति दिएको फोनले स्क्यान गर्नुहोस्।</string>
+    <string name="calendar_enroll_qr_body">फोन दर्ता गर्न यो कोड ChurchPresenter एपले स्क्यान गर्नुहोस्। यो ८ घण्टासम्म जहाँबाट पनि चल्छ।</string>
     <string name="remote_api_calendar_enroll_detail">एक फोन वा ट्याब्लेटले जहाँबाट पनि पात्रोमा सेवाहरू योजना गर्न चाहन्छ।</string>
     <string name="remote_activity_calendar_enroll">पात्रो योजना गर्न दर्ता भयो</string>
     <string name="start_outputs_hidden">आउटपुट स्क्रिनहरू लुकाएर सुरु गर्नुहोस्</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y %</string>
     <string name="setting_field_zone_sizes">क्षेत्रका आकार</string>
     <string name="setting_field_zone_styles">क्षेत्रका शैली</string>
+    <string name="song_alias">उपनाम</string>
+    <string name="song_language_places_subtitle">हरेक आउटपुटले यी स्थानका भाषाहरू देखाउँछ, एउटा भाषा वा धेरै</string>
+    <string name="song_language_names_where">भाषाका नामहरू गीत ट्याबको भाषाहरू मेनुमा राखिन्छन् र सम्पादन गरिन्छन्।</string>
+    <string name="profile_song_looks_follow_language">भाषा</string>
+    <string name="profile_song_looks_follow_place_hint">जुनसुकै भाषा आए पनि हरेक स्थानले आफ्नो रूप राख्छ</string>
+    <string name="profile_song_looks_follow_language_hint">हरेक भाषा जहाँ सरे पनि आफ्नै रूप राख्छ</string>
 </resources>

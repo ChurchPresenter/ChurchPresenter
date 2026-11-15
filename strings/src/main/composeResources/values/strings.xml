@@ -1706,7 +1706,7 @@
     <string name="remote_api_calendar_enroll_code">Code %1$s — allow only if the phone shows the same code</string>
     <string name="calendar_enroll_qr_title">Scan with the phone</string>
     <string name="calendar_enroll_invite_failed">Could not create an invite — this computer could not reach the relay.</string>
-    <string name="calendar_enroll_qr_body">Scan this code with the ChurchPresenter app to enroll the phone. It works for 15 minutes, from anywhere.</string>
+    <string name="calendar_enroll_qr_body">Scan this code with the ChurchPresenter app to enroll the phone. It works for 8 hours, from anywhere.</string>
     <string name="remote_api_calendar_enroll_detail">A phone or tablet wants to plan services in the calendar from anywhere.</string>
     <string name="remote_api_qa_add">Q&amp;A: Add Question</string>
     <string name="remote_api_qa_edit">Q&amp;A: Edit Question</string>

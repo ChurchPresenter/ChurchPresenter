@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">Kod %1$s — tillåt bara om telefonen visar samma kod</string>
     <string name="calendar_enroll_qr_title">Skanna med telefonen</string>
     <string name="calendar_enroll_invite_failed">Det gick inte att skapa en inbjudan – den här datorn nådde inte reläet.</string>
-    <string name="calendar_enroll_qr_body">Skanna den här koden med telefonen du just tillät för att slutföra.</string>
+    <string name="calendar_enroll_qr_body">Skanna den här koden med ChurchPresenter-appen för att registrera telefonen. Den gäller i 8 timmar, var du än är.</string>
     <string name="remote_api_calendar_enroll_detail">En telefon eller surfplatta vill planera gudstjänster i kalendern var som helst ifrån.</string>
     <string name="remote_activity_calendar_enroll">Registrerad för att planera kalendern</string>
     <string name="start_outputs_hidden">Starta med utgångsskärmarna dolda</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">Zonstorlekar</string>
     <string name="setting_field_zone_styles">Zonstilar</string>
+    <string name="song_alias">Alias</string>
+    <string name="song_language_places_subtitle">Varje utgång visar språken på dessa platser, ett språk eller flera</string>
+    <string name="song_language_names_where">Språknamn anges och redigeras i menyn Språk på fliken Sånger.</string>
+    <string name="profile_song_looks_follow_language">Språk</string>
+    <string name="profile_song_looks_follow_place_hint">Varje plats behåller sitt utseende vilket språk som än flyttas dit</string>
+    <string name="profile_song_looks_follow_language_hint">Varje språk behåller sitt eget utseende var det än hamnar</string>
 </resources>

@@ -2615,7 +2615,7 @@
     <string name="remote_api_calendar_enroll_code">Kod %1$s — faqat telefon xuddi shu kodni ko‘rsatsa ruxsat bering</string>
     <string name="calendar_enroll_qr_title">Telefon bilan skanerlang</string>
     <string name="calendar_enroll_invite_failed">Taklif yaratib boʻlmadi — bu kompyuter relega ulana olmadi.</string>
-    <string name="calendar_enroll_qr_body">Yakunlash uchun ushbu kodni hozirgina ruxsat bergan telefoningiz bilan skanerlang.</string>
+    <string name="calendar_enroll_qr_body">Telefonni roʻyxatdan oʻtkazish uchun ushbu kodni ChurchPresenter ilovasi bilan skanerlang. U 8 soat davomida istalgan joydan ishlaydi.</string>
     <string name="remote_api_calendar_enroll_detail">Telefon yoki planshet taqvimdagi xizmatlarni istalgan joydan rejalashtirmoqchi.</string>
     <string name="remote_activity_calendar_enroll">Taqvimni rejalashtirish uchun ro‘yxatdan o‘tdi</string>
     <string name="start_outputs_hidden">Chiqish ekranlari yashirin holda ishga tushirish</string>
@@ -4824,4 +4824,10 @@
     <string name="setting_field_y_percent">Y (%)</string>
     <string name="setting_field_zone_sizes">Hudud oʻlchamlari</string>
     <string name="setting_field_zone_styles">Hudud uslublari</string>
+    <string name="song_alias">Muqobil nom</string>
+    <string name="song_language_places_subtitle">Har bir chiqish tillarni shu oʻrinlarda koʻrsatadi — bitta yoki bir nechta tilni</string>
+    <string name="song_language_names_where">Til nomlari Qoʻshiqlar yorligʻidagi Tillar menyusida belgilanadi va tahrirlanadi.</string>
+    <string name="profile_song_looks_follow_language">Til</string>
+    <string name="profile_song_looks_follow_place_hint">Qaysi til koʻchib kelmasin, har bir oʻrin oʻz koʻrinishini saqlaydi</string>
+    <string name="profile_song_looks_follow_language_hint">Har bir til qayerga koʻchmasin, oʻz koʻrinishini saqlaydi</string>
 </resources>
