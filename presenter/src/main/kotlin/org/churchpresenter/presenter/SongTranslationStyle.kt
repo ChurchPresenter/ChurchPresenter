@@ -19,7 +19,6 @@ val SongStyleElement.translationElement: SongTranslationElement?
         SongStyleElement.SECTION_LABEL -> null
         SongStyleElement.TITLE -> SongTranslationElement.TITLE
         SongStyleElement.LYRICS -> SongTranslationElement.LYRICS
-        SongStyleElement.LOOK_AHEAD -> SongTranslationElement.LOOK_AHEAD
         SongStyleElement.NEXT_SECTION -> SongTranslationElement.NEXT_SECTION
         // The title slide's credits name people and numbers, not words in a language.
         SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO -> null
@@ -50,7 +49,6 @@ val SongTranslationElement.styleElement: SongStyleElement
     get() = when (this) {
         SongTranslationElement.TITLE -> SongStyleElement.TITLE
         SongTranslationElement.LYRICS -> SongStyleElement.LYRICS
-        SongTranslationElement.LOOK_AHEAD -> SongStyleElement.LOOK_AHEAD
         SongTranslationElement.NEXT_SECTION -> SongStyleElement.NEXT_SECTION
     }
 

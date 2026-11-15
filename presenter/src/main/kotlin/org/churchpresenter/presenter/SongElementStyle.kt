@@ -17,7 +17,8 @@ enum class SongStyleElement {
     NUMBER,
     TITLE,
     LYRICS,
-    LOOK_AHEAD,
+
+    /** The section after this one, drawn under the lyrics on an output with look-ahead on. */
     NEXT_SECTION,
 
     /** The current section's name -- "Verse 1", "Chorus" -- drawn with the lyrics; see `SongSectionLabel`. */
@@ -57,17 +58,15 @@ val SongStyleElement.hasPosition: Boolean
  * they never needed one.
  */
 val SongStyleElement.hasAutoFit: Boolean
-    get() = this == SongStyleElement.LYRICS ||
-        this == SongStyleElement.LOOK_AHEAD ||
-        this == SongStyleElement.NEXT_SECTION
+    get() = this == SongStyleElement.LYRICS || this == SongStyleElement.NEXT_SECTION
 
 /** Chords are drawn over the lyrics and nowhere else, so only the lyrics carry a chord colour. */
 val SongStyleElement.hasChordColor: Boolean
     get() = this == SongStyleElement.LYRICS
 
-/** The two elements that only ever appear on a look-ahead slide. */
+/** The element that only ever appears on a look-ahead slide. */
 val SongStyleElement.onLookAheadSlide: Boolean
-    get() = this == SongStyleElement.LOOK_AHEAD || this == SongStyleElement.NEXT_SECTION
+    get() = this == SongStyleElement.NEXT_SECTION
 
 /** The four credit lines, which only the title slide draws. */
 val SongStyleElement.isCredit: Boolean
@@ -116,7 +115,6 @@ fun SongSettings.elementStyle(
     SongStyleElement.NUMBER -> numberStyle(target)
     SongStyleElement.TITLE -> titleStyle(target)
     SongStyleElement.LYRICS -> lyricsStyle(target)
-    SongStyleElement.LOOK_AHEAD -> lookAheadStyle(target)
     SongStyleElement.NEXT_SECTION -> nextSectionStyle(target)
     SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO ->
         creditStyle(element, target).toElementStyle(
@@ -151,8 +149,6 @@ fun SongSettings.withElementStyle(
         if (target.isLowerThird) withTitleLowerThird(style) else withTitle(style)
     SongStyleElement.LYRICS ->
         if (target.isLowerThird) withLyricsLowerThird(style) else withLyrics(style)
-    SongStyleElement.LOOK_AHEAD ->
-        if (target.isLowerThird) withLookAheadLowerThird(style) else withLookAhead(style)
     SongStyleElement.NEXT_SECTION ->
         if (target.isLowerThird) withNextSectionLowerThird(style) else withNextSection(style)
     SongStyleElement.AUTHOR, SongStyleElement.COMPOSER, SongStyleElement.CCLI, SongStyleElement.TEMPO ->
@@ -324,51 +320,6 @@ private fun SongSettings.lyricsStyle(target: SongStyleTarget): SongElementStyle 
             autoFit = lyricsFontSizeAutoFit,
             backdrop = lyricsBackdrop,
             outline = outlines.lyrics,
-        )
-    }
-
-private fun SongSettings.lookAheadStyle(target: SongStyleTarget): SongElementStyle =
-    if (target.isLowerThird) {
-        SongElementStyle(
-            color = lowerThirdLookAheadColor,
-            fontType = lowerThirdLookAheadFontType,
-            fontSize = lowerThirdLookAheadFontSize,
-            bold = lowerThirdLookAheadBold,
-            italic = lowerThirdLookAheadItalic,
-            underline = lowerThirdLookAheadUnderline,
-            strikethrough = lowerThirdLookAheadStrikethrough,
-            shadow = lowerThirdLookAheadShadow,
-            shadowColor = lowerThirdLookAheadShadowColor,
-            shadowSize = lowerThirdLookAheadShadowSize,
-            shadowOpacity = lowerThirdLookAheadShadowOpacity,
-            horizontalAlignment = lowerThirdLookAheadHorizontalAlignment,
-            letterSpacing = lowerThirdLookAheadLetterSpacing,
-            wordSpacing = lowerThirdLookAheadWordSpacing,
-            transform = lowerThirdLookAheadTransform,
-            autoFit = lowerThirdLookAheadFontSizeAutoFit,
-            backdrop = lowerThirdLookAheadBackdrop,
-            outline = outlines.lookAheadLowerThird,
-        )
-    } else {
-        SongElementStyle(
-            color = lookAheadColor,
-            fontType = lookAheadFontType,
-            fontSize = lookAheadFontSize,
-            bold = lookAheadBold,
-            italic = lookAheadItalic,
-            underline = lookAheadUnderline,
-            strikethrough = lookAheadStrikethrough,
-            shadow = lookAheadShadow,
-            shadowColor = lookAheadShadowColor,
-            shadowSize = lookAheadShadowSize,
-            shadowOpacity = lookAheadShadowOpacity,
-            horizontalAlignment = lookAheadHorizontalAlignment,
-            letterSpacing = lookAheadLetterSpacing,
-            wordSpacing = lookAheadWordSpacing,
-            transform = lookAheadTransform,
-            autoFit = lookAheadFontSizeAutoFit,
-            backdrop = lookAheadBackdrop,
-            outline = outlines.lookAhead,
         )
     }
 

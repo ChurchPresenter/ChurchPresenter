@@ -31,7 +31,6 @@ private fun layerProperty(element: SongTranslationElement, lowerThird: Boolean):
     val name = when (element) {
         SongTranslationElement.TITLE -> "title"
         SongTranslationElement.LYRICS -> "lyrics"
-        SongTranslationElement.LOOK_AHEAD -> "lookAhead"
         SongTranslationElement.NEXT_SECTION -> "nextSection"
     }
     return if (lowerThird) "${name}LowerThird" else name

@@ -320,7 +320,9 @@ data class SongSettings(
      */
     val languageOrder: List<Int> = emptyList(),
 
-    // Look-ahead styling — fullscreen
+    // Look-ahead — fullscreen. The display mode and the languages are live; the style fields below
+    // them, and their lower-third twins, are read only by `migrateLookAheadIntoLyrics`: the current
+    // lines on a look-ahead output are drawn with the lyrics' style.
     val lookAheadDisplayMode: String = Constants.SONG_DISPLAY_MODE_VERSE,
     val lookAheadLanguageDisplay: String = Constants.SONG_LANG_PRIMARY,
     val lookAheadHorizontalAlignment: String = Constants.CENTER,

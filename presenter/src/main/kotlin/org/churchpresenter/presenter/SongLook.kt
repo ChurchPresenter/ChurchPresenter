@@ -192,24 +192,13 @@ internal class SongLook(
     val songNumberFontFamily = systemFontFamilyOrDefault(
         numberStyleProfile.fontType.ifBlank { if (isLowerThird) ss.titleLowerThirdFontType else ss.titleFontType },
     )
-    val effectiveLyricsBold = if (lookAheadEnabled) {
-        if (isLowerThird) ss.lowerThirdLookAheadBold else ss.lookAheadBold
-    } else if (isLowerThird) ss.lyricsLowerThirdBold else ss.lyricsBold
-    val effectiveLyricsItalic = if (lookAheadEnabled) {
-        if (isLowerThird) ss.lowerThirdLookAheadItalic else ss.lookAheadItalic
-    } else if (isLowerThird) ss.lyricsLowerThirdItalic else ss.lyricsItalic
-    val effectiveLyricsUnderline = if (lookAheadEnabled) {
-        if (isLowerThird) ss.lowerThirdLookAheadUnderline else ss.lookAheadUnderline
-    } else if (isLowerThird) ss.lyricsLowerThirdUnderline else ss.lyricsUnderline
-    val effectiveLyricsShadow = if (lookAheadEnabled) {
-        if (isLowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow
-    } else if (isLowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow
+    val effectiveLyricsBold = if (isLowerThird) ss.lyricsLowerThirdBold else ss.lyricsBold
+    val effectiveLyricsItalic = if (isLowerThird) ss.lyricsLowerThirdItalic else ss.lyricsItalic
+    val effectiveLyricsUnderline = if (isLowerThird) ss.lyricsLowerThirdUnderline else ss.lyricsUnderline
+    val effectiveLyricsShadow = if (isLowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow
 
-    // Which profile the body text is drawn from: the look-ahead slide styles its lines separately.
-    val lyricsStyleProfile = ss.elementStyle(
-        if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS,
-        songTarget,
-    )
+    // The body text is the lyrics' own, with or without the look-ahead under it.
+    val lyricsStyleProfile = ss.elementStyle(SongStyleElement.LYRICS, songTarget)
     val lyricsTextStyle = TextStyle(
         fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
@@ -230,11 +219,7 @@ internal class SongLook(
         else -> Alignment.Center
     }
     val lyricsHorizontalAlignment = getTextAlign(
-        if (lookAheadEnabled) {
-            if (isLowerThird) ss.lowerThirdLookAheadHorizontalAlignment else ss.lookAheadHorizontalAlignment
-        } else {
-            if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
-        }
+        if (isLowerThird) ss.lyricsLowerThirdHorizontalAlignment else ss.lyricsHorizontalAlignment
     )
     val titleHorizontalAlignment = getTextAlign(
         if (isLowerThird) ss.titleLowerThirdHorizontalAlignment else ss.titleHorizontalAlignment
@@ -263,20 +248,14 @@ internal class SongLookResources(
 internal fun rememberSongLookResources(
     ss: SongSettings,
     isLowerThird: Boolean,
-    lookAheadEnabled: Boolean,
     isKey: Boolean,
 ): SongLookResources {
     // Resolve font families per fullscreen / lower third
     val titleFontFamily = remember(ss.titleFontType, ss.titleLowerThirdFontType, isLowerThird) {
         systemFontFamilyOrDefault(if (isLowerThird) ss.titleLowerThirdFontType else ss.titleFontType)
     }
-    val lyricsFontFamily = remember(ss.lyricsFontType, ss.lyricsLowerThirdFontType,
-        ss.lookAheadFontType, ss.lowerThirdLookAheadFontType, isLowerThird, lookAheadEnabled) {
-        if (lookAheadEnabled) {
-            systemFontFamilyOrDefault(if (isLowerThird) ss.lowerThirdLookAheadFontType else ss.lookAheadFontType)
-        } else {
-            systemFontFamilyOrDefault(if (isLowerThird) ss.lyricsLowerThirdFontType else ss.lyricsFontType)
-        }
+    val lyricsFontFamily = remember(ss.lyricsFontType, ss.lyricsLowerThirdFontType, isLowerThird) {
+        systemFontFamilyOrDefault(if (isLowerThird) ss.lyricsLowerThirdFontType else ss.lyricsFontType)
     }
 
     // Resolve colors — key mode forces white for a proper key signal
@@ -284,14 +263,9 @@ internal fun rememberSongLookResources(
         if (isKey) Color.White
         else parseHexColor(if (isLowerThird) ss.titleLowerThirdColor else ss.titleColor)
     }
-    val lyricsColor = remember(ss.lyricsColor, ss.lyricsLowerThirdColor,
-        ss.lookAheadColor, ss.lowerThirdLookAheadColor, isLowerThird, lookAheadEnabled, isKey) {
+    val lyricsColor = remember(ss.lyricsColor, ss.lyricsLowerThirdColor, isLowerThird, isKey) {
         if (isKey) Color.White
-        else if (lookAheadEnabled) {
-            parseHexColor(if (isLowerThird) ss.lowerThirdLookAheadColor else ss.lookAheadColor)
-        } else {
-            parseHexColor(if (isLowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor)
-        }
+        else parseHexColor(if (isLowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor)
     }
     val chordColor = remember(ss.lyricsChordColor, ss.lyricsLowerThirdChordColor, isLowerThird, isKey) {
         if (isKey) Color.White

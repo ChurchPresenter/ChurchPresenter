@@ -15,7 +15,7 @@ class StyleModelSettersTest {
     @Test
     fun `only the lyrics and the lines that preview them fit themselves`() {
         assertEquals(
-            setOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION),
+            setOf(SongStyleElement.LYRICS, SongStyleElement.NEXT_SECTION),
             SongStyleElement.entries.filter { it.hasAutoFit }.toSet(),
         )
         assertTrue(SongStyleElement.LYRICS.hasChordColor)

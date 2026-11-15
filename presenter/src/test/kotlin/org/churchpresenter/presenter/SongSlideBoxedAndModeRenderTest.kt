@@ -108,7 +108,7 @@ class SongSlideBoxedAndModeRenderTest {
     fun `boxed look-ahead previews the next section in a box`() =
         slide(
             SongSettings(lookAheadDisplayMode = verse)
-                .boxing(SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION),
+                .boxing(SongStyleElement.LYRICS, SongStyleElement.NEXT_SECTION),
             lookAhead = true,
         ) {
             assertTrue(shows("Amazing grace"))
@@ -117,7 +117,7 @@ class SongSlideBoxedAndModeRenderTest {
     @Test
     fun `boxed look-ahead in line mode on the last section`() =
         slide(
-            SongSettings(lookAheadDisplayMode = line).boxing(SongStyleElement.LOOK_AHEAD),
+            SongSettings(lookAheadDisplayMode = line).boxing(SongStyleElement.LYRICS),
             lookAhead = true,
             sections = listOf(current, next),
             index = 1,
@@ -129,7 +129,7 @@ class SongSlideBoxedAndModeRenderTest {
     @Test
     fun `a look-ahead skips a following section with no lines`() =
         slide(
-            SongSettings(lookAheadDisplayMode = verse).boxing(SongStyleElement.LOOK_AHEAD),
+            SongSettings(lookAheadDisplayMode = verse).boxing(SongStyleElement.LYRICS),
             lookAhead = true,
             sections = listOf(current, empty),
         ) {
@@ -147,7 +147,7 @@ class SongSlideBoxedAndModeRenderTest {
     @Test
     fun `boxed lyrics on a lower third with a look-ahead in line mode`() =
         slide(
-            SongSettings(lowerThirdLookAheadDisplayMode = line).boxing(SongStyleElement.LOOK_AHEAD, lowerThird = true),
+            SongSettings(lowerThirdLookAheadDisplayMode = line).boxing(SongStyleElement.LYRICS, lowerThird = true),
             isLowerThird = true,
             lookAhead = true,
             lineIndex = 0,
@@ -247,7 +247,7 @@ class SongSlideBoxedAndModeRenderTest {
     @Test
     fun `boxed lyrics with auto-fit off and next-section position on the lyrics`() =
         slide(
-            SongSettings(lyricsFontSizeAutoFit = false, lookAheadFontSizeAutoFit = false)
+            SongSettings(lyricsFontSizeAutoFit = false)
                 .boxing(SongStyleElement.LYRICS)
                 .let {
                     it.copy(
@@ -266,7 +266,6 @@ class SongSlideBoxedAndModeRenderTest {
         slide(
             SongSettings(
                 lyricsFontSizeAutoFit = false,
-                lookAheadFontSizeAutoFit = false,
                 bilingualLayout = Constants.BILINGUAL_SIDE_BY_SIDE,
             ),
             lookAhead = true,

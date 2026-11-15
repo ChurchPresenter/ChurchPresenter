@@ -118,12 +118,12 @@ class SongPresenterStyleRenderTest {
     }
 
     @Test
-    fun `look-ahead preview and its own styling render full-screen`() {
+    fun `look-ahead preview and the lyrics' styling render full-screen`() {
         val current = section()
         val next = section(lines = listOf("That saved a wretch like me"), header = "[Verse 2]")
         val settings = AppSettings(
             songSettings = SongSettings(
-                lookAheadBold = true, lookAheadItalic = true, lookAheadUnderline = true, lookAheadShadow = true,
+                lyricsBold = true, lyricsItalic = true, lyricsUnderline = true, lyricsShadow = true,
                 lookAheadNextBold = true,
                 lookAheadNextItalic = false,
                 lookAheadNextUnderline = true,
@@ -153,8 +153,8 @@ class SongPresenterStyleRenderTest {
         val next = section(lines = listOf("That saved a wretch like me"), header = "[Verse 2]")
         val settings = AppSettings(
             songSettings = SongSettings(
-                lowerThirdLookAheadBold = true, lowerThirdLookAheadItalic = true,
-                lowerThirdLookAheadUnderline = true, lowerThirdLookAheadShadow = true,
+                lyricsLowerThirdBold = true, lyricsLowerThirdItalic = true,
+                lyricsLowerThirdUnderline = true, lyricsLowerThirdShadow = true,
                 lowerThirdLookAheadNextBold = true, lowerThirdLookAheadNextItalic = false,
                 lowerThirdLookAheadNextUnderline = true, lowerThirdLookAheadNextShadow = true,
             ),

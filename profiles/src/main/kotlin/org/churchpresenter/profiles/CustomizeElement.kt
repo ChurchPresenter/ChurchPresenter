@@ -6,7 +6,6 @@ import org.churchpresenter.strings.generated.resources.customize_group_reference
 import org.churchpresenter.strings.generated.resources.customize_group_verse_text
 import org.churchpresenter.strings.generated.resources.song_element_look_ahead
 import org.churchpresenter.strings.generated.resources.song_element_lyrics
-import org.churchpresenter.strings.generated.resources.shortcut_description_next_section
 import org.churchpresenter.strings.generated.resources.song_element_number
 import org.churchpresenter.strings.generated.resources.song_element_section_label_short
 import org.churchpresenter.strings.generated.resources.title
@@ -31,7 +30,6 @@ internal enum class CustomizeElement {
     SONG_LYRICS,
     SONG_TITLE,
     SONG_NUMBER,
-    SONG_LOOK_AHEAD,
     SONG_NEXT_SECTION,
     SONG_SECTION_LABEL,
     SONG_TITLE_SLIDE,
@@ -68,7 +66,6 @@ internal fun customizeElements(pane: CustomizePane): List<CustomizeElement> = wh
         CustomizeElement.SONG_TITLE_SLIDE,
         CustomizeElement.SONG_TITLE,
         CustomizeElement.SONG_NUMBER,
-        CustomizeElement.SONG_LOOK_AHEAD,
         CustomizeElement.SONG_NEXT_SECTION,
         CustomizeElement.SONG_SECTION_LABEL,
     )
@@ -86,9 +83,9 @@ internal fun CustomizeElement.label(): String = when (this) {
     CustomizeElement.SONG_LYRICS -> stringResource(Res.string.song_element_lyrics)
     CustomizeElement.SONG_TITLE -> stringResource(Res.string.title)
     CustomizeElement.SONG_NUMBER -> stringResource(Res.string.song_element_number)
-    CustomizeElement.SONG_LOOK_AHEAD -> stringResource(Res.string.song_element_look_ahead)
-    CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.shortcut_description_next_section)
-    // Short, beside Next Section: the Songs strip keeps its six elements on one line.
+    // The next section, drawn under the lyrics: what an operator calls the look-ahead.
+    CustomizeElement.SONG_NEXT_SECTION -> stringResource(Res.string.song_element_look_ahead)
+    // Short, beside Look Ahead: the Songs strip keeps its elements on one line.
     CustomizeElement.SONG_SECTION_LABEL -> stringResource(Res.string.song_element_section_label_short)
     CustomizeElement.SONG_TITLE_SLIDE -> stringResource(Res.string.song_target_title_slide)
     // Named for the surface this output actually writes. Which of the pair that is follows from

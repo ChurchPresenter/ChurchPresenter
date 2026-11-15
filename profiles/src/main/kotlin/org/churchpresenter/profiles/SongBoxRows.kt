@@ -26,7 +26,6 @@ private val BOXABLE_SONG_ELEMENTS = setOf(
     SongStyleElement.NUMBER,
     SongStyleElement.TITLE,
     SongStyleElement.LYRICS,
-    SongStyleElement.LOOK_AHEAD,
     SongStyleElement.NEXT_SECTION,
     SongStyleElement.SECTION_LABEL,
 )

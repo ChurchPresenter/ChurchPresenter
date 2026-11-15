@@ -31,9 +31,10 @@ class ProfilesCustomizeStripExtrasTest {
     private fun doc(
         mode: String = Constants.DISPLAY_MODE_FULLSCREEN,
         label: SongSectionLabel = SongSectionLabel(),
+        lookAhead: Boolean = false,
     ) = profileDocument(
         mode = mode,
-        profile = OutputProfile(),
+        profile = OutputProfile(songLookAhead = lookAhead),
         song = SongSettings(layoutExtras = SongLayoutExtras(sectionLabel = label)),
     )
 
@@ -128,7 +129,7 @@ class ProfilesCustomizeStripExtrasTest {
 
     @Test
     fun `the next section can be held above the lyrics`() {
-        profilesTab(doc()) { get ->
+        profilesTab(doc(lookAhead = true)) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_NEXT_SECTION)
             segment("Above lyrics").performScrollTo().performClick()
             waitForIdle()

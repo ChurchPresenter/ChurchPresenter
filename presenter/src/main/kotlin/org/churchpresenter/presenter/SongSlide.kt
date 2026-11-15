@@ -187,8 +187,7 @@ internal class SongSlide(
 
     // The languages laid out here: a language whose lyrics are boxed is drawn in its
     // box instead, and one whose next section is boxed keeps only its lyrics here.
-    val boxLyricsElement =
-        if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+    val boxLyricsElement = SongStyleElement.LYRICS
     val languageBlocks = slideBlocks
         .filterNot { ss.isBoxed(boxLyricsElement, isLowerThird, lookOf(it.index)) }
         .map { block ->
@@ -312,7 +311,7 @@ internal class SongSlide(
         fontSize = scaledLaFontSize,
         textStyle = lookAheadTextStyle,
     )
-    val lyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS
+    val lyricsElement = SongStyleElement.LYRICS
 
     // Indexed by the language drawn, styled by the look it is drawn with (`lookOf`).
     val languageLyricStyling = List(MAX_SONG_TRANSLATIONS) { slot ->
@@ -487,7 +486,7 @@ internal fun SongFrame.SlideBoxes(section: LyricSection, lineIndex: Int, alpha: 
         songBoxItems(
             settings = ss,
             lowerThird = isLowerThird,
-            lyricsElement = if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS,
+            lyricsElement = SongStyleElement.LYRICS,
             lookOf = ::lookOf,
             slide = SongBoxSlide(
                 blocks = blocks,

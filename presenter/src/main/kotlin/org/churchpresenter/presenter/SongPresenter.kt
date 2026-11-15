@@ -135,7 +135,7 @@ fun SongPresenter(
         languageOverride = languageOverride,
         languageSelection = languageSelection,
         showChords = showChords,
-        resources = rememberSongLookResources(ss, isLowerThird, lookAheadEnabled, isKey),
+        resources = rememberSongLookResources(ss, isLowerThird, isKey),
     )
     with(look) {
         // A title slide with a Lottie of its own plays it instead (#971): in the band's place on a

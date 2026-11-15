@@ -22,10 +22,9 @@ class SongLookResourcesTest {
     fun `each colour follows its own setting through every output shape and the key`() = runComposeUiTest {
         var ss by mutableStateOf(SongSettings())
         var lowerThird by mutableStateOf(false)
-        var lookAhead by mutableStateOf(false)
         var key by mutableStateOf(false)
         var res: SongLookResources? = null
-        setContent { res = rememberSongLookResources(ss, lowerThird, lookAhead, key) }
+        setContent { res = rememberSongLookResources(ss, lowerThird, key) }
         fun look(): SongLookResources { waitForIdle(); return checkNotNull(res) }
 
         assertEquals(parseHexColor(SongSettings().lyricsColor), look().lyricsColor)
@@ -41,18 +40,14 @@ class SongLookResourcesTest {
         ss = ss.copy(titleFontType = "Serif", lyricsFontType = "Serif", lookAheadNextFontType = "Serif")
         look()
 
-        lookAhead = true
-        ss = ss.copy(lookAheadColor = blue, lookAheadFontType = "Monospaced")
-        assertEquals(parseHexColor(blue), look().lyricsColor)
-
         lowerThird = true
         ss = ss.copy(
             titleLowerThirdColor = green,
-            lowerThirdLookAheadColor = red,
+            lyricsLowerThirdColor = red,
             lyricsLowerThirdChordColor = green,
             lowerThirdLookAheadNextColor = blue,
             titleLowerThirdFontType = "Serif",
-            lowerThirdLookAheadFontType = "Serif",
+            lyricsLowerThirdFontType = "Serif",
             lowerThirdLookAheadNextFontType = "Monospaced",
         )
         look().let {
@@ -62,7 +57,6 @@ class SongLookResourcesTest {
             assertEquals(parseHexColor(blue), it.laColor)
         }
 
-        lookAhead = false
         ss = ss.copy(lyricsLowerThirdColor = blue, lyricsLowerThirdFontType = "Monospaced")
         assertEquals(parseHexColor(blue), look().lyricsColor)
 
@@ -74,7 +68,6 @@ class SongLookResourcesTest {
             assertEquals(Color.White, it.laColor)
         }
 
-        lookAhead = true
         lowerThird = false
         assertEquals(Color.White, look().lyricsColor)
     }

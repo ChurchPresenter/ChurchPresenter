@@ -203,7 +203,7 @@ private fun songBlocks(profile: OutputProfile, titleSlide: Boolean, song: SongSe
             SongBlock(SongStyleElement.NUMBER, null, lowerThird, false),
             SongBlock(SongStyleElement.TITLE, languages.first(), lowerThird, false),
             SongBlock(SongStyleElement.SECTION_LABEL, null, lowerThird, false),
-        ) + listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NEXT_SECTION)
+        ) + listOf(SongStyleElement.LYRICS, SongStyleElement.NEXT_SECTION)
             .flatMap { element -> languages.map { SongBlock(element, it, lowerThird, false) } }
     }
 }
@@ -226,7 +226,6 @@ private fun SongBlock.pickIn(targets: SongTargets, profile: OutputProfile, song:
 private fun SongStyleElement.customizeElement(): CustomizeElement = when (this) {
     SongStyleElement.NUMBER -> CustomizeElement.SONG_NUMBER
     SongStyleElement.TITLE -> CustomizeElement.SONG_TITLE
-    SongStyleElement.LOOK_AHEAD -> CustomizeElement.SONG_LOOK_AHEAD
     SongStyleElement.NEXT_SECTION -> CustomizeElement.SONG_NEXT_SECTION
     SongStyleElement.SECTION_LABEL -> CustomizeElement.SONG_SECTION_LABEL
     SongStyleElement.LYRICS -> CustomizeElement.SONG_LYRICS

@@ -108,7 +108,7 @@ class SongTitleSlideOffsetTest {
     @Test
     fun `an element the title slide never draws has no slot either`() {
         val settings = SongSettings()
-        for (element in listOf(SongStyleElement.LYRICS, SongStyleElement.LOOK_AHEAD, SongStyleElement.NUMBER)) {
+        for (element in listOf(SongStyleElement.LYRICS, SongStyleElement.NEXT_SECTION, SongStyleElement.NUMBER)) {
             assertNull(settings.titleSlideOffset(element, SongStyleTarget.FULL_SCREEN), "$element")
             assertSame(
                 settings,
