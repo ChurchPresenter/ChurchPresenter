@@ -55,6 +55,8 @@ import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.sharedui.composables.rememberDropdownWidthFor
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.settings.ResourceDirectory
+import org.churchpresenter.settings.resourceDirectories
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.moveBibleTranslation
@@ -95,7 +97,7 @@ fun BibleSettingsTab(
 ) {
     // Null while the folder is still being read. Walking it and reading a header out of every module
     // used to happen inline here, so the whole dialog waited on it before painting once per open.
-    val listing = rememberBibleFolderListing(settings.bibleSettings.storageDirectory)
+    val listing = rememberBibleFolderListing(settings.resourceDirectories(ResourceDirectory.BIBLE))
     val bibleFilesInDirectory = listing?.files.orEmpty()
     // The renames are applied over the scan rather than baked into it, so typing in a name field
     // re-labels every picker on the next frame without walking the Bible folder again.

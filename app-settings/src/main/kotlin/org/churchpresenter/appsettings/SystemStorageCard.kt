@@ -373,6 +373,8 @@ internal fun SystemStorageCard(
                 BIBLE_ROW -> BibleStorageDetail(folder.path, bibleFiles, browseStart, onSettingsChange)
                 SONGS_ROW -> SongsStorageDetail(folder.path, songScan, browseStart)
             }
+            AdditionalResourceDirectories(settings, org.churchpresenter.settings.ResourceDirectory.entries[index],
+                fileManager, onSettingsChange, folder.path)
             if (index < folders.lastIndex) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = ROW_LINE_ALPHA))
             }

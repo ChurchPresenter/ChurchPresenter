@@ -1,4 +1,7 @@
 <resources>
+    <string name="resource_directory_default">设为默认</string>
+    <string name="resource_directory_add">添加目录</string>
+    <string name="resource_directory_remove">移除目录</string>
     <string name="presentation_resources">选择资源 ▾</string>
     <string name="output_menu_next">下一页</string>
     <string name="output_menu_previous">上一页</string>

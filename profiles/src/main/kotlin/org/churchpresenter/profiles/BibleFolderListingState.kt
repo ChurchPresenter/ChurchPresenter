@@ -26,3 +26,24 @@ fun rememberBibleFolderListing(directory: String): BibleFolderListing? {
     }
     return listing
 }
+
+@Composable
+fun rememberBibleFolderListing(directories: List<String>): BibleFolderListing? {
+    var listing by remember(directories) { mutableStateOf<BibleFolderListing?>(null) }
+    LaunchedEffect(directories) {
+        listing = withContext(Dispatchers.IO) {
+            val files = mutableListOf<String>()
+            val titles = linkedMapOf<String, String>()
+            directories.forEachIndexed { index, directory ->
+                val folder = readBibleFolderListing(directory)
+                folder.files.forEach { relative ->
+                    val key = if (index == 0) relative else java.io.File(directory, relative).absolutePath
+                    files.add(key)
+                    titles[key] = folder.titles[relative] ?: relative
+                }
+            }
+            BibleFolderListing(files.distinct(), titles)
+        }
+    }
+    return listing
+}

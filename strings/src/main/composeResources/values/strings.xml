@@ -1,4 +1,7 @@
 <resources>
+    <string name="resource_directory_default">Use as default</string>
+    <string name="resource_directory_add">Add directory</string>
+    <string name="resource_directory_remove">Remove directory</string>
     <string name="presentation_resources">Choose resources ▾</string>
     <string name="output_menu_next">Next slide</string>
     <string name="output_menu_previous">Previous slide</string>

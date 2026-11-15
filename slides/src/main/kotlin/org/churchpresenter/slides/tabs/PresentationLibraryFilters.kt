@@ -19,19 +19,22 @@ import org.churchpresenter.strings.generated.resources.hymn_quick_format
 import org.churchpresenter.strings.generated.resources.hymn_quick_book
 import org.churchpresenter.strings.generated.resources.hymn_quick_all
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.settings.ResourceDirectory
+import org.churchpresenter.settings.resourceDirectories
 import java.io.File
 
 @Composable
 internal fun PresentationTabScope.PresentationLibraryFilters(documents: List<File>) {
     val settings = appSettings.presentationSettings
     val root = File(appSettings.presentationStorageDirectory)
+    val roots = appSettings.resourceDirectories(ResourceDirectory.PRESENTATIONS).map(::File)
         PresentationScreenChoice()
         QuickPlayChoice(stringResource(Res.string.hymn_quick_format), settings.quickPlayFormat,
             listOf("pptx", "pdf", "docx")) { format ->
             onSettingsChange { it.copy(presentationSettings = it.presentationSettings.copy(quickPlayFormat = format)) }
         }
         val all = stringResource(Res.string.hymn_quick_all)
-        val books = documents.map { HymnQuickPlay.book(it, root) }.distinct().sorted()
+        val books = documents.map { HymnQuickPlay.book(it, root, roots) }.distinct().sorted()
         QuickPlayChoice(stringResource(Res.string.hymn_quick_book), settings.quickPlayBook.ifEmpty { all },
             listOf(all) + books.filter { it.isNotEmpty() }) { book ->
             onSettingsChange {

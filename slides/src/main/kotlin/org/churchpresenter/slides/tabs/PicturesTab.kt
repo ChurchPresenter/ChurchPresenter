@@ -131,6 +131,13 @@ fun PicturesTab(
     // focus AND the window is focused — full machinery in composables/FocusLostRescue.kt
     // (shared with Presentation/Bible/Songs).
     val focusRescue = rememberFocusLostRescue(hostWindow, focusRequester)
+    LaunchedEffect(appSettings?.pictureSettings?.storageDirectory) {
+        val path = appSettings?.pictureSettings?.storageDirectory.orEmpty()
+        val folder = java.io.File(path)
+        if (path.isNotBlank() && folder.isDirectory && viewModel.selectedFolder != folder) {
+            viewModel.selectFolder(folder)
+        }
+    }
     val shortcuts = LocalShortcuts.current
     val wentLive = LocalWentLive.current
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the

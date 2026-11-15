@@ -7,6 +7,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.settings.ResourceDirectory
+import org.churchpresenter.settings.resourceDirectories
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleSyncMode
@@ -24,7 +26,9 @@ import java.io.File
 internal fun BibleViewModel.updateSettings(newSettings: AppSettings) {
     val previous = appSettings
     appSettings = newSettings
-    if (translationReloadRequired(previous.bibleSettings, newSettings.bibleSettings)) {
+    val directoriesChanged = previous.resourceDirectories(ResourceDirectory.BIBLE) !=
+        newSettings.resourceDirectories(ResourceDirectory.BIBLE)
+    if (translationReloadRequired(previous.bibleSettings, newSettings.bibleSettings) || directoriesChanged) {
         loadBibles()
         return
     }
@@ -326,10 +330,14 @@ private fun BibleViewModel.resolveTranslationSources(
     configuredTranslations: List<BibleTranslationSettings>,
 ): TranslationSources {
     val storageDirectory = appSettings.bibleSettings.storageDirectory
+    val directories = appSettings.resourceDirectories(ResourceDirectory.BIBLE)
+    fun moduleFile(name: String): File? {
+        val explicit = File(name)
+        if (explicit.isAbsolute) return explicit.takeIf { it.isFile }
+        return directories.asSequence().map { File(it, name) }.firstOrNull { it.isFile }
+    }
     fun configuredFile(index: Int): File? = configuredTranslations.getOrNull(index)
-        ?.fileName?.takeIf { it.isNotEmpty() }
-        ?.let { name -> storageDirectory.takeIf { it.isNotEmpty() }?.let { File(it, name) } }
-        ?.takeIf { it.exists() }
+        ?.fileName?.takeIf { it.isNotEmpty() }?.let(::moduleFile)
 
     val primaryPath = if (useReplica) remoteBibleCacheFile?.takeIf { it.exists() } else configuredFile(0)
     val secondaryPath =
@@ -341,8 +349,7 @@ private fun BibleViewModel.resolveTranslationSources(
             (configuredTranslations.getOrNull(index)?.fileName ?: path.name) to path
         }
         else -> configuredTranslations.mapNotNull { translation ->
-            File(storageDirectory, translation.fileName)
-                .takeIf { it.exists() }
+            moduleFile(translation.fileName)
                 ?.let { translation.fileName to it }
         }
     }

@@ -26,14 +26,16 @@ import org.churchpresenter.strings.generated.resources.presentation_documents_sc
 import org.churchpresenter.strings.generated.resources.presentation_documents_empty
 import org.churchpresenter.strings.generated.resources.presentation_documents_word_renderer
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.settings.ResourceDirectory
+import org.churchpresenter.settings.resourceDirectories
 import java.io.File
 
 private const val DOCUMENT_RESCAN_INTERVAL_MS = 30_000L
 
 @Composable
 internal fun PresentationTabScope.PresentationDocuments(viewModel: PresentationViewModel) {
-    val directories = remember(appSettings.presentationStorageDirectory) {
-        listOf(appSettings.presentationStorageDirectory).filter { it.isNotBlank() }
+    val directories = remember(appSettings.presentationStorageDirectory, appSettings.additionalResourceDirectories) {
+        appSettings.resourceDirectories(ResourceDirectory.PRESENTATIONS)
     }
     val documents = viewModel.discoveredDocuments
     var scanning by remember { mutableStateOf(false) }

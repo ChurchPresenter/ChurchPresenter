@@ -79,7 +79,7 @@ internal fun rememberModuleBookNames(storageDirectory: String, fileName: String)
 }
 
 internal fun readModuleBookNames(storageDirectory: String, fileName: String): ModuleBookNames {
-    val file = File(storageDirectory, fileName)
+    val file = File(fileName).takeIf { it.isAbsolute } ?: File(storageDirectory, fileName)
     if (storageDirectory.isEmpty() || fileName.isEmpty() || !file.isFile) {
         return ModuleBookNames(emptyMap(), BookNamesRead.FAILED)
     }

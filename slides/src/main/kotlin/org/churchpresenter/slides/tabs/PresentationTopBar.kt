@@ -46,6 +46,8 @@ import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.presentation_documents_folder
 import org.churchpresenter.strings.generated.resources.presentation_resources
+import org.churchpresenter.settings.ResourceDirectory
+import org.churchpresenter.settings.withPrimaryResourceDirectory
 import org.churchpresenter.strings.generated.resources.toolbar_remote
 import org.churchpresenter.strings.generated.resources.toolbar_unfreeze
 import org.churchpresenter.strings.generated.resources.toolbar_freeze
@@ -196,7 +198,10 @@ private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationV
                 onSettingsChange {
                     val presentation = if (it.presentationStorageDirectory == path) it.presentationSettings else
                         it.presentationSettings.copy(quickPlayBook = "")
-                    it.copy(presentationStorageDirectory = path, presentationSettings = presentation)
+                    it.withPrimaryResourceDirectory(
+                        ResourceDirectory.PRESENTATIONS, path, it.presentationStorageDirectory,
+                    )
+                        .copy(presentationSettings = presentation)
                 }
                 viewModel.refreshDocumentLibrary()
             }

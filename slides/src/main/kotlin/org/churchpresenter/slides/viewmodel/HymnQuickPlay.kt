@@ -6,14 +6,20 @@ internal object HymnQuickPlay {
     private const val OTHER_FORMAT_RANK = 3
     private val leadingNumber = Regex("^\\s*0*(\\d+)(?=\\D|$)")
 
-    fun book(file: File, root: File): String =
-        file.parentFile.relativeToOrNull(root)?.path.orEmpty().substringBefore(File.separatorChar)
+    fun book(file: File, root: File, roots: List<File> = listOf(root)): String {
+        val path = file.absoluteFile.toPath().normalize()
+        val owner = roots.firstOrNull { path.startsWith(it.absoluteFile.toPath().normalize()) }
+            ?: root
+        return file.parentFile.relativeToOrNull(owner)?.path.orEmpty().substringBefore(File.separatorChar)
+    }
 
-    fun find(files: List<File>, root: File, query: String, preferredBook: String, format: String): List<File> {
+    fun find(files: List<File>, root: File, query: String, preferredBook: String, format: String,
+        roots: List<File> = listOf(root),
+    ): List<File> {
         val text = query.trim()
         val number = text.toIntOrNull()
         val matches = files.filter { file ->
-            val inBook = preferredBook.isEmpty() || book(file, root) == preferredBook
+            val inBook = preferredBook.isEmpty() || book(file, root, roots) == preferredBook
             val matchesName = if (number != null) {
                 leadingNumber.find(file.nameWithoutExtension)?.groupValues?.get(1)?.toIntOrNull() == number
             } else {
@@ -22,7 +28,7 @@ internal object HymnQuickPlay {
             }
             inBook && matchesName
         }
-        val grouped = matches.groupBy { book(it, root) to it.nameWithoutExtension.lowercase() }
+        val grouped = matches.groupBy { book(it, root, roots) to it.nameWithoutExtension.lowercase() }
         return grouped.values.map { variants ->
             variants.minWith(
                 compareBy<File> { formatRank(it.extension.lowercase(), format) }.thenBy { it.absolutePath }

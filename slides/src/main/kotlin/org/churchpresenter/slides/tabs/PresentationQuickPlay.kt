@@ -37,6 +37,8 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.hymn_quick_query
 import org.churchpresenter.strings.generated.resources.hymn_quick_missing
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.settings.ResourceDirectory
+import org.churchpresenter.settings.resourceDirectories
 import java.io.File
 
 @Composable
@@ -45,12 +47,13 @@ internal fun PresentationTabScope.PresentationQuickPlay(viewModel: PresentationV
 ) {
     val settings = appSettings.presentationSettings
     val root = File(appSettings.presentationStorageDirectory)
+    val roots = appSettings.resourceDirectories(ResourceDirectory.PRESENTATIONS).map(::File)
     var query by remember { mutableStateOf("") }
-    val results = remember(documents, query, settings.quickPlayBook, settings.quickPlayFormat) {
-        HymnQuickPlay.find(documents, root, query, settings.quickPlayBook, settings.quickPlayFormat)
+    val results = remember(documents, query, settings.quickPlayBook, settings.quickPlayFormat, roots) {
+        HymnQuickPlay.find(documents, root, query, settings.quickPlayBook, settings.quickPlayFormat, roots)
     }
     val resultScroll = rememberLazyListState()
-    LaunchedEffect(query, settings.quickPlayBook, settings.quickPlayFormat) { resultScroll.scrollToItem(0) }
+    LaunchedEffect(query, settings.quickPlayBook, settings.quickPlayFormat, roots) { resultScroll.scrollToItem(0) }
     var pending by remember { mutableStateOf<Pair<File, Int>?>(null) }
     val start: (File) -> Unit = { file ->
         pending = file to viewModel.loadGeneration
@@ -99,7 +102,7 @@ internal fun PresentationTabScope.PresentationQuickPlay(viewModel: PresentationV
         }
         libraryControls()
         if (results.isEmpty()) Text(stringResource(Res.string.hymn_quick_missing))
-        QuickPlayResults(results, root, pending == null, resultScroll) { file ->
+        QuickPlayResults(results, root, roots, pending == null, resultScroll) { file ->
             pending = null
             viewModel.previewPresentation(file)
         }
@@ -108,7 +111,7 @@ internal fun PresentationTabScope.PresentationQuickPlay(viewModel: PresentationV
 
 @Composable
 private fun QuickPlayResults(
-    results: List<File>, root: File, enabled: Boolean,
+    results: List<File>, root: File, roots: List<File>, enabled: Boolean,
     resultScroll: androidx.compose.foundation.lazy.LazyListState,
     onSelect: (File) -> Unit,
 ) {
@@ -126,7 +129,7 @@ private fun QuickPlayResults(
                     }.padding(horizontal = 12.dp, vertical = 8.dp)) {
                         Text(file.name, style = MaterialTheme.typography.titleSmall,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(HymnQuickPlay.book(file, root), style = MaterialTheme.typography.labelSmall)
+                        Text(HymnQuickPlay.book(file, root, roots), style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }

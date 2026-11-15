@@ -19,8 +19,33 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.slides.FakeSlidesOutput
 import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.settings.ResourceDirectory
 
 class PresentationDocumentLibraryTest {
+    @Test
+    fun `the presentation library merges configured directories`() {
+        val root = Files.createTempDirectory("presentation-multiple-directories").toFile()
+        try {
+            val primary = root.resolve("primary").apply { mkdirs() }
+            val additional = root.resolve("additional").apply { mkdirs() }
+            primary.resolve("001 Primary.pdf").writeText("discovery fixture")
+            additional.resolve("002 Additional.pdf").writeText("discovery fixture")
+            presentationTab(settings = {
+                it.copy(
+                    presentationStorageDirectory = primary.absolutePath,
+                    additionalResourceDirectories = mapOf(
+                        ResourceDirectory.PRESENTATIONS to listOf(additional.absolutePath)
+                    ),
+                )
+            }) { _, _ ->
+                waitUntilAtLeastOneExists(hasText("001 Primary.pdf"), timeoutMillis = 10_000)
+                onNodeWithText("002 Additional.pdf").assertExists()
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
     @Test
     fun `a resource selection refresh request discovers newly added files immediately`() {
         val root = Files.createTempDirectory("presentation-selection-refresh").toFile()

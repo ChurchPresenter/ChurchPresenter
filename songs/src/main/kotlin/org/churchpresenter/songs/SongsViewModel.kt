@@ -10,8 +10,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.settings.ResourceDirectory
+import org.churchpresenter.settings.resourceDirectories
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.core.models.songs.CachedSong
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.utils.Constants
@@ -54,6 +55,8 @@ class SongsViewModel(
     // every visit and the app keeps the last schedule song, so this is how a visit tells a fresh
     // schedule click apart from one it has already handled.
     internal var scheduleSeen: Pair<ScheduleItem.SongItem?, Int>? = null
+
+    private val additionalSongWatchers = mutableListOf<SongFolderWatcher>()
 
     internal val songFolderWatcher = SongFolderWatcher(viewModelScope) { loadSongs() }
 
@@ -193,6 +196,8 @@ class SongsViewModel(
         remoteModeActive = true
         remoteFetchLyrics = fetchLyrics
         loadSongsJob?.cancel()
+        additionalSongWatchers.forEach { it.dispose() }
+        additionalSongWatchers.clear()
         songFolderWatcher.dispose()
         val items = catalog.orEmpty()
         applySongList(items)
@@ -205,6 +210,7 @@ class SongsViewModel(
         loadSongsJob = viewModelScope.launch {
             isLoadingState.value = true
             val storageDir = appSettings.songSettings.storageDirectory
+            val storageDirs = appSettings.resourceDirectories(ResourceDirectory.SONGS)
             try {
                 // Phase 1: Try loading from cache for instant display
                 if (storageDir.isNotEmpty()) {
@@ -220,27 +226,25 @@ class SongsViewModel(
                 // Phase 2: Load from disk incrementally (only re-parse changed files)
                 val result = withContext(ioDispatcher) {
                     val s = Songs()
-                    var cachedSongsList: List<CachedSong> = emptyList()
-                    if (storageDir.isNotEmpty()) {
-                        val dir = File(storageDir)
-                        if (dir.exists() && dir.isDirectory) {
-                            val parser = SongFileParser()
-                            val cacheMap = SongFileParser.loadCachedSongMap(storageDir)
-                            cachedSongsList = parser.loadSongsFromDirectory(dir.absolutePath, cacheMap)
-                            s.addSongs(cachedSongsList.map { it.song })
+                    val cache = SongFileParser.loadCachedSongMap(storageDir)
+                    val cachedSongsList = storageDirs.flatMap { directory ->
+                        val dir = File(directory)
+                        if (!dir.isDirectory) emptyList() else {
+                            SongFileParser().loadSongsFromDirectory(directory, cache)
                         }
-                    }
+                    }.distinctBy { it.song.sourceFile }
+                    s.addSongs(cachedSongsList.map { it.song })
+                    if (storageDir.isNotBlank()) SongFileParser.saveSongCache(storageDir, cachedSongsList)
                     if (s.getSongCount() == 0) {
                         try {
                             s.loadFromSps(Constants.FALLBACK_SONG_RESOURCE)
                         } catch (_: Exception) {
                         }
                     }
-                    Pair(s, cachedSongsList)
+                    s
                 }
 
-                val songs = result.first
-                val cachedSongsList = result.second
+                val songs = result
                 val freshSongs = songs.getSongs()
 
                 // Only update UI if data actually changed
@@ -249,16 +253,16 @@ class SongsViewModel(
                     applySongList(freshSongs, songs)
                 }
 
-                // Save cache for next launch
-                if (storageDir.isNotEmpty() && cachedSongsList.isNotEmpty()) {
-                    withContext(ioDispatcher) {
-                        SongFileParser.saveSongCache(storageDir, cachedSongsList)
+                // Keep a watcher for each configured root.
+                additionalSongWatchers.forEach { it.dispose() }
+                additionalSongWatchers.clear()
+                songFolderWatcher.dispose()
+                if (enableFolderWatcher) {
+                    storageDirs.forEachIndexed { index, directory ->
+                        val watcher = if (index == 0) songFolderWatcher else
+                            SongFolderWatcher(viewModelScope) { loadSongs() }.also { additionalSongWatchers.add(it) }
+                        watcher.watchDirectory(File(directory))
                     }
-                }
-
-                // Start watching the song directory for changes
-                if (enableFolderWatcher && storageDir.isNotEmpty()) {
-                    songFolderWatcher.watchDirectory(File(storageDir))
                 }
             } finally {
                 isLoadingState.value = false
@@ -267,6 +271,8 @@ class SongsViewModel(
     }
 
     fun dispose() {
+        additionalSongWatchers.forEach { it.dispose() }
+        additionalSongWatchers.clear()
         songFolderWatcher.dispose()
         viewModelScope.cancel()
     }
