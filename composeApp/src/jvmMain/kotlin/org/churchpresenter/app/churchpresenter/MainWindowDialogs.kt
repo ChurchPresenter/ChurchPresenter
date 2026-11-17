@@ -38,7 +38,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.ui.theme.themeChoiceFrom
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.ThemeMode
-import java.io.File
 import org.churchpresenter.serverui.InstanceLinkDialog
 import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import org.churchpresenter.updater.UpdateChecker
@@ -259,10 +258,7 @@ internal fun MainWindowScope.MoreToolWindows() {
         if (showVerseFixerWindow) {
             BibleVerseFixerWindow(
                 theme = theme,
-                bibleFiles = appSettings.bibleSettings.let { bible ->
-                    bible.translations.map { File(bible.storageDirectory, it.fileName) }
-                        .filter { it.isFile }.distinct()
-                },
+                bibleFiles = appSettings.bibleSettings.stackFiles(),
                 onClose = { showVerseFixerWindow = false },
             )
         }
