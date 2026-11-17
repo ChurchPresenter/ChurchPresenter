@@ -6,6 +6,7 @@
 
 package org.churchpresenter.songs
 
+import org.churchpresenter.strings.generated.resources.song_alias_column
 import org.churchpresenter.strings.generated.resources.song_order
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
@@ -272,6 +273,7 @@ private fun SongListScope.SongListColumn(modifier: Modifier) {
         // Pre-compute column labels (stringResource is @Composable, can't be called in forEach)
         val colHeaderLabels = mapOf(
             SongColumnId.NUMBER     to stringResource(Res.string.song_element_number),
+            SongColumnId.ALIAS      to stringResource(Res.string.song_alias_column),
             SongColumnId.TITLE      to stringResource(Res.string.title),
             SongColumnId.SONGBOOK   to stringResource(Res.string.song_book),
             SongColumnId.TUNE       to stringResource(Res.string.tune),

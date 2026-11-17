@@ -6,6 +6,7 @@ package org.churchpresenter.settings
  */
 object SongColumnId {
     const val NUMBER = "number"
+    const val ALIAS = "alias"
     const val TITLE = "title"
     const val SONGBOOK = "songbook"
     const val TUNE = "tune"

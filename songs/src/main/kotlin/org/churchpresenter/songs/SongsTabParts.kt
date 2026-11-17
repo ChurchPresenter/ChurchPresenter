@@ -1,5 +1,6 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.settings.withPanelLanguageShown
 import org.churchpresenter.sharedui.models.Presenting
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -353,6 +354,9 @@ private fun SongsTabController.SongLyricsSide(row: RowScope) = with(row) {
         },
         onRenameLanguage = { slot, name ->
             onSettingsChange { s -> s.copy(songSettings = s.songSettings.withLanguageName(slot, name)) }
+        },
+        onShowLanguageInPanel = { slot, shown ->
+            onSettingsChange { s -> s.withPanelLanguageShown(slot, shown) }
         },
     )
 }

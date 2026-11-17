@@ -20,7 +20,10 @@ class SongColumnsTest {
         val cols = availableSongColumns(songbookCount = 1, hasAddToSchedule = false)
         assertFalse("songbook" in cols, "one songbook needs no songbook column")
         assertFalse("add_to_schedule" in cols, "no callback means no add column")
-        assertEquals(listOf("number", "title", "tune", "play_count", "author", "composer", "order", "favorites"), cols)
+        assertEquals(
+            listOf("number", "alias", "title", "tune", "play_count", "author", "composer", "order", "favorites"),
+            cols,
+        )
     }
 
     @Test
@@ -29,6 +32,7 @@ class SongColumnsTest {
         assertEquals(
             listOf(
                 "number",
+                "alias",
                 "title",
                 "songbook",
                 "tune",
@@ -85,12 +89,12 @@ class SongColumnsTest {
     // ── hiddenWithNewColumns ──────────────────────────────────────────────────
 
     @Test
-    fun `the order column starts hidden while the saved layout has never listed it`() =
-        assertEquals(setOf("tune", "order"), hiddenWithNewColumns(setOf("tune"), listOf("number", "title")))
+    fun `the order and alias columns start hidden while the saved layout has never listed them`() =
+        assertEquals(setOf("tune", "order", "alias"), hiddenWithNewColumns(setOf("tune"), listOf("number", "title")))
 
     @Test
-    fun `the order column keeps the operator's choice once the saved layout lists it`() =
-        assertEquals(setOf("tune"), hiddenWithNewColumns(setOf("tune"), listOf("number", "order")))
+    fun `the order and alias columns keep the operator's choice once the saved layout lists them`() =
+        assertEquals(setOf("tune"), hiddenWithNewColumns(setOf("tune"), listOf("number", "alias", "order")))
 
     // ── moveColumn ────────────────────────────────────────────────────────────
 

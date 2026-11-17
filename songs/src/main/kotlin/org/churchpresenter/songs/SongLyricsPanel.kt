@@ -9,6 +9,10 @@ import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageDisplayOrder
 import org.churchpresenter.sharedui.utils.defaultSongLanguageName
 import org.churchpresenter.settings.languageLabel
+import org.churchpresenter.settings.panelLanguageSlots
+import org.churchpresenter.sharedui.composables.OrderShown
+import org.churchpresenter.strings.generated.resources.song_language_panel_hint
+import org.churchpresenter.strings.generated.resources.song_language_panel_shown
 import org.churchpresenter.strings.generated.resources.profile_box_languages
 import org.churchpresenter.strings.generated.resources.song_language_places_subtitle
 import org.churchpresenter.strings.generated.resources.move_language_up
@@ -150,6 +154,8 @@ internal fun RowScope.SongLyricsPanel(
     onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit = { _, _, _ -> },
     /** Names language [slot] install-wide -- blank goes back to "Language N". */
     onRenameLanguage: (slot: Int, name: String) -> Unit = { _, _ -> },
+    /** Shows language [slot] in this panel, or hides it; the outputs are not affected. */
+    onShowLanguageInPanel: (slot: Int, shown: Boolean) -> Unit = { _, _ -> },
 ) {
     val density = LocalDensity.current
     // Right panel — Lyrics display (fixed width, resizable via drag handle)
@@ -171,8 +177,10 @@ internal fun RowScope.SongLyricsPanel(
             onPresenting = onPresenting,
             sendToPresenter = sendToPresenter,
             songSettings = appSettings.operatorSongSettings(),
+            panelHiddenLanguages = appSettings.songPanelHiddenLanguages,
             onMoveLanguage = onMoveLanguage,
             onRenameLanguage = onRenameLanguage,
+            onShowLanguageInPanel = onShowLanguageInPanel,
         )
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
 
@@ -276,8 +284,10 @@ private fun LyricsActionBar(
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
     songSettings: SongSettings,
+    panelHiddenLanguages: List<Int>,
     onMoveLanguage: (available: Int, index: Int, offset: Int) -> Unit,
     onRenameLanguage: (slot: Int, name: String) -> Unit,
+    onShowLanguageInPanel: (slot: Int, shown: Boolean) -> Unit,
 ) {
     val editSongStr    = stringResource(Res.string.edit_song)
     val goLiveStr      = stringResource(Res.string.go_live)
@@ -308,6 +318,7 @@ private fun LyricsActionBar(
                         key = slot.toString(),
                         name = songSettings.languageLabel(slot),
                         placeholder = defaultSongLanguageName(slot),
+                        shown = slot !in panelHiddenLanguages,
                     )
                 },
             subtitle = stringResource(Res.string.song_language_places_subtitle),
@@ -320,6 +331,11 @@ private fun LyricsActionBar(
                 onRename = { key, name -> onRenameLanguage(key.toInt(), name) },
                 addLabel = stringResource(Res.string.song_add_translation),
                 onAdd = { added = languages + 1 }.takeIf { languages < MAX_SONG_TRANSLATIONS },
+            ),
+            shown = OrderShown(
+                label = stringResource(Res.string.song_language_panel_shown),
+                hint = stringResource(Res.string.song_language_panel_hint),
+                onToggle = { key, shown -> onShowLanguageInPanel(key.toInt(), shown) },
             ),
             modifier = Modifier.widthIn(min = 127.dp, max = 174.dp),
         )
@@ -454,6 +470,11 @@ private fun LyricsList(
 
         // Get lyric sections from ViewModel — no parsing in UI
         val sections = if (currentSong != null) lyricSections() else emptyList()
+        // The languages the operator keeps in this panel, less any the song never fills.
+        val columns = panelColumnSlots(
+            sections,
+            appSettings.panelLanguageSlots(currentSong?.translationCount ?: 1),
+        )
 
         LazyColumn(
             state = lyricsListState,
@@ -484,6 +505,7 @@ private fun LyricsList(
                         cue = currentSong?.sectionNotes?.get(section.sectionKey)
                             ?.takeIf { section.slideIndex == 0 }.orEmpty(),
                         sectionIndex = sectionIndex,
+                        columns = columns,
                         isPerLineMode = isSongLineMode(appSettings.operatorSongSettings()),
                         selectedSectionIndex = selectedSectionIndex,
                         selectedLineIndex = selectedLineIndex,
@@ -590,6 +612,7 @@ private fun LyricSectionEntry(
     section: LyricSection,
     cue: String,
     sectionIndex: Int,
+    columns: List<Int>,
     isPerLineMode: Boolean,
     selectedSectionIndex: Int,
     selectedLineIndex: Int,
@@ -658,9 +681,9 @@ private fun LyricSectionEntry(
             }
         }
 
-        // The panel always shows every language the song carries — what an output shows is that
-        // output's business, and the operator needs to see all of it to know what is going where.
-        val panelLanguages = section.allLanguageLines().filter { it.isNotEmpty() }
+        // The languages the operator keeps in this panel -- every one unless some are hidden from
+        // its Languages menu. What an output shows is that output's business, not this list's.
+        val panelLanguages = panelColumnLines(section, columns)
 
         val lineClickHandler: ((Int) -> Unit)? = if (isPerLineMode) { lineIdx ->
             onSectionSelected(sectionIndex)
@@ -694,7 +717,7 @@ private fun LyricSectionEntry(
             }
         } else {
             LyricLines(
-                panelLanguages.firstOrNull() ?: section.lines,
+                panelLanguages.first(),
                 textColor, activeLineIndex, lineClickHandler, lineDoubleClickHandler,
             )
         }

@@ -1331,6 +1331,7 @@
     <string name="song_play_count">Plays</string>
     <string name="song_columns">Filter columns</string>
     <string name="song_columns_show_in_list">Show in list</string>
+    <string name="song_alias_column">Alias</string>
     <string name="bible_no_primary_title">No Primary Bible Configured</string>
     <string name="bible_no_primary_hint">Open ⚙ Settings and go to the Bible tab, then:</string>
     <string name="bible_no_primary_step1">1. Set the Bible storage directory</string>
@@ -1802,6 +1803,8 @@
     <string name="move_language_down">Move language down</string>
     <string name="song_language_names_where">Language names are set and edited in the Songs tab's Languages menu.</string>
     <string name="song_language_name_hint">Names this language in every song, and in each profile's song languages.</string>
+    <string name="song_language_panel_shown">Show in the lyrics list</string>
+    <string name="song_language_panel_hint">The eye shows or hides a language in the lyrics list here. The outputs are not affected.</string>
     <string name="song_chords">Chords</string>
     <string name="stage_monitor_show_chords">Show Chords</string>
     <string name="song_chords_toggle">Show chords in the preview</string>

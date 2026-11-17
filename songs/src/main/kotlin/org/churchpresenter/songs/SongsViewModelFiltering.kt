@@ -45,14 +45,17 @@ internal fun SongsViewModel.applyFilters() {
         filtered = when (filterTypeState.value) {
             Constants.CONTAINS -> filtered.filter { song ->
                 song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) } ||
+                    song.alias.contains(query, ignoreCase = true) ||
                     searchLyricsOf(song).contains(query, ignoreCase = true)
             }
             Constants.STARTS_WITH -> filtered.filter { song ->
                 song.number.startsWith(query, ignoreCase = true) ||
+                    song.alias.startsWith(query, ignoreCase = true) ||
                     song.searchTitles().any { it.startsWith(query, ignoreCase = true) }
             }
             Constants.EXACT_MATCH -> filtered.filter { song ->
                 song.number.trim().equals(query, ignoreCase = true) ||
+                    song.alias.trim().equals(query, ignoreCase = true) ||
                     song.searchTitles().any { it.trim().equals(query, ignoreCase = true) }
             }
             else -> filtered
@@ -140,6 +143,12 @@ internal fun SongsViewModel.sortedBy(column: String, items: List<SongItem>): Lis
         items.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
     else
         items.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
+    // Natural order, like the number: "Ch 9" before "Ch 10". Songs with no alias last either way.
+    Constants.SORT_ALIAS -> items.sortedWith(
+        compareBy<SongItem> { it.alias.isBlank() }.then(
+            if (sortAscendingState.value) aliasOrder else aliasOrder.reversed()
+        )
+    )
     Constants.SORT_TITLE -> if (sortAscendingState.value)
         items.sortedBy { it.title.lowercase() }
     else
