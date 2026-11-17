@@ -34,6 +34,10 @@ file explains.
 - **`SongLibraryState` sits outside `ui/` on purpose.** It holds the window's decisions, so they are
   tested as plain state; `ui/` is measured and analysed too, and its tests drive the window and
   assert what each control does.
+- **The grid is three parts per line** (`ui/TableLine.kt`): the tick, Number and Title frozen on the
+  left, the row's buttons pinned on the right, and only the columns between them scrolling sideways,
+  on one `ScrollState` the header and every row share. A song's title and its Edit button are always
+  on screen together; a new column goes in the scrolling middle unless it identifies the song.
 - The logic the window runs on — filtering, sorting, pending edits, moving files — is in
   `:core-models` and tested there, so the window itself stays thin.
 

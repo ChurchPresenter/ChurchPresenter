@@ -74,8 +74,8 @@ internal fun ComposeUiTest.rowTitles(of: List<SongItem> = STOCK): List<String> =
     of.map { it.title }.filter { onAllNodesWithText(it).fetchSemanticsNodes().isNotEmpty() }
 
 /**
- * Turns every column off but the title, which is what brings the row's own buttons into a window
- * this narrow — the actions column sits past the right edge of a full-width grid.
+ * Turns every column off but the title, which brings a column at the far end of the scrolling
+ * middle — Duration, Order — into a window this narrow without scrolling to it.
  */
 internal fun ComposeUiTest.narrowToTitleOnly() {
     click(Text.COLUMNS)

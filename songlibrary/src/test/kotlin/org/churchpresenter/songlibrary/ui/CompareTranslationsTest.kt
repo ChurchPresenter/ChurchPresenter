@@ -185,8 +185,6 @@ class CompareTranslationsTest {
 
     @Test
     fun `a one-language song's compare button is there but disabled`() = withLibrary { _ ->
-        narrowToTitleOnly()
-
         val buttons = onAllNodesWithContentDescription("Only one language — nothing to compare")
         assertEquals(STOCK.size, buttons.fetchSemanticsNodes().size)
         buttons[0].assertIsNotEnabled()

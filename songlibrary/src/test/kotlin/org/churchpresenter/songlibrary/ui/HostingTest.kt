@@ -26,7 +26,6 @@ class HostingTest {
     fun `a row asks the host to edit the song it belongs to`() {
         var asked: SongItem? = null
         withLibrary(songEditor = { request -> asked = request.song; Text("editing ${request.song.title}") }) { _ ->
-            narrowToTitleOnly()
             onAllNodesWithContentDescription("Edit song")[0].performClick()
             waitForIdle()
 
@@ -39,7 +38,6 @@ class HostingTest {
     fun `the request carries the library around the song, not just the song`() {
         var request: SongEditorRequest? = null
         withLibrary(songEditor = { request = it }) { _ ->
-            narrowToTitleOnly()
             onAllNodesWithContentDescription("Edit song")[0].performClick()
             waitForIdle()
 
@@ -53,8 +51,6 @@ class HostingTest {
 
     @Test
     fun `with no editor supplied a row offers no way to open one`() = withLibrary { _ ->
-        narrowToTitleOnly()
-
         assertEquals(
             0,
             onAllNodesWithContentDescription("Edit song").fetchSemanticsNodes().size,
@@ -77,7 +73,6 @@ class HostingTest {
     fun `the host's save puts the edited song in the grid, and its dismiss closes the editor`() {
         var request: SongEditorRequest? = null
         withLibrary(songEditor = { request = it; Text("editing ${it.song.title}") }) { _ ->
-            narrowToTitleOnly()
             onAllNodesWithContentDescription("Edit song")[0].performClick()
             waitForIdle()
             val asked = request!!
