@@ -28,9 +28,10 @@ change model and that file are `:bible-edits`, which the Bible tab also reads: a
 | `EditHistory.kt` | the history in the window: commit, revert, save point, discard |
 | `BibleEditorState.kt` | what is open, what is being typed, loading on `io` |
 | `ChapterRow.kt` | the open chapter as rows, the verse actions, the shelf scan |
+| `ChapterStatus.kt` | each chapter's state in the picker, and the next missing verse in reading order |
 | `MissingVerse.kt` | verses the reference (the shelf's KJV) has and this Bible lacks, by verse code |
 | `WordDiff.kt` | the word diff the editor and the history show |
-| `ui/` | the window: header, chapter, verse rows, history panel, missing-verses dialog |
+| `ui/` | the window: header, chapter picker, chapter, verse rows, history panel, missing-verses dialog |
 
 ## Rules
 
@@ -54,13 +55,23 @@ change model and that file are `:bible-edits`, which the Bible tab also reads: a
 
 `EditorFixture` writes a KJV and an "RST" whose Matthew 17 lacks verse 11 and has two typos. The UI
 suites open the window through `withEditor` in a window tall enough that the whole chapter is laid
-out (a lazy list composes only what shows); the screenshots use the real 1240×820.
+out (a lazy list composes only what shows); `GateDispatcher` holds reads back to catch the window
+while a Bible or the missing-verse check is still loading.
 
-The screenshots exist although the editor is dev mode only: they were asked for by the person
-running the work, against the root rule that dev-mode features are not shot.
+## Screenshots
+
+Every state of every composable, in three suites through `shootEditor` (`screenshot/Shot.kt`) at the
+real 1240×820: `bibleEditor/` (the window, the chapter, the verse card, the footer),
+`bibleEditorHistory/` and `bibleEditorDialogs/` (the missing-verses dialog and the three pickers).
+Fonts, clock and locale are pinned; verse text is drawn in the pinned sans face because no serif
+ships with the fixtures. The one state not shot is a verse's hover buttons — `captureTo` clears
+hover; the UI suites cover them.
+
+They exist although the editor is dev mode only: the person running the work asked for them,
+against the root rule that dev-mode features are not shot.
 
 ## Gates
 
-INSTRUCTION, LINE, METHOD and CLASS clear 98%. BRANCH (0.81) and COMPLEXITY (0.78) are under the
-85% floor: what is left is the recomposition branches Compose emits around remembered lambdas.
-No floor is lowered and nothing is excluded until the person running the work decides.
+`cp.test`'s six counters at 85%, nothing excluded and no floor lowered. COMPLEXITY has the least
+room (about 85.1%): most of what is left is the recomposition branches Compose emits around
+remembered lambdas, so a new branch in `ui/` needs a test that takes it.

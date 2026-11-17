@@ -82,6 +82,20 @@ class EditorFixture(withReference: Boolean = true) {
             },
         )
 
+        private fun entry(id: Long, ago: Long, verse: Int, before: VerseChange?, after: VerseChange?,
+            revertOf: Long? = null) =
+            EditEntry(id, NOW - ago, "rst.spb", MATTHEW, 17, verse, before, after, revertOf,
+                original = "Original $verse.")
+
+        /** One of every kind: edited, added, removed, restored and reverted, from minutes to days ago. */
+        fun everyKind() = listOf(
+            entry(1, 72 * HOUR, 3, null, VerseChange(removed = true)),
+            entry(2, 30 * HOUR, 3, VerseChange(removed = true), null),
+            entry(3, 2 * HOUR, 11, null, VerseChange(text = "Howbeit this kind goeth not out.", added = true)),
+            entry(4, HOUR / 2, 4, null, VerseChange(text = "Then answered Peter.")),
+            entry(5, 5 * 60_000L, 4, VerseChange(text = "Then answered Peter."), null, revertOf = 4),
+        )
+
         /** Two saved fixes in RST: verse 2 yesterday, verse 9 three hours ago. */
         fun savedFixes() = listOf(
             EditEntry(1, NOW - 27 * HOUR, "rst.spb", MATTHEW, 17, 2, after = VerseChange(text = KJV_17[1]),

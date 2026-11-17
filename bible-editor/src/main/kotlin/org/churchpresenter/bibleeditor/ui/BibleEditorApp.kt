@@ -102,7 +102,12 @@ private fun EditorBody(state: BibleEditorState, now: Long, onClose: () -> Unit) 
         Divider()
         Row(Modifier.weight(1f).fillMaxWidth()) {
             Column(Modifier.weight(1f).fillMaxHeight()) {
-                ChapterView(state, rows, now, Modifier.weight(1f))
+                if (state.bible == null) {
+                    // The chapter is not known until the Bible is read; say so rather than show an empty one.
+                    Box(Modifier.weight(1f)) { Notice(stringResource(Res.string.bible_editor_loading)) }
+                } else {
+                    ChapterView(state, rows, now, Modifier.weight(1f))
+                }
                 Divider()
                 EditorFooter(state, now, onClose)
             }

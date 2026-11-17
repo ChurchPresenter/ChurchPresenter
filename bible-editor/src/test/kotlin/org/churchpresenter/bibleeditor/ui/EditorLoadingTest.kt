@@ -23,6 +23,8 @@ class EditorLoadingTest {
         withEditor(io = gate, awaitOpen = false) { _, _ ->
             awaitText("Russian Synodal")
             assertFalse(isShowing("Matthew 1"))
+            assertTrue(isShowing("Loading Bibles…"), "the chapter waits for its Bible")
+            assertFalse(isShowing("Complete, matches KJV"))
             click("Russian Synodal")
             click("Russian Synodal")
             click("Validate")

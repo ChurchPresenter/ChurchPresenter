@@ -21,32 +21,15 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.withKeyDown
-import org.churchpresenter.bibleedits.EditEntry
-import org.churchpresenter.bibleedits.VerseChange
-import org.churchpresenter.bibleeditor.EditorFixture.Companion.HOUR
-import org.churchpresenter.bibleeditor.EditorFixture.Companion.MATTHEW
-import org.churchpresenter.bibleeditor.EditorFixture.Companion.NOW
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class EditorDetailsTest {
 
-    private fun entry(id: Long, ago: Long, verse: Int, before: VerseChange?, after: VerseChange?,
-        revertOf: Long? = null) =
-        EditEntry(id, NOW - ago, "rst.spb", MATTHEW, 17, verse, before, after, revertOf, original = "Original $verse.")
-
-    /** One of every kind: edited, added, removed, restored and reverted, from minutes to days ago. */
-    private val everyKind = listOf(
-        entry(1, 72 * HOUR, 3, null, VerseChange(removed = true)),
-        entry(2, 30 * HOUR, 3, VerseChange(removed = true), null),
-        entry(3, 2 * HOUR, 11, null, VerseChange(text = "Howbeit.", added = true)),
-        entry(4, HOUR / 2, 4, null, VerseChange(text = "Then answered Peter.")),
-        entry(5, 5 * 60_000L, 4, VerseChange(text = "Then answered Peter."), null, revertOf = 4),
-    )
-
     @Test
-    fun `the history names every kind of change and when it was made`() = withEditor(everyKind) { _, _ ->
+    fun `the history names every kind of change and when it was made`() = withEditor(EditorFixture.everyKind()) { _,
+        _ ->
         listOf("EDITED", "ADDED", "REMOVED", "RESTORED", "REVERTED").forEach { assertTrue(isShowing(it), it) }
         assertTrue(isShowing("5 min ago"))
         assertTrue(isShowing("30 min ago"))
@@ -56,7 +39,8 @@ class EditorDetailsTest {
     }
 
     @Test
-    fun `while every Bible is listed, another Bible's books are shown by number`() = withEditor(everyKind) { _, _ ->
+    fun `while every Bible is listed, another Bible's books are shown by number`() =
+        withEditor(EditorFixture.everyKind()) { _, _ ->
         click("All Bibles")
         click("Russian Synodal")
         click("King James Version")
