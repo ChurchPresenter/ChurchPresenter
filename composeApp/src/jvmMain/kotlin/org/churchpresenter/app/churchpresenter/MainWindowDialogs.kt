@@ -27,7 +27,7 @@ import org.churchpresenter.strings.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.profiles.hostFontPicker
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.dialogs.BibleVerseFixerWindow
+import org.churchpresenter.app.churchpresenter.dialogs.BibleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.dialogs.MemoryMonitorWindow
 import org.churchpresenter.dialogs.CustomizeThemeDialog
@@ -255,11 +255,14 @@ internal fun MainWindowScope.MoreToolWindows() {
             theme = theme,
             onClose = { showMemoryMonitorWindow = false }
         )
-        if (showVerseFixerWindow) {
-            BibleVerseFixerWindow(
+        // Developer menu only, so dev mode going off closes it rather than leaving it working unseen.
+        if (showBibleEditorWindow && devMode) {
+            BibleEditorWindow(
                 theme = theme,
-                bibleFiles = appSettings.bibleSettings.stackFiles(),
-                onClose = { showVerseFixerWindow = false },
+                bibleFolder = appSettings.bibleSettings.storageDirectory,
+                preferred = appSettings.bibleSettings.stackFiles(),
+                onClose = { showBibleEditorWindow = false },
+                onSaved = { bibleEditsRevision++ },
             )
         }
         if (showStyleEditorWindow) {

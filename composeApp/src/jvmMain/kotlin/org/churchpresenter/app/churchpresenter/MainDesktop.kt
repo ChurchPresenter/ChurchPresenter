@@ -83,7 +83,7 @@ fun MainDesktop(
     val state = rememberMainDesktopState {
         CrashReporter.didCrashLastRun && appSettings.analyticsReportingEnabled
     }
-    val vms = rememberMainDesktopViewModels(appSettings, publish, link)
+    val vms = rememberMainDesktopViewModels(appSettings, publish, link, live.devMode)
     val hasCompanionTabConnections = appSettings.companionSatelliteConnections
         .any { it.showInTab && it.host.isNotBlank() }
     val visibleTabs = remember(appSettings.hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections) {

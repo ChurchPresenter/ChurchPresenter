@@ -374,6 +374,15 @@ class Bible {
         }
     }
 
+    /** Lays [edits] over the loaded verses (see [VerseEdit]) and rebuilds the lookups over them. */
+    fun applyVerseEdits(edits: List<VerseEdit>) {
+        if (edits.isEmpty()) return
+        val next = overlaid(operatorBible, edits)
+        operatorBible.clear()
+        operatorBible.addAll(next)
+        buildChapterIndex()
+    }
+
     private fun buildChapterIndex() {
         chapterIndex.clear()
         codeIndex.clear()

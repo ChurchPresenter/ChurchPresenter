@@ -124,7 +124,7 @@ internal fun MainWindowScope.AppMenuBar() {
             onOpenStoryPrompt = { showStoryPrompt = true },
             // Shows it whether or not it has been seen, like Replay intro.
             onOpenWickIntro = { helperState.replayIntro = true },
-            onOpenVerseFixer = { showVerseFixerWindow = true },
+            onOpenBibleEditor = { showBibleEditorWindow = true },
         )
     }
 }
@@ -201,6 +201,7 @@ private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(ro
         onRunMacro = ::runMacro,
         controlHub = controlHub,
         devMode = devMode,
+        bibleEditsRevision = bibleEditsRevision,
         onVerseSelected = { verses -> presenterManager.previewBus.forVerses(verses).setSelectedVerses(verses) },
         // Line mode used to push the section straight to the outputs from
         // here. That put the words on screen behind the transition driver's

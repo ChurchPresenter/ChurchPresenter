@@ -39,6 +39,11 @@ class BibleViewModel(
     internal val usage: UsageEventStore = UsageEvents,
     // Where the Instance Link follower's Bible sync events are logged; the app's InstanceLinkLogger.
     internal val remoteSyncLog: (event: String, fields: Map<String, Any?>) -> Unit = { _, _ -> },
+    /**
+     * The folder the Bible editor keeps its corrections in, laid over each translation as it loads;
+     * null leaves the files as they are. Read on every load, so dev mode going off takes them away.
+     */
+    internal val verseEditsFolder: () -> File? = { null },
 ) {
     data class LoadedTranslation(val fileName: String, val bible: Bible)
 
@@ -337,6 +342,9 @@ class BibleViewModel(
     internal var lastChapterSelectTime = 0L
 
     internal var lastBookSelectTime = 0L
+
+    /** Loads every translation again, so corrections saved in the Bible editor show. */
+    fun reloadForVerseEdits() = loadBibles()
 
     init {
         _selectedScopeIndex.value = 0

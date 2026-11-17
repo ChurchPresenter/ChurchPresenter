@@ -63,7 +63,7 @@ private fun navigationTopBar(
     onOpenMemoryMonitor: () -> Unit = {},
     onOpenStoryPrompt: () -> Unit = {},
     onOpenWickIntro: () -> Unit = {},
-    onOpenVerseFixer: () -> Unit = {},
+    onOpenBibleEditor: () -> Unit = {},
     onZoomIn: () -> Unit = {},
     onZoomOut: () -> Unit = {},
     onActualSize: () -> Unit = {},
@@ -119,7 +119,7 @@ private fun navigationTopBar(
                 onOpenMemoryMonitor = onOpenMemoryMonitor,
                 onOpenStoryPrompt = onOpenStoryPrompt,
                 onOpenWickIntro = onOpenWickIntro,
-                onOpenVerseFixer = onOpenVerseFixer,
+                onOpenBibleEditor = onOpenBibleEditor,
                 onZoomIn = onZoomIn,
                 onZoomOut = onZoomOut,
                 onActualSize = onActualSize,
@@ -634,17 +634,17 @@ class NavigationTopBarTest {
     }
 
     @Test
-    fun `developer menu bible verse fixer item invokes its callback`() {
-        var verseFixer = 0
+    fun `developer menu bible editor item invokes its callback`() {
+        var bibleEditor = 0
         navigationTopBar(
             showDeveloperMenu = true,
-            onOpenVerseFixer = { verseFixer++ },
+            onOpenBibleEditor = { bibleEditor++ },
         ) {
             val developer = getMenu(7)
-            assertEquals("Bible Verse Fixer", developer.getItem(5).text)
+            assertEquals("Bible Editor", developer.getItem(5).text)
             developer.getItem(5).doClick(0)
         }
-        assertEquals(1, verseFixer)
+        assertEquals(1, bibleEditor)
     }
 
     @Test

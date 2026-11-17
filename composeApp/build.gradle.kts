@@ -149,6 +149,8 @@ kotlin {
             implementation(projects.bibleFormats)
             // The Bible itself: the loaded translation, its books, verses and search.
             implementation(projects.bible)
+            // The Bible editor: restore missing verses and fix typos, opened from the Developer menu.
+            implementation(projects.bibleEditor)
             // The song library: the grid of every song in the library, opened from the Help menu.
             implementation(projects.songlibrary)
             // The Calendar Manager: the planner window, opened from the Help menu beside it. Holds

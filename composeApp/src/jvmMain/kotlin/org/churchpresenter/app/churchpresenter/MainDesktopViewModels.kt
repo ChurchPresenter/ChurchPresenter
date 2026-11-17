@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
+import org.churchpresenter.settings.utils.AppDataDir
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.bibletab.BibleEngineClient
@@ -35,6 +36,7 @@ internal class MainDesktopViewModels(
     publish: State<MainDesktopPublishers>,
     link: State<InstanceLinkBridge>,
     settings: State<AppSettings>,
+    devMode: State<Boolean>,
 ) {
     val picturesViewModel = PicturesViewModel(appSettings)
     val presentationViewModel = PresentationViewModel(appSettings)
@@ -50,6 +52,8 @@ internal class MainDesktopViewModels(
         onSecondaryBibleFilePathChanged = { path -> link.value.onSecondaryBibleFilePathChanged?.invoke(path) },
         onBibleFilePathsChanged = { paths -> link.value.onBibleFilePathsChanged?.invoke(paths) },
         remoteSyncLog = { event, fields -> InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, event, fields) },
+        // The Bible editor's corrections are dev mode only, like the editor itself.
+        verseEditsFolder = { if (devMode.value) AppDataDir.resolvedThisRun() else null },
     )
 
     /** The Bible Lookup Engine client — feeds detected scripture into the Bible tab and forwards the
@@ -86,11 +90,15 @@ internal fun rememberMainDesktopViewModels(
     appSettings: AppSettings,
     publish: MainDesktopPublishers,
     link: InstanceLinkBridge,
+    devMode: Boolean,
 ): MainDesktopViewModels {
     val currentPublish = rememberUpdatedState(publish)
     val currentLink = rememberUpdatedState(link)
     val currentSettings = rememberUpdatedState(appSettings)
-    val vms = remember { MainDesktopViewModels(appSettings, currentPublish, currentLink, currentSettings) }
+    val currentDevMode = rememberUpdatedState(devMode)
+    val vms = remember {
+        MainDesktopViewModels(appSettings, currentPublish, currentLink, currentSettings, currentDevMode)
+    }
     DisposableEffect(Unit) { onDispose { vms.dispose() } }
     return vms
 }
