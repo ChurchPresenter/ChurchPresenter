@@ -4,7 +4,10 @@ import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,10 +37,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -81,25 +87,25 @@ internal fun SongTable(
     // Read here and passed down: as `state.songbooks` inside the row it was a scan and sort of the
     // whole library per visible row per frame.
     val songbooks = state.songbooks
-    val columnWidth = state.visibleColumns.fold(0.dp) { total, field -> total + field.width() + 1.dp }
-    val width = TICK_WIDTH + PROBLEM_WIDTH + columnWidth + durationColumnWidth(state.showDuration) +
-        orderColumnWidth(state.showOrder) + ACTIONS_WIDTH
+    val (frozen, scrolling) = splitFrozen(state.visibleColumns)
+    val frozenWidth = TICK_WIDTH + PROBLEM_WIDTH + columnsWidth(frozen)
 
-    // The scrollbars sit OUTSIDE the horizontally scrolled column, so they stay pinned to the edges
-    // of the table rather than sliding away with the columns they are there to move.
+    // The scrollbars sit outside the lines they move, pinned to the edges of the table. The
+    // horizontal one spans only the scrolling middle: the frozen edges never move.
     Box(modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().horizontalScroll(scroll)) {
-            TableHeader(state, width)
+        Column(Modifier.fillMaxSize()) {
+            TableHeader(state, frozen, scrolling, scroll)
             when {
-                state.isLoading -> SkeletonTable(state, width)
-                rows.isEmpty() -> EmptyState(state, width)
-                else -> LazyColumn(Modifier.width(width).fillMaxHeight(), state = listState) {
+                state.isLoading -> SkeletonTable(state, frozen, scrolling, scroll)
+                rows.isEmpty() -> EmptyState(state)
+                else -> LazyColumn(Modifier.fillMaxSize(), state = listState) {
                     items(rows, key = { it.sourceFile }) { song ->
                         SongRow(
                             song = song,
                             state = state,
                             songbooks = songbooks,
-                            width = width,
+                            columns = frozen to scrolling,
+                            scroll = scroll,
                             onCompare = { onCompareRow(song) },
                             onEdit = onEditRow?.let { { it(song) } },
                             onDelete = { onDeleteRow(song) },
@@ -115,7 +121,9 @@ internal fun SongTable(
         )
         HorizontalScrollbar(
             adapter = rememberScrollbarAdapter(scroll),
-            modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(end = SCROLLBAR_THICKNESS),
+            modifier = Modifier.align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .padding(start = frozenWidth, end = ACTIONS_WIDTH),
         )
     }
 }
@@ -124,35 +132,46 @@ internal fun SongTable(
 private val SCROLLBAR_THICKNESS = 12.dp
 
 @Composable
-private fun TableHeader(state: SongLibraryState, width: Dp) {
+private fun TableHeader(
+    state: SongLibraryState,
+    frozen: List<SongField>,
+    scrolling: List<SongField>,
+    scroll: ScrollState,
+) {
     val scheme = MaterialTheme.colorScheme
     val visible = state.rows.map { it.sourceFile }
     val all = visible.isNotEmpty() && visible.all { it in state.selected }
     val some = !all && visible.any { it in state.selected }
 
-    Column(Modifier.width(width)) {
-        Row(
-            Modifier.fillMaxWidth().height(LibraryMetrics.headerHeight).background(scheme.surfaceContainer),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
-                LibraryCheckbox(checked = all, indeterminate = some, onToggle = { state.toggleAll() })
-            }
-            Spacer(Modifier.width(PROBLEM_WIDTH))
-            state.visibleColumns.forEach { field ->
-                HeadCell(state, label = columnLabel(field), sort = field.sortColumn(), width = field.width())
-            }
-            if (state.showDuration) {
-                HeadCell(
-                    state,
-                    label = stringResource(Res.string.column_duration),
-                    sort = SortColumn.DURATION,
-                    width = DURATION_WIDTH,
-                )
-            }
-            if (state.showOrder) OrderHeadCell()
-            Spacer(Modifier.width(ACTIONS_WIDTH))
-        }
+    Column(Modifier.fillMaxWidth()) {
+        TableLine(
+            scroll,
+            Modifier.height(LibraryMetrics.headerHeight).background(scheme.surfaceContainer),
+            frozen = {
+                Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
+                    LibraryCheckbox(checked = all, indeterminate = some, onToggle = { state.toggleAll() })
+                }
+                Spacer(Modifier.width(PROBLEM_WIDTH))
+                frozen.forEach { field ->
+                    HeadCell(state, label = columnLabel(field), sort = field.sortColumn(), width = field.width())
+                }
+            },
+            scrolling = {
+                scrolling.forEach { field ->
+                    HeadCell(state, label = columnLabel(field), sort = field.sortColumn(), width = field.width())
+                }
+                if (state.showDuration) {
+                    HeadCell(
+                        state,
+                        label = stringResource(Res.string.column_duration),
+                        sort = SortColumn.DURATION,
+                        width = DURATION_WIDTH,
+                    )
+                }
+                if (state.showOrder) OrderHeadCell()
+            },
+            actions = { Spacer(Modifier.width(ACTIONS_WIDTH)) },
+        )
         Hairline()
     }
 }
@@ -164,7 +183,7 @@ private fun HeadCell(state: SongLibraryState, label: String, sort: SortColumn, w
     val sorted = state.view.sortBy == sort
     Row(
         Modifier.width(width)
-            .fillMaxHeight()
+            .height(LibraryMetrics.headerHeight)
             .clickable { state.sortBy(sort) }
             .padding(horizontal = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -186,7 +205,7 @@ private fun HeadCell(state: SongLibraryState, label: String, sort: SortColumn, w
             )
         }
     }
-    Box(Modifier.width(1.dp).fillMaxHeight().background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)))
+    ColumnDivider(LibraryMetrics.headerHeight)
 }
 
 @Composable
@@ -194,7 +213,8 @@ private fun SongRow(
     song: SongItem,
     state: SongLibraryState,
     songbooks: List<String>,
-    width: Dp,
+    columns: Pair<List<SongField>, List<SongField>>,
+    scroll: ScrollState,
     onCompare: () -> Unit,
     onEdit: (() -> Unit)?,
     onDelete: () -> Unit,
@@ -202,91 +222,103 @@ private fun SongRow(
 ) {
     val scheme = MaterialTheme.colorScheme
     val checked = song.sourceFile in state.selected
-    Column(Modifier.width(width)) {
-        Row(
-            Modifier.fillMaxWidth()
-                .heightIn(min = LibraryMetrics.rowHeight)
-                .background(if (checked) scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA) else scheme.background),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // The stripe down the left is what makes a ticked row readable at a glance in a
-            // hundred-row table, where the tick alone disappears.
-            Box(
-                Modifier.width(2.dp)
-                    .height(LibraryMetrics.rowHeight)
-                    .background(if (checked) scheme.primary else Color.Transparent)
-            )
-            Box(Modifier.width(TICK_WIDTH - 2.dp), contentAlignment = Alignment.Center) {
-                LibraryCheckbox(checked = checked, onToggle = { state.toggle(song.sourceFile) })
-            }
-            ProblemMark(state.translationProblems[song.sourceFile])
-            state.visibleColumns.forEach { field ->
-                Box(Modifier.width(field.width())) {
-                    if (field == SongField.SONGBOOK) {
-                        SongbookCell(
-                            value = field.of(song),
-                            songbooks = songbooks,
-                            onPick = { state.edit(song.sourceFile, field, it) },
-                            onNewBook = onNewBook,
-                        )
-                    } else {
-                        EditableCell(
-                            value = field.of(song),
-                            strong = field == SongField.TITLE,
-                            onCommit = { state.edit(song.sourceFile, field, it) },
-                        )
+    val hover = remember { MutableInteractionSource() }
+    val hovered by hover.collectIsHoveredAsState()
+    Column(Modifier.fillMaxWidth()) {
+        TableLine(
+            scroll,
+            Modifier.heightIn(min = LibraryMetrics.rowHeight)
+                .background(if (checked) scheme.primary.copy(alpha = ACCENT_SURFACE_ALPHA) else scheme.background)
+                // Over the tick's tint too: the row under the pointer is the one its buttons act on,
+                // ticked or not.
+                .background(if (hovered) scheme.onSurface.copy(alpha = HOVER_ALPHA) else Color.Transparent)
+                .hoverable(hover)
+                .testTag(SONG_ROW_TAG),
+            frozen = {
+                // The stripe down the left is what makes a ticked row readable at a glance in a
+                // hundred-row table, where the tick alone disappears.
+                Box(
+                    Modifier.width(2.dp)
+                        .height(LibraryMetrics.rowHeight)
+                        .background(if (checked) scheme.primary else Color.Transparent)
+                )
+                Box(Modifier.width(TICK_WIDTH - 2.dp), contentAlignment = Alignment.Center) {
+                    LibraryCheckbox(checked = checked, onToggle = { state.toggle(song.sourceFile) })
+                }
+                ProblemMark(state.translationProblems[song.sourceFile])
+                SongCells(columns.first, song, state, songbooks, onNewBook)
+            },
+            scrolling = {
+                SongCells(columns.second, song, state, songbooks, onNewBook)
+                if (state.showDuration) {
+                    // Measured, not typed: how long the song usually stays on screen. Read only --
+                    // the number comes from the services it was sung in, and there is nothing to
+                    // correct by hand.
+                    DurationCell(seconds = state.durations[song.sourceFile])
+                    ColumnDivider()
+                }
+                if (state.showOrder) {
+                    OrderCell(song.sectionOrder)
+                    ColumnDivider()
+                }
+            },
+            actions = {
+                Row(
+                    Modifier.width(ACTIONS_WIDTH).padding(end = SCROLLBAR_THICKNESS),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CompareAction(
+                        languages = song.translationList().count { !it.isEmpty },
+                        mismatches = state.translationProblems[song.sourceFile]?.mismatchedSections ?: 0,
+                        onClick = onCompare,
+                    )
+                    if (onEdit != null) {
+                        RowAction(Icons.Default.Edit, stringResource(Res.string.edit_song), scheme.primary, onEdit)
                     }
+                    RowAction(Icons.Default.Delete, stringResource(Res.string.delete_song), scheme.error, onDelete)
                 }
-                Box(
-                    Modifier.width(1.dp)
-                        .height(LibraryMetrics.rowHeight)
-                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
-                )
-            }
-            if (state.showDuration) {
-                // Measured, not typed: how long the song usually stays on screen. Read only --
-                // the number comes from the services it was sung in, and there is nothing to
-                // correct by hand.
-                DurationCell(seconds = state.durations[song.sourceFile])
-                Box(
-                    Modifier.width(1.dp)
-                        .height(LibraryMetrics.rowHeight)
-                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
-                )
-            }
-            if (state.showOrder) {
-                OrderCell(song.sectionOrder)
-                Box(
-                    Modifier.width(1.dp)
-                        .height(LibraryMetrics.rowHeight)
-                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
-                )
-            }
-            Row(
-                Modifier.width(ACTIONS_WIDTH).padding(end = 8.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CompareAction(
-                    languages = song.translationList().count { !it.isEmpty },
-                    mismatches = state.translationProblems[song.sourceFile]?.mismatchedSections ?: 0,
-                    onClick = onCompare,
-                )
-                if (onEdit != null) {
-                    RowAction(Icons.Default.Edit, stringResource(Res.string.edit_song), scheme.primary, onEdit)
-                }
-                RowAction(Icons.Default.Delete, stringResource(Res.string.delete_song), scheme.error, onDelete)
-            }
-        }
+            },
+        )
         Hairline()
     }
 }
 
+/** [fields]' cells of [song], each editable in place, with the hairline after each. */
 @Composable
-private fun EmptyState(state: SongLibraryState, width: Dp) {
+private fun SongCells(
+    fields: List<SongField>,
+    song: SongItem,
+    state: SongLibraryState,
+    songbooks: List<String>,
+    onNewBook: () -> Unit,
+) {
+    fields.forEach { field ->
+        Box(Modifier.width(field.width())) {
+            if (field == SongField.SONGBOOK) {
+                SongbookCell(
+                    value = field.of(song),
+                    songbooks = songbooks,
+                    onPick = { state.edit(song.sourceFile, field, it) },
+                    onNewBook = onNewBook,
+                )
+            } else {
+                EditableCell(
+                    value = field.of(song),
+                    strong = field == SongField.TITLE,
+                    onCommit = { state.edit(song.sourceFile, field, it) },
+                )
+            }
+        }
+        ColumnDivider()
+    }
+}
+
+@Composable
+private fun EmptyState(state: SongLibraryState) {
     val scheme = MaterialTheme.colorScheme
     Column(
-        Modifier.width(width).padding(vertical = 70.dp),
+        Modifier.fillMaxWidth().padding(vertical = 70.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(9.dp),
     ) {
@@ -358,3 +390,6 @@ internal val TICK_WIDTH = 36.dp
 internal val PROBLEM_WIDTH = 18.dp
 
 internal val ACTIONS_WIDTH = 96.dp
+
+/** Each song row, for the tests that read how a row is drawn. */
+internal const val SONG_ROW_TAG = "song-row"
