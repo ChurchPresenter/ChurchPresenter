@@ -113,7 +113,7 @@ class SongsTabColumnsTest {
 
             assertFalse(tableShowsColumn(Col.TUNE), "the column has to leave the table: ${rendered()}")
             assertEquals(
-                setOf("order", "tune"),
+                setOf("order", "alias", "tune"),
                 reports.settingsAfterChange?.songHiddenCols,
                 "and the choice has to survive a restart",
             )
@@ -148,7 +148,7 @@ class SongsTabColumnsTest {
 
             assertFalse(tableShowsColumn(Col.TUNE), rendered().toString())
             assertFalse(tableShowsColumn(Col.COMPOSER))
-            assertEquals(setOf("order", "tune", "composer"), reports.settingsAfterChange?.songHiddenCols)
+            assertEquals(setOf("order", "alias", "tune", "composer"), reports.settingsAfterChange?.songHiddenCols)
         }
     }
 
@@ -169,7 +169,44 @@ class SongsTabColumnsTest {
         }
     }
 
+    // ── Alias (#1047) ───────────────────────────────────────────────────────────────────────────
+
+    private val aliased = listOf(
+        SongFixture(number = "14", title = "O for a Thousand Tongues", alias = "Ch 9"),
+        SongFixture(number = "14", title = "O for a Thousand Tongues (Azmon)", alias = "Ch 10"),
+    )
+
+    @Test
+    fun `the alias column is offered but off, even when no song has an alias`() {
+        songsTab { _, _ ->
+            assertFalse(shows(Col.ALIAS), "off until the operator turns it on")
+            openColumnMenu()
+            assertEquals(1, headerCount(Col.ALIAS), "listed once, as a menu item: ${rendered()}")
+        }
+    }
+
+    @Test
+    fun `turning the alias column on shows each song's alias and saves the choice`() {
+        songsTab(aliased) { _, reports ->
+            openColumnMenu()
+            clickColumnItem(Col.ALIAS)
+
+            assertTrue(tableShowsColumn(Col.ALIAS), rendered().toString())
+            assertTrue(showsContaining("Ch 9") && showsContaining("Ch 10"), rendered().toString())
+            assertFalse(Col.ALIAS.lowercase() in reports.settingsAfterChange?.songHiddenCols.orEmpty())
+        }
+    }
+
+    @Test
+    fun `a saved layout that lists the alias column keeps it on`() {
+        songsTab(aliased, hiddenCols = allShown, colOrder = listOf("number", "alias", "title", "order")) { _, _ ->
+            assertTrue(shows(Col.ALIAS), rendered().toString())
+            assertTrue(showsContaining("Ch 10"))
+        }
+    }
+
     private object Col {
+        const val ALIAS = "Alias"
         const val NUMBER = "Number"
         const val SONG_BOOK = "Song Book"
         const val TITLE = "Title"

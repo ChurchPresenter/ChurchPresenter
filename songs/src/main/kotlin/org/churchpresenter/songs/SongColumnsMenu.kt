@@ -1,5 +1,6 @@
 package org.churchpresenter.songs
 
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.foundation.background
 import org.churchpresenter.settings.SongColumnId
@@ -134,6 +135,7 @@ private fun SongListScope.ColumnVisibilityItem(colId: String, allColLabels: Map<
 @Composable
 private fun songColumnPainter(colId: String): Painter = when (colId) {
     SongColumnId.NUMBER -> rememberVectorPainter(Icons.Default.Tag)
+    SongColumnId.ALIAS -> rememberVectorPainter(Icons.AutoMirrored.Filled.Label)
     SongColumnId.TITLE -> rememberVectorPainter(Icons.Default.Title)
     SongColumnId.SONGBOOK -> rememberVectorPainter(Icons.AutoMirrored.Filled.MenuBook)
     SongColumnId.TUNE -> rememberVectorPainter(Icons.Default.MusicNote)
@@ -158,6 +160,7 @@ private fun songColumnAccent(colId: String): Color {
         SongColumnId.AUTHOR -> semantic.contentCalendar
         SongColumnId.COMPOSER -> semantic.contentPresentation
         SongColumnId.ORDER -> semantic.contentSongs
+        SongColumnId.ALIAS -> semantic.contentBible
         SongColumnId.ADD_TO_SCHEDULE -> semantic.success
         SongColumnId.FAVORITES -> semantic.favorite
         else -> MaterialTheme.colorScheme.primary

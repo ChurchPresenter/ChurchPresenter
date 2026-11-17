@@ -47,7 +47,7 @@ internal class SongTableColumns(
         val MIN_WIDTHS = mapOf(
             SongColumnId.NUMBER to 30, SongColumnId.TITLE to 60, SongColumnId.SONGBOOK to 40, SongColumnId.TUNE to 40,
             SongColumnId.PLAY_COUNT to 30, SongColumnId.AUTHOR to 40, SongColumnId.COMPOSER to 40,
-            SongColumnId.ORDER to 60,
+            SongColumnId.ORDER to 60, SongColumnId.ALIAS to 30,
         )
     }
 }
@@ -68,7 +68,7 @@ internal fun rememberSongTableColumns(
     settings.songSettings.colWidthNumber, settings.songSettings.colWidthTitle,
     settings.songSettings.colWidthSongbook, settings.songSettings.colWidthTune,
     settings.songSettings.colWidthPlayCount, settings.songSettings.colWidthAuthor,
-    settings.songSettings.colWidthComposer, settings.songColWidthOrder,
+    settings.songSettings.colWidthComposer, settings.songColWidthOrder, settings.songColWidthAlias,
     settings.songColOrder, settings.songHiddenCols, availableColumns, density,
 ) {
     SongTableColumns(
@@ -83,6 +83,7 @@ internal fun rememberSongTableColumns(
                 SongColumnId.AUTHOR to settings.songSettings.colWidthAuthor.dp.toPx(),
                 SongColumnId.COMPOSER to settings.songSettings.colWidthComposer.dp.toPx(),
                 SongColumnId.ORDER to settings.songColWidthOrder.dp.toPx(),
+                SongColumnId.ALIAS to settings.songColWidthAlias.dp.toPx(),
             )
         },
         initialOrder = mergeColumnOrder(settings.songColOrder, availableColumns),
@@ -91,8 +92,11 @@ internal fun rememberSongTableColumns(
 }
 
 /**
- * [hidden] with the Order column added while the saved [order] has never listed it: a column
- * newer than the operator's saved layout starts off, as it does on a fresh install.
+ * [hidden] with the Order and Alias columns added while the saved [order] has never listed them: a
+ * column newer than the operator's saved layout starts off, as it does on a fresh install.
  */
 internal fun hiddenWithNewColumns(hidden: Set<String>, order: List<String>): Set<String> =
-    if (SongColumnId.ORDER in order) hidden else hidden + SongColumnId.ORDER
+    hidden + LATER_COLUMNS.filterNot { it in order }
+
+/** Columns added after layouts were first saved, each off until the operator turns it on. */
+private val LATER_COLUMNS = listOf(SongColumnId.ORDER, SongColumnId.ALIAS)

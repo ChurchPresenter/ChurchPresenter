@@ -129,6 +129,7 @@ class SongsTabScreenshotTest {
         songBpm: Map<String, Int>? = null,
         stageMonitor: Boolean = false,
         isPresenting: Boolean = false,
+        panelHiddenLanguages: List<Int> = emptyList(),
         drive: ComposeUiTest.(SongsViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         songsTab(
@@ -139,6 +140,7 @@ class SongsTabScreenshotTest {
             songBpm = songBpm,
             stageMonitor = stageMonitor,
             isPresenting = isPresenting,
+            panelHiddenLanguages = panelHiddenLanguages,
             themeMode = mode,
         ) { vm, _ ->
             drive(vm)
@@ -182,6 +184,19 @@ class SongsTabScreenshotTest {
     @Test
     fun `the order column`() =
         shoot("columns_order", songs = arranged, hiddenCols = orderColumnShown, colOrder = orderColumnOrder)
+
+    /** The Alias column beside the number, telling two tunes of one hymn apart (#1047). */
+    @Test
+    fun `the alias column`() = shoot(
+        "columns_alias",
+        songs = listOf(
+            SongFixture(number = "14", title = "O for a Thousand Tongues", alias = "Ch 9"),
+            SongFixture(number = "14", title = "O for a Thousand Tongues (Azmon)", alias = "Ch 10"),
+            SongFixture(number = "25", title = "Abide With Me"),
+        ),
+        hiddenCols = setOf("songbook", "tune", "play_count", "author", "composer", "order"),
+        colOrder = listOf("number", "alias", "title", "order", "add_to_schedule", "favorites"),
+    )
 
     @Test
     fun `every column shown`() = shoot("columns_all_shown", hiddenCols = allColumns)
@@ -322,7 +337,7 @@ class SongsTabScreenshotTest {
         }
     }
 
-    /** The language Display order opened on a two-language song, its languages named. */
+    /** The language Display order opened on a two-language song, its languages named, each with its eye. */
     @Test
     fun `the language display order`() = stackedThemes(SECTION, "language_order") { mode, file ->
         songsTab(
@@ -337,7 +352,17 @@ class SongsTabScreenshotTest {
         }
     }
 
-    /** The first verse untranslated: it shows in one language while verse 2 shows in both. */
+    /** A two-language song with its second language hidden from the lyrics list (#1024). */
+    @Test
+    fun `a language hidden from the lyrics list`() =
+        shoot("lyrics_language_hidden", songs = bilingual, panelHiddenLanguages = listOf(1)) {
+            clickSong("Amazing Grace")
+        }
+
+    /**
+     * The first verse untranslated: its second column stays, blank, so verse 2's languages sit in the
+     * same columns as verse 1's.
+     */
     @Test
     fun `a song translated only in part`() = stackedThemes(SECTION, "song_two_languages_partial") { mode, file ->
         songsTab(songs = partlyTranslated, themeMode = mode) { _, _ ->

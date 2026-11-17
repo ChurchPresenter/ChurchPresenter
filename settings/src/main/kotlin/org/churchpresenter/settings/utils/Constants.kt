@@ -178,6 +178,7 @@ object Constants {
 
     // Sort Columns
     const val SORT_NUMBER = "number"
+    const val SORT_ALIAS = "alias"
     const val SORT_TITLE = "title"
     const val SORT_SONGBOOK = "songbook"
     const val SORT_TUNE = "tune"

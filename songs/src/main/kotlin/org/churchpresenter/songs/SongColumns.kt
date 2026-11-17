@@ -14,7 +14,7 @@ import org.churchpresenter.settings.utils.Constants
  * is present.
  */
 internal fun availableSongColumns(songbookCount: Int, hasAddToSchedule: Boolean): List<String> = buildList {
-    add(SongColumnId.NUMBER); add(SongColumnId.TITLE)
+    add(SongColumnId.NUMBER); add(SongColumnId.ALIAS); add(SongColumnId.TITLE)
     if (songbookCount > 1) add(SongColumnId.SONGBOOK)
     add(SongColumnId.TUNE)
     add(SongColumnId.PLAY_COUNT)
@@ -60,6 +60,7 @@ internal fun moveColumn(order: List<String>, colId: String, targetId: String): L
 /** The sort key a column header drives, or `""` for a column that isn't sortable. */
 internal fun songColumnSortKey(colId: String): String = when (colId) {
     SongColumnId.NUMBER -> Constants.SORT_NUMBER
+    SongColumnId.ALIAS -> Constants.SORT_ALIAS
     SongColumnId.TITLE -> Constants.SORT_TITLE
     SongColumnId.SONGBOOK -> Constants.SORT_SONGBOOK
     SongColumnId.TUNE -> Constants.SORT_TUNE

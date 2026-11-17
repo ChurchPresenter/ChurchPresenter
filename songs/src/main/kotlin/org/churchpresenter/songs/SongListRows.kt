@@ -288,6 +288,7 @@ private fun SongListScope.SongDataCell(
     }
     val cellText = when (colId) {
         SongColumnId.NUMBER     -> song.number
+        SongColumnId.ALIAS      -> song.alias
         SongColumnId.TITLE      -> song.title
         SongColumnId.SONGBOOK   -> song.songbook
         SongColumnId.TUNE       -> song.tune

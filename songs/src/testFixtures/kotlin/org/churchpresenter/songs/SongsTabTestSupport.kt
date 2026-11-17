@@ -70,6 +70,8 @@ data class SongFixture(
     val notes: String = "",
     /** A cue per section, by section key, shown beside its label. */
     val sectionNotes: Map<String, String> = emptyMap(),
+    /** What the output shows in place of the number, written as the `alias:` header; blank for none. */
+    val alias: String = "",
 )
 
 /**
@@ -140,6 +142,8 @@ fun songsTab(
     colOrder: List<String>? = null,
     /** Metronome tempo per song id, which lives on [AppSettings] rather than [SongSettings]. */
     songBpm: Map<String, Int>? = null,
+    /** The language slots the lyrics panel hides, which live on [AppSettings]; none by default. */
+    panelHiddenLanguages: List<Int> = emptyList(),
     /**
      * Whether a stage monitor screen is configured.
      *
@@ -214,6 +218,7 @@ fun songsTab(
                     sectionOrder = s.sectionOrder,
                     notes = s.notes,
                     sectionNotes = s.sectionNotes,
+                    alias = s.alias,
                 ),
                 File(book, "${s.number} - ${s.title}.song").absolutePath,
             )
@@ -224,6 +229,7 @@ fun songsTab(
             .let { if (hiddenCols != null) it.copy(songHiddenCols = hiddenCols) else it }
             .let { if (colOrder != null) it.copy(songColOrder = colOrder) else it }
             .let { if (songBpm != null) it.copy(songBpm = songBpm) else it }
+            .copy(songPanelHiddenLanguages = panelHiddenLanguages)
             .let {
                 if (!stageMonitor) it
                 else it.copy(

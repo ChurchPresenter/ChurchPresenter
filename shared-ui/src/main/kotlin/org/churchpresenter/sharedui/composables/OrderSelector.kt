@@ -83,6 +83,8 @@ data class OrderEntry(
     val detail: String = "",
     /** Shown in place of a blank [name] -- what an entry is called until it is named. */
     val placeholder: String = "",
+    /** Whether the entry is shown where [OrderShown] says; read only when the selector has one. */
+    val shown: Boolean = true,
 ) {
     /** What the entry reads as: its [name], or the [placeholder] while it has none. */
     val shownName: String get() = name.ifBlank { placeholder }
@@ -103,6 +105,17 @@ data class OrderRename(
 )
 
 /**
+ * An eye on each row of an [OrderSelector] that shows or hides the entry somewhere apart from the
+ * order itself -- the Songs tab's lyrics panel. [label] names the eye for a screen reader; [hint]
+ * says, under the rows, what hiding one changes. The last entry shown cannot be hidden.
+ */
+data class OrderShown(
+    val label: String,
+    val hint: String,
+    val onToggle: (key: String, shown: Boolean) -> Unit,
+)
+
+/**
  * A header button naming the first of [entries], opening a Display order panel that reorders them
  * by drag or by arrow -- the Bible tab's translations, and the Songs tab's languages.
  */
@@ -117,6 +130,8 @@ fun OrderSelector(
     modifier: Modifier = Modifier,
     /** Null keeps the names fixed, which is every caller but the Songs tab's languages. */
     rename: OrderRename? = null,
+    /** Null draws no eye on the rows, which is every caller but the Songs tab's languages. */
+    shown: OrderShown? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val primaryName = entries.first().shownName
@@ -196,6 +211,7 @@ fun OrderSelector(
                 moveDownLabel = moveDownLabel,
                 onMove = onMove,
                 rename = rename,
+                shown = shown,
             )
         }
     }
@@ -209,6 +225,7 @@ private fun OrderPanel(
     moveDownLabel: String,
     onMove: (index: Int, offset: Int) -> Unit,
     rename: OrderRename?,
+    shown: OrderShown?,
 ) {
     Column(modifier = Modifier.width(320.dp)) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
@@ -240,8 +257,12 @@ private fun OrderPanel(
         }
 
         Column(modifier = Modifier.padding(6.dp)) {
+            val onlyShown = entries.singleOrNull { it.shown }?.key
             entries.forEachIndexed { index, entry ->
-                OrderRow(entry, index, entries.lastIndex, drag, moveUpLabel, moveDownLabel, onMove, onDragEnd, rename)
+                val eye = shown?.let { OrderRowEye(it, canHide = entry.key != onlyShown) }
+                OrderRow(
+                    entry, index, entries.lastIndex, drag, moveUpLabel, moveDownLabel, onMove, onDragEnd, rename, eye,
+                )
                 if (index != entries.lastIndex) Spacer(Modifier.height(4.dp))
             }
             rename?.onAdd?.let { onAdd ->
@@ -276,9 +297,9 @@ private fun OrderPanel(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
-                rename?.let {
+                listOfNotNull(rename?.hint, shown?.hint).forEach { hint ->
                     Text(
-                        text = it.hint,
+                        text = hint,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     )
@@ -324,6 +345,7 @@ private fun OrderRow(
     onMove: (index: Int, offset: Int) -> Unit,
     onDragEnd: () -> Unit,
     rename: OrderRename?,
+    eye: OrderRowEye?,
 ) {
     val isPrimary = index == 0
     Row(
@@ -392,6 +414,8 @@ private fun OrderRow(
                 )
             }
         }
+
+        eye?.let { OrderShownToggle(entry, it) }
 
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             ReorderArrowButton(
