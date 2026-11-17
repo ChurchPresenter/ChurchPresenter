@@ -2072,6 +2072,7 @@
     <string name="stage_monitor_layout_quad">Quad grid</string>
     <string name="stage_monitor_layout_top_three_below">Top / 3 below</string>
     <string name="stage_monitor_layout_top_four_below">Top / 4 below</string>
+    <string name="stage_monitor_bible_all_translations">Show all Bible translations</string>
     <string name="stage_monitor_metronome_position">Metronome Position</string>
     <string name="stage_monitor_position_top_center">Top-Center</string>
     <string name="stage_monitor_position_middle_left">Middle-Left</string>

@@ -516,6 +516,27 @@ class StageMonitorScreenshotTest {
         nextVerses = listOf(verse(number = 2, text = "He maketh me to lie down in green pastures.")),
     )
 
+    /** Two translations on air with the switch on: both in the zone, primary first. */
+    @Test
+    fun `two translations in a zone`() = shoot(
+        "bible_two_translations",
+        settings = stageSettings().copy(bibleAllTranslations = true),
+        presenting = Presenting.BIBLE,
+        section = LyricSection(),
+        verses = TWO_TRANSLATIONS,
+    )
+
+    /** The same two translations with Bible routed to the whole screen. */
+    @Test
+    fun `two translations on the full screen`() = shoot(
+        "bible_two_translations_full_screen",
+        settings = stageSettings(zones = mapOf(StageMonitorContentType.BIBLE to StageMonitorZone.FULL_SCREEN))
+            .copy(bibleAllTranslations = true),
+        presenting = Presenting.BIBLE,
+        section = LyricSection(),
+        verses = TWO_TRANSLATIONS,
+    )
+
     // ── Zone styling ────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -1205,6 +1226,22 @@ class StageMonitorScreenshotTest {
             "The LORD is my shepherd; I shall not want. He maketh me to lie down in green " +
                 "pastures: he leadeth me beside the still waters. He restoreth my soul: he " +
                 "leadeth me in the paths of righteousness for his name's sake."
+
+        /** The same verse in two translations, primary first. */
+        val TWO_TRANSLATIONS = listOf(
+            SelectedVerse(
+                translationFileName = "kjv.spb", bibleAbbreviation = "KJV", bibleName = "KJV",
+                bookName = "John", chapter = 3, verseNumber = 16,
+                verseText = "For God so loved the world, that he gave his only begotten Son, that " +
+                    "whosoever believeth in him should not perish, but have everlasting life.",
+            ),
+            SelectedVerse(
+                translationFileName = "rst.spb", bibleAbbreviation = "RST", bibleName = "RST",
+                bookName = "John", chapter = 3, verseNumber = 16,
+                verseText = "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного, дабы " +
+                    "всякий верующий в Него, не погиб, но имел жизнь вечную.",
+            ),
+        )
 
         val LONG_NOTES = List(6) {
             "Point ${'$'}{it + 1}: read the passage slowly, pause before the last line, and let the " +

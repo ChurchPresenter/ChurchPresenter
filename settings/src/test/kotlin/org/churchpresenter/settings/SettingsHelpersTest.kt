@@ -577,6 +577,19 @@ class StageMonitorSettingsTest {
     }
 
     @Test
+    fun `the Bible zone shows the first translation only until it is switched on`() {
+        assertFalse(StageMonitorSettings().bibleAllTranslations)
+        assertTrue(StageMonitorSettings().copy(bibleAllTranslations = true).bibleAllTranslations)
+    }
+
+    @Test
+    fun `a saved file from before the switch reads as off`() {
+        val settings = settingsJson.decodeFromString<StageMonitorSettings>("{}")
+
+        assertFalse(settings.bibleAllTranslations)
+    }
+
+    @Test
     fun `a content type missing from a saved file falls back to its default`() {
         val settings = StageMonitorSettings(contentZones = emptyMap())
 

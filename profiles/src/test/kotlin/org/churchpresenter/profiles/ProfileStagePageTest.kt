@@ -80,6 +80,43 @@ class ProfileStagePageTest {
     }
 
     @Test
+    fun `Bible can be put on the full screen`() = profilesTab(doc()) { get ->
+        open()
+        onNodeWithTag(stageContentTag(StageMonitorContentType.BIBLE)).performScrollTo().performClick()
+        waitForIdle()
+        pickFromMenu("Full Screen")
+        assertEquals(StageMonitorZone.FULL_SCREEN, get().stage().zoneFor(StageMonitorContentType.BIBLE))
+    }
+
+    @Test
+    fun `Songs and Next still share the screen, with no full screen choice`() = profilesTab(doc()) { _ ->
+        open()
+        // Presenter Notes already reads "Full Screen", so count the choices an open menu adds.
+        fun fullScreenNodes() = onAllNodes(hasTextExactly("Full Screen") and hasClickAction())
+            .fetchSemanticsNodes().size
+        val before = fullScreenNodes()
+        listOf(StageMonitorContentType.SONGS, StageMonitorContentType.NEXT).forEach { type ->
+            onNodeWithTag(stageContentTag(type)).performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(before, fullScreenNodes(), type.name)
+            onNodeWithTag(stageContentTag(type)).performClick()
+            waitForIdle()
+        }
+    }
+
+    @Test
+    fun `the Bible zone's all-translations switch is off, and turns on and off`() = profilesTab(doc()) { get ->
+        open()
+        assertFalse(get().stage().bibleAllTranslations)
+        onNodeWithTag("stage_bible_all_translations").performScrollTo().performClick()
+        waitForIdle()
+        assertTrue(get().stage().bibleAllTranslations)
+        onNodeWithTag("stage_bible_all_translations").performScrollTo().performClick()
+        waitForIdle()
+        assertFalse(get().stage().bibleAllTranslations)
+    }
+
+    @Test
     fun `the metronome is placed from its own row`() = profilesTab(doc()) { get ->
         open()
         inRow("Metronome Position", hasClickAction()).performClick()

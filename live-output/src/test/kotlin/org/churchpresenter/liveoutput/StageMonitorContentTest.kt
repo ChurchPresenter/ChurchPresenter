@@ -157,6 +157,41 @@ class StageMonitorContentTest {
     }
 
     @Test
+    fun `every translation on air reaches the live zone when all translations is on`() {
+        val text = stageCurrentText(
+            Presenting.BIBLE,
+            LyricSection(),
+            listOf(verse(), verse(text = "Ибо так возлюбил Бог мир")),
+            allTranslations = true,
+        )
+        assertEquals("John 3:16\nFor God so loved the world\n\nJohn 3:16\nИбо так возлюбил Бог мир", text)
+    }
+
+    @Test
+    fun `a translation with no text is left out of the all-translations zone`() {
+        val text = stageCurrentText(
+            Presenting.BIBLE,
+            LyricSection(),
+            listOf(verse(), verse(text = "  ")),
+            allTranslations = true,
+        )
+        assertEquals("John 3:16\nFor God so loved the world", text)
+    }
+
+    @Test
+    fun `all translations with nothing selected still shows nothing`() {
+        assertEquals("", stageCurrentText(Presenting.BIBLE, LyricSection(), emptyList(), allTranslations = true))
+    }
+
+    @Test
+    fun `all translations leaves a song's words alone`() {
+        assertEquals(
+            "Amazing grace",
+            stageCurrentText(Presenting.LYRICS, section("Amazing grace"), listOf(verse()), allTranslations = true),
+        )
+    }
+
+    @Test
     fun `Bible mode with nothing selected shows nothing rather than a stray reference`() {
         assertEquals("", stageCurrentText(Presenting.BIBLE, LyricSection(), emptyList()))
     }
