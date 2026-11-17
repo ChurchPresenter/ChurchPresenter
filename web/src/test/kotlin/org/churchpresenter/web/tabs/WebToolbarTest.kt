@@ -74,19 +74,46 @@ class WebToolbarTest {
         assertTrue(hasWebCapableOutput(projection(onDisplay(-2), onDisplay(2))))
     }
 
+    private fun virtual(
+        omt: Boolean? = null,
+        ndi: Boolean? = null,
+        source: Boolean? = null,
+        showWebsite: Boolean = true,
+    ): ProjectionSettings {
+        fun one(enabled: Boolean?, build: (Boolean) -> ScreenAssignment) =
+            listOfNotNull(enabled?.let(build))
+        return ProjectionSettings(
+            omtOutputs = one(omt) { ScreenAssignment(omtEnabled = it, activeProfileId = PROFILE) },
+            ndiOutputs = one(ndi) { ScreenAssignment(ndiEnabled = it, activeProfileId = PROFILE) },
+            browserSourceOutputs = one(source) {
+                ScreenAssignment(browserSourceEnabled = it, activeProfileId = PROFILE)
+            },
+            outputProfiles = listOf(
+                OutputProfile(id = PROFILE, name = "Main", look = OutputLook(slide = SlideLook(web = showWebsite))),
+            ),
+        )
+    }
+
     @Test
     fun `an enabled OMT, NDI or Browser Source output whose profile shows websites can take one`() {
-        val look = OutputLook(slide = SlideLook(web = true))
-        val profiles = listOf(OutputProfile(id = PROFILE, name = "Main", look = look))
-        fun omt(enabled: Boolean = true) = ScreenAssignment(omtEnabled = enabled, activeProfileId = PROFILE)
-        assertTrue(hasWebCapableOutput(ProjectionSettings(omtOutputs = listOf(omt()), outputProfiles = profiles)))
-        assertFalse(hasWebCapableOutput(ProjectionSettings(omtOutputs = listOf(omt(false)), outputProfiles = profiles)))
-        val ndi = ScreenAssignment(activeProfileId = PROFILE)
-        assertTrue(hasWebCapableOutput(ProjectionSettings(ndiOutputs = listOf(ndi), outputProfiles = profiles)))
-        val source = ScreenAssignment(activeProfileId = PROFILE)
-        val withSource = ProjectionSettings(browserSourceOutputs = listOf(source), outputProfiles = profiles)
-        assertTrue(hasWebCapableOutput(withSource))
-        assertFalse(hasWebCapableOutput(ProjectionSettings(omtOutputs = listOf(omt()))))
+        assertTrue(hasWebCapableOutput(virtual(omt = true)))
+        assertTrue(hasWebCapableOutput(virtual(ndi = true)))
+        assertTrue(hasWebCapableOutput(virtual(source = true)))
+    }
+
+    @Test
+    fun `a disabled OMT, NDI or Browser Source output cannot`() {
+        assertFalse(hasWebCapableOutput(virtual(omt = false)))
+        assertFalse(hasWebCapableOutput(virtual(ndi = false)))
+        assertFalse(hasWebCapableOutput(virtual(source = false)))
+    }
+
+    @Test
+    fun `an OMT, NDI or Browser Source output whose profile hides websites cannot`() {
+        assertFalse(hasWebCapableOutput(virtual(omt = true, showWebsite = false)))
+        assertFalse(hasWebCapableOutput(virtual(ndi = true, showWebsite = false)))
+        assertFalse(hasWebCapableOutput(virtual(source = true, showWebsite = false)))
+        assertFalse(hasWebCapableOutput(virtual()))
     }
 
     // ── Go Live ─────────────────────────────────────────────────────────────────────────────────
@@ -113,6 +140,17 @@ class WebToolbarTest {
         assertFalse(hasWebCapableOutput(projection(onDisplay(-2))))
         val deckLink = projection(onDisplay(-2, type = Constants.TARGET_TYPE_DECKLINK))
         assertFalse(hasWebCapableOutput(deckLink, devOutputWindows = true))
+    }
+
+    @Test
+    fun `with only an OMT output showing websites and no second screen, Go Live puts the address on it`() = webTab(
+        settings = { it.copy(projectionSettings = virtual(omt = true)) },
+    ) { presenter, _ ->
+        onNodeWithText(WebLabel.URL_PLACEHOLDER_DEFAULT).performTextReplacement("example.com")
+        webButton(WebLabel.GO_LIVE).assertIsEnabled().performClick()
+        waitForIdle()
+
+        assertEquals(Presenting.WEBSITE, presenter.onAir.value)
     }
 
     @Test
