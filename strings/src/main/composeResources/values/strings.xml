@@ -28,6 +28,7 @@
     <string name="bible_row_warning_show">Show verses</string>
     <string name="bible_row_warning_hide_verses">Hide verses</string>
     <string name="bible_row_warning_more">…and %1$d more</string>
+    <string name="bible_row_warning_tooltip">%1$d verse(s) in this Bible have a damaged ID and cannot be shown. The Bible tab says which.</string>
     <string name="bible_row_warning_hide">Hide</string>
     <string name="bible_row_warning_never">Never remind me again</string>
     <string name="search_songs">Search songs...</string>
