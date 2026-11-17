@@ -96,6 +96,18 @@ class MainDesktopSlidePushTest {
     }
 
     @Test
+    fun `a slide whose file is gone from the cache decodes to nothing instead of throwing`() = runBlocking {
+        // CHURCH-PRESENTER-DESKTOP-1C4: the cache folder was cleared while the deck was still selected.
+        val files = slideFiles(3)
+        files[1].delete()
+
+        val (current, next) = decodeSlideBitmaps(files, index = 1)
+
+        assertNull(current, "nothing to push, so the callers leave the output alone")
+        assertEquals(12, next?.width, "the slide after it is still there")
+    }
+
+    @Test
     fun `an empty deck decodes nothing`() = runBlocking {
         val (current, next) = decodeSlideBitmaps(emptyList(), index = 0)
 

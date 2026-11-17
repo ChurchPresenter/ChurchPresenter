@@ -243,16 +243,16 @@ internal fun approved(show: () -> Int): Boolean = try {
 }
 
 /**
- * Builds one throwaway [JFileChooser] off the event thread, once a run, on Windows.
+ * Builds the run's [JFileChooser] off the event thread, once a run, on Windows.
  *
  * The first chooser a run builds asks the Windows shell for the places bar's folders and icons, and
  * on a slow disk or a busy shell that takes seconds -- on the event thread, before the dialog even
- * opens. Swing caches what the shell answered, so the real chooser a button builds later is quick.
- * The chooser built here is never shown.
+ * opens. The chooser built here is the one every pick reuses ([obtainChooser]), so a pick made
+ * while it is still building waits for it instead of building a second one beside it.
  */
 internal class FileChooserWarmUp(
     private val os: String = System.getProperty("os.name").orEmpty(),
-    private val build: () -> Unit = { JFileChooser(defaultDir) },
+    private val build: () -> Unit = { obtainChooser() },
 ) {
     @Volatile private var done = false
 
@@ -297,9 +297,15 @@ val LocalConverterPickers = staticCompositionLocalOf<ConverterPickers> { SwingPi
  * saved the first. Kept, the second pick costs nothing to build, and opens where the last one left.
  */
 private var sharedChooser: JFileChooser? = null
+private val chooserLock = Any()
+
+/** The shared chooser, built once: by the warm-up if it got there first, else by the first pick. */
+internal fun obtainChooser(): JFileChooser = synchronized(chooserLock) {
+    sharedChooser ?: JFileChooser(defaultDir).also { sharedChooser = it }
+}
 
 private fun freshChooser(): JFileChooser {
-    val chooser = sharedChooser ?: JFileChooser(defaultDir).also { sharedChooser = it }
+    val chooser = obtainChooser()
     chooser.resetChoosableFileFilters()
     chooser.isAcceptAllFileFilterUsed = true
     chooser.fileSelectionMode = JFileChooser.FILES_ONLY

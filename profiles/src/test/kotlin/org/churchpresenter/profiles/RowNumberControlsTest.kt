@@ -62,6 +62,26 @@ class RowNumberControlsTest {
     }
 
     @Test
+    fun `the field is as wide as its digits`() = runComposeUiTest {
+        // The width is counted from the text, not asked of the layout: an intrinsic-width query lays a
+        // paragraph out on every measure (CHURCH-PRESENTER-DESKTOP-1F0, -1F1).
+        setContent {
+            MaterialTheme {
+                Column {
+                    RowNumberField(value = 7, onValueChange = {}, range = 0..99_999, testTag = "short")
+                    RowNumberField(value = 12_345, onValueChange = {}, range = 0..99_999, testTag = "long")
+                }
+            }
+        }
+        waitForIdle()
+        val short = onNodeWithTag("short").fetchSemanticsNode().size.width
+        val long = onNodeWithTag("long").fetchSemanticsNode().size.width
+        assertTrue(long > short, "five digits take more room than one ($long vs $short)")
+        val fiveDigits = with(density) { (5 * 8).dp.roundToPx() }
+        assertTrue(long >= fiveDigits, "five digits fit without scrolling ($long < $fiveDigits)")
+    }
+
+    @Test
     fun `the stepper keys clamp to the range and stop at its ends`() = runComposeUiTest {
         var value by mutableIntStateOf(4)
         setContent {

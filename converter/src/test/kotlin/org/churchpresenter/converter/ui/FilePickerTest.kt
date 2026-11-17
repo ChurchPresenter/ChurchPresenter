@@ -1,5 +1,6 @@
 package org.churchpresenter.converter.ui
 
+import kotlin.test.assertSame
 import kotlinx.coroutines.runBlocking
 import javax.swing.JFileChooser
 import kotlin.test.Test
@@ -30,6 +31,13 @@ class FilePickerTest {
 
         assertEquals(1, threads.size, "a run warms the chooser once")
         assertTrue(threads.single().startsWith("DefaultDispatcher"), "on the IO pool, not ${threads.single()}")
+    }
+
+    @Test
+    fun `the chooser the warm-up builds is the one every pick reuses`() = runBlocking {
+        FileChooserWarmUp(os = "Windows 11").run()
+
+        assertSame(obtainChooser(), obtainChooser(), "a pick must not build a second chooser beside the warm one")
     }
 
     @Test

@@ -48,11 +48,23 @@ object EngineServer {
     private const val STOP_GRACE_MS = 500L
     private const val STOP_TIMEOUT_MS = 1000L
 
+    /**
+     * Why the last [start] returned null, or null when it did not. The start's caller reports a
+     * failed start, and without this every cause -- no Bible folder, no translation loaded, no free
+     * port, a bad STT url -- read as a port collision.
+     */
+    @Volatile var lastFailure: String? = null
+        private set
+
+    private fun failed(reason: String): EngineHandle? {
+        System.err.println("bible-engine: $reason")
+        lastFailure = reason
+        return null
+    }
+
     fun start(sttUrl: String, bibleRoot: String, port: Int, bibleFiles: List<String> = emptyList()): EngineHandle? {
-        if (bibleRoot.isBlank()) {
-            System.err.println("bible-engine: bible root not configured")
-            return null
-        }
+        lastFailure = null
+        if (bibleRoot.isBlank()) return failed("bible root not configured")
         Config.bibleRoot = bibleRoot
         Config.sttServerUrl = sttUrl
 
@@ -60,10 +72,7 @@ object EngineServer {
         // index are built only for the requested bibles (ChurchPresenter's primary + secondary).
         BookResolver.register(SpbLoader.scanAllBookManifests())
         val translations = SpbLoader.loadSelected(bibleFiles)
-        if (translations.isEmpty()) {
-            System.err.println("bible-engine: no translations loaded from $bibleRoot")
-            return null
-        }
+        if (translations.isEmpty()) return failed("no translations loaded from $bibleRoot")
         Config.loadedBibles = translations.map { it.id }
 
         // Version detection recognizes translations beyond the two indexed above — the reader's
@@ -145,10 +154,7 @@ object EngineServer {
                 }.start(wait = false)
             }.getOrNull()?.let { it to p }
         }
-        if (bound == null) {
-            System.err.println("bible-engine: failed to bind WS server on ports $port..${port + PORT_ATTEMPTS - 1}")
-            return null
-        }
+        if (bound == null) return failed("failed to bind WS server on ports $port..${port + PORT_ATTEMPTS - 1}")
         val (server, boundPort) = bound
         if (boundPort != port) System.err.println("bible-engine: port $port busy — bound on $boundPort instead")
         Config.outputPort = boundPort
@@ -167,12 +173,11 @@ object EngineServer {
                 } else null
             } catch (e: URISyntaxException) {
                 // IO.socket's one failure: the url does not parse. Connecting itself is asynchronous.
-                System.err.println("bible-engine: failed to connect STT client — ${e.message}")
                 runCatching { server.stop(STOP_GRACE_MS, STOP_TIMEOUT_MS) }
                 runCatching { broadcaster.close() }
                 runCatching { detectionScope.cancel() }
                 runCatching { detectionExecutor.shutdown() }
-                return null
+                return failed("failed to connect STT client — ${e.message}")
             }
 
         return EngineHandle(boundPort) {

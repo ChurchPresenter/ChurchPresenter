@@ -4,8 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
+import java.io.FileNotFoundException
 
 /*
  * The presentation and picture decisions behind the main screen's remote commands and slide pushes.
@@ -31,7 +33,9 @@ internal fun shouldPushSlide(slideContent: Presenting, selectedIndex: Int, slide
  * slide there would show the operator the wrong thing to prepare for.
  *
  * A file that will not decode throws, as it did inline: unlike the slide grid, which falls back to a
- * blank thumbnail, there is no sensible blank frame to put on the output here.
+ * blank thumbnail, there is no sensible blank frame to put on the output here. A file that is gone
+ * -- its folder in the slide cache was cleared while the deck was still selected -- is a null
+ * bitmap, which the callers take to mean there is nothing to push.
  */
 internal suspend fun decodeSlideBitmaps(
     slideFiles: List<File>,
@@ -39,16 +43,17 @@ internal suspend fun decodeSlideBitmaps(
     /** The slide shown as "next": the one after [index] unless hidden slides are passed over. */
     nextIndex: Int? = index + 1,
 ): Pair<ImageBitmap?, ImageBitmap?> {
-    val current = slideFiles.getOrNull(index)?.let { f ->
-        withContext(Dispatchers.IO) {
+    // One slide's picture, or null when its file has gone from the cache.
+    suspend fun decode(f: File): ImageBitmap? = withContext(Dispatchers.IO) {
+        try {
             org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+        } catch (e: FileNotFoundException) {
+            Log.warn("Slides", "Slide file is gone from the cache: ${f.path} (${e.message})")
+            null
         }
     }
-    val next = nextIndex?.let { slideFiles.getOrNull(it) }?.let { f ->
-        withContext(Dispatchers.IO) {
-            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-        }
-    }
+    val current = slideFiles.getOrNull(index)?.let { decode(it) }
+    val next = nextIndex?.let { slideFiles.getOrNull(it) }?.let { decode(it) }
     return current to next
 }
 

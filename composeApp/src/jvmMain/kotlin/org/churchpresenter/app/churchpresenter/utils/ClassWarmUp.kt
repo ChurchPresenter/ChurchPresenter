@@ -176,6 +176,11 @@ internal val WARM_PACKAGES = listOf(
     "org/churchpresenter/songchords/",
     "androidx/compose/material3/",
     "androidx/compose/foundation/",
+    // The icons the settings dialog's tab strip and the tab labels read: each is its own class in
+    // the extended-icons jar, and the first Options opening was seen stalling for seconds loading
+    // them on a slow disk.
+    "androidx/compose/material/icons/filled/",
+    "androidx/compose/material/icons/automirrored/filled/",
     // The native file dialogs every Open and Save goes through.
     "io/github/vinceglb/filekit/",
 )

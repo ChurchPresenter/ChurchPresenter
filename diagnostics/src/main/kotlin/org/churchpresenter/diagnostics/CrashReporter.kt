@@ -260,8 +260,10 @@ object CrashReporter {
         val lastKind = takeLastCrashKind()
         val (count, disable) = evaluateCrashEscalation(didCrashLastRun, readCrashCount(), lastKind)
         // A Java crash was reported as it happened (it left a kind); anything else ended under the app.
+        // Only a packaged build's: a developer's run stopped from the IDE ends the same way, and was
+        // the one sender of "Previous run ended without closing" from a local build.
         if (previousStartMs != null && lastKind == null && analyticsReportingEnabled) {
-            reportUncleanExit(previousStartMs)
+            if (build.isRelease) reportUncleanExit(previousStartMs)
         }
         consecutiveCrashes = count
         writeCrashCount(count)
