@@ -138,7 +138,7 @@ fun WebTab(
         val mobile = output?.webMobile?.value ?: return@LaunchedEffect
         if (mobile != navController.mobileMode) navController.setMobileEmulation(mobile)
     }
-    val canShowOutput = hasSecondaryDisplay || devOutputWindows
+    val canShowOutput = hasSecondaryDisplay || devOutputWindows || hasVirtualWebOutput(appSettings.projectionSettings)
     val webCapable = remember(appSettings.projectionSettings, devOutputWindows) {
         hasWebCapableOutput(appSettings.projectionSettings, devOutputWindows)
     }

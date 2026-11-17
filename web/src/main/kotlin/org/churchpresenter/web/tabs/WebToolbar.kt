@@ -410,11 +410,18 @@ private fun WebTabScope.WebTypeToPage() {
 
 /**
  * Whether a website can go live anywhere: on at least one regular (not DeckLink) output, assigned to
- * a display, whose profile shows websites. With [devOutputWindows] the outputs are windows on the
- * operator's own screen, so no display assignment is needed.
+ * a display, whose profile shows websites -- or on an enabled Browser Source, NDI or OMT output
+ * whose profile does, which needs no display. With [devOutputWindows] the outputs are windows on
+ * the operator's own screen, so no display assignment is needed.
  */
 internal fun hasWebCapableOutput(proj: ProjectionSettings, devOutputWindows: Boolean = false): Boolean =
     proj.screenAssignments.any {
         it.targetType != Constants.TARGET_TYPE_DECKLINK && (devOutputWindows || it.targetDisplay >= 0) &&
             proj.profileFor(it)?.look?.slide?.web == true
-    }
+    } || hasVirtualWebOutput(proj)
+
+/** Whether an enabled Browser Source, NDI or OMT output follows a profile that shows websites. */
+internal fun hasVirtualWebOutput(proj: ProjectionSettings): Boolean =
+    proj.browserSourceOutputs.any { it.browserSourceEnabled && proj.profileFor(it)?.look?.slide?.web == true } ||
+        proj.ndiOutputs.any { it.ndiEnabled && proj.profileFor(it)?.look?.slide?.web == true } ||
+        proj.omtOutputs.any { it.omtEnabled && proj.profileFor(it)?.look?.slide?.web == true }
