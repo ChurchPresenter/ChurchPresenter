@@ -87,6 +87,11 @@ internal fun MainDesktopScope.ScheduleTabPane() {
             onShowThumbnailsChange = { shown ->
                 onSettingsChange { settings -> settings.copy(scheduleThumbnails = shown) }
             },
+            isOnAir = { item -> scheduleRowOnAir(item, presenterManager.onAirState()) },
+            highlightLive = appSettings.scheduleHighlightLive,
+            onHighlightLiveChange = { on ->
+                onSettingsChange { settings -> settings.copy(scheduleHighlightLive = on) }
+            },
             toolbarIconSize = ScheduleToolbarIconSize.fromName(appSettings.scheduleToolbarIconSize),
             onToolbarIconSizeChange = { size ->
                 onSettingsChange { settings -> settings.copy(scheduleToolbarIconSize = size.name) }

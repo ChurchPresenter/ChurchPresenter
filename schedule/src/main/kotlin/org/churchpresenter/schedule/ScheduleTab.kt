@@ -73,6 +73,7 @@ internal object ScheduleToolbarTags {
     const val OPTIONS = "schedule_options"
     const val OPTIONS_LEGACY_ACTIONS = "schedule_options_legacy_actions"
     const val OPTIONS_THUMBNAILS = "schedule_options_thumbnails"
+    const val OPTIONS_HIGHLIGHT_LIVE = "schedule_options_highlight_live"
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -115,6 +116,11 @@ fun ScheduleTab(
     /** Rows show a picture of what they are, where the app has one (#1050). */
     showThumbnails: Boolean = false,
     onShowThumbnailsChange: (Boolean) -> Unit = {},
+    /** Whether a row is still what the outputs show -- the app knows; see `liveMark` (#1049). */
+    isOnAir: (ScheduleItem) -> Boolean = { false },
+    /** Mark the row that is on screen. */
+    highlightLive: Boolean = false,
+    onHighlightLiveChange: (Boolean) -> Unit = {},
     hiddenToolbarButtons: Set<String> = emptySet(),
     onToggleToolbarButton: (ScheduleToolbarButton) -> Unit = {},
     toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
@@ -170,25 +176,19 @@ fun ScheduleTab(
             onLegacyRowActionsChange = onLegacyRowActionsChange,
             showThumbnails = showThumbnails,
             onShowThumbnailsChange = onShowThumbnailsChange,
+            highlightLive = highlightLive,
+            onHighlightLiveChange = onHighlightLiveChange,
             hiddenButtons = hiddenToolbarButtons,
             onToggleButton = onToggleToolbarButton,
             toolbarIconSize = toolbarIconSize,
             onToolbarIconSizeChange = onToolbarIconSizeChange
         )
 
-        // When each row is expected to go live, reckoned from the first pinned row across the
-        // whole schedule -- so every row shows a time, not only the ones carrying a pin.
-        val rowClocks = remember(scheduleItems, viewModel.timing, viewModel.serviceStartTime) {
-            scheduleClocks(scheduleItems, viewModel.timing, viewModel.serviceStartTime)
-        }
         ScheduleRowList(
             viewModel = viewModel,
-            look = ScheduleRowLook(
-                density = density,
-                legacyRowActions = legacyRowActions,
-                rowClocks = rowClocks,
-                drift = rememberLiveDrift(viewModel, rowClocks),
-                showThumbnails = showThumbnails,
+            look = rememberRowLook(
+                viewModel, density, legacyRowActions, showThumbnails,
+                liveMark = if (highlightLive) liveMark(scheduleItems, viewModel.liveRowId, isOnAir) else null,
             ),
             onRowClick = { item ->
                 viewModel.selectItem(item.id)
@@ -413,3 +413,28 @@ internal val SECTION_ACTION_BUTTON_SIZE = 22.dp
 internal val SECTION_ACTION_ICON_SIZE = 12.dp
 
 internal val SECTION_ROW_PADDING = 3.dp
+
+/** How every row is drawn: the density and layout chosen, when each is due, and which is live. */
+@Composable
+private fun rememberRowLook(
+    viewModel: ScheduleViewModel,
+    density: ScheduleDensity,
+    legacyRowActions: Boolean,
+    showThumbnails: Boolean,
+    liveMark: LiveMark?,
+): ScheduleRowLook {
+    val items = viewModel.scheduleItems
+    // When each row is expected to go live, reckoned from the first pinned row across the
+    // whole schedule -- so every row shows a time, not only the ones carrying a pin.
+    val rowClocks = remember(items, viewModel.timing, viewModel.serviceStartTime) {
+        scheduleClocks(items, viewModel.timing, viewModel.serviceStartTime)
+    }
+    return ScheduleRowLook(
+        density = density,
+        legacyRowActions = legacyRowActions,
+        rowClocks = rowClocks,
+        drift = rememberLiveDrift(viewModel, rowClocks),
+        showThumbnails = showThumbnails,
+        liveMark = liveMark,
+    )
+}

@@ -168,6 +168,8 @@ internal class ScheduleRowTitleLook(
     val timing: RowTiming,
     val clock: RowClock?,
     val sectionText: Color,
+    /** The row is on screen (#1049): a LIVE badge after its title. */
+    val isLive: Boolean,
 )
 
 /** The row's title -- a label's name or an item's content -- with the hover actions over its end. */
@@ -220,6 +222,7 @@ internal fun ScheduleRowTitle(
                         isSelected = look.isSelected,
                         timing = look.timing,
                         clock = look.clock,
+                        isLive = look.isLive,
                     )
                 }
             }
@@ -270,11 +273,14 @@ internal fun BoxScope.ScheduleRowAccent(leftAccent: Color) {
     }
 }
 
+/** How strongly the live row's border shows its red. */
+private const val LIVE_BORDER_ALPHA = 0.7f
+
 /** A row's card, border and accent colors, and a label's ink -- a label in its own colors. */
 internal class ScheduleRowColors(val card: Color, val sectionText: Color, val border: Color, val accent: Color)
 
 @Composable
-internal fun scheduleRowColors(item: ScheduleItem, isSelected: Boolean): ScheduleRowColors {
+internal fun scheduleRowColors(item: ScheduleItem, isSelected: Boolean, isLive: Boolean): ScheduleRowColors {
     val isSection = item is ScheduleItem.LabelItem
     val sectionAccent = if (item is ScheduleItem.LabelItem) Utils.parseHexColor(item.textColor) else Color.Unspecified
 
@@ -291,10 +297,12 @@ internal fun scheduleRowColors(item: ScheduleItem, isSelected: Boolean): Schedul
 
     val sectionText = if (isSection) Utils.ensureContrast(sectionAccent, cardBg, minRatio = 7.0) else sectionAccent
     val cardBorder = when {
+        isLive -> MaterialTheme.colorScheme.error.copy(alpha = LIVE_BORDER_ALPHA)
         isSection -> sectionAccent.copy(alpha = 0.35f)
         else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     }
     val leftAccent = when {
+        isLive -> MaterialTheme.colorScheme.error
         isSection -> sectionAccent
         else -> Color.Transparent
     }

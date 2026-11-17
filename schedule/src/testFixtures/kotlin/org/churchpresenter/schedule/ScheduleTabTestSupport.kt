@@ -56,6 +56,7 @@ internal class ScheduleReports {
     val zoomChanges = mutableListOf<Int>()
     val legacyRowActionChanges = mutableListOf<Boolean>()
     val thumbnailChanges = mutableListOf<Boolean>()
+    val highlightLiveChanges = mutableListOf<Boolean>()
     val toolbarButtonToggles = mutableListOf<ScheduleToolbarButton>()
     val toolbarIconSizeChanges = mutableListOf<ScheduleToolbarIconSize>()
 
@@ -109,6 +110,9 @@ internal fun scheduleTab(
     /** Rows draw a thumbnail where [thumbnails] has one (#1050). */
     showThumbnails: Boolean = false,
     thumbnails: ScheduleThumbnails = ScheduleThumbnails { null },
+    /** What the outputs show, and whether the row on screen is marked (#1049). */
+    isOnAir: (ScheduleItem) -> Boolean = { false },
+    highlightLive: Boolean = false,
     block: ComposeUiTest.(vm: ScheduleViewModel, reports: ScheduleReports) -> Unit,
 ) {
     val realHome = System.getProperty("user.home")
@@ -135,6 +139,9 @@ internal fun scheduleTab(
                             onLegacyRowActionsChange = { reports.legacyRowActionChanges += it },
                             showThumbnails = showThumbnails,
                             onShowThumbnailsChange = { reports.thumbnailChanges += it },
+                            isOnAir = isOnAir,
+                            highlightLive = highlightLive,
+                            onHighlightLiveChange = { reports.highlightLiveChanges += it },
                             hiddenToolbarButtons = hiddenToolbarButtons,
                             onToggleToolbarButton = { reports.toolbarButtonToggles += it },
                             toolbarIconSize = toolbarIconSize,

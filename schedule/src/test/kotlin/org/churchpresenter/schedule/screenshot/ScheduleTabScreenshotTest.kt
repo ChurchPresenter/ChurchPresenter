@@ -91,6 +91,8 @@ class ScheduleTabScreenshotTest {
         scheduleService: ScheduleServiceLink? = null,
         offerAddToCalendar: Boolean = false,
         showThumbnails: Boolean = false,
+        highlightLive: Boolean = false,
+        isOnAir: (ScheduleItem) -> Boolean = { false },
         drive: ComposeUiTest.(ScheduleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         // A feed left over from another shot would mark this one's cue rows.
@@ -109,6 +111,8 @@ class ScheduleTabScreenshotTest {
             offerAddToCalendar = offerAddToCalendar,
             showThumbnails = showThumbnails,
             thumbnails = PaintedThumbnails,
+            highlightLive = highlightLive,
+            isOnAir = isOnAir,
         ) { vm, _ ->
             drive(vm)
             captureTo(file, rootIndex)
@@ -372,6 +376,30 @@ class ScheduleTabScreenshotTest {
 
     private fun ComposeUiTest.awaitThumbnails() = waitUntil(timeoutMillis = 5_000) {
         onAllNodesWithTag(SCHEDULE_ROW_THUMBNAIL_TAG).fetchSemanticsNodes().size == 3
+    }
+
+    /** Highlight live item on (#1049): the deck is on screen, so it wears the LIVE mark. */
+    @Test
+    fun `live row`() = shoot("live_row", highlightLive = true, isOnAir = { true }) { vm -> markDeckLive(vm) }
+
+    /** Live and selected together: the selection's tint under the live mark. */
+    @Test
+    fun `live row selected`() = shoot("live_row_selected", highlightLive = true, isOnAir = { true }) { vm ->
+        markDeckLive(vm)
+        runOnIdle { vm.selectItem(deckId(vm)) }
+        waitForIdle()
+    }
+
+    /** Something else went live: the deck's mark gives way to a "Left off" bar under it. */
+    @Test
+    fun `live row left off`() = shoot("live_row_left_off", highlightLive = true) { vm -> markDeckLive(vm) }
+
+    private fun deckId(vm: ScheduleViewModel): String =
+        vm.scheduleItems.first { it is ScheduleItem.PresentationItem }.id
+
+    private fun ComposeUiTest.markDeckLive(vm: ScheduleViewModel) {
+        runOnIdle { vm.markLive(deckId(vm), NOW) }
+        waitForIdle()
     }
 
     @Test

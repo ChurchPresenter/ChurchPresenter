@@ -768,6 +768,9 @@
     <string name="tooltip_schedule_options">Schedule Options</string>
     <string name="schedule_show_buttons_under_title">Show buttons under title</string>
     <string name="schedule_show_thumbnails">Show thumbnails</string>
+    <string name="schedule_highlight_live">Highlight live item</string>
+    <string name="schedule_live_badge">LIVE</string>
+    <string name="schedule_left_off">Left off</string>
     <string name="schedule_option_item_count">Item Count</string>
     <string name="schedule_option_zoom">Zoom Controls</string>
     <string name="schedule_option_icon_size">Toolbar icon size</string>

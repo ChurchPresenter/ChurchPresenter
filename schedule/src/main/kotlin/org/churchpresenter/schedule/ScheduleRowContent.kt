@@ -60,6 +60,7 @@ internal fun ScheduleRowTitleLine(
     isSelected: Boolean,
     timing: RowTiming,
     clock: RowClock?,
+    isLive: Boolean,
 ) {
     val titleColor = MaterialTheme.colorScheme.onSurface
     // Provided around the live row only -- see LocalLiveDrift.
@@ -112,6 +113,7 @@ internal fun ScheduleRowTitleLine(
                 softWrap = false,
             )
         }
+        if (isLive) ScheduleRowLiveBadge()
         if (drift != null) PlanDriftBadge(drift)
     }
 }

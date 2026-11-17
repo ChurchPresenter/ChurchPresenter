@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -83,6 +84,8 @@ internal class ScheduleRowLook(
     val drift: PlanDrift?,
     /** Each row's picture in place of its type chip, where there is one (#1050). */
     val showThumbnails: Boolean = false,
+    /** The row last put live and whether it still is, when Highlight live item is on (#1049). */
+    val liveMark: LiveMark? = null,
 )
 
 /** The panel's rows, reordered by dragging and taking files dropped on it from outside the app. */
@@ -145,7 +148,7 @@ internal fun ScheduleRowList(
         ) {
             itemsIndexed(rows, key = { index, _ -> rowKeys[index] }) { index, item ->
                 val isDraggingThis = drag.isActive && drag.fromIndex == index
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem()
@@ -166,6 +169,7 @@ internal fun ScheduleRowList(
                             density = look.density,
                             legacyRowActions = look.legacyRowActions,
                             showThumbnail = look.showThumbnails,
+                            isLive = look.liveMark?.takeIf { it.onAir }?.rowId == item.id,
                             isSelected = item.id == selectedItemId,
                             note = viewModel.getNote(item.id),
                             onSelect = { if (!drag.isActive) onRowClick(item) },
@@ -176,15 +180,14 @@ internal fun ScheduleRowList(
                                 if (selectedItemId == item.id) viewModel.clearSelection()
                             },
                             onPresent = { onPresent(item) },
-                            onEditLabel = {
-                                if (item is ScheduleItem.LabelItem) onEditLabel(item)
-                            },
+                            onEditLabel = { if (item is ScheduleItem.LabelItem) onEditLabel(item) },
                             onNoteChanged = { viewModel.setNote(item.id, it) },
                             actions = viewModel.actionsFor(item.id),
                             rows = rows,
                             onActionsChanged = { viewModel.setActions(item.id, it) },
                         )
                     }
+                    if (look.liveMark?.takeIf { !it.onAir }?.rowId == item.id) ScheduleLeftOffBar()
                 }
             }
         }

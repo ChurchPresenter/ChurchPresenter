@@ -45,7 +45,9 @@ class ScheduleRowContentTest {
 
     private fun liveRow(drift: PlanDrift) = @Composable {
         CompositionLocalProvider(LocalLiveDrift provides drift) {
-            ScheduleRowTitleLine(song, isSelected = true, RowTiming(), RowClock(LocalTime.of(9, 45), exact = false))
+            ScheduleRowTitleLine(
+                song, isSelected = true, RowTiming(), RowClock(LocalTime.of(9, 45), exact = false), isLive = false,
+            )
         }
     }
 

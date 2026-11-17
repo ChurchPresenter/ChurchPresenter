@@ -49,6 +49,7 @@ import org.churchpresenter.strings.generated.resources.schedule_option_item_coun
 import org.churchpresenter.strings.generated.resources.schedule_option_zoom
 import org.churchpresenter.strings.generated.resources.schedule_show_buttons_under_title
 import org.churchpresenter.strings.generated.resources.schedule_show_thumbnails
+import org.churchpresenter.strings.generated.resources.schedule_highlight_live
 import org.churchpresenter.strings.generated.resources.tooltip_schedule_options
 import org.churchpresenter.strings.generated.resources.tooltip_redo_unbound
 import org.churchpresenter.strings.generated.resources.tooltip_undo_unbound
@@ -94,6 +95,8 @@ internal fun ScheduleOptionsButton(
     onLegacyRowActionsChange: (Boolean) -> Unit,
     showThumbnails: Boolean,
     onShowThumbnailsChange: (Boolean) -> Unit,
+    highlightLive: Boolean,
+    onHighlightLiveChange: (Boolean) -> Unit,
     hiddenButtons: Set<String>,
     onToggleButton: (ScheduleToolbarButton) -> Unit,
     toolbarIconSize: ScheduleToolbarIconSize,
@@ -130,6 +133,12 @@ internal fun ScheduleOptionsButton(
                     checked = showThumbnails,
                     onCheckedChange = onShowThumbnailsChange,
                     testTag = ScheduleToolbarTags.OPTIONS_THUMBNAILS,
+                )
+                ScheduleOptionSwitch(
+                    label = stringResource(Res.string.schedule_highlight_live),
+                    checked = highlightLive,
+                    onCheckedChange = onHighlightLiveChange,
+                    testTag = ScheduleToolbarTags.OPTIONS_HIGHLIGHT_LIVE,
                 )
             }
             ContextMenuDivider()

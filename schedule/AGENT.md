@@ -32,6 +32,11 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
   image, a deck's first slide, a local video's first frame. That keeps the picture decoder, the
   deck rasterizer and ffmpeg out of this module. The row loads it on `Dispatchers.IO`; the default
   has none, so every row keeps its chip.
+- **`isOnAir`** (#1049): whether a row is still what the outputs show. With the options menu's
+  Highlight live item on, the row last put live (`liveRowId`) wears a LIVE badge while it holds,
+  and a "Left off" bar under it once it does not. The app answers it from `PresenterManager`
+  (`scheduleRowOnAir` in `OnAirState.kt`): the same song, verse or range, picture, deck, clip,
+  page, scene, preset or word. The default says no.
 - **`ScheduleViewModel(autoSaveIntervalMs = …)`** is defaulted, so the app never passes it. Tests
   shorten it to drive the autosave loop.
 

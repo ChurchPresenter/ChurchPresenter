@@ -238,6 +238,8 @@ internal fun ScheduleItemRow(
     legacyRowActions: Boolean = false,
     /** A picture of the item in place of its type chip, where the app has one (#1050). */
     showThumbnail: Boolean,
+    /** This row is on screen (#1049): red accent and border, and a LIVE badge. */
+    isLive: Boolean,
     isSelected: Boolean,
     note: String,
     onSelect: () -> Unit,
@@ -263,7 +265,7 @@ internal fun ScheduleItemRow(
     LaunchedEffect(note) { if (noteText != note) noteText = note }
 
     val isSection = item is ScheduleItem.LabelItem
-    val colors = scheduleRowColors(item, isSelected)
+    val colors = scheduleRowColors(item, isSelected, isLive)
     val cardBg = colors.card
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -312,7 +314,7 @@ internal fun ScheduleItemRow(
 
                 ScheduleRowTitle(
                     item = item,
-                    look = ScheduleRowTitleLook(density, isSelected, timing, clock, colors.sectionText),
+                    look = ScheduleRowTitleLook(density, isSelected, timing, clock, colors.sectionText, isLive),
                     legacyRowActions = legacyRowActions,
                     note = note,
                     noteExpanded = noteExpanded,
@@ -476,8 +478,9 @@ internal fun ScheduleItemContent(
     timing: RowTiming = RowTiming.DEFAULT,
     /** When this row is expected to go live, reckoned across the schedule -- see `scheduleClocks`. */
     clock: RowClock? = null,
+    isLive: Boolean,
 ) {
-    ScheduleRowTitleLine(item = item, isSelected = isSelected, timing = timing, clock = clock)
+    ScheduleRowTitleLine(item = item, isSelected = isSelected, timing = timing, clock = clock, isLive = isLive)
 
     if (!scheduleShowDetailLine(density.percent)) return
 
