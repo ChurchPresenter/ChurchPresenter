@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants
+import java.io.File
 
 /**
  * One independently configurable translation in the parallel Bible stack.
@@ -408,6 +409,11 @@ data class BibleSettings(
     val textBoxes: Map<String, TextBox> = emptyMap(),
     /** How the Bible page's boxes behave -- see [TextBoxOptions]. */
     val textBoxOptions: TextBoxOptions = TextBoxOptions(),
+    /**
+     * Bible files whose damaged-verses warning the operator chose never to see again, by file name.
+     * One per install ([BIBLE_GLOBAL_KEYS]): it is about the person, not about an output.
+     */
+    val hiddenRowWarnings: List<String> = emptyList(),
 ) {
     /**
      * The translations to present, in order. The first is the navigation bible.
@@ -418,6 +424,13 @@ data class BibleSettings(
      */
     fun translationList(): List<BibleTranslationSettings> =
         translations.ifEmpty { legacyTranslationList() }
+
+    /** The files of the stacked translations that exist in [storageDirectory], in stack order. */
+    fun stackFiles(): List<File> = translationList()
+        .filter { it.fileName.isNotEmpty() }
+        .map { File(storageDirectory, it.fileName) }
+        .filter { it.isFile }
+        .distinct()
 
     /** Stable key used by the Bible UI to detect when its loaded module set must be refreshed. */
     fun translationSelectionKey(): List<String> = translationList().map { it.fileName }

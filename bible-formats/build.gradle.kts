@@ -14,6 +14,8 @@ dependencies {
 
     // Constants only — the app data directory the installer writes modules into.
     implementation(projects.settings)
+    // checkSpbRows: what is left malformed in a file after a repair.
+    implementation(projects.bible)
     // CrashReporter.reportWarning on a failed fetch or a malformed catalogue entry.
     implementation(projects.diagnostics)
 

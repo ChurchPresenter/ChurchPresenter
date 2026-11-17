@@ -233,6 +233,7 @@ internal fun BibleViewModel.loadBibles() {
         _isFullyLoadedFlow.value = false
 
         _loadErrors.value = emptyList()
+        _loadWarnings.value = emptyList()
         try {
             val useReplica = remoteModeActive && syncMode == BibleSyncMode.FULL_REPLICA
             val configuredTranslations = appSettings.bibleSettings.translationList()
@@ -277,6 +278,8 @@ internal fun BibleViewModel.loadBibles() {
             val secondary = modules.secondary
 
             _loadErrors.value = missingTranslations + modules.errors
+            // A linked instance's copies are the primary's to repair, not this machine's.
+            _loadWarnings.value = if (remoteModeActive) emptyList() else rowWarningsFor(translationSources, loaded)
 
             if (remoteModeActive) {
                 remoteSyncLog("bible_load_result",

@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +67,26 @@ internal fun ColumnScope.BibleTabContent(
         if (loadErrors.isNotEmpty()) {
             BibleLoadErrorBanner(
                 errors = loadErrors,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp),
+            )
+        }
+
+        // Hide lasts until the app restarts; "never remind me" is saved per file name, per install.
+        var hiddenThisSession by remember { mutableStateOf(false) }
+        val hiddenFiles = appSettings.bibleSettings.hiddenRowWarnings
+        val rowWarnings = viewModel.loadWarnings.value.filter { it.fileName !in hiddenFiles }
+        if (rowWarnings.isNotEmpty() && !hiddenThisSession) {
+            BibleRowWarningBanner(
+                warnings = rowWarnings,
+                onHide = { hiddenThisSession = true },
+                onNeverRemind = {
+                    val names = rowWarnings.map { it.fileName }
+                    onSettingsChange { s ->
+                        s.copy(bibleSettings = s.bibleSettings.copy(
+                            hiddenRowWarnings = (s.bibleSettings.hiddenRowWarnings + names).distinct(),
+                        ))
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp),
             )
         }

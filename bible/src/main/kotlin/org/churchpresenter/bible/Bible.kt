@@ -105,6 +105,15 @@ class Bible {
         private set
 
     /**
+     * The verse rows of the last [loadFromSpb] whose ids [Bible] could not read — see [SpbRowIssue].
+     *
+     * Those verses are missing from the module, so this is what tells the operator the file, and not
+     * the app, is why. Clean unless the module has such rows; cleared at the start of every load.
+     */
+    var rowReport: SpbRowReport = SpbRowReport.CLEAN
+        private set
+
+    /**
      * A short form of a book name, in whatever language the module names its books.
      *
      * Single words shorten to their first three or four characters ("Genesis" → "Gen", "Бытие" →
@@ -201,13 +210,18 @@ class Bible {
         operatorBible.clear()
         books.clear()
         loadError = null
+        rowReport = SpbRowReport.CLEAN
 
         // Declared out here so a failure partway through still has whatever parsed to build from.
         val state = SpbParseState()
 
         try {
             openSpbReader(resourcePath).use { r ->
-                r.forEachLine { rawLine -> parseSpbLine(rawLine.trimEnd('\r', '\n'), state) }
+                r.forEachLine { rawLine ->
+                    val line = rawLine.trimEnd('\r', '\n')
+                    state.rows.check(line)
+                    parseSpbLine(line, state)
+                }
                 // Flush last verse if using multiline format
                 flushPendingVerse(state)
             }
@@ -217,6 +231,8 @@ class Bible {
                 parsedAnything = operatorBible.isNotEmpty() || state.headerOrder.isNotEmpty(),
             )
         }
+
+        rowReport = state.rows.report()
 
         // Outside the try: on a module that stops being readable partway through, the books and
         // verses that did parse are still indexed and still shown, as far as they go.
@@ -240,6 +256,7 @@ class Bible {
         var currentCode: String? = null
         val pendingText = StringBuilder()
         var headerParsed = false
+        val rows = SpbRowChecker()
     }
 
     private fun parseSpbLine(line: String, state: SpbParseState) {

@@ -170,7 +170,9 @@ private fun TranslationsSection(
             translations.size > 1 -> 2
             else -> 1
         }
-        val reserved = (REORDER_BUTTON_SIZE + ROW_GAP) * buttonSlots
+        val damaged = rememberDamagedCounts(settings.bibleSettings.storageDirectory, translations.map { it.fileName })
+        val markRoom = if (damaged.isEmpty()) 0.dp else DamagedMarkSize + ROW_GAP
+        val reserved = (REORDER_BUTTON_SIZE + ROW_GAP) * buttonSlots + markRoom
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val pickerWidth = minOf(measured, (maxWidth - reserved).coerceAtLeast(PICKER_MIN_WIDTH))
             Column(
@@ -185,6 +187,7 @@ private fun TranslationsSection(
                         bibleFilesInDirectory = bibleFilesInDirectory,
                         bibleFileDisplayNames = bibleFileDisplayNames,
                         moduleTitle = moduleTitles[translation.fileName].orEmpty(),
+                        damagedCount = damaged[translation.fileName] ?: 0,
                         storageDirectory = settings.bibleSettings.storageDirectory,
                         pickerWidth = pickerWidth,
                         noneStr = noneStr,
@@ -233,6 +236,7 @@ private fun TranslationRow(
     bibleFilesInDirectory: List<String>,
     bibleFileDisplayNames: Map<String, String>,
     moduleTitle: String,
+    damagedCount: Int,
     storageDirectory: String,
     pickerWidth: Dp,
     noneStr: String,
@@ -296,6 +300,7 @@ private fun TranslationRow(
             tooltipText = stringResource(Res.string.remove),
             painter = painterResource(IconRes.drawable.ic_delete),
         )
+        if (damagedCount > 0) DamagedVersesMark(damagedCount)
     }
     TranslationIdentityRow(
         index = index,

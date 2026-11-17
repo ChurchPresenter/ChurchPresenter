@@ -124,6 +124,7 @@ internal fun MainWindowScope.AppMenuBar() {
             onOpenStoryPrompt = { showStoryPrompt = true },
             // Shows it whether or not it has been seen, like Replay intro.
             onOpenWickIntro = { helperState.replayIntro = true },
+            onOpenVerseFixer = { showVerseFixerWindow = true },
         )
     }
 }
