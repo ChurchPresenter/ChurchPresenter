@@ -460,11 +460,13 @@ private fun LyricsList(
         val titleSlideEnabled = appSettings.operatorSongSettings().titleSlideEnabled
 
         LaunchedEffect(selectedSectionIndex, live.titleSlideSelected) {
+            // Only as far as it takes to show the selection: a row that is already on screen stays put,
+            // so a double-click's second press lands where the first did.
             if (live.titleSlideSelected) {
-                lyricsListState.animateScrollToItem(0)
+                lyricsListState.followLyricsEntry(0)
             } else if (selectedSectionIndex >= 0) {
                 val offset = if (titleSlideEnabled && currentSong != null) 1 else 0
-                lyricsListState.animateScrollToItem(selectedSectionIndex + offset)
+                lyricsListState.followLyricsEntry(selectedSectionIndex + offset)
             }
         }
 
