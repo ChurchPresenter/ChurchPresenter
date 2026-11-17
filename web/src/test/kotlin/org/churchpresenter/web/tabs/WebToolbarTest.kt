@@ -74,6 +74,21 @@ class WebToolbarTest {
         assertTrue(hasWebCapableOutput(projection(onDisplay(-2), onDisplay(2))))
     }
 
+    @Test
+    fun `an enabled OMT, NDI or Browser Source output whose profile shows websites can take one`() {
+        val look = OutputLook(slide = SlideLook(web = true))
+        val profiles = listOf(OutputProfile(id = PROFILE, name = "Main", look = look))
+        fun omt(enabled: Boolean = true) = ScreenAssignment(omtEnabled = enabled, activeProfileId = PROFILE)
+        assertTrue(hasWebCapableOutput(ProjectionSettings(omtOutputs = listOf(omt()), outputProfiles = profiles)))
+        assertFalse(hasWebCapableOutput(ProjectionSettings(omtOutputs = listOf(omt(false)), outputProfiles = profiles)))
+        val ndi = ScreenAssignment(activeProfileId = PROFILE)
+        assertTrue(hasWebCapableOutput(ProjectionSettings(ndiOutputs = listOf(ndi), outputProfiles = profiles)))
+        val source = ScreenAssignment(activeProfileId = PROFILE)
+        val withSource = ProjectionSettings(browserSourceOutputs = listOf(source), outputProfiles = profiles)
+        assertTrue(hasWebCapableOutput(withSource))
+        assertFalse(hasWebCapableOutput(ProjectionSettings(omtOutputs = listOf(omt()))))
+    }
+
     // ── Go Live ─────────────────────────────────────────────────────────────────────────────────
 
     private val liveCapable: (AppSettings) -> AppSettings =
