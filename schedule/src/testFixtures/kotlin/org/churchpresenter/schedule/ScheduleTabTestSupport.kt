@@ -55,6 +55,7 @@ internal class ScheduleReports {
     var addWebsiteRequests = 0
     val zoomChanges = mutableListOf<Int>()
     val legacyRowActionChanges = mutableListOf<Boolean>()
+    val thumbnailChanges = mutableListOf<Boolean>()
     val toolbarButtonToggles = mutableListOf<ScheduleToolbarButton>()
     val toolbarIconSizeChanges = mutableListOf<ScheduleToolbarIconSize>()
 
@@ -105,6 +106,9 @@ internal fun scheduleTab(
      * tests, off for a shot (one with a [themeMode]): screenshots show production only (AGENT.md).
      */
     showControl: Boolean = themeMode == null,
+    /** Rows draw a thumbnail where [thumbnails] has one (#1050). */
+    showThumbnails: Boolean = false,
+    thumbnails: ScheduleThumbnails = ScheduleThumbnails { null },
     block: ComposeUiTest.(vm: ScheduleViewModel, reports: ScheduleReports) -> Unit,
 ) {
     val realHome = System.getProperty("user.home")
@@ -118,7 +122,10 @@ internal fun scheduleTab(
             setContent {
                 PinnedFonts {
                     ThemedForTest(themeMode) {
-                        CompositionLocalProvider(LocalShowControlEnabled provides showControl) {
+                        CompositionLocalProvider(
+                            LocalShowControlEnabled provides showControl,
+                            LocalScheduleThumbnails provides thumbnails,
+                        ) {
                         Box(modifier = if (width != null) Modifier.width(width) else Modifier) {
                         ScheduleTab(
                             scheduleViewModel = vm,
@@ -126,6 +133,8 @@ internal fun scheduleTab(
                             onItemZoomChange = { reports.zoomChanges += it },
                             legacyRowActions = legacyRowActions,
                             onLegacyRowActionsChange = { reports.legacyRowActionChanges += it },
+                            showThumbnails = showThumbnails,
+                            onShowThumbnailsChange = { reports.thumbnailChanges += it },
                             hiddenToolbarButtons = hiddenToolbarButtons,
                             onToggleToolbarButton = { reports.toolbarButtonToggles += it },
                             toolbarIconSize = toolbarIconSize,

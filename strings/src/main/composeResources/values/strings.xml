@@ -767,6 +767,7 @@
     <string name="schedule_timing_blank">then blank</string>
     <string name="tooltip_schedule_options">Schedule Options</string>
     <string name="schedule_show_buttons_under_title">Show buttons under title</string>
+    <string name="schedule_show_thumbnails">Show thumbnails</string>
     <string name="schedule_option_item_count">Item Count</string>
     <string name="schedule_option_zoom">Zoom Controls</string>
     <string name="schedule_option_icon_size">Toolbar icon size</string>

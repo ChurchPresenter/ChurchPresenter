@@ -232,11 +232,13 @@
 - **Drag-and-drop schedules** — build your whole service from songs, scripture, slides, media, lower thirds, announcements and websites.
 - **Save & reopen services** — store schedules as files and pick up exactly where you left off, with autosave and crash recovery.
 - **Stay organized** — color-coded labels, per-item notes, quick reordering, recents and full undo/redo; Add Item stays pinned below the run of show however long it grows.
+- **Thumbnails** — turn on Show thumbnails in the Schedule's options menu to see each picture, presentation and video row as a small picture of its first image, slide or frame.
 
 **Source locations:**
 - `schedule/src/main/kotlin/org/churchpresenter/schedule/ScheduleTab.kt` — main UI (the `:schedule` module)
 - `schedule/src/main/kotlin/org/churchpresenter/schedule/ScheduleViewModel.kt`, plus its `ScheduleViewModel*.kt` extensions
 - `core-models/src/main/kotlin/.../models/schedule/ScheduleItem.kt` (the `:core-models` module)
+- `schedule/…/ScheduleThumbnails.kt` (the row tile's seam) and `composeApp/…/utils/ScheduleRowThumbnails.kt` (where the pictures come from)
 - `profiles/…/FileManager.kt`
 - `dialogs/AddLabelDialog.kt`
 

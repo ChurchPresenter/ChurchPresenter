@@ -27,6 +27,11 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
   row's Actions button opens `RowActionsDialog`; what its pickers offer comes from the app through
   `LocalActionChoices`. `presentItem` hands a row's actions to `onRowActions` after its content;
   the app runs them.
+- **`LocalScheduleThumbnails`** (#1050): a row's picture in place of its type chip, when the
+  options menu's Show thumbnails is on. The app provides `ScheduleRowThumbnails`: a picture's
+  image, a deck's first slide, a local video's first frame. That keeps the picture decoder, the
+  deck rasterizer and ffmpeg out of this module. The row loads it on `Dispatchers.IO`; the default
+  has none, so every row keeps its chip.
 - **`ScheduleViewModel(autoSaveIntervalMs = …)`** is defaulted, so the app never passes it. Tests
   shorten it to drive the autosave loop.
 

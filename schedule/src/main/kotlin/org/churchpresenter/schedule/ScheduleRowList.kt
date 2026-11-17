@@ -81,6 +81,8 @@ internal class ScheduleRowLook(
     val legacyRowActions: Boolean,
     val rowClocks: Map<String, RowClock>,
     val drift: PlanDrift?,
+    /** Each row's picture in place of its type chip, where there is one (#1050). */
+    val showThumbnails: Boolean = false,
 )
 
 /** The panel's rows, reordered by dragging and taking files dropped on it from outside the app. */
@@ -163,6 +165,7 @@ internal fun ScheduleRowList(
                                 .reorderGesture(index, requireShift = false, drag, geometry),
                             density = look.density,
                             legacyRowActions = look.legacyRowActions,
+                            showThumbnail = look.showThumbnails,
                             isSelected = item.id == selectedItemId,
                             note = viewModel.getNote(item.id),
                             onSelect = { if (!drag.isActive) onRowClick(item) },

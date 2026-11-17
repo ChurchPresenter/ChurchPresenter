@@ -48,6 +48,7 @@ import org.churchpresenter.strings.generated.resources.schedule_option_icon_size
 import org.churchpresenter.strings.generated.resources.schedule_option_item_count
 import org.churchpresenter.strings.generated.resources.schedule_option_zoom
 import org.churchpresenter.strings.generated.resources.schedule_show_buttons_under_title
+import org.churchpresenter.strings.generated.resources.schedule_show_thumbnails
 import org.churchpresenter.strings.generated.resources.tooltip_schedule_options
 import org.churchpresenter.strings.generated.resources.tooltip_redo_unbound
 import org.churchpresenter.strings.generated.resources.tooltip_undo_unbound
@@ -91,6 +92,8 @@ private val OPTIONS_GROUP_ENDS = setOf(
 internal fun ScheduleOptionsButton(
     legacyRowActions: Boolean,
     onLegacyRowActionsChange: (Boolean) -> Unit,
+    showThumbnails: Boolean,
+    onShowThumbnailsChange: (Boolean) -> Unit,
     hiddenButtons: Set<String>,
     onToggleButton: (ScheduleToolbarButton) -> Unit,
     toolbarIconSize: ScheduleToolbarIconSize,
@@ -115,9 +118,20 @@ internal fun ScheduleOptionsButton(
             onDismissRequest = { expanded = false },
             width = OPTIONS_MENU_WIDTH,
         ) {
-            ScheduleIconSizeSection(
-                toolbarIconSize, onToolbarIconSizeChange, legacyRowActions, onLegacyRowActionsChange,
-            )
+            ScheduleIconSizeSection(toolbarIconSize, onToolbarIconSizeChange) {
+                ScheduleOptionSwitch(
+                    label = stringResource(Res.string.schedule_show_buttons_under_title),
+                    checked = legacyRowActions,
+                    onCheckedChange = onLegacyRowActionsChange,
+                    testTag = ScheduleToolbarTags.OPTIONS_LEGACY_ACTIONS,
+                )
+                ScheduleOptionSwitch(
+                    label = stringResource(Res.string.schedule_show_thumbnails),
+                    checked = showThumbnails,
+                    onCheckedChange = onShowThumbnailsChange,
+                    testTag = ScheduleToolbarTags.OPTIONS_THUMBNAILS,
+                )
+            }
             ContextMenuDivider()
             val shownCount = ScheduleToolbarButton.entries.count { it.name !in hiddenButtons }
             ToggleMenuHeader(
@@ -143,13 +157,12 @@ internal fun ScheduleOptionsButton(
     }
 }
 
-/** Icon size as one segmented control, and the row-buttons choice as a switch under it. */
+/** Icon size as one segmented control, and the row choices ([switches]) under it. */
 @Composable
 private fun ScheduleIconSizeSection(
     toolbarIconSize: ScheduleToolbarIconSize,
     onToolbarIconSizeChange: (ScheduleToolbarIconSize) -> Unit,
-    legacyRowActions: Boolean,
-    onLegacyRowActionsChange: (Boolean) -> Unit,
+    switches: @Composable () -> Unit,
 ) {
     Column(
         modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 6.dp),
@@ -166,25 +179,32 @@ private fun ScheduleIconSizeSection(
             buttonHeight = 34.dp,
             fontSize = MaterialTheme.typography.bodySmall.fontSize,
         )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(ScheduleToolbarTags.OPTIONS_LEGACY_ACTIONS)
-                .toggleable(
-                    value = legacyRowActions,
-                    role = Role.Switch,
-                    onValueChange = onLegacyRowActionsChange,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(Res.string.schedule_show_buttons_under_title),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            RaisedSwitch(checked = legacyRowActions, onCheckedChange = null)
-        }
+        switches()
+    }
+}
+
+/** One of the menu's on/off row choices: its [label], with the switch at the end. */
+@Composable
+private fun ScheduleOptionSwitch(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    testTag: String,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(testTag)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        RaisedSwitch(checked = checked, onCheckedChange = null)
     }
 }
 

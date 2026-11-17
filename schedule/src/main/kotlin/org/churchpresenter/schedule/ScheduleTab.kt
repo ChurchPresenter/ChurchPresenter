@@ -72,6 +72,7 @@ internal object ScheduleToolbarTags {
     const val REDO = "schedule_redo"
     const val OPTIONS = "schedule_options"
     const val OPTIONS_LEGACY_ACTIONS = "schedule_options_legacy_actions"
+    const val OPTIONS_THUMBNAILS = "schedule_options_thumbnails"
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -111,6 +112,9 @@ fun ScheduleTab(
     onItemZoomChange: (Int) -> Unit = {},
     legacyRowActions: Boolean = false,
     onLegacyRowActionsChange: (Boolean) -> Unit = {},
+    /** Rows show a picture of what they are, where the app has one (#1050). */
+    showThumbnails: Boolean = false,
+    onShowThumbnailsChange: (Boolean) -> Unit = {},
     hiddenToolbarButtons: Set<String> = emptySet(),
     onToggleToolbarButton: (ScheduleToolbarButton) -> Unit = {},
     toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
@@ -164,6 +168,8 @@ fun ScheduleTab(
             canClear = scheduleItems.isNotEmpty(),
             legacyRowActions = legacyRowActions,
             onLegacyRowActionsChange = onLegacyRowActionsChange,
+            showThumbnails = showThumbnails,
+            onShowThumbnailsChange = onShowThumbnailsChange,
             hiddenButtons = hiddenToolbarButtons,
             onToggleButton = onToggleToolbarButton,
             toolbarIconSize = toolbarIconSize,
@@ -182,6 +188,7 @@ fun ScheduleTab(
                 legacyRowActions = legacyRowActions,
                 rowClocks = rowClocks,
                 drift = rememberLiveDrift(viewModel, rowClocks),
+                showThumbnails = showThumbnails,
             ),
             onRowClick = { item ->
                 viewModel.selectItem(item.id)

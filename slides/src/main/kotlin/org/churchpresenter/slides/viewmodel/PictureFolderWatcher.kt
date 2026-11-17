@@ -1,5 +1,6 @@
 package org.churchpresenter.slides.viewmodel
 
+import org.churchpresenter.settings.utils.Constants
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -24,7 +25,7 @@ private const val MAX_RESCAN_ATTEMPTS = 3
 private const val THUMBNAIL_RETRY_ATTEMPTS = 3
 
 /** The picture file extensions a folder is loaded and watched for. */
-internal val PICTURE_EXTENSIONS = listOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
+internal val PICTURE_EXTENSIONS = Constants.PICTURE_EXTENSIONS
 
 /** Where [PictureFolderWatcher] gets its watch service and registers the folder with it. */
 internal interface FolderWatchSource {
