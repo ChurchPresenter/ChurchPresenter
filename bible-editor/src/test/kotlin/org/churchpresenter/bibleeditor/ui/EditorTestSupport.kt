@@ -6,7 +6,9 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -15,6 +17,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.churchpresenter.bibleedits.EditEntry
 import org.churchpresenter.bibleeditor.EditorFixture
@@ -38,6 +41,8 @@ internal fun withEditor(
     history: List<EditEntry> = emptyList(),
     withReference: Boolean = true,
     openMatthew17: Boolean = true,
+    io: CoroutineDispatcher = Dispatchers.Unconfined,
+    awaitOpen: Boolean = true,
     body: ComposeUiTest.(fixture: EditorFixture, calls: EditorCalls) -> Unit,
 ) {
     val fixture = EditorFixture(withReference)
@@ -54,14 +59,16 @@ internal fun withEditor(
                         onClose = { calls.closed++ },
                         preferred = listOf(fixture.rst),
                         onSaved = { calls.saved++ },
-                        io = Dispatchers.Unconfined,
+                        io = io,
                         clock = { EditorFixture.NOW },
                         tickClock = false,
                     )
                 }
             }
-            awaitText("Matthew 1")
-            if (openMatthew17) goToChapter(17)
+            if (awaitOpen) {
+                awaitText("Matthew 1")
+                if (openMatthew17) goToChapter(17)
+            }
             body(fixture, calls)
         }
     } finally {
@@ -92,10 +99,18 @@ internal fun ComposeUiTest.press(description: String) {
     waitForIdle()
 }
 
+/** The "Go to" box inside the chapter picker. */
 internal fun ComposeUiTest.chapterField(): SemanticsNodeInteraction =
-    onNode(hasSetTextAction() and hasContentDescription("Chapter"))
+    onNode(hasSetTextAction() and hasContentDescription("Chapter number"))
+
+/** Opens the chapter picker from the header's chapter button. */
+internal fun ComposeUiTest.openChapterPicker() {
+    onNode(hasText("Chapter") and hasClickAction()).performClick()
+    waitForIdle()
+}
 
 internal fun ComposeUiTest.goToChapter(chapter: Int) {
+    openChapterPicker()
     chapterField().performTextReplacement(chapter.toString())
     chapterField().performKeyInput { pressKey(Key.Enter) }
     waitForIdle()
@@ -103,4 +118,4 @@ internal fun ComposeUiTest.goToChapter(chapter: Int) {
 
 /** The field a verse is typed in, open in the editor card. */
 internal fun ComposeUiTest.draftField(): SemanticsNodeInteraction =
-    onNode(hasSetTextAction() and hasContentDescription("Chapter").not())
+    onNode(hasSetTextAction() and hasContentDescription("Chapter number").not())

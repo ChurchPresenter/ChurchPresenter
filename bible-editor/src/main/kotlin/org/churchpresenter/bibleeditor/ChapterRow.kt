@@ -43,8 +43,8 @@ internal fun scanShelf(folder: File): List<ShelfBible> {
 
 /** The open chapter, verse by verse, with a gap wherever a verse is missing. */
 fun BibleEditorState.chapterRows(): List<ChapterRow> {
-    val loaded = bible ?: return emptyList()
     val key = selected?.key ?: return emptyList()
+    val loaded = bible ?: return emptyList()
     val verses = loaded.getChapterVerses(bookId, chapter).associate { it.verseNumber to it.verseText }
     val changes = history.changes
     val missingHere = missingInChapter()

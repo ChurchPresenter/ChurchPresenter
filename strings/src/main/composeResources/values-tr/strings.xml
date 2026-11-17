@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">Kopyalandı</string>
     <string name="bible_editor_report_header">%1$s — eksik ayetler</string>
     <string name="bible_editor_type_next">Sonrakini yaz</string>
+    <string name="bible_editor_chapter_count">%1$d bölüm</string>
+    <string name="bible_editor_go_to">Git</string>
+    <string name="bible_editor_chapter_number">Bölüm numarası</string>
+    <string name="bible_editor_some_chapters_missing">Bazı bölümlerde eksik ayetler var</string>
+    <string name="bible_editor_chapter_tip_missing">Eksik: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Eksik ayetler geri yüklendi</string>
+    <string name="bible_editor_chapter_tip">Bölüm %1$d</string>
+    <string name="bible_editor_next_missing_at">Sonraki: %1$s</string>
+    <string name="bible_editor_no_next_missing">Bu Kutsal Kitapta eksik ayet yok</string>
+    <string name="bible_editor_next_missing">Sonraki eksik</string>
 </resources>

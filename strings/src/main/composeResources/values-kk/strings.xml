@@ -4888,4 +4888,14 @@
     <string name="bible_editor_copied">Көшірілді</string>
     <string name="bible_editor_report_header">%1$s — жетіспейтін аяттар</string>
     <string name="bible_editor_type_next">Келесісін теру</string>
+    <string name="bible_editor_chapter_count">Тараулар: %1$d</string>
+    <string name="bible_editor_go_to">Өту</string>
+    <string name="bible_editor_chapter_number">Тарау нөмірі</string>
+    <string name="bible_editor_some_chapters_missing">Кейбір тарауларда жетіспейтін аяттар бар</string>
+    <string name="bible_editor_chapter_tip_missing">Жетіспейді: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Жетіспейтін аяттар қалпына келтірілді</string>
+    <string name="bible_editor_chapter_tip">Тарау %1$d</string>
+    <string name="bible_editor_next_missing_at">Келесі: %1$s</string>
+    <string name="bible_editor_no_next_missing">Осы Киелі Кітапта жетіспейтін аят жоқ</string>
+    <string name="bible_editor_next_missing">Келесі жетіспейтін</string>
 </resources>

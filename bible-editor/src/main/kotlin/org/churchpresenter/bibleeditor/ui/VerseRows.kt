@@ -148,7 +148,7 @@ internal fun VerseEditorCard(state: BibleEditorState, row: ChapterRow) {
                     .padding(horizontal = 10.dp, vertical = 8.dp)) {
                     Caption(stringResource(Res.string.bible_editor_your_change), Modifier.padding(bottom = 3.dp),
                         fontSize = 9.5.sp)
-                    DiffText(wordDiff(verse?.original.orEmpty(), typed))
+                    DiffText(wordDiff(verse.original.orEmpty(), typed))
                 }
             }
             Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {

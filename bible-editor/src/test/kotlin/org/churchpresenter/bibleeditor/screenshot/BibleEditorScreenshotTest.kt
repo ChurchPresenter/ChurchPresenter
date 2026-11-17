@@ -20,6 +20,7 @@ import org.churchpresenter.bibleeditor.ui.awaitText
 import org.churchpresenter.bibleeditor.ui.click
 import org.churchpresenter.bibleeditor.ui.draftField
 import org.churchpresenter.bibleeditor.ui.goToChapter
+import org.churchpresenter.bibleeditor.ui.openChapterPicker
 import org.churchpresenter.bibleeditor.ui.press
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import org.churchpresenter.sharedui.screenshot.captureTo
@@ -78,6 +79,9 @@ class BibleEditorScreenshotTest {
 
     @Test
     fun `the Bible picker`() = shoot("bible_picker", rootIndex = 1) { click("Russian Synodal") }
+
+    @Test
+    fun `the chapter picker`() = shoot("chapter_picker", rootIndex = 1) { openChapterPicker() }
 
     @Test
     fun `the book picker`() = shoot("book_picker", rootIndex = 1) { click("Matthew") }

@@ -4920,4 +4920,14 @@
     <string name="bible_editor_copied">Kopeeritud</string>
     <string name="bible_editor_report_header">%1$s — puuduvad salmid</string>
     <string name="bible_editor_type_next">Sisesta järgmine</string>
+    <string name="bible_editor_chapter_count">Peatükke: %1$d</string>
+    <string name="bible_editor_go_to">Mine</string>
+    <string name="bible_editor_chapter_number">Peatüki number</string>
+    <string name="bible_editor_some_chapters_missing">Mõnes peatükis on salme puudu</string>
+    <string name="bible_editor_chapter_tip_missing">Puudu: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Puuduvad salmid taastatud</string>
+    <string name="bible_editor_chapter_tip">Peatükk %1$d</string>
+    <string name="bible_editor_next_missing_at">Järgmine: %1$s</string>
+    <string name="bible_editor_no_next_missing">Selles Piiblis pole ühtegi salmi puudu</string>
+    <string name="bible_editor_next_missing">Järgmine puuduv</string>
 </resources>

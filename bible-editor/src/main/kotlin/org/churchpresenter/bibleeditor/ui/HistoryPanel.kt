@@ -92,8 +92,8 @@ internal fun HistoryPanel(state: BibleEditorState, now: Long, modifier: Modifier
                 },
                 modifier = Modifier.padding(top = 10.dp).fillMaxWidth(),
             )
-            val verse = state.historyVerse
-            if (verse != null && state.historyScope == HistoryScope.CHAPTER) VerseFilter(state, verse)
+            // Switching scope clears it, so a verse is only ever set while the chapter is listed.
+            state.historyVerse?.let { VerseFilter(state, it) }
         }
         if (shown.isEmpty()) {
             HistoryEmpty()

@@ -4915,4 +4915,14 @@
     <string name="bible_editor_copied">Copié</string>
     <string name="bible_editor_report_header">%1$s — versets manquants</string>
     <string name="bible_editor_type_next">Saisir le suivant</string>
+    <string name="bible_editor_chapter_count">%1$d chapitres</string>
+    <string name="bible_editor_go_to">Aller à</string>
+    <string name="bible_editor_chapter_number">Numéro de chapitre</string>
+    <string name="bible_editor_some_chapters_missing">Certains chapitres ont des versets manquants</string>
+    <string name="bible_editor_chapter_tip_missing">Manquant : %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Versets manquants restaurés</string>
+    <string name="bible_editor_chapter_tip">Chapitre %1$d</string>
+    <string name="bible_editor_next_missing_at">Suivant : %1$s</string>
+    <string name="bible_editor_no_next_missing">Aucun verset manquant dans cette Bible</string>
+    <string name="bible_editor_next_missing">Manquant suivant</string>
 </resources>

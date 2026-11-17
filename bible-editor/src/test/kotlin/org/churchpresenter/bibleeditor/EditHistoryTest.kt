@@ -55,6 +55,14 @@ class EditHistoryTest {
     }
 
     @Test
+    fun `a change is stamped with the time it was made`() {
+        val before = System.currentTimeMillis()
+        val live = EditHistory()
+        live.commit(verse, fixed, "shnie")
+        assertTrue(live.entries.single().time >= before)
+    }
+
+    @Test
     fun `a loaded history counts as saved`() {
         history.reset(EditorFixture.savedFixes())
         assertEquals(2, history.savedCount)

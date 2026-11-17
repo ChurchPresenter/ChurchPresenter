@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">คัดลอกแล้ว</string>
     <string name="bible_editor_report_header">%1$s — ข้อที่ขาดหาย</string>
     <string name="bible_editor_type_next">พิมพ์ข้อถัดไป</string>
+    <string name="bible_editor_chapter_count">%1$d บท</string>
+    <string name="bible_editor_go_to">ไปที่</string>
+    <string name="bible_editor_chapter_number">หมายเลขบท</string>
+    <string name="bible_editor_some_chapters_missing">บางบทมีข้อที่ขาดหาย</string>
+    <string name="bible_editor_chapter_tip_missing">ขาด: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">กู้คืนข้อที่ขาดหายแล้ว</string>
+    <string name="bible_editor_chapter_tip">บทที่ %1$d</string>
+    <string name="bible_editor_next_missing_at">ถัดไป: %1$s</string>
+    <string name="bible_editor_no_next_missing">ไม่มีข้อที่ขาดหายในพระคัมภีร์นี้</string>
+    <string name="bible_editor_next_missing">ข้อที่ขาดถัดไป</string>
 </resources>

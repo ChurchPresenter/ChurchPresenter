@@ -3,6 +3,18 @@
 package org.churchpresenter.bibleeditor.ui
 
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import kotlinx.coroutines.Dispatchers
+import org.churchpresenter.bibleeditor.EditorFixture
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
+import kotlin.test.assertEquals
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -74,10 +86,12 @@ class EditorDetailsTest {
 
     @Test
     fun `the keypad's Enter goes to the chapter typed`() = withEditor(openMatthew17 = false) { _, _ ->
+        openChapterPicker()
         chapterField().performTextReplacement("17")
         chapterField().performKeyInput { pressKey(Key.NumPadEnter) }
         waitForIdle()
         assertTrue(isShowing("Matthew 17"))
+        openChapterPicker()
         chapterField().performClick()
         chapterField().performKeyInput { pressKey(Key.A) }
         waitForIdle()
@@ -92,5 +106,59 @@ class EditorDetailsTest {
         assertTrue(isShowing("Type verse 11 (missing in this Bible)"))
         press("Edit verse 3")
         assertFalse(isShowing("Type verse 11 (missing in this Bible)"))
+    }
+}
+
+class EditorDismissTest {
+
+    @Test
+    fun `a picker closes when the pointer goes down outside it`() = withEditor { _, _ ->
+        click("Russian Synodal")
+        assertTrue(isShowing("King James Version"))
+        clickOutside()
+        assertFalse(isShowing("King James Version"))
+        click("Matthew")
+        assertTrue(isShowing("Mark"))
+        clickOutside()
+        assertFalse(isShowing("Mark"))
+        openChapterPicker()
+        assertTrue(isShowingDescription("Chapter number"))
+        clickOutside()
+        assertFalse(isShowingDescription("Chapter number"))
+    }
+
+    @Test
+    fun `a click inside the missing verses dialog keeps it open`() = withEditor { _, _ ->
+        click("Validate")
+        // The dialog merges its title into one node; its top-left corner is padding, not a control.
+        onAllNodesWithText("Missing verses")[0].performMouseInput { click(Offset(8f, 8f)) }
+        waitForIdle()
+        assertTrue(isShowing("Missing verses"))
+    }
+
+    @Test
+    fun `the window saves with no one listening`() {
+        val fixture = EditorFixture()
+        try {
+            runDesktopComposeUiTest(width = WINDOW_WIDTH, height = 1800) {
+                setContent {
+                    ChurchPresenterTheme(themeMode = ThemeMode.LIGHT) {
+                        BibleEditorApp(fixture.bibles, fixture.data, onClose = {}, io = Dispatchers.Unconfined,
+                            tickClock = false)
+                    }
+                }
+                awaitText("Matthew 1")
+                press("Remove verse")
+                click("Save 1 change")
+                assertEquals(1, fixture.store.load().size)
+            }
+        } finally {
+            fixture.delete()
+        }
+    }
+
+    private fun ComposeUiTest.clickOutside() {
+        onAllNodes(isRoot())[0].performMouseInput { click(Offset(400f, 700f)) }
+        waitForIdle()
     }
 }

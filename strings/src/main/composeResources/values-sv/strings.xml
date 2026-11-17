@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">Kopierad</string>
     <string name="bible_editor_report_header">%1$s — saknade verser</string>
     <string name="bible_editor_type_next">Skriv nästa</string>
+    <string name="bible_editor_chapter_count">%1$d kapitel</string>
+    <string name="bible_editor_go_to">Gå till</string>
+    <string name="bible_editor_chapter_number">Kapitelnummer</string>
+    <string name="bible_editor_some_chapters_missing">Vissa kapitel har saknade verser</string>
+    <string name="bible_editor_chapter_tip_missing">Saknas: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Saknade verser återställda</string>
+    <string name="bible_editor_chapter_tip">Kapitel %1$d</string>
+    <string name="bible_editor_next_missing_at">Nästa: %1$s</string>
+    <string name="bible_editor_no_next_missing">Inga saknade verser i denna bibel</string>
+    <string name="bible_editor_next_missing">Nästa saknade</string>
 </resources>

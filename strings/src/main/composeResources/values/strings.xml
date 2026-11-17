@@ -2757,6 +2757,16 @@
     <string name="bible_editor_copied">Copied</string>
     <string name="bible_editor_report_header">%1$s — missing verses</string>
     <string name="bible_editor_type_next">Type the next one</string>
+    <string name="bible_editor_chapter_count">%1$d chapters</string>
+    <string name="bible_editor_go_to">Go to</string>
+    <string name="bible_editor_chapter_number">Chapter number</string>
+    <string name="bible_editor_some_chapters_missing">Some chapters have missing verses</string>
+    <string name="bible_editor_chapter_tip_missing">Missing %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Missing verses restored</string>
+    <string name="bible_editor_chapter_tip">Chapter %1$d</string>
+    <string name="bible_editor_next_missing_at">Next: %1$s</string>
+    <string name="bible_editor_no_next_missing">No missing verses in this Bible</string>
+    <string name="bible_editor_next_missing">Next missing</string>
     <!-- Font picker -->
     <string name="font_picker_search">Search fonts…</string>
     <string name="font_picker_clear_search">Clear search</string>

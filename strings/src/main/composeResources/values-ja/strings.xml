@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">コピーしました</string>
     <string name="bible_editor_report_header">%1$s — 欠けている節</string>
     <string name="bible_editor_type_next">次を入力</string>
+    <string name="bible_editor_chapter_count">%1$d 章</string>
+    <string name="bible_editor_go_to">移動</string>
+    <string name="bible_editor_chapter_number">章番号</string>
+    <string name="bible_editor_some_chapters_missing">一部の章に欠けている節があります</string>
+    <string name="bible_editor_chapter_tip_missing">欠けている節: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">欠けていた節を復元しました</string>
+    <string name="bible_editor_chapter_tip">第 %1$d 章</string>
+    <string name="bible_editor_next_missing_at">次: %1$s</string>
+    <string name="bible_editor_no_next_missing">この聖書に欠けている節はありません</string>
+    <string name="bible_editor_next_missing">次の欠落</string>
 </resources>

@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">Kopioitu</string>
     <string name="bible_editor_report_header">%1$s — puuttuvat jakeet</string>
     <string name="bible_editor_type_next">Kirjoita seuraava</string>
+    <string name="bible_editor_chapter_count">Lukuja: %1$d</string>
+    <string name="bible_editor_go_to">Siirry</string>
+    <string name="bible_editor_chapter_number">Luvun numero</string>
+    <string name="bible_editor_some_chapters_missing">Joistakin luvuista puuttuu jakeita</string>
+    <string name="bible_editor_chapter_tip_missing">Puuttuu: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Puuttuvat jakeet palautettu</string>
+    <string name="bible_editor_chapter_tip">Luku %1$d</string>
+    <string name="bible_editor_next_missing_at">Seuraava: %1$s</string>
+    <string name="bible_editor_no_next_missing">Tästä Raamatusta ei puutu jakeita</string>
+    <string name="bible_editor_next_missing">Seuraava puuttuva</string>
 </resources>

@@ -4917,4 +4917,14 @@
     <string name="bible_editor_copied">Skopírované</string>
     <string name="bible_editor_report_header">%1$s — chýbajúce verše</string>
     <string name="bible_editor_type_next">Napísať ďalší</string>
+    <string name="bible_editor_chapter_count">Kapitoly: %1$d</string>
+    <string name="bible_editor_go_to">Prejsť na</string>
+    <string name="bible_editor_chapter_number">Číslo kapitoly</string>
+    <string name="bible_editor_some_chapters_missing">Niektoré kapitoly majú chýbajúce verše</string>
+    <string name="bible_editor_chapter_tip_missing">Chýba %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Chýbajúce verše obnovené</string>
+    <string name="bible_editor_chapter_tip">Kapitola %1$d</string>
+    <string name="bible_editor_next_missing_at">Ďalší: %1$s</string>
+    <string name="bible_editor_no_next_missing">V tejto Biblii nechýbajú žiadne verše</string>
+    <string name="bible_editor_next_missing">Ďalší chýbajúci</string>
 </resources>

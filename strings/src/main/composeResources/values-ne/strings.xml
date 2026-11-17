@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">प्रतिलिपि भयो</string>
     <string name="bible_editor_report_header">%1$s — छुटेका पदहरू</string>
     <string name="bible_editor_type_next">अर्को टाइप गर्नुहोस्</string>
+    <string name="bible_editor_chapter_count">अध्यायहरू: %1$d</string>
+    <string name="bible_editor_go_to">यहाँ जानुहोस्</string>
+    <string name="bible_editor_chapter_number">अध्याय नम्बर</string>
+    <string name="bible_editor_some_chapters_missing">केही अध्यायहरूमा पदहरू छुटेका छन्</string>
+    <string name="bible_editor_chapter_tip_missing">छुटेको: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">छुटेका पदहरू पुनर्स्थापित</string>
+    <string name="bible_editor_chapter_tip">अध्याय %1$d</string>
+    <string name="bible_editor_next_missing_at">अर्को: %1$s</string>
+    <string name="bible_editor_no_next_missing">यो बाइबलमा कुनै पद छुटेको छैन</string>
+    <string name="bible_editor_next_missing">अर्को छुटेको</string>
 </resources>

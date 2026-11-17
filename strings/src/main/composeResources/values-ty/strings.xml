@@ -5051,4 +5051,14 @@
     <string name="bible_editor_copied">Ua neneʻihia</string>
     <string name="bible_editor_report_header">%1$s — te mau ʻirava e ʻere nei</string>
     <string name="bible_editor_type_next">Pāpaʻi i te ʻirava i muri</string>
+    <string name="bible_editor_chapter_count">Pene: %1$d</string>
+    <string name="bible_editor_go_to">Haere i</string>
+    <string name="bible_editor_chapter_number">Numera pene</string>
+    <string name="bible_editor_some_chapters_missing">Tē ʻere nei te tahi mau ʻirava i roto i te tahi mau pene</string>
+    <string name="bible_editor_chapter_tip_missing">Tē ʻere nei: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Ua faʻahoʻihia te mau ʻirava e ʻere nei</string>
+    <string name="bible_editor_chapter_tip">Pene %1$d</string>
+    <string name="bible_editor_next_missing_at">I muri: %1$s</string>
+    <string name="bible_editor_no_next_missing">ʻAita e ʻirava e ʻere nei i roto i teie Bibilia</string>
+    <string name="bible_editor_next_missing">ʻIrava ʻere i muri</string>
 </resources>

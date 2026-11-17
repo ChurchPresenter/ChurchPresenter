@@ -4888,4 +4888,14 @@
     <string name="bible_editor_copied">Kopiert</string>
     <string name="bible_editor_report_header">%1$s — fehlende Verse</string>
     <string name="bible_editor_type_next">Den nächsten eingeben</string>
+    <string name="bible_editor_chapter_count">%1$d Kapitel</string>
+    <string name="bible_editor_go_to">Gehe zu</string>
+    <string name="bible_editor_chapter_number">Kapitelnummer</string>
+    <string name="bible_editor_some_chapters_missing">Einige Kapitel haben fehlende Verse</string>
+    <string name="bible_editor_chapter_tip_missing">Fehlt: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Fehlende Verse wiederhergestellt</string>
+    <string name="bible_editor_chapter_tip">Kapitel %1$d</string>
+    <string name="bible_editor_next_missing_at">Nächster: %1$s</string>
+    <string name="bible_editor_no_next_missing">Keine fehlenden Verse in dieser Bibel</string>
+    <string name="bible_editor_next_missing">Nächster fehlender</string>
 </resources>

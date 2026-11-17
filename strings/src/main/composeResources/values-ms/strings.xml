@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">Disalin</string>
     <string name="bible_editor_report_header">%1$s — ayat yang hilang</string>
     <string name="bible_editor_type_next">Taip yang seterusnya</string>
+    <string name="bible_editor_chapter_count">%1$d bab</string>
+    <string name="bible_editor_go_to">Pergi ke</string>
+    <string name="bible_editor_chapter_number">Nombor bab</string>
+    <string name="bible_editor_some_chapters_missing">Sesetengah bab ada ayat yang hilang</string>
+    <string name="bible_editor_chapter_tip_missing">Hilang: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Ayat yang hilang dipulihkan</string>
+    <string name="bible_editor_chapter_tip">Bab %1$d</string>
+    <string name="bible_editor_next_missing_at">Seterusnya: %1$s</string>
+    <string name="bible_editor_no_next_missing">Tiada ayat yang hilang dalam Alkitab ini</string>
+    <string name="bible_editor_next_missing">Hilang seterusnya</string>
 </resources>

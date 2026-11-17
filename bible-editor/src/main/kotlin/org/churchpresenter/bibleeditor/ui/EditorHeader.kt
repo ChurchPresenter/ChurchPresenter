@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Icon
@@ -28,47 +26,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.bibleeditor.BibleEditorState
 import org.churchpresenter.bibleeditor.openMissing
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
-import org.churchpresenter.icons.generated.resources.ic_arrow_left
-import org.churchpresenter.icons.generated.resources.ic_arrow_right
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_editor_book_flag
 import org.churchpresenter.strings.generated.resources.bible_editor_changes_one
 import org.churchpresenter.strings.generated.resources.bible_editor_changes_other
-import org.churchpresenter.strings.generated.resources.bible_editor_chapter
-import org.churchpresenter.strings.generated.resources.bible_editor_chapter_of
 import org.churchpresenter.strings.generated.resources.bible_editor_history
-import org.churchpresenter.strings.generated.resources.bible_editor_next_chapter
-import org.churchpresenter.strings.generated.resources.bible_editor_previous_chapter
 import org.churchpresenter.strings.generated.resources.bible_editor_title
 import org.churchpresenter.strings.generated.resources.bible_editor_validate
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
-
-private const val MAX_CHAPTER_DIGITS = 3
 
 /** The top bar: the title, the Bible, book and chapter pickers, Validate and History. */
 @Composable
@@ -207,75 +185,5 @@ private fun BookPicker(state: BibleEditorState) {
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ChapterStepper(state: BibleEditorState) {
-    val colors = editorColors()
-    var draft by remember { mutableStateOf<String?>(null) }
-    var focused by remember { mutableStateOf(false) }
-    val focus = LocalFocusManager.current
-    val requester = remember { FocusRequester() }
-    fun commit() {
-        draft?.toIntOrNull()?.takeIf { it in 1..state.chapterCount }?.let { state.goToChapter(it) }
-        draft = null
-    }
-    Row(
-        Modifier.height(34.dp).clip(ButtonShape).background(colors.well).padding(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        EditorIconButton(
-            painterResource(IconRes.drawable.ic_arrow_left), stringResource(Res.string.bible_editor_previous_chapter),
-            onClick = { state.goToChapter(state.chapter - 1) }, size = 28.dp, iconSize = 12.dp,
-        )
-        Text(
-            stringResource(Res.string.bible_editor_chapter), Modifier.padding(start = 4.dp, end = 2.dp),
-            fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = colors.dim,
-        )
-        val chapterLabel = stringResource(Res.string.bible_editor_chapter)
-        BasicTextField(
-            value = draft ?: state.chapter.toString(),
-            onValueChange = { typed -> draft = typed.filter(Char::isDigit).take(MAX_CHAPTER_DIGITS) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            textStyle = TextStyle(color = colors.ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center),
-            cursorBrush = SolidColor(colors.accent),
-            modifier = Modifier
-                .width(42.dp).height(26.dp)
-                .focusRequester(requester)
-                .onFocusChanged {
-                    if (focused && !it.isFocused) commit()
-                    focused = it.isFocused
-                }
-                .onPreviewKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                    when (event.key) {
-                        Key.Enter, Key.NumPadEnter -> { commit(); focus.clearFocus(); true }
-                        Key.Escape -> { draft = null; focus.clearFocus(); true }
-                        Key.DirectionUp -> { draft = null; state.goToChapter(state.chapter + 1); true }
-                        Key.DirectionDown -> { draft = null; state.goToChapter(state.chapter - 1); true }
-                        else -> false
-                    }
-                }
-                .semantics { contentDescription = chapterLabel },
-            decorationBox = { inner ->
-                Box(
-                    Modifier.clip(RoundedCornerShape(7.dp)).background(colors.shell)
-                        .border(1.dp, if (focused) colors.accent else colors.line, RoundedCornerShape(7.dp)),
-                    contentAlignment = Alignment.Center,
-                ) { inner() }
-            },
-        )
-        Text(
-            stringResource(Res.string.bible_editor_chapter_of, state.chapterCount), Modifier.padding(horizontal = 2.dp),
-            fontSize = 12.sp, color = colors.faint, maxLines = 1,
-        )
-        EditorIconButton(
-            painterResource(IconRes.drawable.ic_arrow_right), stringResource(Res.string.bible_editor_next_chapter),
-            onClick = { state.goToChapter(state.chapter + 1) }, size = 28.dp, iconSize = 12.dp,
-        )
     }
 }

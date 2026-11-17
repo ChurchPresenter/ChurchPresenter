@@ -58,6 +58,7 @@ class BibleEditorAppTest {
         assertTrue(isShowing("Matthew 2"))
         press("Previous chapter")
         assertTrue(isShowing("Matthew 1"))
+        openChapterPicker()
         chapterField().performClick()
         chapterField().performKeyInput { pressKey(Key.DirectionUp) }
         waitForIdle()
@@ -65,14 +66,19 @@ class BibleEditorAppTest {
         chapterField().performKeyInput { pressKey(Key.DirectionDown) }
         waitForIdle()
         assertTrue(isShowing("Matthew 1"))
-        goToChapter(17)
+        chapterField().performTextReplacement("17")
+        chapterField().performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
         assertTrue(isShowing("Matthew 17"))
+        assertFalse(isShowingDescription("Chapter number"), "going to a chapter closes the picker")
         goToChapter(40)
         assertTrue(isShowing("Matthew 17"), "a chapter the book does not have is not gone to")
         chapterField().performTextReplacement("3")
         chapterField().performKeyInput { pressKey(Key.Escape) }
         waitForIdle()
         assertTrue(isShowing("Matthew 17"), "Escape leaves the chapter as it was")
+        assertFalse(isShowingDescription("Chapter number"), "and closes the picker")
+        openChapterPicker()
         chapterField().performTextReplacement("2")
         chapterField().performKeyInput { pressKey(Key.Tab) }
         waitForIdle()

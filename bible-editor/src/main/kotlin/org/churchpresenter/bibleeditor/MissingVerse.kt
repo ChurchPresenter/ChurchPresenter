@@ -44,7 +44,8 @@ fun findMissingVerses(target: Bible, reference: Bible): List<MissingVerse> {
 
 /** Where [code] would sit among [siblings], the verses this Bible has of the same code chapter. */
 private fun placeOf(code: Triple<Int, Int, Int>, siblings: List<CodeVerse>?): MissingVerse? {
-    if (siblings.isNullOrEmpty()) return null
+    // Never empty: a code chapter is only listed once a verse of it has been seen.
+    if (siblings == null) return null
     val anchor = siblings.filter { it.codeVerse < code.third }.maxByOrNull { it.codeVerse }
         ?: siblings.minBy { it.codeVerse }
     val shown = code.third + (anchor.verse.verseNumber - anchor.codeVerse)

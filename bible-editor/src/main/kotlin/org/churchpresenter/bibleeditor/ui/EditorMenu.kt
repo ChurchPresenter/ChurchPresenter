@@ -59,8 +59,7 @@ internal fun EditorMenu(
         val height = minOf(itemHeight * count + MenuPadding * 2, maxHeight)
         val density = LocalDensity.current
         LaunchedEffect(Unit) {
-            if (selected < 0) return@LaunchedEffect
-            val target = with(density) { (itemHeight * selected - (height - itemHeight) / 2).toPx() }
+            val target = with(density) { (itemHeight * selected.coerceAtLeast(0) - (height - itemHeight) / 2).toPx() }
             scroll.scrollTo(target.toInt().coerceIn(0, scroll.maxValue))
         }
         Box(Modifier.width(width).height(height)) {

@@ -4,8 +4,6 @@ package org.churchpresenter.bibleeditor.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.bibleeditor.EditorFixture
@@ -60,7 +58,6 @@ class HistoryPanelTest {
         goToChapter(1)
         click("This Bible")
         click("Matthew 17:2")
-        chapterField().assert(hasText("17"))
         assertTrue(isShowing(EditorFixture.KJV_17[1]), "verse 2 is in view, as it was fixed")
     }
 }

@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">Nakopya</string>
     <string name="bible_editor_report_header">%1$s — mga nawawalang talata</string>
     <string name="bible_editor_type_next">I-type ang susunod</string>
+    <string name="bible_editor_chapter_count">Mga kabanata: %1$d</string>
+    <string name="bible_editor_go_to">Pumunta sa</string>
+    <string name="bible_editor_chapter_number">Numero ng kabanata</string>
+    <string name="bible_editor_some_chapters_missing">May nawawalang talata ang ilang kabanata</string>
+    <string name="bible_editor_chapter_tip_missing">Nawawala: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Naibalik ang mga nawawalang talata</string>
+    <string name="bible_editor_chapter_tip">Kabanata %1$d</string>
+    <string name="bible_editor_next_missing_at">Susunod: %1$s</string>
+    <string name="bible_editor_no_next_missing">Walang nawawalang talata sa Bibliang ito</string>
+    <string name="bible_editor_next_missing">Susunod na nawawala</string>
 </resources>

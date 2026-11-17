@@ -4932,4 +4932,14 @@
     <string name="bible_editor_copied">कॉपी हो गया</string>
     <string name="bible_editor_report_header">%1$s — छूटी हुई आयतें</string>
     <string name="bible_editor_type_next">अगली टाइप करें</string>
+    <string name="bible_editor_chapter_count">अध्याय: %1$d</string>
+    <string name="bible_editor_go_to">यहाँ जाएँ</string>
+    <string name="bible_editor_chapter_number">अध्याय संख्या</string>
+    <string name="bible_editor_some_chapters_missing">कुछ अध्यायों में आयतें छूटी हैं</string>
+    <string name="bible_editor_chapter_tip_missing">छूटी: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">छूटी हुई आयतें पुनर्स्थापित</string>
+    <string name="bible_editor_chapter_tip">अध्याय %1$d</string>
+    <string name="bible_editor_next_missing_at">अगली: %1$s</string>
+    <string name="bible_editor_no_next_missing">इस बाइबल में कोई आयत छूटी नहीं है</string>
+    <string name="bible_editor_next_missing">अगली छूटी आयत</string>
 </resources>

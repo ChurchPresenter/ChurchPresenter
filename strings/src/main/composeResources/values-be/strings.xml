@@ -4887,4 +4887,14 @@
     <string name="bible_editor_copied">Скапіявана</string>
     <string name="bible_editor_report_header">%1$s — прапушчаныя вершы</string>
     <string name="bible_editor_type_next">Увесці наступны</string>
+    <string name="bible_editor_chapter_count">Раздзелаў: %1$d</string>
+    <string name="bible_editor_go_to">Перайсці да</string>
+    <string name="bible_editor_chapter_number">Нумар раздзела</string>
+    <string name="bible_editor_some_chapters_missing">У некаторых раздзелах ёсць прапушчаныя вершы</string>
+    <string name="bible_editor_chapter_tip_missing">Прапушчана: %1$s</string>
+    <string name="bible_editor_chapter_tip_restored">Прапушчаныя вершы адноўлены</string>
+    <string name="bible_editor_chapter_tip">Раздзел %1$d</string>
+    <string name="bible_editor_next_missing_at">Наступны: %1$s</string>
+    <string name="bible_editor_no_next_missing">У гэтай Бібліі няма прапушчаных вершаў</string>
+    <string name="bible_editor_next_missing">Наступны прапушчаны</string>
 </resources>
