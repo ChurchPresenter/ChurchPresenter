@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ScrollWheel
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isToggleable
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
@@ -80,6 +82,18 @@ class SongLibraryScreenshotTest {
         waitForIdle()
     }
 
+    /**
+     * The middle columns scrolled sideways: Number and Title stay on the left, the row's buttons on
+     * the right, and a shadow on each edge with more columns beyond it.
+     */
+    @Test
+    fun `the middle columns scrolled sideways`() = shoot("scrolled_sideways") {
+        onAllNodesWithText("Hymnal")[0].performMouseInput {
+            moveTo(center)
+            scroll(SIDEWAYS_SCROLL, ScrollWheel.Horizontal)
+        }
+    }
+
     @Test
     fun `the skeleton shown while the folder is being read`() = shoot("loading", hold = true)
 
@@ -132,17 +146,10 @@ class SongLibraryScreenshotTest {
 
     /**
      * Songs in several languages: the `!` beside a song whose languages need attention, and the
-     * compare button — amber where sections are out of step, disabled on a one-language song. The
-     * wide columns are turned off to bring the row's buttons into view at this window size.
+     * compare button — amber where sections are out of step, disabled on a one-language song.
      */
     @Test
-    fun `songs with translation problems flagged`() = shoot("translation_problems", songs = TRANSLATED) {
-        onNodeWithText(COLUMNS).performClick()
-        listOf("Song Book", "Author", "Composer", "Tune", "CCLI", "Duration").forEach {
-            onAllNodesWithText(it).onLast().performClick()
-        }
-        dismissPopup()
-    }
+    fun `songs with translation problems flagged`() = shoot("translation_problems", songs = TRANSLATED)
 
     /** The language 3 and 4 title columns, which start hidden and are offered once a song uses them. */
     @Test
@@ -314,6 +321,9 @@ class SongLibraryScreenshotTest {
     }
 
     private companion object {
+        /** Wheel notches: enough to scroll the middle part of the way, so both edges show a shadow. */
+        const val SIDEWAYS_SCROLL = 3f
+
         const val SECTION = "songLibrary"
 
         // The window's own English strings, which is what a test run renders.
