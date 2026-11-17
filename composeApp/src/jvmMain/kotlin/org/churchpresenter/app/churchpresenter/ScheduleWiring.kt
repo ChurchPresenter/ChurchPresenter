@@ -1,10 +1,13 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.app.churchpresenter.utils.ScheduleRowThumbnails
+import org.churchpresenter.schedule.LocalScheduleThumbnails
 import org.churchpresenter.schedule.ScheduleTab
 import org.churchpresenter.schedule.ScheduleToolbarIconSize
 import org.churchpresenter.sharedui.models.Presenting
@@ -35,66 +38,78 @@ internal fun MainDesktopScope.ScheduleTabPane() {
     val currentOnScheduleActionsReady by rememberUpdatedState(publish.onScheduleActionsReady)
     val timerExpiredDefaultLabel = stringResource(Res.string.timer_expired)
     val rows = remember(this) { scheduleRowHandlers() }
-    ScheduleTab(
-        scheduleViewModel = scheduleViewModel,
-        onPresenting = live.presenting,
-        onAddLabel = { state.showAddLabelDialog = true },
-        upcomingServiceLoad = service.upcomingServiceLoad,
-        onLoadServiceNow = service.onLoadServiceNow,
-        scheduleService = service.scheduleService,
-        onSaveScheduleToCalendar = service.onSaveScheduleToCalendar,
-        onAddScheduleToCalendar = service.onAddScheduleToCalendar,
-        onPresentBible = rows::presentBible,
-        onPresentSong = rows::presentSong,
-        onPresentPresentation = rows::presentPresentation,
-        onPresentPictures = rows::presentPictures,
-        onPresentMedia = rows::presentMedia,
-        onPresentAnnouncement = { item -> rows.presentAnnouncement(item, timerExpiredDefaultLabel) },
-        onPresentLowerThird = rows::presentLowerThird,
-        onPresentWebsite = rows::presentWebsite,
-        onPresentDictionary = rows::presentDictionary,
-        onPresentCue = service.onPresentCue,
-        onPresentScene = { item -> presentScene(item.sceneId) },
-        onItemClick = this::openScheduleItem,
-        onEditLabel = { labelItem ->
-            state.editingLabelItem = labelItem
-            state.showAddLabelDialog = true
-        },
-        onActionsReady = { actions ->
-            state.scheduleActions = actions
-            currentOnScheduleActionsReady(
-                scheduleActionsFrom(actions, presentScene = this::presentScene, playSlideshow = this::playSlideshow)
-            )
-        },
-        onSelectedItemChanged = { id ->
-            publish.onScheduleItemSelected(id)
-        },
-        onScheduleChanged = publish.onScheduleChanged,
-        itemZoomPercent = appSettings.scheduleItemZoomPercent,
-        onItemZoomChange = { percent ->
-            onSettingsChange { settings -> settings.copy(scheduleItemZoomPercent = percent) }
-        },
-        legacyRowActions = appSettings.scheduleLegacyRowActions,
-        onLegacyRowActionsChange = { legacy ->
-            onSettingsChange { settings -> settings.copy(scheduleLegacyRowActions = legacy) }
-        },
-        toolbarIconSize = ScheduleToolbarIconSize.fromName(appSettings.scheduleToolbarIconSize),
-        onToolbarIconSizeChange = { size ->
-            onSettingsChange { settings -> settings.copy(scheduleToolbarIconSize = size.name) }
-        },
-        hiddenToolbarButtons = appSettings.hiddenScheduleButtons,
-        onToggleToolbarButton = { button ->
-            onSettingsChange { settings ->
-                settings.copy(
-                    hiddenScheduleButtons =
-                        toggleHiddenScheduleButton(settings.hiddenScheduleButtons, button)
+    val thumbnails = remember { ScheduleRowThumbnails() }
+    CompositionLocalProvider(LocalScheduleThumbnails provides thumbnails) {
+        ScheduleTab(
+            scheduleViewModel = scheduleViewModel,
+            onPresenting = live.presenting,
+            onAddLabel = { state.showAddLabelDialog = true },
+            upcomingServiceLoad = service.upcomingServiceLoad,
+            onLoadServiceNow = service.onLoadServiceNow,
+            scheduleService = service.scheduleService,
+            onSaveScheduleToCalendar = service.onSaveScheduleToCalendar,
+            onAddScheduleToCalendar = service.onAddScheduleToCalendar,
+            onPresentBible = rows::presentBible,
+            onPresentSong = rows::presentSong,
+            onPresentPresentation = rows::presentPresentation,
+            onPresentPictures = rows::presentPictures,
+            onPresentMedia = rows::presentMedia,
+            onPresentAnnouncement = { item -> rows.presentAnnouncement(item, timerExpiredDefaultLabel) },
+            onPresentLowerThird = rows::presentLowerThird,
+            onPresentWebsite = rows::presentWebsite,
+            onPresentDictionary = rows::presentDictionary,
+            onPresentCue = service.onPresentCue,
+            onPresentScene = { item -> presentScene(item.sceneId) },
+            onItemClick = this::openScheduleItem,
+            onEditLabel = { labelItem ->
+                state.editingLabelItem = labelItem
+                state.showAddLabelDialog = true
+            },
+            onActionsReady = { actions ->
+                state.scheduleActions = actions
+                currentOnScheduleActionsReady(
+                    scheduleActionsFrom(actions, presentScene = this::presentScene, playSlideshow = this::playSlideshow)
                 )
+            },
+            onSelectedItemChanged = { id ->
+                publish.onScheduleItemSelected(id)
+            },
+            onScheduleChanged = publish.onScheduleChanged,
+            itemZoomPercent = appSettings.scheduleItemZoomPercent,
+            onItemZoomChange = { percent ->
+                onSettingsChange { settings -> settings.copy(scheduleItemZoomPercent = percent) }
+            },
+            legacyRowActions = appSettings.scheduleLegacyRowActions,
+            onLegacyRowActionsChange = { legacy ->
+                onSettingsChange { settings -> settings.copy(scheduleLegacyRowActions = legacy) }
+            },
+            showThumbnails = appSettings.scheduleThumbnails,
+            onShowThumbnailsChange = { shown ->
+                onSettingsChange { settings -> settings.copy(scheduleThumbnails = shown) }
+            },
+            isOnAir = { item -> scheduleRowOnAir(item, presenterManager.onAirState()) },
+            highlightLive = appSettings.scheduleHighlightLive,
+            onHighlightLiveChange = { on ->
+                onSettingsChange { settings -> settings.copy(scheduleHighlightLive = on) }
+            },
+            toolbarIconSize = ScheduleToolbarIconSize.fromName(appSettings.scheduleToolbarIconSize),
+            onToolbarIconSizeChange = { size ->
+                onSettingsChange { settings -> settings.copy(scheduleToolbarIconSize = size.name) }
+            },
+            hiddenToolbarButtons = appSettings.hiddenScheduleButtons,
+            onToggleToolbarButton = { button ->
+                onSettingsChange { settings ->
+                    settings.copy(
+                        hiddenScheduleButtons =
+                            toggleHiddenScheduleButton(settings.hiddenScheduleButtons, button)
+                    )
+                }
+            },
+            planningCenterImport = { isVisible, onDismiss ->
+                PlanningCenterImport(isVisible = isVisible, onDismiss = onDismiss)
             }
-        },
-        planningCenterImport = { isVisible, onDismiss ->
-            PlanningCenterImport(isVisible = isVisible, onDismiss = onDismiss)
-        }
-    )
+        )
+    }
 }
 
 /** Puts a Canvas scene live and shows it in its tab — from a Schedule row or the menu. */

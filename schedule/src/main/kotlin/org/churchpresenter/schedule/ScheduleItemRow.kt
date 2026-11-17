@@ -150,7 +150,8 @@ private fun RowScope.ScheduleRowActionButtons(
             onClick = onRemove,
             buttonSize = actionSize,
             iconSize = actionIcon,
-            iconTint = MaterialTheme.colorScheme.error
+            iconTint = MaterialTheme.colorScheme.error,
+            tooltipBelow = removeFirst
         )
     }
 
@@ -164,7 +165,8 @@ private fun RowScope.ScheduleRowActionButtons(
         onClick = onMoveUp,
         buttonSize = actionSize,
         iconSize = actionIcon,
-        iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+        iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+        tooltipBelow = removeFirst
     )
     ScheduleRowActionButton(
         painter = painterResource(IconRes.drawable.ic_arrow_down),
@@ -172,7 +174,8 @@ private fun RowScope.ScheduleRowActionButtons(
         onClick = onMoveDown,
         buttonSize = actionSize,
         iconSize = actionIcon,
-        iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+        iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+        tooltipBelow = removeFirst
     )
     ScheduleRowActionButton(
         painter = painterResource(IconRes.drawable.ic_note),
@@ -181,7 +184,8 @@ private fun RowScope.ScheduleRowActionButtons(
         buttonSize = actionSize,
         iconSize = actionIcon,
         iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
-                   else MaterialTheme.colorScheme.onSurfaceVariant
+                   else MaterialTheme.colorScheme.onSurfaceVariant,
+        tooltipBelow = removeFirst
     )
     if (!isSection && LocalShowControlEnabled.current) {
         ScheduleRowActionButton(
@@ -192,7 +196,8 @@ private fun RowScope.ScheduleRowActionButtons(
             buttonSize = actionSize,
             iconSize = actionIcon,
             iconTint = if (hasActions) MaterialTheme.colorScheme.primary
-                       else MaterialTheme.colorScheme.onSurfaceVariant
+                       else MaterialTheme.colorScheme.onSurfaceVariant,
+            tooltipBelow = removeFirst
         )
     }
     if (!removeFirst) removeButton()
@@ -205,7 +210,8 @@ private fun RowScope.ScheduleRowActionButtons(
             modifier = Modifier.padding(start = 2.dp),
             buttonSize = actionSize,
             iconSize = SECTION_ACTION_ICON_SIZE,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tooltipBelow = removeFirst
         )
     } else {
         ScheduleRowActionButton(
@@ -214,7 +220,8 @@ private fun RowScope.ScheduleRowActionButtons(
             onClick = onPresent,
             modifier = Modifier.padding(start = 2.dp),
             iconSize = 15.dp,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tooltipBelow = removeFirst
         )
     }
 }
@@ -229,6 +236,10 @@ internal fun ScheduleItemRow(
     density: ScheduleDensity,
     /** Legacy layout: buttons on their own line under the title instead of the hover overlay. */
     legacyRowActions: Boolean = false,
+    /** A picture of the item in place of its type chip, where the app has one (#1050). */
+    showThumbnail: Boolean,
+    /** This row is on screen (#1049): red accent and border, and a LIVE badge. */
+    isLive: Boolean,
     isSelected: Boolean,
     note: String,
     onSelect: () -> Unit,
@@ -254,7 +265,7 @@ internal fun ScheduleItemRow(
     LaunchedEffect(note) { if (noteText != note) noteText = note }
 
     val isSection = item is ScheduleItem.LabelItem
-    val colors = scheduleRowColors(item, isSelected)
+    val colors = scheduleRowColors(item, isSelected, isLive)
     val cardBg = colors.card
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -298,11 +309,12 @@ internal fun ScheduleItemRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ScheduleRowDragHandle(item, isSection, dragHandleModifier)
+                val thumbnail by rememberScheduleThumbnail(item, showThumbnail && !isSection)
+                ScheduleRowDragHandle(item, isSection, dragHandleModifier, thumbnail, density, showThumbnail)
 
                 ScheduleRowTitle(
                     item = item,
-                    look = ScheduleRowTitleLook(density, isSelected, timing, clock, colors.sectionText),
+                    look = ScheduleRowTitleLook(density, isSelected, timing, clock, colors.sectionText, isLive),
                     legacyRowActions = legacyRowActions,
                     note = note,
                     noteExpanded = noteExpanded,
@@ -466,8 +478,9 @@ internal fun ScheduleItemContent(
     timing: RowTiming = RowTiming.DEFAULT,
     /** When this row is expected to go live, reckoned across the schedule -- see `scheduleClocks`. */
     clock: RowClock? = null,
+    isLive: Boolean,
 ) {
-    ScheduleRowTitleLine(item = item, isSelected = isSelected, timing = timing, clock = clock)
+    ScheduleRowTitleLine(item = item, isSelected = isSelected, timing = timing, clock = clock, isLive = isLive)
 
     if (!scheduleShowDetailLine(density.percent)) return
 

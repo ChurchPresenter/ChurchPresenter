@@ -2,7 +2,17 @@
 
 package org.churchpresenter.schedule.screenshot
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.LinearGradientShader
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onAllNodesWithTag
+import org.churchpresenter.schedule.SCHEDULE_ROW_THUMBNAIL_TAG
+import org.churchpresenter.schedule.ScheduleThumbnails
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.calendar.ScheduleServiceLink
@@ -43,6 +53,28 @@ import org.churchpresenter.schedule.addDictionary
 import org.churchpresenter.schedule.addBibleVerse
 import org.churchpresenter.schedule.addAnnouncement
 
+/** A drawn stand-in for each kind's picture -- a deck's white slide, a photo, a dark video frame. */
+private object PaintedThumbnails : ScheduleThumbnails {
+    private fun painted(top: Color, bottom: Color, mark: Color): ImageBitmap {
+        val bitmap = ImageBitmap(192, 108)
+        val canvas = Canvas(bitmap)
+        val fill = Paint().apply {
+            shader = LinearGradientShader(Offset.Zero, Offset(192f, 108f), listOf(top, bottom))
+        }
+        canvas.drawRect(Rect(0f, 0f, 192f, 108f), fill)
+        canvas.drawCircle(Offset(130f, 40f), 22f, Paint().apply { color = mark })
+        canvas.drawRect(Rect(0f, 80f, 192f, 108f), Paint().apply { color = mark.copy(alpha = 0.5f) })
+        return bitmap
+    }
+
+    override suspend fun thumbnail(item: ScheduleItem): ImageBitmap? = when (item) {
+        is ScheduleItem.PictureItem -> painted(Color(0xFF1E5AA8), Color(0xFF7FC4E8), Color(0xFFF4D35E))
+        is ScheduleItem.PresentationItem -> painted(Color.White, Color(0xFFE6E6E6), Color(0xFFB23A48))
+        is ScheduleItem.MediaItem -> painted(Color(0xFF2B1B3D), Color(0xFF8A4FBF), Color.White)
+        else -> null
+    }
+}
+
 class ScheduleTabScreenshotTest {
 
     private fun shoot(
@@ -58,6 +90,9 @@ class ScheduleTabScreenshotTest {
         upcomingServiceLoad: UpcomingLoad? = null,
         scheduleService: ScheduleServiceLink? = null,
         offerAddToCalendar: Boolean = false,
+        showThumbnails: Boolean = false,
+        highlightLive: Boolean = false,
+        isOnAir: (ScheduleItem) -> Boolean = { false },
         drive: ComposeUiTest.(ScheduleViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         // A feed left over from another shot would mark this one's cue rows.
@@ -74,6 +109,10 @@ class ScheduleTabScreenshotTest {
             upcomingServiceLoad = upcomingServiceLoad,
             scheduleService = scheduleService,
             offerAddToCalendar = offerAddToCalendar,
+            showThumbnails = showThumbnails,
+            thumbnails = PaintedThumbnails,
+            highlightLive = highlightLive,
+            isOnAir = isOnAir,
         ) { vm, _ ->
             drive(vm)
             captureTo(file, rootIndex)
@@ -324,6 +363,42 @@ class ScheduleTabScreenshotTest {
         hiddenToolbarButtons = setOf(ScheduleToolbarButton.UNDO.name, ScheduleToolbarButton.PLANNING_CENTER.name),
     ) {
         onNodeWithTag(ScheduleToolbarTags.OPTIONS).performClick()
+        waitForIdle()
+    }
+
+    /** Thumbnails on (#1050): a tile for the deck, the pictures and the video, a chip for the rest. */
+    @Test
+    fun `thumbnails`() = shoot("thumbnails", showThumbnails = true) { awaitThumbnails() }
+
+    @Test
+    fun `thumbnails extra detailed`() =
+        shoot("thumbnails_extra_detailed", itemZoomPercent = 200, showThumbnails = true) { awaitThumbnails() }
+
+    private fun ComposeUiTest.awaitThumbnails() = waitUntil(timeoutMillis = 5_000) {
+        onAllNodesWithTag(SCHEDULE_ROW_THUMBNAIL_TAG).fetchSemanticsNodes().size == 3
+    }
+
+    /** Highlight live item on (#1049): the deck is on screen, so it wears the LIVE mark. */
+    @Test
+    fun `live row`() = shoot("live_row", highlightLive = true, isOnAir = { true }) { vm -> markDeckLive(vm) }
+
+    /** Live and selected together: the selection's tint under the live mark. */
+    @Test
+    fun `live row selected`() = shoot("live_row_selected", highlightLive = true, isOnAir = { true }) { vm ->
+        markDeckLive(vm)
+        runOnIdle { vm.selectItem(deckId(vm)) }
+        waitForIdle()
+    }
+
+    /** Something else went live: the deck's mark gives way to a "Left off" bar under it. */
+    @Test
+    fun `live row left off`() = shoot("live_row_left_off", highlightLive = true) { vm -> markDeckLive(vm) }
+
+    private fun deckId(vm: ScheduleViewModel): String =
+        vm.scheduleItems.first { it is ScheduleItem.PresentationItem }.id
+
+    private fun ComposeUiTest.markDeckLive(vm: ScheduleViewModel) {
+        runOnIdle { vm.markLive(deckId(vm), NOW) }
         waitForIdle()
     }
 

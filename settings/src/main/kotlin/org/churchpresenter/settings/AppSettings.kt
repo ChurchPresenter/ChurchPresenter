@@ -77,6 +77,10 @@ data class AppSettings(
      * always visible, instead of the hover overlay that paints over the title's right-hand end.
      */
     val scheduleLegacyRowActions: Boolean = false,
+    /** Schedule rows draw a picture of a picture, deck or video in place of their type chip (#1050). */
+    val scheduleThumbnails: Boolean = false,
+    /** The Schedule marks the row that is on screen (#1049). */
+    val scheduleHighlightLive: Boolean = false,
     /**
      * How large the schedule toolbar's icons are drawn, by `ScheduleToolbarIconSize` name. A name
      * this build does not know falls back to the smallest, which is the size they always had.

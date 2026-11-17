@@ -66,6 +66,7 @@ import org.churchpresenter.sharedui.composables.bibleListCardFill
 import org.churchpresenter.sharedui.composables.topBarCard
 
 private const val MENU_OFFSET_DP = 8
+private const val TOOLTIP_GAP_DP = 4
 private const val DASH_ON_PX = 6f
 private const val DASH_OFF_PX = 4f
 
@@ -92,6 +93,10 @@ internal fun ScheduleHeader(
     canClear: Boolean = true,
     legacyRowActions: Boolean = false,
     onLegacyRowActionsChange: (Boolean) -> Unit = {},
+    showThumbnails: Boolean,
+    onShowThumbnailsChange: (Boolean) -> Unit,
+    highlightLive: Boolean,
+    onHighlightLiveChange: (Boolean) -> Unit,
     hiddenButtons: Set<String> = emptySet(),
     onToggleButton: (ScheduleToolbarButton) -> Unit = {},
     toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
@@ -138,6 +143,10 @@ internal fun ScheduleHeader(
             ScheduleOptionsButton(
                 legacyRowActions = legacyRowActions,
                 onLegacyRowActionsChange = onLegacyRowActionsChange,
+                showThumbnails = showThumbnails,
+                onShowThumbnailsChange = onShowThumbnailsChange,
+                highlightLive = highlightLive,
+                onHighlightLiveChange = onHighlightLiveChange,
                 hiddenButtons = hiddenButtons,
                 onToggleButton = onToggleButton,
                 toolbarIconSize = toolbarIconSize,
@@ -205,15 +214,27 @@ internal fun ScheduleRowActionButton(
     buttonSize: Dp = 30.dp,
     iconSize: Dp = 13.dp,
     iconTint: Color? = null,
-    colors: IconButtonColors = IconButtonDefaults.iconButtonColors()
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    /**
+     * Below the button instead of to its left. A button at the panel's left edge has no room on
+     * that side, so its tooltip would be pushed back over the button and take its clicks.
+     */
+    tooltipBelow: Boolean = false,
 ) {
     ConditionalTooltipArea(
-
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.CenterStart,
-            alignment = Alignment.CenterStart,
-            offset = DpOffset((-MENU_OFFSET_DP).dp, 0.dp)
-        ),
+        tooltipPlacement = if (tooltipBelow) {
+            TooltipPlacement.ComponentRect(
+                anchor = Alignment.BottomCenter,
+                alignment = Alignment.BottomCenter,
+                offset = DpOffset(0.dp, TOOLTIP_GAP_DP.dp)
+            )
+        } else {
+            TooltipPlacement.ComponentRect(
+                anchor = Alignment.CenterStart,
+                alignment = Alignment.CenterStart,
+                offset = DpOffset((-MENU_OFFSET_DP).dp, 0.dp)
+            )
+        },
         tooltip = {
             Surface(
                 color = MaterialTheme.colorScheme.inverseSurface,

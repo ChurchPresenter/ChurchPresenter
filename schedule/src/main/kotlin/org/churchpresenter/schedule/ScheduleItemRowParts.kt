@@ -2,7 +2,13 @@ package org.churchpresenter.schedule
 
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.calendar.model.RowClock
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,9 +47,17 @@ import org.churchpresenter.theme.isDarkScheme
 import org.churchpresenter.sharedui.utils.Utils
 import androidx.compose.ui.graphics.lerp
 
-/** The grip a row is dragged by, and the chip naming what kind of row it is. */
+/** The grip a row is dragged by, and the chip naming what kind of row it is -- or its [thumbnail]. */
 @Composable
-internal fun ScheduleRowDragHandle(item: ScheduleItem, isSection: Boolean, dragHandleModifier: Modifier) {
+internal fun ScheduleRowDragHandle(
+    item: ScheduleItem,
+    isSection: Boolean,
+    dragHandleModifier: Modifier,
+    thumbnail: ImageBitmap?,
+    density: ScheduleDensity,
+    /** Thumbnails are on: a chip takes a tile's width too, so every title starts at one x. */
+    thumbnailSlot: Boolean,
+) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -61,22 +75,90 @@ internal fun ScheduleRowDragHandle(item: ScheduleItem, isSection: Boolean, dragH
             )
             if (!isSection) {
                 val (chipBg, chipFg) = scheduleChipColors(scheduleItemPaletteIndex(item))
-                Box(
-                    modifier = Modifier
-                        .testTag(SCHEDULE_ROW_TYPE_CHIP_TAG)
-                        .size(26.dp)
-                        .background(chipBg, AppShape(7.dp)),
-                    contentAlignment = Alignment.Center
+                if (thumbnail != null) {
+                    ScheduleRowThumbnail(item, thumbnail, density, chipBg, chipFg)
+                } else Box(
+                    modifier = if (thumbnailSlot) Modifier.width(density.thumbnailWidth()) else Modifier,
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        imageVector = scheduleItemIcon(item),
-                        contentDescription = null,
-                        tint = chipFg,
-                        modifier = Modifier.size(SCHEDULE_TYPE_ICON_SIZE)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .testTag(SCHEDULE_ROW_TYPE_CHIP_TAG)
+                            .size(26.dp)
+                            .background(chipBg, AppShape(7.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = scheduleItemIcon(item),
+                            contentDescription = null,
+                            tint = chipFg,
+                            modifier = Modifier.size(SCHEDULE_TYPE_ICON_SIZE)
+                        )
+                    }
                 }
             }
         }
+}
+
+/** A row's thumbnail tile (#1050). */
+internal const val SCHEDULE_ROW_THUMBNAIL_TAG = "schedule_row_thumbnail"
+
+/** How wide the thumbnail tile is at each density; it is always 16:9. */
+internal fun ScheduleDensity.thumbnailWidth(): Dp = when (this) {
+    ScheduleDensity.EXTRA_COMPACT -> 34.dp
+    ScheduleDensity.COMPACT -> 40.dp
+    ScheduleDensity.NORMAL -> 56.dp
+    ScheduleDensity.DETAILED -> 72.dp
+    ScheduleDensity.EXTRA_DETAILED -> 96.dp
+}
+
+private const val THUMBNAIL_ASPECT = 16f / 9f
+private val THUMBNAIL_BADGE_SIZE = 14.dp
+private val THUMBNAIL_BADGE_ICON_SIZE = 10.dp
+
+/**
+ * [thumbnail] cropped to a 16:9 tile, with the row's type in a small badge in its corner so the
+ * kind still reads at a glance -- the chip it stands in for says nothing else.
+ */
+@Composable
+private fun ScheduleRowThumbnail(
+    item: ScheduleItem,
+    thumbnail: ImageBitmap,
+    density: ScheduleDensity,
+    chipBg: Color,
+    chipFg: Color,
+) {
+    val width = density.thumbnailWidth()
+    Box(
+        modifier = Modifier
+            .testTag(SCHEDULE_ROW_THUMBNAIL_TAG)
+            .size(width, width / THUMBNAIL_ASPECT)
+            .clip(AppShape(5.dp))
+            .background(Color.Black)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), AppShape(5.dp))
+    ) {
+        Image(
+            bitmap = thumbnail,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(2.dp)
+                .size(THUMBNAIL_BADGE_SIZE)
+                .background(chipBg, AppShape(4.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = scheduleItemIcon(item),
+                contentDescription = null,
+                tint = chipFg,
+                modifier = Modifier.size(THUMBNAIL_BADGE_ICON_SIZE)
+            )
+        }
+    }
 }
 
 /** What the title line draws an item with: its density, selection, timing and a label's ink. */
@@ -86,6 +168,8 @@ internal class ScheduleRowTitleLook(
     val timing: RowTiming,
     val clock: RowClock?,
     val sectionText: Color,
+    /** The row is on screen (#1049): a LIVE badge after its title. */
+    val isLive: Boolean,
 )
 
 /** The row's title -- a label's name or an item's content -- with the hover actions over its end. */
@@ -138,6 +222,7 @@ internal fun ScheduleRowTitle(
                         isSelected = look.isSelected,
                         timing = look.timing,
                         clock = look.clock,
+                        isLive = look.isLive,
                     )
                 }
             }
@@ -188,11 +273,14 @@ internal fun BoxScope.ScheduleRowAccent(leftAccent: Color) {
     }
 }
 
+/** How strongly the live row's border shows its red. */
+private const val LIVE_BORDER_ALPHA = 0.7f
+
 /** A row's card, border and accent colors, and a label's ink -- a label in its own colors. */
 internal class ScheduleRowColors(val card: Color, val sectionText: Color, val border: Color, val accent: Color)
 
 @Composable
-internal fun scheduleRowColors(item: ScheduleItem, isSelected: Boolean): ScheduleRowColors {
+internal fun scheduleRowColors(item: ScheduleItem, isSelected: Boolean, isLive: Boolean): ScheduleRowColors {
     val isSection = item is ScheduleItem.LabelItem
     val sectionAccent = if (item is ScheduleItem.LabelItem) Utils.parseHexColor(item.textColor) else Color.Unspecified
 
@@ -209,10 +297,12 @@ internal fun scheduleRowColors(item: ScheduleItem, isSelected: Boolean): Schedul
 
     val sectionText = if (isSection) Utils.ensureContrast(sectionAccent, cardBg, minRatio = 7.0) else sectionAccent
     val cardBorder = when {
+        isLive -> MaterialTheme.colorScheme.error.copy(alpha = LIVE_BORDER_ALPHA)
         isSection -> sectionAccent.copy(alpha = 0.35f)
         else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     }
     val leftAccent = when {
+        isLive -> MaterialTheme.colorScheme.error
         isSection -> sectionAccent
         else -> Color.Transparent
     }

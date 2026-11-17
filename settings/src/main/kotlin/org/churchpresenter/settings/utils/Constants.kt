@@ -219,6 +219,9 @@ object Constants {
     val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus")
     val VIDEO_EXTENSIONS = setOf("mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v")
 
+    /** What the Pictures tab shows from a folder. */
+    val PICTURE_EXTENSIONS = listOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
+
     /** Default max media-file upload size accepted from a companion device (700 MB).
      *  Operator-overridable via AppSettings.maxMediaUploadMb. */
     const val DEFAULT_MAX_MEDIA_UPLOAD_MB = 700
