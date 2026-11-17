@@ -19,6 +19,7 @@ import org.churchpresenter.strings.generated.resources.profile_layout
 import org.churchpresenter.strings.generated.resources.profile_group_what_goes_where
 import org.churchpresenter.strings.generated.resources.profile_stage_arrangement
 import org.churchpresenter.strings.generated.resources.profile_stage_zones
+import org.churchpresenter.strings.generated.resources.stage_monitor_bible_all_translations
 import org.churchpresenter.strings.generated.resources.stage_monitor_layout_stranded
 import org.churchpresenter.strings.generated.resources.stage_monitor_metronome_position
 import org.churchpresenter.strings.generated.resources.stage_monitor_size_hint
@@ -59,7 +60,6 @@ private val BASIC_CONTENT = listOf(
 
 /** Always meant to share the screen with other zones, never to take it over. */
 private val NO_FULL_SCREEN = setOf(
-    StageMonitorContentType.BIBLE,
     StageMonitorContentType.SONGS,
     StageMonitorContentType.NEXT,
 )
@@ -245,6 +245,13 @@ private fun WhatGoesWhereGroup(
                 )
             }
         }
+        SettingsSwitchRow(
+            Res.string.stage_monitor_bible_all_translations,
+            checked = sm.bibleAllTranslations,
+            onCheckedChange = { on -> update { copy(bibleAllTranslations = on) } },
+            paths = listOf("$STAGE_PATH.bibleAllTranslations"),
+            modifier = Modifier.testTag("stage_bible_all_translations"),
+        )
         SettingsRow(
             Res.string.stage_monitor_metronome_position,
             advanced = true,

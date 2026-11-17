@@ -194,6 +194,11 @@ data class StageMonitorSettings(
     val textBoxes: Map<String, TextBox> = emptyMap(),
     /** How this page's boxes behave -- see [TextBoxOptions]. */
     val textBoxOptions: TextBoxOptions = TextBoxOptions(),
+    /**
+     * Whether the Bible zone shows every translation of the live verse, primary first, or only the
+     * first. Off by default so a layout sized for one verse is not changed under anyone.
+     */
+    val bibleAllTranslations: Boolean = false,
 ) {
     /** Safe lookup that falls back to the built-in default zone for content types missing from older saved settings. */
     fun zoneFor(type: StageMonitorContentType): StageMonitorZone =

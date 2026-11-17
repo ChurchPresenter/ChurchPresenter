@@ -67,14 +67,23 @@ private const val CLOCK_TICK_MS = 1000L
 private fun SelectedVerse.asZoneText(): String =
     "$bookName $chapter:${verseRange.ifEmpty { verseNumber.toString() }}\n$verseText"
 
-/** The words the live zone shows: the song section on screen, or the verse being presented. */
+/**
+ * The words the live zone shows: the song section on screen, or the verse being presented -- in
+ * every translation on air, a blank line between them, when [allTranslations] is on.
+ */
 internal fun stageCurrentText(
     slideContent: Presenting,
     currentLyricSection: LyricSection,
     displayedVerses: List<SelectedVerse>,
+    allTranslations: Boolean = false,
 ): String = when (slideContent) {
     Presenting.LYRICS -> currentLyricSection.lines.joinToString("\n", transform = SecondVoice::plain)
-    Presenting.BIBLE -> displayedVerses.firstOrNull()?.asZoneText().orEmpty()
+    Presenting.BIBLE ->
+        if (allTranslations) {
+            displayedVerses.filter { it.verseText.isNotBlank() }.joinToString("\n\n") { it.asZoneText() }
+        } else {
+            displayedVerses.firstOrNull()?.asZoneText().orEmpty()
+        }
     else -> ""
 }
 
@@ -178,7 +187,7 @@ fun StageMonitorScreen(
     use24Hour: Boolean = isSystemUsing24HourFormat(),
     modifier: Modifier = Modifier
 ) {
-    val currentText = stageCurrentText(slideContent, currentLyricSection, displayedVerses)
+    val currentText = stageCurrentText(slideContent, currentLyricSection, displayedVerses, sm.bibleAllTranslations)
     val nextText = stageNextText(slideContent, allLyricSections, songDisplaySectionIndex, nextVerses)
 
     // Load image bitmap for PICTURES mode
