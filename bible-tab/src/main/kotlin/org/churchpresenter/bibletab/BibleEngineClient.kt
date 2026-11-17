@@ -153,12 +153,16 @@ class BibleEngineClient(
                     // The engine could not start (bad config or — the headline bug — a port collision
                     // that prevents the WS server from binding). Don't enter the connect loop against
                     // a server that will never exist; surface the failure for retry instead.
-                    Log.warn("bible-engine", "in-process engine failed to start on port $port")
+                    // Why: without it every failure reads the same, whatever stopped it.
+                    val reason = EngineServer.lastFailure
+                    Log.warn("bible-engine", "in-process engine failed to start on port $port: $reason")
                     CrashReporter.reportWarning(
                         "Bible engine: in-process engine failed to start on port $port",
-                        // Why: without it every failure reads the same, whatever stopped it.
                         throwable = started.exceptionOrNull(),
-                        tags = mapOf("subsystem" to "bible-engine")
+                        tags = buildMap {
+                            put("subsystem", "bible-engine")
+                            reason?.let { put("start.failure", it) }
+                        }
                     )
                     _startFailed.value = true
                     return@launch

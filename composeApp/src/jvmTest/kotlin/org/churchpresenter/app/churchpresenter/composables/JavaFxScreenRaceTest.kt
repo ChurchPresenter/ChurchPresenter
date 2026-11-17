@@ -44,6 +44,28 @@ class JavaFxScreenRaceTest {
     }
 
     @Test
+    fun `a negative screen size from the glass layer is the same race`() {
+        // CHURCH-PRESENTER-DESKTOP-1CY: Rectangle2D refused a screen that had just been unplugged.
+        val throwable = throwableFrom(
+            "javafx.geometry.Rectangle2D",
+            "com.sun.glass.ui.Screen",
+            cause = IllegalArgumentException("Both width and height must be >= 0"),
+        )
+
+        assertTrue(isJavaFxScreenReconfigRace(throwable))
+    }
+
+    @Test
+    fun `an illegal argument from the app's own code is not the known race`() {
+        val throwable = throwableFrom(
+            "org.churchpresenter.app.churchpresenter.MainKt",
+            cause = IllegalArgumentException("bad"),
+        )
+
+        assertFalse(isJavaFxScreenReconfigRace(throwable))
+    }
+
+    @Test
     fun `a different exception from the same javafx frame is not the known race`() {
         val throwable = throwableFrom(
             "com.sun.glass.ui.Screen",

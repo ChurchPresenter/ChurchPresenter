@@ -68,6 +68,12 @@ class BibleLoadErrorTest {
     }
 
     @Test
+    fun `a module whose file has gone is the file's absence, not a fault in loading`() {
+        // CHURCH-PRESENTER-DESKTOP-1F2: the Instance Link replica was cleared between its check and its load.
+        assertTrue(isFileFault(SpbFileMissingException("replica/primary.spb")))
+    }
+
+    @Test
     fun `a module that is not there says so instead of loading empty`() {
         val missing = File(dir, "does-not-exist.spb")
         val b = Bible()

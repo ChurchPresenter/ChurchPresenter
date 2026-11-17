@@ -95,13 +95,19 @@ internal fun collectBookHeader(
     parsedChapterCounts[bookId] = m.groupValues[REGEX_GROUP_THIRD].toInt()
 }
 
+/**
+ * The module's file is not there: not on the classpath and not on disk. A file that was checked and
+ * then deleted before it was read -- the Instance Link replica is cleared while a load starts --
+ * ends up here, which is the file's absence, not a fault in loading.
+ */
+internal class SpbFileMissingException(resourcePath: String) :
+    IllegalArgumentException("loadFromSpb: resource not found on classpath or filesystem: $resourcePath")
+
 internal fun openSpbReader(resourcePath: String): java.io.BufferedReader {
     val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
     if (inputStream != null) return inputStream.bufferedReader(StandardCharsets.UTF_8)
     val path = Paths.get(resourcePath)
-    require(Files.exists(path)) {
-        "loadFromSpb: resource not found on classpath or filesystem: $resourcePath"
-    }
+    if (!Files.exists(path)) throw SpbFileMissingException(resourcePath)
     return Files.newBufferedReader(path, StandardCharsets.UTF_8)
 }
 

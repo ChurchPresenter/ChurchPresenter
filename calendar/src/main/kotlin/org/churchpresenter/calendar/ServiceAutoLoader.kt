@@ -113,10 +113,16 @@ class ServiceAutoLoader(
         }
     }
 
+    /**
+     * The time, read off the event thread: the first `LocalDateTime.now()` of a run loads the time
+     * zone rules, which was seen stalling the window for a few hundred milliseconds on Windows.
+     */
+    private suspend fun clock(): LocalDateTime = withContext(compute) { now() }
+
     /** One pass at the current time. Public so a test can drive it without the loop. */
     suspend fun tick() = lock.withLock {
         val calendar = document().also { lastDocument = it }
-        val at = now()
+        val at = clock()
         try {
             val schedule = host.currentSchedule()
             withContext(compute) { dueLoad(calendar, at, schedule) }
@@ -135,7 +141,7 @@ class ServiceAutoLoader(
     suspend fun loadNow(serviceId: String, replace: Boolean) = lock.withLock {
         val calendar = document().also { lastDocument = it }
         calendar.services.firstOrNull { it.id == serviceId }?.let { load(it, replace) }
-        announce(calendar, now())
+        announce(calendar, clock())
     }
 
     /**
@@ -144,7 +150,7 @@ class ServiceAutoLoader(
      */
     suspend fun refresh(reread: Boolean = false) = lock.withLock {
         val calendar = lastDocument.takeUnless { reread } ?: document().also { lastDocument = it }
-        announce(calendar, now())
+        announce(calendar, clock())
     }
 
     /**
@@ -161,7 +167,7 @@ class ServiceAutoLoader(
         )
         save(updated)
         lastDocument = updated
-        announce(updated, now())
+        announce(updated, clock())
     }
 
     private fun startDay(at: LocalDateTime) {

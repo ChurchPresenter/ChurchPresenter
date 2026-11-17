@@ -35,6 +35,8 @@ internal suspend fun pushPresentationSlideIfLive(
         index,
         presentation.nextShownSlideIndex(index),
     )
+    // The slide's file is gone from the cache: leave what is on the output alone.
+    if (bitmap == null) return
     presenterManager.setSelectedSlide(bitmap)
     presenterManager.setLiveSlide(presentation.presentationName, index)
     presenterManager.setNextSlide(nextBitmap)

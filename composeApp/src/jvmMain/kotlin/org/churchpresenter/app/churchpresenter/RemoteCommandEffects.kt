@@ -169,6 +169,8 @@ private fun RemotePresentationEffects(
                     index,
                     presentationViewModel.nextShownSlideIndex(index),
                 )
+                // The slide's file is gone from the cache: leave what is on the output alone.
+                if (bitmap == null) return@collect
                 presenterManager.setSelectedSlide(bitmap)
                 presenterManager.setLiveSlide(presentationViewModel.selectedPresentation?.name, index)
                 presenterManager.setNextSlide(nextBitmap)
