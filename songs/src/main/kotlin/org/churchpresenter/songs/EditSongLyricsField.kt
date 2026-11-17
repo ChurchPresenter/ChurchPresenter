@@ -1,8 +1,18 @@
 package org.churchpresenter.songs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -47,6 +57,19 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.semantic
 
 private val LyricsFieldShape = AppShape(10.dp)
+
+/**
+ * How the lyrics box answers a request to scroll something into view. From the press that focuses
+ * the field until the next key press it holds still: taking focus scrolls the field's old cursor --
+ * line 1, until the press moves it -- into view, which would throw the box back to the top under the
+ * click and put the cursor on whatever line the release then lands on. A key press ends the hold.
+ */
+internal class LyricsScrollSpec : BringIntoViewSpec {
+    var holdStill = false
+
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float =
+        if (holdStill) 0f else super.calculateScrollDistance(offset, size, containerSize)
+}
 
 /**
  * Colours what brackets mean while they are being typed: a verse header, a chorus header, and the
@@ -108,6 +131,7 @@ internal fun pasteLyrics(
  * available height with its own scrollbar and a monospaced face, which is what keeps a
  * chord over the syllable it was typed against.
  */
+@OptIn(ExperimentalFoundationApi::class) // LocalBringIntoViewSpec
 @Composable
 internal fun LyricsTextField(
     value: TextFieldValue,
@@ -119,6 +143,8 @@ internal fun LyricsTextField(
 ) {
     val scrollState = rememberScrollState()
     val interactionSource = remember { MutableInteractionSource() }
+    val scrollSpec = remember { LyricsScrollSpec() }
+    var focused by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val currentValue by rememberUpdatedState(value)
     val currentOnValueChange by rememberUpdatedState(onValueChange)
@@ -131,6 +157,7 @@ internal fun LyricsTextField(
             // whichever application holds the clipboard -- seconds on Windows -- so the keystroke
             // is taken here and the clipboard read off the event thread.
             .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown) scrollSpec.holdStill = false
                 val paste = event.type == KeyEventType.KeyDown &&
                     event.key == Key.V &&
                     (event.isCtrlPressed || event.isMetaPressed)
@@ -142,38 +169,47 @@ internal fun LyricsTextField(
                 }
                 paste
             }
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    if (!focused) scrollSpec.holdStill = true
+                }
+            }
+            .onFocusChanged { focused = it.hasFocus }
             .background(MaterialTheme.colorScheme.surfaceContainerHigh, LyricsFieldShape)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, LyricsFieldShape)
     ) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(start = 12.dp, top = 10.dp, bottom = 10.dp, end = 18.dp),
-            textStyle = MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = FontFamily.Monospace,
-                fontSize = 13.sp,
-                lineHeight = 22.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            visualTransformation = visualTransformation,
-            interactionSource = interactionSource,
-            decorationBox = { innerTextField ->
-                Box {
-                    if (placeholder != null && value.text.isEmpty()) {
-                        CompositionLocalProvider(
-                            LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        ) {
-                            placeholder()
+        CompositionLocalProvider(LocalBringIntoViewSpec provides scrollSpec) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(start = 12.dp, top = 10.dp, bottom = 10.dp, end = 18.dp),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 13.sp,
+                    lineHeight = 22.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                visualTransformation = visualTransformation,
+                interactionSource = interactionSource,
+                decorationBox = { innerTextField ->
+                    Box {
+                        if (placeholder != null && value.text.isEmpty()) {
+                            CompositionLocalProvider(
+                                LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            ) {
+                                placeholder()
+                            }
                         }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
-            }
-        )
+            )
+        }
         VerticalScrollbar(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
