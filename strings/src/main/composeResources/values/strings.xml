@@ -23,6 +23,13 @@
     <string name="bible_load_failed_detail">%1$s — %2$s</string>
     <string name="bible_load_failed_partial_hint">Only the part that could be read is shown. Books or verses after the damaged point are missing.</string>
     <string name="bible_load_failed_report_hint">The details are in the crash report folder — attach the newest file when reporting this.</string>
+    <string name="bible_row_warning_title">Some verses are missing from this Bible</string>
+    <string name="bible_row_warning_detail">%1$s — %2$d verse(s) have a damaged ID and cannot be shown</string>
+    <string name="bible_row_warning_show">Show verses</string>
+    <string name="bible_row_warning_hide_verses">Hide verses</string>
+    <string name="bible_row_warning_more">…and %1$d more</string>
+    <string name="bible_row_warning_hide">Hide</string>
+    <string name="bible_row_warning_never">Never remind me again</string>
     <string name="search_songs">Search songs...</string>
     <string name="song_book">Song Book</string>
     <string name="song_book_none">No song book</string>
@@ -2642,6 +2649,9 @@
     <string name="story_prompt_reassurance">Nothing is published without your OK.</string>
     <string name="menu_developer_story_prompt">Share Your Story Dialog</string>
     <string name="menu_developer_wick_intro">Wick Intro Dialog</string>
+    <string name="menu_developer_verse_fixer">Bible Verse Fixer</string>
+    <string name="verse_fixer_choose_title">Choose a Bible file</string>
+    <string name="verse_fixer_window_title">ChurchPresenter Bible Verse Fixer</string>
     <!-- Font picker -->
     <string name="font_picker_search">Search fonts…</string>
     <string name="font_picker_clear_search">Clear search</string>

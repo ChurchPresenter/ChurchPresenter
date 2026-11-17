@@ -27,6 +27,7 @@ import org.churchpresenter.strings.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.profiles.hostFontPicker
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
+import org.churchpresenter.app.churchpresenter.dialogs.BibleVerseFixerWindow
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.dialogs.MemoryMonitorWindow
 import org.churchpresenter.dialogs.CustomizeThemeDialog
@@ -37,6 +38,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.ui.theme.themeChoiceFrom
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.ThemeMode
+import java.io.File
 import org.churchpresenter.serverui.InstanceLinkDialog
 import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import org.churchpresenter.updater.UpdateChecker
@@ -254,6 +256,16 @@ internal fun MainWindowScope.MoreToolWindows() {
             theme = theme,
             onClose = { showMemoryMonitorWindow = false }
         )
+        if (showVerseFixerWindow) {
+            BibleVerseFixerWindow(
+                theme = theme,
+                bibleFiles = appSettings.bibleSettings.let { bible ->
+                    bible.translations.map { File(bible.storageDirectory, it.fileName) }
+                        .filter { it.isFile }.distinct()
+                },
+                onClose = { showVerseFixerWindow = false },
+            )
+        }
         if (showStyleEditorWindow) {
             StyleEditorWindow(
                 theme = theme,

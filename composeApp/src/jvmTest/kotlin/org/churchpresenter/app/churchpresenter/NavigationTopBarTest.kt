@@ -558,7 +558,7 @@ class NavigationTopBarTest {
             assertEquals(8, menuCount)
             val developer = getMenu(7)
             assertEquals("Developer", developer.text)
-            assertEquals(5, developer.itemCount)
+            assertEquals(6, developer.itemCount)
 
             val display = developer.getItem(0) as JMenu
             assertEquals("Display", display.text)

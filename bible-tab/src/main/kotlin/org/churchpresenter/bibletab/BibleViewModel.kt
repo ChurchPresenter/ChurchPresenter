@@ -140,6 +140,10 @@ class BibleViewModel(
 
     val loadErrors: State<List<BibleLoadError>> = _loadErrors
 
+    internal val _loadWarnings = mutableStateOf<List<BibleRowWarning>>(emptyList())
+
+    internal val loadWarnings: State<List<BibleRowWarning>> = _loadWarnings
+
     internal val _verseSelectionToken = mutableStateOf(0)
 
     val verseSelectionToken: State<Int> = _verseSelectionToken

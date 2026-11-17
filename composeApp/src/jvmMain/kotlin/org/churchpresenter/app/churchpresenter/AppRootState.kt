@@ -216,6 +216,7 @@ internal class AppRootState(
 
     // The song source its Songs tab opens on, when the helper named one; null opens the default.
     var converterInitialSource by mutableStateOf<String?>(null)
+
     var showSongLibraryWindow by mutableStateOf(false)
     var showCalendarWindow by mutableStateOf(false)
 
@@ -233,6 +234,7 @@ internal class AppRootState(
     var automationArmed by mutableStateOf(true)
     var showLottieGenWindow by mutableStateOf(false)
     var showStyleEditorWindow by mutableStateOf(false)
+    var showVerseFixerWindow by mutableStateOf(false)
     var showMemoryMonitorWindow by mutableStateOf(false)
     var developerMenuUnlocked by mutableStateOf(false)
 

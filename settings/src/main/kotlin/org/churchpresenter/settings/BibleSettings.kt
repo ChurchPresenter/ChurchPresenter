@@ -408,6 +408,11 @@ data class BibleSettings(
     val textBoxes: Map<String, TextBox> = emptyMap(),
     /** How the Bible page's boxes behave -- see [TextBoxOptions]. */
     val textBoxOptions: TextBoxOptions = TextBoxOptions(),
+    /**
+     * Bible files whose damaged-verses warning the operator chose never to see again, by file name.
+     * One per install ([BIBLE_GLOBAL_KEYS]): it is about the person, not about an output.
+     */
+    val hiddenRowWarnings: List<String> = emptyList(),
 ) {
     /**
      * The translations to present, in order. The first is the navigation bible.
