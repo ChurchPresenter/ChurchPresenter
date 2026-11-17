@@ -333,6 +333,22 @@ class BibleTabScreenshotTest {
         settings = { stack(it, "test.spb", "deleted.spb") },
     )
 
+    // -- A translation with verse rows whose id cannot be read -------------------
+
+    /** The Bible fixture plus Genesis 1:4 written with a stray zero in its id (`V0040`). */
+    private val damagedContent = bibleFixture.trimEnd() + "\nB001C001V0040\t1\t1\t4\tAnd God saw the light.\n"
+
+    /** The warning above the tab: it names the file and how many verses are missing. */
+    @Test
+    fun `damaged verses warning`() = shoot("damaged_verses_warning", content = damagedContent)
+
+    /** Show verses opened: the affected verses are listed under the file's line. */
+    @Test
+    fun `damaged verses listed`() = shoot("damaged_verses_listed", content = damagedContent) {
+        onNodeWithText("Show verses").performClick()
+        waitForIdle()
+    }
+
     // -- A long verse shown as two halves ---------------------------------------
 
     /** 60 words, past the count that makes a verse worth splitting. */

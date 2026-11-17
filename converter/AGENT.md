@@ -21,6 +21,7 @@ Only these symbols — keep them public, and treat a signature change here as an
 | Symbol | Used by |
 |---|---|
 | `ui.App` (as `ConverterApp`), `ui.Strings`, `ui.ConverterTab` | `dialogs/AboutDialog.kt`, `main.kt` — the Help-menu window |
+| `ui.BibleVerseFixerApp` | `dialogs/ToolWindows.kt` — the Developer menu's Bible Verse Fixer window; it takes the Bibles from settings and the app's own file chooser as parameters, so it opens none itself |
 | `ui.SongSources`, `ui.BIBLE_CONVERSION` | `utils/UsageEventMappings.kt` — naming a conversion in usage events |
 
 The Bible converters (`XmlToSpbConverter`, `UsfxToSpbConverter`, `SpbVersePatcher`, the catalogue

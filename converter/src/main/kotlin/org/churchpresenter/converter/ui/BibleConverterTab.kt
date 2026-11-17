@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.bibleformats.SpbVersePatcher
+import org.churchpresenter.bibleformats.malformedSpbIdCount
 import org.churchpresenter.bibleformats.XmlToSpbConverter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +49,9 @@ import java.io.File
 // =============================================================================
 
 @Composable
-fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
+fun BibleConverterTab(
+    onConverted: (sourceId: String) -> Unit = {},
+) {
     val pickers = LocalConverterPickers.current
     var inputFiles by remember { mutableStateOf<List<File>>(emptyList()) }
     var outputDir by remember { mutableStateOf<File?>(null) }
@@ -217,8 +220,10 @@ fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
                                 spbFiles.map { file ->
                                     try {
                                         val count = SpbVersePatcher.applyPatches(file)
-                                        if (count > 0) "OK: ${file.name} \u2014 $count verse(s) patched"
-                                        else "OK: ${file.name} \u2014 no patches needed"
+                                        val left = malformedSpbIdCount(file)
+                                        val rest = if (left > 0) " \u2014 ${Strings.fixStillDamaged(left)}" else ""
+                                        if (count > 0) "OK: ${file.name} \u2014 $count verse(s) patched$rest"
+                                        else "OK: ${file.name} \u2014 no patches needed$rest"
                                     } catch (e: Exception) { "ERROR: ${file.name} \u2014 ${e.message}" }
                                 }
                             }
