@@ -34,6 +34,8 @@ import org.churchpresenter.lottiegen.ui.components.ColorPickerRow
 import org.churchpresenter.lottiegen.ui.components.DeleteIconButton
 import org.churchpresenter.lottiegen.ui.components.HiddenFieldWarning
 import org.churchpresenter.lottiegen.ui.components.LottieDropdown
+import org.churchpresenter.lottiegen.ui.components.LottieFloatField
+import org.churchpresenter.lottiegen.ui.components.LottieIntField
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
 import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SubtleButton
@@ -170,48 +172,37 @@ private fun FontAndSizeRows(viewModel: LottieGenState, fontPicker: BandFontPicke
                 }
             }
         }
-        LottieTextField(
-            value = cfg.baseSize.toString(),
-            onValueChange = { v ->
-                v.toIntOrNull()?.let {
-                    viewModel.updateConfig { c ->
-                        c.copy(baseSize = it.coerceIn(MIN_BASE_SIZE, MAX_BASE_SIZE))
-                    }
-                }
-            },
+        LottieIntField(
             label = Strings.baseSize,
-            modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+            value = cfg.baseSize,
+            onCommit = { s -> viewModel.updateConfig { c -> c.copy(baseSize = s) } },
+            range = MIN_BASE_SIZE..MAX_BASE_SIZE,
+            modifier = Modifier.weight(1f), fillWidth = true
         )
     }
     FieldRow {
-        LottieTextField(
-            value = cfg.nameSize.toString(),
-            onValueChange = { v ->
-                v.toFloatOrNull()?.let {
-                    viewModel.updateConfig { c -> c.copy(nameSize = it.coerceIn(MIN_TEXT_EM, MAX_TEXT_EM)) }
-                }
-            },
-            label = Strings.nameSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+        LottieFloatField(
+            label = Strings.nameSize,
+            value = cfg.nameSize,
+            onCommit = { s -> viewModel.updateConfig { c -> c.copy(nameSize = s) } },
+            range = MIN_TEXT_EM..MAX_TEXT_EM,
+            modifier = Modifier.weight(1f), fillWidth = true
         )
-        LottieTextField(
-            value = cfg.infoSize.toString(),
-            onValueChange = { v ->
-                v.toFloatOrNull()?.let {
-                    viewModel.updateConfig { c -> c.copy(infoSize = it.coerceIn(MIN_TEXT_EM, MAX_TEXT_EM)) }
-                }
-            },
-            label = Strings.infoSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+        LottieFloatField(
+            label = Strings.infoSize,
+            value = cfg.infoSize,
+            onCommit = { s -> viewModel.updateConfig { c -> c.copy(infoSize = s) } },
+            range = MIN_TEXT_EM..MAX_TEXT_EM,
+            modifier = Modifier.weight(1f), fillWidth = true
         )
     }
     FieldRow {
-        LottieTextField(
-            value = cfg.detailSize.toString(),
-            onValueChange = { v ->
-                v.toFloatOrNull()?.let {
-                    viewModel.updateConfig { c -> c.copy(detailSize = it.coerceIn(MIN_TEXT_EM, MAX_TEXT_EM)) }
-                }
-            },
-            label = Strings.detailSize, modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+        LottieFloatField(
+            label = Strings.detailSize,
+            value = cfg.detailSize,
+            onCommit = { s -> viewModel.updateConfig { c -> c.copy(detailSize = s) } },
+            range = MIN_TEXT_EM..MAX_TEXT_EM,
+            modifier = Modifier.weight(1f), fillWidth = true
         )
         Box(Modifier.weight(1f))
     }
