@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d jae puuttuu</string>
     <string name="bible_editor_missing_other">%1$d jaetta puuttuu</string>
     <string name="bible_editor_complete_matches">Täydellinen, vastaa käännöstä %1$s</string>
-    <string name="bible_editor_complete">Jakeiden numeroinnissa ei ole aukkoja</string>
     <string name="bible_editor_chapter_changes_one">%1$d muutos tässä luvussa</string>
     <string name="bible_editor_chapter_changes_other">%1$d muutosta tässä luvussa</string>
     <string name="bible_editor_care_title">Käsittele huolella. Tämä on Pyhä Raamattu.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Puuttuvat jakeet</string>
     <string name="bible_editor_compared">%1$s verrattuna käännökseen %2$s · %3$d kirjaa tarkistettu</string>
-    <string name="bible_editor_no_reference">Raamattukansiossasi ei ole KJV:tä vertailua varten.</string>
     <string name="bible_editor_checking">Tarkistetaan…</string>
     <string name="bible_editor_stat_missing">Puuttuu yhä</string>
     <string name="bible_editor_stat_restored">Palautettu</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Seuraava: %1$s</string>
     <string name="bible_editor_no_next_missing">Tästä Raamatusta ei puutu jakeita</string>
     <string name="bible_editor_next_missing">Seuraava puuttuva</string>
+    <string name="bible_editor_gap_end_caution">Monet käännökset yhdistävät tämän jakeen jakeeseen %1$d — vertaa painettuun Raamattuun ennen kuin kirjoitat sen.</string>
 </resources>

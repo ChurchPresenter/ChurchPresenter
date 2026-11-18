@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d 節が欠けています</string>
     <string name="bible_editor_missing_other">%1$d 節が欠けています</string>
     <string name="bible_editor_complete_matches">完全、%1$s と一致</string>
-    <string name="bible_editor_complete">節番号に欠落はありません</string>
     <string name="bible_editor_chapter_changes_one">この章で %1$d 件の変更</string>
     <string name="bible_editor_chapter_changes_other">この章で %1$d 件の変更</string>
     <string name="bible_editor_care_title">慎重に扱ってください。これは聖書のみことばです。</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s、%2$s</string>
     <string name="bible_editor_missing_title">欠けている節</string>
     <string name="bible_editor_compared">%1$s を %2$s と比較 · %3$d 書を確認</string>
-    <string name="bible_editor_no_reference">聖書フォルダーに比較用の KJV がありません。</string>
     <string name="bible_editor_checking">確認中…</string>
     <string name="bible_editor_stat_missing">まだ欠落</string>
     <string name="bible_editor_stat_restored">復元済み</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">次: %1$s</string>
     <string name="bible_editor_no_next_missing">この聖書に欠けている節はありません</string>
     <string name="bible_editor_next_missing">次の欠落</string>
+    <string name="bible_editor_gap_end_caution">多くの訳ではこの節を %1$d 節に統合しています。入力する前に印刷版の聖書と照らし合わせてください。</string>
 </resources>

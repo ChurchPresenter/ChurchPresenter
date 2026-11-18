@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d आयत छूटी है</string>
     <string name="bible_editor_missing_other">%1$d आयतें छूटी हैं</string>
     <string name="bible_editor_complete_matches">पूर्ण, %1$s से मेल खाती है</string>
-    <string name="bible_editor_complete">आयत संख्याओं में कोई अंतराल नहीं</string>
     <string name="bible_editor_chapter_changes_one">इस अध्याय में %1$d बदलाव</string>
     <string name="bible_editor_chapter_changes_other">इस अध्याय में %1$d बदलाव</string>
     <string name="bible_editor_care_title">सावधानी से संभालें। यह पवित्र शास्त्र है।</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">छूटी हुई आयतें</string>
     <string name="bible_editor_compared">%1$s की तुलना %2$s से · %3$d पुस्तकें जाँची गईं</string>
-    <string name="bible_editor_no_reference">तुलना के लिए आपके बाइबल फ़ोल्डर में कोई KJV नहीं है।</string>
     <string name="bible_editor_checking">जाँच हो रही है…</string>
     <string name="bible_editor_stat_missing">अब भी छूटी हुई</string>
     <string name="bible_editor_stat_restored">पुनर्स्थापित</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">अगली: %1$s</string>
     <string name="bible_editor_no_next_missing">इस बाइबल में कोई आयत छूटी नहीं है</string>
     <string name="bible_editor_next_missing">अगली छूटी आयत</string>
+    <string name="bible_editor_gap_end_caution">कई अनुवाद इस आयत को आयत %1$d से जोड़ देते हैं — इसे टाइप करने से पहले छपी हुई बाइबल से मिलान करें।</string>
 </resources>

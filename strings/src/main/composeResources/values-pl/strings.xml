@@ -4805,7 +4805,6 @@
     <string name="bible_editor_missing_one">Brakuje %1$d wersetu</string>
     <string name="bible_editor_missing_other">Brakujące wersety: %1$d</string>
     <string name="bible_editor_complete_matches">Kompletna, zgodna z %1$s</string>
-    <string name="bible_editor_complete">Brak luk w numeracji wersetów</string>
     <string name="bible_editor_chapter_changes_one">%1$d zmiana w tym rozdziale</string>
     <string name="bible_editor_chapter_changes_other">Zmiany w tym rozdziale: %1$d</string>
     <string name="bible_editor_care_title">Zachowaj ostrożność. To jest Pismo Święte.</string>
@@ -4865,7 +4864,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Brakujące wersety</string>
     <string name="bible_editor_compared">%1$s w porównaniu z %2$s · sprawdzone księgi: %3$d</string>
-    <string name="bible_editor_no_reference">W folderze Biblii nie ma KJV do porównania.</string>
     <string name="bible_editor_checking">Sprawdzanie…</string>
     <string name="bible_editor_stat_missing">Nadal brakuje</string>
     <string name="bible_editor_stat_restored">Przywrócone</string>
@@ -4897,4 +4895,5 @@
     <string name="bible_editor_next_missing_at">Następny: %1$s</string>
     <string name="bible_editor_no_next_missing">W tej Biblii nie brakuje żadnego wersetu</string>
     <string name="bible_editor_next_missing">Następny brakujący</string>
+    <string name="bible_editor_gap_end_caution">Wiele przekładów łączy ten werset z wersetem %1$d — przed wpisaniem porównaj z drukowaną Biblią.</string>
 </resources>

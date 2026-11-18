@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d ayet eksik</string>
     <string name="bible_editor_missing_other">%1$d ayet eksik</string>
     <string name="bible_editor_complete_matches">Tam, %1$s ile eşleşiyor</string>
-    <string name="bible_editor_complete">Ayet numaralarında boşluk yok</string>
     <string name="bible_editor_chapter_changes_one">Bu bölümde %1$d değişiklik</string>
     <string name="bible_editor_chapter_changes_other">Bu bölümde %1$d değişiklik</string>
     <string name="bible_editor_care_title">Özenle davranın. Bu Kutsal Yazı'dır.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Eksik ayetler</string>
     <string name="bible_editor_compared">%1$s ile %2$s karşılaştırıldı · %3$d kitap kontrol edildi</string>
-    <string name="bible_editor_no_reference">Kutsal Kitap klasörünüzde karşılaştırma için KJV yok.</string>
     <string name="bible_editor_checking">Kontrol ediliyor…</string>
     <string name="bible_editor_stat_missing">Hâlâ eksik</string>
     <string name="bible_editor_stat_restored">Geri yüklenen</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Sonraki: %1$s</string>
     <string name="bible_editor_no_next_missing">Bu Kutsal Kitapta eksik ayet yok</string>
     <string name="bible_editor_next_missing">Sonraki eksik</string>
+    <string name="bible_editor_gap_end_caution">Birçok çeviri bu ayeti %1$d. ayetle birleştirir — yazmadan önce basılı bir Kutsal Kitap'la karşılaştırın.</string>
 </resources>

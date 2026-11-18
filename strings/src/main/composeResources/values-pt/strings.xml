@@ -4834,7 +4834,6 @@
     <string name="bible_editor_missing_one">%1$d versículo ausente</string>
     <string name="bible_editor_missing_other">%1$d versículos ausentes</string>
     <string name="bible_editor_complete_matches">Completa, confere com %1$s</string>
-    <string name="bible_editor_complete">Sem lacunas na numeração dos versículos</string>
     <string name="bible_editor_chapter_changes_one">%1$d alteração neste capítulo</string>
     <string name="bible_editor_chapter_changes_other">%1$d alterações neste capítulo</string>
     <string name="bible_editor_care_title">Manuseie com cuidado. Esta é a Sagrada Escritura.</string>
@@ -4894,7 +4893,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Versículos ausentes</string>
     <string name="bible_editor_compared">%1$s comparada com %2$s · %3$d livros verificados</string>
-    <string name="bible_editor_no_reference">Não há KJV na sua pasta de Bíblias para comparar.</string>
     <string name="bible_editor_checking">Verificando…</string>
     <string name="bible_editor_stat_missing">Ainda ausentes</string>
     <string name="bible_editor_stat_restored">Restaurados</string>
@@ -4926,4 +4924,5 @@
     <string name="bible_editor_next_missing_at">Próximo: %1$s</string>
     <string name="bible_editor_no_next_missing">Não há versículos ausentes nesta Bíblia</string>
     <string name="bible_editor_next_missing">Próximo ausente</string>
+    <string name="bible_editor_gap_end_caution">Muitas traduções unem este versículo ao versículo %1$d — compare com uma Bíblia impressa antes de digitá-lo.</string>
 </resources>

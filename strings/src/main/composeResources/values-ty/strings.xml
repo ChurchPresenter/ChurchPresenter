@@ -4969,7 +4969,6 @@
     <string name="bible_editor_missing_one">%1$d ʻirava tē ʻere nei</string>
     <string name="bible_editor_missing_other">%1$d ʻirava tē ʻere nei</string>
     <string name="bible_editor_complete_matches">Tāatoʻa, tūʻati i te %1$s</string>
-    <string name="bible_editor_complete">ʻAita e ʻāpoʻo i roto i te mau numera ʻirava</string>
     <string name="bible_editor_chapter_changes_one">%1$d tauiraʻa i roto i teie pene</string>
     <string name="bible_editor_chapter_changes_other">%1$d tauiraʻa i roto i teie pene</string>
     <string name="bible_editor_care_title">Ia haʻapaʻo maitaʻi. E Parau Moʻa teie.</string>
@@ -5029,7 +5028,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Te mau ʻirava e ʻere nei</string>
     <string name="bible_editor_compared">%1$s faʻaauhia i te %2$s · %3$d buka i hiʻopoʻahia</string>
-    <string name="bible_editor_no_reference">ʻAita e KJV i roto i tō ʻoe dossier Bibilia nō te faʻaau.</string>
     <string name="bible_editor_checking">Tē hiʻopoʻa nei…</string>
     <string name="bible_editor_stat_missing">Tē ʻere noa nei</string>
     <string name="bible_editor_stat_restored">Faʻahoʻihia</string>
@@ -5061,4 +5059,5 @@
     <string name="bible_editor_next_missing_at">I muri: %1$s</string>
     <string name="bible_editor_no_next_missing">ʻAita e ʻirava e ʻere nei i roto i teie Bibilia</string>
     <string name="bible_editor_next_missing">ʻIrava ʻere i muri</string>
+    <string name="bible_editor_gap_end_caution">E rave rahi mau huriraʻa i te tāʻati i teie ʻirava i te ʻirava %1$d — e faʻaau i te hōʻē Bibilia neneʻihia hou a pāpaʻi ai.</string>
 </resources>

@@ -4806,7 +4806,6 @@
     <string name="bible_editor_missing_one">%1$d Vers fehlt</string>
     <string name="bible_editor_missing_other">%1$d Verse fehlen</string>
     <string name="bible_editor_complete_matches">Vollständig, stimmt mit %1$s überein</string>
-    <string name="bible_editor_complete">Keine Lücken in den Versnummern</string>
     <string name="bible_editor_chapter_changes_one">%1$d Änderung in diesem Kapitel</string>
     <string name="bible_editor_chapter_changes_other">%1$d Änderungen in diesem Kapitel</string>
     <string name="bible_editor_care_title">Mit Sorgfalt behandeln. Dies ist die Heilige Schrift.</string>
@@ -4866,7 +4865,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Fehlende Verse</string>
     <string name="bible_editor_compared">%1$s verglichen mit %2$s · %3$d Bücher geprüft</string>
-    <string name="bible_editor_no_reference">In Ihrem Bibelordner gibt es keine KJV zum Vergleichen.</string>
     <string name="bible_editor_checking">Wird geprüft…</string>
     <string name="bible_editor_stat_missing">Noch fehlend</string>
     <string name="bible_editor_stat_restored">Wiederhergestellt</string>
@@ -4898,4 +4896,5 @@
     <string name="bible_editor_next_missing_at">Nächster: %1$s</string>
     <string name="bible_editor_no_next_missing">Keine fehlenden Verse in dieser Bibel</string>
     <string name="bible_editor_next_missing">Nächster fehlender</string>
+    <string name="bible_editor_gap_end_caution">Viele Übersetzungen fassen diesen Vers mit Vers %1$d zusammen – vergleichen Sie vor dem Eingeben mit einer gedruckten Bibel.</string>
 </resources>

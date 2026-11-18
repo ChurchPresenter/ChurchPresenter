@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d ayat hilang</string>
     <string name="bible_editor_missing_other">%1$d ayat hilang</string>
     <string name="bible_editor_complete_matches">Lengkap, sesuai dengan %1$s</string>
-    <string name="bible_editor_complete">Tidak ada celah pada nomor ayat</string>
     <string name="bible_editor_chapter_changes_one">%1$d perubahan di pasal ini</string>
     <string name="bible_editor_chapter_changes_other">%1$d perubahan di pasal ini</string>
     <string name="bible_editor_care_title">Tangani dengan hati-hati. Ini adalah Kitab Suci.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Ayat yang hilang</string>
     <string name="bible_editor_compared">%1$s dibandingkan dengan %2$s · %3$d kitab diperiksa</string>
-    <string name="bible_editor_no_reference">Tidak ada KJV di folder Alkitab Anda untuk dibandingkan.</string>
     <string name="bible_editor_checking">Memeriksa…</string>
     <string name="bible_editor_stat_missing">Masih hilang</string>
     <string name="bible_editor_stat_restored">Dipulihkan</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Berikutnya: %1$s</string>
     <string name="bible_editor_no_next_missing">Tidak ada ayat yang hilang di Alkitab ini</string>
     <string name="bible_editor_next_missing">Hilang berikutnya</string>
+    <string name="bible_editor_gap_end_caution">Banyak terjemahan menggabungkan ayat ini dengan ayat %1$d — bandingkan dengan Alkitab cetak sebelum mengetiknya.</string>
 </resources>

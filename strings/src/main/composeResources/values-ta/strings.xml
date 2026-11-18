@@ -4856,7 +4856,6 @@
     <string name="bible_editor_missing_one">%1$d வசனம் விடுபட்டுள்ளது</string>
     <string name="bible_editor_missing_other">%1$d வசனங்கள் விடுபட்டுள்ளன</string>
     <string name="bible_editor_complete_matches">முழுமை, %1$s உடன் பொருந்துகிறது</string>
-    <string name="bible_editor_complete">வசன எண்களில் இடைவெளி இல்லை</string>
     <string name="bible_editor_chapter_changes_one">இந்த அதிகாரத்தில் %1$d மாற்றம்</string>
     <string name="bible_editor_chapter_changes_other">இந்த அதிகாரத்தில் %1$d மாற்றங்கள்</string>
     <string name="bible_editor_care_title">கவனத்துடன் கையாளுங்கள். இது பரிசுத்த வேதாகமம்.</string>
@@ -4916,7 +4915,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">விடுபட்ட வசனங்கள்</string>
     <string name="bible_editor_compared">%1$s, %2$s உடன் ஒப்பிடப்பட்டது · %3$d புத்தகங்கள் சரிபார்க்கப்பட்டன</string>
-    <string name="bible_editor_no_reference">ஒப்பிட உங்கள் வேதாகமக் கோப்புறையில் KJV இல்லை.</string>
     <string name="bible_editor_checking">சரிபார்க்கிறது…</string>
     <string name="bible_editor_stat_missing">இன்னும் விடுபட்டவை</string>
     <string name="bible_editor_stat_restored">மீட்டமைக்கப்பட்டவை</string>
@@ -4948,4 +4946,5 @@
     <string name="bible_editor_next_missing_at">அடுத்தது: %1$s</string>
     <string name="bible_editor_no_next_missing">இந்த வேதாகமத்தில் விடுபட்ட வசனங்கள் இல்லை</string>
     <string name="bible_editor_next_missing">அடுத்த விடுபட்டது</string>
+    <string name="bible_editor_gap_end_caution">பல மொழிபெயர்ப்புகள் இந்த வசனத்தை வசனம் %1$d உடன் இணைக்கின்றன — தட்டச்சிடும் முன் அச்சிட்ட வேதாகமத்துடன் ஒப்பிடுங்கள்.</string>
 </resources>

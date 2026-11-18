@@ -4805,7 +4805,6 @@
     <string name="bible_editor_missing_one">Прапушчаны %1$d верш</string>
     <string name="bible_editor_missing_other">Прапушчана вершаў: %1$d</string>
     <string name="bible_editor_complete_matches">Поўная, супадае з %1$s</string>
-    <string name="bible_editor_complete">Няма пропускаў у нумарацыі вершаў</string>
     <string name="bible_editor_chapter_changes_one">%1$d змена ў гэтым раздзеле</string>
     <string name="bible_editor_chapter_changes_other">Змен у гэтым раздзеле: %1$d</string>
     <string name="bible_editor_care_title">Звяртайцеся беражліва. Гэта Святое Пісанне.</string>
@@ -4865,7 +4864,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Прапушчаныя вершы</string>
     <string name="bible_editor_compared">%1$s параўноўваецца з %2$s · праверана кніг: %3$d</string>
-    <string name="bible_editor_no_reference">У вашай папцы Біблій няма KJV для параўнання.</string>
     <string name="bible_editor_checking">Праверка…</string>
     <string name="bible_editor_stat_missing">Яшчэ прапушчана</string>
     <string name="bible_editor_stat_restored">Адноўлена</string>
@@ -4897,4 +4895,5 @@
     <string name="bible_editor_next_missing_at">Наступны: %1$s</string>
     <string name="bible_editor_no_next_missing">У гэтай Бібліі няма прапушчаных вершаў</string>
     <string name="bible_editor_next_missing">Наступны прапушчаны</string>
+    <string name="bible_editor_gap_end_caution">Многія пераклады далучаюць гэты верш да верша %1$d — звярыцеся з друкаванай Бібліяй, перш чым уводзіць яго.</string>
 </resources>

@@ -4833,7 +4833,6 @@
     <string name="bible_editor_missing_one">%1$d vers ontbreekt</string>
     <string name="bible_editor_missing_other">%1$d verzen ontbreken</string>
     <string name="bible_editor_complete_matches">Volledig, komt overeen met %1$s</string>
-    <string name="bible_editor_complete">Geen gaten in de versnummers</string>
     <string name="bible_editor_chapter_changes_one">%1$d wijziging in dit hoofdstuk</string>
     <string name="bible_editor_chapter_changes_other">%1$d wijzigingen in dit hoofdstuk</string>
     <string name="bible_editor_care_title">Ga er zorgvuldig mee om. Dit is de Heilige Schrift.</string>
@@ -4893,7 +4892,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Ontbrekende verzen</string>
     <string name="bible_editor_compared">%1$s vergeleken met %2$s · %3$d boeken gecontroleerd</string>
-    <string name="bible_editor_no_reference">Er staat geen KJV in uw bijbelmap om mee te vergelijken.</string>
     <string name="bible_editor_checking">Controleren…</string>
     <string name="bible_editor_stat_missing">Nog ontbrekend</string>
     <string name="bible_editor_stat_restored">Hersteld</string>
@@ -4925,4 +4923,5 @@
     <string name="bible_editor_next_missing_at">Volgende: %1$s</string>
     <string name="bible_editor_no_next_missing">Geen ontbrekende verzen in deze Bijbel</string>
     <string name="bible_editor_next_missing">Volgende ontbrekende</string>
+    <string name="bible_editor_gap_end_caution">Veel vertalingen voegen dit vers samen met vers %1$d — vergelijk met een gedrukte Bijbel voordat u het typt.</string>
 </resources>

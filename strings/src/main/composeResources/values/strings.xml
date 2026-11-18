@@ -2675,7 +2675,6 @@
     <string name="bible_editor_missing_one">%1$d verse missing</string>
     <string name="bible_editor_missing_other">%1$d verses missing</string>
     <string name="bible_editor_complete_matches">Complete, matches %1$s</string>
-    <string name="bible_editor_complete">No gaps in the verse numbers</string>
     <string name="bible_editor_chapter_changes_one">%1$d change in this chapter</string>
     <string name="bible_editor_chapter_changes_other">%1$d changes in this chapter</string>
     <string name="bible_editor_care_title">Handle with care. This is Holy Scripture.</string>
@@ -2735,7 +2734,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Missing verses</string>
     <string name="bible_editor_compared">%1$s compared with %2$s · %3$d books checked</string>
-    <string name="bible_editor_no_reference">There is no KJV in your Bible folder to compare with.</string>
     <string name="bible_editor_checking">Checking…</string>
     <string name="bible_editor_stat_missing">Still missing</string>
     <string name="bible_editor_stat_restored">Restored</string>
@@ -2757,6 +2755,7 @@
     <string name="bible_editor_copied">Copied</string>
     <string name="bible_editor_report_header">%1$s — missing verses</string>
     <string name="bible_editor_type_next">Type the next one</string>
+    <string name="bible_editor_gap_end_caution">Many translations join this verse to verse %1$d — compare with a printed Bible before typing it.</string>
     <string name="bible_editor_chapter_count">%1$d chapters</string>
     <string name="bible_editor_go_to">Go to</string>
     <string name="bible_editor_chapter_number">Chapter number</string>

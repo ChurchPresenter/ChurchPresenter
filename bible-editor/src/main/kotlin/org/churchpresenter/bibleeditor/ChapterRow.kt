@@ -12,7 +12,8 @@ import java.io.File
 sealed interface ChapterRow {
     val verse: Int
 
-    data class Gap(override val verse: Int) : ChapterRow
+    /** [joinedTo] is the chapter's last verse when this gap comes after it: often where its words are. */
+    data class Gap(override val verse: Int, val joinedTo: Int? = null) : ChapterRow
 
     data class Verse(
         override val verse: Int,
@@ -52,12 +53,14 @@ fun BibleEditorState.chapterRows(): List<ChapterRow> {
         .filter { it.bible == key && it.book == bookId && it.chapter == chapter }
         .map { it.verse }
     val count = maxOf(verses.keys.maxOrNull() ?: 0, missingHere.maxOrNull() ?: 0, addedHere.maxOrNull() ?: 0)
+    val pastEnd = missingPastEnd()
+    val lastVerse = verses.keys.maxOrNull()
     return (1..count).map { n ->
         val address = VerseAddress(key, bookId, chapter, n)
         val change = changes[address]
         val base = verses[n]
         if (base == null && change?.added != true) {
-            ChapterRow.Gap(n)
+            ChapterRow.Gap(n, joinedTo = lastVerse.takeIf { n in pastEnd })
         } else {
             ChapterRow.Verse(n, change?.text ?: base.orEmpty(), base, change, history.lastFor(address))
         }
@@ -68,6 +71,13 @@ fun BibleEditorState.chapterRows(): List<ChapterRow> {
 fun BibleEditorState.missingInChapter(): Set<Int> {
     val key = selected?.key ?: return emptySet()
     return missing[key].orEmpty().filter { it.book == bookId && it.chapter == chapter }.map { it.verse }.toSet()
+}
+
+/** Missing verses of the open chapter that come after its last verse: the ones often joined, not lost. */
+fun BibleEditorState.missingPastEnd(): Set<Int> {
+    val key = selected?.key ?: return emptySet()
+    return missing[key].orEmpty().filter { it.book == bookId && it.chapter == chapter && it.atChapterEnd }
+        .map { it.verse }.toSet()
 }
 
 /** The open Bible's missing verses that are not typed back in yet. */

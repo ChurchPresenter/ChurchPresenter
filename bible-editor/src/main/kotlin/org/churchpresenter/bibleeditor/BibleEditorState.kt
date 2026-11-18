@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.bible.Bible
+import org.churchpresenter.bibleformats.KjvVersification
 import java.io.File
 
 /** One `.spb` file the editor can open. [key] is its path inside the Bible folder. */
@@ -54,10 +55,6 @@ class BibleEditorState(
     var chapter by mutableIntStateOf(1)
         private set
 
-    /** The Bible missing verses are judged against: the shelf's KJV, when there is one. */
-    var reference by mutableStateOf<ShelfBible?>(null)
-        private set
-    private var referenceBible: Bible? = null
     var missing by mutableStateOf<Map<String, List<MissingVerse>>>(emptyMap())
         private set
 
@@ -90,8 +87,6 @@ class BibleEditorState(
             history.reset(saved)
             shelf = found
             loadingShelf = false
-            reference = found.firstOrNull { it.abbreviation.equals(REFERENCE_ABBREVIATION, ignoreCase = true) }
-                ?: found.firstOrNull { it.file.name.contains(REFERENCE_ABBREVIATION, ignoreCase = true) }
             val first = preferred.firstNotNullOfOrNull { p -> found.firstOrNull { it.file == p } }
                 ?: found.firstOrNull()
             first?.let { selectBible(it) }
@@ -114,16 +109,8 @@ class BibleEditorState(
     }
 
     private suspend fun scanMissing(target: ShelfBible, loaded: Bible) {
-        val ref = reference ?: return
         if (target.key in missing) return
-        if (ref.key == target.key) {
-            missing = missing + (target.key to emptyList())
-            return
-        }
-        val found = withContext(io) {
-            val refBible = referenceBible ?: loadBible(ref.file).also { referenceBible = it }
-            findMissingVerses(loaded, refBible)
-        }
+        val found = withContext(io) { findMissingVerses(loaded) }
         missing = missing + (target.key to found)
     }
 
@@ -177,6 +164,7 @@ class BibleEditorState(
     fun address(verse: Int): VerseAddress? = selected?.let { VerseAddress(it.key, bookId, chapter, verse) }
 
     companion object {
+        /** The numbering missing verses are judged against: the KJV's (see [KjvVersification]). */
         const val REFERENCE_ABBREVIATION = "KJV"
     }
 }

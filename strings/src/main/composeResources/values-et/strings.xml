@@ -4838,7 +4838,6 @@
     <string name="bible_editor_missing_one">%1$d salm on puudu</string>
     <string name="bible_editor_missing_other">%1$d salmi on puudu</string>
     <string name="bible_editor_complete_matches">Täielik, ühtib tõlkega %1$s</string>
-    <string name="bible_editor_complete">Salminumbrites pole lünki</string>
     <string name="bible_editor_chapter_changes_one">%1$d muudatus selles peatükis</string>
     <string name="bible_editor_chapter_changes_other">%1$d muudatust selles peatükis</string>
     <string name="bible_editor_care_title">Käsitse hoolega. See on Pühakiri.</string>
@@ -4898,7 +4897,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Puuduvad salmid</string>
     <string name="bible_editor_compared">%1$s võrrelduna tõlkega %2$s · %3$d raamatut kontrollitud</string>
-    <string name="bible_editor_no_reference">Sinu piiblikaustas pole KJV-d, millega võrrelda.</string>
     <string name="bible_editor_checking">Kontrollimine…</string>
     <string name="bible_editor_stat_missing">Endiselt puudu</string>
     <string name="bible_editor_stat_restored">Taastatud</string>
@@ -4930,4 +4928,5 @@
     <string name="bible_editor_next_missing_at">Järgmine: %1$s</string>
     <string name="bible_editor_no_next_missing">Selles Piiblis pole ühtegi salmi puudu</string>
     <string name="bible_editor_next_missing">Järgmine puuduv</string>
+    <string name="bible_editor_gap_end_caution">Paljud tõlked liidavad selle salmi salmiga %1$d — võrrelge enne sisestamist trükitud Piibliga.</string>
 </resources>

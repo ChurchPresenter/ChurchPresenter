@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">缺失 %1$d 节</string>
     <string name="bible_editor_missing_other">缺失 %1$d 节</string>
     <string name="bible_editor_complete_matches">完整，与 %1$s 一致</string>
-    <string name="bible_editor_complete">节号没有缺漏</string>
     <string name="bible_editor_chapter_changes_one">本章有 %1$d 处更改</string>
     <string name="bible_editor_chapter_changes_other">本章有 %1$d 处更改</string>
     <string name="bible_editor_care_title">请谨慎处理。这是神圣的经文。</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s，%2$s</string>
     <string name="bible_editor_missing_title">缺失的经文</string>
     <string name="bible_editor_compared">%1$s 与 %2$s 对照 · 已检查 %3$d 卷书</string>
-    <string name="bible_editor_no_reference">您的圣经文件夹中没有可供对照的 KJV。</string>
     <string name="bible_editor_checking">正在检查…</string>
     <string name="bible_editor_stat_missing">仍缺失</string>
     <string name="bible_editor_stat_restored">已恢复</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">下一处：%1$s</string>
     <string name="bible_editor_no_next_missing">此圣经中没有缺失的经文</string>
     <string name="bible_editor_next_missing">下一处缺失</string>
+    <string name="bible_editor_gap_end_caution">许多译本将此节并入第 %1$d 节——输入前请对照纸质圣经核实。</string>
 </resources>

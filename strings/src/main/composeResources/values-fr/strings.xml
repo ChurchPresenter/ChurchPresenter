@@ -4833,7 +4833,6 @@
     <string name="bible_editor_missing_one">%1$d verset manquant</string>
     <string name="bible_editor_missing_other">%1$d versets manquants</string>
     <string name="bible_editor_complete_matches">Complète, conforme à %1$s</string>
-    <string name="bible_editor_complete">Aucune lacune dans la numérotation des versets</string>
     <string name="bible_editor_chapter_changes_one">%1$d modification dans ce chapitre</string>
     <string name="bible_editor_chapter_changes_other">%1$d modifications dans ce chapitre</string>
     <string name="bible_editor_care_title">À manier avec soin. Ceci est la Sainte Écriture.</string>
@@ -4893,7 +4892,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Versets manquants</string>
     <string name="bible_editor_compared">%1$s comparée à %2$s · %3$d livres vérifiés</string>
-    <string name="bible_editor_no_reference">Aucune KJV dans votre dossier de Bibles pour comparer.</string>
     <string name="bible_editor_checking">Vérification…</string>
     <string name="bible_editor_stat_missing">Encore manquants</string>
     <string name="bible_editor_stat_restored">Restaurés</string>
@@ -4925,4 +4923,5 @@
     <string name="bible_editor_next_missing_at">Suivant : %1$s</string>
     <string name="bible_editor_no_next_missing">Aucun verset manquant dans cette Bible</string>
     <string name="bible_editor_next_missing">Manquant suivant</string>
+    <string name="bible_editor_gap_end_caution">De nombreuses traductions rattachent ce verset au verset %1$d — comparez avec une Bible imprimée avant de le saisir.</string>
 </resources>

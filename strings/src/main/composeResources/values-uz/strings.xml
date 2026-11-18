@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d ta oyat yetishmayapti</string>
     <string name="bible_editor_missing_other">%1$d ta oyat yetishmayapti</string>
     <string name="bible_editor_complete_matches">Toʻliq, %1$s bilan mos</string>
-    <string name="bible_editor_complete">Oyat raqamlarida boʻshliq yoʻq</string>
     <string name="bible_editor_chapter_changes_one">Bu bobda %1$d ta oʻzgarish</string>
     <string name="bible_editor_chapter_changes_other">Bu bobda %1$d ta oʻzgarish</string>
     <string name="bible_editor_care_title">Ehtiyotkorlik bilan munosabatda boʻling. Bu Muqaddas Yozuvdir.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Yetishmayotgan oyatlar</string>
     <string name="bible_editor_compared">%1$s va %2$s solishtirildi · %3$d ta kitob tekshirildi</string>
-    <string name="bible_editor_no_reference">Muqaddas Kitob papkangizda solishtirish uchun KJV yoʻq.</string>
     <string name="bible_editor_checking">Tekshirilmoqda…</string>
     <string name="bible_editor_stat_missing">Hali yetishmayapti</string>
     <string name="bible_editor_stat_restored">Tiklangan</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Keyingisi: %1$s</string>
     <string name="bible_editor_no_next_missing">Shu Muqaddas Kitobda yetishmayotgan oyat yoʻq</string>
     <string name="bible_editor_next_missing">Keyingi yetishmayotgan</string>
+    <string name="bible_editor_gap_end_caution">Koʻp tarjimalarda bu oyat %1$d-oyatga qoʻshilgan — yozishdan oldin bosma Muqaddas Kitob bilan solishtiring.</string>
 </resources>

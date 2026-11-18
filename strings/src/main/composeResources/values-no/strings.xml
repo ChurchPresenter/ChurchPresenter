@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d vers mangler</string>
     <string name="bible_editor_missing_other">%1$d vers mangler</string>
     <string name="bible_editor_complete_matches">Komplett, stemmer med %1$s</string>
-    <string name="bible_editor_complete">Ingen hull i versnumrene</string>
     <string name="bible_editor_chapter_changes_one">%1$d endring i dette kapittelet</string>
     <string name="bible_editor_chapter_changes_other">%1$d endringer i dette kapittelet</string>
     <string name="bible_editor_care_title">Håndter med omhu. Dette er Den hellige skrift.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Manglende vers</string>
     <string name="bible_editor_compared">%1$s sammenlignet med %2$s · %3$d bøker kontrollert</string>
-    <string name="bible_editor_no_reference">Det finnes ingen KJV i bibelmappen din å sammenligne med.</string>
     <string name="bible_editor_checking">Kontrollerer…</string>
     <string name="bible_editor_stat_missing">Mangler fortsatt</string>
     <string name="bible_editor_stat_restored">Gjenopprettet</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Neste: %1$s</string>
     <string name="bible_editor_no_next_missing">Ingen manglende vers i denne bibelen</string>
     <string name="bible_editor_next_missing">Neste manglende</string>
+    <string name="bible_editor_gap_end_caution">Mange oversettelser slår dette verset sammen med vers %1$d — sammenlign med en trykt bibel før du skriver det inn.</string>
 </resources>

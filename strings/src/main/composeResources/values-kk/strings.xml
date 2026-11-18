@@ -4806,7 +4806,6 @@
     <string name="bible_editor_missing_one">%1$d аят жетіспейді</string>
     <string name="bible_editor_missing_other">Жетіспейтін аяттар: %1$d</string>
     <string name="bible_editor_complete_matches">Толық, %1$s нұсқасымен сәйкес</string>
-    <string name="bible_editor_complete">Аят нөмірлерінде олқылық жоқ</string>
     <string name="bible_editor_chapter_changes_one">Осы тарауда %1$d өзгеріс</string>
     <string name="bible_editor_chapter_changes_other">Осы тараудағы өзгерістер: %1$d</string>
     <string name="bible_editor_care_title">Абайлап қараңыз. Бұл — Киелі жазба.</string>
@@ -4866,7 +4865,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Жетіспейтін аяттар</string>
     <string name="bible_editor_compared">%1$s мен %2$s салыстырылды · тексерілген кітаптар: %3$d</string>
-    <string name="bible_editor_no_reference">Киелі Кітап қалтаңызда салыстыруға арналған KJV жоқ.</string>
     <string name="bible_editor_checking">Тексерілуде…</string>
     <string name="bible_editor_stat_missing">Әлі жетіспейді</string>
     <string name="bible_editor_stat_restored">Қалпына келтірілді</string>
@@ -4898,4 +4896,5 @@
     <string name="bible_editor_next_missing_at">Келесі: %1$s</string>
     <string name="bible_editor_no_next_missing">Осы Киелі Кітапта жетіспейтін аят жоқ</string>
     <string name="bible_editor_next_missing">Келесі жетіспейтін</string>
+    <string name="bible_editor_gap_end_caution">Көп аудармалар бұл аятты %1$d аятпен біріктіреді — оны енгізбес бұрын баспа Киелі Кітаппен салыстырыңыз.</string>
 </resources>

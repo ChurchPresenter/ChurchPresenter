@@ -7,9 +7,9 @@ enum class ChapterStatus { COMPLETE, MISSING, RESTORED }
 fun BibleEditorState.chapterStatus(chapter: Int): ChapterStatus {
     val here = missingHere.orEmpty().filter { it.book == bookId && it.chapter == chapter }
     return when {
-        here.isEmpty() -> ChapterStatus.COMPLETE
         here.any { !isRestored(it) } -> ChapterStatus.MISSING
-        else -> ChapterStatus.RESTORED
+        here.any { isRestored(it) } -> ChapterStatus.RESTORED
+        else -> ChapterStatus.COMPLETE
     }
 }
 

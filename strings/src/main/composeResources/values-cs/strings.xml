@@ -4815,7 +4815,6 @@
     <string name="bible_editor_missing_one">Chybí %1$d verš</string>
     <string name="bible_editor_missing_other">Chybějící verše: %1$d</string>
     <string name="bible_editor_complete_matches">Úplná, odpovídá %1$s</string>
-    <string name="bible_editor_complete">V číslování veršů nejsou mezery</string>
     <string name="bible_editor_chapter_changes_one">%1$d změna v této kapitole</string>
     <string name="bible_editor_chapter_changes_other">Změny v této kapitole: %1$d</string>
     <string name="bible_editor_care_title">Zacházejte opatrně. Toto je Písmo svaté.</string>
@@ -4875,7 +4874,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Chybějící verše</string>
     <string name="bible_editor_compared">%1$s porovnáno s %2$s · zkontrolováno knih: %3$d</string>
-    <string name="bible_editor_no_reference">Ve složce Biblí není KJV k porovnání.</string>
     <string name="bible_editor_checking">Kontrola…</string>
     <string name="bible_editor_stat_missing">Stále chybí</string>
     <string name="bible_editor_stat_restored">Obnoveno</string>
@@ -4907,4 +4905,5 @@
     <string name="bible_editor_next_missing_at">Další: %1$s</string>
     <string name="bible_editor_no_next_missing">V této Bibli nechybí žádné verše</string>
     <string name="bible_editor_next_missing">Další chybějící</string>
+    <string name="bible_editor_gap_end_caution">Mnoho překladů spojuje tento verš s veršem %1$d — před napsáním ho porovnejte s tištěnou Biblí.</string>
 </resources>

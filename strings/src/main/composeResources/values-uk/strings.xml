@@ -4805,7 +4805,6 @@
     <string name="bible_editor_missing_one">Пропущено %1$d вірш</string>
     <string name="bible_editor_missing_other">Пропущено віршів: %1$d</string>
     <string name="bible_editor_complete_matches">Повна, збігається з %1$s</string>
-    <string name="bible_editor_complete">Немає пропусків у нумерації віршів</string>
     <string name="bible_editor_chapter_changes_one">%1$d зміна в цьому розділі</string>
     <string name="bible_editor_chapter_changes_other">Змін у цьому розділі: %1$d</string>
     <string name="bible_editor_care_title">Поводьтеся дбайливо. Це Святе Письмо.</string>
@@ -4865,7 +4864,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Пропущені вірші</string>
     <string name="bible_editor_compared">%1$s порівнюється з %2$s · перевірено книг: %3$d</string>
-    <string name="bible_editor_no_reference">У вашій теці Біблій немає KJV для порівняння.</string>
     <string name="bible_editor_checking">Перевірка…</string>
     <string name="bible_editor_stat_missing">Ще пропущено</string>
     <string name="bible_editor_stat_restored">Відновлено</string>
@@ -4897,4 +4895,5 @@
     <string name="bible_editor_next_missing_at">Наступний: %1$s</string>
     <string name="bible_editor_no_next_missing">У цій Біблії немає пропущених віршів</string>
     <string name="bible_editor_next_missing">Наступний пропущений</string>
+    <string name="bible_editor_gap_end_caution">У багатьох перекладах цей вірш об'єднано з віршем %1$d — звіртеся з друкованою Біблією, перш ніж вводити його.</string>
 </resources>

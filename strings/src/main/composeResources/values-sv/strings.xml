@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d vers saknas</string>
     <string name="bible_editor_missing_other">%1$d verser saknas</string>
     <string name="bible_editor_complete_matches">Komplett, stämmer med %1$s</string>
-    <string name="bible_editor_complete">Inga luckor i versnumren</string>
     <string name="bible_editor_chapter_changes_one">%1$d ändring i detta kapitel</string>
     <string name="bible_editor_chapter_changes_other">%1$d ändringar i detta kapitel</string>
     <string name="bible_editor_care_title">Hantera med omsorg. Detta är den Heliga Skrift.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Saknade verser</string>
     <string name="bible_editor_compared">%1$s jämförd med %2$s · %3$d böcker kontrollerade</string>
-    <string name="bible_editor_no_reference">Det finns ingen KJV i din bibelmapp att jämföra med.</string>
     <string name="bible_editor_checking">Kontrollerar…</string>
     <string name="bible_editor_stat_missing">Saknas fortfarande</string>
     <string name="bible_editor_stat_restored">Återställda</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Nästa: %1$s</string>
     <string name="bible_editor_no_next_missing">Inga saknade verser i denna bibel</string>
     <string name="bible_editor_next_missing">Nästa saknade</string>
+    <string name="bible_editor_gap_end_caution">Många översättningar slår ihop den här versen med vers %1$d – jämför med en tryckt bibel innan du skriver in den.</string>
 </resources>

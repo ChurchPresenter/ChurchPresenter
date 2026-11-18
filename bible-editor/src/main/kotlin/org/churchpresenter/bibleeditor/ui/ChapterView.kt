@@ -38,7 +38,6 @@ import org.churchpresenter.strings.generated.resources.bible_editor_care_body
 import org.churchpresenter.strings.generated.resources.bible_editor_care_title
 import org.churchpresenter.strings.generated.resources.bible_editor_chapter_changes_one
 import org.churchpresenter.strings.generated.resources.bible_editor_chapter_changes_other
-import org.churchpresenter.strings.generated.resources.bible_editor_complete
 import org.churchpresenter.strings.generated.resources.bible_editor_complete_matches
 import org.churchpresenter.strings.generated.resources.bible_editor_double_click_hint
 import org.churchpresenter.strings.generated.resources.bible_editor_hide_note
@@ -88,7 +87,6 @@ private fun ChapterTitle(state: BibleEditorState, rows: List<ChapterRow>) {
     val gaps = rows.count { it is ChapterRow.Gap }
     val present = rows.count { it is ChapterRow.Verse && !it.removed }
     val here = rows.count { it is ChapterRow.Verse && it.change != null }
-    val reference = state.reference
     Column(Modifier.padding(start = 50.dp, bottom = 16.dp)) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(
@@ -105,8 +103,9 @@ private fun ChapterTitle(state: BibleEditorState, rows: List<ChapterRow>) {
             val strip = when {
                 gaps > 0 -> countString(gaps, Res.string.bible_editor_missing_one,
                     Res.string.bible_editor_missing_other)
-                reference != null -> stringResource(Res.string.bible_editor_complete_matches, reference.abbreviation)
-                else -> stringResource(Res.string.bible_editor_complete)
+                else -> stringResource(
+                    Res.string.bible_editor_complete_matches, BibleEditorState.REFERENCE_ABBREVIATION,
+                )
             }
             StatusChip(strip, if (gaps > 0) colors.warnBg else colors.goodBg,
                 if (gaps > 0) colors.warn else colors.good, dot = true)
@@ -164,7 +163,7 @@ private fun ChapterRowView(state: BibleEditorState, row: ChapterRow, now: Long) 
     val typing = state.editing == row.verse || state.addingAt == row.verse
     when {
         typing -> VerseEditorCard(state, row)
-        row is ChapterRow.Gap -> GapRow(row.verse) { state.clearEditing(); state.addingAt = row.verse }
+        row is ChapterRow.Gap -> GapRow(row.verse, row.joinedTo) { state.clearEditing(); state.addingAt = row.verse }
         row is ChapterRow.Verse -> VerseLine(state, row, now)
     }
 }
@@ -176,3 +175,4 @@ internal fun VerseNumber(number: Int, color: Color, top: Int = 4) {
         Text(number.toString(), color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
+

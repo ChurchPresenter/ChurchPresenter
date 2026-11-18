@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d آية ناقصة</string>
     <string name="bible_editor_missing_other">%1$d آيات ناقصة</string>
     <string name="bible_editor_complete_matches">كامل، يطابق %1$s</string>
-    <string name="bible_editor_complete">لا فجوات في أرقام الآيات</string>
     <string name="bible_editor_chapter_changes_one">%1$d تغيير في هذا الأصحاح</string>
     <string name="bible_editor_chapter_changes_other">%1$d تغييرات في هذا الأصحاح</string>
     <string name="bible_editor_care_title">تعامَل بعناية. هذا هو الكتاب المقدس.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s، %2$s</string>
     <string name="bible_editor_missing_title">الآيات الناقصة</string>
     <string name="bible_editor_compared">%1$s مقارنةً بـ %2$s · فُحص %3$d سفرًا</string>
-    <string name="bible_editor_no_reference">لا توجد ترجمة KJV في مجلد الكتاب المقدس للمقارنة بها.</string>
     <string name="bible_editor_checking">جارٍ الفحص…</string>
     <string name="bible_editor_stat_missing">لا تزال ناقصة</string>
     <string name="bible_editor_stat_restored">مُستعادة</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">التالية: %1$s</string>
     <string name="bible_editor_no_next_missing">لا توجد آيات ناقصة في هذا الكتاب المقدس</string>
     <string name="bible_editor_next_missing">الناقصة التالية</string>
+    <string name="bible_editor_gap_end_caution">تدمج ترجمات كثيرة هذه الآية في الآية %1$d — قارن بكتاب مقدس مطبوع قبل كتابتها.</string>
 </resources>

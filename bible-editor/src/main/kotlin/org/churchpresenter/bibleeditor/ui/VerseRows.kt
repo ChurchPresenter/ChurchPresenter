@@ -60,6 +60,7 @@ import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.icons.generated.resources.ic_edit
 import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.bible_editor_gap_end_caution
 import org.churchpresenter.strings.generated.resources.bible_editor_add_verse
 import org.churchpresenter.strings.generated.resources.bible_editor_cancel
 import org.churchpresenter.strings.generated.resources.bible_editor_edit_hint
@@ -92,18 +93,26 @@ private val CardShape = RoundedCornerShape(14.dp)
 
 /** The place a missing verse goes, with the button that types it in. */
 @Composable
-internal fun GapRow(verse: Int, onAdd: () -> Unit) {
+internal fun GapRow(verse: Int, joinedTo: Int?, onAdd: () -> Unit) {
     val colors = editorColors()
     Row(Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         VerseNumber(verse, colors.warn, top = 0)
         Row(
-            Modifier.weight(1f).height(46.dp).clip(GapShape).background(colors.warnBg)
-                .border(1.5.dp, colors.warnLine, GapShape).padding(start = 14.dp, end = 8.dp),
+            Modifier.weight(1f).heightIn(min = 46.dp).clip(GapShape).background(colors.warnBg)
+                .border(1.5.dp, colors.warnLine, GapShape).padding(start = 14.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text(stringResource(Res.string.bible_editor_gap, verse), Modifier.weight(1f), fontSize = 13.sp,
-                color = colors.warn)
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(Res.string.bible_editor_gap, verse), fontSize = 13.sp, color = colors.warn)
+                // Past the chapter's last verse it is more often joined to that verse than lost.
+                if (joinedTo != null) {
+                    Text(
+                        stringResource(Res.string.bible_editor_gap_end_caution, joinedTo),
+                        Modifier.padding(top = 2.dp), fontSize = 11.5.sp, lineHeight = 16.sp, color = colors.dim,
+                    )
+                }
+            }
             EditorButton(
                 stringResource(Res.string.bible_editor_type_verse, verse), onAdd, height = 30.dp, fontSize = 12.5.sp,
                 leading = { Icon(painterResource(IconRes.drawable.ic_edit), null, Modifier.size(11.dp),

@@ -56,7 +56,6 @@ import org.churchpresenter.strings.generated.resources.bible_editor_empty_none_b
 import org.churchpresenter.strings.generated.resources.bible_editor_empty_restored
 import org.churchpresenter.strings.generated.resources.bible_editor_empty_restored_body
 import org.churchpresenter.strings.generated.resources.bible_editor_missing_title
-import org.churchpresenter.strings.generated.resources.bible_editor_no_reference
 import org.churchpresenter.strings.generated.resources.bible_editor_report_header
 import org.churchpresenter.strings.generated.resources.bible_editor_stat_chapters
 import org.churchpresenter.strings.generated.resources.bible_editor_stat_missing
@@ -106,14 +105,12 @@ internal fun MissingVersesDialog(state: BibleEditorState) {
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(Res.string.bible_editor_missing_title), fontSize = 17.sp,
                         fontWeight = FontWeight.Bold, color = colors.ink)
-                    val reference = state.reference
                     Text(
                         when {
-                            reference == null -> stringResource(Res.string.bible_editor_no_reference)
                             all == null -> stringResource(Res.string.bible_editor_checking)
                             else -> stringResource(
                                 Res.string.bible_editor_compared, state.selected?.title.orEmpty(),
-                                reference.abbreviation,
+                                BibleEditorState.REFERENCE_ABBREVIATION,
                                 bible?.getBookCount() ?: 0,
                             )
                         },
@@ -191,18 +188,15 @@ private fun MissingList(state: BibleEditorState, shown: List<MissingVerse>) {
                         fontWeight = FontWeight.SemiBold, color = colors.ink)
                     Text(
                         stringResource(
-                            if (fixed) {
-                                Res.string.bible_editor_state_restored
-                            } else {
-                                Res.string.bible_editor_state_missing
-                            },
+                            if (fixed) Res.string.bible_editor_state_restored else Res.string.bible_editor_state_missing,
                         ),
                         fontSize = 11.5.sp, fontWeight = FontWeight.Bold,
                         color = if (fixed) colors.good else colors.warn,
                     )
+                    val typeIt = !fixed
                     EditorButton(
-                        stringResource(if (fixed) Res.string.bible_editor_view else Res.string.bible_editor_type_it),
-                        onClick = { openVerse(state, verse, typeIt = !fixed) }, height = 28.dp, fontSize = 12.sp,
+                        stringResource(if (typeIt) Res.string.bible_editor_type_it else Res.string.bible_editor_view),
+                        onClick = { openVerse(state, verse, typeIt) }, height = 28.dp, fontSize = 12.sp,
                         contentPadding = PaddingValues(horizontal = 11.dp),
                     )
                 }

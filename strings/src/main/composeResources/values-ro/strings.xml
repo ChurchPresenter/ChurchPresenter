@@ -4835,7 +4835,6 @@
     <string name="bible_editor_missing_one">%1$d verset lipsă</string>
     <string name="bible_editor_missing_other">%1$d versete lipsă</string>
     <string name="bible_editor_complete_matches">Completă, corespunde cu %1$s</string>
-    <string name="bible_editor_complete">Nicio lipsă în numerotarea versetelor</string>
     <string name="bible_editor_chapter_changes_one">%1$d modificare în acest capitol</string>
     <string name="bible_editor_chapter_changes_other">%1$d modificări în acest capitol</string>
     <string name="bible_editor_care_title">Mânuiți cu grijă. Aceasta este Sfânta Scriptură.</string>
@@ -4895,7 +4894,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Versete lipsă</string>
     <string name="bible_editor_compared">%1$s comparată cu %2$s · %3$d cărți verificate</string>
-    <string name="bible_editor_no_reference">Nu există nicio KJV în dosarul de Biblii pentru comparare.</string>
     <string name="bible_editor_checking">Se verifică…</string>
     <string name="bible_editor_stat_missing">Încă lipsă</string>
     <string name="bible_editor_stat_restored">Restaurate</string>
@@ -4927,4 +4925,5 @@
     <string name="bible_editor_next_missing_at">Următorul: %1$s</string>
     <string name="bible_editor_no_next_missing">Nu lipsește niciun verset din această Biblie</string>
     <string name="bible_editor_next_missing">Următorul lipsă</string>
+    <string name="bible_editor_gap_end_caution">Multe traduceri unesc acest verset cu versetul %1$d — comparați cu o Biblie tipărită înainte de a-l scrie.</string>
 </resources>

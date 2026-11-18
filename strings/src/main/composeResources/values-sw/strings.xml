@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">Mstari %1$d unakosekana</string>
     <string name="bible_editor_missing_other">Mistari %1$d inakosekana</string>
     <string name="bible_editor_complete_matches">Kamili, inalingana na %1$s</string>
-    <string name="bible_editor_complete">Hakuna mapengo katika namba za mistari</string>
     <string name="bible_editor_chapter_changes_one">Badiliko %1$d katika sura hii</string>
     <string name="bible_editor_chapter_changes_other">Mabadiliko %1$d katika sura hii</string>
     <string name="bible_editor_care_title">Shughulikia kwa uangalifu. Haya ni Maandiko Matakatifu.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Mistari inayokosekana</string>
     <string name="bible_editor_compared">%1$s ikilinganishwa na %2$s · vitabu %3$d vimekaguliwa</string>
-    <string name="bible_editor_no_reference">Hakuna KJV katika folda yako ya Biblia ya kulinganisha nayo.</string>
     <string name="bible_editor_checking">Inakagua…</string>
     <string name="bible_editor_stat_missing">Bado inakosekana</string>
     <string name="bible_editor_stat_restored">Imerejeshwa</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Inayofuata: %1$s</string>
     <string name="bible_editor_no_next_missing">Hakuna mistari inayokosekana katika Biblia hii</string>
     <string name="bible_editor_next_missing">Inayokosekana ijayo</string>
+    <string name="bible_editor_gap_end_caution">Tafsiri nyingi huunganisha mstari huu na mstari %1$d — linganisha na Biblia iliyochapishwa kabla ya kuuandika.</string>
 </resources>

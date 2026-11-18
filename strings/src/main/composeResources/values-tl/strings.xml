@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d talatang nawawala</string>
     <string name="bible_editor_missing_other">%1$d talatang nawawala</string>
     <string name="bible_editor_complete_matches">Kumpleto, tugma sa %1$s</string>
-    <string name="bible_editor_complete">Walang puwang sa mga numero ng talata</string>
     <string name="bible_editor_chapter_changes_one">%1$d pagbabago sa kabanatang ito</string>
     <string name="bible_editor_chapter_changes_other">%1$d pagbabago sa kabanatang ito</string>
     <string name="bible_editor_care_title">Mag-ingat. Ito ay Banal na Kasulatan.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Mga nawawalang talata</string>
     <string name="bible_editor_compared">%1$s kumpara sa %2$s · %3$d aklat ang nasuri</string>
-    <string name="bible_editor_no_reference">Walang KJV sa iyong Biblia folder na mapaghahambingan.</string>
     <string name="bible_editor_checking">Sinusuri…</string>
     <string name="bible_editor_stat_missing">Nawawala pa</string>
     <string name="bible_editor_stat_restored">Naibalik</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Susunod: %1$s</string>
     <string name="bible_editor_no_next_missing">Walang nawawalang talata sa Bibliang ito</string>
     <string name="bible_editor_next_missing">Susunod na nawawala</string>
+    <string name="bible_editor_gap_end_caution">Maraming salin ang nagsasama ng talatang ito sa talata %1$d — ihambing muna sa isang nakalimbag na Biblia bago ito i-type.</string>
 </resources>

@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d آیه گمشده</string>
     <string name="bible_editor_missing_other">%1$d آیه گمشده</string>
     <string name="bible_editor_complete_matches">کامل، مطابق با %1$s</string>
-    <string name="bible_editor_complete">شماره‌های آیات فاصله‌ای ندارند</string>
     <string name="bible_editor_chapter_changes_one">%1$d تغییر در این باب</string>
     <string name="bible_editor_chapter_changes_other">%1$d تغییر در این باب</string>
     <string name="bible_editor_care_title">با دقت رفتار کنید. این کلام مقدس خداست.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s، %2$s</string>
     <string name="bible_editor_missing_title">آیات گمشده</string>
     <string name="bible_editor_compared">%1$s در مقایسه با %2$s · %3$d کتاب بررسی شد</string>
-    <string name="bible_editor_no_reference">هیچ KJV در پوشهٔ کتاب مقدس شما برای مقایسه وجود ندارد.</string>
     <string name="bible_editor_checking">در حال بررسی…</string>
     <string name="bible_editor_stat_missing">هنوز گمشده</string>
     <string name="bible_editor_stat_restored">بازیابی‌شده</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">بعدی: %1$s</string>
     <string name="bible_editor_no_next_missing">این کتاب مقدس آیه گمشده‌ای ندارد</string>
     <string name="bible_editor_next_missing">گمشده بعدی</string>
+    <string name="bible_editor_gap_end_caution">بسیاری از ترجمه‌ها این آیه را به آیهٔ %1$d پیوسته‌اند — پیش از تایپ آن، با یک کتاب مقدس چاپی مقایسه کنید.</string>
 </resources>

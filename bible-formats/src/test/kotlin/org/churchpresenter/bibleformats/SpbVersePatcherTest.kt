@@ -76,6 +76,17 @@ class SpbVersePatcherTest {
     }
 
     @Test
+    fun `a two-verse psalm title shares a code but is two verses, and stays two rows`() {
+        val file = spb(
+            "B019C051V000\t19\t50\t1\tНачальнику хора. Псалом Давида,",
+            "B019C051V000\t19\t50\t2\tкогда приходил к нему пророк Нафан",
+            "B019C051V001\t19\t50\t3\tПомилуй меня, Боже",
+        )
+        assertEquals(0, SpbVersePatcher.applyPatches(file))
+        assertEquals(3, verseLines(file).size)
+    }
+
+    @Test
     fun `only consecutive duplicates are merged`() {
         val file = spb(
             "B001C001V001\t1\t1\t1\tFirst",

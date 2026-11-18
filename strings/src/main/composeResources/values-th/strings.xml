@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">ขาด %1$d ข้อ</string>
     <string name="bible_editor_missing_other">ขาด %1$d ข้อ</string>
     <string name="bible_editor_complete_matches">ครบถ้วน ตรงกับ %1$s</string>
-    <string name="bible_editor_complete">ไม่มีเลขข้อที่ขาดหาย</string>
     <string name="bible_editor_chapter_changes_one">%1$d การเปลี่ยนแปลงในบทนี้</string>
     <string name="bible_editor_chapter_changes_other">%1$d การเปลี่ยนแปลงในบทนี้</string>
     <string name="bible_editor_care_title">โปรดใช้ความระมัดระวัง นี่คือพระคัมภีร์บริสุทธิ์</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">ข้อที่ขาดหาย</string>
     <string name="bible_editor_compared">%1$s เทียบกับ %2$s · ตรวจแล้ว %3$d เล่ม</string>
-    <string name="bible_editor_no_reference">ไม่มี KJV ในโฟลเดอร์พระคัมภีร์ของคุณสำหรับเปรียบเทียบ</string>
     <string name="bible_editor_checking">กำลังตรวจสอบ…</string>
     <string name="bible_editor_stat_missing">ยังขาดอยู่</string>
     <string name="bible_editor_stat_restored">กู้คืนแล้ว</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">ถัดไป: %1$s</string>
     <string name="bible_editor_no_next_missing">ไม่มีข้อที่ขาดหายในพระคัมภีร์นี้</string>
     <string name="bible_editor_next_missing">ข้อที่ขาดถัดไป</string>
+    <string name="bible_editor_gap_end_caution">หลายฉบับแปลรวมข้อนี้เข้ากับข้อ %1$d — ควรเทียบกับพระคัมภีร์ฉบับพิมพ์ก่อนพิมพ์</string>
 </resources>

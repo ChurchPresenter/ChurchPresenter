@@ -4808,7 +4808,6 @@
     <string name="bible_editor_missing_one">Пропущен %1$d стих</string>
     <string name="bible_editor_missing_other">Пропущено стихов: %1$d</string>
     <string name="bible_editor_complete_matches">Полная, совпадает с %1$s</string>
-    <string name="bible_editor_complete">Нет пропусков в нумерации стихов</string>
     <string name="bible_editor_chapter_changes_one">%1$d изменение в этой главе</string>
     <string name="bible_editor_chapter_changes_other">Изменений в этой главе: %1$d</string>
     <string name="bible_editor_care_title">Обращайтесь бережно. Это Священное Писание.</string>
@@ -4868,7 +4867,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Пропущенные стихи</string>
     <string name="bible_editor_compared">%1$s сравнивается с %2$s · проверено книг: %3$d</string>
-    <string name="bible_editor_no_reference">В вашей папке Библий нет KJV для сравнения.</string>
     <string name="bible_editor_checking">Проверка…</string>
     <string name="bible_editor_stat_missing">Ещё пропущено</string>
     <string name="bible_editor_stat_restored">Восстановлено</string>
@@ -4900,4 +4898,5 @@
     <string name="bible_editor_next_missing_at">Следующий: %1$s</string>
     <string name="bible_editor_no_next_missing">В этой Библии нет пропущенных стихов</string>
     <string name="bible_editor_next_missing">Следующий пропущенный</string>
+    <string name="bible_editor_gap_end_caution">Во многих переводах этот стих объединён со стихом %1$d — сверьтесь с печатной Библией, прежде чем вводить его.</string>
 </resources>

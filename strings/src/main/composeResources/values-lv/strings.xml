@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d pants trūkst</string>
     <string name="bible_editor_missing_other">Trūkstošie panti: %1$d</string>
     <string name="bible_editor_complete_matches">Pilnīgs, atbilst %1$s</string>
-    <string name="bible_editor_complete">Pantu numerācijā nav robu</string>
     <string name="bible_editor_chapter_changes_one">%1$d izmaiņa šajā nodaļā</string>
     <string name="bible_editor_chapter_changes_other">Izmaiņas šajā nodaļā: %1$d</string>
     <string name="bible_editor_care_title">Rīkojieties uzmanīgi. Šie ir Svētie Raksti.</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Trūkstošie panti</string>
     <string name="bible_editor_compared">%1$s salīdzināts ar %2$s · pārbaudītas grāmatas: %3$d</string>
-    <string name="bible_editor_no_reference">Jūsu Bībeļu mapē nav KJV, ar ko salīdzināt.</string>
     <string name="bible_editor_checking">Pārbauda…</string>
     <string name="bible_editor_stat_missing">Joprojām trūkst</string>
     <string name="bible_editor_stat_restored">Atjaunoti</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">Nākamais: %1$s</string>
     <string name="bible_editor_no_next_missing">Šajā Bībelē netrūkst neviena panta</string>
     <string name="bible_editor_next_missing">Nākamais trūkstošais</string>
+    <string name="bible_editor_gap_end_caution">Daudzos tulkojumos šis pants ir apvienots ar %1$d. pantu — pirms ierakstīšanas salīdziniet ar drukātu Bībeli.</string>
 </resources>

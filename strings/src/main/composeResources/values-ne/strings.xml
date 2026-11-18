@@ -4850,7 +4850,6 @@
     <string name="bible_editor_missing_one">%1$d पद छुटेको छ</string>
     <string name="bible_editor_missing_other">%1$d पदहरू छुटेका छन्</string>
     <string name="bible_editor_complete_matches">पूर्ण, %1$s सँग मिल्छ</string>
-    <string name="bible_editor_complete">पद नम्बरहरूमा कुनै खाली ठाउँ छैन</string>
     <string name="bible_editor_chapter_changes_one">यस अध्यायमा %1$d परिवर्तन</string>
     <string name="bible_editor_chapter_changes_other">यस अध्यायमा %1$d परिवर्तनहरू</string>
     <string name="bible_editor_care_title">होसियारीसाथ चलाउनुहोस्। यो पवित्र धर्मशास्त्र हो।</string>
@@ -4910,7 +4909,6 @@
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">छुटेका पदहरू</string>
     <string name="bible_editor_compared">%1$s लाई %2$s सँग तुलना गरियो · %3$d पुस्तक जाँचिए</string>
-    <string name="bible_editor_no_reference">तुलना गर्न तपाईंको बाइबल फोल्डरमा कुनै KJV छैन।</string>
     <string name="bible_editor_checking">जाँच हुँदैछ…</string>
     <string name="bible_editor_stat_missing">अझै छुटेका</string>
     <string name="bible_editor_stat_restored">पुनर्स्थापित</string>
@@ -4942,4 +4940,5 @@
     <string name="bible_editor_next_missing_at">अर्को: %1$s</string>
     <string name="bible_editor_no_next_missing">यो बाइबलमा कुनै पद छुटेको छैन</string>
     <string name="bible_editor_next_missing">अर्को छुटेको</string>
+    <string name="bible_editor_gap_end_caution">धेरै अनुवादहरूले यो पदलाई पद %1$d सँग जोड्छन् — टाइप गर्नुअघि छापिएको बाइबलसँग मिलाउनुहोस्।</string>
 </resources>
