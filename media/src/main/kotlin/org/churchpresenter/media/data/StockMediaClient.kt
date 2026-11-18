@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -314,7 +315,15 @@ object StockMediaClient {
         downloadDir: File = defaultDownloadDir,
     ): DownloadOutcome = withContext(Dispatchers.IO) {
         try {
-            val response = http.get(item.downloadUrl)
+            // The client's 20 s cap suits a search and a thumbnail, not a whole video over a slow link
+            // (CHURCH-PRESENTER-DESKTOP-50): a download gets minutes in all, and is cut off only if
+            // the connection goes quiet.
+            val response = http.get(item.downloadUrl) {
+                timeout {
+                    requestTimeoutMillis = DOWNLOAD_TIMEOUT_MS
+                    socketTimeoutMillis = DOWNLOAD_IDLE_TIMEOUT_MS
+                }
+            }
             if (response.status.value !in 200..299) {
                 CrashReporter.reportWarning(
                     "Stock media download returned HTTP ${response.status.value} (${item.source.name.lowercase()})",
@@ -359,4 +368,6 @@ object StockMediaClient {
     }
 
     private const val PER_PAGE = 24
+    private const val DOWNLOAD_TIMEOUT_MS = 300_000L
+    private const val DOWNLOAD_IDLE_TIMEOUT_MS = 30_000L
 }

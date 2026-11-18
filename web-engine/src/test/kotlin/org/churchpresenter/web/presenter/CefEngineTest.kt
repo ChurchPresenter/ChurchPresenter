@@ -259,6 +259,20 @@ class CefEngineTest {
     }
 
     @Test
+    fun `the first client the engine makes says that web is in use, once`() {
+        val client = mockk<CefClient>(relaxed = true)
+        engine.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
+        engine.clientSource = { client }
+        var told = 0
+        engine.onClientCreated = { told++ }
+
+        engine.createClient()
+        engine.createClient()
+
+        assertEquals(1, told, "web is in use from the first client, and the second adds nothing")
+    }
+
+    @Test
     fun `on its own default the early start runs on a daemon thread`() {
         val made = CountDownLatch(1)
         var thread: Thread? = null

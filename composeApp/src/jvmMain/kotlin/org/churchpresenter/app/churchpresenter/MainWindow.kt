@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.DisposableEffect
 import org.churchpresenter.web.offscreen.OffscreenPage
+import org.churchpresenter.app.churchpresenter.utils.WebEngineUse
 import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.server.clearPresentationState
 import org.churchpresenter.server.preloadData
@@ -260,6 +261,10 @@ private fun AppRootState.MainWindow(
             // Then the classes behind the settings pages, profiles, outputs and server, loaded off
             // it at the lowest priority so their first opening does not read the jar.
             startClassWarmUp()
+            // Web has been used here before: bring its engine up now, while nothing is on air, rather
+            // than when a web cue goes live and holds the window for the seconds it takes.
+            val webInUse = withContext(Dispatchers.IO) { WebEngineUse.wasUsed(AppDataDir.resolve()) }
+            if (webInUse && presenterManager.liveContent.value.isEmpty()) CefManager.startEarly()
         }
         MacMenuBarActivationFix()
         LanguageProvider(language = currentLanguage) {

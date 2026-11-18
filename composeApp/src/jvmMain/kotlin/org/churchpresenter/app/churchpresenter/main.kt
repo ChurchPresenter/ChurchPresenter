@@ -37,6 +37,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.withBundledBible
 import org.churchpresenter.statistics.asDurationRow
 import org.churchpresenter.settings.SettingsManager
+import org.churchpresenter.app.churchpresenter.utils.WebEngineUse
 import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.LocalThemeCustomization
@@ -344,6 +345,7 @@ fun main(args: Array<String>) {
     }
 
     CefManager.init(offscreen = offscreenWeb)
+    WebEngineUse.markOnFirstClient() // so the next launch can start the web engine early
     CrashReporter.setTag("jcef.available", CefManager.initialized.toString())
     CrashReporter.setTag("web.render", if (CefManager.offscreen) "offscreen" else "windowed")
     if (CefManager.macOsUnsupported) CrashReporter.setTag("jcef.macos_unsupported", "true")
