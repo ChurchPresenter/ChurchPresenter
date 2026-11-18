@@ -11,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -21,6 +23,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
@@ -63,6 +66,17 @@ internal fun ComposeUiTest.hasNode(text: String, substring: Boolean = false): Bo
 /** Types [value] into the text field currently holding [current]. */
 internal fun ComposeUiTest.type(current: String, value: String) {
     onAllNodes(hasSetTextAction() and hasText(current)).onFirst().performTextReplacement(value)
+    settle()
+}
+
+/** Types [value] into the number field showing [current] and presses Enter, which clamps it. */
+internal fun ComposeUiTest.typeAndEnter(current: String, value: String) {
+    // By position, not by text: the text is gone from the node the moment it is replaced.
+    val index = onAllNodes(hasSetTextAction()).fetchSemanticsNodes()
+        .indexOfFirst { node -> node.config.getOrNull(SemanticsProperties.EditableText)?.text == current }
+    val field = onAllNodes(hasSetTextAction())[index]
+    field.performTextReplacement(value)
+    field.performImeAction()
     settle()
 }
 

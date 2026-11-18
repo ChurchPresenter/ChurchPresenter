@@ -48,7 +48,8 @@ import org.churchpresenter.lottiegen.ui.components.DeleteIconButton
 import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
 import org.churchpresenter.lottiegen.ui.components.LottieCheckbox
 import org.churchpresenter.lottiegen.ui.components.LottieDropdown
-import org.churchpresenter.lottiegen.ui.components.LottieTextField
+import org.churchpresenter.lottiegen.ui.components.LottieFloatField
+import org.churchpresenter.lottiegen.ui.components.LottieIntField
 import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SegmentedButtons
 import org.churchpresenter.lottiegen.ui.components.SliderWithLabel
@@ -74,29 +75,19 @@ internal fun CanvasSection(viewModel: LottieGenState) {
             }
         )
         FieldRow {
-            LottieTextField(
-                value = cfg.canvasW.toString(),
-                onValueChange = { v ->
-                    v.toIntOrNull()?.let {
-                        viewModel.updateConfig { c ->
-                            c.copy(canvasW = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_W_PX))
-                        }
-                    }
-                },
+            LottieIntField(
                 label = Strings.width,
-                modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+                value = cfg.canvasW,
+                onCommit = { w -> viewModel.updateConfig { c -> c.copy(canvasW = w) } },
+                range = MIN_CANVAS_PX..MAX_CANVAS_W_PX,
+                modifier = Modifier.weight(1f), fillWidth = true
             )
-            LottieTextField(
-                value = cfg.canvasH.toString(),
-                onValueChange = { v ->
-                    v.toIntOrNull()?.let {
-                        viewModel.updateConfig { c ->
-                            c.copy(canvasH = it.coerceIn(MIN_CANVAS_PX, MAX_CANVAS_H_PX))
-                        }
-                    }
-                },
+            LottieIntField(
                 label = Strings.height,
-                modifier = Modifier.weight(1f), fillWidth = true, singleLine = true
+                value = cfg.canvasH,
+                onCommit = { h -> viewModel.updateConfig { c -> c.copy(canvasH = h) } },
+                range = MIN_CANVAS_PX..MAX_CANVAS_H_PX,
+                modifier = Modifier.weight(1f), fillWidth = true
             )
         }
         SliderWithLabel(
@@ -317,27 +308,19 @@ internal fun TimingSection(viewModel: LottieGenState) {
             }
         )
         FieldRow {
-            LottieTextField(
-                value = cfg.animDuration.toString(),
-                onValueChange = { v ->
-                    v.toFloatOrNull()?.let {
-                        viewModel.updateConfig { c ->
-                            c.copy(animDuration = it.coerceIn(MIN_ANIM_SECONDS, MAX_ANIM_SECONDS))
-                        }
-                    }
-                },
-                label = Strings.animDuration, modifier = Modifier.weight(1f),
-                fillWidth = true, singleLine = true
+            LottieFloatField(
+                label = Strings.animDuration,
+                value = cfg.animDuration,
+                onCommit = { s -> viewModel.updateConfig { c -> c.copy(animDuration = s) } },
+                range = MIN_ANIM_SECONDS..MAX_ANIM_SECONDS,
+                modifier = Modifier.weight(1f), fillWidth = true
             )
-            LottieTextField(
-                value = cfg.holdDuration.toString(),
-                onValueChange = { v ->
-                    v.toFloatOrNull()?.let {
-                        viewModel.updateConfig { c -> c.copy(holdDuration = it.coerceIn(0f, MAX_HOLD_SECONDS)) }
-                    }
-                },
-                label = Strings.holdDuration, modifier = Modifier.weight(1f),
-                fillWidth = true, singleLine = true
+            LottieFloatField(
+                label = Strings.holdDuration,
+                value = cfg.holdDuration,
+                onCommit = { s -> viewModel.updateConfig { c -> c.copy(holdDuration = s) } },
+                range = 0f..MAX_HOLD_SECONDS,
+                modifier = Modifier.weight(1f), fillWidth = true
             )
         }
     }

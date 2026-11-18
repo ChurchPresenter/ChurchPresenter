@@ -36,7 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.lottiegen.ui.components.LottieDropdown
-import org.churchpresenter.lottiegen.ui.components.LottieTextField
+import org.churchpresenter.lottiegen.ui.components.LottieNumberField
 
 /** Small shared widgets for the Style Editor's inspector panels. */
 
@@ -65,8 +65,8 @@ fun EditorTooltip(text: String, content: @Composable () -> Unit) {
 }
 
 /**
- * Numeric field that commits only when the text parses — transient invalid input
- * (empty, lone minus sign) is tolerated without corrupting the spec.
+ * Numeric field with no range: it keeps what is typed -- empty, a lone minus sign, "1," -- and
+ * commits a number as soon as the text is one, a comma counting as the decimal mark.
  */
 @Composable
 fun NumberField(
@@ -75,22 +75,15 @@ fun NumberField(
     onCommit: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var text by remember(value) { mutableStateOf(formatNumber(value)) }
-    LottieTextField(
-        value = text,
-        onValueChange = { newText ->
-            text = newText
-            newText.toDoubleOrNull()?.let { parsed ->
-                if (parsed != value) onCommit(parsed)
-            }
-        },
+    LottieNumberField(
         label = label,
-        modifier = modifier
+        value = value,
+        onCommit = onCommit,
+        min = Double.NEGATIVE_INFINITY,
+        max = Double.POSITIVE_INFINITY,
+        modifier = modifier,
     )
 }
-
-private fun formatNumber(value: Double): String =
-    if (value == value.toLong().toDouble()) value.toLong().toString() else value.toString()
 
 /** Generic dropdown over a fixed option list, built on the shared LottieDropdown row. */
 @OptIn(ExperimentalMaterial3Api::class)
