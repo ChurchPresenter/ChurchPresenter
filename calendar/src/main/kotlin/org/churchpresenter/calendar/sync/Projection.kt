@@ -5,6 +5,7 @@ import org.churchpresenter.calendar.model.ItemPreset
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
+import kotlinx.serialization.json.Json
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -17,7 +18,8 @@ object Projection {
 
     /**
      * The library as catalog records, keyed by record id: one per songbook, split into parts past
-     * [WireLimits.CATALOG_PART_SONGS]. [seconds] is each song's usual length, or null. Sorted so the
+     * [WireLimits.CATALOG_PART_SONGS] songs or [WireLimits.CATALOG_PART_BYTES] bytes. [seconds] is
+     * each song's usual length, or null. Sorted so the
      * same library always produces the same records -- the desktop pushes a record only when its
      * bytes changed.
      */
@@ -31,12 +33,38 @@ object Projection {
                     val second = song.secondaryTitle.ifBlank { null }
                     CatalogSong(n = song.number, t = song.title, s = seconds(song), t2 = second)
                 }
-            entries.chunked(WireLimits.CATALOG_PART_SONGS).forEachIndexed { part, chunk ->
+            catalogParts(entries).forEachIndexed { part, chunk ->
                 records[catalogRecordId(book, part)] = CatalogRecord(songbook = book, part = part, songs = chunk)
             }
         }
         return records
     }
+
+    /**
+     * [entries] in order, cut wherever the next song would take a part past either cap. A book under
+     * both is cut exactly where counting alone cut it, so its records -- and their hashes -- stay the
+     * same and nothing is pushed again for it.
+     */
+    internal fun catalogParts(entries: List<CatalogSong>): List<List<CatalogSong>> {
+        val parts = mutableListOf<List<CatalogSong>>()
+        var current = mutableListOf<CatalogSong>()
+        var bytes = 0
+        for (entry in entries) {
+            val size = catalogJson.encodeToString(CatalogSong.serializer(), entry).toByteArray().size + 1
+            val full = current.size >= WireLimits.CATALOG_PART_SONGS || bytes + size > WireLimits.CATALOG_PART_BYTES
+            if (current.isNotEmpty() && full) {
+                parts += current
+                current = mutableListOf()
+                bytes = 0
+            }
+            current += entry
+            bytes += size
+        }
+        if (current.isNotEmpty()) parts += current
+        return parts
+    }
+
+    private val catalogJson = Json { encodeDefaults = true; explicitNulls = false }
 
     /** `catalog:<songbook>` for the first part, `catalog:<songbook>:<part>` after. */
     fun catalogRecordId(songbook: String, part: Int): String =

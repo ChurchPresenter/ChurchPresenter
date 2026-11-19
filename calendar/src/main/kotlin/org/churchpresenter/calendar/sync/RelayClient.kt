@@ -10,8 +10,8 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 
-/** One HTTP exchange, reduced to what the client reads. */
-class RelayReply(val status: Int, val body: String, val etag: String = "")
+/** One HTTP exchange, reduced to what the client reads; [ray] is Cloudflare's id for the request. */
+class RelayReply(val status: Int, val body: String, val etag: String = "", val ray: String = "")
 
 /**
  * The one step that reaches the network, taken as a parameter so the client's sequencing — which
@@ -37,7 +37,13 @@ class HttpRelayTransport(
         val publisher = body?.let(HttpRequest.BodyPublishers::ofString) ?: HttpRequest.BodyPublishers.noBody()
         request.method(method, publisher)
         val response = client.send(request.build(), HttpResponse.BodyHandlers.ofString())
-        return RelayReply(response.statusCode(), response.body(), response.headers().firstValue("ETag").orElse(""))
+        val replyHeaders = response.headers()
+        return RelayReply(
+            response.statusCode(),
+            response.body(),
+            replyHeaders.firstValue("ETag").orElse(""),
+            replyHeaders.firstValue("cf-ray").orElse(""),
+        )
     }
 
     private companion object {
@@ -80,7 +86,7 @@ sealed class RelayFailure(message: String, cause: Throwable? = null) : Exception
     /** The relay moved on since our cursor; pull again before pushing. */
     class Conflict : RelayFailure("relay state changed since last pull")
 
-    class Rejected(status: Int, detail: String, cause: Throwable? = null) :
+    class Rejected(val status: Int, val detail: String, cause: Throwable? = null, val call: RelayCall? = null) :
         RelayFailure("relay rejected the request ($status): $detail", cause)
 
     class Unreachable(cause: Throwable) : RelayFailure("relay unreachable: ${cause.message}")
@@ -89,6 +95,28 @@ sealed class RelayFailure(message: String, cause: Throwable? = null) : Exception
     class Misconfigured(cause: Throwable? = null) :
         RelayFailure("the relay address is not an https:// address", cause)
 }
+
+/**
+ * Which relay call a [RelayFailure.Rejected] came from, for the crash report: the route as a
+ * template -- no instance, record or device id -- and Cloudflare's ray id, which finds the same
+ * request in the relay's own log.
+ */
+data class RelayCall(val method: String, val route: String, val host: String, val ray: String)
+
+/** [url]'s path as a template: every segment that is not a plain word reads `{id}`, the query dropped. */
+internal fun routeTemplate(url: String): String {
+    val path = url.substringAfter("://").substringAfter('/', "").substringBefore('?')
+    val segments = path.split('/').filter { it.isNotEmpty() }
+    return "/" + segments.mapIndexed { i, segment ->
+        when {
+            i == 1 && segments[0] == "i" -> "{instance}"
+            i > 0 && !segment.matches(PLAIN_WORD) -> "{id}"
+            else -> segment
+        }
+    }.joinToString("/")
+}
+
+private val PLAIN_WORD = Regex("[a-z-]{1,24}")
 
 /** The desktop's half of the relay protocol. */
 class RelayClient(
@@ -163,7 +191,9 @@ class RelayClient(
         if (body != null) headers["Content-Type"] = "application/json"
         if (token != null) headers["Authorization"] = "Bearer $token"
         val reply = send(method, url, headers, body)
-        return reply.takeIf { it.status in HTTP_OK_RANGE } ?: throw failureFor(reply, registering = token == null)
+        if (reply.status in HTTP_OK_RANGE) return reply
+        val relayCall = RelayCall(method, routeTemplate(url), hostOf(url), reply.ray)
+        throw failureFor(reply, registering = token == null, relayCall)
     }
 
     private fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply = try {
@@ -178,7 +208,12 @@ class RelayClient(
     private fun <T> decode(serializer: KSerializer<T>, reply: RelayReply): T = try {
         json.decodeFromString(serializer, reply.body)
     } catch (e: IllegalArgumentException) {
-        throw RelayFailure.Rejected(reply.status, "unreadable reply: ${e.message?.take(MAX_ERROR_CHARS)}", e)
+        throw RelayFailure.Rejected(
+            reply.status,
+            "unreadable reply: ${e.message?.take(MAX_ERROR_CHARS)}",
+            e,
+            RelayCall("", "", "", reply.ray),
+        )
     }
 
     private companion object {
@@ -198,13 +233,15 @@ private const val BANNED_ERROR = "\"banned\""
 private val lenientJson = Json { ignoreUnknownKeys = true }
 
 /** What a non-2xx reply means; [registering] because 409 is "instance id taken" only on register. */
-private fun failureFor(reply: RelayReply, registering: Boolean): RelayFailure = when (reply.status) {
+private fun hostOf(url: String): String = url.substringAfter("://").substringBefore('/').substringBefore(':')
+
+private fun failureFor(reply: RelayReply, registering: Boolean, call: RelayCall): RelayFailure = when (reply.status) {
     HTTP_UNAUTHORIZED ->
         if (reply.body.contains(CLIENT_KEY_ERROR)) RelayFailure.ClientKey() else RelayFailure.Unauthorized()
     HTTP_FORBIDDEN -> if (reply.body.contains(BANNED_ERROR)) RelayFailure.Banned() else RelayFailure.Unauthorized()
     HTTP_CONFLICT -> if (registering) RelayFailure.Taken() else RelayFailure.Conflict()
     HTTP_PRECONDITION_FAILED -> RelayFailure.Conflict()
-    else -> RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS))
+    else -> RelayFailure.Rejected(reply.status, reply.body.take(MAX_ERROR_CHARS), call = call)
 }
 
 /** `GET` of the website's client-key endpoint: the key the relay currently expects. */
