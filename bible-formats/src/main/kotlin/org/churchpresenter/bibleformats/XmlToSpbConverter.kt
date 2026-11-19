@@ -76,8 +76,53 @@ object XmlToSpbConverter {
         9 to 9, 113 to 114, 114 to 116, 115 to 116, 146 to 147, 147 to 147,
     )
 
+    private const val LXX_PSALM_9 = 9
+
+    /** The most verses a psalm title runs to. */
+    private const val MAX_TITLE_VERSES = 2
+    private const val LXX_PSALM_113 = 113
+    private const val LXX_PSALM_114 = 114
+    private const val LXX_PSALM_115 = 115
+    private const val LXX_PSALM_146 = 146
+    private const val LXX_PSALM_147 = 147
+    private const val HEBREW_PSALM_9 = 9
+    private const val HEBREW_PSALM_10 = 10
+    private const val HEBREW_PSALM_114 = 114
+    private const val HEBREW_PSALM_115 = 115
+    private const val HEBREW_PSALM_116 = 116
+    private const val HEBREW_PSALM_147 = 147
+    private const val HEBREW_PSALM_9_VERSES = 20
+    private const val HEBREW_PSALM_114_VERSES = 8
+    private const val HEBREW_PSALM_116_FIRST_HALF = 9
+    private const val HEBREW_PSALM_147_FIRST_HALF = 11
+
     /** The runs where the Septuagint is exactly one behind the Hebrew numbering. */
     private val LXX_PSALMS_ONE_BEHIND = listOf(10..112, 116..145)
+
+    /**
+     * Where a Septuagint psalm holds two Hebrew ones, or half of one: its verses are carried across
+     * as well as its chapter, so each verse gets the code of the Hebrew verse it actually is.
+     *
+     * Psalm 9 is Hebrew 9 (20 verses) and then Hebrew 10; Psalm 113 is Hebrew 114 (8 verses) and then
+     * Hebrew 115; Psalm 115 is the second half of Hebrew 116, from its verse 10; Psalm 147 is the
+     * second half of Hebrew 147, from its verse 12. Psalms 114 and 146 are the first halves of Hebrew
+     * 116 and 147 and keep their verse numbers.
+     */
+    private fun lxxToHebrewPsalmVerse(lxxChapter: Int, verse: Int): Pair<Int, Int> = when (lxxChapter) {
+        LXX_PSALM_9 -> if (verse > HEBREW_PSALM_9_VERSES) {
+            HEBREW_PSALM_10 to verse - HEBREW_PSALM_9_VERSES
+        } else {
+            HEBREW_PSALM_9 to verse
+        }
+        LXX_PSALM_113 -> if (verse > HEBREW_PSALM_114_VERSES) {
+            HEBREW_PSALM_115 to verse - HEBREW_PSALM_114_VERSES
+        } else {
+            HEBREW_PSALM_114 to verse
+        }
+        LXX_PSALM_115 -> HEBREW_PSALM_116 to verse + HEBREW_PSALM_116_FIRST_HALF
+        LXX_PSALM_147 -> HEBREW_PSALM_147 to verse + HEBREW_PSALM_147_FIRST_HALF
+        else -> lxxToHebrewPsalm(lxxChapter) to verse
+    }
 
     /**
      * Maps LXX Psalm chapter number to Hebrew Psalm chapter number.
@@ -101,21 +146,60 @@ object XmlToSpbConverter {
         // Too long to be just a title
         if (trimmed.length > MAX_SUPERSCRIPTION_LENGTH) return false
         // Remove text inside «» brackets (title markers)
-        val withoutBrackets = trimmed.replace(Regex("«[^»]*»\\.?"), "").trim()
+        val withoutBrackets = trimmed.replace(BRACKETED_TITLE, "").trim()
         // If after removing bracketed title there's substantial content, it's embedded
         if (withoutBrackets.length > MAX_TITLE_REMAINDER) return false
-        // Check for known superscription patterns
-        val titlePatterns = listOf(
-            "Псалом", "Молитва", "Начальнику", "Песнь", "Аллилуия",
-            "Давида", "Асафа", "Кореевых", "Соломона", "Моисея", "Ефама", "Емана",
-            "Psalm", "Prayer", "Song", "Maskil", "Miktam", "Shiggaion",
-            "For the director", "Of David", "Of Asaph", "Of Solomon",
-            "Псалом", "Пісня", "Молитва" // Ukrainian
-        )
-        val hasTitle = titlePatterns.any { trimmed.contains(it, ignoreCase = true) }
         // If it contains a title pattern and has no substantial content after removal, it's a superscription
-        return hasTitle || withoutBrackets.isEmpty()
+        return readsLikeTitle(trimmed) || withoutBrackets.isEmpty()
     }
+
+    private val BRACKETED_TITLE = Regex("«[^»]*»\\.?")
+
+    /** Words a psalm title is made of, in the languages whose Psalters number titles as verse 1. */
+    private val TITLE_PATTERNS = listOf(
+        "Псалом", "Молитва", "Начальнику", "Песнь", "Аллилуия",
+        "Давида", "Асафа", "Кореевых", "Соломона", "Моисея", "Ефама", "Емана",
+        "Psalm", "Prayer", "Song", "Maskil", "Miktam", "Shiggaion",
+        "For the director", "Of David", "Of Asaph", "Of Solomon",
+        "Пісня", // Ukrainian
+    )
+
+    private fun readsLikeTitle(text: String): Boolean = TITLE_PATTERNS.any { text.contains(it, ignoreCase = true) }
+
+    /**
+     * How many of [chapter]'s opening verses are its title, numbered as verses of their own: 0, 1 or 2.
+     *
+     * Short titles are recognised by their wording alone. A longer one ("Начальнику хора. По смерти
+     * Лабена. Псалом Давида.") is too long for that — a first verse of that length can be content that
+     * mentions David — so it counts only when the psalm also has more verses than the Hebrew psalm it
+     * is: one more for a one-verse title, two more where the title runs on into a second verse
+     * ("…Псалом Давида," / "когда приходил к нему пророк Нафан…").
+     */
+    private fun titleVerses(chapter: BibleChapter): Int {
+        val first = chapter.verses.firstOrNull()?.text?.trim() ?: return 0
+        val extra = chapter.verses.size - hebrewVersesIn(chapter.number)
+        val titled = first.length <= MAX_SUPERSCRIPTION_LENGTH && !BRACKETED_TITLE.containsMatchIn(first) &&
+            readsLikeTitle(first)
+        return when {
+            titled && extra == 2 -> 2
+            isPsalmSuperscription(first) -> 1
+            titled && extra == 1 -> 1
+            else -> 0
+        }
+    }
+
+    /** How many Hebrew-numbered (KJV) verses Septuagint psalm [lxxChapter] holds. */
+    private fun hebrewVersesIn(lxxChapter: Int): Int = when (lxxChapter) {
+        LXX_PSALM_9 -> psalmVerses(HEBREW_PSALM_9) + psalmVerses(HEBREW_PSALM_10)
+        LXX_PSALM_113 -> psalmVerses(HEBREW_PSALM_114) + psalmVerses(HEBREW_PSALM_115)
+        LXX_PSALM_114 -> HEBREW_PSALM_116_FIRST_HALF
+        LXX_PSALM_115 -> psalmVerses(HEBREW_PSALM_116) - HEBREW_PSALM_116_FIRST_HALF
+        LXX_PSALM_146 -> HEBREW_PSALM_147_FIRST_HALF
+        LXX_PSALM_147 -> psalmVerses(HEBREW_PSALM_147) - HEBREW_PSALM_147_FIRST_HALF
+        else -> psalmVerses(lxxToHebrewPsalm(lxxChapter))
+    }
+
+    private fun psalmVerses(hebrewPsalm: Int): Int = KjvVersification.verseCount(PSALMS_BOOK_NUMBER, hebrewPsalm)
 
     /**
      * Reads either dialect this converter understands, choosing between them by the file's root.
@@ -265,8 +349,9 @@ object XmlToSpbConverter {
         outputFile.bufferedWriter(Charsets.UTF_8).use { w ->
             writeHeader(w, bible)
             w.write("-----\n")
+            val lxxPsalms = usesLxxPsalms(bible)
             for ((index, book) in bible.books.withIndex()) {
-                book.chapters.forEach { chapter -> writeChapter(w, bible, book, chapter) }
+                book.chapters.forEach { chapter -> writeChapter(w, lxxPsalms, book, chapter) }
                 onProgress((index + 1).toFloat() / bible.books.size)
             }
         }
@@ -299,18 +384,40 @@ object XmlToSpbConverter {
      * verse is nothing but its title codes that title as verse 0 so the verses under it line up
      * with the same psalm in a Hebrew-numbered translation.
      */
-    private fun writeChapter(w: Writer, bible: ParsedBible, book: BibleBook, chapter: BibleChapter) {
-        val isLxxPsalm = bible.language?.uppercase() in LXX_PSALM_LANGUAGES && book.number == PSALMS_BOOK_NUMBER
-        val hasStandaloneTitle = isLxxPsalm && chapter.verses.isNotEmpty() &&
-            isPsalmSuperscription(chapter.verses.first().text)
-        val codeChapter = if (isLxxPsalm) lxxToHebrewPsalm(chapter.number) else chapter.number
-
+    private fun writeChapter(w: Writer, lxxPsalms: Boolean, book: BibleBook, chapter: BibleChapter) {
+        val isLxxPsalm = lxxPsalms && book.number == PSALMS_BOOK_NUMBER
+        val titleVerses = if (isLxxPsalm) titleVerses(chapter) else 0
         for (verse in chapter.verses) {
-            val codeVerse = if (hasStandaloneTitle) verse.number - 1 else verse.number
+            // A title is verse 0 in the code; a two-verse title is verse 0 twice.
+            val ownVerse = (verse.number - titleVerses).coerceAtLeast(0)
+            val (codeChapter, codeVerse) =
+                if (isLxxPsalm) lxxToHebrewPsalmVerse(chapter.number, ownVerse) else chapter.number to ownVerse
             val verseId = "B%03dC%03dV%03d".format(book.number, codeChapter, codeVerse)
             w.write("$verseId\t${book.number}\t${chapter.number}\t${verse.number}\t${verse.text}\n")
         }
     }
+
+    /**
+     * Whether [bible] numbers the Psalms as the Septuagint does.
+     *
+     * Decided by which numbering its Psalms match more closely: each psalm's verse count is set
+     * against what the Hebrew numbering gives that psalm number and against what the Septuagint
+     * numbering gives it (a title of one or two verses allowed either way), and the one more psalms
+     * fit wins. The language does not settle it -- the Ukrainian Bible 1996 on eBible is
+     * Hebrew-numbered, the Synodal is not -- so it only breaks a tie, as a partial Psalter gives.
+     */
+    internal fun usesLxxPsalms(bible: ParsedBible): Boolean {
+        val psalms = bible.books.firstOrNull { it.number == PSALMS_BOOK_NUMBER }?.chapters.orEmpty()
+        val asSeptuagint = psalms.count { fits(it.verses.size, hebrewVersesIn(it.number)) }
+        val asHebrew = psalms.count { fits(it.verses.size, psalmVerses(it.number)) }
+        return when {
+            asSeptuagint != asHebrew -> asSeptuagint > asHebrew
+            else -> bible.language?.uppercase() in LXX_PSALM_LANGUAGES
+        }
+    }
+
+    /** Whether a psalm of [actual] verses is the [expected] length, give or take a one- or two-verse title. */
+    private fun fits(actual: Int, expected: Int): Boolean = expected > 0 && actual - expected in 0..MAX_TITLE_VERSES
 
     /**
      * Header values are tab-separated single lines, so a `<description>` or `<rights>` containing

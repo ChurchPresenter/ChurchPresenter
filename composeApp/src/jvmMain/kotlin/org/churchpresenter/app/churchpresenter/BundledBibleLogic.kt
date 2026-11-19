@@ -2,6 +2,26 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.BibleSettings
 import java.io.File
+import java.security.MessageDigest
+
+/**
+ * The KJV earlier builds shipped, byte for byte: its psalm titles and epistle subscriptions were
+ * written as verses with borrowed numbers (Psalm 4's title as 4:8, beside the real 4:8), which put it
+ * out of step with every other translation in the Psalms.
+ */
+private const val OLD_BUNDLED_BIBLE_SIZE = 4_804_519L
+private const val OLD_BUNDLED_BIBLE_SHA256 = "7a7db138ca3e44327c00bec8dc765c91f43701fe57698bb9d095ab6a36ebdb4e"
+
+/**
+ * Whether [file] is the KJV earlier builds installed, unchanged, and so is to be replaced by the
+ * corrected one. A copy anyone has changed is left alone: the size is checked first, so a different
+ * file costs no read at all.
+ */
+internal fun isOldBundledBible(file: File): Boolean =
+    file.isFile && file.length() == OLD_BUNDLED_BIBLE_SIZE && sha256(file) == OLD_BUNDLED_BIBLE_SHA256
+
+private fun sha256(file: File): String =
+    MessageDigest.getInstance("SHA-256").digest(file.readBytes()).joinToString("") { "%02x".format(it) }
 
 /**
  * Whether the bundled KJV has to be written out and made primary.

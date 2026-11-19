@@ -15,6 +15,8 @@ import org.churchpresenter.settings.operatorBibleSettings
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.bibleformats.catalog.BibleInstallSupport
 import org.churchpresenter.bible.BibleLoadError
+import org.churchpresenter.bibleedits.BibleEditsStore
+import org.churchpresenter.bibleedits.applySavedEdits
 import java.io.File
 
 /**
@@ -403,6 +405,8 @@ private suspend fun BibleViewModel.loadModules(
     translationSources: List<Pair<String, File>>,
 ): LoadedModules = coroutineScope {
     val englishNames = _englishBookNames.value
+    // An Instance Link replica is the primary's text, so this machine's corrections stay off it.
+    val editsStore = if (useReplica) null else verseEditsFolder()?.let(::BibleEditsStore)
     val bibleDeferred = translationSources.map { (identity, path) ->
         val rename = configuredTranslations.firstOrNull { it.fileName == identity }
         identity to async(ioDispatcher) {
@@ -412,6 +416,7 @@ private suspend fun BibleViewModel.loadModules(
                 loadFromSpb(path.absolutePath, englishNames)
                 applyNameOverride(rename?.customName, rename?.customAbbreviation)
                 applyBookNameOverrides(rename?.bookNameOverrides.orEmpty())
+                editsStore?.let { applySavedEdits(it, identity) }
             }
         }
     }

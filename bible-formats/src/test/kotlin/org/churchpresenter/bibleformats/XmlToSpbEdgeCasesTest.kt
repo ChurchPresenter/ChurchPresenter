@@ -80,8 +80,10 @@ class XmlToSpbEdgeCasesTest {
     }
 
     @Test
-    fun `the split psalms both point at the Hebrew psalm they came from`() {
-        // LXX 114 and 115 are the two halves of Hebrew 116; LXX 146 and 147 are the halves of 147.
+    fun `the split psalms are each coded as the half of the Hebrew psalm they are`() {
+        // LXX 114 and 115 are the two halves of Hebrew 116 (verses 1-9 and 10-19); LXX 146 and 147
+        // are the halves of 147 (1-11 and 12-20). Coded from verse 1 alike, the second half's verses
+        // collided with the first's and lined up with the wrong verse beside a Hebrew-numbered Bible.
         val lines = psalter(
             114 to listOf("Я радуюсь"),
             115 to listOf("Я веровал"),
@@ -89,9 +91,22 @@ class XmlToSpbEdgeCasesTest {
             147 to listOf("Хвали, Иерусалим"),
         )
         assertEquals("B019C116V001", codeFor(lines, 114, 1))
-        assertEquals("B019C116V001", codeFor(lines, 115, 1))
+        assertEquals("B019C116V010", codeFor(lines, 115, 1))
         assertEquals("B019C147V001", codeFor(lines, 146, 1))
-        assertEquals("B019C147V001", codeFor(lines, 147, 1))
+        assertEquals("B019C147V012", codeFor(lines, 147, 1))
+    }
+
+    @Test
+    fun `the second half of a merged psalm is coded as the Hebrew psalm it is`() {
+        // LXX 9:21 onward is Hebrew 10; LXX 113:9 onward is Hebrew 115.
+        val lines = psalter(
+            9 to (1..22).map { "Стих $it" },
+            113 to (1..9).map { "Стих $it" },
+        )
+        assertEquals("B019C009V020", codeFor(lines, 9, 20))
+        assertEquals("B019C010V001", codeFor(lines, 9, 21))
+        assertEquals("B019C114V008", codeFor(lines, 113, 8))
+        assertEquals("B019C115V001", codeFor(lines, 113, 9))
     }
 
     @Test

@@ -142,10 +142,12 @@ object SpbVersePatcher {
         val deduped = mutableListOf<String>()
         for (line in verseLines) {
             val id = line.substringBefore('\t')
-            val previousId = deduped.lastOrNull { it.isNotBlank() }?.substringBefore('\t')
+            val previous = deduped.lastOrNull { it.isNotBlank() }
             val parts = line.split("\t", limit = VERSE_COLUMNS)
-            val mergeable = line.isNotBlank() && id.startsWith("B") &&
-                previousId == id && parts.size >= VERSE_COLUMNS
+            // One verse split over two rows repeats its displayed reference too. Two rows that only
+            // share a code are two verses -- a two-verse psalm title is coded verse 0 twice -- and stay.
+            val mergeable = line.isNotBlank() && id.startsWith("B") && parts.size >= VERSE_COLUMNS &&
+                previous?.split("\t", limit = VERSE_COLUMNS)?.take(COLUMN_TEXT) == parts.take(COLUMN_TEXT)
             if (!mergeable) {
                 deduped.add(line)
                 continue

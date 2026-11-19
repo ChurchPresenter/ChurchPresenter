@@ -53,8 +53,10 @@ class ToolWindowFramesTest {
     }
 
     @Test
-    fun `the bible verse fixer`() = opens("ChurchPresenter Bible Verse Fixer", DpSize(960.dp, 760.dp)) { f ->
-        BibleVerseFixerWindow(ThemeMode.LIGHT, bibleFiles = emptyList(), onClose = { f.closed++ }, frame = f.frame)
+    fun `the bible editor`() = opens("ChurchPresenter Bible Editor", DpSize(1240.dp, 820.dp)) { f ->
+        BibleEditorWindow(
+            ThemeMode.LIGHT, bibleFolder = "", preferred = emptyList(), onClose = { f.closed++ }, frame = f.frame,
+        )
     }
 
     @Test

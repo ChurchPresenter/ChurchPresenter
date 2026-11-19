@@ -44,6 +44,7 @@ that trap before this module existed.
 | `SpbFormat.kt` | the `.spb` format itself — the six helpers that are pure functions of the file |
 | `BibleBook.kt`, `BibleVerse.kt`, `BibleSearch.kt` | the three row types the API hands back |
 | `BibleTranslationNames.kt` | reading a module's title without loading it |
+| `VerseEdit.kt` | laying corrections over a loaded module (`Bible.applyVerseEdits`) — the Bible editor's, via `:bible-edits` |
 
 ## Test fixtures published from here
 
