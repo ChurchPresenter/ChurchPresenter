@@ -16,12 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -261,29 +262,34 @@ private fun SearchableMenuItems(
     itemContent: @Composable (String) -> Unit,
     onPick: (String) -> Unit,
 ) {
-    val scrollState = rememberScrollState()
+    // Lazy: the download browser's language list runs past a thousand options, and composing every
+    // one of them on each keystroke stalled the UI thread. The fixed width and height keep the
+    // menu's intrinsic measurement from reaching the lazy list.
+    val listState = rememberLazyListState()
     Box(modifier = Modifier.height(menuHeight).width(menuWidth)) {
-        Column(
+        LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(menuHeight)
-                .verticalScroll(scrollState)
                 .padding(end = 10.dp)
         ) {
             if (filteredOptions.isEmpty()) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            stringResource(Res.string.no_results_found, query),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    },
-                    onClick = {},
-                    enabled = false
-                )
+                item {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(Res.string.no_results_found, query),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        },
+                        onClick = {},
+                        enabled = false
+                    )
+                }
             } else {
-                filteredOptions.forEach { option ->
+                items(filteredOptions) { option ->
                     DropdownMenuItem(
                         text = { itemContent(option) },
                         onClick = { onPick(option) }
@@ -292,7 +298,7 @@ private fun SearchableMenuItems(
             }
         }
         VerticalScrollbar(
-            adapter = rememberScrollbarAdapter(scrollState),
+            adapter = rememberScrollbarAdapter(listState),
             modifier = Modifier.align(Alignment.CenterEnd).height(menuHeight),
             style = LocalScrollbarStyle.current.copy(
                 thickness = 8.dp,
