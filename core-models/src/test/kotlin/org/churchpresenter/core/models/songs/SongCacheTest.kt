@@ -135,4 +135,20 @@ class SongCacheTest {
         assertTrue(cacheFile.isDirectory, "the failed write must have left the path alone")
         cacheFile.delete()
     }
+
+    @Test
+    fun `one read gives both the songs to show and the map to rescan with`() {
+        SongFileParser.saveSongCache("/library", listOf(cachedSong("A", "/library/a.song")))
+
+        val cache = SongFileParser.readSongCache("/library")
+
+        assertEquals(listOf("A"), cache?.let(SongFileParser::songsIn)?.map { it.title })
+        assertEquals(setOf("/library/a.song"), SongFileParser.songMapIn(cache).keys)
+    }
+
+    @Test
+    fun `no cache gives an empty map to rescan with`() {
+        assertNull(SongFileParser.readSongCache("/library"))
+        assertEquals(emptyMap(), SongFileParser.songMapIn(null))
+    }
 }

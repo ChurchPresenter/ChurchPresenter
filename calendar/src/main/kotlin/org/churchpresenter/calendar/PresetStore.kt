@@ -80,12 +80,15 @@ class PresetStore(
      * result back only when the merge holds something the file did not. The same rule as
      * `CalendarState.reloadMerging`: an identical document is not worth a write, and two machines
      * writing the same merge at each other is a loop. Returns the merged document.
+     *
+     * The write-back is best effort, as it is for the calendar: the folder may be a synced drive
+     * that is offline, and the merge still holds in memory until the next write reaches it.
      */
     fun reloadMerging(known: PresetDocument): PresetDocument {
         val onDisk = load()
         if (onDisk == known) return onDisk
         val merged = known.mergedWith(onDisk, now())
-        if (merged != onDisk) save(merged)
+        if (merged != onDisk) runCatching { save(merged) }
         return merged
     }
 }
