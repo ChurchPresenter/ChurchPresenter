@@ -43,10 +43,15 @@ internal fun SongsViewModel.applyFilters() {
         }
     } else if (query.isNotEmpty()) {
         filtered = when (filterTypeState.value) {
-            Constants.CONTAINS -> filtered.filter { song ->
-                song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) } ||
-                    song.alias.contains(query, ignoreCase = true) ||
-                    searchLyricsOf(song).contains(query, ignoreCase = true)
+            Constants.CONTAINS -> {
+                // The lyrics are cached lowercased: a plain contains is many times faster over a
+                // whole library than an ignoreCase one, which compared it char by char per keystroke.
+                val lowerQuery = query.lowercase()
+                filtered.filter { song ->
+                    song.searchTitles().any { "${song.number}. $it".contains(query, ignoreCase = true) } ||
+                        song.alias.contains(query, ignoreCase = true) ||
+                        searchLyricsOf(song).contains(lowerQuery)
+                }
             }
             Constants.STARTS_WITH -> filtered.filter { song ->
                 song.number.startsWith(query, ignoreCase = true) ||
@@ -108,7 +113,7 @@ internal fun SongsViewModel.searchLyricsOf(song: SongItem): String {
     return lyricSearchText.getOrPut(song) { lyricSearchTextOf(song) }
 }
 
-/** [song]'s lyrics as the search reads them: every language, no chords, headers or breaks. */
+/** [song]'s lyrics as the search reads them: every language, lowercased, no chords, headers or breaks. */
 internal fun lyricSearchTextOf(song: SongItem): String =
     song.translationList().asSequence()
         .flatMap { it.lyrics.asSequence() }
@@ -116,6 +121,7 @@ internal fun lyricSearchTextOf(song: SongItem): String =
         .map { plainLyricLine(ChordTransposer.stripChords(it)) }
         .joinToString(" ")
         .replace(WHITESPACE_RUN, " ")
+        .lowercase()
 
 /**
  * Where the current search found [song] -- a title, a named section, which language -- for the
