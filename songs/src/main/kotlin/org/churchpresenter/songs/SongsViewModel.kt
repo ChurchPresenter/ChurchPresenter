@@ -213,13 +213,16 @@ class SongsViewModel(
             isLoadingState.value = true
             val storageDir = appSettings.songSettings.storageDirectory
             try {
+                // Read once and used by both phases: a large library's cache decoded twice is two
+                // copies of every song held at once.
+                val songCache = if (storageDir.isEmpty()) null else withContext(ioDispatcher) {
+                    SongFileParser.readSongCache(storageDir)
+                }
                 // Phase 1: the cache, for instant display at startup -- only while nothing is shown.
                 // On a reload the cache is older than what is on screen, and showing it put an
                 // edit's old text back until the folder had been read again.
-                if (storageDir.isNotEmpty() && allSongItemsState.value.isEmpty()) {
-                    val cached = withContext(ioDispatcher) {
-                        SongFileParser.loadSongCache(storageDir)
-                    }
+                if (songCache != null && allSongItemsState.value.isEmpty()) {
+                    val cached = SongFileParser.songsIn(songCache)
                     if (cached != null && cached.isNotEmpty()) {
                         applySongList(cached)
                         isLoadingState.value = false
@@ -234,7 +237,7 @@ class SongsViewModel(
                         val dir = File(storageDir)
                         if (dir.exists() && dir.isDirectory) {
                             val parser = SongFileParser()
-                            val cacheMap = SongFileParser.loadCachedSongMap(storageDir)
+                            val cacheMap = SongFileParser.songMapIn(songCache)
                             cachedSongsList = parser.loadSongsFromDirectory(dir.absolutePath, cacheMap)
                             s.addSongs(cachedSongsList.map { it.song })
                         }
