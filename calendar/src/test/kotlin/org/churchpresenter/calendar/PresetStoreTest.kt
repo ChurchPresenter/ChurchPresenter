@@ -119,4 +119,16 @@ class PresetStoreTest {
         assertEquals(2, merged.presets.size)
         assertEquals(0, saves)
     }
+
+    @Test
+    fun `a folder that cannot be reached keeps the merge in memory instead of failing`() {
+        val blocker = File(folder, "not-a-folder").apply { writeText("") }
+        val store = PresetStore(File(blocker, "Calendar"), now = { now }, onSaved = { saves++ })
+        val known = PresetDocument(presets = listOf(preset("a", "Mine")))
+
+        val merged = store.reloadMerging(known)
+
+        assertEquals(listOf("a"), merged.presets.map { it.id })
+        assertEquals(0, saves)
+    }
 }
