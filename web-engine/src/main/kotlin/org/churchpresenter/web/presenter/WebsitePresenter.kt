@@ -450,6 +450,11 @@ object CefManager {
      */
     @Volatile var onQuitRequested: (() -> Unit)? = null
 
+    /** Called once a run when the first browser client is made; see [CefEngine.onClientCreated]. */
+    var onClientCreated: (() -> Unit)?
+        get() = engine.onClientCreated
+        set(value) { engine.onClientCreated = value }
+
     /** Starts the native engine on a thread of its own, ahead of the first browser; see [CefEngine.startEarly]. */
     fun startEarly() = engine.startEarly()
 

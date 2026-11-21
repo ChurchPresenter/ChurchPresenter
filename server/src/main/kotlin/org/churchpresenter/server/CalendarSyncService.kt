@@ -320,7 +320,32 @@ class CalendarSyncService(
 }
 
 /** The status a relay failure reads as: the token refused is its own state, anything else a message. */
-private fun failure(e: RelayFailure): CalendarSyncStatus = when (e) {
-    is RelayFailure.Unauthorized -> CalendarSyncStatus.Unauthorized
-    else -> CalendarSyncStatus.Failed(e.message.orEmpty())
+private fun failure(e: RelayFailure): CalendarSyncStatus {
+    if (e is RelayFailure.Rejected) reportRejected(e)
+    return when (e) {
+        is RelayFailure.Unauthorized -> CalendarSyncStatus.Unauthorized
+        else -> CalendarSyncStatus.Failed(e.message.orEmpty())
+    }
+}
+
+/**
+ * Sends a refusal the desktop has no answer for -- a 5xx, an unexpected status, a reply it could
+ * not read -- to Sentry, with everything known about the call. The refusals that are a state of
+ * their own (token, key, ban, conflict) and an unreachable relay are not reported; they are not
+ * faults. Grouped on the route, the status and what the relay said, so one fault is one issue.
+ */
+private fun reportRejected(e: RelayFailure.Rejected) {
+    val call = e.call
+    val route = call?.route?.takeIf { it.isNotEmpty() } ?: "in sync"
+    CrashReporter.reportWarning(
+        context = "Calendar relay rejected a request",
+        throwable = e,
+        tags = mapOf(
+            "relay_status" to e.status.toString(),
+            "relay_route" to listOfNotNull(call?.method?.takeIf { it.isNotEmpty() }, route).joinToString(" "),
+            "relay_host" to call?.host.orEmpty(),
+        ),
+        extras = mapOf("relay_reply" to e.detail, "cf_ray" to call?.ray.orEmpty()),
+        fingerprint = listOf("calendar-relay-rejected", route, e.status.toString(), e.detail),
+    )
 }

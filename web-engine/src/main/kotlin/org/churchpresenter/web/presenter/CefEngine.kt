@@ -155,6 +155,13 @@ internal class CefEngine(
     }
 
     private val startedEarly = AtomicBoolean(false)
+    private val clientMade = AtomicBoolean(false)
+
+    /**
+     * Called once a run, the first time the engine hands out a client: web is in use. The app
+     * remembers it, so the next launch can bring the engine up before a web cue goes live.
+     */
+    @Volatile var onClientCreated: (() -> Unit)? = null
 
     /**
      * Brings the native engine up ahead of the first browser: one client, made and disposed through
@@ -181,7 +188,7 @@ internal class CefEngine(
     fun createClient(): CefClient? {
         val source = clientSource ?: return null
         return try {
-            source()
+            source().also { if (clientMade.compareAndSet(false, true)) onClientCreated?.invoke() }
         } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
             // JCEF's native side fails with Errors (UnsatisfiedLinkError and the like), not Exceptions.
             engineUnavailable()

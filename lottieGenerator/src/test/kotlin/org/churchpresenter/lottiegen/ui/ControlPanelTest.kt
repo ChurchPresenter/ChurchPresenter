@@ -20,6 +20,7 @@ import org.churchpresenter.lottiegen.model.StyleCatalog
 import org.churchpresenter.lottiegen.model.TIMING_PRESETS
 import org.churchpresenter.lottiegen.ui.components.FakePickers
 import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
+import org.churchpresenter.lottiegen.ui.components.NumberInput
 import java.io.File
 import javax.swing.SwingUtilities
 import kotlin.test.Test
@@ -39,6 +40,8 @@ class ControlPanelTest {
         ).forEach { click(it) }
     }
 
+    private fun shown(value: Float) = NumberInput.format(value.toString().toDouble())
+
     @Test
     fun `canvas, timing and text fields write the config`() = runDesktopComposeUiTest(1400, 2600) {
         val state = FakeLottieGenState()
@@ -46,22 +49,23 @@ class ControlPanelTest {
         openAll(this)
         click(CANVAS_PRESETS[4].label)
         assertEquals(1080 to 1080, state.config.canvasW to state.config.canvasH)
-        type("1080", "99999")
+        typeAndEnter("1080", "99999")
         assertEquals(7680, state.config.canvasW)
-        type("1080", "12")
+        typeAndEnter("1080", "12")
         assertTrue(state.config.canvasH < 1080)
         click(TIMING_PRESETS[0].label)
         assertEquals(2f, state.config.animDuration)
-        type("2.0", "100")
-        type(state.config.holdDuration.toString(), "7")
+        typeAndEnter("2", "100")
+        assertEquals(20f, state.config.animDuration)
+        type(shown(state.config.holdDuration), "7")
         assertEquals(7f, state.config.holdDuration)
         type("Church Presenter", "Ann")
         type("Software Engineer", "Elder")
         assertEquals("Ann" to "Elder", state.config.nameText to state.config.infoText)
         type(state.config.baseSize.toString(), "30")
-        type(state.config.nameSize.toString(), "2")
-        type(state.config.infoSize.toString(), "1.5")
-        type(state.config.detailSize.toString(), "1.25")
+        type(shown(state.config.nameSize), "2")
+        type(shown(state.config.infoSize), "1.5")
+        type(shown(state.config.detailSize), "1.25")
         assertEquals(30, state.config.baseSize)
         assertEquals(
             listOf(2f, 1.5f, 1.25f),

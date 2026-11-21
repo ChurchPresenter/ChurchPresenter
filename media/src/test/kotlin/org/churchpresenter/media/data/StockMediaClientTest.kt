@@ -4,10 +4,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
@@ -484,6 +486,26 @@ class StockMediaClientTest {
             StockMediaClient.DownloadOutcome.Failure,
             runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) },
         )
+    }
+
+    @Test
+    fun `a download that outlasts the client's short cap is not cut off`() {
+        // CHURCH-PRESENTER-DESKTOP-50: the client's own cap suits a search; a whole video over a slow
+        // link takes longer, and a download sets its own limit above it.
+        http = HttpClient(
+            MockEngine {
+                delay(150)
+                respond("mp4-bytes", HttpStatusCode.OK)
+            }
+        ) {
+            install(HttpTimeout) { requestTimeoutMillis = 20 }
+        }
+
+        val outcome = runBlocking {
+            StockMediaClient.download(item(isVideo = true), http = http, downloadDir = downloadDir)
+        }
+
+        assertIs<StockMediaClient.DownloadOutcome.Success>(outcome)
     }
 
     @Test
