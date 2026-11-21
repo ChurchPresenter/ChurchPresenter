@@ -351,6 +351,9 @@ compose.desktop {
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
+            // Diagnostics: an exception the JIT has seen often is otherwise thrown with no message
+            // and no stack, which reaches the crash report as a bare "NullPointerException: null".
+            "-XX:-OmitStackTraceInFastThrow",
             // Rendering hints (renderApi is set per-platform in the blocks below / jvmArgs above)
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
