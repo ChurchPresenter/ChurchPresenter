@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -140,28 +141,32 @@ internal fun LanguageDropdown(
 ) {
     val allLanguagesLabel = stringResource(Res.string.bible_catalog_language_all)
 
-    val languageLabels = languages.associate { option ->
-
-        val names = listOf(option.name, option.nativeName)
-            .filter { it.isNotBlank() }
-            .distinctBy { it.lowercase() }
-        val label = when (names.size) {
-            0 -> stringResource(Res.string.bible_catalog_language_count, option.code, option.count)
-            1 -> stringResource(Res.string.bible_catalog_language_named, names[0], option.code, option.count)
-            else -> stringResource(
-                Res.string.bible_catalog_language_named_native,
-                names[0], names[1], option.code, option.count
-            )
+    // The templates are read once and filled per language inside remember: a thousand-odd
+    // stringResource calls on every recomposition stalled the dialog.
+    val countTemplate = stringResource(Res.string.bible_catalog_language_count)
+    val namedTemplate = stringResource(Res.string.bible_catalog_language_named)
+    val nativeTemplate = stringResource(Res.string.bible_catalog_language_named_native)
+    val languageLabels = remember(languages, countTemplate, namedTemplate, nativeTemplate) {
+        languages.associate { option ->
+            val names = listOf(option.name, option.nativeName)
+                .filter { it.isNotBlank() }
+                .distinctBy { it.lowercase() }
+            val label = when (names.size) {
+                0 -> fillTemplate(countTemplate, option.code, option.count)
+                1 -> fillTemplate(namedTemplate, names[0], option.code, option.count)
+                else -> fillTemplate(nativeTemplate, names[0], names[1], option.code, option.count)
+            }
+            label to option.code
         }
-        label to option.code
     }
+    val options = remember(languageLabels, allLanguagesLabel) { listOf(allLanguagesLabel) + languageLabels.keys }
     val selectedLabel = languageLabels.entries
         .firstOrNull { it.value == selectedLanguage }?.key
         ?: allLanguagesLabel
 
     SearchableDropdownField(
         value = selectedLabel,
-        options = listOf(allLanguagesLabel) + languageLabels.keys,
+        options = options,
         onValueChange = { label -> onLanguageChange(languageLabels[label]) },
         leadingIcon = {
             Icon(
@@ -189,6 +194,14 @@ internal fun LanguageDropdown(
         modifier = Modifier.width(220.dp)
     )
 }
+
+private val TEMPLATE_ARG = Regex("%(\\d+)\\$[ds]")
+
+/** [template]'s `%1$s`/`%2$d` placeholders filled from [args], as `stringResource(id, args)` fills them. */
+internal fun fillTemplate(template: String, vararg args: Any): String =
+    TEMPLATE_ARG.replace(template) { match ->
+        args.getOrNull(match.groupValues[1].toInt() - 1)?.toString() ?: match.value
+    }
 
 private val SearchFieldShape = AppShape(10.dp)
 

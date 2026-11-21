@@ -22,6 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.churchpresenter.sharedui.composables.FontSettingsDropdown
+import org.churchpresenter.bibletab.catalog.BibleCatalogViewModel.LanguageOption
 
 /**
  * The searchable dropdown, driven through its two configurations.
@@ -265,5 +266,51 @@ class SearchableDropdownFieldTest {
         open()
 
         fruits.forEach { onNode(menuItem(it)).assertExists() }
+    }
+
+    @Test
+    fun `a long list draws only the rows in view, and typing reaches one far down`() = runComposeUiTest {
+        val languages = (1..2000).map { "Language $it" }
+        val committed = field(initial = "", options = languages)
+        open()
+
+        onNode(menuItem("Language 1")).assertExists()
+        onNode(menuItem("Language 2000")).assertDoesNotExist()
+
+        onNode(isEditable()).performTextInput("2000")
+        waitForIdle()
+        onNode(menuItem("Language 2000")).performClick()
+        waitForIdle()
+
+        assertEquals("Language 2000", committed())
+    }
+
+    @Test
+    fun `the language menu labels each language by its names, code and count`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LanguageDropdown(
+                    languages = listOf(
+                        LanguageOption(code = "xyz", name = "", count = 3),
+                        LanguageOption(code = "en", name = "English", count = 5, nativeName = "english"),
+                        LanguageOption(code = "ru", name = "Russian", count = 2, nativeName = "Русский"),
+                    ),
+                    selectedLanguage = "en",
+                    onLanguageChange = {},
+                )
+            }
+        }
+        waitForIdle()
+        onNodeWithText("English · en (5)").assertExists()
+        open()
+
+        onNode(menuItem("xyz (3)")).assertExists()
+        onNode(menuItem("Russian · Русский · ru (2)")).assertExists()
+    }
+
+    @Test
+    fun `a template is filled by position, and a placeholder with no argument is left as it is`() {
+        assertEquals("b · a (7)", fillTemplate("%2\$s · %1\$s (%3\$d)", "a", "b", 7))
+        assertEquals("a %2\$s", fillTemplate("%1\$s %2\$s", "a"))
     }
 }
