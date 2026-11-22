@@ -18,7 +18,6 @@ class MainDesktopStateTest {
 
         assertFalse(state.showAddLabelDialog)
         assertNull(state.editingLabelItem)
-        assertFalse(state.showAddWebsiteDialog)
         assertFalse(state.showKonamiEasterEgg)
         assertFalse(state.showCrashFeedback)
     }
@@ -45,17 +44,13 @@ class MainDesktopStateTest {
     }
 
     @Test
-    fun `the website and easter egg dialogs open and close on their own flags`() {
+    fun `the easter egg dialog opens and closes on its own flag`() {
         val state = state()
 
-        state.showAddWebsiteDialog = true
         state.showKonamiEasterEgg = true
-        assertTrue(state.showAddWebsiteDialog)
         assertTrue(state.showKonamiEasterEgg)
 
-        state.showAddWebsiteDialog = false
         state.showKonamiEasterEgg = false
-        assertFalse(state.showAddWebsiteDialog)
         assertFalse(state.showKonamiEasterEgg)
     }
 }

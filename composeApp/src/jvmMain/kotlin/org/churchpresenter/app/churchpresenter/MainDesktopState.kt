@@ -63,7 +63,6 @@ internal class MainDesktopState(
     /** The background a tab's Set as Background is asking about, or null while that question is closed. */
     var pendingBackground by mutableStateOf<PendingBackground?>(null)
     var editingLabelItem by mutableStateOf<ScheduleItem.LabelItem?>(null)
-    var showAddWebsiteDialog by mutableStateOf(false)
     var showKonamiEasterEgg by mutableStateOf(false)
 
     /** Invites feedback on the launch after an unexpected shutdown (opt-in analytics only). */

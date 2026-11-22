@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.ui.geometry.Offset
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -233,12 +234,16 @@ abstract class MainDesktopComposeHarness {
      * the same name -- by selecting it and then double-clicking it. Selecting first lets the tab the
      * row opens settle: a double-click whose first click switched the tab could otherwise reach the
      * row as two single clicks.
+     *
+     * Both clicks land just inside the start of the label, not its middle: the row's action buttons
+     * lie over the rest of it, hit-testable while invisible, and how far a label's middle reaches
+     * under them depends on the platform's fonts.
      */
     protected fun ComposeUiTest.takeLive(label: String) {
         val row = onAllNodes(hasText(label, substring = true) and hasAnyAncestor(hasTestTag(SCHEDULE_ROW_CARD_TAG)))[0]
-        row.performMouseInput { click() }
+        row.performMouseInput { click(Offset(LABEL_START_PX, centerY)) }
         waitForIdle()
-        row.performMouseInput { doubleClick() }
+        row.performMouseInput { doubleClick(Offset(LABEL_START_PX, centerY)) }
         waitForIdle()
     }
 
@@ -256,3 +261,6 @@ abstract class MainDesktopComposeHarness {
         previewBus.showLowerThird("{}", false, -1f, 0L, "Pastor")
     }
 }
+
+/** How far into a schedule row's label [MainDesktopComposeHarness.takeLive] clicks: clear of its action buttons. */
+private const val LABEL_START_PX = 4f
