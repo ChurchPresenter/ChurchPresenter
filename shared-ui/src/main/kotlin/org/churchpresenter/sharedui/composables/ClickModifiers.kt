@@ -105,8 +105,10 @@ private class PassClickNode(
                         onClick()
                         continue
                     }
-                    val now = System.currentTimeMillis()
-                    val isDouble = now - lastClickTime < DOUBLE_CLICK_MS
+                    // The release's own time, not the clock now: a stall between the two clicks must
+                    // not turn a double-click into two singles, and a test's clicks run on its clock.
+                    val now = event.changes.first().uptimeMillis
+                    val isDouble = lastClickTime != 0L && now - lastClickTime < DOUBLE_CLICK_MS
                     val doubleClick = onDoubleClick
                     if (isDouble && doubleClick != null) {
                         // A double-click uses up both its clicks: a third straight after it starts
