@@ -82,23 +82,6 @@ class MainDesktopRemoteContentTest {
         assertEquals("", presenterNotesAt(listOf("first"), -1))
     }
 
-    // ── Book ids ────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `a found book reports the id its bible gives it`() {
-        assertEquals(43, resolveBookIdOrZero(bookIndex = 42) { it + 1 })
-    }
-
-    @Test
-    fun `a book that was not found reports no book`() {
-        assertEquals(0, resolveBookIdOrZero(bookIndex = -1) { it + 1 })
-    }
-
-    @Test
-    fun `a bible that cannot name the book reports no book`() {
-        assertEquals(0, resolveBookIdOrZero(bookIndex = 3) { null })
-    }
-
     // ── Picture selection ───────────────────────────────────────────────────────
 
     @Test

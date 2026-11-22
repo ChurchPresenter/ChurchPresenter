@@ -607,7 +607,6 @@
     <string name="settings_exported">Instellingen succesvol geëxporteerd.</string>
     <string name="settings_export_failed">Exporteren van instellingen mislukt.</string>
     <string name="settings_import_failed">Importeren van instellingen mislukt. Het bestand is mogelijk ongeldig.</string>
-    <string name="install_damaged">De installatie van ChurchPresenter is beschadigd: sommige bestanden ontbreken.\n\nInstalleer ChurchPresenter opnieuw. Je instellingen blijven bewaard.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Lokaal bestand</string>
