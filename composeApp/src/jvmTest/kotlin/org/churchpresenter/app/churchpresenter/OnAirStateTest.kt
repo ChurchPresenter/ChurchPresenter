@@ -127,4 +127,37 @@ class OnAirStateTest {
         assertFalse(scheduleRowOnAir(ScheduleItem.CueItem("c", CueAction.PROJECT, label = "Offering"), everything))
         assertFalse(scheduleRowOnAir(ScheduleItem.MinistryItem("m", "Prayer"), everything))
     }
+
+    @Test
+    fun `every other kind of row is off air once its kind of content is`() {
+        val cleared = on().copy(
+            imagePath = "/pictures/one.jpg", websiteUrl = "https://example.org", sceneId = "scene-1",
+            lowerThirdName = "Pastor", dictionaryWord = "agape",
+        )
+        assertFalse(scheduleRowOnAir(ScheduleItem.PictureItem("p", "/pictures", "pictures", 1), cleared))
+        assertFalse(scheduleRowOnAir(ScheduleItem.WebsiteItem("w", "https://example.org"), cleared))
+        assertFalse(scheduleRowOnAir(ScheduleItem.SceneItem("c", "scene-1", "Welcome"), cleared))
+        val third = ScheduleItem.LowerThirdItem("l", "pastor", "Pastor", pauseAtFrame = false, pauseDurationMs = 0)
+        assertFalse(scheduleRowOnAir(third, cleared))
+        assertFalse(scheduleRowOnAir(ScheduleItem.DictionaryItem("x", "G26", "agape", "agapē", "love"), cleared))
+    }
+
+    @Test
+    fun `a numbered song matches an unnumbered one by title, and a verse needs its own book`() {
+        val numbered = ScheduleItem.SongItem("s", 42, "Amazing Grace", "Hymnal")
+        assertTrue(scheduleRowOnAir(numbered, on(Presenting.LYRICS).copy(songTitle = "AMAZING GRACE")))
+
+        val verse = ScheduleItem.BibleVerseItem("b", "John", 3, 16, "")
+        val live = on(Presenting.BIBLE).copy(verseBook = "Luke", verseChapter = 3, verseNumber = 16)
+        assertFalse(scheduleRowOnAir(verse, live), "the same chapter and verse of another book")
+    }
+
+    @Test
+    fun `a deck with no name up and a picture with no folder are off air`() {
+        val deck = ScheduleItem.PresentationItem("d", "/decks/Sermon.pptx", "Sermon.pptx", 24, "pptx")
+        assertFalse(scheduleRowOnAir(deck, on(Presenting.PRESENTATION)))
+
+        val folder = ScheduleItem.PictureItem("p", "/pictures", "pictures", 1)
+        assertFalse(scheduleRowOnAir(folder, on(Presenting.PICTURES).copy(imagePath = "loose.jpg")))
+    }
 }
