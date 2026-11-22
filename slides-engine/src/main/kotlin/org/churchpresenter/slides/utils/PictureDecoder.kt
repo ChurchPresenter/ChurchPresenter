@@ -140,8 +140,10 @@ object PictureDecoder {
         )
         if (scale >= 1f) return original
 
-        val newWidth = (original.width * scale).toInt()
-        val newHeight = (original.height * scale).toInt()
+        // At least a pixel each way: a very thin picture would otherwise truncate to a zero side,
+        // and a zero-sized image drawn cropped scales by infinity and crashes the output.
+        val newWidth = (original.width * scale).toInt().coerceAtLeast(1)
+        val newHeight = (original.height * scale).toInt().coerceAtLeast(1)
         val srcRect = Rect.makeWH(original.width.toFloat(), original.height.toFloat())
         val dstRect = Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
         // The full-size decode and the surface are native memory the GC cannot see, so they are
@@ -176,9 +178,16 @@ object PictureDecoder {
             out.toByteArray()
         }
 
-    /** [decodeScaled], or null if [file] could not be decoded at all. */
+    /** [decodeScaled], or null if [file] could not be decoded at all or decodes to an empty picture. */
     fun decodeScaledOrNull(file: File, maxWidth: Int, maxHeight: Int): Image? = try {
-        decodeScaled(file, maxWidth, maxHeight)
+        decodeScaled(file, maxWidth, maxHeight).let { image ->
+            if (image.width > 0 && image.height > 0) {
+                image
+            } else {
+                image.close()
+                null
+            }
+        }
     } catch (_: Exception) {
         null
     }
