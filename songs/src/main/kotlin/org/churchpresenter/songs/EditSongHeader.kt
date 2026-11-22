@@ -64,6 +64,7 @@ import org.churchpresenter.strings.generated.resources.unit_bpm
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppExposedDropdownMenu
 
 internal val EditSongCardShape = AppShape(9.dp)
 
@@ -398,7 +399,7 @@ private fun RowScope.SongbookCard(
                     )
                 }
             }
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            AppExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 DropdownMenuItem(
                     text = { Text(stringResource(Res.string.song_book_none)) },
                     onClick = { onSongbookChange(""); expanded = false },

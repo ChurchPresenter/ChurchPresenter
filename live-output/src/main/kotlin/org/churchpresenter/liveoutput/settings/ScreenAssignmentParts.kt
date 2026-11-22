@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +55,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.isScreenUnused
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /**
  * Where a key can go: nowhere, any display but the primary, or a DeckLink port. A monitor marked
@@ -151,7 +151,7 @@ internal fun OutputTargetDropdown(
             )
         }
     }
-    DropdownMenu(
+    AppDropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false }
     ) {

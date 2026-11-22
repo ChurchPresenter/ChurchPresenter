@@ -56,7 +56,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +85,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.time.format.TextStyle
 import java.util.Locale
 import java.util.UUID
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** One time of a schedule as it is being edited: the times as typed, checked when it is saved. */
 private data class Draft(
@@ -315,7 +315,7 @@ private fun ShowsPicker(
                 modifier = Modifier.size(16.dp),
             )
         }
-            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
                 names.forEach { name ->
                     DropdownMenuItem(
                         text = { Text(name) },

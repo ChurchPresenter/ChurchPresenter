@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -77,6 +76,7 @@ import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 internal val ORDER_COLUMN_WIDTH = 176.dp
 private val CHIP_HEIGHT = 30.dp
@@ -265,7 +265,7 @@ private fun PresetsButton(state: EditSongState, sections: EditSongSections) {
             Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
         }
         val checkInk = MaterialTheme.colorScheme.primary
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             orderPresetsOf(sections).forEach { preset ->
                 val selected = preset.keys == state.order
                 val sequence = preset.keys.ifEmpty { sections.defaultOrder }
@@ -334,7 +334,7 @@ private fun AddSectionButton(sections: EditSongSections, effective: List<String>
                 modifier = Modifier.padding(start = 6.dp),
             )
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             sections.written.forEach { section ->
                 val ink = SectionInk.of(section.kind)
                 val count = effective.count { it == section.key }

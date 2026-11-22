@@ -27,7 +27,6 @@ import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import org.churchpresenter.theme.components.RaisedCheckbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -57,6 +56,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.Desktop
 import org.churchpresenter.converter.library.SongInfo
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** Confirms deleting the marked files. */
 @Composable
@@ -205,7 +205,7 @@ private fun DuplicateFinderState.CompareFileColumn(
                 Spacer(Modifier.width(4.dp))
                 Icon(Icons.Default.ArrowDropDown, null, Modifier.size(16.dp))
             }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 cg.songs.forEachIndexed { idx, song ->
                     DropdownMenuItem(
                         text = { Text("${song.file.parentFile.name}/${song.file.name}", style = MaterialTheme.typography.bodySmall) },

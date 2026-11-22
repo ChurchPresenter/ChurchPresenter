@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.churchpresenter.theme.dropdownField
 import org.churchpresenter.theme.keyboardFocusRing
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /**
  * A signage dialog's title: [kind]'s tile (or [icon] on [tint]), the title, and a line under it on
@@ -275,7 +275,7 @@ internal fun PickerField(
                 modifier = Modifier.size(16.dp),
             )
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEachIndexed { index, option ->
                 DropdownMenuItem(
                     text = { Text(option.label) },

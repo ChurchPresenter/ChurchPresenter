@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +51,7 @@ import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 // Naming, resuming and the absence of a session -- the tab's pieces that deal in sessions.
 
@@ -66,7 +66,7 @@ internal fun ResumeMenu(tab: QATabScope) = with(tab) {
             Text(stringResource(Res.string.qa_resume_session))
             Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(18.dp))
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             sessions.forEach { session ->
                 DropdownMenuItem(
                     text = { Text(sessionLabel(session)) },

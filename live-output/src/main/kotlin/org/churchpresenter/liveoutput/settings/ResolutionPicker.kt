@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +39,7 @@ import org.churchpresenter.sharedui.utils.formatAspectRatio
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** The widest and narrowest an output may be set to. Wide enough for 8K, narrow enough to stay sane. */
 private val RESOLUTION_RANGE = 16..8192
@@ -95,7 +95,7 @@ fun ResolutionPicker(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             OUTPUT_RESOLUTIONS.forEach { size ->
                 DropdownMenuItem(
                     text = {

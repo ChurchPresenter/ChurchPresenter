@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AspectRatio
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,6 +45,7 @@ import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** Test handle for a scene row's canvas-size button. */
 internal const val CANVAS_SIZE_BUTTON_TAG = "canvas_size_button"
@@ -121,7 +121,7 @@ internal fun CanvasSizeMenu(
                 )
             }
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             val choose: (Int, Int) -> Unit = { w, h ->
                 onSetSize(w, h)
                 open = false
