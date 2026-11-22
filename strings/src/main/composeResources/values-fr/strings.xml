@@ -607,6 +607,7 @@
     <string name="settings_exported">Paramètres exportés avec succès.</string>
     <string name="settings_export_failed">Échec de l'exportation des paramètres.</string>
     <string name="settings_import_failed">Échec de l'importation des paramètres. Le fichier est peut-être invalide.</string>
+    <string name="install_damaged">L'installation de ChurchPresenter est endommagée : certains de ses fichiers sont manquants.\n\nVeuillez réinstaller ChurchPresenter. Vos paramètres sont conservés.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Fichier local</string>

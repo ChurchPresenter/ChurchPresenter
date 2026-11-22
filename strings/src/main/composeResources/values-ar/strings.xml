@@ -814,6 +814,7 @@
     <string name="settings_exported">تم تصدير الإعدادات بنجاح.</string>
     <string name="settings_export_failed">فشل تصدير الإعدادات.</string>
     <string name="settings_import_failed">فشل استيراد الإعدادات. قد يكون الملف غير صالح.</string>
+    <string name="install_damaged">تثبيت ChurchPresenter تالف: بعض ملفاته مفقودة.\n\nيُرجى إعادة تثبيت ChurchPresenter. ستُحفظ إعداداتك.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">ملف محلي</string>

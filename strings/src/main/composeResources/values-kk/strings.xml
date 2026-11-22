@@ -681,6 +681,7 @@
     <string name="settings_exported">Параметрлер сәтті экспортталды.</string>
     <string name="settings_export_failed">Параметрлерді экспорттау сәтсіз аяқталды.</string>
     <string name="settings_import_failed">Параметрлерді импорттау сәтсіз аяқталды. Файл жарамсыз болуы мүмкін.</string>
+    <string name="install_damaged">ChurchPresenter орнатылымы зақымдалған: оның кейбір файлдары жоқ.\n\nChurchPresenter бағдарламасын қайта орнатыңыз. Параметрлеріңіз сақталады.</string>
     <string name="schedule_add_files">Файлдар қосу…</string>
     <string name="schedule_autoload_notice">%1$s жүктеледі: %2$s кейін</string>
     <string name="schedule_autoload_notice_now">%1$s қазір жүктелуде…</string>

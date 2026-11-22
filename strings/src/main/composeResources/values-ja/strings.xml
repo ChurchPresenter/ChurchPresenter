@@ -814,6 +814,7 @@
     <string name="settings_exported">設定をエクスポートしました。</string>
     <string name="settings_export_failed">設定をエクスポートできませんでした。</string>
     <string name="settings_import_failed">設定をインポートできませんでした。ファイルが正しくない可能性があります。</string>
+    <string name="install_damaged">ChurchPresenter のインストールが破損しています。一部のファイルが見つかりません。\n\nChurchPresenter を再インストールしてください。設定はそのまま残ります。</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">ローカルファイル</string>

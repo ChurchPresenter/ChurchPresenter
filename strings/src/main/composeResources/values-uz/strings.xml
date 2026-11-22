@@ -814,6 +814,7 @@
     <string name="settings_exported">Sozlamalar eksport qilindi.</string>
     <string name="settings_export_failed">Sozlamalarni eksport qilib boʻlmadi.</string>
     <string name="settings_import_failed">Sozlamalarni import qilib boʻlmadi. Fayl notoʻgʻri boʻlishi mumkin.</string>
+    <string name="install_damaged">ChurchPresenter oʻrnatilishi shikastlangan: uning baʼzi fayllari yetishmayapti.\n\nIltimos, ChurchPresenter’ni qayta oʻrnating. Sozlamalaringiz saqlanib qoladi.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Kompyuterdagi fayl</string>

@@ -1199,6 +1199,7 @@
     <string name="settings_exported">Ua hapono maitaʻi te mau faʻanahoraʻa.</string>
     <string name="settings_export_failed">ʻAita te haponoraʻa i te mau faʻanahoraʻa i manuia.</string>
     <string name="settings_import_failed">ʻAita te faʻaōraʻa mai i te mau faʻanahoraʻa i manuia. Peneiaʻe e hape tō te fichier.</string>
+    <string name="install_damaged">Ua ino te haamauraa o ChurchPresenter: ua ere te tahi o tōna mau fichier.\n\nA haamau faahou ia ChurchPresenter. E vai noa tō ʻoe mau faʻanahoraʻa.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Fichier i ʻō nei</string>

@@ -716,6 +716,7 @@
     <string name="settings_exported">Настройки успешно экспортированы.</string>
     <string name="settings_export_failed">Не удалось экспортировать настройки.</string>
     <string name="settings_import_failed">Не удалось импортировать настройки. Файл может быть повреждён.</string>
+    <string name="install_damaged">Установка ChurchPresenter повреждена: некоторые её файлы отсутствуют.\n\nПереустановите ChurchPresenter. Ваши настройки сохранятся.</string>
     <string name="schedule_add_files">Добавить файлы…</string>
     <string name="schedule_autoload_notice">Загрузка %1$s через %2$s</string>
     <string name="schedule_autoload_notice_now">Загрузка %1$s…</string>

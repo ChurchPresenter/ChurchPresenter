@@ -814,6 +814,7 @@
     <string name="settings_exported">Inställningarna har exporterats.</string>
     <string name="settings_export_failed">Kunde inte exportera inställningarna.</string>
     <string name="settings_import_failed">Kunde inte importera inställningarna. Filen kan vara ogiltig.</string>
+    <string name="install_damaged">Installationen av ChurchPresenter är skadad: några av dess filer saknas.\n\nInstallera om ChurchPresenter. Dina inställningar behålls.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Lokal fil</string>
