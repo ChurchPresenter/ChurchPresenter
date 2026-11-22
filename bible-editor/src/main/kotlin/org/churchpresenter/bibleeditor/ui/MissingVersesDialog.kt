@@ -46,7 +46,7 @@ import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_editor_checking
 import org.churchpresenter.strings.generated.resources.bible_editor_close
-import org.churchpresenter.strings.generated.resources.bible_editor_compared
+import org.churchpresenter.strings.generated.resources.bible_editor_matched
 import org.churchpresenter.strings.generated.resources.bible_editor_copied
 import org.churchpresenter.strings.generated.resources.bible_editor_copy_list
 import org.churchpresenter.strings.generated.resources.bible_editor_empty_all_done
@@ -71,6 +71,7 @@ import org.churchpresenter.strings.generated.resources.bible_editor_view
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.bibleeditor.Numbering
 
 private val DialogShape = RoundedCornerShape(18.dp)
 private const val SCRIM_ALPHA = 0.55f
@@ -109,8 +110,8 @@ internal fun MissingVersesDialog(state: BibleEditorState) {
                         when {
                             all == null -> stringResource(Res.string.bible_editor_checking)
                             else -> stringResource(
-                                Res.string.bible_editor_compared, state.selected?.title.orEmpty(),
-                                BibleEditorState.REFERENCE_ABBREVIATION,
+                                Res.string.bible_editor_matched, state.selected?.title.orEmpty(),
+                                numberingName(state.numberingHere ?: Numbering.KJV),
                                 bible?.getBookCount() ?: 0,
                             )
                         },

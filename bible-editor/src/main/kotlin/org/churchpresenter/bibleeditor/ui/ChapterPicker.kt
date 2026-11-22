@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -83,6 +82,7 @@ import org.churchpresenter.strings.generated.resources.bible_editor_state_restor
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private const val MAX_CHAPTER_DIGITS = 3
 private const val GRID_COLUMNS = 7
@@ -113,7 +113,7 @@ internal fun ChapterStepper(state: BibleEditorState) {
                 onClick = { state.goToChapter(state.chapter + 1) }, size = 28.dp, iconSize = 12.dp,
             )
         }
-        DropdownMenu(open, onDismissRequest = { open = false }, containerColor = colors.raise) {
+        AppDropdownMenu(open, onDismissRequest = { open = false }, containerColor = colors.raise) {
             ChapterPicker(state, onDone = { open = false })
         }
     }

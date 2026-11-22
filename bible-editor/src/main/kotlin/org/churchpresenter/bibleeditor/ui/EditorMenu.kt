@@ -20,7 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,6 +33,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.keyboardFocusRing
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private val MenuPadding = 5.dp
 private val ScrollbarGutter = 12.dp
@@ -54,7 +54,7 @@ internal fun EditorMenu(
     selected: Int,
     item: @Composable (index: Int) -> Unit,
 ) {
-    DropdownMenu(expanded, onDismissRequest = onDismiss, containerColor = editorColors().raise) {
+    AppDropdownMenu(expanded, onDismissRequest = onDismiss, containerColor = editorColors().raise) {
         val scroll = rememberScrollState()
         val height = minOf(itemHeight * count + MenuPadding * 2, maxHeight)
         val density = LocalDensity.current

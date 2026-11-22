@@ -13,7 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.bibleformats.KjvVersification
 import java.io.File
 
 /** One `.spb` file the editor can open. [key] is its path inside the Bible folder. */
@@ -58,6 +57,10 @@ class BibleEditorState(
     var missing by mutableStateOf<Map<String, List<MissingVerse>>>(emptyMap())
         private set
 
+    /** The [Numbering] each checked Bible matched. */
+    var numbering by mutableStateOf<Map<String, Numbering>>(emptyMap())
+        private set
+
     var editing by mutableStateOf<Int?>(null)
     var addingAt by mutableStateOf<Int?>(null)
     var draft by mutableStateOf("")
@@ -74,6 +77,9 @@ class BibleEditorState(
 
     /** The open Bible's missing verses; null while they are looked for, or with nothing to compare with. */
     val missingHere: List<MissingVerse>? get() = selected?.let { missing[it.key] }
+
+    /** The numbering the open Bible matched; null until the check is done. */
+    val numberingHere: Numbering? get() = selected?.let { numbering[it.key] }
 
     /** The open book's name, as the open Bible gives it. */
     val bookName: String get() = bible?.getBooks()?.getOrNull(bookIndex).orEmpty()
@@ -110,8 +116,9 @@ class BibleEditorState(
 
     private suspend fun scanMissing(target: ShelfBible, loaded: Bible) {
         if (target.key in missing) return
-        val found = withContext(io) { findMissingVerses(loaded) }
-        missing = missing + (target.key to found)
+        val found = withContext(io) { checkMissingVerses(loaded) }
+        numbering = numbering + (target.key to found.numbering)
+        missing = missing + (target.key to found.missing)
     }
 
     fun selectBook(index: Int) {
@@ -162,11 +169,6 @@ class BibleEditorState(
     }
 
     fun address(verse: Int): VerseAddress? = selected?.let { VerseAddress(it.key, bookId, chapter, verse) }
-
-    companion object {
-        /** The numbering missing verses are judged against: the KJV's (see [KjvVersification]). */
-        const val REFERENCE_ABBREVIATION = "KJV"
-    }
 }
 
 private fun loadBible(file: File): Bible = Bible().apply { loadFromSpb(file.absolutePath) }

@@ -29,7 +29,8 @@ change model and that file are `:bible-edits`, which the Bible tab also reads: a
 | `BibleEditorState.kt` | what is open, what is being typed, loading on `io` |
 | `ChapterRow.kt` | the open chapter as rows, the verse actions, the shelf scan |
 | `ChapterStatus.kt` | each chapter's state in the picker, and the next missing verse in reading order |
-| `MissingVerse.kt` | verses the reference (the shelf's KJV) has and this Bible lacks, by verse code |
+| `MissingVerse.kt` | verses this Bible lacks, by verse code, each book judged against the numbering it fits best |
+| `Numbering.kt` | the numberings a book is judged against (KJV, Synodal, Septuagint, Hebrew, Vulgate…), their tables in `src/main/resources/versification/` |
 | `WordDiff.kt` | the word diff the editor and the history show |
 | `ui/` | the window: header, chapter picker, chapter, verse rows, history panel, missing-verses dialog |
 

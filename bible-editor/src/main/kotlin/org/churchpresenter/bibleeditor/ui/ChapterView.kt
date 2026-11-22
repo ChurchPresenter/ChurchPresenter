@@ -38,7 +38,7 @@ import org.churchpresenter.strings.generated.resources.bible_editor_care_body
 import org.churchpresenter.strings.generated.resources.bible_editor_care_title
 import org.churchpresenter.strings.generated.resources.bible_editor_chapter_changes_one
 import org.churchpresenter.strings.generated.resources.bible_editor_chapter_changes_other
-import org.churchpresenter.strings.generated.resources.bible_editor_complete_matches
+import org.churchpresenter.strings.generated.resources.bible_editor_matches
 import org.churchpresenter.strings.generated.resources.bible_editor_double_click_hint
 import org.churchpresenter.strings.generated.resources.bible_editor_hide_note
 import org.churchpresenter.strings.generated.resources.bible_editor_missing_one
@@ -47,6 +47,11 @@ import org.churchpresenter.strings.generated.resources.bible_editor_verses_prese
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.bible_editor_numbering_caution
+import org.churchpresenter.strings.generated.resources.bible_editor_checking
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.layout.fillMaxHeight
 
 /** Rows before the first verse in the list: the title and the care note. */
 private const val LEADING_ITEMS = 2
@@ -77,6 +82,7 @@ internal fun ChapterView(state: BibleEditorState, rows: List<ChapterRow>, now: L
                 )
             }
         }
+        VerticalScrollbar(rememberScrollbarAdapter(list), Modifier.align(Alignment.CenterEnd).fillMaxHeight())
     }
 }
 
@@ -100,15 +106,21 @@ private fun ChapterTitle(state: BibleEditorState, rows: List<ChapterRow>) {
             )
         }
         Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val strip = when {
-                gaps > 0 -> countString(gaps, Res.string.bible_editor_missing_one,
-                    Res.string.bible_editor_missing_other)
-                else -> stringResource(
-                    Res.string.bible_editor_complete_matches, BibleEditorState.REFERENCE_ABBREVIATION,
+            // A match only once the check has run: until then a verse missing at a chapter's end is not known.
+            val matched = state.numberingHere
+            when {
+                gaps > 0 -> StatusChip(
+                    countString(gaps, Res.string.bible_editor_missing_one, Res.string.bible_editor_missing_other),
+                    colors.warnBg, colors.warn, dot = true,
+                )
+                matched == null -> StatusChip(
+                    stringResource(Res.string.bible_editor_checking), colors.accentBg, colors.accent, dot = true,
+                )
+                else -> StatusChip(
+                    stringResource(Res.string.bible_editor_matches, numberingName(matched)),
+                    colors.goodBg, colors.good, dot = true,
                 )
             }
-            StatusChip(strip, if (gaps > 0) colors.warnBg else colors.goodBg,
-                if (gaps > 0) colors.warn else colors.good, dot = true)
             if (here > 0) {
                 StatusChip(
                     countString(here, Res.string.bible_editor_chapter_changes_one,
@@ -148,6 +160,8 @@ private fun CareNote(onHide: () -> Unit) {
                 }
                 append(" ")
                 append(stringResource(Res.string.bible_editor_care_body))
+                append("\n\n")
+                append(stringResource(Res.string.bible_editor_numbering_caution))
             },
             Modifier.weight(1f), fontSize = 12.5.sp, lineHeight = 19.sp, color = colors.dim,
         )

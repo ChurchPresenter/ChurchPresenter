@@ -2,10 +2,9 @@ package org.churchpresenter.bibleeditor
 
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.bible.BibleVerse
-import org.churchpresenter.bibleformats.KjvVersification
 
 /**
- * A verse the KJV numbering has and this Bible does not, placed in this Bible's own numbering.
+ * A verse the Bible's [Numbering] has and this Bible does not, by the numbers the file shows.
  *
  * [atChapterEnd] is one that would come after the chapter's last verse. Those are seldom missing:
  * a translation that joins two verses, or ends a chapter where the Hebrew text does (Leviticus 5-6,
@@ -13,8 +12,6 @@ import org.churchpresenter.bibleformats.KjvVersification
  * gap inside a chapter -- Matthew 17 going 20, 22 -- is a verse that is not there.
  */
 data class MissingVerse(val book: Int, val chapter: Int, val verse: Int, val atChapterEnd: Boolean = false)
-
-private data class CodeVerse(val codeVerse: Int, val verse: BibleVerse)
 
 /** Every verse of [bible], book by book, chapter by chapter. */
 internal fun allVerses(bible: Bible): Sequence<BibleVerse> = sequence {
@@ -24,49 +21,59 @@ internal fun allVerses(bible: Bible): Sequence<BibleVerse> = sequence {
     }
 }
 
+/** What the missing-verse check found: the [Numbering] the Bible matched, and the verses it lacks in it. */
+data class MissingCheck(val missing: List<MissingVerse>, val numbering: Numbering)
+
 /**
- * The verses the KJV numbering has that [target] lacks, matched by verse code (the `BxxxCxxxVxxx` id,
- * which every translation is coded in) and placed where [target]'s own numbering would put them.
+ * The verses [target] lacks, by the book, chapter and verse numbers the file shows.
  *
- * Judged against [KjvVersification]'s table rather than against a KJV file, so it needs no KJV
- * installed and cannot inherit one's mistakes. A chapter [target] has no verse of at all is left
- * out: that is a missing chapter or a different book order, not a verse to type in.
+ * Translations do not all number alike -- the Synodal joins and splits chapters the KJV does not,
+ * the Septuagint and Vulgate count verses the Hebrew text has not -- so the Bible is matched to the
+ * [Numbering] it fits best: the one with the fewest verses missing plus verses it has no place for,
+ * over all its books. A book that fits another numbering with fewer issues -- a Synodal Bible
+ * without the Greek additions to Daniel, one that breaks a few chapters where the Hebrew text does --
+ * is checked against that one instead. The numbers the file shows are what is matched, never the
+ * verse codes an importer wrote. A chapter [target] has no verse of at all is left out: that is a missing chapter
+ * or a different book order, not a verse to type in.
  */
-fun findMissingVerses(target: Bible): List<MissingVerse> {
-    val byCodeChapter = HashMap<Pair<Int, Int>, MutableList<CodeVerse>>()
-    val present = HashSet<Triple<Int, Int, Int>>()
-    val displayTaken = HashSet<Triple<Int, Int, Int>>()
-    for (v in allVerses(target)) {
-        val code = target.parseVerseCode(v.verseId) ?: continue
-        present += code
-        displayTaken += Triple(v.book, v.chapter, v.verseNumber)
-        byCodeChapter.getOrPut(code.first to code.second) { mutableListOf() } += CodeVerse(code.third, v)
+fun checkMissingVerses(target: Bible): MissingCheck {
+    val books = allVerses(target)
+        .filter { it.book in 1..NumberingTables.BOOKS && it.verseNumber > 0 }
+        .groupBy({ it.book }, { it.chapter to it.verseNumber })
+        .mapValues { it.value.toSet() }
+    val tables = NumberingTables.all
+    val numbering = Numbering.entries.minBy { candidate ->
+        books.entries.sumOf { (book, verses) -> issues(book, verses, tables.getValue(candidate)) }
     }
-    val lastVerse = displayTaken.groupBy({ it.first to it.second }, { it.third }).mapValues { it.value.max() }
-    return kjvVerseCodes()
-        .filterNot { it in present }
-        .mapNotNull { code -> placeOf(code, byCodeChapter[code.first to code.second]) }
-        .filterNot { Triple(it.book, it.chapter, it.verse) in displayTaken }
-        .map { it.copy(atChapterEnd = it.verse > (lastVerse[it.book to it.chapter] ?: 0)) }
-        .distinct()
-        .toList()
+    val missing = books.toSortedMap().flatMap { (book, verses) ->
+        val fit = Numbering.entries.minBy { issues(book, verses, tables.getValue(it)) }
+            .takeIf { issues(book, verses, tables.getValue(it)) < issues(book, verses, tables.getValue(numbering)) }
+            ?: numbering
+        missingIn(book, verses, tables.getValue(fit))
+    }
+    return MissingCheck(missing, numbering)
 }
 
-/** Every verse code in the KJV numbering, in reading order. */
-private fun kjvVerseCodes(): Sequence<Triple<Int, Int, Int>> = sequence {
-    for (book in 1..KjvVersification.BOOKS) {
-        for (chapter in 1..KjvVersification.chapterCount(book)) {
-            for (verse in 1..KjvVersification.verseCount(book, chapter)) yield(Triple(book, chapter, verse))
-        }
+/** The verses [target] lacks; see [checkMissingVerses]. */
+fun findMissingVerses(target: Bible): List<MissingVerse> = checkMissingVerses(target).missing
+
+/** The verses [table] has in the chapters of [book] that [verses] reaches, and [verses] lacks. */
+private fun missingIn(book: Int, verses: Set<Pair<Int, Int>>, table: VerseTable): List<MissingVerse> {
+    val lastVerse = verses.groupBy({ it.first }, { it.second }).mapValues { it.value.max() }
+    return lastVerse.toSortedMap().flatMap { (chapter, last) ->
+        (1..table.verseCount(book, chapter))
+            .filterNot { (chapter to it) in verses }
+            .map { MissingVerse(book, chapter, it, atChapterEnd = it > last) }
     }
 }
 
-/** Where [code] would sit among [siblings], the verses this Bible has of the same code chapter. */
-private fun placeOf(code: Triple<Int, Int, Int>, siblings: List<CodeVerse>?): MissingVerse? {
-    // Never empty: a code chapter is only listed once a verse of it has been seen.
-    if (siblings == null) return null
-    val anchor = siblings.filter { it.codeVerse < code.third }.maxByOrNull { it.codeVerse }
-        ?: siblings.minBy { it.codeVerse }
-    val shown = code.third + (anchor.verse.verseNumber - anchor.codeVerse)
-    return if (shown < 1) null else MissingVerse(anchor.verse.book, anchor.verse.chapter, shown)
+/**
+ * How badly [verses] fit [table]: the verses [table] has in the chapters [verses] reaches and
+ * [verses] lacks, plus the verses [verses] has that [table] has no place for.
+ */
+private fun issues(book: Int, verses: Set<Pair<Int, Int>>, table: VerseTable): Int {
+    val chapters = verses.mapTo(HashSet()) { it.first }
+    val expected = chapters.sumOf { table.verseCount(book, it) }
+    val placed = verses.count { it.second <= table.verseCount(book, it.first) }
+    return (expected - placed) + (verses.size - placed)
 }

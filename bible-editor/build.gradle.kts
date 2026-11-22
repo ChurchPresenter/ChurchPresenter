@@ -11,8 +11,6 @@ dependencies {
     implementation(projects.bible)
     // The change model and the history file, shared with the Bible tab that applies them.
     implementation(projects.bibleEdits)
-    // KjvVersification: the numbering missing verses are judged against.
-    implementation(projects.bibleFormats)
     implementation(projects.theme)
     implementation(projects.strings)
     implementation(projects.icons)
