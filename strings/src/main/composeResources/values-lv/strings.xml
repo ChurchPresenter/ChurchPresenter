@@ -814,7 +814,6 @@
     <string name="settings_exported">Iestatījumi veiksmīgi eksportēti.</string>
     <string name="settings_export_failed">Neizdevās eksportēt iestatījumus.</string>
     <string name="settings_import_failed">Neizdevās importēt iestatījumus. Fails var būt nederīgs.</string>
-    <string name="install_damaged">ChurchPresenter instalācija ir bojāta: trūkst dažu tās failu.\n\nLūdzu, pārinstalējiet ChurchPresenter. Jūsu iestatījumi tiks saglabāti.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Vietējais fails</string>

@@ -814,7 +814,6 @@
     <string name="settings_exported">सेटिङ सफलतापूर्वक निर्यात भयो।</string>
     <string name="settings_export_failed">सेटिङ निर्यात गर्न सकिएन।</string>
     <string name="settings_import_failed">सेटिङ आयात गर्न सकिएन। फाइल अमान्य हुन सक्छ।</string>
-    <string name="install_damaged">ChurchPresenter को स्थापना बिग्रिएको छ: यसका केही फाइलहरू हराएका छन्।\n\nकृपया ChurchPresenter पुनः स्थापना गर्नुहोस्। तपाईंका सेटिङहरू रहिरहनेछन्।</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">स्थानीय फाइल</string>

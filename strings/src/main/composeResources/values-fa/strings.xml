@@ -814,7 +814,6 @@
     <string name="settings_exported">تنظیمات با موفقیت برون‌بری شد.</string>
     <string name="settings_export_failed">برون‌بری تنظیمات ناموفق بود.</string>
     <string name="settings_import_failed">درون‌ریزی تنظیمات ناموفق بود. ممکن است فایل نامعتبر باشد.</string>
-    <string name="install_damaged">نصب ChurchPresenter آسیب دیده است: برخی از فایل‌های آن وجود ندارند.\n\nلطفاً ChurchPresenter را دوباره نصب کنید. تنظیمات شما حفظ می‌شود.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">فایل محلی</string>

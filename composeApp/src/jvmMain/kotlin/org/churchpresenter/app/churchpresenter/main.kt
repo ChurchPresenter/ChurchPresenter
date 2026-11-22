@@ -266,7 +266,7 @@ fun main(args: Array<String>) {
     val offscreenWeb = startupSettings.projectionSettings.offscreenWebEnabled
     if (offscreenWeb) turnOffLinuxVsync()
     startCrashReporting(startupSettings.analyticsReportingEnabled)
-    stopIfInstallDamaged()
+    reportIfInstallDamaged()
     // Every build says where the UI thread was stuck whenever it stops answering, and a release
     // build sends the stall to Sentry -- see UiWatchdog and UiStallReporter. After the reporter is
     // set up, so the first stall it counts can be sent.
