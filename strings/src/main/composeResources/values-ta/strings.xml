@@ -819,6 +819,7 @@
     <string name="settings_exported">அமைப்புகள் வெற்றிகரமாக ஏற்றுமதி செய்யப்பட்டன.</string>
     <string name="settings_export_failed">அமைப்புகளை ஏற்றுமதி செய்ய முடியவில்லை.</string>
     <string name="settings_import_failed">அமைப்புகளை இறக்குமதி செய்ய முடியவில்லை. கோப்பு தவறானதாக இருக்கலாம்.</string>
+    <string name="install_damaged">ChurchPresenter நிறுவல் சேதமடைந்துள்ளது: அதன் சில கோப்புகள் காணவில்லை.\n\nChurchPresenter-ஐ மீண்டும் நிறுவவும். உங்கள் அமைப்புகள் அப்படியே இருக்கும்.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">உள்ளூர்க் கோப்பு</string>

@@ -681,6 +681,7 @@
     <string name="settings_exported">Налады паспяхова экспартаваны.</string>
     <string name="settings_export_failed">Не ўдалося экспартаваць налады.</string>
     <string name="settings_import_failed">Не ўдалося імпартаваць налады. Файл можа быць пашкоджаны.</string>
+    <string name="install_damaged">Усталёўка ChurchPresenter пашкоджана: некаторых яе файлаў не хапае.\n\nПераўсталюйце ChurchPresenter. Вашы налады захаваюцца.</string>
     <string name="schedule_add_files">Дадаць файлы…</string>
     <string name="schedule_autoload_notice">Загрузка %1$s праз %2$s</string>
     <string name="schedule_autoload_notice_now">Загрузка %1$s…</string>

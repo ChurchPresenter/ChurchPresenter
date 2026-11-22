@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.appsettings.REPLACING_PID_ARGUMENT
+import org.churchpresenter.appsettings.replacingCommand
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.telemetry.GpuInfo
@@ -19,9 +21,6 @@ import kotlin.system.exitProcess
  */
 
 internal const val SOFTWARE_RENDER_API = "SOFTWARE"
-
-/** Passed to the relaunched app: the pid it waits for, so two copies never run side by side. */
-internal const val REPLACING_PID_ARGUMENT = "--replacing-pid="
 
 private const val FALLBACK_FILE = "render-fallback.properties"
 private const val KEY_API = "api"
@@ -67,10 +66,6 @@ internal fun awaitReplacedProcess(args: Array<String>, timeoutSeconds: Long = RE
         runCatching { handle.onExit().get(timeoutSeconds, TimeUnit.SECONDS) }
     }
 }
-
-/** [base] with this process's [pid] as the one to replace, in place of any it already carried. */
-internal fun replacingCommand(base: List<String>, pid: Long): List<String> =
-    base.filterNot { it.startsWith(REPLACING_PID_ARGUMENT) } + "$REPLACING_PID_ARGUMENT$pid"
 
 /**
  * Saves [api] for this GPU, starts the app again and exits. Called once the main window has drawn,

@@ -814,6 +814,7 @@
     <string name="settings_exported">Matagumpay na na-export ang mga setting.</string>
     <string name="settings_export_failed">Nabigong i-export ang mga setting.</string>
     <string name="settings_import_failed">Nabigong i-import ang mga setting. Maaaring hindi valid ang file.</string>
+    <string name="install_damaged">Sira ang pagkaka-install ng ChurchPresenter: may ilang file nito na nawawala.\n\nPakiinstall muli ang ChurchPresenter. Mananatili ang iyong mga setting.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Lokal na File</string>

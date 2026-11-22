@@ -607,6 +607,7 @@
     <string name="settings_exported">Configuración exportada correctamente.</string>
     <string name="settings_export_failed">Error al exportar la configuración.</string>
     <string name="settings_import_failed">Error al importar la configuración. El archivo puede no ser válido.</string>
+    <string name="install_damaged">La instalación de ChurchPresenter está dañada: faltan algunos de sus archivos.\n\nVuelve a instalar ChurchPresenter. Tu configuración se conserva.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Archivo local</string>

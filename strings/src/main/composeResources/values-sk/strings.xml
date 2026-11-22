@@ -607,6 +607,7 @@
     <string name="settings_exported">Nastavenia boli úspešne exportované.</string>
     <string name="settings_export_failed">Export nastavení zlyhal.</string>
     <string name="settings_import_failed">Import nastavení zlyhal. Súbor môže byť neplatný.</string>
+    <string name="install_damaged">Inštalácia ChurchPresenter je poškodená: niektoré jej súbory chýbajú.\n\nPreinštalujte ChurchPresenter. Vaše nastavenia zostanú zachované.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Lokálny súbor</string>

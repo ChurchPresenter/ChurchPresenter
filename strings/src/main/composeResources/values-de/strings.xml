@@ -681,6 +681,7 @@
     <string name="settings_exported">Einstellungen erfolgreich exportiert.</string>
     <string name="settings_export_failed">Einstellungen konnten nicht exportiert werden.</string>
     <string name="settings_import_failed">Einstellungen konnten nicht importiert werden. Die Datei ist möglicherweise ungültig.</string>
+    <string name="install_damaged">Die Installation von ChurchPresenter ist beschädigt: Einige Dateien fehlen.\n\nBitte installieren Sie ChurchPresenter neu. Ihre Einstellungen bleiben erhalten.</string>
     <string name="schedule_add_files">Dateien hinzufügen…</string>
     <string name="schedule_autoload_notice">%1$s wird in %2$s geladen</string>
     <string name="schedule_autoload_notice_now">%1$s wird jetzt geladen…</string>

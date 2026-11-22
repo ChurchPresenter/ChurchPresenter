@@ -814,6 +814,7 @@
     <string name="settings_exported">Ayarlar dışa aktarıldı.</string>
     <string name="settings_export_failed">Ayarlar dışa aktarılamadı.</string>
     <string name="settings_import_failed">Ayarlar içe aktarılamadı. Dosya geçersiz olabilir.</string>
+    <string name="install_damaged">ChurchPresenter kurulumu bozuk: bazı dosyaları eksik.\n\nLütfen ChurchPresenter'ı yeniden kurun. Ayarlarınız korunur.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Yerel Dosya</string>

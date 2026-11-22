@@ -27,6 +27,10 @@ private const val DSN_KEY_VISIBLE_CHARS = 6
 private const val MIN_SCRUBBED_NAME_LENGTH = 3
 private const val RELEASE_SAMPLE_RATE = 0.2
 
+// The Sentry context a stackless crash carries, and how much of the live thread list it keeps.
+private const val CRASHED_THREAD_CONTEXT = "crashed_thread"
+private const val MAX_LIVE_THREADS_CHARS = 2_000
+
 /**
  * Exit code for a fatal uncaught exception, once it has been logged and flushed to Sentry.
  *
@@ -239,6 +243,9 @@ object CrashReporter {
                 writeLocalLog(throwable, context = "Thread: ${thread.name} (recovered)", fatal = false)
                 throwable.printStackTrace()
                 return@setUncaughtHandler
+            }
+            stacklessCrashContext(throwable, thread, Thread.getAllStackTraces().keys)?.let {
+                setContext(CRASHED_THREAD_CONTEXT, it)
             }
             recordFatal(throwable, context = "Thread: ${thread.name}")
             // The JVM's own default (print to stderr) does not end the process, and every output
@@ -816,6 +823,26 @@ object CrashReporter {
         options.addInAppInclude("org.churchpresenter")
         options.beforeSend = crashAttachingBeforeSend()
         options.beforeBreadcrumb = scrubbingBeforeBreadcrumb()
+    }
+
+    /**
+     * What is known of a thread that died of an exception with no stack trace -- one thrown from
+     * native code, or on a thread a library started without a name ("Thread-19") -- so the report
+     * can point at its source: the thread's class, whether it is a daemon, its group, and the names
+     * of the threads alive beside it. Null when the exception has frames, which say all of that.
+     */
+    internal fun stacklessCrashContext(
+        throwable: Throwable,
+        thread: Thread,
+        live: Collection<Thread>,
+    ): Map<String, Any>? {
+        if (throwable.stackTrace.isNotEmpty()) return null
+        return mapOf(
+            "class" to thread.javaClass.name,
+            "daemon" to thread.isDaemon,
+            "group" to (thread.threadGroup?.name ?: "none"),
+            "live_threads" to live.map { it.name }.sorted().joinToString(", ").take(MAX_LIVE_THREADS_CHARS),
+        )
     }
 
     /**

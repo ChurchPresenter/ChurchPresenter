@@ -636,6 +636,7 @@
     <string name="settings_exported">Setările au fost exportate cu succes.</string>
     <string name="settings_export_failed">Exportul setărilor a eșuat.</string>
     <string name="settings_import_failed">Importul setărilor a eșuat. Fișierul poate fi invalid.</string>
+    <string name="install_damaged">Instalarea ChurchPresenter este deteriorată: unele dintre fișierele sale lipsesc.\n\nReinstalați ChurchPresenter. Setările dvs. se păstrează.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Fișier Local</string>
