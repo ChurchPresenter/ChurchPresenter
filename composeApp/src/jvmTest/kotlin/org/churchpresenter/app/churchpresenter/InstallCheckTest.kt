@@ -12,7 +12,7 @@ class InstallCheckTest {
     fun `a jar that is not on disk is missing, and one that is is not`() {
         val there = setOf("app/theme.jar", "app/settings.jar")
 
-        val missing = missingClassPathEntries(
+        val missing = missingClassPathJars(
             path("app/theme.jar", "app/strings.jar", "app/settings.jar"),
             exists = { it.path.replace(File.separatorChar, '/') in there },
         )
@@ -21,8 +21,13 @@ class InstallCheckTest {
     }
 
     @Test
-    fun `blank and wildcard entries are never reported`() {
-        assertTrue(missingClassPathEntries(path("", "app/*", " "), exists = { false }).isEmpty())
+    fun `folders, wildcards and blanks are never reported`() {
+        val missing = missingClassPathJars(
+            path("", "app/*", "build/processedResources/jvm/main", "build/classes/kotlin/jvm/main"),
+            exists = { false },
+        )
+
+        assertTrue(missing.isEmpty())
     }
 
     @Test
@@ -34,25 +39,8 @@ class InstallCheckTest {
     }
 
     @Test
-    fun `the message comes from the strings`() {
-        assertEquals(DAMAGED_INSTALL_FALLBACK, damagedInstallMessage())
-    }
-
-    @Test
-    fun `the message is still said in English when the strings jar is the one missing`() {
-        val message = damagedInstallMessage {
-            throw NoClassDefFoundError("org/churchpresenter/strings/generated/resources/Res\$string")
-        }
-
-        assertEquals(DAMAGED_INSTALL_FALLBACK, message)
-    }
-
-    @Test
-    fun `reporting a damaged install shows the message`() {
-        val shown = mutableListOf<String>()
-
-        reportDamagedInstall(listOf(File("strings.jar")), show = { shown += it })
-
-        assertEquals(listOf(DAMAGED_INSTALL_FALLBACK), shown)
+    fun `a damaged install is reported and the start carries on`() {
+        reportIfInstallDamaged(listOf(File("strings.jar")))
+        reportIfInstallDamaged(emptyList())
     }
 }

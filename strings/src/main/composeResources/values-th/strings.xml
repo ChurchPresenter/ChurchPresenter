@@ -814,7 +814,6 @@
     <string name="settings_exported">ส่งออกการตั้งค่าเรียบร้อยแล้ว</string>
     <string name="settings_export_failed">ส่งออกการตั้งค่าไม่สำเร็จ</string>
     <string name="settings_import_failed">นำเข้าการตั้งค่าไม่สำเร็จ ไฟล์อาจไม่ถูกต้อง</string>
-    <string name="install_damaged">การติดตั้ง ChurchPresenter เสียหาย: ไฟล์บางส่วนหายไป\n\nโปรดติดตั้ง ChurchPresenter ใหม่ การตั้งค่าของคุณจะยังคงอยู่</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">ไฟล์ในเครื่อง</string>

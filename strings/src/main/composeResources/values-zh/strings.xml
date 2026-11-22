@@ -814,7 +814,6 @@
     <string name="settings_exported">设置已成功导出。</string>
     <string name="settings_export_failed">导出设置失败。</string>
     <string name="settings_import_failed">导入设置失败。文件可能无效。</string>
-    <string name="install_damaged">ChurchPresenter 的安装已损坏：缺少部分文件。\n\n请重新安装 ChurchPresenter。您的设置会保留。</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">本地文件</string>

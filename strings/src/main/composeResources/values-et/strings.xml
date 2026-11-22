@@ -680,7 +680,6 @@
     <string name="settings_exported">Seaded eksporditi edukalt.</string>
     <string name="settings_export_failed">Seadete eksportimine ebaõnnestus.</string>
     <string name="settings_import_failed">Seadete importimine ebaõnnestus. Fail võib olla vigane.</string>
-    <string name="install_damaged">ChurchPresenteri paigaldus on kahjustatud: osa selle faile puudub.\n\nPalun paigalda ChurchPresenter uuesti. Sinu seaded säilivad.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Kohalik fail</string>

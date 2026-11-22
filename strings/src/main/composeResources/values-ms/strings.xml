@@ -814,7 +814,6 @@
     <string name="settings_exported">Tetapan berjaya dieksport.</string>
     <string name="settings_export_failed">Gagal mengeksport tetapan.</string>
     <string name="settings_import_failed">Gagal mengimport tetapan. Fail itu mungkin tidak sah.</string>
-    <string name="install_damaged">Pemasangan ChurchPresenter rosak: sesetengah failnya hilang.\n\nSila pasang semula ChurchPresenter. Tetapan anda dikekalkan.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Fail Setempat</string>
