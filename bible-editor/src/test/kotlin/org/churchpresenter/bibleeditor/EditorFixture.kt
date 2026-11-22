@@ -9,16 +9,19 @@ import java.nio.file.Files
 import java.time.LocalDate
 import java.time.ZoneId
 
-/** A Bible folder of two translations and a data folder, under one temp directory a test deletes. */
-class EditorFixture(withReference: Boolean = true) {
+/**
+ * A Bible folder of two translations and a data folder, under one temp directory a test deletes.
+ *
+ * Every chapter either Bible has is as long as its numbering makes it, so the one gap is the one
+ * meant: the KJV is KJV-numbered, and the "RST" Synodal-numbered (its Romans 14 runs to 26 and 16
+ * to 24) and lacks Matthew 17:11.
+ */
+class EditorFixture(rstContent: String = rst()) {
     val root: File = Files.createTempDirectory("cp-bible-editor").toFile()
     val bibles = File(root, "bibles").also { it.mkdirs() }
     val data = File(root, "data")
-    val rst: File = SpbFixture.spbFile(bibles, "rst.spb", rst())
-
-    init {
-        if (withReference) SpbFixture.spbFile(bibles, "kjv.spb", kjv())
-    }
+    val rst: File = SpbFixture.spbFile(bibles, "rst.spb", rstContent)
+    val kjv: File = SpbFixture.spbFile(bibles, "kjv.spb", kjv())
 
     val store = BibleEditsStore(data)
 
@@ -34,6 +37,14 @@ class EditorFixture(withReference: Boolean = true) {
         const val HOUR = 3_600_000L
         const val MATTHEW = 40
         const val MARK = 41
+        const val ROMANS = 45
+
+        /** How long each of the fixture's chapters runs. */
+        private const val MATTHEW_1_VERSES = 25
+        private const val MATTHEW_17_VERSES = 27
+        private const val MARK_1_VERSES = 45
+        private const val ROMANS_14_SYNODAL = 26
+        private const val ROMANS_16_SYNODAL = 24
 
         val KJV_17 = listOf(
             "And after six days Jesus taketh Peter, James, and John his brother, " +
@@ -58,28 +69,33 @@ class EditorFixture(withReference: Boolean = true) {
 
         private fun books() = listOf(SpbFixture.Book(MATTHEW, "Matthew", 17), SpbFixture.Book(MARK, "Mark", 1))
 
-        private fun firstChapters() = listOf(
-            SpbFixture.Verse(MATTHEW, 1, 1, "The book of the generation of Jesus Christ."),
-            SpbFixture.Verse(MATTHEW, 1, 2, "Abraham begat Isaac."),
-            SpbFixture.Verse(MARK, 1, 1, "The beginning of the gospel of Jesus Christ."),
-        )
+        /** [count] verses of [book] [chapter], [known] first and a numbered line after them. */
+        private fun chapter(book: Int, chapter: Int, count: Int, known: List<String> = emptyList()) =
+            (1..count).map { n -> SpbFixture.Verse(book, chapter, n, known.getOrNull(n - 1) ?: "Verse $chapter:$n.") }
+
+        private fun firstChapters() =
+            chapter(MATTHEW, 1, MATTHEW_1_VERSES, listOf("The book of the generation of Jesus Christ.",
+                "Abraham begat Isaac.")) +
+                chapter(MARK, 1, MARK_1_VERSES, listOf("The beginning of the gospel of Jesus Christ."))
 
         fun kjv(): String = SpbFixture.buildContent(
             "King James Version", books(),
-            firstChapters() + KJV_17.mapIndexed { i, t -> SpbFixture.Verse(MATTHEW, 17, i + 1, t) },
+            firstChapters() + chapter(MATTHEW, 17, MATTHEW_17_VERSES, KJV_17),
         )
 
+        /** The RST without Mark 1:45, so Mark 1 ends a verse short: a gap after the chapter's last verse. */
+        fun rstShortMark(): String = rst().lines().filterNot { it.startsWith("B041C001V045") }.joinToString("\n")
+
         fun rst(): String = SpbFixture.buildContent(
-            "Russian Synodal", books(),
-            firstChapters() + KJV_17.mapIndexedNotNull { i, t ->
-                val n = i + 1
-                when (n) {
+            "Russian Synodal", books() + SpbFixture.Book(ROMANS, "Romans", 16),
+            firstChapters() + chapter(MATTHEW, 17, MATTHEW_17_VERSES, KJV_17).mapNotNull { v ->
+                when (v.verse) {
                     11 -> null
-                    2 -> SpbFixture.Verse(MATTHEW, 17, n, RST_TYPO_2)
-                    9 -> SpbFixture.Verse(MATTHEW, 17, n, RST_TYPO_9)
-                    else -> SpbFixture.Verse(MATTHEW, 17, n, t)
+                    2 -> v.copy(text = RST_TYPO_2)
+                    9 -> v.copy(text = RST_TYPO_9)
+                    else -> v
                 }
-            },
+            } + chapter(ROMANS, 14, ROMANS_14_SYNODAL) + chapter(ROMANS, 16, ROMANS_16_SYNODAL),
         )
 
         private fun entry(id: Long, ago: Long, verse: Int, before: VerseChange?, after: VerseChange?,

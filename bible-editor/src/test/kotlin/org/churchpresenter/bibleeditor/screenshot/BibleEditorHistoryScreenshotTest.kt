@@ -10,6 +10,8 @@ import org.churchpresenter.bibleeditor.EditorFixture
 import org.churchpresenter.bibleeditor.ui.click
 import org.churchpresenter.bibleeditor.ui.press
 import kotlin.test.Test
+import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.performScrollToIndex
 
 /** The History panel: empty, every kind of change, one verse, and its three scopes. */
 class BibleEditorHistoryScreenshotTest {
@@ -31,7 +33,11 @@ class BibleEditorHistoryScreenshotTest {
     }
 
     @Test
-    fun `one verse's history`() = shoot("one_verse", Shot()) { press("History of verse 9") }
+    fun `one verse's history`() = shoot("one_verse", Shot()) {
+        // Below the care note at this height: the title and the note come first, verse 9 is the 11th item.
+        onAllNodes(hasScrollToIndexAction())[0].performScrollToIndex(10)
+        press("History of verse 9")
+    }
 
     @Test
     fun `this Bible`() = shoot("this_bible") { click("This Bible") }

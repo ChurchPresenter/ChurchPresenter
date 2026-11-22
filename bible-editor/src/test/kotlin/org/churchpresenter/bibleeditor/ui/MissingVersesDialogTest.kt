@@ -21,10 +21,10 @@ class MissingVersesDialogTest {
     }
 
     @Test
-    fun `it lists what is missing against the KJV and types the next one`() = withEditor { _, _ ->
+    fun `it lists what is missing in the numbering the Bible matches and types the next one`() = withEditor { _, _ ->
         assertTrue(isShowing("1"), "the Validate button counts what is still missing")
         openValidator()
-        assertTrue(isShowing("Russian Synodal compared with KJV · 2 books checked"))
+        assertTrue(isShowing("Russian Synodal · Synodal numbering · 3 books checked"))
         assertTrue(isShowing("Still missing"))
         assertTrue(isShowing("Missing (1)"))
         assertTrue(isShowing("Matthew 17:11"))
@@ -73,14 +73,8 @@ class MissingVersesDialogTest {
         click("Russian Synodal")
         click("King James Version")
         openValidator()
+        assertTrue(isShowing("King James Version · KJV numbering · 2 books checked"))
         assertTrue(isShowing("No missing verses"))
         assertTrue(isShowing("This Bible matches the reference verse for verse."))
-    }
-
-    @Test
-    fun `with no KJV on the shelf there is nothing to compare with`() = withEditor(withReference = false) { _, _ ->
-        openValidator()
-        assertTrue(isShowing("There is no KJV in your Bible folder to compare with."))
-        assertTrue(isShowing("No gaps in the verse numbers") || isShowing("1 verse missing"))
     }
 }

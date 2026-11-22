@@ -73,6 +73,7 @@ class MainDesktopViewModelsTest {
                 ),
             ),
             settings = mutableStateOf(settings),
+            devMode = mutableStateOf(false),
         )
         try {
             waitFor("the Bible to load") { loaded.isNotEmpty() && paths.isNotEmpty() && secondary.isNotEmpty() }

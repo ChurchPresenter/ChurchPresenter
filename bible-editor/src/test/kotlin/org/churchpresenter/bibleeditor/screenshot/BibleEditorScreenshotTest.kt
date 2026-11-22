@@ -12,6 +12,11 @@ import org.churchpresenter.bibleeditor.ui.click
 import org.churchpresenter.bibleeditor.ui.draftField
 import org.churchpresenter.bibleeditor.ui.press
 import kotlin.test.Test
+import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.performScrollToIndex
+import org.churchpresenter.bibleeditor.EditorFixture
+import org.churchpresenter.bibleeditor.ui.goToChapter
+import org.churchpresenter.bibleeditor.ui.isShowing
 
 /**
  * The editor window: loading, the chapter in each of its states, the verse card, the footer.
@@ -47,7 +52,35 @@ class BibleEditorScreenshotTest {
         shoot("chapter_complete", Shot(history = emptyList(), openMatthew17 = false)) { press("Close history") }
 
     @Test
-    fun `a Bible with no KJV to compare with`() = shoot("no_reference", Shot(withReference = false))
+    fun `a chapter while the Bible's numbering is still being matched`() =
+        shoot("chapter_checking", Shot(history = emptyList(), io = { GateDispatcher(allowed = 2) },
+            openMatthew17 = false)) {
+            awaitText("Checking…")
+        }
+
+    @Test
+    fun `a KJV-numbered Bible`() = shoot("chapter_kjv", Shot(history = emptyList())) {
+        click("Russian Synodal")
+        click("King James Version")
+    }
+
+    @Test
+    fun `a chapter only the Synodal numbering runs this long`() =
+        shoot("chapter_synodal", Shot(history = emptyList(), openMatthew17 = false)) {
+            click("Matthew")
+            click("Romans")
+            goToChapter(14)
+        }
+
+    @Test
+    fun `a verse missing after the chapter's last one`() =
+        shoot("gap_at_chapter_end", Shot(history = emptyList(), rst = EditorFixture.rstShortMark(),
+            openMatthew17 = false)) {
+            click("Matthew")
+            click("Mark")
+            // The title and the care note come before the verses: verse 45 is the list's 47th item.
+            onAllNodes(hasScrollToIndexAction())[0].performScrollToIndex(46)
+        }
 
     @Test
     fun `the care note hidden`() = shoot("note_hidden") { press("Hide until next time") }
@@ -82,7 +115,8 @@ class BibleEditorScreenshotTest {
         click("Validate")
         click("Type the next one")
         draftField().performTextReplacement(KJV_17[10])
-        click("Add verse 11")
+        pressInView("Add verse 11")
+        check(isShowing("ADDED")) { "verse 11 was not added" }
         press("Close history")
     }
 

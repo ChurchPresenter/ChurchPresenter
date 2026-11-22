@@ -24,7 +24,7 @@ class EditorLoadingTest {
             awaitText("Russian Synodal")
             assertFalse(isShowing("Matthew 1"))
             assertTrue(isShowing("Loading Bibles…"), "the chapter waits for its Bible")
-            assertFalse(isShowing("Complete, matches KJV"))
+            assertFalse(isShowing("Matches", substring = true))
             click("Russian Synodal")
             click("Russian Synodal")
             click("Validate")
@@ -42,15 +42,19 @@ class EditorLoadingTest {
             click("Validate")
             assertTrue(isShowing("Checking…"))
             runOnIdle { gate.release() }
-            awaitText("Russian Synodal compared with KJV · 2 books checked")
+            awaitText("Russian Synodal · Synodal numbering · 3 books checked")
         }
     }
 
     @Test
-    fun `with nothing to compare with, every tab is empty`() = withEditor(withReference = false) { _, _ ->
-        click("Validate")
-        click("All (0)")
-        assertTrue(isShowing("No missing verses"))
+    fun `until the check is done the chapter says it is checking, then which numbering it matches`() {
+        val gate = GateDispatcher(allowed = 2)
+        withEditor(io = gate, openMatthew17 = false) { _, _ ->
+            assertTrue(isShowing("Checking…"))
+            assertFalse(isShowing("Matches", substring = true))
+            runOnIdle { gate.release() }
+            awaitText("Matches Synodal numbering")
+        }
     }
 
     @Test

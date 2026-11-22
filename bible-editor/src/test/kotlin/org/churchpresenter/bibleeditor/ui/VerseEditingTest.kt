@@ -68,7 +68,7 @@ class VerseEditingTest {
         assertFalse(isShowing("YOUR CHANGE"))
         click("Add verse 11")
         assertTrue(isShowing("ADDED"))
-        assertTrue(isShowing("Complete, matches KJV"))
+        assertTrue(isShowing("Matches Synodal numbering"))
         press("Take out the verse you added")
         assertTrue(isShowing("1 verse missing"))
     }
@@ -77,9 +77,9 @@ class VerseEditingTest {
     fun `a removed verse is struck out until it is restored`() = withEditor { _, _ ->
         press("Remove verse")
         assertTrue(isShowing("REMOVED"))
-        assertTrue(isShowing("RS · 10 of 12 verses"))
+        assertTrue(isShowing("RS · 25 of 27 verses"))
         click("Restore")
-        assertTrue(isShowing("RS · 11 of 12 verses"))
+        assertTrue(isShowing("RS · 26 of 27 verses"))
         assertTrue(isShowing("RESTORED"), "the history lists the restore")
     }
 

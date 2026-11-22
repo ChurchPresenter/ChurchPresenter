@@ -99,7 +99,8 @@ internal fun GapRow(verse: Int, joinedTo: Int?, onAdd: () -> Unit) {
         VerseNumber(verse, colors.warn, top = 0)
         Row(
             Modifier.weight(1f).heightIn(min = 46.dp).clip(GapShape).background(colors.warnBg)
-                .border(1.5.dp, colors.warnLine, GapShape).padding(start = 14.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+                .border(1.5.dp, colors.warnLine, GapShape)
+                .padding(start = 14.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {

@@ -28,7 +28,7 @@ internal const val WINDOW_WIDTH = 1240
 internal const val WINDOW_HEIGHT = 820
 
 /** Tall enough that every verse of the fixture's chapter is laid out at once: a lazy list composes only what shows. */
-private const val TALL_WINDOW_HEIGHT = 1800
+private const val TALL_WINDOW_HEIGHT = 3200
 
 /** What a test sees of the window's callbacks. */
 internal class EditorCalls {
@@ -39,13 +39,12 @@ internal class EditorCalls {
 /** The editor opened on a fresh [EditorFixture], with [history] already saved, at the window's size. */
 internal fun withEditor(
     history: List<EditEntry> = emptyList(),
-    withReference: Boolean = true,
     openMatthew17: Boolean = true,
     io: CoroutineDispatcher = Dispatchers.Unconfined,
     awaitOpen: Boolean = true,
     body: ComposeUiTest.(fixture: EditorFixture, calls: EditorCalls) -> Unit,
 ) {
-    val fixture = EditorFixture(withReference)
+    val fixture = EditorFixture()
     val calls = EditorCalls()
     try {
         if (history.isNotEmpty()) fixture.saveHistory(history)

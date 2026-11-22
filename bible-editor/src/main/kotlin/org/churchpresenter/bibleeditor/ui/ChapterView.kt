@@ -189,4 +189,3 @@ internal fun VerseNumber(number: Int, color: Color, top: Int = 4) {
         Text(number.toString(), color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
-

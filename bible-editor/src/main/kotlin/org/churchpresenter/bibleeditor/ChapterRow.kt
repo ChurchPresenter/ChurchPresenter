@@ -3,10 +3,6 @@ package org.churchpresenter.bibleeditor
 import org.churchpresenter.bibleedits.EditEntry
 import org.churchpresenter.bibleedits.VerseAddress
 import org.churchpresenter.bibleedits.VerseChange
-import org.churchpresenter.bible.MAX_BIBLE_SCAN_DEPTH
-import org.churchpresenter.bible.defaultTranslationAbbreviation
-import org.churchpresenter.bible.readTranslationTitle
-import java.io.File
 
 /** One line of the open chapter: a verse, or the place a missing one goes. */
 sealed interface ChapterRow {
@@ -27,19 +23,6 @@ sealed interface ChapterRow {
         val added: Boolean get() = change?.added == true
         val edited: Boolean get() = change != null && !added && !removed && change.text != null
     }
-}
-
-/** Every `.spb` under [folder], with its title and abbreviation read from its header. */
-internal fun scanShelf(folder: File): List<ShelfBible> {
-    if (!folder.isDirectory) return emptyList()
-    return folder.walkTopDown().maxDepth(MAX_BIBLE_SCAN_DEPTH)
-        .filter { it.isFile && it.extension.equals("spb", ignoreCase = true) }
-        .map { file ->
-            val title = readTranslationTitle(file)
-            ShelfBible(file.relativeTo(folder).path, file, title, defaultTranslationAbbreviation(title, file.name))
-        }
-        .sortedBy { it.title.lowercase() }
-        .toList()
 }
 
 /** The open chapter, verse by verse, with a gap wherever a verse is missing. */

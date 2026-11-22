@@ -38,13 +38,14 @@ class BibleEditorStateTest {
     }
 
     @Test
-    fun `it opens the preferred Bible and judges it against the shelf's KJV`() {
+    fun `it opens the preferred Bible and finds what it lacks in the numbering it matches`() {
         val state = state()
         assertEquals(listOf("King James Version", "Russian Synodal"), state.shelf.map { it.title })
         assertEquals("rst.spb", state.selected?.key)
-        assertEquals("kjv.spb", state.reference?.key)
+        assertEquals(Numbering.SYNODAL, state.numberingHere)
         assertEquals(listOf(MissingVerse(MATTHEW, 17, 11)), state.missing["rst.spb"])
         state.selectBible(state.shelf.first())
+        assertEquals(Numbering.KJV, state.numberingHere)
         assertEquals(emptyList(), state.missing["kjv.spb"])
     }
 
@@ -57,15 +58,11 @@ class BibleEditorStateTest {
     }
 
     @Test
-    fun `a shelf with no KJV checks nothing`() {
-        val bare = EditorFixture(withReference = false)
-        try {
-            val state = BibleEditorState(bare.bibles, emptyList(), bare.store, scope, dispatcher).also { it.start() }
-            assertNull(state.reference)
-            assertNull(state.missing["rst.spb"])
-        } finally {
-            bare.delete()
-        }
+    fun `no KJV is needed on the shelf to check a Bible`() {
+        fixture.kjv.delete()
+        val state = state()
+        assertEquals(listOf("rst.spb"), state.shelf.map { it.key })
+        assertEquals(listOf(MissingVerse(MATTHEW, 17, 11)), state.missingHere)
     }
 
     @Test
@@ -73,7 +70,7 @@ class BibleEditorStateTest {
         val state = state()
         state.openMatthew17()
         val rows = state.chapterRows()
-        assertEquals(12, rows.size)
+        assertEquals(27, rows.size)
         assertIs<ChapterRow.Gap>(rows[10])
         assertEquals(EditorFixture.RST_TYPO_2, (rows[1] as ChapterRow.Verse).text)
         assertEquals(setOf(11), state.missingInChapter())

@@ -189,7 +189,11 @@ private fun MissingList(state: BibleEditorState, shown: List<MissingVerse>) {
                         fontWeight = FontWeight.SemiBold, color = colors.ink)
                     Text(
                         stringResource(
-                            if (fixed) Res.string.bible_editor_state_restored else Res.string.bible_editor_state_missing,
+                            if (fixed) {
+                                Res.string.bible_editor_state_restored
+                            } else {
+                                Res.string.bible_editor_state_missing
+                            },
                         ),
                         fontSize = 11.5.sp, fontWeight = FontWeight.Bold,
                         color = if (fixed) colors.good else colors.warn,

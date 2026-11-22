@@ -3,7 +3,6 @@ package org.churchpresenter.bibleeditor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.bibleedits.VerseAddress
 import org.churchpresenter.bibleedits.VerseChange
 import org.churchpresenter.bibleeditor.EditorFixture.Companion.KJV_17
@@ -19,17 +18,13 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChapterStatusTest {
 
-    private val fixture = EditorFixture()
+    private val fixture = EditorFixture(EditorFixture.rstShortMark())
 
     @AfterTest
     fun delete() = fixture.delete()
 
-    /** RST with a second gap, in Mark 1, so the search has somewhere to go round to. */
+    /** RST with a second gap, at the end of Mark 1, so the search has somewhere to go round to. */
     private fun state(): BibleEditorState {
-        SpbFixture.spbFile(fixture.bibles, "kjv.spb", EditorFixture.kjv().replace(
-            "B041C001V001 41 1 1 The beginning of the gospel of Jesus Christ.",
-            "B041C001V001 41 1 1 The beginning of the gospel of Jesus Christ.\nB041C001V002 41 1 2 As it is written.",
-        ))
         val dispatcher = UnconfinedTestDispatcher()
         return BibleEditorState(fixture.bibles, listOf(fixture.rst), fixture.store, TestScope(dispatcher), dispatcher)
             .also { it.start() }
@@ -52,7 +47,7 @@ class ChapterStatusTest {
         val state = state()
         assertEquals(MissingVerse(MATTHEW, 17, 11), state.nextMissing())
         state.goToChapter(17)
-        assertEquals(MissingVerse(MARK, 1, 2), state.nextMissing())
+        assertEquals(MissingVerse(MARK, 1, 45, atChapterEnd = true), state.nextMissing())
         state.selectBook(1)
         assertEquals(MissingVerse(MATTHEW, 17, 11), state.nextMissing(), "nothing after Mark 1, so round to the start")
         state.goToNextMissing()

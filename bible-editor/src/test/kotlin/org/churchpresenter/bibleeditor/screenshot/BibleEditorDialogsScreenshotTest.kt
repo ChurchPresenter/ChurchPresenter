@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.bibleeditor.EditorFixture.Companion.KJV_17
 import org.churchpresenter.bibleeditor.ui.GateDispatcher
 import org.churchpresenter.bibleeditor.ui.click
+import org.churchpresenter.bibleeditor.ui.isShowing
 import org.churchpresenter.bibleeditor.ui.draftField
 import org.churchpresenter.bibleeditor.ui.openChapterPicker
 import kotlin.test.Test
@@ -22,7 +23,8 @@ class BibleEditorDialogsScreenshotTest {
         click("Validate")
         click("Type the next one")
         draftField().performTextReplacement(KJV_17[10])
-        click("Add verse 11")
+        pressInView("Add verse 11")
+        check(isShowing("ADDED")) { "verse 11 was not added" }
     }
 
     @Test
@@ -55,11 +57,6 @@ class BibleEditorDialogsScreenshotTest {
 
     @Test
     fun `missing verses, still checking`() = shoot("missing_checking", Shot(io = { GateDispatcher(allowed = 2) })) {
-        click("Validate")
-    }
-
-    @Test
-    fun `missing verses, with no KJV to compare with`() = shoot("missing_no_reference", Shot(withReference = false)) {
         click("Validate")
     }
 

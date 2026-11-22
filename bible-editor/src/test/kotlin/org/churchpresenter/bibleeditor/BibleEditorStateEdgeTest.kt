@@ -71,30 +71,17 @@ class BibleEditorStateEdgeTest {
     }
 
     @Test
-    fun `a KJV is found by its file name when its title does not abbreviate to KJV`() {
-        val bare = EditorFixture(withReference = false)
-        try {
-            SpbFixture.spbFile(bare.bibles, "kjv1769.spb", EditorFixture.kjv().replace("King James Version",
-                "Authorized"))
-            val dispatcher = UnconfinedTestDispatcher()
-            val state = BibleEditorState(bare.bibles, listOf(bare.rst), bare.store, TestScope(dispatcher), dispatcher)
-            state.start()
-            assertEquals("kjv1769.spb", state.reference?.key)
-            assertEquals(listOf(MissingVerse(MATTHEW, 17, 11)), state.missingHere)
-        } finally {
-            bare.delete()
-        }
-    }
-
-    @Test
-    fun `the reference is read once, however many Bibles are checked against it`() {
+    fun `each Bible is checked on its own, and only once however often it is opened`() {
         SpbFixture.spbFile(fixture.bibles, "ukr.spb", EditorFixture.rst().replace("Russian Synodal", "Ukrainian"))
         val state = started()
         state.selectBible(state.shelf.first { it.key == "ukr.spb" })
         assertEquals(1, state.missing["ukr.spb"]?.size)
+        val checked = state.missing["rst.spb"]
+        assertEquals(Numbering.SYNODAL, state.numbering["ukr.spb"])
         state.selectBible(state.shelf.first { it.key == "rst.spb" })
         state.selectBible(state.shelf.first { it.key == "rst.spb" })
         assertEquals("rst.spb", state.selected?.key)
+        assertTrue(checked === state.missing["rst.spb"])
     }
 
     @Test
@@ -142,7 +129,7 @@ class BibleEditorStateEdgeTest {
             VerseAddress("rst.spb", MATTHEW + 1, 17, 31),
             VerseAddress("rst.spb", MATTHEW, 16, 32),
         ).forEach { state.history.commit(it, added, null) }
-        assertEquals(12, state.chapterRows().size)
+        assertEquals(27, state.chapterRows().size)
         assertEquals(emptyList(), state.visibleHistory())
         state.history.commit(VerseAddress("rst.spb", MATTHEW, 17, 11), VerseChange(added = true), null)
         assertFalse(state.isRestored(MissingVerse(MATTHEW, 17, 11)), "added with no text is not restored")

@@ -23,13 +23,18 @@ import org.churchpresenter.sharedui.screenshot.stackedThemes
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import java.util.Locale
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performClick
 
 private const val EMPTY_SHELF = "build/screenshot-empty-bible-folder"
 
 /** How the window is opened for one shot. */
 internal data class Shot(
     val history: List<EditEntry> = EditorFixture.savedFixes(),
-    val withReference: Boolean = true,
+    /** What the RST on the shelf holds. */
+    val rst: String = EditorFixture.rst(),
     /** Makes the dispatcher the window reads on, once per theme; a `GateDispatcher` holds some reads back. */
     val io: () -> CoroutineDispatcher = { Dispatchers.Unconfined },
     /** Opens Matthew 17 once the window has its Bible; off for a window caught before that. */
@@ -48,7 +53,7 @@ internal data class Shot(
  */
 internal fun shootEditor(section: String, name: String, shot: Shot = Shot(), drive: ComposeUiTest.() -> Unit = {}) =
     stackedThemes(section, name) { mode, file ->
-        val fixture = EditorFixture(shot.withReference)
+        val fixture = EditorFixture(shot.rst)
         val locale = Locale.getDefault()
         Locale.setDefault(Locale.US)
         try {
@@ -89,3 +94,9 @@ internal fun shootEditor(section: String, name: String, shot: Shot = Shot(), dri
             File(EMPTY_SHELF).deleteRecursively()
         }
     }
+
+/** Presses the button reading [text], brought into view first: the window is shorter than the chapter. */
+internal fun ComposeUiTest.pressInView(text: String) {
+    onAllNodesWithText(text).onLast().performScrollTo().performClick()
+    waitForIdle()
+}

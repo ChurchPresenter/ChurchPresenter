@@ -28,8 +28,8 @@ class BibleEditorAppTest {
     @Test
     fun `it opens on the preferred Bible's first chapter`() = withEditor(openMatthew17 = false) { _, _ ->
         assertTrue(isShowing("Russian Synodal"))
-        assertTrue(isShowing("RS · 2 of 2 verses"))
-        assertTrue(isShowing("Complete, matches KJV"))
+        assertTrue(isShowing("RS · 25 of 25 verses"))
+        assertTrue(isShowing("Matches Synodal numbering"))
         assertTrue(isShowing("of 17"))
     }
 
@@ -99,8 +99,8 @@ class BibleEditorAppTest {
             click("Russian Synodal")
             assertTrue(isShowing("2 changes"))
             click("King James Version")
-            assertTrue(isShowing("KJV · 12 of 12 verses"))
-            assertTrue(isShowing("Complete, matches KJV"))
+            assertTrue(isShowing("KJV · 27 of 27 verses"))
+            assertTrue(isShowing("Matches KJV numbering"))
             click("King James Version")
             click("Russian Synodal")
             assertTrue(isShowing("1 verse missing"))
