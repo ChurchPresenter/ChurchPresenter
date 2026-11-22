@@ -54,6 +54,8 @@ private const val WINDOWS_SHELL_FOLDER = "sun.awt.shell.Win32ShellFolder"
 /** The JDK's file chooser list, whose focus listener repaints a selected row that has no cell. */
 private const val FILE_CHOOSER_PANE = "sun.swing.FilePane"
 
+private const val METAL_GRAPHICS_CONFIG = "sun.java2d.metal.MTLGraphicsConfig"
+
 /**
  * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
  * and whether it is a release.
@@ -847,6 +849,12 @@ object CrashReporter {
      * open; nothing around `showOpenDialog` can catch it, because it never unwinds that far
      * (Sentry CHURCH-PRESENTER-DESKTOP-9R).
      *
+     * The fourth is the JDK's macOS Metal pipeline dividing by a display's scale while that display
+     * is changing — unplugged, lid closed, waking — when the scale briefly reads zero:
+     * `MTLGraphicsConfig.getMaxTextureWidth` throws an `ArithmeticException` out of a window's
+     * display-changed callback. Only that window's minimum size goes unrefreshed, and the next
+     * display change refreshes it (Sentry CHURCH-PRESENTER-DESKTOP-1HB).
+     *
      * Widen this only for something with the same two properties: a named platform condition, and
      * a thread that demonstrably survives it.
      *
@@ -860,7 +868,8 @@ object CrashReporter {
     internal fun isRecoverableInteraction(throwable: Throwable): Boolean =
         (throwable is IllegalStateException && throwable.thrownFrom { it in CLIPBOARD_PEERS }) ||
             (throwable is InternalError && throwable.thrownFrom { it.startsWith(WINDOWS_SHELL_FOLDER) }) ||
-            (throwable is NullPointerException && throwable.thrownFrom { it.startsWith(FILE_CHOOSER_PANE) })
+            (throwable is NullPointerException && throwable.thrownFrom { it.startsWith(FILE_CHOOSER_PANE) }) ||
+            (throwable is ArithmeticException && throwable.thrownFrom { it == METAL_GRAPHICS_CONFIG })
 
     private fun Throwable.thrownFrom(matches: (className: String) -> Boolean): Boolean =
         stackTrace.any { frame -> matches(frame.className) }
