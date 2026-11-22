@@ -152,10 +152,23 @@ class PicturePartsTest {
     }
 
     @Test
-    fun `a picture too thin to scale is retried and recorded as failed`() = runTest {
+    fun `a picture too thin to scale still gets a thumbnail`() = runTest {
         val thumbs = PictureThumbnails(state, Dispatchers.Unconfined)
         val thin = solidImage(dir, "thin.png", Color.RED, width = 4000, height = 1)
-        thumbs.decodeThumbnail(thin, attempts = 2)
-        assertTrue(thin in state.thumbnailFailures)
+        assertNull(thumbs.decodeThumbnail(thin, attempts = 2))
+        assertTrue(thin !in state.thumbnailFailures)
+    }
+
+    @Test
+    fun `a file the decoder cannot make an image of is retried and recorded as failed`() = runTest {
+        var calls = 0
+        val thumbs = PictureThumbnails(state, Dispatchers.Unconfined) {
+            calls++
+            throw IllegalArgumentException("not a picture")
+        }
+        val file = File(dir, "z.png").apply { writeText("x") }
+        assertNotNull(thumbs.decodeThumbnail(file, attempts = 2))
+        assertEquals(2, calls)
+        assertEquals("not a picture", state.thumbnailFailures[file])
     }
 }
