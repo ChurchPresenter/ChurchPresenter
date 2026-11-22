@@ -53,7 +53,6 @@ import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songs.bundledSongCount
 import org.churchpresenter.appsettings.AutoStartManager
-import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.EventThreadIoMonitor
 import org.churchpresenter.diagnostics.StartupProbe
@@ -227,7 +226,7 @@ fun main(args: Array<String>) {
     // Before anything can touch AWT, the output guard included; see initXlibThreads.
     initXlibThreads()
     if (runAsOutputGuard(args)) return
-    // Started by switchRenderApiAndRelaunch: the copy it replaces still holds the lock until it exits.
+    // Started by a relaunch (render fallback, Settings import): the old copy holds the lock until it exits.
     awaitReplacedProcess(args)
     setLatchedSystemProperties()
     // Off unless the startup benchmark asked for it; see StartupProbe.
@@ -266,19 +265,8 @@ fun main(args: Array<String>) {
     val startupSettings = SettingsManager().loadSettings()
     val offscreenWeb = startupSettings.projectionSettings.offscreenWebEnabled
     if (offscreenWeb) turnOffLinuxVsync()
-    CrashReporter.initialize(
-        startupSettings.analyticsReportingEnabled,
-        // BuildConfig is generated into :composeApp, so :diagnostics is told what this build is
-        // rather than reading it.
-        BuildIdentity(
-            versionDisplay = BuildConfig.VERSION_DISPLAY,
-            appVersion = BuildConfig.APP_VERSION,
-            isRelease = BuildConfig.IS_RELEASE,
-            buildType = BuildConfig.BUILD_TYPE,
-            buildChannel = BuildConfig.BUILD_CHANNEL,
-        ),
-    )
-    CrashReporter.breadcrumb("Application started", category = "lifecycle")
+    startCrashReporting(startupSettings.analyticsReportingEnabled)
+    stopIfInstallDamaged()
     // Every build says where the UI thread was stuck whenever it stops answering, and a release
     // build sends the stall to Sentry -- see UiWatchdog and UiStallReporter. After the reporter is
     // set up, so the first stall it counts can be sent.

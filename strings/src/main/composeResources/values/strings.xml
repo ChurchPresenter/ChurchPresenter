@@ -1229,6 +1229,7 @@
     <string name="settings_exported">Settings exported successfully.</string>
     <string name="settings_export_failed">Failed to export settings.</string>
     <string name="settings_import_failed">Failed to import settings. The file may be invalid.</string>
+    <string name="install_damaged">ChurchPresenter's installation is damaged: some of its files are missing.\n\nPlease reinstall ChurchPresenter. Your settings are kept.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Local File</string>

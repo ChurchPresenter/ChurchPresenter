@@ -607,6 +607,7 @@
     <string name="settings_exported">Configurações exportadas com sucesso.</string>
     <string name="settings_export_failed">Falha ao exportar configurações.</string>
     <string name="settings_import_failed">Falha ao importar configurações. O arquivo pode ser inválido.</string>
+    <string name="install_damaged">A instalação do ChurchPresenter está danificada: alguns de seus arquivos estão faltando.\n\nReinstale o ChurchPresenter. Suas configurações são mantidas.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Arquivo Local</string>

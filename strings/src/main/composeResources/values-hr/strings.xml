@@ -814,6 +814,7 @@
     <string name="settings_exported">Postavke su uspješno izvezene.</string>
     <string name="settings_export_failed">Izvoz postavki nije uspio.</string>
     <string name="settings_import_failed">Uvoz postavki nije uspio. Datoteka je možda neispravna.</string>
+    <string name="install_damaged">Instalacija ChurchPresentera je oštećena: neke njezine datoteke nedostaju.\n\nPonovno instalirajte ChurchPresenter. Vaše postavke ostaju sačuvane.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Lokalna datoteka</string>

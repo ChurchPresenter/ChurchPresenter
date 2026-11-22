@@ -814,6 +814,7 @@
     <string name="settings_exported">Mipangilio imehamishwa.</string>
     <string name="settings_export_failed">Kuhamisha mipangilio kumeshindikana.</string>
     <string name="settings_import_failed">Kuingiza mipangilio kumeshindikana. Faili inaweza kuwa si sahihi.</string>
+    <string name="install_damaged">Usakinishaji wa ChurchPresenter umeharibika: baadhi ya faili zake hazipo.\n\nTafadhali sakinisha upya ChurchPresenter. Mipangilio yako itabaki.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Faili ya Kwenye Kompyuta</string>

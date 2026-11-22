@@ -814,6 +814,7 @@
     <string name="settings_exported">Asetukset vietiin.</string>
     <string name="settings_export_failed">Asetusten vienti epäonnistui.</string>
     <string name="settings_import_failed">Asetusten tuonti epäonnistui. Tiedosto voi olla virheellinen.</string>
+    <string name="install_damaged">ChurchPresenterin asennus on vioittunut: osa sen tiedostoista puuttuu.\n\nAsenna ChurchPresenter uudelleen. Asetuksesi säilyvät.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">Paikallinen tiedosto</string>

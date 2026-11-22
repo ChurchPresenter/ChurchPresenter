@@ -727,6 +727,7 @@
     <string name="settings_exported">Nastavení bylo úspěšně exportováno.</string>
     <string name="settings_export_failed">Export nastavení se nezdařil.</string>
     <string name="settings_import_failed">Import nastavení se nezdařil. Soubor může být neplatný.</string>
+    <string name="install_damaged">Instalace ChurchPresenter je poškozená: některé její soubory chybí.\n\nPřeinstalujte prosím ChurchPresenter. Vaše nastavení zůstanou zachována.</string>
     <string name="schedule_add_files">Přidat soubory…</string>
     <string name="schedule_autoload_notice">Načtení %1$s za %2$s</string>
     <string name="schedule_autoload_notice_now">Načítání %1$s…</string>

@@ -814,6 +814,7 @@
     <string name="settings_exported">Pengaturan berhasil diekspor.</string>
     <string name="settings_export_failed">Gagal mengekspor pengaturan.</string>
     <string name="settings_import_failed">Gagal mengimpor pengaturan. File mungkin tidak valid.</string>
+    <string name="install_damaged">Instalasi ChurchPresenter rusak: beberapa filenya hilang.\n\nSilakan instal ulang ChurchPresenter. Pengaturan Anda tetap tersimpan.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_local_file">File Lokal</string>
