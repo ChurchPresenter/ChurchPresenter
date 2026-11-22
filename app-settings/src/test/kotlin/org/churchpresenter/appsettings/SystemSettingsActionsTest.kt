@@ -178,6 +178,35 @@ class SystemSettingsActionsTest {
         importSettings("Import", "Replace everything?", "Failed", companionServer = null, secrets = secrets, ui = ui)
 
     @Test
+    fun `nothing this window saves after an import replaces the imported file`() = runBlocking<Unit> {
+        val window = SettingsManager()
+        window.saveSettings(AppSettings(songFavoritesPanelHeightDp = 200))
+        val ui = FakeUi(openPath = exportFile(AppSettings(songFavoritesPanelHeightDp = 444)), confirms = listOf(true))
+
+        import(ui)
+        window.saveSettings(AppSettings(songFavoritesPanelHeightDp = 200))
+        SettingsManager.flushAllSaves()
+
+        assertEquals(444, saved().songFavoritesPanelHeightDp)
+        assertEquals(1, ui.restarts)
+    }
+
+    @Test
+    fun `an import that cannot be written says it failed and restarts nothing`() = runBlocking<Unit> {
+        save(AppSettings(songFavoritesPanelHeightDp = 200))
+        SettingsManager().flushSettings()
+        // A folder where the temp file goes: the write fails before settings.json is touched.
+        File(home, ".churchpresenter/settings.json.tmp").mkdirs()
+        val ui = FakeUi(openPath = exportFile(AppSettings(songFavoritesPanelHeightDp = 444)), confirms = listOf(true))
+
+        import(ui)
+
+        assertEquals(listOf("Failed" to SettingsMessageKind.ERROR), ui.messages)
+        assertEquals(0, ui.restarts)
+        assertEquals(200, saved().songFavoritesPanelHeightDp)
+    }
+
+    @Test
     fun `an import the operator cancels at the picker asks nothing`() = runBlocking<Unit> {
         val ui = FakeUi(openPath = null)
 

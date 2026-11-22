@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.appsettings.REPLACING_PID_ARGUMENT
+import org.churchpresenter.appsettings.replacingCommand
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
