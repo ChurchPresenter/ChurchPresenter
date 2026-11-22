@@ -2674,7 +2674,6 @@
     <string name="bible_editor_verses_present">%1$d of %2$d verses</string>
     <string name="bible_editor_missing_one">%1$d verse missing</string>
     <string name="bible_editor_missing_other">%1$d verses missing</string>
-    <string name="bible_editor_complete_matches">Complete, matches %1$s</string>
     <string name="bible_editor_matches">Matches %1$s numbering</string>
     <string name="bible_editor_numbering_kjv">KJV</string>
     <string name="bible_editor_numbering_synodal">Synodal</string>
@@ -2746,7 +2745,6 @@
     <string name="bible_editor_yesterday">Yesterday</string>
     <string name="bible_editor_day_time">%1$s, %2$s</string>
     <string name="bible_editor_missing_title">Missing verses</string>
-    <string name="bible_editor_compared">%1$s compared with %2$s · %3$d books checked</string>
     <string name="bible_editor_numbering_caution">Bibles are numbered in many different ways, so this Bible may have been matched to the wrong numbering and some verses listed here may not really be missing. Double- and triple-check every one against a printed copy of this translation before typing it in.</string>
     <string name="bible_editor_matched">%1$s · %2$s numbering · %3$d books checked</string>
     <string name="bible_editor_checking">Checking…</string>
