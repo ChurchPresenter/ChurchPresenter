@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -34,6 +33,7 @@ import org.churchpresenter.strings.generated.resources.screen_release_all
 import org.churchpresenter.strings.generated.resources.unlock_screen
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** The hold menu for screen [screenIndex]. */
 @Composable
@@ -91,7 +91,7 @@ internal fun ScreenHoldMenuButton(
                 modifier = Modifier.size(13.dp),
             )
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             fun pick(action: () -> Unit) {
                 open = false
                 action()

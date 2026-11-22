@@ -82,7 +82,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.ui.semantics.Role
@@ -103,6 +102,7 @@ import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** A player waiting on the TV with its code, to approve or decline. */
 @Composable
@@ -456,7 +456,7 @@ private fun PlaylistPicker(row: ScreenRowState, onPlay: (String) -> Unit) {
                 modifier = Modifier.size(16.dp),
             )
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             playlists.forEach { playlist ->
                 DropdownMenuItem(
                     text = { Text(playlist.name) },

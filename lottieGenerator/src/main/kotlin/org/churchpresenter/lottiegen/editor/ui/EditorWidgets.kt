@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.lottiegen.ui.components.LottieDropdown
 import org.churchpresenter.lottiegen.ui.components.LottieNumberField
+import org.churchpresenter.theme.components.AppExposedDropdownMenu
 
 /** Small shared widgets for the Style Editor's inspector panels. */
 
@@ -104,7 +105,7 @@ fun <T> OptionDropdown(
             expanded = expanded,
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(display(option)) },

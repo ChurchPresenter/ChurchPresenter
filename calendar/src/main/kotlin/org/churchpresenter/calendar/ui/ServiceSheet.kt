@@ -16,7 +16,6 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.automirrored.filled.EventNote
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -64,6 +63,7 @@ import java.util.Locale
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private val SHEET_WIDTH = 460.dp
 
@@ -341,7 +341,7 @@ private fun DateField(
                 maxLines = 1,
             )
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             MonthPane(
                 month = month,
                 selected = date,

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +38,7 @@ import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.theme.dropdownField
 import org.churchpresenter.theme.keyboardFocusRing
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** The style the field draws its current value in. Shared with [rememberDropdownWidthFor] so a width
  *  measured for a set of options matches the text that will actually be drawn in it. */
@@ -145,7 +145,7 @@ fun DropdownSettingsField(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        DropdownMenu(
+        AppDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             containerColor = MaterialTheme.colorScheme.surface

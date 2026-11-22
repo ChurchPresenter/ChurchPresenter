@@ -57,6 +57,7 @@ import org.churchpresenter.atem.formatAtemFps
 import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.semantic
+import org.churchpresenter.theme.components.AppExposedDropdownMenu
 
 /** The Send to ATEM dialog: mode, slot, clip capacity, and preparation and upload progress. */
 @Composable
@@ -234,7 +235,7 @@ private fun LowerThirdTabScope.AtemSlotPicker() {
                         singleLine = true,
                         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth()
                     )
-                    ExposedDropdownMenu(
+                    AppExposedDropdownMenu(
                         expanded = slotExpanded,
                         onDismissRequest = { slotExpanded = false }
                     ) {

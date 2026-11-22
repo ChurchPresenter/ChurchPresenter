@@ -38,7 +38,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -72,6 +71,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.Desktop
 import java.io.File
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 // =============================================================================
 // Bulk Rename Tab
@@ -376,7 +376,7 @@ fun BulkRenameTab() {
                                         Text(if (lf != null) "${lf.parentFile.name}/${lf.name}" else "", maxLines = 1, style = MaterialTheme.typography.bodySmall)
                                         Spacer(Modifier.width(4.dp)); Icon(Icons.Default.ArrowDropDown, null, Modifier.size(16.dp))
                                     }
-                                    DropdownMenu(expanded = leftExp, onDismissRequest = { leftExp = false }) {
+                                    AppDropdownMenu(expanded = leftExp, onDismissRequest = { leftExp = false }) {
                                         cFiles.forEachIndexed { idx, f ->
                                             DropdownMenuItem(text = { Text("${f.parentFile.name}/${f.name}", style = MaterialTheme.typography.bodySmall) },
                                                 onClick = { renameCompareLeft = idx; leftExp = false }, enabled = idx != renameCompareRight)
@@ -413,7 +413,7 @@ fun BulkRenameTab() {
                                         Text(if (rf != null) "${rf.parentFile.name}/${rf.name}" else "", maxLines = 1, style = MaterialTheme.typography.bodySmall)
                                         Spacer(Modifier.width(4.dp)); Icon(Icons.Default.ArrowDropDown, null, Modifier.size(16.dp))
                                     }
-                                    DropdownMenu(expanded = rightExp, onDismissRequest = { rightExp = false }) {
+                                    AppDropdownMenu(expanded = rightExp, onDismissRequest = { rightExp = false }) {
                                         cFiles.forEachIndexed { idx, f ->
                                             DropdownMenuItem(text = { Text("${f.parentFile.name}/${f.name}", style = MaterialTheme.typography.bodySmall) },
                                                 onClick = { renameCompareRight = idx; rightExp = false }, enabled = idx != renameCompareLeft)

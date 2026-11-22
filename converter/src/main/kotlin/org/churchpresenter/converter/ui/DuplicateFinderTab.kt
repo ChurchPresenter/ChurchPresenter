@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.TextFormat
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -58,6 +57,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.CoroutineScope
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 // =============================================================================
 // Duplicate Finder Tab
@@ -305,7 +305,7 @@ private fun DuplicateFinderState.DuplicateScanSummary() {
                     Spacer(Modifier.width(4.dp))
                     Icon(Icons.Default.ArrowDropDown, null, Modifier.size(18.dp))
                 }
-                DropdownMenu(expanded = keepDropdownExpanded, onDismissRequest = { keepDropdownExpanded = false }) {
+                AppDropdownMenu(expanded = keepDropdownExpanded, onDismissRequest = { keepDropdownExpanded = false }) {
                     songFolders.forEach { folder ->
                         val relativePath = directory?.let {
                             folder.toRelativeString(it).ifEmpty { "." }

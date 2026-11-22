@@ -19,7 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -121,7 +120,7 @@ fun DropdownSelector(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        DropdownMenu(
+        AppDropdownMenu(
             containerColor = MaterialTheme.colorScheme.surface,
             expanded = expanded,
             onDismissRequest = { expanded = false }
@@ -222,7 +221,7 @@ fun DropdownSelector(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        DropdownMenu(
+        AppDropdownMenu(
             containerColor = MaterialTheme.colorScheme.surface,
             expanded = expanded.value,
             onDismissRequest = { expanded.value = false }

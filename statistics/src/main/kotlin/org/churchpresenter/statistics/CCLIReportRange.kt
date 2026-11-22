@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -77,6 +76,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** The report's date range as the From and To pickers show it, and the quick period that set it. */
 @Stable
@@ -359,7 +359,7 @@ private fun DropdownPicker(
             )
             Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEachIndexed { idx, opt ->
                 DropdownMenuItem(
                     text = { Text(opt, style = MaterialTheme.typography.bodySmall) },

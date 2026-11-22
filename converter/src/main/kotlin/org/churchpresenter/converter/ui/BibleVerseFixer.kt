@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,6 +53,7 @@ import org.churchpresenter.bibleformats.SpbRowView
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedButton
 import java.io.File
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private val LineNumberWidth = 52.dp
 private val IdFieldWidth = 150.dp
@@ -242,7 +242,7 @@ private fun BiblePicker(
             Text(selected?.name ?: Strings.verseFixerSelectFile, Modifier.padding(horizontal = 6.dp))
             Icon(Icons.Default.ArrowDropDown, null, Modifier.size(18.dp))
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             bibleFiles.forEach { bible ->
                 DropdownMenuItem(text = { Text(bible.name) }, onClick = { open = false; onChosen(bible) })
             }

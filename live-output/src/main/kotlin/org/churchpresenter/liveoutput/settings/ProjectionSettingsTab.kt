@@ -18,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
@@ -97,6 +96,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private const val HALF_WIDTH = 0.5f
 
@@ -545,7 +545,7 @@ private fun AudioDeviceRow(
                         maxLines = 1
                     )
                 }
-                DropdownMenu(
+                AppDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {

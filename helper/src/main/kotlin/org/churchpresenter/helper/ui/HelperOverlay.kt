@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -112,6 +111,7 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.semantic
 import org.churchpresenter.theme.sunken
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** How long nothing has to be live before the lamp offers a tip. */
 private const val TIP_IDLE_MS = 60_000L
@@ -395,7 +395,7 @@ private fun HeaderMenu(canClear: Boolean, onClear: () -> Unit, onShareChat: (() 
             buttonSize = 30.dp,
             modifier = Modifier.testTag("helper.menu"),
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.helper_clear)) },
                 enabled = canClear,

@@ -23,7 +23,6 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +60,7 @@ import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.hoverOutline
 import org.churchpresenter.sharedui.composables.DropdownSettingsField
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /**
  * A dropdown whose value is also a search box: typing narrows the menu to the options that contain
@@ -205,7 +205,7 @@ fun SearchableDropdownField(
             )
         }
 
-        DropdownMenu(
+        AppDropdownMenu(
             expanded = expanded,
             onDismissRequest = {
                 expanded = false
