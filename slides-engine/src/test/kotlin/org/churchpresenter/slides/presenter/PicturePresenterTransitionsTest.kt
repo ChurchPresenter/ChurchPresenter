@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -21,6 +23,7 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalTestApi::class)
 class PicturePresenterTransitionsTest {
 
     private val screen = Modifier.size(1920.dp, 1080.dp)
@@ -31,6 +34,18 @@ class PicturePresenterTransitionsTest {
     private fun png(): File = File.createTempFile("cp-pic-transition", ".png").apply {
         ImageIO.write(BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB), "png", this)
         deleteOnExit()
+    }
+
+    /**
+     * Waits for [count] presented images, then checks there are exactly that many. The pictures
+     * decode on `Dispatchers.IO`, which waiting for idle does not cover, so a busy machine can
+     * reach the assertion before the second one is on screen.
+     */
+    private fun ComposeUiTest.awaitImages(count: Int) {
+        waitUntil(timeoutMillis = IMAGE_TIMEOUT_MS) {
+            onAllNodesWithContentDescription(presentedImage).fetchSemanticsNodes().size >= count
+        }
+        onAllNodesWithContentDescription(presentedImage).assertCountEquals(count)
     }
 
     @Test
@@ -69,7 +84,7 @@ class PicturePresenterTransitionsTest {
                 )
             }
         }
-        onAllNodesWithContentDescription(presentedImage).assertCountEquals(2)
+        awaitImages(2)
     }
 
     @Test
@@ -80,7 +95,7 @@ class PicturePresenterTransitionsTest {
                 PicturePresenter(imagePath = current, animationType = AnimationType.CROSSFADE)
             }
         }
-        onAllNodesWithContentDescription(presentedImage).assertCountEquals(1)
+        awaitImages(1)
     }
 
     @Test
@@ -97,7 +112,7 @@ class PicturePresenterTransitionsTest {
                 )
             }
         }
-        onAllNodesWithContentDescription(presentedImage).assertCountEquals(2)
+        awaitImages(2)
     }
 
     @Test
@@ -114,7 +129,7 @@ class PicturePresenterTransitionsTest {
                 )
             }
         }
-        onAllNodesWithContentDescription(presentedImage).assertCountEquals(2)
+        awaitImages(2)
     }
 
     @Test
@@ -133,6 +148,8 @@ class PicturePresenterTransitionsTest {
                 }
             }
         }
-        onAllNodesWithContentDescription(presentedImage).assertCountEquals(2)
+        awaitImages(2)
     }
 }
+
+private const val IMAGE_TIMEOUT_MS = 5_000L
