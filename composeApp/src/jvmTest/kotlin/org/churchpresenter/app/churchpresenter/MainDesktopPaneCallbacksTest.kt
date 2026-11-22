@@ -8,6 +8,8 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -128,9 +130,12 @@ class MainDesktopPaneCallbacksTest : MainDesktopComposeHarness() {
             waitForIdle()
             takeLive("A Test Song")
             // Marked LIVE if the song reached the output, "Left off" if it did not: either way the row is the live one.
-            waitUntil("the row is marked", 5_000) {
-                leftOff() || onAllNodesWithTag(LIVE_BADGE_TAG).fetchSemanticsNodes().isNotEmpty()
+            val marked = runCatching {
+                waitUntil("the row is marked", 5_000) {
+                    leftOff() || onAllNodesWithTag(LIVE_BADGE_TAG).fetchSemanticsNodes().isNotEmpty()
+                }
             }
+            if (marked.isFailure) throw AssertionError(screenAfterTakeLive(), marked.exceptionOrNull())
             runOnIdle { manager.setPresentingMode(Presenting.NONE) }
             waitUntil("the row is marked as left off", 5_000) { leftOff() }
         }
@@ -199,6 +204,14 @@ class MainDesktopPaneCallbacksTest : MainDesktopComposeHarness() {
             waitForIdle()
             onNodeWithText("Generate").assertExists()
         }
+    }
+
+    // What was on screen when the row never showed it was live: CI fails here and no local run does.
+    private fun ComposeUiTest.screenAfterTakeLive(): String = buildString {
+        appendLine("The row was never marked live. Roots: ${onAllNodes(isRoot()).fetchSemanticsNodes().size}")
+        val titles = onAllNodesWithText("A Test Song", substring = true).fetchSemanticsNodes().size
+        appendLine("Nodes saying A Test Song: $titles")
+        appendLine(onAllNodesWithTag(SCHEDULE_ROW_CARD_TAG, useUnmergedTree = true).printToString(maxDepth = 6))
     }
 
     private fun ComposeUiTest.leftOff(): Boolean =
