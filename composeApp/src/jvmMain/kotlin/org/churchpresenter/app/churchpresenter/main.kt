@@ -164,23 +164,6 @@ private fun bundleDefaultBible(settings: AppSettings) {
     }
 }
 
-/**
- * Swaps the KJV an earlier build installed for the corrected one bundled now (see
- * [isOldBundledBible]), so the Psalms line up with every other translation without a reinstall.
- */
-private fun replaceOldBundledBible(storageDirectory: String) {
-    try {
-        val installed = File(storageDirectory.ifEmpty { return }, BUNDLED_BIBLE_FILE)
-        if (!isOldBundledBible(installed)) return
-        installed.writeBytes(runBlocking { Res.readBytes("files/bible_samples/$BUNDLED_BIBLE_FILE") })
-        Log.info("Bible", "Replaced the bundled KJV with the corrected one")
-    } catch (e: IOException) {
-        CrashReporter.reportException(e, "Replacing the bundled KJV Bible")
-    } catch (e: MissingResourceException) {
-        CrashReporter.reportException(e, "Replacing the bundled KJV Bible")
-    }
-}
-
 /** System properties the JDK and skiko each read once, on first use, so they are set before anything runs. */
 /**
  * At shutdown, what this run tells the next launch's ping about itself: how long it lasted, how long
@@ -307,7 +290,6 @@ fun main(args: Array<String>) {
     CrashReporter.setConfigTags(GpuInfo.crashTags())
 
     if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)
-    replaceOldBundledBible(startupSettings.bibleSettings.storageDirectory)
 
     val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
     val previousRun = UsageEvents.lastRun()
