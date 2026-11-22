@@ -1,9 +1,7 @@
 package org.churchpresenter.settings
 
 import java.io.File
-import java.nio.file.AtomicMoveNotSupportedException
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.serialization.decodeFromString
 import org.churchpresenter.core.models.io.LatestWriteQueue
 import org.churchpresenter.settings.AppSettings.Companion.CURRENT_SETTINGS_VERSION
@@ -227,36 +225,51 @@ class SettingsManager internal constructor(
     /**
      * Makes [settings] the current settings at once and writes them to disk on the settings writer,
      * off the caller's thread: encoding and stripping the document takes seconds on a slow machine.
-     * A newer save replaces one not yet written. [flushSettings] waits for the write.
+     * A newer save replaces one not yet written. [flushSettings] waits for the write. Does nothing
+     * once [saveSettingsAndHold] has written this file.
      */
     fun saveSettings(settings: AppSettings) {
+        if (settingsFile.absolutePath in heldFiles) return
         cachedSettings = settings
-        writer.submit(settingsFile) { writeSettings(settings) }
+        writer.submit(settingsFile) { writeSettingsOrNothing(settings) }
     }
 
     /** Blocks until every save so far is on disk. Never call it on the event thread. */
     fun flushSettings() = writer.flush(settingsFile)
 
-    private fun writeSettings(settings: AppSettings) {
-        try {
-            val json = stripProfileOwnedStyling(settingsJson.encodeToString(settings))
-            // Write to a temp file first, then atomically swap it into place — a process kill
-            // mid-write (e.g. during the self-updater's exit race) leaves the temp file
-            // incomplete but never touches the live settings.json.
-            settingsTmpFile.writeText(json)
-            try {
-                Files.move(
-                    settingsTmpFile.toPath(), settingsFile.toPath(),
-                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING,
-                )
-            } catch (_: AtomicMoveNotSupportedException) {
-                // Some network and FUSE filesystems cannot promise atomicity; a plain replace is
-                // still a rename rather than a truncate-in-place.
-                Files.move(settingsTmpFile.toPath(), settingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            }
-        } catch (_: Exception) {
-            // Silently handle error
+    /**
+     * Writes [settings] before returning, and from then on ignores every other save of this file in
+     * this process: for a document the app restarts on, like an import. The window still holds the
+     * settings it started with, and any save of those -- or the writer's flush at exit -- would put
+     * the old document back over the new one. Throws when the file cannot be written, so the caller
+     * can say so rather than restart into the old file. Never call it on the event thread.
+     */
+    fun saveSettingsAndHold(settings: AppSettings) {
+        var failure: Exception? = null
+        writer.submit(settingsFile) {
+            failure = runCatching { writeSettings(settings) }.exceptionOrNull() as? Exception
         }
+        writer.flush(settingsFile)
+        failure?.let { throw it }
+        cachedSettings = settings
+        heldFiles += settingsFile.absolutePath
+    }
+
+    private fun writeSettingsOrNothing(settings: AppSettings) {
+        try {
+            writeSettings(settings)
+        } catch (_: Exception) {
+            // The next save tries again; the file on disk is still the last whole one.
+        }
+    }
+
+    private fun writeSettings(settings: AppSettings) {
+        val json = stripProfileOwnedStyling(settingsJson.encodeToString(settings))
+        // Write to a temp file first, then atomically swap it into place — a process kill
+        // mid-write (e.g. during the self-updater's exit race) leaves the temp file
+        // incomplete but never touches the live settings.json.
+        settingsTmpFile.writeText(json)
+        replaceWithRetries(settingsTmpFile, settingsFile)
     }
 
     companion object {
@@ -266,6 +279,9 @@ class SettingsManager internal constructor(
          * shutdown hook writes it.
          */
         fun flushAllSaves() = LatestWriteQueue.shared.flushAll()
+
+        /** Settings files [saveSettingsAndHold] wrote, by absolute path: no other save may follow. */
+        private val heldFiles: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
         /**
          * The band templates folder under [appDataDir], for a caller with no manager at hand —
