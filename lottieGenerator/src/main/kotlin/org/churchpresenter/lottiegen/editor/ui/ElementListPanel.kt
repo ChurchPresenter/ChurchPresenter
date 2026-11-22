@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Rectangle
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.outlined.ChangeHistory
 import androidx.compose.material.icons.outlined.Photo
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
@@ -53,6 +52,7 @@ import org.churchpresenter.lottiegen.spec.PolygonElement
 import org.churchpresenter.lottiegen.spec.RectElement
 import org.churchpresenter.lottiegen.spec.TextElement
 import org.churchpresenter.lottiegen.ui.Strings
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /**
  * The layer stack: elements listed top → bottom in z-order (first = topmost layer),
@@ -89,7 +89,7 @@ private fun AddElementButton(state: EditorState) {
                 Text(Strings.editorAddElement)
             }
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             for (kind in NewElementKind.entries) {
                 DropdownMenuItem(
                     text = { Text(newElementLabel(kind)) },

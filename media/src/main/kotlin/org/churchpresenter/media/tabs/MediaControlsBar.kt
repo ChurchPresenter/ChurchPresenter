@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DropdownMenu
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -77,6 +76,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlinx.coroutines.launch
 import androidx.compose.material3.IconButtonColors
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** Transport, loop, scale, subtitles and volume. */
 @Composable
@@ -357,7 +357,7 @@ private fun MediaTabScope.MediaSubtitlesButton(
                 )
             }
         }
-        DropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
+        AppDropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
             SubtitleMenuItems(
                 state = SubtitleMenuState(
                     subtitlesVisible = viewModel.subtitlesVisible,

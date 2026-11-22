@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.UnfoldMore
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,6 +50,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyButton
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** The value the Custom entry stands for among the preset names. */
 private const val CUSTOM = "CUSTOM"
@@ -125,7 +125,7 @@ internal fun PreviewShapeMenu(
                 )
                 Icon(Icons.Filled.UnfoldMore, contentDescription = null, modifier = Modifier.size(14.dp))
             }
-            DropdownMenu(
+            AppDropdownMenu(
                 expanded = open,
                 onDismissRequest = { open = false },
                 containerColor = MaterialTheme.colorScheme.surface,

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
@@ -25,6 +24,7 @@ import org.churchpresenter.strings.generated.resources.projection_merged_by_prof
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** How wide every output profile picker on the Projection tab is: room for a profile's name. */
 internal val OUTPUT_PROFILE_PICKER_WIDTH = 160.dp
@@ -83,7 +83,7 @@ internal fun OutputProfilePicker(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             if (onDontUse != null) {
                 DropdownMenuItem(
                     text = {

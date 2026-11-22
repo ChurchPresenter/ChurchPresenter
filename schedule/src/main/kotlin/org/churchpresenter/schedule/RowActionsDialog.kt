@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +56,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /**
  * Edits what a schedule row does when it goes live (`docs/SHOW_CONTROL.md`, Cue actions): a list of
@@ -248,7 +248,7 @@ private fun AddActionButton(onAdd: (ActionKind) -> Unit) {
         ) {
             Text(stringResource(Res.string.row_actions_add))
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             ActionKind.entries.forEach { kind ->
                 DropdownMenuItem(
                     text = { Text(stringResource(kind.label)) },

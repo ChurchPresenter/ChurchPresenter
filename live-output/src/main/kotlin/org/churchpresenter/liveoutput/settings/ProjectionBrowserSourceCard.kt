@@ -21,7 +21,6 @@ import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import org.churchpresenter.theme.components.RaisedCheckbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -74,6 +73,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.withBrowserSourceOutput
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.SystemClipboard
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp
@@ -412,7 +412,7 @@ private fun FpsCell(output: ScreenAssignment, update: (ScreenAssignment) -> Unit
                 maxLines = 1
             )
         }
-        DropdownMenu(
+        AppDropdownMenu(
             expanded = fpsExpanded,
             onDismissRequest = { fpsExpanded = false }
         ) {

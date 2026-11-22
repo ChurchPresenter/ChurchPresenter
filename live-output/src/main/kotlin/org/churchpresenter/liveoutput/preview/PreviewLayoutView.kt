@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,6 +57,7 @@ import org.churchpresenter.settings.without
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Cursor
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private val DIVIDER = 6.dp
 private val AREA_GAP = 4.dp
@@ -266,7 +266,7 @@ private fun OutputPicker(
                 style = MaterialTheme.typography.labelMedium,
             )
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.preview_layout_empty_area)) },
                 onClick = {

@@ -56,6 +56,7 @@ import org.churchpresenter.lottiegen.ui.components.SliderWithLabel
 import org.churchpresenter.lottiegen.ui.components.SubtleButton
 import javax.swing.SwingUtilities
 import org.churchpresenter.lottiegen.ui.components.ScrollingMenuItems
+import org.churchpresenter.theme.components.AppExposedDropdownMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,7 +157,7 @@ internal fun StyleLayoutSection(viewModel: LottieGenState) {
                 )
                 // Wider than its field, which shares the row with Alignment: a thumbnail and the
                 // style's name side by side do not fit in half the panel.
-                ExposedDropdownMenu(
+                AppExposedDropdownMenu(
                     expanded = styleExpanded,
                     onDismissRequest = { styleExpanded = false },
                     matchAnchorWidth = false,
@@ -192,7 +193,7 @@ internal fun StyleLayoutSection(viewModel: LottieGenState) {
                     modifier = Modifier.fillMaxWidth()
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 )
-                ExposedDropdownMenu(alignExpanded, { alignExpanded = false }) {
+                AppExposedDropdownMenu(alignExpanded, { alignExpanded = false }) {
                     alignmentLabels.forEach { (id, label) ->
                         DropdownMenuItem(
                             text = { Text(label) },
@@ -264,7 +265,7 @@ internal fun LogoSection(viewModel: LottieGenState) {
                 expanded = logoExpanded,
                 modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
             )
-            ExposedDropdownMenu(logoExpanded, { logoExpanded = false }) {
+            AppExposedDropdownMenu(logoExpanded, { logoExpanded = false }) {
                 DropdownMenuItem({ Text(Strings.logoNone) }, { viewModel.clearLogo(); logoExpanded = false })
                 viewModel.availableLogos.forEach { logo ->
                     DropdownMenuItem({ Text(logo) }, { viewModel.selectLogo(logo); logoExpanded = false })

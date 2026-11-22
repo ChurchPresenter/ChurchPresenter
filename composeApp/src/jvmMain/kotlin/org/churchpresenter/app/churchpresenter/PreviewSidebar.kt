@@ -20,7 +20,6 @@ import org.churchpresenter.strings.generated.resources.tooltip_clear_layers
 import androidx.compose.material.icons.outlined.LayersClear
 import androidx.compose.material.icons.outlined.FormatClear
 import androidx.compose.material.icons.outlined.TextFields
-import androidx.compose.material3.DropdownMenu
 import org.churchpresenter.liveoutput.setPropOn
 import org.churchpresenter.liveoutput.propsOnAir
 import org.churchpresenter.strings.generated.resources.props_picture
@@ -98,6 +97,7 @@ import androidx.compose.foundation.layout.size
 import org.churchpresenter.dialogs.LiveActionButton
 import org.churchpresenter.dialogs.LiveTool
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /**
  * A Companion surface drawn in one of the main screen's sidebars: the connection it shows and where.
@@ -482,7 +482,7 @@ private fun ClearLayersButton(
             onClick = { menuOpen = true },
             modifier = Modifier.testTag(CLEAR_LAYERS_BUTTON_TAG),
         )
-        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+        AppDropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             ClearLayersMenuItems(
                 groups = appSettings.clearGroups,
                 onAir = presenterManager.program.value.keys,

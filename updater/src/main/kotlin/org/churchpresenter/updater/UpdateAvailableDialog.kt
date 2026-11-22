@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,6 +53,7 @@ import java.io.InputStream
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /**
  * The temp-file suffix for a downloaded installer, inferred from the release asset's URL so the
@@ -127,7 +127,7 @@ private fun UpdateIntervalDropdown(
             Text(updateIntervalLabel(selected), style = MaterialTheme.typography.bodySmall)
             Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             UpdateCheckInterval.entries.forEach { interval ->
                 DropdownMenuItem(
                     text = { Text(updateIntervalLabel(interval), style = MaterialTheme.typography.bodySmall) },

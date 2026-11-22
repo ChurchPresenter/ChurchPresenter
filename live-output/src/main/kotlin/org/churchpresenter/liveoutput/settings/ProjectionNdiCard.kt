@@ -18,7 +18,6 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -105,6 +104,7 @@ import kotlin.io.path.absolutePathString
 import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp
@@ -612,7 +612,7 @@ private fun NdiModePicker(
                 )
             }
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             modes.forEach { (mode, label) ->
                 DropdownMenuItem(
                     text = { Text(label, style = MaterialTheme.typography.bodySmall) },
@@ -678,7 +678,7 @@ internal fun LabeledDropdownCell(
                 state = rememberTooltipState(),
             ) { button() }
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { (optionLabel, optionValue) ->
                 DropdownMenuItem(
                     text = { Text(optionLabel, style = MaterialTheme.typography.bodySmall) },

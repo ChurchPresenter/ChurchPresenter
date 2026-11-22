@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +41,7 @@ import org.churchpresenter.strings.generated.resources.signage_pictures_and_vide
 import org.churchpresenter.theme.components.RaisedButton
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.AppDropdownMenu
 
 /** Add a link, a single picture or video, a rotation, or a folder, the file and folder from anywhere. */
 @Composable
@@ -62,7 +62,7 @@ internal fun AddPlaylistMenu(state: SignageFolderState, actions: FolderActions) 
             Spacer(Modifier.width(4.dp))
             Icon(Icons.Filled.ExpandMore, contentDescription = null, modifier = Modifier.size(16.dp))
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(
                 text = { AddItemText(Res.string.signage_add_link, Res.string.signage_add_link_desc) },
                 leadingIcon = { KindTile(TileKind.WEB, size = 32.dp) },
