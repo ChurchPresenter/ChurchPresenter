@@ -1,5 +1,7 @@
 package org.churchpresenter.appsettings
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.server.CompanionServer
@@ -120,11 +122,8 @@ internal object SwingSettingsActionUi : SettingsActionUi {
     private fun relaunch() {
         // The settings just saved must be on disk before the new process reads them.
         SettingsManager.flushAllSaves()
-        val javaBin = System.getProperty("java.home") + "/bin/java"
-        val command = ProcessHandle.current().info().command().orElse(javaBin)
-        val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
         try {
-            ProcessBuilder(listOf(command) + args.toList()).start()
+            ProcessBuilder(relaunchCommand()).start()
         } catch (_: Exception) {}
         Runtime.getRuntime().exit(0)
     }
@@ -191,10 +190,16 @@ internal suspend fun importSettings(
         // older schema, and decoding it directly would drop every field a migration converts.
         // Keep this machine's own relay pairing: an older export may still carry another machine's key
         // and tokens, and adopting them would make two desktops answer as one.
-        val imported = settingsManager.migrateAndDecode(file.readText())
+        val imported = withContext(Dispatchers.IO) { settingsManager.migrateAndDecode(file.readText()) }
         // A file with passwords of its own asks whose to keep; one without keeps this computer's
         val useFileSecrets = if (imported.hasSecrets) askUseFileSecrets(title, secrets, ui) ?: return else false
-        settingsManager.saveSettings(importedSettings(imported, settingsManager.loadSettings(), useFileSecrets))
+        // On disk before the restart, and nothing of this window's after it: a write that fails says so
+        // here, rather than the app coming back on the settings it had.
+        withContext(Dispatchers.IO) {
+            settingsManager.saveSettingsAndHold(
+                importedSettings(imported, settingsManager.loadSettings(), useFileSecrets),
+            )
+        }
         ui.restart(companionServer)
     } catch (_: Exception) {
         ui.showMessage(failedMsg, title, SettingsMessageKind.ERROR)

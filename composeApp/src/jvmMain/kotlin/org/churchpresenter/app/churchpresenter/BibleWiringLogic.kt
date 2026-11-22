@@ -156,13 +156,6 @@ internal fun parseVerseRangeEnd(verseRange: String, verseNumber: Int): Int? {
 }
 
 /**
- * The book id for a resolved book index, or 0 when the book was not found or the bible cannot name
- * it. Zero is the "no book" value the verse payload carries.
- */
-internal fun resolveBookIdOrZero(bookIndex: Int, bookIdAt: (Int) -> Int?): Int =
-    if (bookIndex >= 0) bookIdAt(bookIndex) ?: 0 else 0
-
-/**
  * Whether a bible announced by the primary invalidates the cached copy. Either signal counts —
  * primary or secondary — because a full replica re-downloads both.
  */

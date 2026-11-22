@@ -337,6 +337,17 @@ class CrashReporterStartupTest {
         assertEquals(EXIT_CODE_FATAL_CRASH, exitCode, "a distinct code from the clean-exit 0")
     }
 
+    @Test
+    fun `a crash with no stack trace still ends the process and leaves its log`() {
+        startUp(analyticsReportingEnabled = false)
+        val handler = assertNotNull(handler)
+
+        handler.uncaughtException(Thread.currentThread(), NullPointerException().apply { stackTrace = emptyArray() })
+
+        assertEquals(EXIT_CODE_FATAL_CRASH, exitCode)
+        assertEquals(1, crashDir.listFiles()?.count { it.name.startsWith("crash_") })
+    }
+
     /** An exception thrown from the AWT clipboard peer, as Windows produces it. */
     private fun clipboardRefusal() = IllegalStateException("cannot open system clipboard").apply {
         stackTrace = arrayOf(

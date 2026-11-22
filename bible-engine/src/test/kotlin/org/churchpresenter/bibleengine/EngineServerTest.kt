@@ -125,6 +125,20 @@ class EngineServerTest {
     }
 
     @Test
+    fun `a refused start says why it was refused`() {
+        assertNull(EngineServer.start(sttUrl = "", bibleRoot = "", port = 39_956))
+
+        assertEquals("bible root not configured", EngineServer.lastFailure)
+    }
+
+    @Test
+    fun `a bible root with no translation names the folder in its reason`() {
+        assertNull(EngineServer.start(sttUrl = "", bibleRoot = temp.absolutePath, port = 39_958))
+
+        assertEquals("no translations loaded from ${temp.absolutePath}", EngineServer.lastFailure)
+    }
+
+    @Test
     fun `a bible root holding no usable translation is refused`() {
         // A truncated download must not register as a Bible; the loader wants ten verses.
         File(temp, "ENG_SHORT.spb").writeText(

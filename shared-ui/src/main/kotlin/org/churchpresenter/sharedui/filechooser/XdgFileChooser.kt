@@ -302,7 +302,17 @@ internal fun parseResponse(params: Array<out Any?>): List<String>? {
 }
 
 /** The portal answers with `file://` URIs; callers deal in paths. */
-internal fun toPaths(uris: List<String>?): List<Path>? = uris?.map { Path.of(URI.create(it)) }
+internal fun toPaths(uris: List<String>?): List<Path>? = uris?.map(::uriToPath)
+
+/**
+ * One portal URI as a path. A portal that does not percent-encode a space in the name hands back a
+ * URI [URI.create] refuses, so the text after `file://` is the path as it stands.
+ */
+internal fun uriToPath(uri: String): Path = try {
+    Path.of(URI.create(uri))
+} catch (_: IllegalArgumentException) {
+    Path.of(uri.removePrefix("file://"))
+}
 
 private fun String.asAnyCaseRegex(): String {
     val sb = StringBuilder()

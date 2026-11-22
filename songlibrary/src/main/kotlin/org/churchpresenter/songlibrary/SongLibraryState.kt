@@ -16,6 +16,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.Collections
+import java.util.IdentityHashMap
 
 /** Which columns the grid shows. The title is not among them: a row without it is unreadable. */
 val OPTIONAL_COLUMNS: List<SongField> = listOf(
@@ -157,8 +159,25 @@ class SongLibraryState(
     /** What is wrong with each song's languages, by source file, for the songs that have anything. */
     val translationProblems: Map<String, TranslationProblems> by derivedStateOf {
         songs.mapNotNull { song ->
-            TranslationComparison.problemsOf(song).takeUnless { it.isEmpty }?.let { song.sourceFile to it }
+            problemsFor(song).takeUnless { it.isEmpty }?.let { song.sourceFile to it }
         }.toMap()
+    }
+
+    /**
+     * Each song's [TranslationProblems], by the song instance. Comparing a song's languages runs a
+     * handful of regexes per line, so the whole library is worked out on the IO thread as it loads
+     * ([primeProblems]); after that an edit replaces one song and costs one comparison, instead of
+     * the first row drawn after the edit working the whole library out on the event thread.
+     */
+    private val problemCache: MutableMap<SongItem, TranslationProblems> =
+        Collections.synchronizedMap(IdentityHashMap())
+
+    private fun problemsFor(song: SongItem): TranslationProblems =
+        problemCache[song] ?: TranslationComparison.problemsOf(song).also { problemCache[song] = it }
+
+    private fun primeProblems(loaded: List<SongItem>) {
+        problemCache.clear()
+        loaded.forEach { problemsFor(it) }
     }
     val changedCount: Int get() = edits.changed.size
 
@@ -174,7 +193,7 @@ class SongLibraryState(
     suspend fun reloadAsync(io: CoroutineDispatcher = Dispatchers.IO) {
         isLoading = true
         try {
-            adopt(withContext(io) { library.load() })
+            adopt(withContext(io) { library.load().also(::primeProblems) })
         } finally {
             isLoading = false
         }
@@ -261,7 +280,7 @@ class SongLibraryState(
         if (outcome.errors.isEmpty()) edits.markSaved()
         if (outcome.saved > 0) onUsage(SongLibraryUsage.SONGS_SAVED, outcome.saved)
         // A rename moves the file the edits are keyed on, so what is on screen has to be re-read.
-        adopt(withContext(io) { library.load() })
+        adopt(withContext(io) { library.load().also(::primeProblems) })
         lastOutcome = outcome
         outcome
     }

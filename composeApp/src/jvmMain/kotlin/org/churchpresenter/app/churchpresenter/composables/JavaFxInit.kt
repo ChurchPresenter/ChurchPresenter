@@ -10,7 +10,7 @@ import org.churchpresenter.diagnostics.Log
  * Still needed for WebView (WebsitePresenter).
  */
 internal fun isJavaFxScreenReconfigRace(throwable: Throwable): Boolean =
-    throwable is NullPointerException &&
+    (throwable is NullPointerException || throwable is IllegalArgumentException) &&
         throwable.stackTrace.any {
             it.className.startsWith("com.sun.glass.ui.Screen") ||
                 it.className.startsWith("com.sun.javafx.tk.quantum.QuantumToolkit")

@@ -1,8 +1,10 @@
 package org.churchpresenter.core.models.songs
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import org.churchpresenter.core.models.io.writeTextAtomically
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -383,22 +385,33 @@ class SongFileParser {
         }
         private val cacheFile = File(System.getProperty("user.home"), ".churchpresenter/song_cache.json")
 
-        private fun readCacheFor(storageDirectory: String): SongCache? = try {
-            cacheJson.decodeFromString<SongCache>(cacheFile.readText(StandardCharsets.UTF_8))
+        /**
+         * The cache for [storageDirectory], or null when there is none, it is for another folder or
+         * it cannot be read. Decoded straight from the file: a large library's cache is tens of
+         * megabytes, and reading it into a String first holds it twice.
+         */
+        @OptIn(ExperimentalSerializationApi::class)
+        fun readSongCache(storageDirectory: String): SongCache? = try {
+            cacheFile.inputStream().buffered().use { cacheJson.decodeFromStream<SongCache>(it) }
                 .takeIf { it.storageDirectory == storageDirectory }
         } catch (_: Exception) {
             null
         }
 
-        fun loadSongCache(storageDirectory: String): List<SongItem>? {
-            val cache = readCacheFor(storageDirectory) ?: return null
-            // Prefer cachedSongs (with timestamps); fall back to legacy songs list
-            return if (cache.cachedSongs.isNotEmpty()) cache.cachedSongs.map { it.song }
+        /** The songs [cache] holds — its timestamped entries, or the legacy list — or null when empty. */
+        fun songsIn(cache: SongCache): List<SongItem>? =
+            if (cache.cachedSongs.isNotEmpty()) cache.cachedSongs.map { it.song }
             else cache.songs.ifEmpty { null }
-        }
+
+        /** [cache]'s timestamped entries by source file, for [loadSongsFromDirectory] to reuse. */
+        fun songMapIn(cache: SongCache?): Map<String, CachedSong> =
+            cache?.cachedSongs?.associateBy { it.song.sourceFile } ?: emptyMap()
+
+        fun loadSongCache(storageDirectory: String): List<SongItem>? =
+            readSongCache(storageDirectory)?.let(::songsIn)
 
         fun loadCachedSongMap(storageDirectory: String): Map<String, CachedSong> =
-            readCacheFor(storageDirectory)?.cachedSongs?.associateBy { it.song.sourceFile } ?: emptyMap()
+            songMapIn(readSongCache(storageDirectory))
 
         fun saveSongCache(storageDirectory: String, cachedSongs: List<CachedSong>) {
             try {

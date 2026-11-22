@@ -27,6 +27,10 @@ private const val DSN_KEY_VISIBLE_CHARS = 6
 private const val MIN_SCRUBBED_NAME_LENGTH = 3
 private const val RELEASE_SAMPLE_RATE = 0.2
 
+// The Sentry context a stackless crash carries, and how much of the live thread list it keeps.
+private const val CRASHED_THREAD_CONTEXT = "crashed_thread"
+private const val MAX_LIVE_THREADS_CHARS = 2_000
+
 /**
  * Exit code for a fatal uncaught exception, once it has been logged and flushed to Sentry.
  *
@@ -53,6 +57,8 @@ private const val WINDOWS_SHELL_FOLDER = "sun.awt.shell.Win32ShellFolder"
 
 /** The JDK's file chooser list, whose focus listener repaints a selected row that has no cell. */
 private const val FILE_CHOOSER_PANE = "sun.swing.FilePane"
+
+private const val METAL_GRAPHICS_CONFIG = "sun.java2d.metal.MTLGraphicsConfig"
 
 /**
  * What the reporter says this build is: the version it stamps on a crash log and a Sentry event,
@@ -238,6 +244,9 @@ object CrashReporter {
                 throwable.printStackTrace()
                 return@setUncaughtHandler
             }
+            stacklessCrashContext(throwable, thread, Thread.getAllStackTraces().keys)?.let {
+                setContext(CRASHED_THREAD_CONTEXT, it)
+            }
             recordFatal(throwable, context = "Thread: ${thread.name}")
             // The JVM's own default (print to stderr) does not end the process, and every output
             // this app draws — the presenter windows, DeckLink, and the NDI/Browser Source scenes
@@ -260,8 +269,10 @@ object CrashReporter {
         val lastKind = takeLastCrashKind()
         val (count, disable) = evaluateCrashEscalation(didCrashLastRun, readCrashCount(), lastKind)
         // A Java crash was reported as it happened (it left a kind); anything else ended under the app.
+        // Only a packaged build's: a developer's run stopped from the IDE ends the same way, and was
+        // the one sender of "Previous run ended without closing" from a local build.
         if (previousStartMs != null && lastKind == null && analyticsReportingEnabled) {
-            reportUncleanExit(previousStartMs)
+            if (build.isRelease) reportUncleanExit(previousStartMs)
         }
         consecutiveCrashes = count
         writeCrashCount(count)
@@ -815,6 +826,26 @@ object CrashReporter {
     }
 
     /**
+     * What is known of a thread that died of an exception with no stack trace -- one thrown from
+     * native code, or on a thread a library started without a name ("Thread-19") -- so the report
+     * can point at its source: the thread's class, whether it is a daemon, its group, and the names
+     * of the threads alive beside it. Null when the exception has frames, which say all of that.
+     */
+    internal fun stacklessCrashContext(
+        throwable: Throwable,
+        thread: Thread,
+        live: Collection<Thread>,
+    ): Map<String, Any>? {
+        if (throwable.stackTrace.isNotEmpty()) return null
+        return mapOf(
+            "class" to thread.javaClass.name,
+            "daemon" to thread.isDaemon,
+            "group" to (thread.threadGroup?.name ?: "none"),
+            "live_threads" to live.map { it.name }.sorted().joinToString(", ").take(MAX_LIVE_THREADS_CHARS),
+        )
+    }
+
+    /**
      * Whether [throwable] is a platform refusal the event thread carries straight on from, so
      * ending the process over it would be the more damaging of the two outcomes.
      *
@@ -845,6 +876,12 @@ object CrashReporter {
      * open; nothing around `showOpenDialog` can catch it, because it never unwinds that far
      * (Sentry CHURCH-PRESENTER-DESKTOP-9R).
      *
+     * The fourth is the JDK's macOS Metal pipeline dividing by a display's scale while that display
+     * is changing — unplugged, lid closed, waking — when the scale briefly reads zero:
+     * `MTLGraphicsConfig.getMaxTextureWidth` throws an `ArithmeticException` out of a window's
+     * display-changed callback. Only that window's minimum size goes unrefreshed, and the next
+     * display change refreshes it (Sentry CHURCH-PRESENTER-DESKTOP-1HB).
+     *
      * Widen this only for something with the same two properties: a named platform condition, and
      * a thread that demonstrably survives it.
      *
@@ -858,7 +895,8 @@ object CrashReporter {
     internal fun isRecoverableInteraction(throwable: Throwable): Boolean =
         (throwable is IllegalStateException && throwable.thrownFrom { it in CLIPBOARD_PEERS }) ||
             (throwable is InternalError && throwable.thrownFrom { it.startsWith(WINDOWS_SHELL_FOLDER) }) ||
-            (throwable is NullPointerException && throwable.thrownFrom { it.startsWith(FILE_CHOOSER_PANE) })
+            (throwable is NullPointerException && throwable.thrownFrom { it.startsWith(FILE_CHOOSER_PANE) }) ||
+            (throwable is ArithmeticException && throwable.thrownFrom { it == METAL_GRAPHICS_CONFIG })
 
     private fun Throwable.thrownFrom(matches: (className: String) -> Boolean): Boolean =
         stackTrace.any { frame -> matches(frame.className) }

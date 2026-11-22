@@ -353,6 +353,9 @@ compose.desktop {
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
+            // Keep the stack of an exception thrown over and over: after enough throws the JVM reuses
+            // one without a trace, and a Sentry report of it (CHURCH-PRESENTER-DESKTOP-PE) is empty.
+            "-XX:-OmitStackTraceInFastThrow",
             // Rendering hints (renderApi is set per-platform in the blocks below / jvmArgs above)
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",

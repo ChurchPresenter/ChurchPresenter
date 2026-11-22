@@ -5,10 +5,10 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.core.models.songs.SongField
 import org.churchpresenter.songlibrary.SongLibraryState
 
 /**
@@ -37,81 +38,102 @@ import org.churchpresenter.songlibrary.SongLibraryState
  * something is happening; this says what is coming.
  */
 @Composable
-internal fun SkeletonTable(state: SongLibraryState, width: Dp) {
+internal fun SkeletonTable(
+    state: SongLibraryState,
+    frozen: List<SongField>,
+    scrolling: List<SongField>,
+    scroll: ScrollState,
+) {
     val sweep = rememberInfiniteTransition(label = "skeleton").animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(SKELETON_SWEEP_MS, easing = LinearEasing)),
         label = "sweep",
     )
-    Column(Modifier.width(width)) {
-        repeat(SKELETON_ROWS) { row -> SkeletonRow(state, width, sweep, row) }
+    // The sweep crosses the table as laid end to end, whichever part of it is scrolled into view.
+    val width = TICK_WIDTH + PROBLEM_WIDTH + columnsWidth(frozen + scrolling) +
+        durationColumnWidth(state.showDuration) + orderColumnWidth(state.showOrder) + ACTIONS_WIDTH
+    Column(Modifier.fillMaxWidth()) {
+        repeat(SKELETON_ROWS) { row ->
+            SkeletonRow(state, SkeletonSweep(sweep, width), frozen, scrolling, scroll, row)
+        }
     }
 }
 
+/** The highlight's position, 0 to 1, and the width of the table it crosses. */
+private class SkeletonSweep(val progress: State<Float>, val tableWidth: Dp)
+
 @Composable
-private fun SkeletonRow(state: SongLibraryState, width: Dp, sweep: State<Float>, row: Int) {
+private fun SkeletonRow(
+    state: SongLibraryState,
+    sweep: SkeletonSweep,
+    frozen: List<SongField>,
+    scrolling: List<SongField>,
+    scroll: ScrollState,
+    row: Int,
+) {
     val scheme = MaterialTheme.colorScheme
-    Column(Modifier.width(width)) {
-        Row(
-            Modifier.fillMaxWidth().height(LibraryMetrics.rowHeight).background(scheme.background),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // Every bar is told where it sits across the table, so the highlight crosses the whole
-            // row as one sweep rather than restarting inside each cell.
-            var offset = 0.dp
-            Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
-                SkeletonBar(15.dp, sweep, offset + 10.dp, width)
-            }
-            offset += TICK_WIDTH
-            Spacer(Modifier.width(PROBLEM_WIDTH))
-            offset += PROBLEM_WIDTH
-            state.visibleColumns.forEach { field ->
-                val cell = field.width()
-                Box(Modifier.width(cell).padding(horizontal = 9.dp), contentAlignment = Alignment.CenterStart) {
-                    SkeletonBar((cell - 18.dp) * barFraction(row, field.ordinal), sweep, offset + 9.dp, width)
+    // Every bar is told where it sits across the table, so the highlight crosses the whole row as
+    // one sweep rather than restarting inside each cell.
+    val scrollingStart = TICK_WIDTH + PROBLEM_WIDTH + columnsWidth(frozen)
+    Column(Modifier.fillMaxWidth()) {
+        TableLine(
+            scroll,
+            Modifier.height(LibraryMetrics.rowHeight).background(scheme.background),
+            frozen = {
+                Box(Modifier.width(TICK_WIDTH), contentAlignment = Alignment.Center) {
+                    SkeletonBar(15.dp, sweep, 10.dp)
                 }
-                Box(
-                    Modifier.width(1.dp)
-                        .height(LibraryMetrics.rowHeight)
-                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
-                )
-                offset += cell + 1.dp
-            }
-            if (state.showDuration) {
-                Box(
-                    Modifier.width(DURATION_WIDTH).padding(horizontal = 9.dp),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    SkeletonBar(DURATION_BAR, sweep, offset + 9.dp, width)
+                Spacer(Modifier.width(PROBLEM_WIDTH))
+                SkeletonCells(frozen, sweep, TICK_WIDTH + PROBLEM_WIDTH, row)
+            },
+            scrolling = {
+                SkeletonCells(scrolling, sweep, scrollingStart, row)
+                if (state.showDuration) {
+                    Box(
+                        Modifier.width(DURATION_WIDTH).padding(horizontal = 9.dp),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        SkeletonBar(DURATION_BAR, sweep, scrollingStart + columnsWidth(scrolling) + 9.dp)
+                    }
+                    ColumnDivider()
                 }
-                Box(
-                    Modifier.width(1.dp)
-                        .height(LibraryMetrics.rowHeight)
-                        .background(scheme.onSurface.copy(alpha = HAIRLINE_ALPHA))
-                )
-            }
-            if (state.showOrder) Spacer(Modifier.width(orderColumnWidth(true)))
-            Spacer(Modifier.width(ACTIONS_WIDTH))
-        }
+                if (state.showOrder) Spacer(Modifier.width(orderColumnWidth(true)))
+            },
+            actions = { Spacer(Modifier.width(ACTIONS_WIDTH)) },
+        )
         Hairline()
     }
 }
 
-/** One bar, filled with the moving gradient. [xOffset] is where it starts across [tableWidth]. */
+/** A bar in each of [fields]' cells, the first starting [start] across the table. */
 @Composable
-private fun SkeletonBar(barWidth: Dp, sweep: State<Float>, xOffset: Dp, tableWidth: Dp) {
+private fun SkeletonCells(fields: List<SongField>, sweep: SkeletonSweep, start: Dp, row: Int) {
+    var offset = start
+    fields.forEach { field ->
+        val cell = field.width()
+        Box(Modifier.width(cell).padding(horizontal = 9.dp), contentAlignment = Alignment.CenterStart) {
+            SkeletonBar((cell - 18.dp) * barFraction(row, field.ordinal), sweep, offset + 9.dp)
+        }
+        ColumnDivider()
+        offset += cell + 1.dp
+    }
+}
+
+/** One bar, filled with the moving gradient. [xOffset] is where it starts across the table. */
+@Composable
+private fun SkeletonBar(barWidth: Dp, sweep: SkeletonSweep, xOffset: Dp) {
     val scheme = MaterialTheme.colorScheme
     Box(
         Modifier.width(barWidth)
             .height(SKELETON_BAR_HEIGHT)
             .clip(AppShape(3.dp))
-            // Read in the draw phase, not composition: `sweep.value` changes every frame, and read
-            // up in the composable it would recompose eighty cells sixty times a second.
+            // Read in the draw phase, not composition: `sweep.progress.value` changes every frame,
+            // and read up in the composable it would recompose eighty cells sixty times a second.
             .drawBehind {
-                val total = tableWidth.toPx()
+                val total = sweep.tableWidth.toPx()
                 val band = total * SKELETON_BAND
-                val head = -band + sweep.value * (total + band * 2) - xOffset.toPx()
+                val head = -band + sweep.progress.value * (total + band * 2) - xOffset.toPx()
                 drawRect(
                     Brush.linearGradient(
                         colorStops = arrayOf(

@@ -274,6 +274,9 @@ fun MenuDivider() {
 internal const val HAIRLINE_ALPHA = 0.07f
 internal const val FAINT_TEXT_ALPHA = 0.55f
 internal const val ACCENT_SURFACE_ALPHA = 0.10f
+
+/** The tint over the row under the pointer, so the row its buttons act on stands out from its neighbours. */
+internal const val HOVER_ALPHA = 0.06f
 internal const val ACCENT_BORDER_ALPHA = 0.28f
 internal const val SKELETON_ALPHA = 0.09f
 internal const val SKELETON_HIGHLIGHT_ALPHA = 0.20f

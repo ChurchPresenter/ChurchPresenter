@@ -240,7 +240,16 @@ object WireLimits {
 
     /** Songs per catalog record; a bigger book is split into parts so each box stays under the relay's cap. */
     const val CATALOG_PART_SONGS = 2_000
-    const val CATALOG_SONGS_MAX = 20_000
+
+    /**
+     * Plaintext bytes per catalog record. The relay refuses a box over 262,144 characters (413), and
+     * a box is the plaintext plus 28 bytes, base64'd -- about 196,000 bytes of it. 2,000 songs fit
+     * in English but not with Cyrillic titles, which are two bytes a character; this keeps a margin.
+     */
+    const val CATALOG_PART_BYTES = 180_000
+
+    /** The most songs sent in all; the largest library seen is 22,925. The phone keeps up to 200 parts. */
+    const val CATALOG_SONGS_MAX = 25_000
     const val MAX_PLANNED_SECONDS = 24 * 60 * 60
     const val MAX_REPEATS = 99
 

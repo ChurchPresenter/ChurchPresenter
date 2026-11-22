@@ -197,6 +197,28 @@ class SongsFilteringTest {
     }
 
     @Test
+    fun `contains finds a lyric line whatever the case of the query or the lyric`() {
+        val vm = SongsViewModel(
+            AppSettings(),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        ).also { created.add(it) }
+        val catalog = listOf(
+            SongItem(number = "1", title = "First", lyrics = listOf("Was BLIND but now I see")),
+            SongItem(number = "2", title = "Second", lyrics = listOf("Святый Боже")),
+            SongItem(number = "3", title = "Third", lyrics = listOf("Nothing here")),
+        )
+        vm.setInstanceLinkSource(active = true, catalog = catalog, fetchLyrics = null)
+
+        vm.updateSearchQuery("blind BUT")
+        assertEquals(listOf("First"), vm.titles)
+
+        vm.updateSearchQuery("СВЯТЫЙ")
+        assertEquals(listOf("Second"), vm.titles)
+    }
+
+    @Test
     fun `contains searches the number and title together`() {
         // The haystack is "<number>. <title>", so an operator can type "10. Great".
         val vm = vmWith(*defaultCatalog)

@@ -1,5 +1,7 @@
 package org.churchpresenter.media.dialogs
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipArea
@@ -402,11 +404,15 @@ private fun StockMediaThumbnail(
     var bitmap by remember(item.id) { mutableStateOf<ImageBitmap?>(null) }
     LaunchedEffect(item.id) {
         val bytes = StockMediaClient.fetchThumbnailBytes(item.thumbnailUrl)
+        // Decoded off the event thread: several thumbnails arriving in one frame added up to a stall
+        // (CHURCH-PRESENTER-DESKTOP-1F7).
         bitmap = bytes?.let {
-            try {
-                SkiaImage.makeFromEncoded(it).toComposeImageBitmap()
-            } catch (_: Exception) {
-                null
+            withContext(Dispatchers.IO) {
+                try {
+                    SkiaImage.makeFromEncoded(it).toComposeImageBitmap()
+                } catch (_: Exception) {
+                    null
+                }
             }
         }
     }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
@@ -245,6 +244,11 @@ internal fun RowStepper(
 
 private val STEPPER_FIELD_WIDTH = 66.dp
 private val NUMBER_MIN_WIDTH = 24.dp
+
+// The field's width follows its text by a count, not by asking the layout: an intrinsic-width query
+// lays a Skia paragraph out on every measure, and a page of number rows paid for it each time.
+private const val DIGIT_WIDTH_DP = 8
+private const val CARET_DP = 2
 private val STEP_KEY_WIDTH = 26.dp
 private val STEP_ICON = 14.dp
 
@@ -304,7 +308,7 @@ internal fun RowNumberField(
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.width(IntrinsicSize.Max)
+                    modifier = Modifier.width((text.length.coerceAtLeast(1) * DIGIT_WIDTH_DP + CARET_DP).dp)
                         .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
                 )
             }

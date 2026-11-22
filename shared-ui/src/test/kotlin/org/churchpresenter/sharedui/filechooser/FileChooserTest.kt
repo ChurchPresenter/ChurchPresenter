@@ -816,6 +816,15 @@ class XdgPortalRequestTest {
     }
 
     @Test
+    fun `a uri the portal left unescaped is taken as the path it spells`() {
+        // CHURCH-PRESENTER-DESKTOP-1DB: the portal returned a space as it was, and URI.create refused it.
+        assertEquals(
+            listOf(Path("/home/leader/Musicas ChurchPresenter")),
+            toPaths(listOf("file:///home/leader/Musicas ChurchPresenter")),
+        )
+    }
+
+    @Test
     fun `nothing selected stays nothing`() {
         assertNull(toPaths(null), "null means cancelled and must not become an empty selection")
         assertEquals(emptyList(), toPaths(emptyList()))
