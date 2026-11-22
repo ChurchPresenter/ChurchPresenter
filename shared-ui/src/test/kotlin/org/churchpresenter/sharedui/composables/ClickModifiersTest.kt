@@ -27,17 +27,14 @@ import kotlin.test.assertTrue
  * gesture can consume the event; [finalPassClickable]/[finalPassCombinedClickable] fire only when no
  * child consumed it.
  *
- * Two things are deliberately not covered:
- * - The double-click threshold reads `System.currentTimeMillis()` directly, not an injectable or
- *   virtualized clock, so only the "fires a double-click" side (two clicks the test executes back
- *   to back, reliably well under the 300ms window) is exercised. Proving the *other* side — two
- *   clicks spaced more than 300ms apart register as two singles — would need a real 300ms+ wait,
- *   which the project's no-real-delay rule for tests rules out.
- * - `initialPassClickable` existing specifically to beat a Main-pass scroll gesture (the ARM Mac
- *   bug in its own doc comment) isn't reconstructed here. Compose's guarantee that the Initial pass
- *   reaches a node before the Main pass is a framework invariant, not this file's own logic; the
- *   part that *is* this file's logic — that the modifier fires `onClick` on a real click — is
- *   covered directly instead.
+ * The double-click threshold is measured between the releases' own event times, so the test clock
+ * decides it: two clicks with time advanced between them are two singles.
+ *
+ * Deliberately not covered: `initialPassClickable` existing specifically to beat a Main-pass scroll
+ * gesture (the ARM Mac bug in its own doc comment) isn't reconstructed here. Compose's guarantee that
+ * the Initial pass reaches a node before the Main pass is a framework invariant, not this file's own
+ * logic; the part that *is* this file's logic — that the modifier fires `onClick` on a real click —
+ * is covered directly instead.
  */
 @OptIn(ExperimentalTestApi::class)
 class ClickModifiersTest {
@@ -149,6 +146,27 @@ class ClickModifiersTest {
             assertEquals(1, clickCount, "the second, rapid click must not also count as a plain click")
             assertEquals(1, doubleCount, "two rapid clicks must register as one double-click")
         }
+
+    @Test
+    fun `two clicks further apart than the threshold are two single clicks`() = runComposeUiTest {
+        var clickCount = 0
+        var doubleCount = 0
+        setContent {
+            MaterialTheme {
+                Box(
+                    Modifier.testTag("box").size(50.dp).initialPassCombinedClickable(
+                        onClick = { clickCount++ },
+                        onDoubleClick = { doubleCount++ },
+                    )
+                )
+            }
+        }
+        onNodeWithTag("box").performClick()
+        mainClock.advanceTimeBy(400)
+        onNodeWithTag("box").performClick()
+        assertEquals(2, clickCount)
+        assertEquals(0, doubleCount)
+    }
 
     @Test
     fun `a click straight after a double-click starts afresh rather than making a second double`() =
