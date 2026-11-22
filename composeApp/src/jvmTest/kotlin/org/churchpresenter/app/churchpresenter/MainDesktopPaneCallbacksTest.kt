@@ -122,13 +122,17 @@ class MainDesktopPaneCallbacksTest : MainDesktopComposeHarness() {
     @Test
     fun `with the live highlight on, a row taken live and then left marks where the service left off`() {
         val base = withOneSong().copy(scheduleHighlightLive = true)
-        root(base) { actions ->
+        val manager = PresenterManager()
+        root(base, presenterManager = manager) { actions ->
             actions.addSong(1, "A Test Song", "Hymnal", "Hymnal::1")
             waitForIdle()
             takeLive("A Test Song")
+            // Marked LIVE if the song reached the output, "Left off" if it did not: either way the row is the live one.
             waitUntil("the row is marked", 5_000) {
-                onAllNodesWithText("Left off", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
+                leftOff() || onAllNodesWithTag(LIVE_BADGE_TAG).fetchSemanticsNodes().isNotEmpty()
             }
+            runOnIdle { manager.setPresentingMode(Presenting.NONE) }
+            waitUntil("the row is marked as left off", 5_000) { leftOff() }
         }
     }
 
@@ -196,4 +200,10 @@ class MainDesktopPaneCallbacksTest : MainDesktopComposeHarness() {
             onNodeWithText("Generate").assertExists()
         }
     }
+
+    private fun ComposeUiTest.leftOff(): Boolean =
+        onAllNodesWithText("Left off", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
 }
+
+// The schedule's LIVE badge tag, internal to :schedule.
+private const val LIVE_BADGE_TAG = "schedule_row_live_badge"
