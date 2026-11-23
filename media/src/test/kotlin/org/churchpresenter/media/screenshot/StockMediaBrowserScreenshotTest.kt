@@ -16,7 +16,7 @@ import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.media.dialogs.StockMediaBrowserDialogContent
 import org.churchpresenter.media.viewmodel.StockMediaViewModel
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.stock_photo_browse_photos_title
 import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_photo
@@ -62,7 +62,7 @@ class StockMediaBrowserScreenshotTest {
         pexelsKey: String,
         pixabayKey: String,
         selectedTab: Int = 0,
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         val pexels = viewModel(StockMediaClient.StockSource.PEXELS)
         val pixabay = viewModel(StockMediaClient.StockSource.PIXABAY)
         runComposeUiTest {

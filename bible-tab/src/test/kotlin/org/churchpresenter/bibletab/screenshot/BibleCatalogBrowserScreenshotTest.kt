@@ -31,7 +31,7 @@ import javax.swing.SwingUtilities
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -182,7 +182,7 @@ class BibleCatalogBrowserScreenshotTest {
         progress: InstallProgress? = null,
         installedFiles: List<String> = emptyList(),
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         val dir = bibleFolder(installedFiles)
         val source = FakeSource(
             catalogOutcome = catalog,
@@ -197,7 +197,7 @@ class BibleCatalogBrowserScreenshotTest {
     }
 
     private fun shootTwoTabs(name: String, drive: ComposeUiTest.() -> Unit) =
-        stackedThemes(SECTION, name) { mode, file ->
+        bothThemes(SECTION, name) { mode, file ->
             val dir = bibleFolder(emptyList())
             val models = listOf(MODULES, ZEFANIA_MODULES).map { modules ->
                 BibleCatalogViewModel(

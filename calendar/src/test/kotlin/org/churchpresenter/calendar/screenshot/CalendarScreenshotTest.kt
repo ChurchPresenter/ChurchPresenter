@@ -50,7 +50,7 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import java.awt.Color as AwtColor
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /** Writes settings the way the app does, defaults included. */
@@ -375,7 +375,7 @@ class CalendarScreenshotTest {
         /** The app's calendar sync, for the header's invite and next-sync countdown. */
         cloudSync: CalendarCloudSync? = null,
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name, trim) { mode, file ->
+    ) = bothThemes(SECTION, name, trim) { mode, file ->
         val folder = Files.createTempDirectory("calendar-shot").toFile()
         val songs = Files.createTempDirectory("calendar-shot-songs").toFile()
         try {

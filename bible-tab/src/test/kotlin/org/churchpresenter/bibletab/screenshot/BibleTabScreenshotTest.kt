@@ -40,7 +40,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 class BibleTabScreenshotTest {
 
@@ -89,7 +89,7 @@ class BibleTabScreenshotTest {
         /** Non-null gives the tab something live to read, which is what the split mark needs. */
         presenter: (() -> FakeBibleOutput)? = null,
         drive: ComposeUiTest.(BibleViewModel) -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         bibleTab(
             settings = settings, width = width, stt = stt, themeMode = mode,
             crossReferences = crossReferences, extraModules = extraModules,

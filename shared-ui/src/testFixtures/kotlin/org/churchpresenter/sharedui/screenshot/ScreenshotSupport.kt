@@ -24,7 +24,6 @@ import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.sharedui.composables.RecentColors
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -50,7 +49,7 @@ val THEMES = listOf("light" to ThemeMode.LIGHT, "dark" to ThemeMode.DARK)
  *
  * - **A capture must be written under this root.** Images are matched between the two sides **by
  *   their path relative to it**, so one written elsewhere is not reported as *differing* — it has no
- *   counterpart and silently stops being compared. Go through [stackedThemes]/[captureComponent] and
+ *   counterpart and silently stops being compared. Go through [bothThemes]/[captureComponent] and
  *   this is handled.
  * - **A class must be named `…ScreenshotTest`.** The workflow records with `--tests
  *   '*ScreenshotTest*'`; a class outside that pattern is never rendered in CI and its images are
@@ -128,8 +127,8 @@ private val PARTS = File("$SCREENSHOT_ROOT/.parts")
  * anti-aliasing and nothing else — it sits under every real change measured above.** 0 is the
  * target; keep this only as long as something still jitters.
  *
- * The threshold is a *fraction of the whole image*, so it scales with the picture: on a stacked
- * 1024×1538 tab shot it is ~7,900 pixels, on a trimmed component shot a few hundred.
+ * The threshold is a *fraction of the whole image*, so it scales with the picture: on a 1024×768 tab
+ * shot it is ~790 pixels, on a trimmed component shot a few dozen.
  *
  * Note the comparator underneath already ignores imperceptible color drift — Roborazzi's default
  * `SimpleImageComparator` counts a pixel as differing only past a color distance of 0.007, which is
@@ -138,7 +137,7 @@ private val PARTS = File("$SCREENSHOT_ROOT/.parts")
 const val CHANGE_THRESHOLD = 0.001f
 
 /**
- * What the record/compare/verify tasks apply to a **golden** — the stacked image that is committed.
+ * What the record/compare/verify tasks apply to a **golden** — an image that is committed.
  */
 private val GOLDEN_OPTIONS = RoborazziOptions(
     compareOptions = RoborazziOptions.CompareOptions(changeThreshold = CHANGE_THRESHOLD),
@@ -148,14 +147,15 @@ private val GOLDEN_OPTIONS = RoborazziOptions(
  * What a per-theme part is captured with: always *recorded*, never verified.
  *
  * The parts under `.parts/` are scratch — they exist for the few milliseconds between rendering a
- * theme and stacking the pair, and are deleted straight after. Left on the ambient task type they
+ * theme and writing its golden (trimmed, for a component), and are deleted straight after. Left on
+ * the ambient task type they
  * would be treated as goldens of their own, and `verifyRoborazziJvm` would fail every state with
  * "the original file was not found" while never looking at the images that are actually committed.
  *
  * Falls back to the ambient type when Roborazzi is switched off entirely, which is what keeps an
  * ordinary `jvmTest` run from writing images at all.
  *
- * **Only [stackedThemes] may use this.** A capture written straight to a committed path — which is
+ * **Only [bothThemes] may use this.** A capture written straight to a committed path — which is
  * how every `AppPreview*` suite works — must stay on the ambient task type, or a `verify` run would
  * quietly *re-record* it instead of checking it. That is exactly what happened the first time this
  * was wired up: verify came back green while overwriting eight `previewApp` images.
@@ -171,7 +171,7 @@ private val PART_OPTIONS =
 /**
  * Captures a compose root to [file].
  *
- * A file under `.parts/` is one half of a [stackedThemes] pair and is only ever *recorded*; anything
+ * A file under `.parts/` is a [bothThemes] scratch render and is only ever *recorded*; anything
  * else is a golden and takes whichever task is running — so an `AppPreview*` suite that writes
  * straight to `screenshots/previewApp/…` is verified, while the throwaway halves are not.
  *
@@ -179,14 +179,18 @@ private val PART_OPTIONS =
  *
  * Fails a capture whose content is not inside [PinnedFonts]: its text would be in the system font,
  * and the picture would differ from one Mac to the next.
+ *
+ * [keepHover] leaves the pointer where the test put it, for a state that *is* a hover — a row
+ * showing its hover-only buttons. Every other capture takes the pointer off first (see
+ * [dismissHover]).
  */
-fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0) {
+fun ComposeUiTest.captureTo(file: File, rootIndex: Int = 0, keepHover: Boolean = false) {
     val pinned = onAllNodes(SemanticsMatcher.keyIsDefined(PinnedFontsMarker), useUnmergedTree = true)
         .fetchSemanticsNodes(atLeastOneRootRequired = false)
     check(pinned.isNotEmpty()) {
         "${file.name}: the content is not inside PinnedFonts, so its text is in this machine's system font"
     }
-    dismissHover()
+    if (keepHover) waitForIdle() else dismissHover()
     val options = if (file.absoluteFile.startsWith(PARTS.absoluteFile)) PART_OPTIONS else GOLDEN_OPTIONS
     onAllNodes(isRoot())[rootIndex].captureRoboImage(file.path, options)
 }
@@ -226,53 +230,53 @@ private fun ComposeUiTest.dismissHover() {
 private val OFF_SCREEN = Offset(-1f, -1f)
 
 /**
- * Runs [shoot] once per theme and writes both renders into one `screenshots/<section>/<name>.png`,
- * light above dark — so a state is written once and reviewed as a single image.
+ * Runs [shoot] once per theme and writes each render as its own golden —
+ * `screenshots/<section>/<name>_light.png` and `screenshots/<section>/<name>_dark.png` — so a
+ * reviewer opens the theme they care about at full size, and a change that touches only one theme
+ * shows up as one changed file.
  *
- * Stacked afterwards rather than composed together because each render fills the test window: two
- * in one composition would get half the height each instead of two full-size views.
+ * Each render is taken to a scratch file under `.parts/` first and handed to Roborazzi from there,
+ * so [trim] can crop it before it becomes the golden.
  */
-fun stackedThemes(
+fun bothThemes(
     section: String,
     name: String,
     trim: Boolean = false,
     shoot: (ThemeMode, File) -> Unit,
 ) {
     PARTS.mkdirs()
-    val parts = THEMES.map { (suffix, mode) -> File(PARTS, "${section}_${name}_$suffix.png") }
     // Cleaned up even when a shot throws. Without the finally, an interrupted run stranded the
-    // halves here -- and a later `git add -A` committed 30 of them three separate times, none of
-    // those commits mentioning screenshots. A leftover half is also read by the *next* run's
+    // scratch renders here -- and a later `git add -A` committed 30 of them three separate times,
+    // none of those commits mentioning screenshots. A leftover one is also read by the *next* run's
     // verify, which is the phantom failure AGENT.md warns about.
     try {
-        parts.forEachIndexed { index, part -> shoot(THEMES[index].second, part) }
-        // Nothing was written: capture is inert outside the Roborazzi tasks, so an ordinary test
-        // run still composes every state (a throw there fails the test) without touching the images.
-        if (parts.all { it.exists() }) {
-            stackVertically(parts, File("$SCREENSHOT_ROOT/$section/$name.png"), trim)
-        }
+        THEMES.forEach { (suffix, mode) -> shootTheme("${section}_${name}_$suffix", mode, shoot) { part ->
+            writeGolden(part, File("$SCREENSHOT_ROOT/$section/${name}_$suffix.png"), trim)
+        } }
     } finally {
-        parts.forEach { it.delete() }
         PARTS.delete()
     }
 }
 
-/**
- * Runs [shoot] once per theme and writes each render as its own golden —
- * `screenshots/<section>/<name>_light.png` and `<name>_dark.png`.
- *
- * [stackedThemes] is the default and reviews a state as a single image; this exists for a suite
- * whose states are tall enough that stacking makes a strip too long to read at a glance. Both write
- * under [SCREENSHOT_ROOT], so either way the CI comparison matches the files by path.
- */
-fun separateThemes(section: String, name: String, shoot: (ThemeMode, File) -> Unit) {
-    THEMES.forEach { (suffix, mode) ->
-        shoot(mode, File("$SCREENSHOT_ROOT/$section/${name}_$suffix.png"))
+private fun shootTheme(
+    partName: String,
+    mode: ThemeMode,
+    shoot: (ThemeMode, File) -> Unit,
+    keep: (File) -> Unit,
+) {
+    val part = File(PARTS, "$partName.png")
+    try {
+        shoot(mode, part)
+        // Nothing was written: capture is inert outside the Roborazzi tasks, so an ordinary test run
+        // still composes every state (a throw there fails the test) without touching the images.
+        if (part.exists()) keep(part)
+    } finally {
+        part.delete()
     }
 }
 
 /**
- * A small component in both themes, stacked.
+ * A small component in both themes, each trimmed to what it draws.
  *
  * [drive] runs before the shot — click to open a menu, type into a field. [rootIndex] 1 then shoots
  * the popup that opened.
@@ -291,7 +295,7 @@ fun captureComponent(
     rootIndex: Int = 0,
     drive: ComposeUiTest.() -> Unit = {},
     content: @Composable () -> Unit,
-) = stackedThemes(section, name, trim = true) { mode, file ->
+) = bothThemes(section, name, trim = true) { mode, file ->
     runComposeUiTest {
         setContent {
             PinnedFonts {
@@ -307,37 +311,18 @@ fun captureComponent(
     }
 }
 
-private fun stackVertically(parts: List<File>, out: File, trim: Boolean) {
-    val images = parts
-        .map { ImageIO.read(it) ?: error("unreadable capture: ${it.path}") }
-        .map { if (trim) it.trimmed() else it }
-    val divider = 2
-    val width = images.maxOf { it.width }
-    val height = images.sumOf { it.height } + divider * (images.size - 1)
-
-    val stacked = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
-    val canvas = stacked.createGraphics()
-    var y = 0
-    images.forEachIndexed { index, image ->
-        canvas.drawImage(image, 0, y, null)
-        y += image.height
-        if (index < images.lastIndex) {
-            canvas.color = Color.GRAY
-            canvas.fillRect(0, y, width, divider)
-            y += divider
-        }
-    }
-    canvas.dispose()
+private fun writeGolden(part: File, out: File, trim: Boolean) {
+    val image = ImageIO.read(part) ?: error("unreadable capture: ${part.path}")
     out.parentFile?.mkdirs()
 
     // Handed to Roborazzi rather than written straight to disk, so the file a reviewer opens is the
     // one the record/compare/verify tasks own: `recordRoborazziJvm` writes it, and
     // `verifyRoborazziJvm` compares this exact image against what is committed and fails past
     // [CHANGE_THRESHOLD], leaving a side-by-side `<name>_compare.png` under
-    // `composeApp/build/outputs/roborazzi/`. Composing the pair ourselves and then writing it with
+    // `<module>/build/outputs/roborazzi/`. Writing it ourselves with
     // ImageIO — which is what this did first — left the committed images outside Roborazzi's world
     // entirely: only the throwaway per-theme parts were ever verified.
-    stacked.toComposeImageBitmap().captureRoboImage(out, GOLDEN_OPTIONS)
+    (if (trim) image.trimmed() else image).toComposeImageBitmap().captureRoboImage(out, GOLDEN_OPTIONS)
 }
 
 /**

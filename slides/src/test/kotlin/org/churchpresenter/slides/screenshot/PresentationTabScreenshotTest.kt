@@ -41,7 +41,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 class PresentationTabScreenshotTest {
 
@@ -114,7 +114,7 @@ class PresentationTabScreenshotTest {
         width: Dp? = null,
         rootIndex: Int = 0,
         drive: ComposeUiTest.(PresentationViewModel) -> Unit = { load(it, sermonDeck()) },
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         presentationTab(
             settings = settings,
             presenterManager = if (presenter) FakeSlidesOutput() else null,

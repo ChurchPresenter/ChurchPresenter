@@ -37,7 +37,7 @@ import java.io.File
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureComponent
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -263,7 +263,7 @@ class ServerSettingsTabScreenshotTest {
         server: CompanionServer? = null,
         seedClients: RemoteClientManager.() -> Unit = {},
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         withIsolatedHome {
             val companion = server ?: CompanionServer(shutdownGraceMs = 0)
             val clients = RemoteClientManager().apply(seedClients)

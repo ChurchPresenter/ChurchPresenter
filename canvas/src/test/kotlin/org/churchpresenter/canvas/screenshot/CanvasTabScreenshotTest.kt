@@ -26,7 +26,7 @@ import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.canvas.updateTransform
 import org.churchpresenter.canvas.selectSource
 import org.churchpresenter.canvas.addSource
@@ -51,7 +51,7 @@ class CanvasTabScreenshotTest {
         rootIndex: Int = 0,
         seed: SceneViewModel.() -> Unit = {},
         drive: ComposeUiTest.(SceneViewModel) -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         // Every state starts from a scene: with none the tab has nothing to draw into and no source
         // panel at all, and a shot of that is the one state `no_scene` already covers.
         canvasTab(
@@ -80,7 +80,7 @@ class CanvasTabScreenshotTest {
 
     /** Before any scene exists — the tab offers the New button and nothing else. */
     @Test
-    fun `no scene at all`() = stackedThemes(SECTION, "no_scene") { mode, file ->
+    fun `no scene at all`() = bothThemes(SECTION, "no_scene") { mode, file ->
         canvasTab(themeMode = mode) { _, _ ->
             waitForIdle()
             captureTo(file)
