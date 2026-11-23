@@ -79,7 +79,6 @@ import org.churchpresenter.lowerthird.AtemSettingsTab
 import org.churchpresenter.companionsurface.CompanionSatelliteSettingsTab
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.obs.OBSSettingsTab
-import org.churchpresenter.appsettings.SystemSettingsTab
 import org.churchpresenter.profiles.BackgroundSettingsTab
 import org.churchpresenter.profiles.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.BuildConfig
@@ -400,11 +399,7 @@ private fun SettingsTabContent(
     detectScreens: () -> List<DetectedScreen>,
 ) {
     when (tabIndex) {
-        0 -> SystemSettingsTab(
-            settings = settings,
-            onSettingsChange = onSettingsChange,
-            companionServer = companionServer,
-        )
+        0 -> ShortcutSystemSettings(settings, onSettingsChange, companionServer)
         1 -> BibleSettingsTab(
             settings = settings,
             onSettingsChange = onSettingsChange,

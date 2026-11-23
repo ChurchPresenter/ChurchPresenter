@@ -124,6 +124,7 @@ fun SystemSettingsTab(
     settings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     companionServer: CompanionServer? = null,
+    onKeyboardShortcuts: () -> Unit = {},
 ) {
     val fileManager = FileManager()
 
@@ -175,7 +176,7 @@ fun SystemSettingsTab(
                         modifier = Modifier.width(SIDE_COLUMN_WIDTH),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        GeneralCard(settings, onSettingsChange)
+                        GeneralCard(settings, onSettingsChange, onKeyboardShortcuts)
                         if (LocalSettingsDevMode.current) DevModeCard(settings, onSettingsChange)
                         if (wickAvailable) HelperCard(settings, onSettingsChange)
                         ManageSettingsCard(companionServer)
@@ -184,7 +185,7 @@ fun SystemSettingsTab(
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     storage()
-                    GeneralCard(settings, onSettingsChange)
+                    GeneralCard(settings, onSettingsChange, onKeyboardShortcuts)
                     if (LocalSettingsDevMode.current) DevModeCard(settings, onSettingsChange)
                     if (wickAvailable) HelperCard(settings, onSettingsChange)
                     ManageSettingsCard(companionServer)
@@ -292,10 +293,12 @@ internal val LocalAutoStart = staticCompositionLocalOf<AutoStartSwitch> { AutoSt
 @Composable
 private fun GeneralCard(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onKeyboardShortcuts: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     SettingsCard(title = stringResource(Res.string.general)) {
+        SelectionSettings(settings, onSettingsChange, onKeyboardShortcuts)
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             // Launch at login — the OS registration is the source of truth, not settings.json
             val autoStart = LocalAutoStart.current

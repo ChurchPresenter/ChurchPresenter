@@ -1,4 +1,6 @@
 <resources>
+    <string name="selection_goes_live">选中经文或演示文稿资源时直接上屏</string>
+    <string name="configure_shortcuts">设置快捷键</string>
     <string name="resource_directory_default">设为默认</string>
     <string name="resource_directory_add">添加目录</string>
     <string name="resource_directory_remove">移除目录</string>

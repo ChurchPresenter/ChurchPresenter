@@ -57,6 +57,14 @@ class SettingsManagerTest {
     // ── Fresh install ───────────────────────────────────────────────────────────
 
     @Test
+    fun `existing update preferences migrate away from automatic original releases`() {
+        writeSettings("""{"settingsVersion":26,"updateCheckInterval":"EVERY_LAUNCH"}""")
+        val settings = SettingsManager().loadSettings()
+        assertEquals(org.churchpresenter.settings.utils.UpdateCheckInterval.NEVER, settings.updateCheckInterval)
+        assertEquals(false, settings.selectionGoesLive)
+    }
+
+    @Test
     fun `fresh settings keep output windows hidden at startup`() {
         assertEquals(true, SettingsManager().loadSettings().projectionSettings.startOutputsHidden)
     }

@@ -59,12 +59,12 @@ sealed class UpdateCheckResult {
 object UpdateChecker {
 
     private const val RELEASES_API_URL =
-        "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases?per_page=50"
+        "https://api.github.com/repos/cxze299/ChurchsProjection/releases?per_page=50"
     const val RELEASES_URL =
-        "https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"
+        "https://github.com/cxze299/ChurchsProjection/releases/latest"
 
     /** Where the pull requests a release's notes name are, by number. */
-    const val PULLS_URL = "https://github.com/ChurchPresenter/ChurchPresenter/pull"
+    const val PULLS_URL = "https://github.com/cxze299/ChurchsProjection/pull"
 
     // Count-only beacon on churchpresenter.org that attributes downloads to the
     // app's updater (vs. the website's download buttons vs. GitHub directly).

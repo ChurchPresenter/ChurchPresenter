@@ -23,6 +23,29 @@ import org.churchpresenter.settings.ResourceDirectory
 
 class PresentationDocumentLibraryTest {
     @Test
+    fun `selection goes live only when the settings option is enabled`() {
+        val root = Files.createTempDirectory("selection-go-live").toFile()
+        try {
+            val pdf = root.resolve("001 Song.pdf")
+            PDDocument().use { document ->
+                document.addPage(PDPage())
+                document.save(pdf)
+            }
+            val output = FakeSlidesOutput()
+            presentationTab(settings = {
+                it.copy(presentationStorageDirectory = root.absolutePath, selectionGoesLive = true)
+            }, presenterManager = output) { _, _ ->
+                waitUntilAtLeastOneExists(hasText(pdf.name), timeoutMillis = 10_000)
+                onNodeWithText(pdf.name).performClick()
+                waitUntil(timeoutMillis = 10_000) { output.liveSlide.value?.first == pdf.name }
+                assertTrue(output.showPresenterWindow.value)
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `the presentation library merges configured directories`() {
         val root = Files.createTempDirectory("presentation-multiple-directories").toFile()
         try {

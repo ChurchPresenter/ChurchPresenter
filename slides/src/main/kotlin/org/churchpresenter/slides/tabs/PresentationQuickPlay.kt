@@ -103,8 +103,10 @@ internal fun PresentationTabScope.PresentationQuickPlay(viewModel: PresentationV
         libraryControls()
         if (results.isEmpty()) Text(stringResource(Res.string.hymn_quick_missing))
         QuickPlayResults(results, root, roots, pending == null, resultScroll) { file ->
-            pending = null
-            viewModel.previewPresentation(file)
+            if (appSettings.selectionGoesLive) start(file) else {
+                pending = null
+                viewModel.previewPresentation(file)
+            }
         }
     }
 }

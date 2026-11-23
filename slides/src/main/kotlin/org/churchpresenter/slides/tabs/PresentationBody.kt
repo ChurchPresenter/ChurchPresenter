@@ -197,6 +197,7 @@ private fun PresentationTabScope.PresentationSlideCell(viewModel: PresentationVi
         onToggleHidden = { viewModel.toggleSlideHidden(index) },
         onClick = {
             viewModel.selectSlide(index)
+            if (appSettings.selectionGoesLive) presenterManager?.let { goLiveAtSlide(viewModel, it, index) }
             // Keep arrow keys working after a mouse selection.
             focusRequester.requestFocus()
         },
@@ -215,6 +216,7 @@ private fun PresentationTabScope.goLiveAtSlide(
     presenterManager: SlidesOutput,
     index: Int,
 ) {
+    viewModel.previewOnly = false
     scope.launch {
         val cur = viewModel.slideFiles.getOrNull(index)?.let { f ->
             withContext(Dispatchers.IO) {

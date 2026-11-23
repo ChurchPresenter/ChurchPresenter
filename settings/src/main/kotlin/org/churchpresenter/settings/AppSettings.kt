@@ -159,7 +159,7 @@ data class AppSettings(
     val setupWizardShown: Boolean = false,
     val analyticsReportingEnabled: Boolean = true,
     val participateInPrereleases: Boolean = false,
-    val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
+    val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.NEVER,
     val lastUpdateCheckTimestamp: Long = 0L,
     /** The version the operator chose to skip; the launch check stops offering it, a manual check does not. */
     val skippedUpdateVersion: String = "",
@@ -183,6 +183,7 @@ data class AppSettings(
     /** The MIDI and OSC ports, and what arriving and leaving messages do -- see [ControlSettings]. */
     val control: ControlSettings = ControlSettings(),
     val additionalResourceDirectories: Map<ResourceDirectory, List<String>> = emptyMap(),
+    val selectionGoesLive: Boolean = false,
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =
@@ -203,6 +204,6 @@ data class AppSettings(
          * Purely *additive* fields need no bump: `ignoreUnknownKeys` plus a default already handles
          * those in both directions.
          */
-        const val CURRENT_SETTINGS_VERSION = 26
+        const val CURRENT_SETTINGS_VERSION = 27
     }
 }
