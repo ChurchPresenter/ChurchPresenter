@@ -10,6 +10,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -120,6 +121,14 @@ class UiMonkey : MainDesktopComposeHarness() {
 
     private fun ComposeUiTest.key(random: Random): String {
         val key = KEYS[random.nextInt(KEYS.size)]
+        if (key in ACTIVATING_KEYS) {
+            val focused = onAllNodes(isFocused()).fetchSemanticsNodes(atLeastOneRootRequired = false).firstOrNull()
+            val name = focused?.let(::nameOf)
+            if (name != null && isOffLimits(name)) return "key $key on \"$name\" -- skipped, off limits"
+            if (name != null) {
+                return attempt("key $key on \"$name\"") { onAllNodes(isRoot())[0].performKeyInput { pressKey(key) } }
+            }
+        }
         return attempt("key $key") { onAllNodes(isRoot())[0].performKeyInput { pressKey(key) } }
     }
 
@@ -148,6 +157,10 @@ class UiMonkey : MainDesktopComposeHarness() {
             Key.Escape, Key.Enter, Key.Tab, Key.PageDown, Key.PageUp,
             Key.DirectionUp, Key.DirectionDown, Key.DirectionLeft, Key.DirectionRight, Key.Spacebar,
         )
+
+        /** The keys that press whatever has focus, so they answer to [OFF_LIMITS] as a click does. */
+        val ACTIVATING_KEYS = setOf(Key.Enter, Key.Spacebar)
+
         val WORDS = listOf("Amazing", "John 3:16", "", "   ", "ü€漢字", "a".repeat(500), "<script>", "0")
 
         /**
@@ -166,9 +179,10 @@ class UiMonkey : MainDesktopComposeHarness() {
             "props", "add label", "macros", "message", "new song", "edit song", "edit clear groups",
         )
 
+        fun isOffLimits(name: String): Boolean = name.lowercase().let { lower -> OFF_LIMITS.any { it in lower } }
+
         val PRESSABLE: SemanticsMatcher = hasClickAction() and SemanticsMatcher("not off limits") { node ->
-            val name = nameOf(node).lowercase()
-            OFF_LIMITS.none { it in name }
+            !isOffLimits(nameOf(node))
         }
 
         fun nameOf(node: SemanticsNode): String {
