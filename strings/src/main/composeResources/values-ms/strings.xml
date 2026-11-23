@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Buang daripada Jadual</string>
     <string name="shortcut_description_go_live">Siar Langsung (klik dua kali pada item)</string>
     <string name="shortcut_description_escape">Kosongkan / Henti Memapar</string>
+    <string name="shortcut_description_clear_text">Kosongkan Teks, Kekalkan Latar</string>
+    <string name="shortcut_description_clear_text_and_background">Kosongkan Teks dan Latar</string>
     <string name="shortcut_description_prev_verse">Ayat Sebelumnya</string>
     <string name="shortcut_description_next_verse">Ayat Seterusnya</string>
     <string name="shortcut_description_prev_chapter">Bab Sebelumnya</string>

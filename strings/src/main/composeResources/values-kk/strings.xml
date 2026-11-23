@@ -485,6 +485,8 @@
     <string name="shortcut_description_remove_from_schedule">Кестеден жою</string>
     <string name="shortcut_description_go_live">Тікелей эфир (екі рет басу)</string>
     <string name="shortcut_description_escape">Тазалау / Тоқтату</string>
+    <string name="shortcut_description_clear_text">Мәтінді тазалау, фонды қалдыру</string>
+    <string name="shortcut_description_clear_text_and_background">Мәтін мен фонды тазалау</string>
     <string name="shortcut_description_prev_verse">Алдыңғы өлең</string>
     <string name="shortcut_description_next_verse">Келесі өлең</string>
     <string name="shortcut_description_prev_chapter">Алдыңғы тарау</string>

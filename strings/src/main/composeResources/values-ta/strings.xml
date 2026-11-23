@@ -191,6 +191,8 @@
     <string name="shortcut_description_remove_from_schedule">அட்டவணையிலிருந்து நீக்கு</string>
     <string name="shortcut_description_go_live">நேரலைக்கு (உருப்படியை இருமுறை சொடுக்கு)</string>
     <string name="shortcut_description_escape">அழி / காட்டுவதை நிறுத்து</string>
+    <string name="shortcut_description_clear_text">உரையை அழி, பின்னணியை வை</string>
+    <string name="shortcut_description_clear_text_and_background">உரையையும் பின்னணியையும் அழி</string>
     <string name="shortcut_description_prev_verse">முந்தைய வசனம்</string>
     <string name="shortcut_description_next_verse">அடுத்த வசனம்</string>
     <string name="shortcut_description_prev_chapter">முந்தைய அதிகாரம்</string>

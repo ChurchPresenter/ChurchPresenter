@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">進行表から削除</string>
     <string name="shortcut_description_go_live">ライブ表示（項目をダブルクリック）</string>
     <string name="shortcut_description_escape">クリア／表示を停止</string>
+    <string name="shortcut_description_clear_text">テキストのみクリア(背景は保持)</string>
+    <string name="shortcut_description_clear_text_and_background">テキストと背景をクリア</string>
     <string name="shortcut_description_prev_verse">前の節</string>
     <string name="shortcut_description_next_verse">次の節</string>
     <string name="shortcut_description_prev_chapter">前の章</string>

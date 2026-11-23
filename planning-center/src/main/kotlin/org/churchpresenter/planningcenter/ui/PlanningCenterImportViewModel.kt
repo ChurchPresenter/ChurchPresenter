@@ -180,9 +180,9 @@ class PlanningCenterImportViewModel(
                         val detected = services.detectScriptures(combinedText)
                         if (detected.isNotEmpty()) scriptureMap[pco.id] = detected
                     }
-                    selection.detectedScripturesByItemId = scriptureMap
                     selection.selectedScriptureIndices =
                         scriptureMap.mapValues { (_, verses) -> verses.indices.toSet() }
+                    selection.detectedScripturesByItemId = scriptureMap
 
                     // Eagerly check for attachments too, so the "Show Files" affordance can be
                     // hidden entirely for items that don't have any (one request per item — plans

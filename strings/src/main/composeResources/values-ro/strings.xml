@@ -122,6 +122,8 @@
     <string name="shortcut_description_remove_from_schedule">Elimină din Program</string>
     <string name="shortcut_description_go_live">Proiectează (Dublu clic pe element)</string>
     <string name="shortcut_description_escape">Golește / Oprește Proiecția</string>
+    <string name="shortcut_description_clear_text">Șterge Textul, Păstrează Fundalul</string>
+    <string name="shortcut_description_clear_text_and_background">Șterge Textul și Fundalul</string>
     <string name="shortcut_description_prev_verse">Versetul Anterior</string>
     <string name="shortcut_description_next_verse">Versetul Următor</string>
     <string name="shortcut_description_prev_chapter">Capitolul Anterior</string>

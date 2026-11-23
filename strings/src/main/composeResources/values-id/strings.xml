@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Hapus dari jadwal</string>
     <string name="shortcut_description_go_live">Tayangkan (klik ganda item)</string>
     <string name="shortcut_description_escape">Bersihkan / hentikan tayangan</string>
+    <string name="shortcut_description_clear_text">Hapus Teks, Pertahankan Latar</string>
+    <string name="shortcut_description_clear_text_and_background">Hapus Teks dan Latar</string>
     <string name="shortcut_description_prev_verse">Ayat sebelumnya</string>
     <string name="shortcut_description_next_verse">Ayat berikutnya</string>
     <string name="shortcut_description_prev_chapter">Pasal sebelumnya</string>

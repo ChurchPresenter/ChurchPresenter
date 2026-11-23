@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">นำออกจากรายการ</string>
     <string name="shortcut_description_go_live">ขึ้นจอ (ดับเบิลคลิกที่รายการ)</string>
     <string name="shortcut_description_escape">ล้าง / หยุดแสดง</string>
+    <string name="shortcut_description_clear_text">ล้างข้อความ คงพื้นหลังไว้</string>
+    <string name="shortcut_description_clear_text_and_background">ล้างข้อความและพื้นหลัง</string>
     <string name="shortcut_description_prev_verse">ข้อก่อนหน้า</string>
     <string name="shortcut_description_next_verse">ข้อถัดไป</string>
     <string name="shortcut_description_prev_chapter">บทก่อนหน้า</string>

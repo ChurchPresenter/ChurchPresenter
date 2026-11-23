@@ -101,6 +101,8 @@
     <string name="shortcut_description_remove_from_schedule">Verwijderen uit programma</string>
     <string name="shortcut_description_go_live">Live gaan (dubbelklik op item)</string>
     <string name="shortcut_description_escape">Wissen / presentatie stoppen</string>
+    <string name="shortcut_description_clear_text">Tekst wissen, achtergrond behouden</string>
+    <string name="shortcut_description_clear_text_and_background">Tekst en achtergrond wissen</string>
     <string name="shortcut_description_prev_verse">Vorig vers</string>
     <string name="shortcut_description_next_verse">Volgend vers</string>
     <string name="shortcut_description_prev_chapter">Vorig hoofdstuk</string>
