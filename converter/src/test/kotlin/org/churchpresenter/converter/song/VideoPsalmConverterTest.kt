@@ -205,6 +205,88 @@ class VideoPsalmConverterTest {
         assertEquals(listOf("real"), sections[0].lines)
     }
 
+    private fun mark(tag: Int? = null, id: Int? = null): String =
+        "{${listOfNotNull(tag?.let { "Tag:$it" }, id?.let { "ID:$it" }).joinToString(",")}}"
+
+    private fun lines(first: Int, vararg text: String): String =
+        text.mapIndexed { index, line -> verse(line, id = first + index) }.joinToString(",")
+
+    @Test
+    fun `lines brought in from EasyWorship are put back together under the entry that names them`() {
+        val file = book(
+            """{Verses:[${mark(tag = 4, id = 0)},${verse("LOOK AND LIVE")},${mark()},
+               |${lines(2, "I've a message from the Lord", "Halleluyah", "'Tis recorded in His word", "Halleluyah")},
+               |${mark(tag = 1, id = 0)},${lines(8, "Look and live", "My brother, live")},
+               |${mark(id = 2)},${lines(3, "A message full of love", "Halleluyah")}],
+               |Text:"LOOK AND LIVE"}""".trimMargin()
+        )
+        val sections = VideoPsalmConverter.parse(file).songs[0].sections
+
+        assertEquals(listOf("Tag", "Verse 1", "Chorus", "Verse 2"), sections.map { it.label })
+        assertEquals(listOf("LOOK AND LIVE"), sections[0].lines)
+        assertEquals(
+            listOf("I've a message from the Lord", "Halleluyah", "'Tis recorded in His word", "Halleluyah"),
+            sections[1].lines,
+        )
+        assertEquals(listOf("Look and live", "My brother, live"), sections[2].lines)
+        assertEquals(listOf("A message full of love", "Halleluyah"), sections[3].lines)
+    }
+
+    @Test
+    fun `a chorus written out line by line every time it is sung becomes one section`() {
+        val file = book(
+            """{Verses:[${mark()},${lines(2, "first", "verse")},${mark(tag = 1)},${lines(4, "the", "chorus")},
+               |${mark(id = 2)},${lines(3, "second", "verse")},${mark(tag = 1)},${lines(5, "the", "chorus")}],
+               |Text:"Song"}""".trimMargin()
+        )
+        val sections = VideoPsalmConverter.parse(file).songs[0].sections
+
+        assertEquals(listOf("Verse 1", "Chorus", "Verse 2"), sections.map { it.label })
+        assertEquals(listOf("the", "chorus"), sections[1].lines)
+    }
+
+    @Test
+    fun `a slide of several lines is continued by the line its count numbers on to`() {
+        val file = book(
+            """{Verses:[${mark()},${verse("one\ntwo\nthree", id = 2)},${lines(5, "four", "five")}],
+               |Text:"Song"}""".trimMargin()
+        )
+        val sections = VideoPsalmConverter.parse(file).songs[0].sections
+
+        assertEquals(listOf("Verse 1"), sections.map { it.label })
+        assertEquals(listOf("one", "two", "three", "four", "five"), sections[0].lines)
+    }
+
+    @Test
+    fun `a whole verse followed by the next verse number stays a section of its own`() {
+        val file = book(
+            """{Verses:[${mark(tag = 4)},${lines(2, "a", "b")},
+               |${mark(tag = 4)},${verse("one\ntwo\nthree\nfour", id = 5)},${verse("next\nverse", id = 6)}],
+               |Text:"Song"}""".trimMargin()
+        )
+        val sections = VideoPsalmConverter.parse(file).songs[0].sections
+
+        assertEquals(listOf("Tag 1", "Tag 2", "Verse 6"), sections.map { it.label })
+        assertEquals(listOf("next", "verse"), sections[2].lines)
+    }
+
+    @Test
+    fun `a song VideoPsalm wrote itself keeps each verse after an empty slide`() {
+        val file = book(
+            """{Verses:[${mark(tag = 4, id = 0)},${verse("TITLE", tag = 9, id = 0)},${verse("one\nverse")},
+               |${verse("the\nchorus", tag = 1, id = 0)},${verse("two\nverse", id = 2)}],Text:"Song"}""".trimMargin()
+        )
+        val labels = VideoPsalmConverter.parse(file).songs[0].sections.map { it.label }
+
+        assertEquals(listOf("Other", "Verse 1", "Chorus", "Verse 2"), labels)
+    }
+
+    @Test
+    fun `an id of 0 is no number, as VideoPsalm shows it`() {
+        val file = book("""{Verses:[${verse("one")},${verse("hook", tag = 1, id = 0)}],Text:"Song"}""")
+        assertEquals(listOf("Verse 1", "Chorus"), VideoPsalmConverter.parse(file).songs[0].sections.map { it.label })
+    }
+
     @Test
     fun `credits stored across several lines are flattened onto one`() {
         val file = book(
