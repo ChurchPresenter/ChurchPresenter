@@ -44,6 +44,10 @@ internal class MainDesktopKeyActions(
     val redo: () -> Unit = {},
     val pickQuickBackground: (QuickBackground?) -> Unit = {},
     val clearOutput: () -> Unit = {},
+    /** Takes the words off air and leaves the background up. */
+    val clearText: () -> Unit = {},
+    /** Takes the slide off air, its words and background both, and leaves the other layers up. */
+    val clearTextAndBackground: () -> Unit = {},
     val runMacro: (Macro) -> Unit = {},
     val clearGroup: (ClearGroup) -> Unit = {},
     /** Preview mode's Take. */
@@ -118,6 +122,12 @@ internal fun handleMainDesktopKey(keyEvent: KeyEvent, context: MainDesktopKeyCon
         }
         shortcuts.matches(ShortcutAction.CLEAR_OUTPUT, keyEvent) -> {
             actions.clearOutput(); true
+        }
+        shortcuts.matches(ShortcutAction.CLEAR_TEXT, keyEvent) -> {
+            actions.clearText(); true
+        }
+        shortcuts.matches(ShortcutAction.CLEAR_TEXT_AND_BACKGROUND, keyEvent) -> {
+            actions.clearTextAndBackground(); true
         }
         macroSlot != null -> {
             // Swallowed whether or not that slot is filled, as the quick backgrounds are.

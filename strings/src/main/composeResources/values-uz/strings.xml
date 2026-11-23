@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Jadvaldan olib tashlash</string>
     <string name="shortcut_description_go_live">Ekranga chiqarish (elementni ikki marta bosish)</string>
     <string name="shortcut_description_escape">Tozalash / koʻrsatishni toʻxtatish</string>
+    <string name="shortcut_description_clear_text">Matnni tozalash, fonni qoldirish</string>
+    <string name="shortcut_description_clear_text_and_background">Matn va fonni tozalash</string>
     <string name="shortcut_description_prev_verse">Oldingi oyat</string>
     <string name="shortcut_description_next_verse">Keyingi oyat</string>
     <string name="shortcut_description_prev_chapter">Oldingi bob</string>

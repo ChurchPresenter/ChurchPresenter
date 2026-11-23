@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">कार्यक्रम से हटाएँ</string>
     <string name="shortcut_description_go_live">लाइव करें (आइटम पर डबल-क्लिक)</string>
     <string name="shortcut_description_escape">साफ़ करें / प्रस्तुति रोकें</string>
+    <string name="shortcut_description_clear_text">टेक्स्ट साफ़ करें, पृष्ठभूमि रखें</string>
+    <string name="shortcut_description_clear_text_and_background">टेक्स्ट और पृष्ठभूमि साफ़ करें</string>
     <string name="shortcut_description_prev_verse">पिछला वचन</string>
     <string name="shortcut_description_next_verse">अगला वचन</string>
     <string name="shortcut_description_prev_chapter">पिछला अध्याय</string>

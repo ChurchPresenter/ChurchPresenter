@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Ondoa kwenye Ratiba</string>
     <string name="shortcut_description_go_live">Onyesha Live (bofya kipengee mara mbili)</string>
     <string name="shortcut_description_escape">Futa / Acha Kuwasilisha</string>
+    <string name="shortcut_description_clear_text">Futa Maandishi, Acha Mandharinyuma</string>
+    <string name="shortcut_description_clear_text_and_background">Futa Maandishi na Mandharinyuma</string>
     <string name="shortcut_description_prev_verse">Mstari wa Nyuma</string>
     <string name="shortcut_description_next_verse">Mstari Unaofuata</string>
     <string name="shortcut_description_prev_chapter">Sura ya Nyuma</string>

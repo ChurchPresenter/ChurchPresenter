@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">从程序单移除</string>
     <string name="shortcut_description_go_live">上屏（双击项目）</string>
     <string name="shortcut_description_escape">清除画面/停止投放</string>
+    <string name="shortcut_description_clear_text">清除文字,保留背景</string>
+    <string name="shortcut_description_clear_text_and_background">清除文字和背景</string>
     <string name="shortcut_description_prev_verse">上一节</string>
     <string name="shortcut_description_next_verse">下一节</string>
     <string name="shortcut_description_prev_chapter">上一章</string>

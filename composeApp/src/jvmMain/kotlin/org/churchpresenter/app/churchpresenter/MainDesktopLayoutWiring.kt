@@ -8,6 +8,9 @@ import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.companionsurface.CompanionSurfacePanel
 import org.churchpresenter.liveoutput.clearFromOperator
 import org.churchpresenter.liveoutput.clearGroup
+import org.churchpresenter.liveoutput.clearLayer
+import org.churchpresenter.liveoutput.clearTextOnly
+import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.schedule.redo
 import org.churchpresenter.schedule.undo
 import org.churchpresenter.sharedui.models.Presenting
@@ -91,6 +94,8 @@ internal fun MainDesktopScope.keyContext() = MainDesktopKeyContext(
         redo = { scheduleViewModel.redo() },
         pickQuickBackground = onQuickBackgroundPicked,
         clearOutput = ::clearOutput,
+        clearText = { presenterManager.clearTextOnly() },
+        clearTextAndBackground = { presenterManager.clearLayer(Layer.SLIDE) },
         runMacro = live.onRunMacro,
         clearGroup = { presenterManager.clearGroup(it) },
         take = { presenterManager.previewBus.take() },

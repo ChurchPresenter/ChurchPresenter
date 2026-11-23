@@ -526,6 +526,8 @@
     <string name="shortcut_description_remove_from_schedule">Odebrat z plánu</string>
     <string name="shortcut_description_go_live">Živě (dvojklik)</string>
     <string name="shortcut_description_escape">Vymazat / Zastavit</string>
+    <string name="shortcut_description_clear_text">Vymazat text, ponechat pozadí</string>
+    <string name="shortcut_description_clear_text_and_background">Vymazat text i pozadí</string>
     <string name="shortcut_description_prev_verse">Předchozí verš</string>
     <string name="shortcut_description_next_verse">Další verš</string>
     <string name="shortcut_description_prev_chapter">Předchozí kapitola</string>

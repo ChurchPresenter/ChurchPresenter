@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Fjern fra kjøreplan</string>
     <string name="shortcut_description_go_live">Gå live (dobbeltklikk på element)</string>
     <string name="shortcut_description_escape">Tøm / stopp visning</string>
+    <string name="shortcut_description_clear_text">Tøm tekst, behold bakgrunn</string>
+    <string name="shortcut_description_clear_text_and_background">Tøm tekst og bakgrunn</string>
     <string name="shortcut_description_prev_verse">Forrige vers</string>
     <string name="shortcut_description_next_verse">Neste vers</string>
     <string name="shortcut_description_prev_chapter">Forrige kapittel</string>

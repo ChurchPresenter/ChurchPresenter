@@ -101,6 +101,8 @@
     <string name="shortcut_description_remove_from_schedule">Odstrániť z programu</string>
     <string name="shortcut_description_go_live">Spustiť naživo (dvojklik na položku)</string>
     <string name="shortcut_description_escape">Vymazať / zastaviť prezentáciu</string>
+    <string name="shortcut_description_clear_text">Vymazať text, ponechať pozadie</string>
+    <string name="shortcut_description_clear_text_and_background">Vymazať text aj pozadie</string>
     <string name="shortcut_description_prev_verse">Predchádzajúci verš</string>
     <string name="shortcut_description_next_verse">Nasledujúci verš</string>
     <string name="shortcut_description_prev_chapter">Predchádzajúca kapitola</string>

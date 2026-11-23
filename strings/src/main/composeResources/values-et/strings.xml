@@ -126,6 +126,8 @@
     <string name="shortcut_description_remove_from_schedule">Eemalda kavast</string>
     <string name="shortcut_description_go_live">Mine eetrisse (topeltklõps elemendil)</string>
     <string name="shortcut_description_escape">Tühjenda / peata esitamine</string>
+    <string name="shortcut_description_clear_text">Tühjenda tekst, jäta taust</string>
+    <string name="shortcut_description_clear_text_and_background">Tühjenda tekst ja taust</string>
     <string name="shortcut_description_prev_verse">Eelmine salm</string>
     <string name="shortcut_description_next_verse">Järgmine salm</string>
     <string name="shortcut_description_prev_chapter">Eelmine peatükk</string>
