@@ -32,7 +32,7 @@ import org.churchpresenter.sharedui.models.ShortcutScope
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.separateThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -136,7 +136,7 @@ class KeyboardShortcutsDialogScreenshotTest {
         name: String,
         settings: AppSettings = AppSettings(),
         drive: SkikoComposeUiTest.() -> Unit = {},
-    ) = separateThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         runSkikoComposeUiTest(size = Size(DIALOG_WIDTH, DIALOG_HEIGHT), density = Density(1f)) {
             setContent {
                 PinnedFonts {

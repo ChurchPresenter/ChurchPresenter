@@ -43,13 +43,13 @@ class CompanionSatelliteViewModel {
     private val clients = mutableMapOf<CompanionSurfaceSlot, CompanionSatelliteClient>()
     private val activeParams = mutableMapOf<CompanionSurfaceSlot, SlotRegistrationParams>()
 
-    private val _connectionStates = mutableStateMapOf<CompanionSurfaceSlot, CompanionConnectionUiState>()
-    val connectionStates: Map<CompanionSurfaceSlot, CompanionConnectionUiState> get() = _connectionStates
+    internal val connectionStatesState = mutableStateMapOf<CompanionSurfaceSlot, CompanionConnectionUiState>()
+    val connectionStates: Map<CompanionSurfaceSlot, CompanionConnectionUiState> get() = connectionStatesState
 
     /** Last *settled* (non-[CompanionConnectionStatus.CONNECTING]) status per slot — used to dedupe
      * repeated failure telemetry. Companion's reconnect loop cycles CONNECTING/ERROR every
      * [CompanionSatelliteSettings.reconnectDelayMs] while a host stays unreachable, and CONNECTING
-     * is written into [_connectionStates] on every cycle, so comparing against the raw previous
+     * is written into [connectionStatesState] on every cycle, so comparing against the raw previous
      * state would treat every retry's ERROR as "new". Comparing against this map instead means a
      * failure episode is reported once, stays silent through retries, and reports again only after
      * a genuine recovery (CONNECTED) precedes the next failure. */
@@ -120,7 +120,7 @@ class CompanionSatelliteViewModel {
         val slot = CompanionSurfaceSlot(connectionId, placement)
         clients.remove(slot)?.dispose()
         activeParams.remove(slot)
-        _connectionStates.remove(slot)
+        connectionStatesState.remove(slot)
         _lastSettledStatus.remove(slot)
         _buttons.remove(slot)
     }
@@ -134,7 +134,7 @@ class CompanionSatelliteViewModel {
         clients.values.forEach { it.dispose() }
         clients.clear()
         activeParams.clear()
-        _connectionStates.clear()
+        connectionStatesState.clear()
         _lastSettledStatus.clear()
         _buttons.clear()
     }
@@ -162,7 +162,7 @@ class CompanionSatelliteViewModel {
     private fun clientFor(slot: CompanionSurfaceSlot): CompanionSatelliteClient = clients.getOrPut(slot) {
         CompanionSatelliteClient(
             onStatusChanged = { status, error ->
-                _connectionStates[slot] = (_connectionStates[slot] ?: CompanionConnectionUiState(slot))
+                connectionStatesState[slot] = (connectionStatesState[slot] ?: CompanionConnectionUiState(slot))
                     .copy(status = status, errorMessage = error ?: "")
                 if (status != CompanionConnectionStatus.CONNECTING) {
                     val previousSettled = _lastSettledStatus[slot]
@@ -217,7 +217,7 @@ class CompanionSatelliteViewModel {
                 repeat(count) { list.add(CompanionButtonState(index = it)) }
             },
             onBrightnessChanged = { percent ->
-                _connectionStates[slot] = (_connectionStates[slot] ?: CompanionConnectionUiState(slot))
+                connectionStatesState[slot] = (connectionStatesState[slot] ?: CompanionConnectionUiState(slot))
                     .copy(brightness = percent)
             }
         )

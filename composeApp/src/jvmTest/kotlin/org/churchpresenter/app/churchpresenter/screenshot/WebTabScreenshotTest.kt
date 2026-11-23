@@ -23,7 +23,7 @@ import org.churchpresenter.app.churchpresenter.tabs.webTab
 import org.churchpresenter.liveoutput.PresenterManager
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 /**
  * Every state of the Web tab, in both themes.
@@ -51,7 +51,7 @@ class WebTabScreenshotTest {
         schedule: Boolean = true,
         width: Dp? = null,
         drive: ComposeUiTest.(PresenterManager) -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         webTab(
             settings = settings,
             selectedWebsiteItem = selectedWebsiteItem,

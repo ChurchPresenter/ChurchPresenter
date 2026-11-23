@@ -30,7 +30,7 @@ import java.net.Socket
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -163,7 +163,7 @@ class CompanionSatelliteSettingsTabScreenshotTest {
         name: String,
         registration: Registration,
         expected: CompanionConnectionStatus,
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         val fake = FakeCompanion(registration).also { fakes += it; it.start() }
         val model = viewModel()
         model.connectAll(connectionFor(host = LOOPBACK, port = fake.port))
@@ -176,7 +176,7 @@ class CompanionSatelliteSettingsTabScreenshotTest {
         settings: AppSettings,
         viewModel: CompanionSatelliteViewModel? = null,
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file -> render(mode, file, settings, viewModel, drive) }
+    ) = bothThemes(SECTION, name) { mode, file -> render(mode, file, settings, viewModel, drive) }
 
     private fun render(
         mode: ThemeMode,

@@ -15,7 +15,7 @@ import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -32,7 +32,7 @@ import org.churchpresenter.sharedui.screenshot.PinnedFonts
 class CustomizeThemeDialogScreenshotTest {
 
     private fun shoot(name: String, choice: ThemeCustomizationChoice = DEFAULT) =
-        stackedThemes(SECTION, name) { mode, file ->
+        bothThemes(SECTION, name) { mode, file ->
             runComposeUiTest {
                 setContent {
                     PinnedFonts {

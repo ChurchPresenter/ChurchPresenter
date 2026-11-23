@@ -76,7 +76,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -309,7 +309,7 @@ class LottieBandScreenshotTest {
         Strings.setLocale(Locale.ENGLISH)
         // The generator reopens on whatever was saved last; the shot wants the seed.
         File(System.getProperty("user.home"), LAST_CONFIG).delete()
-        stackedThemes(SECTION, name) { mode, file ->
+        bothThemes(SECTION, name) { mode, file ->
             runSkikoComposeUiTest(size = window, density = Density(1f)) {
                 setContent {
                     PinnedFonts {

@@ -74,7 +74,7 @@ import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.sharedui.screenshot.PinnedRecentColors
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -421,7 +421,7 @@ class ProfilesTabScreenshotTest {
         settings: AppSettings = library(),
         rootIndex: Int = 0,
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         TestSingletons.latchSkikoHostOs()
         runSkikoComposeUiTest(size = Size(WIDTH, HEIGHT), density = Density(1f)) {
             setContent {

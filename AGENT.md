@@ -350,7 +350,7 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
 ### Screenshots
 - **Committed, beside the module that shoots them** — `composeApp/screenshots/` for the app's tabs,
   dialogs and outputs, `<module>/screenshots/` for each module's own (`shared-ui`, `slides`, `media`).
-  The harness (`ScreenshotSupport`, `captureComponent`, `stackedThemes`) is `:shared-ui`'s test
+  The harness (`ScreenshotSupport`, `captureComponent`, `bothThemes`) is `:shared-ui`'s test
   fixtures, used by all of them. They are what
   a reviewer opens and approves before a UI change merges. **Re-record and commit the images
   whenever a state you touched changed.**
@@ -376,15 +376,16 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
   capture is taken inside `PinnedFonts` (`:shared-ui`'s test fixtures), which answers the system
   font's name with bundled Inter and JetBrains Mono. A new suite wraps its `setContent` body in it;
   `captureTo` fails a capture that is not inside it.
-- Every state is shot in **both themes stacked into one image** — go through `stackedThemes` or
-  `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture written elsewhere is never
-  compared). One folder per test class. **Name the class `…ScreenshotTest`** or CI never renders it.
+- Every state is shot in **both themes, one image each** — `<name>_light.png` and `<name>_dark.png`
+  — through `bothThemes` or `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture
+  written elsewhere is never compared). One folder per test class. **Name the class
+  `…ScreenshotTest`** or CI never renders it.
 - An open popup is its own compose root: pass `rootIndex = 1`. Byte-identical captures mean a state
   was never reached (`md5 -q <module>/screenshots/<section>/*.png | sort | uniq -d`).
 - Shoot a shared composable in its own suite via `captureComponent` — in `:shared-ui` when the
   composable lives there, so its pictures sit with its code; a tab's own `private` composables stay
   private and are covered through the tab.
-- `<module>/screenshots/.parts` (per-theme halves) is git-ignored and cleaned in a `finally`;
+- `<module>/screenshots/.parts` (scratch renders) is git-ignored and cleaned in a `finally`;
   never commit it.
 - The `reg_actions` branch holds the PR-comment images; retention is `retention-days` in
   `screenshots.yml`, and `cleanup.yml` squashes the branch monthly. It is not the
