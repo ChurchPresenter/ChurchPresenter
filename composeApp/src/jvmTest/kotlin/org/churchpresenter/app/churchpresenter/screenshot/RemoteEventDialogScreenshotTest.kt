@@ -19,7 +19,7 @@ import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -46,7 +46,7 @@ class RemoteEventDialogScreenshotTest {
         isClientKnownAllowed: Boolean = false,
         isClientKnownBlocked: Boolean = false,
         isInstanceLinkFollower: Boolean = false,
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
                 PinnedFonts {

@@ -3,8 +3,13 @@
 package org.churchpresenter.companionsurface.screenshot
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.companionsatellite.CompanionConnectionStatus
+import org.churchpresenter.companionsurface.CompanionConnectionUiState
+import org.churchpresenter.companionsurface.CompanionSurfacePanel
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -21,7 +26,7 @@ import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -85,7 +90,7 @@ class CompanionSurfaceTabScreenshotTest {
         connections: List<CompanionSatelliteSettings>,
         withButtons: CompanionSatelliteViewModel.() -> Unit = {},
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         runDesktopComposeUiTest(width = WIDTH, height = HEIGHT) {
             val vm = CompanionSatelliteViewModel().also { created += it }.apply(withButtons)
             setContent {
@@ -126,9 +131,71 @@ class CompanionSurfaceTabScreenshotTest {
         waitForIdle()
     }
 
+    private fun CompanionSatelliteViewModel.status(
+        id: String,
+        status: CompanionConnectionStatus,
+        error: String = "",
+        placement: CompanionSurfacePlacement = CompanionSurfacePlacement.TAB,
+    ) {
+        val slot = CompanionSurfaceSlot(id, placement)
+        connectionStatesState[slot] = CompanionConnectionUiState(slot, status, error)
+    }
+
+    @Test
+    fun `one surface connected`() = shoot("connected", listOf(connection("a", "Sanctuary")), withButtons = {
+        seed("a", sundayButtons)
+        status("a", CompanionConnectionStatus.CONNECTED)
+    })
+
+    @Test
+    fun `one surface connecting`() = shoot("connecting", listOf(connection("a", "Sanctuary")), withButtons = {
+        seed("a", sundayButtons)
+        status("a", CompanionConnectionStatus.CONNECTING)
+    })
+
+    @Test
+    fun `one surface whose connection failed`() =
+        shoot("connection_error", listOf(connection("a", "Sanctuary")), withButtons = {
+            seed("a", sundayButtons)
+            status("a", CompanionConnectionStatus.ERROR, error = "Connection refused")
+        })
+
+    @Test
+    fun `a surface in the sidebar`() = bothThemes(SECTION, "sidebar") { mode, file ->
+        val sidebar = connection("a", "Sanctuary").copy(
+            showInTab = false,
+            showInLeftSidebar = true,
+            leftSidebarRows = 2,
+            leftSidebarColumns = 4,
+        )
+        runDesktopComposeUiTest(width = SIDEBAR_WIDTH, height = HEIGHT) {
+            val vm = CompanionSatelliteViewModel().also { created += it }
+            vm.buttonsFor(CompanionSurfaceSlot("a", CompanionSurfacePlacement.LEFT_SIDEBAR)).addAll(sundayButtons)
+            vm.status("a", CompanionConnectionStatus.CONNECTED, placement = CompanionSurfacePlacement.LEFT_SIDEBAR)
+            setContent {
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Surface(Modifier.fillMaxSize()) {
+                            CompanionSurfacePanel(
+                                connection = sidebar,
+                                placement = CompanionSurfacePlacement.LEFT_SIDEBAR,
+                                viewModel = vm,
+                                modifier = Modifier.width(SIDEBAR_WIDTH.dp),
+                                sizeToContent = true,
+                            )
+                        }
+                    }
+                }
+            }
+            waitForIdle()
+            captureTo(file)
+        }
+    }
+
     private companion object {
         const val SECTION = "companionSurfaceTab"
         const val WIDTH = 900
         const val HEIGHT = 520
+        const val SIDEBAR_WIDTH = 340
     }
 }

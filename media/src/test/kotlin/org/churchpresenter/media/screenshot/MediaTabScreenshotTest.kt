@@ -22,7 +22,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 /**
  * The Media tab's states, in both themes.
@@ -47,7 +47,7 @@ class MediaTabScreenshotTest {
         rootIndex: Int = 0,
         settings: (AppSettings) -> AppSettings = { it },
         drive: ComposeUiTest.(MediaViewModel) -> Unit = { waitForIdle() },
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         mediaTab(
             settings = settings,
             presenterManager = if (presenter) FakeMediaOutput() else null,

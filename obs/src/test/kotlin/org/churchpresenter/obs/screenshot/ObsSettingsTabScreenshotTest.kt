@@ -32,7 +32,7 @@ import org.churchpresenter.theme.ThemeMode
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -136,7 +136,7 @@ class ObsSettingsTabScreenshotTest {
         name: String,
         handshake: Handshake,
         expected: OBSWebSocketManager.ConnectionStatus,
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         val server = FakeObs(handshake).also { servers += it; it.start() }
         val manager = OBSWebSocketManager().also { managers += it }
         manager.connect(LOOPBACK, server.port, "")
@@ -148,7 +148,7 @@ class ObsSettingsTabScreenshotTest {
         name: String,
         settings: AppSettings = AppSettings(),
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         render(mode, file, settings, OBSWebSocketManager().also { managers += it }, drive)
     }
 

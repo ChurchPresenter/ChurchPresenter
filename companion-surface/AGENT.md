@@ -41,7 +41,7 @@ stays free of any UI toolkit by design, so the bitmap decoding lives here. It al
 - **No test opens a socket.** Every suite stubs `CompanionSatelliteClient`'s constructor with
   `mockkConstructor`; without it, selecting a surface connects to the configured host and the suite
   hangs rather than failing.
-- Screenshots go through `stackedThemes` and are committed under `screenshots/` — see the root
+- Screenshots go through `bothThemes` and are committed under `screenshots/` — see the root
   `AGENT.md` before re-recording them.
 
 ## Commands

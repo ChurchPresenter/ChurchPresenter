@@ -21,7 +21,7 @@ import java.io.File
 import java.time.Instant
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -41,7 +41,7 @@ class UpdateDialogScreenshotTest {
         participateInPrereleases: Boolean = false,
     ) {
         val height = updateDialogHeight(result is UpdateCheckResult.Available, isManualCheck).value
-        stackedThemes(SECTION, name) { mode, file ->
+        bothThemes(SECTION, name) { mode, file ->
             runSkikoComposeUiTest(size = Size(WIDTH, height), density = Density(1f)) {
                 setContent {
                     PinnedFonts {

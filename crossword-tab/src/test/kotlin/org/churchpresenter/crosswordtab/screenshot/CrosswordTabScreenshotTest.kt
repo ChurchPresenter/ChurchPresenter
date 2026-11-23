@@ -24,7 +24,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -45,7 +45,7 @@ class CrosswordTabScreenshotTest {
         name: String,
         width: Dp? = null,
         drive: ComposeUiTest.() -> Unit = { waitForIdle() },
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
                 PinnedFonts {

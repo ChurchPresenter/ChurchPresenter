@@ -14,7 +14,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.core.PlayerMessage
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -41,7 +41,7 @@ class SignageTabScreenshotTest {
     fun cleanUp() = world.close()
 
     private fun shoot(name: String, serverRunning: Boolean = true, vararg waitFor: String) =
-        stackedThemes(SECTION, name) { mode, file ->
+        bothThemes(SECTION, name) { mode, file ->
             runDesktopComposeUiTest(WIDTH, HEIGHT) {
                 setContent {
                     PinnedFonts {
