@@ -44,6 +44,11 @@ data class VideoPsalmBook(
  *  - **`ID` runs out.** Real books stop writing it past the ninth verse, so verses ten onward all
  *    claim to be `ID` 1. Numbering each section as the first free slot of its kind restores 10, 11
  *    and 12 instead of stacking three "Verse 1"s.
+ *  - **A song brought in from EasyWorship is one entry per line.** Each line is an entry of its
+ *    own, its `ID` the line's number, under an empty entry that says which section the lines make
+ *    up (`Tag:1` for the chorus, `ID:2` for the second verse). Read entry by entry, the section
+ *    names are lost and a repeated line — every "Halleluyah" after the first — is taken for a
+ *    repeat and dropped, so the lines are put back together under the empty entry first.
  *  - **The last verse carries the book's end marker** — a line of `***` or `<><><>` — which is
  *    punctuation for the operator, not a lyric.
  *  - **The text carries the book's own styling.** Inline color, font and size tags are styling from
@@ -169,13 +174,15 @@ object VideoPsalmConverter {
         val used = mutableSetOf<String>()
         val primary = mutableListOf<SongSection>()
         val secondary = mutableListOf<SongSection>()
-        for (verse in verses) {
-            val lines = linesOf(verse.text("Text"), VideoPsalmText.bodyFontOf(verse).ifEmpty { bodyFont }, typedFor)
+        val entries = verses.map { verse ->
+            Entry(verse, linesOf(verse.text("Text"), VideoPsalmText.bodyFontOf(verse).ifEmpty { bodyFont }, typedFor))
+        }
+        for ((labelFrom, lines) in blocksOf(entries)) {
             // A chorus stored once per singing is one section: the repeats are matched on their
             // lyrics — both languages of them, since a verse that differs only in translation is
             // still a different verse.
             if (lines.isEmpty() || !alreadySung.add(lines.joinToString("\n").lowercase())) continue
-            val label = labelOf(verse, used)
+            val label = labelOf(labelFrom, used)
             val rule = lines.indexOfFirst { languageSeparator.matches(it) }
             primary.add(SongSection(label, if (rule < 0) lines else lines.take(rule)))
             secondary.add(SongSection(label, if (rule < 0) emptyList() else lines.drop(rule + 1)))
@@ -194,11 +201,54 @@ object VideoPsalmConverter {
         )
     }
 
-    /** This verse's kind and the first number of that kind [used] has not claimed. */
+    /** One entry of `Verses` with the lyric lines it holds — none for an empty slide. */
+    private class Entry(val verse: LooseJson, val lines: List<String>) {
+        val id: Int = verse.text("ID").toIntOrNull() ?: 1
+        val untagged: Boolean = (verse.text("Tag").toIntOrNull() ?: 0) == 0
+
+        /** [next] is the line after this one, cut out of the same EasyWorship slide. */
+        fun continuedBy(next: Entry): Boolean =
+            untagged && next.untagged && next.lines.isNotEmpty() &&
+                (next.id == id + lines.size || (lines.size <= 2 && next.id == id + 1))
+    }
+
+    /**
+     * The sections a song's entries make, each with the entry that names it.
+     *
+     * A song carried over from EasyWorship has every line as an entry of its own, numbered on from
+     * the line before, under an empty entry that names the section they make up — see the class
+     * doc. When a song has any such run, each run is put back together under the empty entry above
+     * it; otherwise every entry is its own section, as VideoPsalm wrote it.
+     */
+    private fun blocksOf(entries: List<Entry>): List<Pair<LooseJson, List<String>>> {
+        val runs = mutableListOf<Pair<Entry?, MutableList<MutableList<Entry>>>>(null to mutableListOf())
+        for (entry in entries) {
+            val chains = runs.last().second
+            when {
+                entry.lines.isEmpty() -> runs.add(entry to mutableListOf())
+                chains.lastOrNull()?.last()?.continuedBy(entry) == true -> chains.last().add(entry)
+                else -> chains.add(mutableListOf(entry))
+            }
+        }
+        val flattened = runs.any { (header, chains) -> header != null && chains.any { it.size > 1 } }
+        if (!flattened) return entries.map { it.verse to it.lines }
+        return runs.flatMap { (header, chains) ->
+            chains.mapIndexed { index, chain ->
+                val namedBy = if (index == 0 && header != null && chain.first().untagged) header else chain.first()
+                namedBy.verse to chain.flatMap { it.lines }
+            }
+        }
+    }
+
+    /**
+     * This verse's kind and the first number of that kind [used] has not claimed.
+     *
+     * VideoPsalm shows an `ID` of 0 as no number at all, so it is counted from 1 like a missing one.
+     */
     private fun labelOf(verse: LooseJson, used: MutableSet<String>): String {
         val tag = verse.text("Tag").toIntOrNull() ?: 0
         val name = tagNames.getOrElse(tag) { "$NUMBERED_SECTION $tag" }
-        var number = verse.text("ID").toIntOrNull() ?: 1
+        var number = (verse.text("ID").toIntOrNull() ?: 1).coerceAtLeast(1)
         while (!used.add("$name $number")) number++
         return "$name $number"
     }
