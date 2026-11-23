@@ -4,6 +4,12 @@
  */
 package org.churchpresenter.profiles
 
+import org.churchpresenter.theme.components.sliderLook
+import org.churchpresenter.theme.components.drawSlider
+import org.churchpresenter.theme.components.COMPACT_SLIDER_TRACK
+import org.churchpresenter.theme.components.COMPACT_SLIDER_THUMB
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -277,20 +282,10 @@ internal fun PanelSlider(label: String, readout: String, value: Int, max: Int, o
                 },
             contentAlignment = Alignment.CenterStart,
         ) {
-            Box(
-                Modifier.fillMaxWidth().height(4.dp).clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-            )
-            val fraction = if (max == 0) 0f else value.toFloat() / max
-            Box(
-                Modifier.fillMaxWidth(fraction).height(4.dp).clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-            Box(
-                Modifier.fillMaxWidth(fraction).fillMaxHeight(),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Box(Modifier.size(10.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onPrimary))
+            val fraction = if (max == 0) 0f else (value.toFloat() / max).coerceIn(0f, 1f)
+            val look = sliderLook()
+            Canvas(Modifier.fillMaxSize()) {
+                drawSlider(look, fraction = fraction, track = COMPACT_SLIDER_TRACK, thumb = COMPACT_SLIDER_THUMB)
             }
         }
     }

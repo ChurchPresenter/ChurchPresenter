@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -35,6 +37,9 @@ import org.churchpresenter.theme.flatDisabled
 
 private const val DISABLED_INK_ALPHA = 0.35f
 private val KEY_INSET = 2.dp
+private const val TRAY_ALPHA = 0.14f
+private const val TRAY_HOVER_ALPHA = 0.2f
+private const val TRAY_STRONG_ALPHA = 0.26f
 private val KEY_RADIUS = 8.dp
 private val OPEN_DOT = 4.dp
 private val OPEN_DOT_INSET = 3.dp
@@ -52,6 +57,15 @@ enum class ToolbarKeyStyle {
      * icon while its panel is open, so the open one can be told apart at a glance.
      */
     PANEL_TOGGLE,
+
+    /**
+     * A key in a tray of actions: always a flat tint of the primary color with the icon in it,
+     * deeper under the pointer and while [open], with the accent dot while its panel is open.
+     */
+    TONAL,
+
+    /** [TONAL] in the error color: the one destructive key in a tray, like Clear all. */
+    DANGER,
 }
 
 /**
@@ -70,7 +84,7 @@ fun ToolbarKey(
     enabled: Boolean = true,
     buttonSize: Dp = 36.dp,
     iconSize: Dp = 18.dp,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
+    tint: Color = Color.Unspecified,
 ) {
     ConditionalTooltipArea(
         tooltip = {
@@ -94,9 +108,21 @@ fun ToolbarKey(
         val hovered by interaction.collectIsHoveredAsState()
         val pressed by interaction.collectIsPressedAsState()
         val raisedToggle = style == ToolbarKeyStyle.PANEL_TOGGLE && (open || hovered || pressed)
+        val trayColor = when (style) {
+            ToolbarKeyStyle.TONAL -> MaterialTheme.colorScheme.primary
+            ToolbarKeyStyle.DANGER -> MaterialTheme.colorScheme.error
+            else -> Color.Unspecified
+        }
+        val ink = tint.takeOrElse { trayColor.takeOrElse { MaterialTheme.colorScheme.onSurface } }
+        val trayAlpha = when {
+            pressed || open -> TRAY_STRONG_ALPHA
+            hovered -> TRAY_HOVER_ALPHA
+            else -> TRAY_ALPHA
+        }
         val surface = when {
             !enabled && style == ToolbarKeyStyle.RAISED -> Modifier.flatDisabled(shape, palette)
             !enabled -> Modifier.clip(shape)
+            trayColor.isSpecified -> Modifier.clip(shape).background(trayColor.copy(alpha = trayAlpha))
             style == ToolbarKeyStyle.RAISED ->
                 Modifier.raised(shape, palette.key, palette, pressed, hovered, lift = 2.dp)
             raisedToggle -> Modifier.raisedHover(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
@@ -126,9 +152,9 @@ fun ToolbarKey(
                 painter = painter,
                 contentDescription = text,
                 modifier = Modifier.size(iconSize),
-                colorFilter = ColorFilter.tint(if (enabled) tint else tint.copy(alpha = DISABLED_INK_ALPHA)),
+                colorFilter = ColorFilter.tint(if (enabled) ink else ink.copy(alpha = DISABLED_INK_ALPHA)),
             )
-            if (style == ToolbarKeyStyle.PANEL_TOGGLE && open) {
+            if (open && (style == ToolbarKeyStyle.PANEL_TOGGLE || style == ToolbarKeyStyle.TONAL)) {
                 Box(
                     Modifier
                         .align(Alignment.BottomCenter)

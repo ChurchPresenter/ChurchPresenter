@@ -103,6 +103,8 @@ internal fun MediaTabScope.MediaTopCard(viewModel: MediaViewModel) {
         MediaRecentBar(viewModel)
 
         MediaControlsBar(viewModel)
+
+        MediaSeekRow(viewModel)
     }
 }
 

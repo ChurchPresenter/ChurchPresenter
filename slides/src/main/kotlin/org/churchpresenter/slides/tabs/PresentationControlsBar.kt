@@ -1,5 +1,6 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.sharedui.composables.transportPill
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Surface
@@ -168,7 +169,7 @@ internal fun PresentationTabScope.PresentationControlsBar(viewModel: Presentatio
 @Composable
 private fun PresentationTabScope.PresentationTransport(viewModel: PresentationViewModel) {
     // Transport (inner gap: 4dp)
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(Modifier.transportPill(), Arrangement.spacedBy(2.dp), Alignment.CenterVertically) {
         TooltipArea(
             tooltip = {
                 Surface(
@@ -189,7 +190,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
                 offset = DpOffset(0.dp, 4.dp),
             )
         ) {
-            KeyIconButton(onClick = { goPrevious(viewModel) }, modifier = Modifier.size(30.dp)) {
+            KeyIconButton(onClick = { goPrevious(viewModel) }, modifier = Modifier.size(36.dp), shape = CircleShape) {
                 Icon(
                     painterResource(IconRes.drawable.ic_skip_previous),
                     contentDescription = stringResource(Res.string.previous_image),
@@ -221,7 +222,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
             RaisedIconButton(
                 onClick = { viewModel.togglePlayPause() },
                 enabled = viewModel.slideFiles.isNotEmpty(),
-                modifier = Modifier.size(38.dp),
+                modifier = Modifier.size(44.dp),
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -231,7 +232,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
                 Icon(
                     painterResource(if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                     contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                    modifier = Modifier.size(15.dp),
+                    modifier = Modifier.size(17.dp),
                 )
             }
         }
@@ -255,7 +256,7 @@ private fun PresentationTabScope.PresentationTransport(viewModel: PresentationVi
                 offset = DpOffset(0.dp, 4.dp),
             )
         ) {
-            KeyIconButton(onClick = { goNext(viewModel) }, modifier = Modifier.size(30.dp)) {
+            KeyIconButton(onClick = { goNext(viewModel) }, modifier = Modifier.size(36.dp), shape = CircleShape) {
                 Icon(
                     painterResource(IconRes.drawable.ic_skip_next),
                     contentDescription = stringResource(Res.string.next_image),
@@ -338,7 +339,7 @@ private fun PresentationTabScope.PresentationLoopButton(viewModel: PresentationV
                     presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping),
                 ) }
             },
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(32.dp),
             colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer

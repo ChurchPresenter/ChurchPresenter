@@ -5,6 +5,7 @@
 
 package org.churchpresenter.media.tabs
 
+import org.churchpresenter.sharedui.composables.transportPill
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.sharedui.utils.sharedScaleMode
 import org.churchpresenter.sharedui.utils.ScaleButtonContent
@@ -132,14 +133,14 @@ internal fun MediaTabScope.MediaControlsBar(viewModel: MediaViewModel) {
     }
 }
 
-/** Raised keys, Play the biggest and lit. */
+/** The transport pill: round keys on one rounded track, Play the biggest and lit. */
 @Composable
 private fun MediaTabScope.MediaTransport(
     viewModel: MediaViewModel,
     keyColors: IconButtonColors,
     litKeyColors: IconButtonColors,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(Modifier.transportPill(), Arrangement.spacedBy(2.dp), Alignment.CenterVertically) {
         TooltipArea(
             tooltip = { TransportTooltip(stringResource(Res.string.media_seek_backward)) },
             tooltipPlacement = TooltipPlacement.ComponentRect(
@@ -150,7 +151,8 @@ private fun MediaTabScope.MediaTransport(
             RaisedIconButton(
                 onClick = { viewModel.position.seekBackward() },
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
+                modifier = Modifier.size(MEDIA_PILL_KEY_SIZE),
+                shape = CircleShape,
                 colors = keyColors
             ) {
                 Icon(
@@ -171,7 +173,8 @@ private fun MediaTabScope.MediaTransport(
             RaisedIconButton(
                 onClick = { viewModel.stop() },
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
+                modifier = Modifier.size(MEDIA_PILL_KEY_SIZE),
+                shape = CircleShape,
                 colors = keyColors
             ) {
                 Icon(
@@ -191,7 +194,8 @@ private fun MediaTabScope.MediaTransport(
             RaisedIconButton(
                 onClick = { viewModel.position.seekForward() },
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
+                modifier = Modifier.size(MEDIA_PILL_KEY_SIZE),
+                shape = CircleShape,
                 colors = keyColors
             ) {
                 Icon(
@@ -225,7 +229,7 @@ private fun MediaTabScope.MediaPlayKey(viewModel: MediaViewModel, litKeyColors: 
                     if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
                 ),
                 contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                modifier = Modifier.size(15.dp),
+                modifier = Modifier.size(17.dp),
             )
         }
     }
@@ -430,6 +434,7 @@ private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel, keyColors: Icon
             }
         }
         SlimSlider(
+            compact = true,
             value = if (viewModel.isMuted) 0f else viewModel.volume,
             onValueChange = { viewModel.audio.setVolume(it) },
             valueRange = 0f..1f,

@@ -30,11 +30,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.theme.components.drawSlider
+import org.churchpresenter.theme.components.sliderLook
 
 /**
- * A slim, modern slider: a 5px rounded track with a `primary` gradient fill for the selected
- * portion, and a handle that fades and scales in only on hover or drag, so the bar stays clean at
- * rest. Tap or drag anywhere on the track to set the value.
+ * A slim slider in the app's slider look (`drawSlider` in `:theme`): a flat 6dp track, the accent
+ * for the selected portion, and a white handle ringed in the accent. Tap or drag anywhere on the
+ * track to set the value.
  *
  * The current value is shown as a numeric label at the trailing end — pass [trailingLabel] formatted
  * for the unit (e.g. "80%").
@@ -63,14 +65,10 @@ fun SlimSlider(
     val hovered by interactionSource.collectIsHoveredAsState()
     var dragging by remember { mutableStateOf(false) }
     val active = enabled && (hovered || dragging)
-    val handleAlpha by animateFloatAsState(if (active) 1f else 0f, label = "slimHandleAlpha")
-    val handleScale by animateFloatAsState(if (active) 1f else 0.35f, label = "slimHandleScale")
+    val handleScale by animateFloatAsState(if (active) HANDLE_ACTIVE_SCALE else 1f, label = "slimHandleScale")
 
-    val primary = MaterialTheme.colorScheme.primary
-    val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
-    val playedStart = primary.copy(alpha = 0.65f)
     // Hoisted for the Canvas below, which cannot read the theme itself.
-    val handleColor = MaterialTheme.colorScheme.onPrimary
+    val look = sliderLook()
 
     fun seekToX(x: Float, width: Int) {
         if (!enabled || width <= 0) return
@@ -105,24 +103,7 @@ fun SlimSlider(
             contentAlignment = Alignment.CenterStart
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val trackH = 5.dp.toPx()
-                val cy = size.height / 2f
-                val top = cy - trackH / 2f
-                val radius = CornerRadius(trackH / 2f, trackH / 2f)
-                drawRoundRect(color = trackColor, topLeft = Offset(0f, top), size = Size(size.width, trackH), cornerRadius = radius)
-                if (fraction > 0f) {
-                    val playedW = size.width * fraction
-                    drawRoundRect(
-                        brush = Brush.horizontalGradient(listOf(playedStart, primary), startX = 0f, endX = playedW.coerceAtLeast(trackH)),
-                        topLeft = Offset(0f, top),
-                        size = Size(playedW, trackH),
-                        cornerRadius = radius
-                    )
-                }
-                if (handleAlpha > 0.01f) {
-                    val hx = (size.width * fraction).coerceIn(0f, size.width)
-                    drawCircle(color = handleColor.copy(alpha = handleAlpha), radius = 6.dp.toPx() * handleScale, center = Offset(hx, cy))
-                }
+                drawSlider(look, fraction = fraction, thumbScale = handleScale)
             }
         }
         if (trailingLabel != null) {
@@ -137,3 +118,5 @@ fun SlimSlider(
         }
     }
 }
+
+private const val HANDLE_ACTIVE_SCALE = 1.15f

@@ -5,6 +5,7 @@
 
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.sharedui.composables.transportPill
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
@@ -135,13 +136,10 @@ internal fun PicturesTabScope.PicturesControlsBar(viewModel: PicturesViewModel) 
     }
 }
 
-/** Raised keys either side of the biggest one, Play. */
+/** The transport pill: round keys on one rounded track, Play the biggest and lit -- as on the Media tab. */
 @Composable
 private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neutralKeyColors: IconButtonColors) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
+    Row(Modifier.transportPill(), Arrangement.spacedBy(2.dp), Alignment.CenterVertically) {
         TooltipArea(
             tooltip = {
                 Surface(
@@ -166,6 +164,7 @@ private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neu
                 onClick = { viewModel.previousImage(onInstanceLinkSendPreviousPicture) },
                 enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendPreviousPicture != null,
                 modifier = Modifier.size(PICTURES_TRANSPORT_KEY_SIZE),
+                shape = CircleShape,
                 colors = neutralKeyColors
             ) {
                 Icon(
@@ -200,6 +199,7 @@ private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neu
                 onClick = { viewModel.nextImage(onInstanceLinkSendNextPicture) },
                 enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendNextPicture != null,
                 modifier = Modifier.size(PICTURES_TRANSPORT_KEY_SIZE),
+                shape = CircleShape,
                 colors = neutralKeyColors
             ) {
                 Icon(
@@ -250,7 +250,7 @@ private fun PicturesTabScope.PicturesPlayKey(viewModel: PicturesViewModel) {
                     if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play,
                 ),
                 contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                modifier = Modifier.size(15.dp)
+                modifier = Modifier.size(17.dp)
             )
         }
     }

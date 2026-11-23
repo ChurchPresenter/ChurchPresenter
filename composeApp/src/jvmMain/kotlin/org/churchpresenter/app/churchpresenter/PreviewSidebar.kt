@@ -74,9 +74,12 @@ import org.churchpresenter.liveoutput.preview.LivePreviewPanel
 import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
 import org.churchpresenter.liveoutput.preview.ProfileSetsPopover
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.previewOutputSize
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.CompanionSatelliteSettings
@@ -335,28 +338,39 @@ internal fun SidebarButtons(
 ) {
     // Wraps rather than clips: the panel is resizable.
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    // The tray: one panel holding every preview action, so they read as one set.
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .shadow(1.dp, TRAY_SHAPE)
+            .background(MaterialTheme.colorScheme.surface, TRAY_SHAPE)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, TRAY_SHAPE)
+            .padding(TRAY_GAP),
+        horizontalArrangement = Arrangement.spacedBy(TRAY_GAP),
+        verticalArrangement = Arrangement.spacedBy(TRAY_GAP),
     ) {
-        TooltipIconButton(
+        ToolbarKey(
             painter = rememberVectorPainter(Icons.Default.Monitor),
             text = stringResource(Res.string.tooltip_toggle_displays),
             onClick = { presenterManager.togglePresenterWindow() },
-            buttonSize = 36.dp,
+            style = ToolbarKeyStyle.TONAL,
+            buttonSize = TRAY_KEY,
+            iconSize = TRAY_ICON,
             modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
-            iconTint = if (presenterManager.showPresenterWindow.value)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            // Dimmed while the output windows are hidden, as before.
+            tint = if (presenterManager.showPresenterWindow.value) {
+                Color.Unspecified
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
-        TooltipIconButton(
+        ToolbarKey(
             painter = painterResource(IconRes.drawable.ic_close),
             text = stringResource(Res.string.tooltip_clear_display),
             onClick = onClearDisplay,
-            buttonSize = 36.dp,
+            style = ToolbarKeyStyle.DANGER,
+            buttonSize = TRAY_KEY,
+            iconSize = TRAY_ICON,
             modifier = Modifier.guideTarget(GuideTargets.CLEAR_OUTPUT),
-            iconTint = MaterialTheme.colorScheme.error
         )
         PreviewSettingsButton(appSettings.projectionSettings, onEditPreviewLayout) { updated ->
             onSettingsChange { s -> s.copy(projectionSettings = updated) }
@@ -475,11 +489,14 @@ private fun ClearLayersButton(
     var menuOpen by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf(false) }
     Box {
-        LiveToolButton(
-            tool = LiveTool.CLEAR,
+        ToolbarKey(
             painter = rememberVectorPainter(Icons.Outlined.LayersClear),
-            label = stringResource(Res.string.tooltip_clear_layers),
+            text = stringResource(Res.string.tooltip_clear_layers),
             onClick = { menuOpen = true },
+            style = ToolbarKeyStyle.TONAL,
+            open = menuOpen,
+            buttonSize = TRAY_KEY,
+            iconSize = TRAY_ICON,
             modifier = Modifier.testTag(CLEAR_LAYERS_BUTTON_TAG),
         )
         AppDropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
@@ -518,10 +535,10 @@ private fun ClearTextButton(presenterManager: PresenterManager) {
         painter = rememberVectorPainter(if (cleared) Icons.Outlined.TextFields else Icons.Outlined.FormatClear),
         text = stringResource(if (cleared) Res.string.tooltip_restore_text else Res.string.tooltip_clear_text),
         onClick = { if (cleared) presenterManager.restoreText() else presenterManager.clearTextOnly() },
-        style = ToolbarKeyStyle.PANEL_TOGGLE,
+        style = ToolbarKeyStyle.TONAL,
         open = cleared,
-        buttonSize = 40.dp,
-        tint = if (cleared) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        buttonSize = TRAY_KEY,
+        iconSize = TRAY_ICON,
     )
 }
 
@@ -538,9 +555,10 @@ private fun PreviewSettingsButton(
             painter = rememberVectorPainter(Icons.Outlined.DisplaySettings),
             text = stringResource(Res.string.tooltip_preview_settings),
             onClick = { open = true },
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
+            style = ToolbarKeyStyle.TONAL,
             open = open,
-            buttonSize = 40.dp,
+            buttonSize = TRAY_KEY,
+            iconSize = TRAY_ICON,
         )
         PreviewGroupsPopover(
             expanded = open,
@@ -561,14 +579,23 @@ private fun ProfileSetsButton(proj: ProjectionSettings, onChange: (ProjectionSet
             painter = rememberVectorPainter(Icons.Outlined.SwitchAccount),
             text = stringResource(Res.string.profile_sets),
             onClick = { open = true },
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
+            style = ToolbarKeyStyle.TONAL,
             open = open,
-            buttonSize = 40.dp,
+            buttonSize = TRAY_KEY,
+            iconSize = TRAY_ICON,
             modifier = Modifier.testTag(PROFILE_SETS_BUTTON_TAG),
         )
         ProfileSetsPopover(expanded = open, onDismiss = { open = false }, proj = proj, onChange = onChange)
     }
 }
+
+/** The preview action tray: its corners, the gap around and between its keys, and each key's size. */
+private val TRAY_SHAPE = AppShape(12.dp)
+private val TRAY_GAP = 6.dp
+
+/** 38dp drawn: the key's 2dp inset either side. */
+private val TRAY_KEY = 42.dp
+private val TRAY_ICON = 17.dp
 
 /** Test handle for the profile sets button. */
 internal const val PROFILE_SETS_BUTTON_TAG = "preview_profile_sets"

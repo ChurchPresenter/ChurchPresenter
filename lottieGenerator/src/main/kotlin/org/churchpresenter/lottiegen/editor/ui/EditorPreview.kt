@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.editor.ui
 
+import org.churchpresenter.lottiegen.ui.components.LottieSlider
 import org.churchpresenter.lottiegen.render.rememberTextGrouping
 import org.churchpresenter.lottiegen.render.rememberShapedLottiePainter
 import org.churchpresenter.lottiegen.lottie.PERCENT_SCALE
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -133,7 +133,7 @@ fun EditorPreview(
                 )
             }
 
-            Slider(
+            LottieSlider(
                 value = seek,
                 onValueChange = {
                     onSeekChange(it)

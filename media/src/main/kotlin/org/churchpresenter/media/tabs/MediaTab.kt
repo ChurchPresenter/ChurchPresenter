@@ -5,6 +5,9 @@
 
 package org.churchpresenter.media.tabs
 
+import org.churchpresenter.theme.components.sliderLook
+import org.churchpresenter.theme.components.drawSlider
+import androidx.compose.ui.unit.sp
 import org.churchpresenter.settings.BackgroundContent
 import org.churchpresenter.sharedui.composables.BackgroundTarget
 import java.io.File
@@ -55,10 +58,6 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.font.FontWeight
@@ -107,13 +106,16 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.media.viewmodel.formatMediaTime
 
-private const val HANDLE_VISIBLE_ALPHA = 0.01f
+private const val SEEK_HANDLE_ACTIVE_SCALE = 1.15f
 
 /** Upper bound of the loop-count field; 0 means repeat forever. */
 internal const val MEDIA_MAX_LOOP_COUNT = 99
 internal const val MEDIA_DISABLED_TRANSPORT_ALPHA = 0.38f
-internal val MEDIA_TRANSPORT_KEY_SIZE = 30.dp
-internal val MEDIA_PLAY_KEY_SIZE = 38.dp
+internal val MEDIA_TRANSPORT_KEY_SIZE = 32.dp
+
+/** Back, stop and forward in the transport pill, and play/pause between them. */
+internal val MEDIA_PILL_KEY_SIZE = 36.dp
+internal val MEDIA_PLAY_KEY_SIZE = 44.dp
 internal val MEDIA_VOLUME_SLIDER_WIDTH = 150.dp
 
 /**
@@ -254,7 +256,6 @@ fun MediaTab(
             }
     ) {
         tab.MediaTopCard(viewModel)
-        // Seek bar and preview share one card.
         tab.MediaPreviewCard(viewModel, previewOutputPicker, Modifier.weight(1f))
     }
 }
@@ -299,22 +300,6 @@ private fun MediaTabScope.MediaPreviewCard(
             .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
             .bibleListCard()
     ) {
-        // ── Seek bar ──────────────────────────────────────────────────
-        if (viewModel.duration > 0) {
-            MediaSeekBar(
-                position = viewModel.currentPosition,
-                duration = viewModel.duration,
-                // No buffered-position feed from the player yet; wire this to VLC's cached
-                // position later to reveal the loaded-ahead region.
-                bufferedPosition = viewModel.currentPosition,
-                onSeek = { viewModel.position.seekTo(it) },
-                formatTime = { formatMediaTime(it) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
-            )
-        } else if (viewModel.isLoaded && viewModel.isPlaying) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
-
         // ── Content area ──────────────────────────────────────────────
         val isPresenting =
             presenterManager?.isLive(Presenting.MEDIA) == true && presenterManager.showPresenterWindow.value
@@ -434,11 +419,29 @@ internal fun TransportTooltip(text: String) {
     }
 }
 
+/** The seek bar under the transport controls, or a plain progress line while the length is unknown. */
+@Composable
+internal fun MediaSeekRow(viewModel: MediaViewModel) {
+    if (viewModel.duration > 0) {
+        MediaSeekBar(
+            position = viewModel.currentPosition,
+            duration = viewModel.duration,
+            // No buffered-position feed from the player yet; wire this to VLC's cached
+            // position later to reveal the loaded-ahead region.
+            bufferedPosition = viewModel.currentPosition,
+            onSeek = { viewModel.position.seekTo(it) },
+            formatTime = { formatMediaTime(it) },
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+        )
+    } else if (viewModel.isLoaded && viewModel.isPlaying) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp))
+    }
+}
+
 /**
- * Slim media seek bar: a 5px rounded track with a teal gradient played fill, a subtle grey
- * loaded-ahead (buffered) region, and elapsed/total times flanking it (elapsed bold-accented,
- * total muted). The white drag handle fades and scales in only on hover/drag, so the bar stays
- * clean at rest. Tap or drag anywhere on the track to seek.
+ * The media seek bar in the app's slider look: the played part in the accent, a loaded-ahead
+ * (buffered) region under it, and a white handle ringed in the accent that grows a little on hover
+ * or drag. Elapsed and total times flank it. Tap or drag anywhere on the track to seek.
  */
 @Composable
 private fun MediaSeekBar(
@@ -456,15 +459,15 @@ private fun MediaSeekBar(
     val hovered by interactionSource.collectIsHoveredAsState()
     var dragging by remember { mutableStateOf(false) }
     val active = hovered || dragging
-    val handleAlpha by animateFloatAsState(if (active) 1f else 0f, label = "seekHandleAlpha")
-    val handleScale by animateFloatAsState(if (active) 1f else 0.35f, label = "seekHandleScale")
+    val handleScale by animateFloatAsState(if (active) SEEK_HANDLE_ACTIVE_SCALE else 1f, label = "seekHandleScale")
 
-    val primary = MaterialTheme.colorScheme.primary
-    val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
-    val bufferedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
-    val playedStart = primary.copy(alpha = 0.65f)
     // Hoisted for the Canvas below, which cannot read the theme itself.
-    val handleColor = MaterialTheme.colorScheme.onPrimary
+    val look = sliderLook()
+    val timeStyle = MaterialTheme.typography.labelMedium.copy(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontFeatureSettings = "tnum",
+    )
 
     Row(
         modifier = modifier,
@@ -473,9 +476,8 @@ private fun MediaSeekBar(
     ) {
         Text(
             text = formatTime(position),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = primary,
+            style = timeStyle,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             textAlign = TextAlign.End,
             modifier = Modifier.widthIn(min = 42.dp)
@@ -489,54 +491,17 @@ private fun MediaSeekBar(
             contentAlignment = Alignment.CenterStart
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val trackH = 5.dp.toPx()
-                val cy = size.height / 2f
-                val top = cy - trackH / 2f
-                val radius = CornerRadius(trackH / 2f, trackH / 2f)
-                // Base track
-                drawRoundRect(
-                    color = trackColor,
-                    topLeft = Offset(0f, top),
-                    size = Size(size.width, trackH),
-                    cornerRadius = radius,
+                drawSlider(
+                    look,
+                    fraction = playedFraction,
+                    bufferedFraction = bufferedFraction,
+                    thumbScale = handleScale,
                 )
-                // Buffered (loaded-ahead) region
-                if (bufferedFraction > 0f) {
-                    drawRoundRect(
-                        color = bufferedColor,
-                        topLeft = Offset(0f, top),
-                        size = Size(size.width * bufferedFraction, trackH),
-                        cornerRadius = radius,
-                    )
-                }
-                // Played region — teal gradient
-                if (playedFraction > 0f) {
-                    val playedW = size.width * playedFraction
-                    drawRoundRect(
-                        brush = Brush.horizontalGradient(
-                            listOf(playedStart, primary),
-                            startX = 0f,
-                            endX = playedW.coerceAtLeast(trackH),
-                        ),
-                        topLeft = Offset(0f, top),
-                        size = Size(playedW, trackH),
-                        cornerRadius = radius
-                    )
-                }
-                // Hover handle — fades/scales in only on hover or drag
-                if (handleAlpha > HANDLE_VISIBLE_ALPHA) {
-                    val hx = (size.width * playedFraction).coerceIn(0f, size.width)
-                    drawCircle(
-                        color = handleColor.copy(alpha = handleAlpha),
-                        radius = 6.dp.toPx() * handleScale,
-                        center = Offset(hx, cy),
-                    )
-                }
             }
         }
         Text(
             text = formatTime(duration),
-            style = MaterialTheme.typography.labelSmall,
+            style = timeStyle,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             modifier = Modifier.widthIn(min = 42.dp)

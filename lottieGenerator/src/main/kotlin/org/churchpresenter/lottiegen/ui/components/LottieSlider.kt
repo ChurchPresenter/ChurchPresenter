@@ -2,6 +2,13 @@ package org.churchpresenter.lottiegen.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import org.churchpresenter.theme.components.sliderLook
+import org.churchpresenter.theme.components.SLIDER_TRACK
+import org.churchpresenter.theme.components.SLIDER_THUMB
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,17 +37,14 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.flatDisabled
-import org.churchpresenter.theme.raised
-import org.churchpresenter.theme.sunken
 import kotlin.math.roundToInt
 
 /**
- * The house slider, in the app's elevated look: a sunken rounded track with the accent gradient
- * filling it up to the value, and a raised knob that swells slightly on hover -- the same slider as
- * the app's own panels. Replaces Material's Slider so the control panel and the preview transport
+ * The house slider, in the app's slider look ([sliderLook]): a flat rounded track with the accent
+ * filling it up to the value, and a white knob ringed in the accent that swells slightly on hover --
+ * the same slider as the app's own panels. Replaces Material's Slider so the control panel and the preview transport
  * share one visual language.
  *
  * Both a press anywhere on the track and a drag move the value, matching the reference's
@@ -53,17 +57,18 @@ fun LottieSlider(
     valueRange: ClosedFloatingPointRange<Float>,
     modifier: Modifier = Modifier,
     steps: Int = 0,
-    trackHeight: Dp = 5.dp,
-    knobSize: Dp = 13.dp,
-    /** The well's fill; unspecified is the theme's own sunken well. */
+    trackHeight: Dp = SLIDER_TRACK,
+    knobSize: Dp = SLIDER_THUMB,
+    /** The track's fill; unspecified is the app's neutral track. */
     trackColor: Color = Color.Unspecified,
     enabled: Boolean = true,
-    /** What the filled part of the track is painted with; the accent gradient by default. */
+    /** What the filled part of the track is painted with; the accent by default. */
     fillBrush: Brush? = null,
 ) {
     val density = LocalDensity.current
     val palette = elevationPalette()
-    val defaultFill = Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary, palette.accent.top))
+    val look = sliderLook()
+    val defaultFill = SolidColor(look.fill)
     var widthPx by remember { mutableStateOf(0) }
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
@@ -107,7 +112,8 @@ fun LottieSlider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(trackHeight)
-                .sunken(AppShape(99.dp), palette, fill = trackColor)
+                .clip(AppShape(99.dp))
+                .background(trackColor.takeOrElse { look.track })
         ) {
             // Fill
             Box(
@@ -129,7 +135,10 @@ fun LottieSlider(
                 .graphicsLayer { scaleX = knobScale; scaleY = knobScale }
                 .then(
                     if (enabled) {
-                        Modifier.raised(CircleShape, palette.key, palette, lift = 2.dp)
+                        Modifier
+                            .shadow(1.dp, CircleShape)
+                            .background(look.thumb, CircleShape)
+                            .border(KNOB_RING, look.ring, CircleShape)
                     } else {
                         Modifier.flatDisabled(CircleShape, palette)
                     }
@@ -137,3 +146,5 @@ fun LottieSlider(
         )
     }
 }
+
+private val KNOB_RING = 2.dp
