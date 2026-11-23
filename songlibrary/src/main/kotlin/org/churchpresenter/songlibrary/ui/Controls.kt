@@ -1,5 +1,7 @@
 package org.churchpresenter.songlibrary.ui
 
+import org.churchpresenter.theme.flatDisabled
+import org.churchpresenter.theme.elevationPalette
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -306,8 +308,13 @@ fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true, i
     val scheme = MaterialTheme.colorScheme
     Row(
         Modifier.height(LibraryMetrics.control)
-            .clip(AppShape(LibraryMetrics.radius))
-            .background(if (enabled) scheme.primary else scheme.surfaceContainerHigh)
+            .then(
+                if (enabled) {
+                    Modifier.clip(AppShape(LibraryMetrics.radius)).background(scheme.primary)
+                } else {
+                    Modifier.flatDisabled(AppShape(LibraryMetrics.radius), elevationPalette())
+                }
+            )
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -319,7 +326,7 @@ fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true, i
         Text(
             label,
             style = LibraryType.button,
-            color = if (enabled) scheme.onPrimary else scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA),
+            color = if (enabled) scheme.onPrimary else elevationPalette().disabledInk,
         )
     }
 }
@@ -335,12 +342,12 @@ fun QuietButton(
 ) {
     val scheme = MaterialTheme.colorScheme
     val border = when {
-        !enabled -> scheme.onSurface.copy(alpha = HAIRLINE_ALPHA)
+        !enabled -> elevationPalette().disabledLine
         danger -> scheme.error
         else -> scheme.outlineVariant
     }
     val text = when {
-        !enabled -> scheme.onSurfaceVariant.copy(alpha = FAINT_TEXT_ALPHA)
+        !enabled -> elevationPalette().disabledInk
         // Drawn on `dangerSurface` below, so it is that surface's own foreground, not `danger`.
         danger -> scheme.onErrorContainer
         else -> scheme.onSurface
@@ -348,7 +355,13 @@ fun QuietButton(
     Row(
         Modifier.height(LibraryMetrics.control)
             .clip(AppShape(LibraryMetrics.radius))
-            .background(if (danger && enabled) scheme.errorContainer else scheme.surfaceContainerHigh)
+            .background(
+                when {
+                    !enabled -> elevationPalette().disabledFill
+                    danger -> scheme.errorContainer
+                    else -> scheme.surfaceContainerHigh
+                }
+            )
             .border(1.dp, border, AppShape(LibraryMetrics.radius))
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 12.dp),

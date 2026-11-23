@@ -40,14 +40,22 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.strings.generated.resources.Res as StringsRes
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.flatDisabled
 import org.churchpresenter.theme.raised
 
 private const val DIMMED_ALPHA = 0.5f
+private const val TONAL_ALPHA = 0.14f
+private const val TONAL_HOVER_ALPHA = 0.2f
+private const val TONAL_PRESS_ALPHA = 0.26f
 
 /**
  * Uniform action-row icon button used across every tab's primary action row
  * (Go Live, Add to Schedule, and their row-mates). Mirrors the LowerThird tab's look:
  * a 34dp raised key in its own color, with rounded corners and a hover tooltip.
+ *
+ * [tonal] draws a secondary action instead: a flat tint of the primary color with the icon in it,
+ * the same on every tab, so only the main action (Go Live) is a filled key. Disabled, either kind
+ * keeps its container and outline and dims only the icon.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -59,8 +67,7 @@ fun ActionIconButton(
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
-    disabledContainerColor: Color = MaterialTheme.colorScheme.outlineVariant,
-    disabledContentColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+    tonal: Boolean = false,
     buttonSize: Dp = 34.dp,
     iconSize: Dp = 16.dp,
     modifier: Modifier = Modifier,
@@ -93,15 +100,27 @@ fun ActionIconButton(
         val interaction = remember { MutableInteractionSource() }
         val hovered by interaction.collectIsHoveredAsState()
         val pressed by interaction.collectIsPressedAsState()
-        val ink = if (enabled) contentColor else disabledContentColor
+        val tonalInk = MaterialTheme.colorScheme.primary
+        val ink = when {
+            !enabled -> palette.disabledInk
+            tonal -> tonalInk
+            else -> contentColor
+        }
+        val tonalAlpha = when {
+            pressed -> TONAL_PRESS_ALPHA
+            hovered -> TONAL_HOVER_ALPHA
+            else -> TONAL_ALPHA
+        }
         Box(
             modifier = modifier
                 .size(buttonSize)
                 .then(
-                    if (enabled) {
-                        Modifier.raised(shape, palette.tinted(containerColor, contentColor), palette, pressed, hovered)
-                    } else {
-                        Modifier.clip(shape).background(disabledContainerColor)
+                    when {
+                        !enabled -> Modifier.flatDisabled(shape, palette)
+                        tonal -> Modifier.clip(shape).background(tonalInk.copy(alpha = tonalAlpha))
+                        else -> Modifier.raised(
+                            shape, palette.tinted(containerColor, contentColor), palette, pressed, hovered
+                        )
                     }
                 )
                 .clickable(
@@ -173,9 +192,7 @@ fun SavePresetButton(
         tooltipText = tooltipText,
         icon = Icons.Filled.BookmarkAdd,
         enabled = enabled,
-        // Filled like its neighbours: surfaceVariant read as the disabled state next to them.
-        containerColor = MaterialTheme.colorScheme.tertiary,
-        contentColor = MaterialTheme.colorScheme.onTertiary,
+        tonal = true,
         modifier = modifier
     )
 }
@@ -193,8 +210,7 @@ fun AddToScheduleButton(
         tooltipText = tooltipText,
         painter = painterResource(Res.drawable.ic_playlist_add),
         enabled = enabled,
-        containerColor = MaterialTheme.colorScheme.secondary,
-        contentColor = MaterialTheme.colorScheme.onSecondary,
+        tonal = true,
         modifier = modifier
     )
 }

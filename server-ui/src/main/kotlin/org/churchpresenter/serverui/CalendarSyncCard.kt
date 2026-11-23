@@ -357,11 +357,7 @@ internal fun RemoveButton(text: String, enabled: Boolean = true, onClick: () -> 
         shape = AppShape(8.dp),
         contentPadding = COMPACT_PADDING,
         modifier = Modifier.compactButton(),
-        // Disabled, it reads in the muted ink: the theme's 38% all but vanished on the card.
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = MaterialTheme.colorScheme.error,
-            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        ),
+        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
     ) { Text(text, style = MaterialTheme.typography.labelMedium) }
 }
 

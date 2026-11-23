@@ -11,7 +11,6 @@ import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,10 +40,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -184,40 +178,13 @@ private const val TITLE_BAR_FALLBACK = 28
 private const val DARK_LUMINANCE = 0.5f
 private const val TOKEN_ALPHA = 0.14f
 
-/**
- * A dialog's one filled button. Disabled, it is a solid gray block rather than the raised key at
- * 40%, which all but vanished into the dialog's background.
- */
+/** A dialog's one filled button. */
 @Composable
 internal fun DialogPrimaryButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
-    val shape = AppShape(8.dp)
-    if (enabled) {
-        RaisedButton(shape = shape, onClick = onClick) {
-            Text(text, style = MaterialTheme.typography.labelLarge)
-        }
-    } else {
-        Box(
-            modifier = Modifier
-                .defaultMinSize(ButtonDefaults.MinWidth, ButtonDefaults.MinHeight)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest, shape)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
-                .semantics(mergeDescendants = true) {
-                    role = Role.Button
-                    disabled()
-                }
-                .padding(ButtonDefaults.ContentPadding),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_INK_ALPHA),
-            )
-        }
+    RaisedButton(shape = AppShape(8.dp), onClick = onClick, enabled = enabled) {
+        Text(text, style = MaterialTheme.typography.labelLarge)
     }
 }
-
-private const val DISABLED_INK_ALPHA = 0.45f
 
 @Composable
 internal fun ExpiryChip() {

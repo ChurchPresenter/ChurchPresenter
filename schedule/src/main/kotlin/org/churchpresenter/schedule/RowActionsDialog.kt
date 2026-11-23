@@ -229,7 +229,6 @@ private fun CardButton(
         buttonSize = CARD_BUTTON_SIZE,
         iconSize = CARD_ICON_SIZE,
         iconTint = when {
-            !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA)
             error -> MaterialTheme.colorScheme.error
             else -> MaterialTheme.colorScheme.onSurfaceVariant
         },
@@ -280,4 +279,3 @@ private val ROW_ACTIONS_WIDTH = 620.dp
 private val ROW_ACTIONS_HEIGHT = 560.dp
 private val CARD_BUTTON_SIZE = 28.dp
 private val CARD_ICON_SIZE = 14.dp
-private const val DISABLED_ALPHA = 0.3f

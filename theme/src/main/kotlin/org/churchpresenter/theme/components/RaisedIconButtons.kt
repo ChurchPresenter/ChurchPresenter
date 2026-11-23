@@ -53,8 +53,7 @@ fun KeyIconButton(
     val pressed by interaction.collectIsPressedAsState()
     val filled = colors.containerColor.alpha > 0f
     val surface = when {
-        !enabled && filled -> Modifier.flatDisabled(shape, palette)
-        !enabled -> Modifier.clip(shape)
+        !enabled -> Modifier.flatDisabled(shape, palette)
         filled -> Modifier.raised(
             shape, palette.tinted(colors.containerColor, colors.contentColor), palette, pressed, hovered, lift = 2.dp
         )
@@ -77,12 +76,7 @@ fun KeyIconButton(
             .then(surface),
         contentAlignment = Alignment.Center,
     ) {
-        val ink = when {
-            enabled -> colors.contentColor
-            // A filled one is dimmed whole by its disabled surface; a flat one only by its ink.
-            filled -> colors.contentColor
-            else -> colors.disabledContentColor
-        }
+        val ink = if (enabled) colors.contentColor else palette.disabledInk
         CompositionLocalProvider(LocalContentColor provides ink, content = content)
     }
 }
@@ -139,7 +133,7 @@ fun RaisedIconButton(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val ink = if (enabled) colors.contentColor else colors.disabledContentColor
+        val ink = if (enabled) colors.contentColor else palette.disabledInk
         CompositionLocalProvider(LocalContentColor provides ink, content = content)
     }
 }

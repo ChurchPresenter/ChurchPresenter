@@ -1,7 +1,7 @@
 package org.churchpresenter.appsettings
 
 import org.churchpresenter.settings.isWickAvailable
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.strings.generated.resources.settings_helper_title
 import org.churchpresenter.strings.generated.resources.settings_helper_tips
 import org.churchpresenter.strings.generated.resources.settings_helper_show
@@ -217,7 +217,7 @@ private fun HelperCard(
                 onCheckedChange = { update(helper.copy(tipsEnabled = it)) }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            TextButton(
+            GhostButton(
                 onClick = { update(helper.resettingSuggestions()) },
                 enabled = helper.dismissedSuggestions.isNotEmpty() || helper.snoozedUntil.isNotEmpty(),
                 modifier = Modifier.padding(vertical = 4.dp)

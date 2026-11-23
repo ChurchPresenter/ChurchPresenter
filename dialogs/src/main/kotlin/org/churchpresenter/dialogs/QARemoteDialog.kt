@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.TonalButton
 import androidx.compose.material3.ButtonDefaults
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -416,13 +417,9 @@ private fun QaQrColumn(
             )
         }
         Spacer(Modifier.height(8.dp))
-        RaisedButton(
+        TonalButton(
             shape = AppShape(6.dp),
             onClick = { copyText(shownUrl) },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
         ) {
             Text(stringResource(Res.string.qa_copy_url), style = MaterialTheme.typography.labelSmall)
         }

@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -42,7 +41,6 @@ import org.churchpresenter.theme.components.KeyIconButton
 import org.churchpresenter.theme.elevationPalette
 import org.jetbrains.compose.resources.stringResource
 
-private const val DISABLED_KEY_ALPHA = 0.3f
 private val MENU_WIDTH = 380.dp
 private val ROW_KEY = 26.dp
 private val ROW_ICON = 16.dp
@@ -297,7 +295,7 @@ private fun RowKey(
         Icon(
             icon,
             contentDescription = description,
-            tint = if (enabled) tint else tint.copy(alpha = DISABLED_KEY_ALPHA),
+            tint = if (enabled) tint else elevationPalette().disabledInk,
             modifier = Modifier.size(ROW_ICON),
         )
     }

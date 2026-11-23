@@ -43,6 +43,7 @@ import org.churchpresenter.theme.ElevationPalette
 import org.churchpresenter.theme.RaisedFill
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.flatDisabled
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
 import androidx.compose.animation.core.animateFloatAsState
@@ -74,7 +75,6 @@ fun RaisedButton(
         enabled = enabled,
         shape = shape,
         fill = palette.tinted(colors.containerColor, colors.contentColor),
-        // Disabled dims the whole control to 40%, label included; dimming the label too made it vanish.
         ink = colors.contentColor,
         border = border,
         contentPadding = contentPadding,
@@ -123,6 +123,66 @@ fun KeyButton(
 }
 
 /**
+ * `FilledTonalButton` in the elevated look: a secondary action beside the main one -- Apply beside
+ * OK, Copy URL, Retry. Flat, in a light tint of the primary color with its label in that color,
+ * the same on every screen; the tint deepens under the pointer and while pressed. Disabled, it keeps
+ * its container and outline and dims only the label.
+ */
+@Composable
+fun TonalButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = AppShape(BUTTON_RADIUS),
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val palette = elevationPalette()
+    val interaction = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    val tint = MaterialTheme.colorScheme.primary
+    val alpha = when {
+        pressed -> TONAL_PRESS_ALPHA
+        hovered -> TONAL_HOVER_ALPHA
+        else -> TONAL_ALPHA
+    }
+    Box(
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .keyboardFocusRing(shape)
+            .then(
+                if (enabled) Modifier.clip(shape).background(tint.copy(alpha = alpha))
+                else Modifier.flatDisabled(shape, palette)
+            )
+            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            ),
+        propagateMinConstraints = true,
+    ) {
+        CompositionLocalProvider(LocalContentColor provides if (enabled) tint else palette.disabledInk) {
+            ProvideTextStyle(MaterialTheme.typography.labelLarge) {
+                Row(
+                    modifier = Modifier
+                        .defaultMinSize(ButtonDefaults.MinWidth, ButtonDefaults.MinHeight)
+                        .padding(contentPadding),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = content,
+                )
+            }
+        }
+    }
+}
+
+/**
  * `TextButton` in the elevated look: no surface at rest, a faint wash of its own ink under the
  * pointer and an inner shade while pressed -- the quiet action beside a raised one, like Cancel
  * beside OK.
@@ -143,16 +203,17 @@ fun GhostButton(
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
-    val ink = if (enabled) colors.contentColor else colors.disabledContentColor
+    // Disabled, every button looks the same: the flat container, its outline and the dimmed label.
+    val ink = if (enabled) colors.contentColor else palette.disabledInk
     val filled = colors.containerColor.alpha > 0f
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .clip(shape)
-            .then(if (filled) Modifier.background(colors.containerColor) else Modifier)
+            .then(if (filled && enabled) Modifier.background(colors.containerColor) else Modifier)
             .then(
                 when {
-                    !enabled -> Modifier
+                    !enabled -> Modifier.flatDisabled(shape, palette)
                     pressed -> Modifier.sunken(
                         shape,
                         palette,
@@ -226,7 +287,8 @@ private fun RaisedButtonSurface(
             ),
         propagateMinConstraints = true,
     ) {
-        CompositionLocalProvider(LocalContentColor provides ink) {
+        // Disabled keeps its container; only the label dims.
+        CompositionLocalProvider(LocalContentColor provides if (enabled) ink else palette.disabledInk) {
             ProvideTextStyle(MaterialTheme.typography.labelLarge) {
                 Row(
                     modifier = Modifier
@@ -344,6 +406,9 @@ private const val KNOB_PRESS_SCALE = 0.94f
 private const val TRACK_HOVER_BRIGHTEN = 0.12f
 private const val GHOST_PRESS_ALPHA = 0.6f
 private const val GHOST_HOVER_ALPHA = 0.08f
+private const val TONAL_ALPHA = 0.14f
+private const val TONAL_HOVER_ALPHA = 0.2f
+private const val TONAL_PRESS_ALPHA = 0.26f
 private val BUTTON_RADIUS = 10.dp
 private val SWITCH_WIDTH = 44.dp
 private val SWITCH_HEIGHT = 24.dp

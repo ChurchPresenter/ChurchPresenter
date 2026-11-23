@@ -134,8 +134,6 @@ private fun LowerThirdTabScope.LowerThirdAtemButtons() {
         val atemButtonColors = IconButtonDefaults.filledIconButtonColors(
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary,
-            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
         val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
         val goLiveKey = appSettings.atemSettings.goLiveKey

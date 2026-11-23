@@ -181,8 +181,7 @@ private fun QATabScope.DisplayButtons() {
         tooltipText = stringResource(Res.string.tooltip_qa_remote),
         modifier = Modifier.guideTarget(GuideTargets.QA_REMOTE),
         icon = Icons.Default.SettingsRemote,
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        tonal = true,
     )
 
     Spacer(Modifier.width(8.dp))

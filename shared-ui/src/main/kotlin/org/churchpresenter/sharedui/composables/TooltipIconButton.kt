@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.keyboardFocusRing
+import org.churchpresenter.theme.flatDisabled
 import org.churchpresenter.theme.raised
 
 private val ICON_KEY_RADIUS = 8.dp
@@ -79,7 +80,7 @@ fun TooltipIconButton(
         val interaction = remember { MutableInteractionSource() }
         val hovered by interaction.collectIsHoveredAsState()
         val pressed by interaction.collectIsPressedAsState()
-        val ink = if (enabled) colors.contentColor else colors.disabledContentColor
+        val ink = if (enabled) colors.contentColor else palette.disabledInk
         Box(
             modifier = modifier
                 .size(buttonSize)
@@ -93,10 +94,12 @@ fun TooltipIconButton(
                 )
                 .padding(ICON_KEY_INSET)
                 .then(
-                    if (enabled && (hovered || pressed)) {
-                        Modifier.raised(shape, palette.key, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
-                    } else {
-                        Modifier.clip(shape)
+                    when {
+                        !enabled -> Modifier.flatDisabled(shape, palette)
+                        hovered || pressed -> Modifier.raised(
+                            shape, palette.key, palette, pressed = pressed, hovered = hovered, lift = 2.dp
+                        )
+                        else -> Modifier.clip(shape)
                     }
                 ),
             contentAlignment = Alignment.Center
@@ -105,7 +108,8 @@ fun TooltipIconButton(
                 painter = painter,
                 contentDescription = text,
                 modifier = Modifier.size(iconSize),
-                colorFilter = ColorFilter.tint(iconTint ?: ink)
+                // A caller's tint is for the enabled button; disabled, the icon dims like any other.
+                colorFilter = ColorFilter.tint(if (enabled) iconTint ?: ink else ink)
             )
         }
     }

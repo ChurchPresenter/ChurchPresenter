@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.TonalButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -482,13 +483,9 @@ private fun SettingsDialogButtons(onCancel: () -> Unit, onApply: () -> Unit, onO
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        RaisedButton(
+        TonalButton(
             shape = AppShape(6.dp),
             onClick = onApply,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
         ) {
             Text(stringResource(Res.string.apply))
         }

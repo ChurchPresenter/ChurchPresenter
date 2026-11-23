@@ -1,5 +1,6 @@
 package org.churchpresenter.dialogs
 
+import org.churchpresenter.theme.flatDisabled
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -157,8 +158,9 @@ fun Modifier.liveToolPanel(): Modifier {
 }
 
 /**
- * The red button that puts something on air -- Go Live, Take -- with its dot. Off, it lies flat in
- * gray with muted ink instead of fading the red, so it reads as not ready rather than as broken.
+ * The red button that puts something on air -- Go Live, Take -- with its dot. Off, it takes the
+ * disabled look every button shares instead of fading the red, so it reads as not ready rather than
+ * as broken.
  */
 @Composable
 fun LiveActionButton(
@@ -180,20 +182,19 @@ fun LiveActionButton(
             modifier = modifier,
         ) { LiveActionLabel(label, MaterialTheme.colorScheme.onError) }
     } else {
-        val off = if (elevationPalette().isDark) OFF_DARK else OFF_LIGHT
+        val palette = elevationPalette()
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = modifier
                 .defaultMinSize(minHeight = 36.dp)
-                .clip(shape)
-                .background(off.chip)
+                .flatDisabled(shape, palette)
                 .semantics {
                     role = Role.Button
                     disabled()
                 }
                 .padding(horizontal = 18.dp),
-        ) { LiveActionLabel(label, off.icon) }
+        ) { LiveActionLabel(label, palette.disabledInk) }
     }
 }
 
@@ -203,10 +204,6 @@ private fun RowScope.LiveActionLabel(label: String, ink: Color) {
     Spacer(Modifier.width(7.dp))
     Text(label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = ink)
 }
-
-/** The off key's fill and ink, from the design. */
-private val OFF_DARK = LiveToolTint(Color(0xFF2C2E34), Color(0xFF5E636C))
-private val OFF_LIGHT = LiveToolTint(Color(0xFFE3E6EA), Color(0xFF9AA0A8))
 
 /** Rounded share of a chip's size its corners take, as in the design (26dp → 8dp). */
 private const val CHIP_ROUNDING = 0.31f

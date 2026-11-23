@@ -21,6 +21,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -224,7 +225,7 @@ private fun AreaControls(
                 Constants.MIDDLE to Res.string.middle,
                 Constants.BOTTOM to Res.string.bottom,
             ).forEach { (place, label) ->
-                    TextButton(
+                    GhostButton(
                         onClick = { edits.onRoot(root.updatedAt(path) { it.copy(place = place) }) },
                         enabled = area.place != place,
                     ) { ControlLabel(stringResource(label)) }

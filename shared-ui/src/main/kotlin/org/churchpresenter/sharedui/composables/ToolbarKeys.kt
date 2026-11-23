@@ -33,7 +33,6 @@ import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.raisedHover
 import org.churchpresenter.theme.flatDisabled
 
-private const val DISABLED_INK_ALPHA = 0.35f
 private val KEY_INSET = 2.dp
 private val KEY_RADIUS = 8.dp
 private val OPEN_DOT = 4.dp
@@ -95,8 +94,7 @@ fun ToolbarKey(
         val pressed by interaction.collectIsPressedAsState()
         val raisedToggle = style == ToolbarKeyStyle.PANEL_TOGGLE && (open || hovered || pressed)
         val surface = when {
-            !enabled && style == ToolbarKeyStyle.RAISED -> Modifier.flatDisabled(shape, palette)
-            !enabled -> Modifier.clip(shape)
+            !enabled -> Modifier.flatDisabled(shape, palette)
             style == ToolbarKeyStyle.RAISED ->
                 Modifier.raised(shape, palette.key, palette, pressed, hovered, lift = 2.dp)
             raisedToggle -> Modifier.raisedHover(shape, palette.key, palette, pressed = pressed, lift = 2.dp)
@@ -126,7 +124,7 @@ fun ToolbarKey(
                 painter = painter,
                 contentDescription = text,
                 modifier = Modifier.size(iconSize),
-                colorFilter = ColorFilter.tint(if (enabled) tint else tint.copy(alpha = DISABLED_INK_ALPHA)),
+                colorFilter = ColorFilter.tint(if (enabled) tint else palette.disabledInk),
             )
             if (style == ToolbarKeyStyle.PANEL_TOGGLE && open) {
                 Box(

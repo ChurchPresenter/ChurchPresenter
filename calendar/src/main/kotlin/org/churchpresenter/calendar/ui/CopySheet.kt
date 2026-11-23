@@ -1,5 +1,6 @@
 package org.churchpresenter.calendar.ui
 
+import org.churchpresenter.theme.flatDisabled
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -299,14 +300,20 @@ private fun StepButton(
     Box(
         Modifier
             .size(width = STEPPER_BUTTON, height = STEPPER_BUTTON - 2.dp)
-            .clip(AppShape(3.dp))
+            .then(
+                if (enabled) {
+                    Modifier.clip(AppShape(3.dp))
+                } else {
+                    Modifier.flatDisabled(AppShape(3.dp), elevationPalette())
+                }
+            )
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             icon,
             contentDescription = description,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else CARD_TINT),
+            tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else elevationPalette().disabledInk,
             modifier = Modifier.size(STEPPER_BUTTON),
         )
     }

@@ -258,8 +258,7 @@ private fun TranslationControls(
             },
             tooltipText = swapBiblesStr,
             painter = painterResource(IconRes.drawable.ic_swap),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
+            tonal = true,
             tooltipContent = {
                 val pair = translations
                 Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {

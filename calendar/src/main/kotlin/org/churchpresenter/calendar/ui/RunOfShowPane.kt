@@ -1,5 +1,6 @@
 package org.churchpresenter.calendar.ui
 
+import org.churchpresenter.theme.flatDisabled
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -463,7 +464,9 @@ private fun RowAction(
                     if (enabled) {
                         Modifier.raisedKey(CalendarMetrics.smallRadius, elevationPalette().key, onClick = onClick)
                     } else {
-                        Modifier.clip(CalendarMetrics.smallRadius).clickable(enabled = false, onClick = onClick)
+                        Modifier
+                            .flatDisabled(CalendarMetrics.smallRadius, elevationPalette())
+                            .clickable(enabled = false, onClick = onClick)
                     }
                 ),
             contentAlignment = Alignment.Center,
@@ -471,7 +474,7 @@ private fun RowAction(
             Icon(
                 icon,
                 contentDescription = description,
-                tint = scheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else DIM_ALPHA * 0.6f),
+                tint = if (enabled) scheme.onSurfaceVariant else elevationPalette().disabledInk,
                 modifier = Modifier.size(11.dp),
             )
         }

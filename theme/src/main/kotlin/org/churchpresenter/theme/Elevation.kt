@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
@@ -71,6 +70,8 @@ data class ElevationPalette(
     val keyEdge: Color,
     val dropShadow: Color,
     val disabledFill: Color,
+    /** The 1dp outline a disabled control keeps, so it still reads as a control that is off. */
+    val disabledLine: Color,
     val disabledInk: Color,
 ) {
     /** A raised fill in an arbitrary [color] — Go Live, Add to Schedule, a success or danger action. */
@@ -130,6 +131,7 @@ fun elevationPalette(): ElevationPalette {
             keyEdge = Color.White.copy(alpha = 0.07f),
             dropShadow = Color.Black,
             disabledFill = lerp(surface, Color.White, fraction = 0.04f),
+            disabledLine = scheme.onSurface.copy(alpha = 0.10f),
             disabledInk = scheme.onSurface.copy(alpha = 0.38f),
         )
     } else {
@@ -170,6 +172,7 @@ fun elevationPalette(): ElevationPalette {
             keyEdge = Color.Black.copy(alpha = 0.16f),
             dropShadow = Color.Black,
             disabledFill = lerp(surface, Color.Black, fraction = 0.05f),
+            disabledLine = scheme.onSurface.copy(alpha = 0.12f),
             disabledInk = scheme.onSurface.copy(alpha = 0.38f),
         )
     }
@@ -295,17 +298,20 @@ fun Modifier.raised(
         .then(if (ring.isSpecified) Modifier.border(RING_WIDTH, ring, shape) else Modifier)
 }
 
-/** A control that cannot be used: the neutral key, flat and at 40% -- the whole control, label too. */
+/**
+ * A control that cannot be used: flat, in [ElevationPalette.disabledFill] with a 1dp
+ * [ElevationPalette.disabledLine], so it still reads as a control that is off. Only the label dims --
+ * the caller draws it in [ElevationPalette.disabledInk].
+ */
 fun Modifier.flatDisabled(shape: Shape, palette: ElevationPalette): Modifier = this
-    .alpha(DISABLED_OPACITY)
     .clip(shape)
-    .background(Brush.verticalGradient(listOf(palette.key.top, palette.key.bottom)))
+    .background(palette.disabledFill)
+    .border(1.dp, palette.disabledLine, shape)
 
 private val INNER_SHADOW_DEPTH = 4.dp
 private val RAISED_LIFT = 3.dp
 private val HOVER_EXTRA_LIFT = 3.dp
 private const val HOVER_BRIGHTEN = 0.08f
-private const val DISABLED_OPACITY = 0.4f
 internal val RING_WIDTH = 2.dp
 
 /** How strong a focus or open ring is drawn. */

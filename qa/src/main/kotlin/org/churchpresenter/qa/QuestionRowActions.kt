@@ -43,8 +43,6 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedIconButton
 import org.jetbrains.compose.resources.stringResource
 
-private const val QA_DISABLED_ALPHA = 0.38f
-
 /** Approve, deny, done and Go Live, as fit a question that is pending, approved, done or denied. */
 @Composable
 internal fun StatusActions(
@@ -188,8 +186,6 @@ internal fun QAIconButton(
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContainerColor = Color.Transparent,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = QA_DISABLED_ALPHA)
             )
         ) {
             content()

@@ -362,8 +362,7 @@ private fun PresentationTabScope.PresentationOutputButtons(viewModel: Presentati
         onClick = { showRemoteDialog = true },
         tooltipText = stringResource(Res.string.tooltip_presentation_remote),
         icon = Icons.Default.SettingsRemote,
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        tonal = true,
     )
     if (presenterManager != null) {
         ActionIconButton(

@@ -19,6 +19,7 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.TonalButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -294,13 +295,9 @@ private fun PresentationRemoteQr(
         )
     }
     Spacer(Modifier.height(8.dp))
-    RaisedButton(
+    TonalButton(
         shape = AppShape(6.dp),
         onClick = { copyText(qrUrl) },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-        )
     ) {
         Text(
             stringResource(Res.string.presentation_remote_copy_url),
@@ -327,13 +324,9 @@ private fun PresentationTunnelControls(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            RaisedButton(
+            TonalButton(
                 shape = AppShape(6.dp),
                 onClick = onStartTunnel,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
             ) {
                 Text(
                     stringResource(Res.string.qa_enable_public_access),
@@ -356,13 +349,9 @@ private fun PresentationTunnelControls(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error
             )
-            RaisedButton(
+            TonalButton(
                 shape = AppShape(6.dp),
                 onClick = onStartTunnel,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
             ) {
                 Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)
             }
@@ -424,13 +413,9 @@ Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
     }
 }
 Spacer(Modifier.height(8.dp))
-RaisedButton(
+TonalButton(
     shape = AppShape(6.dp),
     onClick = onStopTunnel,
-    colors = ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-    )
 ) {
     Text(
         stringResource(Res.string.qa_disable_public_access),

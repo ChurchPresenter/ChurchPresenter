@@ -342,8 +342,7 @@ private fun MediaTabScope.SetAsBackgroundButton(
             tooltipText = stringResource(Res.string.set_as_background),
             painter = painterResource(IconRes.drawable.ic_layer_image),
             enabled = canBeBackground,
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
+            tonal = true,
             modifier = Modifier.testTag(MEDIA_SET_AS_BACKGROUND_TAG),
         )
         ContextMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {

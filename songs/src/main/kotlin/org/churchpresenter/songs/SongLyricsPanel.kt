@@ -345,8 +345,7 @@ private fun LyricsActionBar(
                 onClick = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },
                 tooltipText = editSongStr,
                 painter = painterResource(IconRes.drawable.ic_edit),
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
+                tonal = true,
                 modifier = Modifier.guideTarget(GuideTargets.EDIT_SONG),
             )
         }
@@ -356,8 +355,7 @@ private fun LyricsActionBar(
             onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
             tooltipText = newSongStr,
             painter = painterResource(IconRes.drawable.ic_add),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
+            tonal = true,
             modifier = Modifier.guideTarget(GuideTargets.NEW_SONG),
         )
 

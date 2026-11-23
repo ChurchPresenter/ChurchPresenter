@@ -1,5 +1,7 @@
 package org.churchpresenter.sharedui.composables
 
+import org.churchpresenter.theme.flatDisabled
+import org.churchpresenter.theme.elevationPalette
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,17 +26,18 @@ fun ReorderArrowButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val palette = elevationPalette()
     Box(
         modifier = Modifier
             .size(width = 22.dp, height = 16.dp)
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 1f else 0.4f),
-                AppShape(5.dp),
-            )
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (enabled) 1f else 0.5f),
-                AppShape(5.dp),
+            .then(
+                if (enabled) {
+                    Modifier
+                        .background(MaterialTheme.colorScheme.surfaceVariant, AppShape(5.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(5.dp))
+                } else {
+                    Modifier.flatDisabled(AppShape(5.dp), palette)
+                }
             )
             .then(
                 if (enabled) {
@@ -53,7 +56,7 @@ fun ReorderArrowButton(
             painter = icon,
             contentDescription = contentDescription,
             modifier = Modifier.size(10.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.35f),
+            tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else palette.disabledInk,
         )
     }
 }

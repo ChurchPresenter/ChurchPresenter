@@ -18,6 +18,7 @@ import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.theme.components.GhostButton
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.theme.components.TonalButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -48,14 +49,10 @@ internal fun StyleDialogButtons(
         ) {
             Text(stringResource(Res.string.cancel))
         }
-        RaisedButton(
+        TonalButton(
             shape = AppShape(6.dp),
             onClick = onApply,
             enabled = changed,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            ),
         ) {
             Text(stringResource(Res.string.apply))
         }

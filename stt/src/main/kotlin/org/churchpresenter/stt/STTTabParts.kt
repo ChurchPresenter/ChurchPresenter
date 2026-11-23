@@ -149,8 +149,7 @@ internal fun ConnectionBar(
             onClick = onOpenSettings,
             tooltipText = stringResource(Res.string.tooltip_stt_settings),
             icon = Icons.Default.Tune,
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            tonal = true,
         )
 
         GoLiveButton(
