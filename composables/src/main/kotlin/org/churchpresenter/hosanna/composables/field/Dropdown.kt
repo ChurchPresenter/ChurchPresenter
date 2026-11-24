@@ -69,6 +69,21 @@ internal fun opensMenu(event: KeyEvent): Boolean = event.type == KeyEventType.Ke
 internal fun labelOf(entries: List<MenuEntry>, selected: String?): String? =
     entries.firstNotNullOfOrNull { (it as? MenuEntry.Item)?.takeIf { item -> item.key == selected }?.label }
 
+/**
+ * A field that opens a menu to pick one entry. ↑ ↓ and Enter work in the menu, and Esc closes it.
+ *
+ * @param entries the menu's lines.
+ * @param selectedKey the key of the picked item, or null.
+ * @param onSelect called with the key of the item picked.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param label an optional label above the field.
+ * @param placeholder shown while nothing is picked.
+ * @param error an error under the field, which also turns its edge red.
+ * @param search turns on a search field at the top of the menu.
+ * @param enabled whether the field can be used.
+ * @param readOnly shows the pick but does not open the menu.
+ */
 @Composable
 fun Dropdown(
     entries: List<MenuEntry>,

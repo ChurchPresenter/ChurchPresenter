@@ -21,6 +21,17 @@ import org.churchpresenter.icons.generated.resources.ic_volume_off
 import org.churchpresenter.icons.generated.resources.ic_volume_up
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * A mute button, a volume slider and the level. Unmuting brings back the level from before.
+ *
+ * @param volume the level from 0 to 100.
+ * @param onVolumeChange called with the new level.
+ * @param labels the slider's and button's screen-reader names.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the slider's looks.
+ * @param muteInteractionSource drives the mute button's looks.
+ * @param enabled whether it can be used.
+ */
 @Composable
 fun VolumeControl(
     volume: Double,

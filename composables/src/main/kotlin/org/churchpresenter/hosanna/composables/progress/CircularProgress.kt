@@ -31,6 +31,12 @@ import org.jetbrains.compose.resources.painterResource
 
 private const val TOP = -90f
 
+/**
+ * A spinning ring for work whose length is not known.
+ *
+ * @param modifier applied to the outermost layout.
+ * @param size the ring's size.
+ */
 @Composable
 fun ProgressSpinner(modifier: Modifier = Modifier, size: ProgressSpinnerSize = ProgressSpinnerSize.Inline) {
     val colors = HosannaTheme.colors.progressColors(ProgressStatus.Running)
@@ -45,6 +51,13 @@ fun ProgressSpinner(modifier: Modifier = Modifier, size: ProgressSpinnerSize = P
     }
 }
 
+/**
+ * A 40dp ring that fills as work completes, with the percent in the middle or the status icon when not running.
+ *
+ * @param progress from 0 to 1.
+ * @param modifier applied to the outermost layout.
+ * @param status where the task stands, which picks the color and icon.
+ */
 @Composable
 fun CircularProgress(
     progress: Float,

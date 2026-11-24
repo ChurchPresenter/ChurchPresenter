@@ -18,6 +18,20 @@ import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
+/**
+ * A rounded-square button that shows only an icon.
+ *
+ * @param icon the icon.
+ * @param contentDescription the button's name for screen readers.
+ * @param onClick called when the button is pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param size the button's side.
+ * @param hierarchy how much the button stands out.
+ * @param intent what the button does, which picks its colors.
+ * @param enabled whether the button can be pressed.
+ * @param loading shows a spinner in place of the icon and stops presses.
+ */
 @Composable
 fun IconButton(
     icon: Painter,
@@ -37,6 +51,21 @@ fun IconButton(
     )
 }
 
+/**
+ * An icon button that stays on or off, reported to screen readers as a toggle.
+ *
+ * @param icon the icon.
+ * @param contentDescription the button's name for screen readers.
+ * @param checked whether it is on.
+ * @param onCheckedChange called with the new state when pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param size the button's side.
+ * @param hierarchy how much the button stands out while off; on, it is filled.
+ * @param intent what the button does, which picks its colors.
+ * @param enabled whether the button can be pressed.
+ * @param loading shows a spinner in place of the icon and stops presses.
+ */
 @Composable
 fun IconToggleButton(
     icon: Painter,

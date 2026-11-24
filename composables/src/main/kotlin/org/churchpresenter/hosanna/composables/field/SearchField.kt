@@ -66,6 +66,25 @@ internal fun searchKey(event: KeyEvent, query: String): SearchKey = when {
 internal fun showKeyCap(shortcut: String?, query: String, focused: Boolean): Boolean =
     shortcut != null && query.isEmpty() && !focused
 
+/**
+ * A search field with a clear button and, while empty, the shortcut that focuses it.
+ *
+ * @param query the search text.
+ * @param onQueryChange called with the new text, as the user types.
+ * @param placeholder the hint shown while empty.
+ * @param clearContentDescription the clear button's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param compact uses the smaller height.
+ * @param shortcut the key cap shown while empty and unfocused, such as "⌘F".
+ * @param resultCount text at the end while searching, such as "12 results".
+ * @param searching shows a spinner while results are on their way.
+ * @param detection a chip at the end for something recognized in the query, such as a Bible reference.
+ * @param onDetectionClick called when that chip is pressed.
+ * @param onSearch called on Enter.
+ * @param onMoveDown called on ↓, to move into the results.
+ * @param enabled whether the field can be used.
+ */
 @Composable
 fun SearchField(
     query: String,

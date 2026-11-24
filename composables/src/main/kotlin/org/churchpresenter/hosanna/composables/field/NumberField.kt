@@ -80,6 +80,20 @@ import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * A number field with up and down arrows. ↑ ↓ step it; held arrows repeat.
+ *
+ * @param value the number.
+ * @param onValueChange called with the new number, kept inside [range].
+ * @param label the field's label.
+ * @param range the allowed values, the step and the decimals shown.
+ * @param actions the arrows' screen-reader names.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param helper an optional line under the field.
+ * @param rangeError shown when typed text falls outside [range].
+ * @param enabled whether the field can be used.
+ */
 @Composable
 fun NumberField(
     value: Double,
@@ -129,6 +143,18 @@ fun NumberField(
     }
 }
 
+/**
+ * A compact number field with its unit after the value, such as "12 px".
+ *
+ * @param value the number.
+ * @param onValueChange called with the new number, kept inside [range].
+ * @param unit the unit shown after the value.
+ * @param range the allowed values, the step and the decimals shown.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param rangeError shown when typed text falls outside [range].
+ * @param enabled whether the field can be used.
+ */
 @Composable
 fun UnitField(
     value: Double,

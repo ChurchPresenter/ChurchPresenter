@@ -24,6 +24,12 @@ import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.hosanna.tabular
 
+/**
+ * A 30dp tile with an icon, for the start of a list row.
+ *
+ * @param icon the icon.
+ * @param modifier applied to the outermost layout.
+ */
 @Composable
 fun ListIconTile(icon: Painter, modifier: Modifier = Modifier) {
     val colors = HosannaTheme.colors
@@ -42,6 +48,12 @@ fun ListIconTile(icon: Painter, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Quiet text for a list row, such as a number, time or count.
+ *
+ * @param text the text.
+ * @param modifier applied to the outermost layout.
+ */
 @Composable
 fun ListMeta(text: String, modifier: Modifier = Modifier) {
     BasicText(
@@ -51,6 +63,16 @@ fun ListMeta(text: String, modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * A small icon button for a row's actions, with a tooltip.
+ *
+ * @param icon the icon.
+ * @param label the button's name and tooltip.
+ * @param onClick called when pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param destructive turns the button red on hover.
+ */
 @Composable
 fun RowAction(
     icon: Painter,

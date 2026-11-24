@@ -82,6 +82,21 @@ internal fun typedColor(text: String, current: Color?, allowOpacity: Boolean): C
 internal fun isNoneText(text: String, none: String): Boolean =
     text.isBlank() || text.trim().equals(none, ignoreCase = true)
 
+/**
+ * A hex color field with a swatch that opens a color picker.
+ *
+ * @param color the color, or null when none is set.
+ * @param onColorChange called with the new color, or null when cleared.
+ * @param label the field's label.
+ * @param labels the picker's texts.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param allowOpacity adds an opacity slider and keeps the color's alpha.
+ * @param allowNone lets the color be cleared.
+ * @param themeColors swatches from the current theme, shown in the picker.
+ * @param recentColors recently used swatches, shown in the picker.
+ * @param enabled whether the field can be used.
+ */
 @Composable
 fun ColorField(
     color: Color?,

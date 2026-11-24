@@ -32,6 +32,20 @@ import org.churchpresenter.hosanna.composables.model.FabSize
 internal fun fabHierarchy(tonal: Boolean): ButtonHierarchy =
     if (tonal) ButtonHierarchy.Secondary else ButtonHierarchy.Primary
 
+/**
+ * A raised round button for a screen's main action, floating over its content.
+ *
+ * @param icon the icon.
+ * @param contentDescription the button's name for screen readers.
+ * @param onClick called when the button is pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param size the button's size.
+ * @param intent what the button does, which picks its colors.
+ * @param tonal uses the soft container colors instead of the filled ones.
+ * @param enabled whether the button can be pressed.
+ * @param visible shows or hides the button with a scale and fade.
+ */
 @Composable
 fun FloatingActionButton(
     icon: Painter,
@@ -62,6 +76,19 @@ fun FloatingActionButton(
     }
 }
 
+/**
+ * A floating action button with a text label.
+ *
+ * @param text the label.
+ * @param icon the icon before the label.
+ * @param onClick called when the button is pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param intent what the button does, which picks its colors.
+ * @param tonal uses the soft container colors instead of the filled ones.
+ * @param enabled whether the button can be pressed.
+ * @param visible shows or hides the button with a scale and fade.
+ */
 @Composable
 fun ExtendedFloatingActionButton(
     text: String,

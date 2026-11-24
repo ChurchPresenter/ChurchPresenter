@@ -214,6 +214,14 @@ internal fun TableSkeleton(layout: TableLayout) {
 private const val SHORT_BAR = 0.4f
 private const val LONG_BAR = 0.7f
 
+/**
+ * The line a table shows when it has no rows, with an optional text button.
+ *
+ * @param text the message.
+ * @param modifier applied to the outermost layout.
+ * @param actionText turns on the button, such as "Clear search".
+ * @param onAction called when that button is pressed.
+ */
 @Composable
 fun TableEmpty(text: String, modifier: Modifier = Modifier, actionText: String? = null, onAction: () -> Unit = {}) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {

@@ -30,6 +30,19 @@ import org.churchpresenter.hosanna.composables.model.ButtonIntent
 private fun look(hierarchy: ButtonHierarchy, intent: ButtonIntent) =
     ButtonLook(hierarchy, intent, StandardButtonDefaults.Height, HosannaRadius.M)
 
+/**
+ * A button with a text label and an optional leading icon.
+ *
+ * @param text the label.
+ * @param onClick called when the button is pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param hierarchy how much the button stands out.
+ * @param intent what the button does, which picks its colors.
+ * @param icon an optional icon before the label.
+ * @param enabled whether the button can be pressed.
+ * @param loading shows a spinner in place of the content and stops presses.
+ */
 @Composable
 fun StandardButton(
     text: String,
@@ -84,6 +97,19 @@ fun StandardButton(
     }
 }
 
+/**
+ * A standard-height button that shows only an icon.
+ *
+ * @param icon the icon.
+ * @param contentDescription the button's name for screen readers.
+ * @param onClick called when the button is pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param hierarchy how much the button stands out.
+ * @param intent what the button does, which picks its colors.
+ * @param enabled whether the button can be pressed.
+ * @param loading shows a spinner in place of the icon and stops presses.
+ */
 @Composable
 fun StandardButton(
     icon: Painter,

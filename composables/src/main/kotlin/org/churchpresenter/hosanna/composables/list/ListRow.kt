@@ -43,6 +43,24 @@ import org.churchpresenter.hosanna.composables.foundation.listRowColors
 import org.churchpresenter.hosanna.composables.model.ChipColor
 import org.churchpresenter.hosanna.hosannaElevation
 
+/**
+ * A list row with one to three lines, optional leading and trailing parts, and actions that show on hover.
+ *
+ * @param headline the first line.
+ * @param onClick called when the row is pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param supporting an optional second line.
+ * @param threeLine lets [supporting] wrap to two lines.
+ * @param leading optional content before the text, such as an icon tile, checkbox or number.
+ * @param trailing optional content after the text, such as meta text or a tag.
+ * @param actions buttons shown on hover, focus or selection.
+ * @param keepActions keeps [actions] visible.
+ * @param selected marks the row as picked.
+ * @param liveTag marks the row as on screen with a red bar and this tag.
+ * @param dragging lifts the row while it is dragged.
+ * @param enabled whether the row can be pressed.
+ */
 @Composable
 fun ListRow(
     headline: String,
@@ -160,6 +178,12 @@ private fun RowText(
     }
 }
 
+/**
+ * The surface a list or table sits in, with a hairline edge and the inset rows sit inside.
+ *
+ * @param modifier applied to the outermost layout.
+ * @param content the list.
+ */
 @Composable
 fun ListPanel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val shape = RoundedCornerShape(ListDefaults.PanelRadius)
@@ -175,6 +199,11 @@ fun ListPanel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     }
 }
 
+/**
+ * A line between multi-line rows.
+ *
+ * @param modifier applied to the outermost layout.
+ */
 @Composable
 fun ListDivider(modifier: Modifier = Modifier) {
     Box(
@@ -186,6 +215,11 @@ fun ListDivider(modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * The line that shows where a dragged row will drop.
+ *
+ * @param modifier applied to the outermost layout.
+ */
 @Composable
 fun ListDropIndicator(modifier: Modifier = Modifier) {
     Box(

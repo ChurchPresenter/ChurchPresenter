@@ -61,6 +61,20 @@ import org.churchpresenter.hosanna.composables.model.seekTimeAt
 import org.churchpresenter.hosanna.composables.model.sliderKey
 import org.churchpresenter.hosanna.tabular
 
+/**
+ * A media seek bar with the elapsed and total time either side. Hovering shows the time under the pointer.
+ *
+ * @param position the playback position in seconds.
+ * @param duration the length in seconds.
+ * @param onSeek called with the position picked.
+ * @param contentDescription the bar's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param buffered how far the media has loaded, in seconds.
+ * @param showTimes shows the times either side.
+ * @param onSeekFinished called when a drag or press ends.
+ * @param enabled whether it can be moved.
+ */
 @Composable
 fun SeekBar(
     position: Double,

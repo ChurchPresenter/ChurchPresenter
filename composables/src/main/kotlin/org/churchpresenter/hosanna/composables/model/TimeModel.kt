@@ -4,6 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
+/**
+ * A part of a time field: the [Hour], the [Minute] or the AM/PM [Period].
+ */
 enum class TimePart { Hour, Minute, Period }
 
 internal const val MINUTES_PER_DAY = 24 * 60

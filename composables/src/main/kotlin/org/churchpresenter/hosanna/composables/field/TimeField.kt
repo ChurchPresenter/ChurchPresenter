@@ -75,6 +75,22 @@ import org.jetbrains.compose.resources.painterResource
 
 private fun nowMinutes(): Int = LocalTime.now().let { it.hour * MINUTES_PER_HOUR + it.minute }
 
+/**
+ * A time of day typed part by part, with a spinner that opens on click.
+ *
+ * @param minutes the time as minutes after midnight.
+ * @param onMinutesChange called with the new time.
+ * @param label the field's label.
+ * @param labels the parts' screen-reader names and the AM/PM words.
+ * @param actions the spinner's button texts.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param use24Hour shows 0–23 hours instead of AM/PM.
+ * @param nextDayTag a tag after the time, such as "+1 day", for a time past midnight.
+ * @param error an error under the field, which also turns its edge red.
+ * @param enabled whether the field can be used.
+ * @param currentMinutes the time the spinner's Now button sets; the clock by default.
+ */
 @Composable
 fun TimeField(
     minutes: Int,

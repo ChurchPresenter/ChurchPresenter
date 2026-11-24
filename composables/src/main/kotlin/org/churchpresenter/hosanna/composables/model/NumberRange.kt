@@ -5,6 +5,14 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import org.churchpresenter.hosanna.composables.defaults.NumberFieldDefaults
 
+/**
+ * The values a number field or slider allows.
+ *
+ * @property min the smallest value.
+ * @property max the largest value.
+ * @property step how far one arrow press or slider step moves.
+ * @property decimals how many decimal places values are shown and rounded to.
+ */
 @Immutable
 data class NumberRange(val min: Double, val max: Double, val step: Double = 1.0, val decimals: Int = 0)
 

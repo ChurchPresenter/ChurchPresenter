@@ -65,6 +65,27 @@ internal fun counterText(value: String, maxLength: Int): String = "${value.lengt
 internal fun showClear(clearable: Boolean, value: String, editable: Boolean, active: Boolean): Boolean =
     clearable && value.isNotEmpty() && editable && active
 
+/**
+ * A text field with an optional label, helper or error text, character counter and clear button.
+ *
+ * @param value the text.
+ * @param onValueChange called with the new text.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param label an optional label above the field.
+ * @param placeholder a hint shown while the field is empty.
+ * @param multiline lets the text wrap onto more lines.
+ * @param leadingIcon an optional icon before the text.
+ * @param suffix optional text after the value, such as a unit.
+ * @param clearContentDescription turns on the clear button and names it for screen readers.
+ * @param helper an optional line under the field.
+ * @param error an error under the field, which also turns its edge red.
+ * @param maxLength shows a counter and marks the field when the text is longer.
+ * @param enabled whether the field can be used.
+ * @param readOnly shows the text but stops editing.
+ * @param keyboardOptions passed to the text input.
+ * @param keyboardActions passed to the text input.
+ */
 @Composable
 fun TextField(
     value: String,

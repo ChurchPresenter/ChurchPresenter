@@ -52,6 +52,18 @@ import org.churchpresenter.hosanna.composables.model.movePosition
 import org.churchpresenter.hosanna.composables.model.positionAt
 import org.churchpresenter.hosanna.composables.model.row
 
+/**
+ * A small screen with nine spots to pick where something goes on the output. Arrows move between spots.
+ *
+ * @param position the picked spot.
+ * @param onPositionChange called with the spot picked.
+ * @param label the picker's screen-reader name.
+ * @param positionName each spot's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param compact uses the smaller screen.
+ * @param enabled whether a spot can be picked.
+ */
 @Composable
 fun PositionPicker(
     position: ScreenPosition,

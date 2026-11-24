@@ -47,6 +47,17 @@ import org.churchpresenter.hosanna.composables.model.jumpTarget
 import org.churchpresenter.hosanna.composables.model.listKey
 import org.churchpresenter.hosanna.composables.model.moveIndex
 
+/**
+ * A list to pick one item from, such as Bible books or chapters. ↑ ↓, Home, End and the page keys move the
+ * pick, and typing jumps to the first match.
+ *
+ * @param items the lines.
+ * @param selectedKey the key of the picked line, or null.
+ * @param onSelect called with the key of the line picked.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the list's focus.
+ * @param centered centers the text, for narrow lists of numbers.
+ */
 @Composable
 fun NavigationList(
     items: List<NavigationItem>,

@@ -77,6 +77,18 @@ import org.churchpresenter.icons.generated.resources.ic_remove
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * A duration set with hours, minutes and seconds columns. Each column can be typed into, stepped with its
+ * arrows (held arrows repeat) or scrolled.
+ *
+ * @param seconds the duration in seconds.
+ * @param onSecondsChange called with the new duration.
+ * @param labels the columns' and arrows' names.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSources per column; pass them to watch or freeze each column's looks.
+ * @param presets quick-pick durations shown under the columns.
+ * @param enabled whether the spinner can be used.
+ */
 @Composable
 fun TimerSpinner(
     seconds: Int,

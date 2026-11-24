@@ -42,6 +42,18 @@ import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
 import org.churchpresenter.hosanna.hosannaElevation
 
+/**
+ * A small card with a title, a few lines and an optional action, opened by hovering or clicking [content]. It
+ * stays while the pointer is over the control or the card.
+ *
+ * @param title the card's title.
+ * @param body the card's text.
+ * @param modifier applied to the outermost layout.
+ * @param actionText turns on a text button at the bottom.
+ * @param onAction called when that button is pressed.
+ * @param actionInteractionSource drives that button's looks.
+ * @param content the control the card belongs to.
+ */
 @Composable
 fun RichTooltip(
     title: String,

@@ -50,6 +50,19 @@ import org.churchpresenter.icons.generated.resources.ic_warning
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * A message across the top of a panel: an icon, an optional title, the text, and the fix as a button.
+ *
+ * @param body the message.
+ * @param modifier applied to the outermost layout.
+ * @param intent what the message is about, which picks its colors and icon.
+ * @param title an optional title above the message.
+ * @param action the main button, filled in the intent's color.
+ * @param otherActions text buttons before the main one.
+ * @param dismiss turns on the close button for info, success and neutral messages.
+ * @param visible shows or hides the banner with a fade and slide.
+ * @param extra optional content under the message, such as a pairing code.
+ */
 @Composable
 fun Banner(
     body: String,
@@ -141,6 +154,13 @@ private fun BannerActions(intent: MessageIntent, action: MessageAction?, otherAc
     }
 }
 
+/**
+ * A small message inside a form, next to what it is about.
+ *
+ * @param text the message.
+ * @param modifier applied to the outermost layout.
+ * @param intent what the message is about, which picks its colors and icon.
+ */
 @Composable
 fun InlineMessage(text: String, modifier: Modifier = Modifier, intent: MessageIntent = MessageIntent.Info) {
     val colors = HosannaTheme.colors.messageColors(intent)
@@ -158,6 +178,12 @@ fun InlineMessage(text: String, modifier: Modifier = Modifier, intent: MessageIn
     }
 }
 
+/**
+ * A line of help text with an info icon and no container.
+ *
+ * @param text the hint.
+ * @param modifier applied to the outermost layout.
+ */
 @Composable
 fun Hint(text: String, modifier: Modifier = Modifier) {
     val ink = HosannaTheme.colors.onSurfaceVariant

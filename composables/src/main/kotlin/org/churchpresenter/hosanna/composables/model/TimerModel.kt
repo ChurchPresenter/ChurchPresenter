@@ -2,8 +2,17 @@ package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
 
+/**
+ * A column of the timer spinner: [Hours], [Minutes] or [Seconds].
+ */
 enum class TimerUnit { Hours, Minutes, Seconds }
 
+/**
+ * A quick-pick duration under the timer spinner.
+ *
+ * @property label the button's text, such as "5 min".
+ * @property seconds the duration it sets.
+ */
 @Immutable
 data class TimerPreset(val label: String, val seconds: Int)
 

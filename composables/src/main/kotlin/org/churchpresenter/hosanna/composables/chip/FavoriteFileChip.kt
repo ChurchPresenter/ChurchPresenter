@@ -26,6 +26,21 @@ import org.churchpresenter.icons.generated.resources.ic_star
 import org.churchpresenter.icons.generated.resources.ic_star_filled
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * A chip for a file with a star to keep it as a favorite.
+ *
+ * @param name the file's name.
+ * @param onClick called when the chip is pressed, to open the file.
+ * @param favorite whether the star is filled.
+ * @param onFavoriteChange called with the new state when the star is pressed.
+ * @param starContentDescription the star's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the chip's looks.
+ * @param starInteractionSource drives the star's looks.
+ * @param icon an optional leading icon, such as the file type.
+ * @param open marks the file that is open now.
+ * @param enabled whether it can be pressed.
+ */
 @Composable
 fun FavoriteFileChip(
     name: String,

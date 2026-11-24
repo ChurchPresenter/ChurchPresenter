@@ -38,6 +38,18 @@ import org.churchpresenter.hosanna.composables.model.neighbourTab
 import org.churchpresenter.hosanna.composables.model.tabsScroll
 import kotlin.math.abs
 
+/**
+ * The tab bar across the top of the window, with optional buttons at the right. Tabs drop to icons when their
+ * labels do not fit, and scroll when even icons do not. ← → move between tabs.
+ *
+ * @param tabs the tabs, in order.
+ * @param selectedKey the key of the open tab.
+ * @param onSelect called with the key of the tab picked.
+ * @param modifier applied to the outermost layout.
+ * @param style how the tabs are drawn when there is room.
+ * @param interactionSources per tab key; pass them to watch or freeze each tab's looks.
+ * @param actions optional buttons at the right, after a divider.
+ */
 @Composable
 fun TopNavigationBar(
     tabs: List<NavigationTab>,

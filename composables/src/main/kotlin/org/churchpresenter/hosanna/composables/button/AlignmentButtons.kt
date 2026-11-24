@@ -52,6 +52,19 @@ internal fun LayerAlignment.icon(): DrawableResource = when (this) {
     LayerAlignment.Bottom -> Res.drawable.ic_layer_align_bottom
 }
 
+/**
+ * Two groups of icon segments that set where text sits: across, and down.
+ *
+ * @param horizontal the picked horizontal alignment, or null to hide that group.
+ * @param vertical the picked vertical alignment, or null to hide that group.
+ * @param onAlignmentChange called with the alignment picked.
+ * @param contentDescription each alignment's screen-reader name and tooltip.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSources per alignment; pass them to watch or freeze each segment's looks.
+ * @param compact uses the smaller segments.
+ * @param enabled whether any alignment can be picked.
+ * @param disabled alignments that cannot be picked right now.
+ */
 @Composable
 fun TextAlignmentButtons(
     horizontal: TextAlignment?,
@@ -91,6 +104,17 @@ fun TextAlignmentButtons(
     }
 }
 
+/**
+ * Two groups of icon buttons that line a layer up to an edge or center, across and down. They act once; nothing
+ * stays picked.
+ *
+ * @param onAlign called with the alignment pressed.
+ * @param contentDescription each alignment's screen-reader name and tooltip.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSources per alignment; pass them to watch or freeze each button's looks.
+ * @param compact uses the smaller buttons.
+ * @param enabled whether the buttons can be pressed.
+ */
 @Composable
 fun LayerAlignmentButtons(
     onAlign: (LayerAlignment) -> Unit,

@@ -46,6 +46,20 @@ import org.churchpresenter.icons.generated.resources.ic_warning
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * A progress bar with an optional label and detail, and finished, failed and paused states.
+ *
+ * @param progress from 0 to 1, or null when the total is not known.
+ * @param modifier applied to the outermost layout.
+ * @param label an optional title above the bar.
+ * @param detail optional text at the end while running, such as "12 of 30".
+ * @param status where the task stands, which picks the color.
+ * @param statusText replaces [detail] when not running, such as "Done".
+ * @param retryText turns on a Retry button while failed.
+ * @param onRetry called when Retry is pressed.
+ * @param retryInteractionSource drives the Retry button's looks.
+ * @param thin draws a 3dp bar without text, for the top edge of a panel.
+ */
 @Composable
 fun LinearProgress(
     progress: Float?,

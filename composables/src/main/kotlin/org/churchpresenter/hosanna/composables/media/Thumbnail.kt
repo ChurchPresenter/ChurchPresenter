@@ -46,6 +46,29 @@ import org.churchpresenter.hosanna.composables.model.showsHoverActions
 
 private fun ThumbnailStatus.showsImage() = this == ThumbnailStatus.Ready || this == ThumbnailStatus.Offline
 
+/**
+ * A 16:9 tile for a slide, picture, video or screen. A click selects it; a double-click, Shift+Enter or the
+ * hover button puts it live.
+ *
+ * @param image the picture, fitted inside without cropping; null while loading or missing.
+ * @param onClick called when it is clicked, to select it.
+ * @param labels the tile's texts.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param size the tile's size.
+ * @param caption optional text under the tile, also its screen-reader name.
+ * @param subtitle an optional second caption line.
+ * @param selected marks it as picked for preview.
+ * @param live marks it as on screen now; wins over [selected].
+ * @param number an optional slide number badge.
+ * @param duration an optional duration badge.
+ * @param progress an optional playback bar from 0 to 1.
+ * @param status whether the picture is ready, loading, missing or of an offline screen.
+ * @param hidden fades it and skips it when presenting; it cannot go live.
+ * @param onGoLive turns on going live.
+ * @param onHiddenChange turns on the hide button and is called with the new state.
+ * @param onLocate turns on the Locate button on a missing file.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Thumbnail(

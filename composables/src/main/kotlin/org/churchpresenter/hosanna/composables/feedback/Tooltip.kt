@@ -44,6 +44,16 @@ import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
 import org.churchpresenter.hosanna.composables.model.TooltipWarmth
 
+/**
+ * Shows a short label beside [content] on hover or keyboard focus, such as an icon button's name. It works on
+ * disabled controls too.
+ *
+ * @param text the label.
+ * @param modifier applied to the outermost layout.
+ * @param shortcut an optional key shortcut after the label.
+ * @param enabled turns the tooltip off, such as for text that is not cut off.
+ * @param content the control the tooltip belongs to.
+ */
 @Composable
 fun Tooltip(
     text: String,

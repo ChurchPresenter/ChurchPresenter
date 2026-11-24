@@ -51,6 +51,23 @@ import org.jetbrains.compose.resources.painterResource
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
+/**
+ * A switch for a setting that takes effect at once. The whole row toggles it.
+ *
+ * @param checked whether it is on.
+ * @param onCheckedChange called with the new state.
+ * @param label the switch's label.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param description an optional line under the label.
+ * @param trailing optional text at the end, such as "3 phones connected".
+ * @param live draws [trailing] in the success color while on.
+ * @param layout where the switch sits beside its label.
+ * @param compact uses the small switch.
+ * @param showCheck shows a check inside the knob while on.
+ * @param isLoading shows a spinner in the knob and stops presses while a change is applied.
+ * @param enabled whether it can be toggled.
+ */
 @Composable
 fun Switch(
     checked: Boolean,

@@ -61,6 +61,22 @@ import org.churchpresenter.hosanna.composables.model.sliderKey
 import org.churchpresenter.hosanna.composables.model.sliderValueAt
 import org.churchpresenter.hosanna.tabular
 
+/**
+ * A slider with two thumbs that pick a start and an end. The thumbs cannot cross, and each has its own keys.
+ *
+ * @param start the start value.
+ * @param end the end value.
+ * @param onRangeChange called with the new start and end.
+ * @param startDescription the start thumb's screen-reader name.
+ * @param endDescription the end thumb's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param startInteractionSource drives the start thumb's looks.
+ * @param endInteractionSource drives the end thumb's looks.
+ * @param range the allowed values and the step it snaps to.
+ * @param valueText the values shown at the end, such as "20–70".
+ * @param onRangeChangeFinished called when a drag ends.
+ * @param enabled whether it can be moved.
+ */
 @Composable
 fun RangeSlider(
     start: Double,

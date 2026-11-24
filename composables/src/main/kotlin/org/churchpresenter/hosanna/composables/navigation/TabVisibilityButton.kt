@@ -68,6 +68,21 @@ import org.churchpresenter.icons.generated.resources.ic_drag_handle
 import org.churchpresenter.icons.generated.resources.ic_visibility
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * The eye button that opens the "Show tabs" menu: the tab style, a checkbox per tab, drag handles to reorder
+ * and Reset. The last visible tab cannot be hidden.
+ *
+ * @param tabs every tab, in the current order.
+ * @param hidden the keys of the hidden tabs.
+ * @param onVisibilityChange called with a tab's key and whether it is now visible.
+ * @param onReorder called with the keys in their new order.
+ * @param onReset called when Reset is pressed.
+ * @param style the current tab style.
+ * @param onStyleChange called with the style picked.
+ * @param labels the button's and menu's texts.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ */
 @Composable
 fun TabVisibilityButton(
     tabs: List<NavigationTab>,

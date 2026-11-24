@@ -60,6 +60,17 @@ internal fun TextStyleToggle.icon(): DrawableResource = when (this) {
     TextStyleToggle.Strikethrough -> Res.drawable.ic_format_strikethrough
 }
 
+/**
+ * Bold, italic, underline and strikethrough toggles in one group. A style can be mixed across a selection.
+ *
+ * @param states each style's state: on, off or mixed.
+ * @param onToggle called with the style pressed.
+ * @param contentDescription each style's screen-reader name and tooltip.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSources per style; pass them to watch or freeze each toggle's looks.
+ * @param enabled whether any style can be pressed.
+ * @param disabled styles that cannot be pressed right now.
+ */
 @Composable
 fun TextStyleToggles(
     states: Map<TextStyleToggle, ToggleableState>,
@@ -99,6 +110,21 @@ internal fun splitPartOverlay(content: Color, state: ButtonState): Color = when 
     else -> Color.Transparent
 }
 
+/**
+ * A toggle with a second part that opens its options, such as text outline with its settings.
+ *
+ * @param icon the toggle's icon.
+ * @param contentDescription the toggle's screen-reader name.
+ * @param checked whether the toggle is on.
+ * @param onCheckedChange called with the new state when the toggle is pressed.
+ * @param onOpenOptions called when the options part is pressed.
+ * @param optionsContentDescription the options part's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the toggle part's looks.
+ * @param optionsInteractionSource drives the options part's looks.
+ * @param indicatorColor an optional bar under the icon, such as the current outline color.
+ * @param enabled whether either part can be pressed.
+ */
 @Composable
 fun SplitToggleButton(
     icon: Painter,

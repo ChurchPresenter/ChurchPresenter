@@ -61,6 +61,18 @@ import org.churchpresenter.hosanna.hosannaElevation
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
+/**
+ * A row of segments with one picked, such as a view switcher. ← and → move between segments.
+ *
+ * @param options the segments.
+ * @param selectedIndex the picked segment.
+ * @param onSelectionChange called with the index of the segment picked.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSources one per segment, in order; pass them to watch or freeze each segment's looks.
+ * @param size the row's height.
+ * @param fillWidth stretches the segments to fill the width.
+ * @param enabled whether any segment can be picked.
+ */
 @Composable
 fun SegmentedButton(
     options: List<SegmentedOption>,

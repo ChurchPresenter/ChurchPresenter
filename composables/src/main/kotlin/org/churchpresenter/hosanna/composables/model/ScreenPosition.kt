@@ -7,6 +7,9 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 
+/**
+ * One of the nine spots on the output screen, from [TopLeft] to [BottomRight].
+ */
 enum class ScreenPosition {
     TopLeft,
     TopCenter,

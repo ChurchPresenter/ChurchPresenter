@@ -2,8 +2,18 @@ package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
 
+/**
+ * What an inline message is about, which picks its colors and icon: [Info], [Success], [Warning], [Error] or
+ * [Neutral].
+ */
 enum class MessageIntent { Info, Success, Warning, Error, Neutral }
 
+/**
+ * A button on a banner.
+ *
+ * @property label the button's text, or the dismiss button's name and tooltip.
+ * @property onClick called when it is pressed.
+ */
 @Immutable
 class MessageAction(val label: String, val onClick: () -> Unit)
 

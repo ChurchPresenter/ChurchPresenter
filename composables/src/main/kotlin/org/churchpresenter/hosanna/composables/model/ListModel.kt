@@ -3,6 +3,12 @@ package org.churchpresenter.hosanna.composables.model
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.input.key.Key
 
+/**
+ * One line of a [org.churchpresenter.hosanna.composables.list.NavigationList].
+ *
+ * @property key what the list reports when this line is picked.
+ * @property label the line's text.
+ */
 @Immutable
 class NavigationItem(val key: String, val label: String)
 

@@ -70,6 +70,23 @@ import org.churchpresenter.hosanna.tabular
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
+/**
+ * A slider for a value in a range, with optional steps, value text and a center origin. ← → step it, Shift
+ * steps ten times, Home and End jump to the ends.
+ *
+ * @param value the value.
+ * @param onValueChange called with the new value while dragging or stepping.
+ * @param contentDescription the slider's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param range the allowed values and the step it snaps to; ten steps or fewer show dots.
+ * @param valueText the value shown at the end and in the drag bubble, such as "60%".
+ * @param centered fills from the middle, snaps to it and resets to it on a double-click, 0 or Delete.
+ * @param startLabel optional text before the slider, such as "−6".
+ * @param endLabel optional text after the slider, such as "+6".
+ * @param onValueChangeFinished called when a drag or press ends.
+ * @param enabled whether it can be moved.
+ */
 @Composable
 fun Slider(
     value: Double,

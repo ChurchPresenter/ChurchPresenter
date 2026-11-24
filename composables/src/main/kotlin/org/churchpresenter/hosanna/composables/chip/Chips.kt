@@ -55,6 +55,18 @@ internal fun chipPadding(size: ChipSize, leading: Boolean, end: Boolean = true):
 internal fun isRemoveKey(event: KeyEvent): Boolean =
     event.type == KeyEventType.KeyDown && (event.key == Key.Delete || event.key == Key.Backspace)
 
+/**
+ * A chip that does something when pressed, such as inserting a section.
+ *
+ * @param label the chip's text.
+ * @param onClick called when pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param icon an optional leading icon.
+ * @param size the chip's height.
+ * @param color the accent it is tinted with.
+ * @param enabled whether it can be pressed.
+ */
 @Composable
 fun ActionChip(
     label: String,
@@ -81,6 +93,19 @@ fun ActionChip(
     }
 }
 
+/**
+ * A chip that turns a filter on or off, showing a check while on.
+ *
+ * @param label the chip's text.
+ * @param selected whether the filter is on.
+ * @param onSelectedChange called with the new state when pressed.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param icon an optional leading icon, replaced by a check while on.
+ * @param size the chip's height.
+ * @param color the accent it is tinted with.
+ * @param enabled whether it can be pressed.
+ */
 @Composable
 fun FilterChip(
     label: String,
@@ -109,6 +134,22 @@ fun FilterChip(
     }
 }
 
+/**
+ * A chip for something the user entered, with a remove button. Delete or Backspace also removes it.
+ *
+ * @param label the chip's text.
+ * @param onRemove called when it is removed.
+ * @param removeContentDescription the remove button's screen-reader name.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the chip's looks.
+ * @param removeInteractionSource drives the remove button's looks.
+ * @param icon an optional leading icon.
+ * @param onClick called when the chip itself is pressed; null makes it not clickable.
+ * @param dragHandle shows a drag handle at the start, for chips that can be reordered.
+ * @param size the chip's height.
+ * @param color the accent it is tinted with.
+ * @param enabled whether it can be pressed or removed.
+ */
 @Composable
 fun InputChip(
     label: String,
@@ -164,6 +205,13 @@ fun InputChip(
     }
 }
 
+/**
+ * A small label that is not clickable, such as a status or a section name.
+ *
+ * @param text the tag's text.
+ * @param modifier applied to the outermost layout.
+ * @param color the accent it is tinted with.
+ */
 @Composable
 fun Tag(
     text: String,

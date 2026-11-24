@@ -43,6 +43,20 @@ import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_remove
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * A checkbox with its label. The whole row toggles it.
+ *
+ * @param checked whether it is checked.
+ * @param onCheckedChange called with the new state.
+ * @param label the text after the box.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param description an optional line under the label.
+ * @param trailing optional text at the end, such as a count.
+ * @param compact uses the shorter row without a description.
+ * @param error turns the box's edge red, such as when nothing in a group is picked.
+ * @param enabled whether it can be toggled.
+ */
 @Composable
 fun Checkbox(
     checked: Boolean,
@@ -70,6 +84,20 @@ fun Checkbox(
     )
 }
 
+/**
+ * A checkbox that can also be mixed, such as a parent whose children are partly checked.
+ *
+ * @param state on, off or mixed.
+ * @param onClick called when pressed; the caller works out the new state.
+ * @param label the text after the box.
+ * @param modifier applied to the outermost layout.
+ * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param description an optional line under the label.
+ * @param trailing optional text at the end, such as a count.
+ * @param compact uses the shorter row without a description.
+ * @param error turns the box's edge red, such as when nothing in a group is picked.
+ * @param enabled whether it can be pressed.
+ */
 @Composable
 fun TriStateCheckbox(
     state: ToggleableState,

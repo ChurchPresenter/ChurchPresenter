@@ -16,7 +16,19 @@ import androidx.compose.ui.window.PopupPositionProvider
 import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 
+/**
+ * One line of a menu: an [Item] to pick, a [Header] over a group, or a [Divider] between groups.
+ */
 sealed interface MenuEntry {
+    /**
+     * A line that can be picked.
+     *
+     * @property key what [org.churchpresenter.hosanna.composables.field.Dropdown] reports when this is picked.
+     * @property label the line's text.
+     * @property supporting an optional second line.
+     * @property count an optional count shown at the end of the line.
+     * @property enabled whether the line can be picked.
+     */
     @Immutable
     data class Item(
         val key: String,
@@ -26,12 +38,27 @@ sealed interface MenuEntry {
         val enabled: Boolean = true,
     ) : MenuEntry
 
+    /**
+     * A title over a group of items.
+     *
+     * @property title the group's title.
+     */
     @Immutable
     data class Header(val title: String) : MenuEntry
 
+    /**
+     * A line between groups of items.
+     */
     data object Divider : MenuEntry
 }
 
+/**
+ * Turns on the search field at the top of a menu.
+ *
+ * @property placeholder the empty field's hint.
+ * @property clearContentDescription the screen-reader name of the clear button.
+ * @property noMatches what the menu says when nothing matches.
+ */
 @Immutable
 class MenuSearch(val placeholder: String, val clearContentDescription: String, val noMatches: String)
 

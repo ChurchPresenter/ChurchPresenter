@@ -42,6 +42,28 @@ import org.churchpresenter.hosanna.composables.model.jumpTarget
 import org.churchpresenter.hosanna.composables.model.listKey
 import org.churchpresenter.hosanna.composables.model.moveIndex
 
+/**
+ * A table with a header that sorts and resizes, rows that select and open, optional checkboxes, row actions,
+ * and loading and empty states. The caller sorts the rows and keeps the selection.
+ *
+ * @param columns the columns, in order.
+ * @param rows the rows, already sorted.
+ * @param modifier applied to the outermost layout.
+ * @param selectedKeys the keys of the picked rows.
+ * @param onRowClick called with a row's key when it is clicked or moved to with the keyboard.
+ * @param onRowOpen called with a row's key on a double-click or Enter.
+ * @param sort the column the rows are sorted by, which shows its arrow.
+ * @param onSortChange called with the new sort when a header is clicked.
+ * @param onColumnWidthChange called with a column's key and width when it is resized.
+ * @param compact uses the shorter rows.
+ * @param bulk turns on the checkbox column.
+ * @param loading shows skeleton rows instead of [rows].
+ * @param rowInteractionSources per row key; pass them to watch or freeze each row's looks.
+ * @param keepActions keys of rows whose actions stay visible.
+ * @param actionsWidth the width kept for [rowActions].
+ * @param rowActions buttons at the end of a row, shown on hover or selection.
+ * @param empty shown when there are no rows.
+ */
 @Composable
 fun Table(
     columns: List<TableColumn>,
