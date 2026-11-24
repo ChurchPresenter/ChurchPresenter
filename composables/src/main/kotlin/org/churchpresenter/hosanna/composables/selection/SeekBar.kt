@@ -45,7 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.SeekBarDefaults
 import org.churchpresenter.hosanna.composables.defaults.SliderDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -59,7 +59,7 @@ import org.churchpresenter.hosanna.composables.model.clockText
 import org.churchpresenter.hosanna.composables.model.seekFraction
 import org.churchpresenter.hosanna.composables.model.seekTimeAt
 import org.churchpresenter.hosanna.composables.model.sliderKey
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**

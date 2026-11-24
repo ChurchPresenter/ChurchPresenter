@@ -25,7 +25,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.SplitButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonColors

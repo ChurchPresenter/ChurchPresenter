@@ -35,8 +35,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.TableDefaults
 import org.churchpresenter.hosanna.composables.model.SortDirection
 import org.churchpresenter.hosanna.composables.model.TableBulk

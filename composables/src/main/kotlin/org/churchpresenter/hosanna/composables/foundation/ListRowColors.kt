@@ -3,6 +3,7 @@ package org.churchpresenter.hosanna.composables.foundation
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import org.churchpresenter.theme.HosannaStateAlpha
 
 @Immutable
 internal data class ListRowColors(

@@ -38,9 +38,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaRadius
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.PositionMetrics
 import org.churchpresenter.hosanna.composables.defaults.PositionPickerDefaults

@@ -31,14 +31,14 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.ProgressDefaults
 import org.churchpresenter.hosanna.composables.foundation.ProgressColors
 import org.churchpresenter.hosanna.composables.foundation.progressColors
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ProgressStatus
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_pause

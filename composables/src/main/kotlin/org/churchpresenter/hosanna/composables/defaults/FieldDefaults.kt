@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.theme.HosannaRadius
 
 internal object FieldDefaults {
     val LabeledHeight: Dp = 44.dp

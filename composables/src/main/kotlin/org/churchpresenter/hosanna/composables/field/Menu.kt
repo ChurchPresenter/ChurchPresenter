@@ -49,10 +49,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
-import org.churchpresenter.hosanna.composables.foundation.asOverline
+import org.churchpresenter.theme.HosannaLevel
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
 import org.churchpresenter.hosanna.composables.model.MenuEntry
@@ -65,7 +65,7 @@ import org.churchpresenter.hosanna.composables.model.itemCount
 import org.churchpresenter.hosanna.composables.model.menuKey
 import org.churchpresenter.hosanna.composables.model.menuRowContainer
 import org.churchpresenter.hosanna.composables.model.nextPickable
-import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
+import org.churchpresenter.theme.hosannaElevation
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource

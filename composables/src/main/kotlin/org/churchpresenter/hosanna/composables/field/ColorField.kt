@@ -40,10 +40,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
-import org.churchpresenter.hosanna.composables.foundation.asOverline
+import org.churchpresenter.theme.HosannaRadius
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ColorFieldDefaults
@@ -62,7 +62,7 @@ import org.churchpresenter.hosanna.composables.model.drawCheckerboard
 import org.churchpresenter.hosanna.composables.model.hexText
 import org.churchpresenter.hosanna.composables.model.opacityText
 import org.churchpresenter.hosanna.composables.model.parseColor
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_palette
 import org.jetbrains.compose.resources.painterResource

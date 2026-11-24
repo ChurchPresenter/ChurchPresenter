@@ -38,7 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.ListDefaults
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.listRowColors

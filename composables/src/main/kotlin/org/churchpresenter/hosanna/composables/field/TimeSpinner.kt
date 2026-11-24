@@ -31,8 +31,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
@@ -48,7 +48,7 @@ import org.churchpresenter.hosanna.composables.model.spinValues
 import org.churchpresenter.hosanna.composables.model.stepTime
 import org.churchpresenter.hosanna.composables.model.timeParts
 import org.churchpresenter.hosanna.composables.model.wrapDay
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up

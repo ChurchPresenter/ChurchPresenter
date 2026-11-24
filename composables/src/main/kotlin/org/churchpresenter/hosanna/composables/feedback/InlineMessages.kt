@@ -28,7 +28,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.MessageDefaults

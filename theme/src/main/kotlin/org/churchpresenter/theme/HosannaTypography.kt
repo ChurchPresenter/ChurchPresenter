@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.foundation
+package org.churchpresenter.theme
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle

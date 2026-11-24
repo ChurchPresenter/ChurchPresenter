@@ -36,8 +36,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaLevel
+import org.churchpresenter.theme.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonColors
 import org.churchpresenter.hosanna.composables.foundation.ButtonState

@@ -32,8 +32,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaLevel
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.SwitchDefaults
 import org.churchpresenter.hosanna.composables.defaults.SwitchMetrics
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -43,8 +43,8 @@ import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.hosanna.composables.foundation.switchColors
 import org.churchpresenter.hosanna.composables.model.SwitchLayout
-import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.hosannaElevation
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource

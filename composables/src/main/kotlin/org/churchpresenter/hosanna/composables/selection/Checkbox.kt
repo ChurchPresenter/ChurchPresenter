@@ -31,13 +31,13 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.state.ToggleableState
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.CheckboxDefaults
 import org.churchpresenter.hosanna.composables.foundation.CheckboxColors
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.checkboxColors
 import org.churchpresenter.hosanna.composables.foundation.focusRing
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_remove

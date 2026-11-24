@@ -46,8 +46,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.ThumbnailDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
@@ -57,7 +57,7 @@ import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ThumbnailLabels
 import org.churchpresenter.hosanna.composables.model.ThumbnailSize
 import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_broken_image
 import org.churchpresenter.icons.generated.resources.ic_play

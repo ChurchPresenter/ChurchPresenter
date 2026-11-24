@@ -26,9 +26,9 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
-import org.churchpresenter.hosanna.composables.foundation.asOverline
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.foundation.ChipCircleButton

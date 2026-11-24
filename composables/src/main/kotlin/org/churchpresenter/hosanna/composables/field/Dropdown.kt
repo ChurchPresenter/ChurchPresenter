@@ -42,9 +42,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
-import org.churchpresenter.hosanna.composables.foundation.asOverline
+import org.churchpresenter.theme.HosannaRadius
+import org.churchpresenter.theme.HosannaTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.foundation.FieldState

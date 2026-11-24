@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.churchpresenter.hosanna.composables.testing.LightThemeColors
+import org.churchpresenter.theme.HosannaStateAlpha
 
 class CheckboxColorsTest {
 

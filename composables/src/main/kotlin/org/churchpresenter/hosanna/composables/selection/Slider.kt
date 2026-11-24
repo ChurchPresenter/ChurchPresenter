@@ -48,7 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.SliderDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
 import org.churchpresenter.hosanna.composables.foundation.SliderBubble
@@ -66,7 +66,7 @@ import org.churchpresenter.hosanna.composables.model.sliderOrigin
 import org.churchpresenter.hosanna.composables.model.sliderStepDots
 import org.churchpresenter.hosanna.composables.model.sliderValueAt
 import org.churchpresenter.hosanna.composables.model.snapToOrigin
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)

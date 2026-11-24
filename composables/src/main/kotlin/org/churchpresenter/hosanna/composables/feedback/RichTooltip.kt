@@ -32,15 +32,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaLevel
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.RichTooltipDefaults
 import org.churchpresenter.hosanna.composables.defaults.StandardButtonDefaults
 import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
-import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
+import org.churchpresenter.theme.hosannaElevation
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**

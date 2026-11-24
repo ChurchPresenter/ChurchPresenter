@@ -11,17 +11,17 @@ The composables built on the app theme's Light and Dark (Hosanna) palette. A rea
 
 ## The one rule that matters
 
-**Colors come from the app theme; type, shapes, elevation and state alphas from `foundation/`'s tokens. Nothing is set per component.**
+**Colors, type, shapes, elevation and state alphas all come from `:theme`. Nothing is set per component.**
 
 - **Colors are the app theme's**, read through `ThemeColors.current` (`foundation/ThemeColors.kt`):
   the current `MaterialTheme.colorScheme` roles and `MaterialTheme.semantic` roles, under the app
   theme's names (`primary`, `faint`, `favorite`, `contentSongs`, `chordVerse`, `screen`…). The app's
   Light and Dark schemes are the Hosanna palette, so the composables follow whichever scheme the user
   picks. A role the design needs and `:theme` lacks is added to `:theme` (`SemanticColors`), never here.
-- **Type, shapes, elevation and state alphas are `foundation/`'s tokens**: `HosannaTheme.typography`
+- **Type, shapes, elevation and state alphas are `:theme`'s Hosanna tokens**: `HosannaTheme.typography`
   (the scale, set in the app theme's font family), `.shapes`, `.elevation` (shadows per light/dark
   scheme, the edge from `SemanticColors.elevationEdge`), `HosannaRadius`, `HosannaLevel`/`hosannaElevation`,
-  `HosannaStateAlpha`. They hold no color literal.
+  `HosannaStateAlpha` (`org.churchpresenter.theme`).
 - **No color, size or radius literal** that a token already names, and no per-component color, shape
   or type table outside `foundation/`'s state functions, which only combine theme roles.
 - **Nothing from Material's components**: build on `androidx.compose.foundation` (`BasicText`,

@@ -28,9 +28,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaLevel
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.SplitButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -42,7 +42,7 @@ import org.churchpresenter.hosanna.composables.foundation.SegmentRole
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.hosanna.composables.model.TextStyleToggle
-import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
+import org.churchpresenter.theme.hosannaElevation
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_format_bold

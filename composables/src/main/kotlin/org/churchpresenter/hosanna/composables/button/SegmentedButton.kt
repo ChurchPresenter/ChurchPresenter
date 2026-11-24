@@ -44,9 +44,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
-import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaLevel
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.ButtonFoundationDefaults
 import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonColors
@@ -56,7 +56,7 @@ import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.hosanna.composables.model.SegmentedButtonSize
 import org.churchpresenter.hosanna.composables.model.SegmentedOption
-import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
+import org.churchpresenter.theme.hosannaElevation
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)

@@ -1,132 +1,30 @@
 package org.churchpresenter.sharedui.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import org.churchpresenter.theme.AppShape
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.label
-import org.churchpresenter.strings.generated.resources.tooltip_with_shortcut
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.strings.generated.resources.Res as StringsRes
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raised
 
 private const val DIMMED_ALPHA = 0.5f
 
 /**
- * Uniform action-row icon button used across every tab's primary action row
- * (Go Live, Add to Schedule, and their row-mates). Mirrors the LowerThird tab's look:
- * a 34dp raised key in its own color, with rounded corners and a hover tooltip.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ActionIconButton(
-    onClick: () -> Unit,
-    tooltipText: String,
-    icon: ImageVector? = null,
-    painter: Painter? = null,
-    enabled: Boolean = true,
-    containerColor: Color = MaterialTheme.colorScheme.primary,
-    contentColor: Color = MaterialTheme.colorScheme.onPrimary,
-    disabledContainerColor: Color = MaterialTheme.colorScheme.outlineVariant,
-    disabledContentColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-    buttonSize: Dp = 34.dp,
-    iconSize: Dp = 16.dp,
-    modifier: Modifier = Modifier,
-    tooltipContent: (@Composable () -> Unit)? = null,
-    /** What the button is called to assistive technology; the tooltip's words unless they say more. */
-    contentDescription: String = tooltipText,
-) {
-    ConditionalTooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                if (tooltipContent != null) {
-                    tooltipContent()
-                } else {
-                    Text(
-                        text = tooltipText,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-        }
-    ) {
-        val palette = elevationPalette()
-        val shape = AppShape(8.dp)
-        val interaction = remember { MutableInteractionSource() }
-        val hovered by interaction.collectIsHoveredAsState()
-        val pressed by interaction.collectIsPressedAsState()
-        val ink = if (enabled) contentColor else disabledContentColor
-        Box(
-            modifier = modifier
-                .size(buttonSize)
-                .then(
-                    if (enabled) {
-                        Modifier.raised(shape, palette.tinted(containerColor, contentColor), palette, pressed, hovered)
-                    } else {
-                        Modifier.clip(shape).background(disabledContainerColor)
-                    }
-                )
-                .clickable(
-                    interactionSource = interaction,
-                    indication = null,
-                    enabled = enabled,
-                    role = Role.Button,
-                    onClick = onClick
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (icon != null) {
-                Icon(icon, contentDescription = contentDescription, tint = ink, modifier = Modifier.size(iconSize))
-            } else if (painter != null) {
-                Icon(painter, contentDescription = contentDescription, tint = ink, modifier = Modifier.size(iconSize))
-            }
-        }
-    }
-}
-
-/**
- * Uniform "Go Live" button — matches LowerThird's action row.
+ * Uniform "Go Live" button.
  *
- * [showsShortcut] adds the Go Live key to the tooltip ("Go Live (Enter)") on the tabs that answer
- * it; it follows a rebinding and drops out when the action is unbound.
+ * [showsShortcut] adds the Go Live key to the tooltip on the tabs that answer it; it follows a
+ * rebinding and drops out when the action is unbound.
  */
 @Composable
 fun GoLiveButton(
@@ -137,23 +35,21 @@ fun GoLiveButton(
     showsShortcut: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val key = if (showsShortcut) LocalShortcuts.current.label(ShortcutAction.GO_LIVE) else ""
-    val tooltip = if (key.isEmpty()) {
-        tooltipText
-    } else {
-        stringResource(StringsRes.string.tooltip_with_shortcut, tooltipText, key)
+    val key = if (showsShortcut) LocalShortcuts.current.label(ShortcutAction.GO_LIVE).ifEmpty { null } else null
+    Tooltip(
+        text = tooltipText,
+        modifier = if (dimmed) modifier.alpha(DIMMED_ALPHA) else modifier,
+        shortcut = key,
+    ) {
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Tv),
+            contentDescription = tooltipText,
+            onClick = onClick,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Default,
+            enabled = enabled,
+        )
     }
-    ActionIconButton(
-        onClick = onClick,
-        tooltipText = tooltip,
-        // Named without the key, which belongs to the tooltip: the button is still "Go Live".
-        contentDescription = tooltipText,
-        icon = Icons.Default.Tv,
-        enabled = enabled,
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
-        modifier = if (dimmed) modifier.alpha(DIMMED_ALPHA) else modifier
-    )
 }
 
 /**
@@ -168,19 +64,19 @@ fun SavePresetButton(
     enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    ActionIconButton(
-        onClick = onClick,
-        tooltipText = tooltipText,
-        icon = Icons.Filled.BookmarkAdd,
-        enabled = enabled,
-        // Filled like its neighbours: surfaceVariant read as the disabled state next to them.
-        containerColor = MaterialTheme.colorScheme.tertiary,
-        contentColor = MaterialTheme.colorScheme.onTertiary,
-        modifier = modifier
-    )
+    Tooltip(text = tooltipText, modifier = modifier) {
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.BookmarkAdd),
+            contentDescription = tooltipText,
+            onClick = onClick,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Default,
+            enabled = enabled,
+        )
+    }
 }
 
-/** Uniform "Add to Schedule" button — matches LowerThird's action row. */
+/** Uniform "Add to Schedule" button. */
 @Composable
 fun AddToScheduleButton(
     onClick: () -> Unit,
@@ -188,13 +84,14 @@ fun AddToScheduleButton(
     enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    ActionIconButton(
-        onClick = onClick,
-        tooltipText = tooltipText,
-        painter = painterResource(Res.drawable.ic_playlist_add),
-        enabled = enabled,
-        containerColor = MaterialTheme.colorScheme.secondary,
-        contentColor = MaterialTheme.colorScheme.onSecondary,
-        modifier = modifier
-    )
+    Tooltip(text = tooltipText, modifier = modifier) {
+        IconButton(
+            icon = painterResource(Res.drawable.ic_playlist_add),
+            contentDescription = tooltipText,
+            onClick = onClick,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Neutral,
+            enabled = enabled,
+        )
+    }
 }

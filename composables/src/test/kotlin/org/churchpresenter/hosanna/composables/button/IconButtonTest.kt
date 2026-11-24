@@ -32,7 +32,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.theme.HosannaRadius
 import org.churchpresenter.hosanna.composables.defaults.IconButtonDefaults
 import org.churchpresenter.hosanna.composables.defaults.IconButtonMetrics
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy

@@ -38,8 +38,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
 import org.churchpresenter.hosanna.composables.model.TooltipWarmth

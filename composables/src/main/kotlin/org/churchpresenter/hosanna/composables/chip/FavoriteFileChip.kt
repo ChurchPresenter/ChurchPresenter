@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.foundation.ChipCircleButton

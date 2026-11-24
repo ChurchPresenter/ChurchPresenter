@@ -32,8 +32,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaLevel
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.chip.Tag
 import org.churchpresenter.hosanna.composables.defaults.ListDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -41,7 +41,7 @@ import org.churchpresenter.hosanna.composables.foundation.ListRowColors
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.listRowColors
 import org.churchpresenter.hosanna.composables.model.ChipColor
-import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
+import org.churchpresenter.theme.hosannaElevation
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**

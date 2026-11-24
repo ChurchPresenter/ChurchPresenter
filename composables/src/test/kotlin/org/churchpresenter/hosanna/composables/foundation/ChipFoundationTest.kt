@@ -13,6 +13,7 @@ import org.churchpresenter.hosanna.composables.model.ChipColors
 import org.churchpresenter.hosanna.composables.model.ChipSize
 import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 import org.churchpresenter.hosanna.composables.testing.DarkThemeColors
+import org.churchpresenter.theme.HosannaStateAlpha
 
 class ChipFoundationTest {
 

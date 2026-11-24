@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
+import org.churchpresenter.theme.HosannaStateAlpha
 
 internal enum class FieldState { Rest, Hovered, Focused, Disabled, ReadOnly }
 

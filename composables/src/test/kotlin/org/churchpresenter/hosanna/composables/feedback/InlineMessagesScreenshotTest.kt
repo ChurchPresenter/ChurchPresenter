@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.model.MessageAction
 import org.churchpresenter.hosanna.composables.model.MessageIntent
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent

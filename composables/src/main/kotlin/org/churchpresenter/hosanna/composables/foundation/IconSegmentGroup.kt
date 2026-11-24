@@ -59,6 +59,9 @@ import org.churchpresenter.hosanna.composables.defaults.IconSegmentMetrics
 import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.theme.HosannaTheme
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.hosannaElevation
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 

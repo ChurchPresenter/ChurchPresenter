@@ -10,7 +10,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButtonDefaults
@@ -80,12 +79,7 @@ class RaisedControlsParametersTest {
         var clicks = 0
         setContent {
             MaterialTheme(colorScheme = colorSchemeFor(ThemeMode.LIGHT)) {
-                val shape = RoundedCornerShape(4.dp)
                 Column {
-                    KeyIconButton(
-                        onClick = { clicks++ }, modifier = Modifier, enabled = true, shape = shape,
-                        colors = IconButtonDefaults.iconButtonColors(), interactionSource = MutableInteractionSource(),
-                    ) { Text("I") }
                     RaisedSwitch(
                         checked = true, onCheckedChange = { clicks++ }, modifier = Modifier.testTag("sw"),
                         enabled = true, interactionSource = MutableInteractionSource(),
@@ -105,11 +99,10 @@ class RaisedControlsParametersTest {
                 }
             }
         }
-        onNodeWithText("I").performClick()
         onNodeWithTag("sw").performClick()
         onNodeWithTag("cb").performClick()
         onNodeWithTag("rb").performClick()
-        assertEquals(4, clicks)
+        assertEquals(3, clicks)
     }
 
     @Test

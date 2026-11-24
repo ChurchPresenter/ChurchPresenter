@@ -10,6 +10,7 @@ import org.churchpresenter.hosanna.composables.field.counterText
 import org.churchpresenter.hosanna.composables.field.isOverLimit
 import org.churchpresenter.hosanna.composables.field.showClear
 import org.churchpresenter.hosanna.composables.testing.LightThemeColors
+import org.churchpresenter.theme.HosannaStateAlpha
 
 class FieldFoundationTest {
 

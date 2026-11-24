@@ -41,10 +41,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import java.time.LocalTime
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
-import org.churchpresenter.hosanna.composables.foundation.asOverline
+import org.churchpresenter.theme.HosannaRadius
+import org.churchpresenter.theme.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.TimeFieldDefaults
@@ -66,7 +66,7 @@ import org.churchpresenter.hosanna.composables.model.stepTime
 import org.churchpresenter.hosanna.composables.model.timeKey
 import org.churchpresenter.hosanna.composables.model.timeParts
 import org.churchpresenter.hosanna.composables.model.typeDigit
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up

@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.foundation
+package org.churchpresenter.theme
 
 object HosannaStateAlpha {
     const val HOVER = 0.08f

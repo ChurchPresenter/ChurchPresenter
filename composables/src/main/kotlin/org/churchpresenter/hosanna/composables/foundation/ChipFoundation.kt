@@ -38,6 +38,8 @@ import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.model.ChipColor
 import org.churchpresenter.hosanna.composables.model.ChipColors
 import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.theme.HosannaTheme
+import org.churchpresenter.theme.HosannaStateAlpha
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 

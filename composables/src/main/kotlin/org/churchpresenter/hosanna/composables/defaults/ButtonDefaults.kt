@@ -3,7 +3,7 @@ package org.churchpresenter.hosanna.composables.defaults
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.theme.HosannaRadius
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.model.FabSize
 import org.churchpresenter.hosanna.composables.model.IconButtonSize

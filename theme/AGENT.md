@@ -49,6 +49,11 @@ Corollaries:
 | `UiScale.kt` | `ProvideUiScale` — the interface size and UI text size on `LocalDensity`, applied once per window; the Ctrl +/− steps and the screen's cap |
 | `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, faint, link, content types, song sections, the output `screen`/`onScreen`…) — one set for the light schemes, one for the dark, and Light's and Dark's own Hosanna sets, which the Custom theme starts from — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
 | `AppThemeWrapper.kt` | The one-call wrapper (`ProvideThemeManager` + `ChurchPresenterTheme`) used by app entry points, previews and screenshot tests |
+| `HosannaTheme.kt` | The `HosannaTheme` accessor `:composables` reads: `.typography` (the scale in the app theme's font family), `.shapes`, `.elevation` (shadows per light/dark scheme, the edge from `SemanticColors.elevationEdge`), `focusRingWidth` |
+| `HosannaTypography.kt` | The ten Hosanna styles (Display … Overline), `hosannaTypography(family)`, `tabular()`, `asOverline()` |
+| `HosannaShapes.kt` | The exact radius scale XS 4 · S 6 · M 8 · L 12 · XL 16 · Full as `HosannaRadius` (dp) and `HosannaShapes` — not scaled by `CORNER_SCALE` |
+| `HosannaElevation.kt` | Levels 0–5, the two-layer shadows per light/dark, `Modifier.hosannaElevation` |
+| `HosannaStateAlpha.kt` | The hover, focus, pressed, dragged, disabled, muted, scrim and overlay alphas the composables derive states with |
 
 **Every rounded corner in the app is an `AppShape`, never a `RoundedCornerShape`** — in this module,
 the app and every module that draws UI. `CORNER_SCALE` is then the single number for how rounded

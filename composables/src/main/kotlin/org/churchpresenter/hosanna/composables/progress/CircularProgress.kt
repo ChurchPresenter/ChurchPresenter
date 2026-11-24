@@ -18,7 +18,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.ProgressDefaults
 import org.churchpresenter.hosanna.composables.foundation.FULL_TURN
 import org.churchpresenter.hosanna.composables.foundation.Spinner
@@ -26,7 +26,7 @@ import org.churchpresenter.hosanna.composables.foundation.progressColors
 import org.churchpresenter.hosanna.composables.model.ProgressSpinnerSize
 import org.churchpresenter.hosanna.composables.model.ProgressStatus
 import org.churchpresenter.hosanna.composables.model.percentText
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 

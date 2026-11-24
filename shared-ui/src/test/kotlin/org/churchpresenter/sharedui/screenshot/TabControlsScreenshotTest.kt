@@ -7,19 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import org.churchpresenter.icons.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_add
-import org.churchpresenter.icons.generated.resources.ic_edit
-import org.jetbrains.compose.resources.painterResource
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.sharedui.composables.FocusLostRescueState
@@ -54,74 +46,8 @@ class TabControlsScreenshotTest {
     }
 
     @Test
-    fun `action icon enabled`() = captureComponent(SECTION, "action_icon_enabled") {
-        ActionIconButton(onClick = {}, tooltipText = "Search", icon = Icons.Filled.Search)
-    }
-
-    @Test
-    fun `action icon disabled`() = captureComponent(SECTION, "action_icon_disabled") {
-        ActionIconButton(
-            onClick = {},
-            tooltipText = "Search",
-            icon = Icons.Filled.Search,
-            enabled = false,
-        )
-    }
-
-    @Test
     fun `the action row as a tab draws it`() = captureComponent(SECTION, "action_row") {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActionIconButton(
-                onClick = {},
-                tooltipText = "Search",
-                icon = Icons.Filled.Search,
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
-            AddToScheduleButton(onClick = {}, tooltipText = "Add to Schedule")
-            GoLiveButton(onClick = {}, tooltipText = "Go Live")
-        }
-    }
-
-    @Test
-    fun `edit song button`() = captureComponent(SECTION, "edit_song_button") {
-        ActionIconButton(
-            onClick = {},
-            tooltipText = "Edit Song",
-            painter = painterResource(Res.drawable.ic_edit),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-        )
-    }
-
-    @Test
-    fun `new song button`() = captureComponent(SECTION, "new_song_button") {
-        ActionIconButton(
-            onClick = {},
-            tooltipText = "New Song",
-            painter = painterResource(Res.drawable.ic_add),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-        )
-    }
-
-    @Test
-    fun `the songs action row with a song selected`() = captureComponent(SECTION, "songs_action_row") {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            ActionIconButton(
-                onClick = {},
-                tooltipText = "Edit Song",
-                painter = painterResource(Res.drawable.ic_edit),
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
-            )
-            ActionIconButton(
-                onClick = {},
-                tooltipText = "New Song",
-                painter = painterResource(Res.drawable.ic_add),
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
-            )
             AddToScheduleButton(onClick = {}, tooltipText = "Add to Schedule")
             GoLiveButton(onClick = {}, tooltipText = "Go Live")
         }

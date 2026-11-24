@@ -345,6 +345,7 @@ private fun PresentationTabScope.PresentationOutputButtons(viewModel: Presentati
             icon = rememberVectorPainter(Icons.Default.SettingsRemote),
             contentDescription = stringResource(Res.string.tooltip_presentation_remote),
             onClick = { showRemoteDialog = true },
+            hierarchy = ButtonHierarchy.Primary,
             intent = ButtonIntent.Neutral,
         )
     }
@@ -364,6 +365,7 @@ private fun PresentationTabScope.PresentationOutputButtons(viewModel: Presentati
                 contentDescription = freezeStr,
                 checked = presentationFrozen,
                 onCheckedChange = { onFreezeToggle() },
+                hierarchy = ButtonHierarchy.Primary,
                 intent = if (presentationFrozen) ButtonIntent.Critical else ButtonIntent.Neutral,
                 enabled = viewModel.slideFiles.isNotEmpty(),
             )
@@ -374,6 +376,7 @@ private fun PresentationTabScope.PresentationOutputButtons(viewModel: Presentati
             icon = painterResource(IconRes.drawable.ic_stop),
             contentDescription = stringResource(Res.string.presentation_clear),
             onClick = { viewModel.clearPresentations(); onClearPresentation() },
+            hierarchy = ButtonHierarchy.Primary,
             intent = ButtonIntent.Critical,
             enabled = viewModel.slideFiles.isNotEmpty(),
         )

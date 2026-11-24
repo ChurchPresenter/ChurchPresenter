@@ -42,7 +42,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.window.PopupProperties
 import kotlinx.coroutines.awaitCancellation
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.button.SegmentedButton
 import org.churchpresenter.hosanna.composables.button.StandardButton

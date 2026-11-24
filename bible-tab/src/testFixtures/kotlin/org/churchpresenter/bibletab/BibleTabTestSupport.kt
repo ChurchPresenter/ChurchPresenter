@@ -366,7 +366,7 @@ fun ComposeUiTest.bibleSearch(query: String) {
 }
 
 /**
- * The action-row buttons, addressed by the content description [ActionIconButton] gives them —
+ * The action-row buttons, addressed by their content description —
  * which is the tooltip text, so the label a user would see is also the test's selector.
  */
 fun ComposeUiTest.actionButton(label: String) = onNodeWithContentDescription(label)

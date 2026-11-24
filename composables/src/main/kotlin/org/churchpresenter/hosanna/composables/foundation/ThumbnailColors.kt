@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.hosanna.composables.model.ThumbnailSize
 import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
+import org.churchpresenter.theme.HosannaStateAlpha
 
 @Immutable
 internal data class ThumbnailColors(

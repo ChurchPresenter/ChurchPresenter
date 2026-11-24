@@ -48,8 +48,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaRadius
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.ColorFieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
@@ -68,7 +68,7 @@ import org.churchpresenter.hosanna.composables.model.sameRgb
 import org.churchpresenter.hosanna.composables.model.toColor
 import org.churchpresenter.hosanna.composables.model.toHsv
 import org.churchpresenter.hosanna.composables.model.withOpacityPercent
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private const val HUE_DEGREES = 360f

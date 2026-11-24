@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.foundation
+package org.churchpresenter.theme
 
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight

@@ -127,7 +127,7 @@ internal const val SONG_LIST_LANGUAGE_TAG_ALPHA = 0.6f
  * They hold different-sized content (a 42.dp search field against 34.dp action buttons), so left to
  * their natural heights the two bars ended 8.dp apart and the divider under them stepped at the
  * pane boundary. Pinning both to one height lines them up without resizing either control: the
- * field keeps Bible's 42.dp and the buttons keep the 34.dp `ActionIconButton` every tab uses.
+ * field keeps Bible's 42.dp and the buttons keep the 34.dp `IconButton` every tab uses.
  *
  * 60.dp = the taller bar's natural height, 42.dp of field plus its 10.dp/8.dp inset.
  */

@@ -44,7 +44,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.NavigationDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
 import org.churchpresenter.hosanna.composables.foundation.TabColors

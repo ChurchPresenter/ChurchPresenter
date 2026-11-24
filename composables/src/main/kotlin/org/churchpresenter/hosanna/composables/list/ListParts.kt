@@ -15,14 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.defaults.ListDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.hosanna.composables.model.IconButtonSize
-import org.churchpresenter.hosanna.composables.foundation.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**

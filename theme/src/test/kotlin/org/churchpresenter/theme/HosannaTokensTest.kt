@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.foundation
+package org.churchpresenter.theme
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.geometry.Size

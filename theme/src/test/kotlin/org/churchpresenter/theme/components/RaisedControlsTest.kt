@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -130,39 +129,6 @@ class RaisedControlsTest {
         on = true
         onNodeWithTag("switch").assertIsOn()
     }
-
-    @Test
-    fun `icon keys click, and disabled ones ignore clicks`() =
-        runComposeUiTest {
-            var clicks = 0
-            setContent {
-                MaterialTheme(colorScheme = colorSchemeFor(ThemeMode.DARK)) {
-                    Column {
-                        KeyIconButton(onClick = { clicks++ }, modifier = Modifier.testTag("flat")) {
-                            Text("flat")
-                        }
-                        KeyIconButton(
-                            onClick = { clicks++ },
-                            colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Blue),
-                        ) { Text("filled") }
-                        KeyIconButton(onClick = { clicks++ }, enabled = false) {
-                            Text("flat off")
-                        }
-                        KeyIconButton(
-                            onClick = { clicks++ },
-                            enabled = false,
-                            colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Blue),
-                        ) { Text("filled off") }
-                    }
-                }
-            }
-            onNodeWithTag("flat").performMouseInput { enter(center) }
-            waitForIdle()
-            listOf("flat", "filled", "flat off", "filled off").forEach {
-                onNodeWithText(it).performClick()
-            }
-            assertEquals(2, clicks)
-        }
 
     @Test
     fun `a checkbox and a radio button report their choice, in the accent or a caller's color`() =

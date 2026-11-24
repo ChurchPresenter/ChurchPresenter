@@ -29,7 +29,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
-import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.theme.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.NavigationDefaults
 import org.churchpresenter.hosanna.composables.model.NavigationTab
 import org.churchpresenter.hosanna.composables.model.TabStyle

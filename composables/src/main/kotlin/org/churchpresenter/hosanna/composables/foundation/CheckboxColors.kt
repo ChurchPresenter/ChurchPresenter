@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.state.ToggleableState
+import org.churchpresenter.theme.HosannaStateAlpha
 
 @Immutable
 internal data class CheckboxColors(

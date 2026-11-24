@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.theme.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.field.labelOf
 import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 

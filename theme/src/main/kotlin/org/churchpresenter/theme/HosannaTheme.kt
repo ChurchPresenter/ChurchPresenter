@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.foundation
+package org.churchpresenter.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -6,8 +6,6 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.theme.isDarkScheme
-import org.churchpresenter.theme.semantic
 
 object HosannaTheme {
     val typography: HosannaTypography
