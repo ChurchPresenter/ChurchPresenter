@@ -14,6 +14,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -178,14 +179,14 @@ private fun menuScrollbarStyle(): ScrollbarStyle {
 }
 
 @Composable
-internal fun MenuSurface(width: Dp, content: @Composable () -> Unit) {
+internal fun MenuSurface(width: Dp?, padding: Dp = MenuDefaults.Padding, content: @Composable () -> Unit) {
     val shape = HosannaTheme.shapes.l
     Column(
         modifier = Modifier
-            .width(width)
+            .then(width?.let { Modifier.width(it) } ?: Modifier.width(IntrinsicSize.Max))
             .hosannaElevation(HosannaLevel.Level3, shape, HosannaTheme.elevation)
             .background(HosannaTheme.colors.surfaceContainerHigh, shape)
-            .padding(MenuDefaults.Padding),
+            .padding(padding),
     ) {
         content()
     }
