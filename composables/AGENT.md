@@ -45,12 +45,12 @@ foundation and ui. Adding `:theme` or `compose.material3` to them breaks this ru
 
 One folder per component family, the same name in main, test and screenshots:
 
-| Where | What |
-|---|---|
-| `src/main/kotlin/.../composables/<family>/` | The composables, package `org.churchpresenter.hosanna.composables.<family>` (`button/StandardButton.kt`) |
-| `src/test/kotlin/.../composables/<family>/` | `<Name>Test` (logic and behaviour) and `<Name>ScreenshotTest`, same package |
-| `src/test/kotlin/.../composables/testing/` | The shared test kit: `hosannaComponent` (both themes in `HosannaTheme`, `PinnedFonts`, trimmed), `FrozenInteractionSource` (holds a hover, press or focus for a shot), `testIcon`, `HosannaSurface` |
-| `screenshots/<family>/<name>/` | The committed images, `<state>_light.png` / `<state>_dark.png` |
+| Where                                       | What                                                                                                                                                                                                |
+|---------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `src/main/kotlin/.../composables/<family>/` | The composables, package `org.churchpresenter.hosanna.composables.<family>` (`button/StandardButton.kt`)                                                                                            |
+| `src/test/kotlin/.../composables/<family>/` | `<Name>Test` (logic and behaviour) and `<Name>ScreenshotTest`, same package                                                                                                                         |
+| `src/test/kotlin/.../composables/testing/`  | The shared test kit: `hosannaComponent` (both themes in `HosannaTheme`, `PinnedFonts`, trimmed), `FrozenInteractionSource` (holds a hover, press or focus for a shot), `testIcon`, `HosannaSurface` |
+| `screenshots/<family>/<name>/`              | The committed images, `<state>_light.png` / `<state>_dark.png`                                                                                                                                      |
 
 - **A component's sizes and timings are an `internal object <Name>Defaults`** beside it — not public:
   callers choose a hierarchy or intent, never a height.

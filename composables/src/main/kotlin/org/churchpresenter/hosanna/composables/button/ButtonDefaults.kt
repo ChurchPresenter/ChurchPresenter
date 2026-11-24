@@ -70,3 +70,23 @@ internal object FabDefaults {
         FabSize.Small -> Small
     }
 }
+
+@Immutable
+internal data class SegmentMetrics(val height: Dp, val padding: Dp, val icon: Dp)
+
+internal object SegmentedButtonDefaults {
+    val Default = SegmentMetrics(height = 30.dp, padding = 14.dp, icon = 16.dp)
+    val Small = SegmentMetrics(height = 26.dp, padding = 12.dp, icon = 14.dp)
+    val MinWidth: Dp = 56.dp
+    val IconGap: Dp = 6.dp
+    val TrackPadding: Dp = 3.dp
+    val TrackGap: Dp = 2.dp
+    val TrackEdge: Dp = 1.dp
+    val SegmentRadius: Dp = HosannaRadius.S
+    val TrackRadius: Dp = HosannaRadius.nested(SegmentRadius, TrackPadding)
+
+    fun metrics(size: SegmentedButtonSize): SegmentMetrics = when (size) {
+        SegmentedButtonSize.Default -> Default
+        SegmentedButtonSize.Small -> Small
+    }
+}

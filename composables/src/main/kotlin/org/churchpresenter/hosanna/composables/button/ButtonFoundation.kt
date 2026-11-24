@@ -54,6 +54,15 @@ enum class IconButtonSize { Large, Medium, Small }
 
 enum class FabSize { Regular, Small }
 
+enum class SegmentedButtonSize { Default, Small }
+
+class SegmentedOption(
+    val label: String,
+    val icon: Painter? = null,
+    val iconOnly: Boolean = false,
+    val enabled: Boolean = true,
+)
+
 internal enum class ButtonState { Rest, Hovered, Pressed, Focused, Loading, Disabled }
 
 @Immutable
@@ -181,7 +190,7 @@ internal fun ButtonFrame(
     }
 }
 
-private fun Modifier.focusRing(color: Color, cornerRadius: Dp?): Modifier = drawBehind {
+internal fun Modifier.focusRing(color: Color, cornerRadius: Dp?): Modifier = drawBehind {
     val width = HosannaTheme.focusRingWidth.toPx()
     val half = width / 2
     val radius = (cornerRadius?.toPx() ?: (size.minDimension / 2)) + half
