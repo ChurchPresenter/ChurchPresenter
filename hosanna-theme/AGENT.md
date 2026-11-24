@@ -6,7 +6,7 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 The Hosanna theme: a palette of its own, used by the composables built on it and by nothing else.
-Its only consumer by design is `:hosanna-composables`. A real Gradle module of this build — `include(":hosanna-theme")`,
+Its only consumer by design is `:composables`. A real Gradle module of this build — `include(":hosanna-theme")`,
 `implementation(projects.hosannaTheme)` — in the package `org.churchpresenter.hosanna`. Layer:
 foundation.
 

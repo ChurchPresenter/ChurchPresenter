@@ -52,7 +52,7 @@ include(":theme")
 // The Hosanna theme: its own palette, used only by the composables built on it.
 include(":hosanna-theme")
 // The composables built on the Hosanna theme, and on nothing else.
-include(":hosanna-composables")
+include(":composables")
 // The animated lower-third generator: its own module, compiled and packaged separately, and
 // depended on by :composeApp, which opens it in a window from the Lower Third settings.
 include(":lottieGenerator")

@@ -11,7 +11,7 @@ name: Screenshots
 #   * reg-actions needs write access to pull requests and to the repository, which `test`
 #     deliberately does not have (`contents: read`).
 #
-# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`, `schedule`, `companion-surface`, `canvas`, `presenter`, `profiles`, `live-output`, `updater`, `server-ui`, `app-settings`, `helper`, `announcements`, `calendar`, `crossword-tab`, `dictionary`, `lottieGenerator`, `lower-third`, `obs`, `qa`, `songlibrary`, `stt`, `dialogs`, `signage`, `hosanna-composables`), so a reviewer can open and approve
+# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`, `schedule`, `companion-surface`, `canvas`, `presenter`, `profiles`, `live-output`, `updater`, `server-ui`, `app-settings`, `helper`, `announcements`, `calendar`, `crossword-tab`, `dictionary`, `lottieGenerator`, `lower-third`, `obs`, `qa`, `songlibrary`, `stt`, `dialogs`, `signage`, `composables`), so a reviewer can open and approve
 # what is on screen rather than take the diff on trust. This job is a second, independent view of
 # the same thing: it records the branch's images and reg-actions diffs them against the base
 # branch's, which it keeps on a `reg_actions` branch of its own. Note the record step below
@@ -137,7 +137,7 @@ jobs:
           :stt:recordRoborazziJvm --tests '*ScreenshotTest*'
           :dialogs:recordRoborazziJvm --tests '*ScreenshotTest*'
           :signage:recordRoborazziJvm --tests '*ScreenshotTest*'
-          :hosanna-composables:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :composables:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
@@ -371,11 +371,11 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      - name: Upload the rendered hosanna-composables screenshots
+      - name: Upload the rendered composables screenshots
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: screenshots-hosanna-composables
-          path: hosanna-composables/screenshots
+          name: screenshots-composables
+          path: composables/screenshots
           retention-days: 30
           if-no-files-found: error
 
@@ -426,7 +426,7 @@ jobs:
       - name: Gather every module's screenshots
         run: |
           rm -rf screenshots-compare
-          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab screenshots-compare/schedule screenshots-compare/companion-surface screenshots-compare/canvas screenshots-compare/presenter screenshots-compare/profiles screenshots-compare/live-output screenshots-compare/updater screenshots-compare/server-ui screenshots-compare/app-settings screenshots-compare/helper screenshots-compare/announcements screenshots-compare/calendar screenshots-compare/crossword-tab screenshots-compare/dictionary screenshots-compare/lottieGenerator screenshots-compare/lower-third screenshots-compare/obs screenshots-compare/qa screenshots-compare/songlibrary screenshots-compare/stt screenshots-compare/dialogs screenshots-compare/signage screenshots-compare/hosanna-composables
+          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab screenshots-compare/schedule screenshots-compare/companion-surface screenshots-compare/canvas screenshots-compare/presenter screenshots-compare/profiles screenshots-compare/live-output screenshots-compare/updater screenshots-compare/server-ui screenshots-compare/app-settings screenshots-compare/helper screenshots-compare/announcements screenshots-compare/calendar screenshots-compare/crossword-tab screenshots-compare/dictionary screenshots-compare/lottieGenerator screenshots-compare/lower-third screenshots-compare/obs screenshots-compare/qa screenshots-compare/songlibrary screenshots-compare/stt screenshots-compare/dialogs screenshots-compare/signage screenshots-compare/composables
           cp -R composeApp/screenshots/. screenshots-compare/
           cp -R shared-ui/screenshots/. screenshots-compare/shared-ui/
           cp -R slides/screenshots/. screenshots-compare/slides/
@@ -455,7 +455,7 @@ jobs:
           cp -R stt/screenshots/. screenshots-compare/stt/
           cp -R dialogs/screenshots/. screenshots-compare/dialogs/
           cp -R signage/screenshots/. screenshots-compare/signage/
-          cp -R hosanna-composables/screenshots/. screenshots-compare/hosanna-composables/
+          cp -R composables/screenshots/. screenshots-compare/composables/
 
       - name: Compare with the base branch
         uses: reg-viz/reg-actions@f0cccbcab7e7ecf9b0434b719f1e842c97bcd2a7 # v3
