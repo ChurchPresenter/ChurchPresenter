@@ -69,7 +69,11 @@ import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
 import org.churchpresenter.strings.generated.resources.tooltip_clear_text
 import org.churchpresenter.strings.generated.resources.tooltip_restore_text
 import org.churchpresenter.strings.generated.resources.profile_sets
-import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Text
+import org.churchpresenter.strings.generated.resources.hymn_quick_screen
+import org.churchpresenter.strings.generated.resources.hymn_quick_window
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
 import org.churchpresenter.liveoutput.preview.LivePreviewPanel
 import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
@@ -339,21 +343,46 @@ internal fun SidebarButtons(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Default.Monitor),
-            text = stringResource(Res.string.tooltip_toggle_displays),
-            onClick = {
-                val count = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
-                onSettingsChange { it.copy(projectionSettings = nextProjectionTarget(it.projectionSettings, count)) }
-                presenterManager.setShowPresenterWindow(true)
-            },
-            buttonSize = 36.dp,
-            modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
-            iconTint = if (presenterManager.showPresenterWindow.value)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        )
+        var choosing by remember { mutableStateOf(false) }
+        Box {
+            TooltipIconButton(
+                painter = rememberVectorPainter(Icons.Default.Monitor),
+                text = stringResource(Res.string.hymn_quick_screen),
+                onClick = { choosing = true },
+                buttonSize = 36.dp,
+                modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
+                iconTint = if (presenterManager.showPresenterWindow.value)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+            if (choosing) {
+                val screens = remember {
+                    if (java.awt.GraphicsEnvironment.isHeadless()) emptyList() else
+                        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.map {
+                            it.defaultConfiguration.bounds
+                        }
+                }
+                val title = stringResource(Res.string.hymn_quick_screen)
+                val labels = listOf(stringResource(Res.string.hymn_quick_window)) + screens.mapIndexed { i, bounds ->
+                    "$title ${i + 1} · ${bounds.width}×${bounds.height}"
+                }
+                DropdownMenu(expanded = true, onDismissRequest = { choosing = false }) {
+                    labels.forEachIndexed { index, label ->
+                        DropdownMenuItem(text = { Text(label) }, onClick = {
+                            choosing = false
+                            val display = (index - 1).takeIf { it >= 0 }
+                            onSettingsChange {
+                                it.copy(projectionSettings = it.projectionSettings.copy(
+                                    windowedProjection = display == null, quickPlayDisplay = display,
+                                ))
+                            }
+                            presenterManager.setShowPresenterWindow(true)
+                        })
+                    }
+                }
+            }
+        }
         TooltipIconButton(
             painter = painterResource(IconRes.drawable.ic_close),
             text = stringResource(Res.string.tooltip_clear_display),
