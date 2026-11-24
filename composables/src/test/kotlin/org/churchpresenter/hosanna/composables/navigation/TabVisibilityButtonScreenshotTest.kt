@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.hosanna.composables.model.MoveLabels
 import org.churchpresenter.hosanna.composables.model.NavigationTab
 import org.churchpresenter.hosanna.composables.model.TabMenuLabels
 import org.churchpresenter.hosanna.composables.model.TabStyle
@@ -30,7 +31,7 @@ class TabVisibilityButtonScreenshotTest {
     private val section = "navigation/tabVisibilityButton"
     private val labels = TabMenuLabels(
         "Tab visibility", TabStyleLabels("Tab style", "Icon + text", "Text", "Icon"),
-        "Show tabs", "Reset to default", "Move up", "Move down",
+        "Show tabs", "Reset to default", "At least one tab has to stay visible", MoveLabels("Move up", "Move down"),
     )
     private val names = listOf("Bible", "Songs", "Pictures", "Presentation", "Media")
 

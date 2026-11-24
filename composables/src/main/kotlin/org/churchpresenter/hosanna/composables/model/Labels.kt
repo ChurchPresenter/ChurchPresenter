@@ -48,11 +48,14 @@ class VolumeLabels(val volume: String, val mute: String, val unmute: String)
 class TabStyleLabels(val title: String, val iconAndText: String, val text: String, val icon: String)
 
 @Immutable
+class MoveLabels(val up: String, val down: String)
+
+@Immutable
 class TabMenuLabels(
     val button: String,
     val style: TabStyleLabels,
     val showTabs: String,
     val reset: String,
-    val moveUp: String,
-    val moveDown: String,
+    val lastTab: String,
+    val move: MoveLabels,
 )

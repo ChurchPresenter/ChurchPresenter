@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.NavigationDefaults
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 import org.churchpresenter.hosanna.composables.foundation.TabColors
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.tabColors
@@ -69,6 +70,24 @@ internal fun TabItem(
     val reveal = remember { BringIntoViewRequester() }
     LaunchedEffect(selected) { if (selected) reveal.bringIntoView() }
     val iconOnly = style == TabStyle.Icon
+    Tooltip(tab.label, enabled = iconOnly) {
+        TabBody(tab, selected, iconOnly, style, colors, interactionSource, focusRequester, reveal, onClick, onMove)
+    }
+}
+
+@Composable
+private fun TabBody(
+    tab: NavigationTab,
+    selected: Boolean,
+    iconOnly: Boolean,
+    style: TabStyle,
+    colors: TabColors,
+    interactionSource: MutableInteractionSource,
+    focusRequester: FocusRequester,
+    reveal: BringIntoViewRequester,
+    onClick: () -> Unit,
+    onMove: (Boolean) -> Unit,
+) {
     Box(
         modifier = Modifier
             .height(NavigationDefaults.BarHeight)

@@ -48,6 +48,7 @@ import org.churchpresenter.hosanna.composables.button.SegmentedButton
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
 import org.churchpresenter.hosanna.composables.defaults.TabMenuDefaults
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 import org.churchpresenter.hosanna.composables.field.MenuDivider
 import org.churchpresenter.hosanna.composables.field.MenuHeader
 import org.churchpresenter.hosanna.composables.field.MenuSurface
@@ -210,20 +211,22 @@ private fun TabRow(
             }
             .semantics {
                 customActions = listOfNotNull(
-                    if (!first) CustomAccessibilityAction(labels.moveUp) { move(-1); true } else null,
-                    if (!last) CustomAccessibilityAction(labels.moveDown) { move(1); true } else null,
+                    if (!first) CustomAccessibilityAction(labels.move.up) { move(-1); true } else null,
+                    if (!last) CustomAccessibilityAction(labels.move.down) { move(1); true } else null,
                 )
             }
             .padding(start = TabMenuDefaults.RowPadding, end = TabMenuDefaults.RowPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Checkbox(
-            checked = visible,
-            onCheckedChange = onVisibilityChange,
-            label = tab.label,
-            modifier = Modifier.weight(1f),
-            enabled = canHide,
-        )
+        Tooltip(labels.lastTab, Modifier.weight(1f), enabled = !canHide) {
+            Checkbox(
+                checked = visible,
+                onCheckedChange = onVisibilityChange,
+                label = tab.label,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = canHide,
+            )
+        }
         Image(
             painterResource(Res.drawable.ic_drag_handle),
             null,

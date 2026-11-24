@@ -27,6 +27,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.hosanna.composables.model.MoveLabels
 import org.churchpresenter.hosanna.composables.model.NavigationTab
 import org.churchpresenter.hosanna.composables.model.TabMenuLabels
 import org.churchpresenter.hosanna.composables.model.TabStyle
@@ -40,7 +41,7 @@ class TabVisibilityButtonTest {
 
     private val labels = TabMenuLabels(
         "Tab visibility", TabStyleLabels("Tab style", "Icon + text", "Text", "Icon"),
-        "Show tabs", "Reset to default", "Move up", "Move down",
+        "Show tabs", "Reset to default", "At least one tab has to stay visible", MoveLabels("Move up", "Move down"),
     )
 
     private var order by mutableStateOf(listOf("Bible", "Songs", "Media"))
@@ -91,6 +92,17 @@ class TabVisibilityButtonTest {
         onNodeWithText("Songs").performClick()
         waitForIdle()
         assertEquals(setOf("Media"), hidden)
+    }
+
+    @Test
+    fun `the last visible tab says why it cannot be hidden`() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        hidden = setOf("Songs", "Media")
+        open()
+        mainClock.advanceTimeBy(100)
+        onNodeWithText("Bible").assertIsNotEnabled().performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(600)
+        onNodeWithText("At least one tab has to stay visible").assertExists()
     }
 
     @Test

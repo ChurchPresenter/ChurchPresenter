@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -18,6 +19,8 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -83,6 +86,24 @@ class TopNavigationBarTest {
         waitForIdle()
         onNodeWithText("Bible").assertDoesNotExist()
         onNodeWithContentDescription("Bible").assertIsSelected()
+    }
+
+    @Test
+    fun `icon tabs name themselves on hover, labelled tabs do not repeat it`() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        var style by mutableStateOf(TabStyle.Icon)
+        setContent { HosannaSurface { TopNavigationBar(tabs(), "bible", {}, Modifier.width(900.dp), style) } }
+        mainClock.advanceTimeBy(100)
+        onNodeWithContentDescription("Songs").performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(600)
+        onNodeWithText("Songs").assertExists()
+        onNodeWithContentDescription("Songs").performMouseInput { moveTo(Offset(-300f, -300f)) }
+        mainClock.advanceTimeBy(600)
+        style = TabStyle.IconAndText
+        mainClock.advanceTimeBy(100)
+        onNodeWithText("Songs").performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(600)
+        onAllNodesWithText("Songs").assertCountEquals(1)
     }
 
     @Test
