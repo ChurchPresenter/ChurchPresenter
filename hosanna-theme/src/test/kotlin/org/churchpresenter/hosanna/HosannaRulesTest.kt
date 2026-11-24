@@ -1,6 +1,7 @@
 package org.churchpresenter.hosanna
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -63,5 +64,12 @@ class HosannaRulesTest {
         assertEquals(Color(0x14, 0x19, 0x23).copy(alpha = light.alpha), light)
         assertEquals(Color.White.copy(alpha = dark.alpha), dark)
         assertTrue(light.alpha in 0.11f..0.13f && dark.alpha in 0.10f..0.12f)
+    }
+
+    @Test
+    fun `the output screen looks the same in both themes`() {
+        assertEquals(HosannaLightColors.screen, HosannaDarkColors.screen)
+        assertEquals(HosannaLightColors.onScreen, HosannaDarkColors.onScreen)
+        assertTrue(HosannaLightColors.screen.luminance() < HosannaLightColors.onScreen.luminance())
     }
 }

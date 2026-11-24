@@ -6,6 +6,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
+private val OutputScreen = Color(0xFF0B0C0E)
+private val OnOutputScreen = Color(0xFFFFFFFF)
+
 @Immutable
 data class HosannaColors(
     val primary: Color,
@@ -66,6 +69,8 @@ data class HosannaColors(
     val intro: Color,
     val voice: Color,
     val otherSection: Color,
+    val screen: Color,
+    val onScreen: Color,
 )
 
 val HosannaLightColors = HosannaColors(
@@ -127,6 +132,8 @@ val HosannaLightColors = HosannaColors(
     intro = Color(0xFF4F6B8A),
     voice = Color(0xFF0F7F86),
     otherSection = Color(0xFF6B7079),
+    screen = OutputScreen,
+    onScreen = OnOutputScreen,
 )
 
 val HosannaDarkColors = HosannaColors(
@@ -188,6 +195,8 @@ val HosannaDarkColors = HosannaColors(
     intro = Color(0xFF9DB6D3),
     voice = Color(0xFF5CCFD4),
     otherSection = Color(0xFFA4A7AE),
+    screen = OutputScreen,
+    onScreen = OnOutputScreen,
 )
 
 fun HosannaColors.toMaterial(dark: Boolean): ColorScheme =
