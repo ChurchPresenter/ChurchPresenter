@@ -1,15 +1,19 @@
-package org.churchpresenter.hosanna.composables.chip
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import org.churchpresenter.hosanna.HosannaDarkColors
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.button.ButtonState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.hosanna.HosannaDarkColors
+import org.churchpresenter.hosanna.HosannaLightColors
+import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.chip.chipPadding
+import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipColors
+import org.churchpresenter.hosanna.composables.model.ChipSize
 
 class ChipFoundationTest {
 

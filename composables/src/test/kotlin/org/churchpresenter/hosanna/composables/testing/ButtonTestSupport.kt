@@ -1,11 +1,11 @@
-package org.churchpresenter.hosanna.composables.button
+package org.churchpresenter.hosanna.composables.testing
 
 import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.ui.geometry.Offset
-import org.churchpresenter.hosanna.composables.testing.FrozenInteractionSource
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
 
 internal fun frozenSource(state: ButtonState): MutableInteractionSource = when (state) {
     ButtonState.Hovered -> FrozenInteractionSource(HoverInteraction.Enter())

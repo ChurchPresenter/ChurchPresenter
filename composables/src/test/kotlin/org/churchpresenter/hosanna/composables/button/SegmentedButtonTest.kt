@@ -32,15 +32,19 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
-import org.churchpresenter.hosanna.composables.testing.testIcon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.hosanna.HosannaLevel
+import org.churchpresenter.hosanna.HosannaLightColors
+import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
+import org.churchpresenter.hosanna.composables.foundation.ButtonColors
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.model.SegmentedOption
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
+import org.churchpresenter.hosanna.composables.testing.testIcon
 
 class SegmentedButtonTest {
 

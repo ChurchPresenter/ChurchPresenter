@@ -1,34 +1,27 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 enum class TimePart { Hour, Minute, Period }
 
-@Immutable
-class TimeFieldLabels(
-    val hour: String,
-    val minute: String,
-    val period: String,
-    val am: String,
-    val pm: String,
-)
-
-@Immutable
-class TimeFieldActions(
-    val now: String,
-    val done: String,
-    val increase: String,
-    val decrease: String,
-)
-
 internal const val MINUTES_PER_DAY = 24 * 60
+
 internal const val MINUTES_PER_HOUR = 60
+
 internal const val HALF_DAY = 12 * 60
+
 internal const val MINUTE_STEP = 5
+
 private const val HOURS_12 = 12
+
 private const val DIGITS_10 = 10
+
 private const val MAX_MINUTE_TENS = 5
+
 private const val MAX_HOUR_TENS_24 = 2
+
 private const val MAX_HOUR_24 = 23
 
 internal fun timeParts(use24Hour: Boolean): List<TimePart> =

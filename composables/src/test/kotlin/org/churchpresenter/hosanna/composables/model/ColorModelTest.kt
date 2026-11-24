@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -9,6 +9,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.hosanna.composables.field.fieldText
+import org.churchpresenter.hosanna.composables.field.isNoneText
+import org.churchpresenter.hosanna.composables.field.typedColor
 
 class ColorModelTest {
 

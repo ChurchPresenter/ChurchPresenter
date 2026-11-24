@@ -8,13 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
+import kotlin.test.Test
 import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.model.TextStyleToggle
+import org.churchpresenter.hosanna.composables.testing.frozenSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_text_backing
 import org.churchpresenter.icons.generated.resources.ic_text_outline
 import org.jetbrains.compose.resources.painterResource
-import kotlin.test.Test
 
 class FontStylingButtonsScreenshotTest {
 

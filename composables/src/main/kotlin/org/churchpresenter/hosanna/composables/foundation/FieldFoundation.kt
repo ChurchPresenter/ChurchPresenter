@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 
 internal enum class FieldState { Rest, Hovered, Focused, Disabled, ReadOnly }
 
@@ -27,35 +27,6 @@ internal data class FieldColors(
     val icon: Color,
     val caret: Color,
 )
-
-internal object FieldDefaults {
-    val LabeledHeight: Dp = 44.dp
-    val CompactHeight: Dp = 36.dp
-    val MultilineMinHeight: Dp = 72.dp
-    val MultilineMaxHeight: Dp = 200.dp
-    val HorizontalPadding: Dp = 12.dp
-    val MultilineVerticalPadding: Dp = 10.dp
-    val LabelGap: Dp = 2.dp
-    val Icon: Dp = 16.dp
-    val IconGap: Dp = 8.dp
-    val ClearCircle: Dp = 20.dp
-    val ClearGlyph: Dp = 10.dp
-    val Border: Dp = 1.dp
-    val SupportingGap: Dp = 6.dp
-    val SupportingIcon: Dp = 13.dp
-    val SupportingIconGap: Dp = 4.dp
-    val Dash: Dp = 4.dp
-    val DashGap: Dp = 3.dp
-    const val TRANSITION_MILLIS: Int = 120
-    val SearchHeight: Dp = 40.dp
-    val SearchCompactHeight: Dp = 32.dp
-    val SearchClear: Dp = 28.dp
-    val Spinner: Dp = 14.dp
-    val KeyCapHeight: Dp = 20.dp
-    val KeyCapPadding: Dp = 6.dp
-    val DetectionHeight: Dp = 22.dp
-    val DetectionPadding: Dp = 8.dp
-}
 
 internal fun fieldState(enabled: Boolean, readOnly: Boolean, hovered: Boolean, focused: Boolean): FieldState = when {
     !enabled -> FieldState.Disabled

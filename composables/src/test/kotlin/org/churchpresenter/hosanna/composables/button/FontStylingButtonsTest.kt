@@ -22,13 +22,21 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
-import org.churchpresenter.hosanna.composables.testing.testIcon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.hosanna.HosannaLightColors
+import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
+import org.churchpresenter.hosanna.composables.defaults.SplitButtonDefaults
+import org.churchpresenter.hosanna.composables.foundation.ButtonColors
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.foundation.SegmentRole
+import org.churchpresenter.hosanna.composables.foundation.iconSegmentColors
+import org.churchpresenter.hosanna.composables.foundation.startSegment
+import org.churchpresenter.hosanna.composables.model.TextStyleToggle
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
+import org.churchpresenter.hosanna.composables.testing.testIcon
 
 class FontStylingButtonsTest {
 

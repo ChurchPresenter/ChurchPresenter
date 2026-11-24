@@ -14,9 +14,9 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,71 +34,44 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import java.time.LocalTime
 import org.churchpresenter.hosanna.HosannaRadius
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.hosanna.asOverline
-import org.churchpresenter.hosanna.composables.button.focusRing
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
+import org.churchpresenter.hosanna.composables.defaults.TimeFieldDefaults
+import org.churchpresenter.hosanna.composables.foundation.FieldState
+import org.churchpresenter.hosanna.composables.foundation.fieldColors
+import org.churchpresenter.hosanna.composables.foundation.fieldState
+import org.churchpresenter.hosanna.composables.foundation.focusRing
+import org.churchpresenter.hosanna.composables.model.MINUTES_PER_HOUR
+import org.churchpresenter.hosanna.composables.model.TimeFieldActions
+import org.churchpresenter.hosanna.composables.model.TimeFieldLabels
+import org.churchpresenter.hosanna.composables.model.TimeKey
+import org.churchpresenter.hosanna.composables.model.TimePart
+import org.churchpresenter.hosanna.composables.model.hourText
+import org.churchpresenter.hosanna.composables.model.isPm
+import org.churchpresenter.hosanna.composables.model.minuteText
+import org.churchpresenter.hosanna.composables.model.nextPart
+import org.churchpresenter.hosanna.composables.model.setPeriod
+import org.churchpresenter.hosanna.composables.model.stepTime
+import org.churchpresenter.hosanna.composables.model.timeKey
+import org.churchpresenter.hosanna.composables.model.timeParts
+import org.churchpresenter.hosanna.composables.model.typeDigit
 import org.churchpresenter.hosanna.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import java.time.LocalTime
-
-internal object TimeFieldDefaults {
-    val Width12: Dp = 112.dp
-    val Width24: Dp = 96.dp
-    val PartPadding: Dp = 2.dp
-    val ArrowWidth: Dp = 16.dp
-    val ArrowHeight: Dp = 15.dp
-    val Arrow: Dp = 10.dp
-    val TagHeight: Dp = 18.dp
-    val TagPadding: Dp = 6.dp
-    val EndPadding: Dp = 4.dp
-}
-
-internal sealed interface TimeKey {
-    data object Open : TimeKey
-    data object Close : TimeKey
-    data class Move(val step: Int) : TimeKey
-    data class Step(val up: Boolean) : TimeKey
-    data class Digit(val value: Int) : TimeKey
-    data class Period(val pm: Boolean) : TimeKey
-    data object None : TimeKey
-}
-
-internal fun timeKey(event: KeyEvent, open: Boolean, use24Hour: Boolean): TimeKey {
-    if (event.type != KeyEventType.KeyDown) return TimeKey.None
-    val char = event.utf16CodePoint.toChar()
-    return when {
-        event.key == Key.DirectionDown && event.isAltPressed -> TimeKey.Open
-        (event.key == Key.Escape || event.key == Key.Enter) && open -> TimeKey.Close
-        event.key == Key.DirectionLeft -> TimeKey.Move(-1)
-        event.key == Key.DirectionRight -> TimeKey.Move(1)
-        event.key == Key.DirectionUp -> TimeKey.Step(up = true)
-        event.key == Key.DirectionDown -> TimeKey.Step(up = false)
-        char.isDigit() -> TimeKey.Digit(char.digitToInt())
-        !use24Hour && char.equals('a', ignoreCase = true) -> TimeKey.Period(pm = false)
-        !use24Hour && char.equals('p', ignoreCase = true) -> TimeKey.Period(pm = true)
-        else -> TimeKey.None
-    }
-}
 
 private fun nowMinutes(): Int = LocalTime.now().let { it.hour * MINUTES_PER_HOUR + it.minute }
 

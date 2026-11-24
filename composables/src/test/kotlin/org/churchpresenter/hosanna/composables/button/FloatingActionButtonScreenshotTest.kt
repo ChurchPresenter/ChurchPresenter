@@ -9,9 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlin.test.Test
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.FabSize
+import org.churchpresenter.hosanna.composables.testing.frozenSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.hosanna.composables.testing.testIcon
-import kotlin.test.Test
 
 class FloatingActionButtonScreenshotTest {
 

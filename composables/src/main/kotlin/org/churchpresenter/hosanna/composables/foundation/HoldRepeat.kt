@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -11,12 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
-
-internal object HoldRepeatDefaults {
-    const val DELAY_MILLIS: Long = 400
-    const val REPEAT_MILLIS: Long = 80
-    const val FAST_AFTER_MILLIS: Long = 2000
-}
+import org.churchpresenter.hosanna.composables.defaults.HoldRepeatDefaults
 
 @Stable
 internal class HoldRepeat {

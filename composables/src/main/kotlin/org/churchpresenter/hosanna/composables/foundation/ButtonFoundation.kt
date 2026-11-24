@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.button
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.CubicBezierEasing
@@ -44,28 +44,13 @@ import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaLevel
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.defaults.ButtonFoundationDefaults
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.hosanna.hosannaElevation
 
-enum class ButtonHierarchy { Primary, Secondary, Tertiary }
-
-enum class ButtonIntent { Default, Critical, Neutral }
-
-enum class IconButtonSize { Large, Medium, Small }
-
-enum class FabSize { Regular, Small }
-
-enum class SegmentedButtonSize { Default, Small }
-
-enum class TextStyleToggle { Bold, Italic, Underline, Strikethrough }
-
 internal enum class SegmentRole { Radio, Action, Toggle }
-
-class SegmentedOption(
-    val label: String,
-    val icon: Painter? = null,
-    val iconOnly: Boolean = false,
-    val enabled: Boolean = true,
-)
 
 internal enum class ButtonState { Rest, Hovered, Pressed, Focused, Loading, Disabled }
 

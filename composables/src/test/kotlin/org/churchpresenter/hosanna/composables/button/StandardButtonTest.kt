@@ -23,16 +23,18 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.v2.runComposeUiTest
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
-import org.churchpresenter.hosanna.composables.testing.settle
-import org.churchpresenter.hosanna.composables.testing.testIcon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.churchpresenter.hosanna.composables.defaults.StandardButtonDefaults
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
+import org.churchpresenter.hosanna.composables.testing.settle
+import org.churchpresenter.hosanna.composables.testing.testIcon
 
 class StandardButtonTest {
 

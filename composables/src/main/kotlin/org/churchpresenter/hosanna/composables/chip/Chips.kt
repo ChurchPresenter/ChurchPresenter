@@ -29,6 +29,15 @@ import androidx.compose.ui.semantics.semantics
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
+import org.churchpresenter.hosanna.composables.foundation.ChipCircleButton
+import org.churchpresenter.hosanna.composables.foundation.ChipFrame
+import org.churchpresenter.hosanna.composables.foundation.ChipGlyph
+import org.churchpresenter.hosanna.composables.foundation.accent
+import org.churchpresenter.hosanna.composables.foundation.chipTextStyle
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipSize
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_close

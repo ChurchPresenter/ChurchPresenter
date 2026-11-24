@@ -9,11 +9,14 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performMouseInput
-import org.churchpresenter.hosanna.composables.button.ButtonState
-import org.churchpresenter.hosanna.composables.button.frozenSource
+import kotlin.test.Test
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.model.TimerPreset
+import org.churchpresenter.hosanna.composables.model.TimerSpinnerLabels
+import org.churchpresenter.hosanna.composables.model.TimerUnit
+import org.churchpresenter.hosanna.composables.testing.frozenSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.hosanna.composables.testing.hosannaPopup
-import kotlin.test.Test
 
 class TimerSpinnerScreenshotTest {
 

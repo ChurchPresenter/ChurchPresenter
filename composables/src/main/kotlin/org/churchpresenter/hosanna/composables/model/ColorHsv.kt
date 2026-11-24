@@ -1,15 +1,20 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import kotlin.math.abs
+import org.churchpresenter.hosanna.composables.defaults.ColorFieldDefaults
 
 private const val DEGREES = 360f
+
 private const val SECTOR = 60f
+
 private const val SECTORS = 6
+
 private const val GREEN_SECTOR = 2
+
 private const val BLUE_SECTOR = 4
 
 @Immutable

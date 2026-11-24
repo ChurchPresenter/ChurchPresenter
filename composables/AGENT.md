@@ -49,17 +49,27 @@ rule.
 
 ## Layout
 
-One folder per component family, the same name in main, test and screenshots:
+Code is split by role, and every family puts its pieces in the same places. Packages are
+`org.churchpresenter.hosanna.composables.<folder>`, the folder under `src/main/kotlin/.../composables/`:
 
-| Where                                       | What                                                                                                                                                                                                |
-|---------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `src/main/kotlin/.../composables/<family>/` | The composables, package `org.churchpresenter.hosanna.composables.<family>` (`button/StandardButton.kt`)                                                                                            |
-| `src/test/kotlin/.../composables/<family>/` | `<Name>Test` (logic and behaviour) and `<Name>ScreenshotTest`, same package                                                                                                                         |
-| `src/test/kotlin/.../composables/testing/`  | The shared test kit: `hosannaComponent` (both themes in `HosannaTheme`, `PinnedFonts`, trimmed), `FrozenInteractionSource` (holds a hover, press or focus for a shot), `testIcon`, `HosannaSurface` |
-| `screenshots/<family>/<name>/`              | The committed images, `<state>_light.png` / `<state>_dark.png`                                                                                                                                      |
+| Folder | Holds |
+|---|---|
+| `button/`, `chip/`, `field/`, … | The composables of one family, and nothing else (`button/StandardButton.kt`) |
+| `foundation/` | What several composables are built from: state, state colors, frames, focus ring, spinner, the icon-segment group, hold-to-repeat |
+| `model/` | Public types and pure logic: enums and option classes (`ButtonHierarchy`, `ChipColor`, `MenuEntry`, `ScreenPosition`…), the caller-supplied text bundles in `Labels.kt`, and the `…Model.kt` / `…Key.kt` files of plain functions (parsing, stepping, formatting, key mapping) |
+| `defaults/` | Every `internal object <Name>Defaults` and its metrics class — sizes and timings, never public: callers choose a hierarchy or intent, never a height |
 
-- **A component's sizes and timings are an `internal object <Name>Defaults`** beside it — not public:
-  callers choose a hierarchy or intent, never a height.
+Tests mirror it: `src/test/kotlin/.../composables/<family>/` holds `<Name>Test` and
+`<Name>ScreenshotTest`; `model/` and `foundation/` hold the tests of those folders; `testing/` is the
+shared kit: `hosannaComponent` and `hosannaPopup` (both themes in `HosannaTheme`, `PinnedFonts`,
+trimmed), `FrozenInteractionSource` and `frozenSource` (hold a hover, press or focus for a shot),
+`testIcon`, `HosannaSurface`.
+
+Screenshots are committed under `screenshots/<family>/<name>/` as `<state>_light.png` /
+`<state>_dark.png`.
+
+- **A new composable** goes in its family's folder; anything it shares goes to `foundation/`, its
+  public types and plain logic to `model/`, its sizes to `defaults/`.
 - **Every state is shot**, one image per state, every variant of the component in it.
 - `:theme` is on the **test** classpath only, for `ThemeMode`, which `:shared-ui`'s `bothThemes`
   labels its renders with; nothing here renders with it.

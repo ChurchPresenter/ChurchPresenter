@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

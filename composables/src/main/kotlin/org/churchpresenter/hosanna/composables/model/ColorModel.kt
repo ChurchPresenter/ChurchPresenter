@@ -1,56 +1,32 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-
-@Immutable
-class ColorFieldLabels(
-    val pick: String,
-    val none: String,
-    val opacity: String,
-    val theme: String,
-    val recent: String,
-    val invalid: String,
-)
-
-internal object ColorFieldDefaults {
-    val Width: Dp = 160.dp
-    val WidthWithOpacity: Dp = 200.dp
-    val Swatch: Dp = 20.dp
-    val PickerWidth: Dp = 256.dp
-    val PickerPadding: Dp = 12.dp
-    val AreaHeight: Dp = 148.dp
-    val AreaThumb: Dp = 14.dp
-    val Ring: Dp = 2.dp
-    val SliderHeight: Dp = 12.dp
-    val SliderThumb: Dp = 16.dp
-    val InputHeight: Dp = 32.dp
-    val OpacityInputWidth: Dp = 64.dp
-    val PaletteSwatch: Dp = 24.dp
-    val SwatchGap: Dp = 6.dp
-    val Gap: Dp = 10.dp
-    val Check: Dp = 5.dp
-    const val SWATCHES_PER_ROW: Int = 8
-    const val KEY_STEP: Float = 0.01f
-    const val KEY_STEP_LARGE: Float = 0.1f
-}
+import org.churchpresenter.hosanna.composables.defaults.ColorFieldDefaults
 
 private const val CHANNEL_MAX = 255
+
 private const val PERCENT = 100
+
 private const val HEX_RADIX = 16
+
 private const val SHORT_HEX = 3
+
 private const val RGB_HEX = 6
+
 private const val RGBA_HEX = 8
+
 private const val RGB_CHANNELS = 3
+
 private const val RED = 0
+
 private const val GREEN = 1
+
 private const val BLUE = 2
+
 private const val ALPHA = 3
 
 internal fun parseColor(text: String): Color? {

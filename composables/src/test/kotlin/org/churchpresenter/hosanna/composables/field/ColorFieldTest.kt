@@ -24,10 +24,11 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.hosanna.composables.model.ColorFieldLabels
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 
 class ColorFieldTest {
 

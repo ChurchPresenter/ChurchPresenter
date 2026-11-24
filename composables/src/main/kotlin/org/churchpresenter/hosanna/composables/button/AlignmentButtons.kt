@@ -7,6 +7,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
+import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
+import org.churchpresenter.hosanna.composables.foundation.IconSegmentGroup
+import org.churchpresenter.hosanna.composables.foundation.IconSegmentOption
+import org.churchpresenter.hosanna.composables.foundation.SegmentRole
+import org.churchpresenter.hosanna.composables.model.HorizontalLayerAlignments
+import org.churchpresenter.hosanna.composables.model.HorizontalTextAlignments
+import org.churchpresenter.hosanna.composables.model.LayerAlignment
+import org.churchpresenter.hosanna.composables.model.TextAlignment
+import org.churchpresenter.hosanna.composables.model.VerticalLayerAlignments
+import org.churchpresenter.hosanna.composables.model.VerticalTextAlignments
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_align_bottom
 import org.churchpresenter.icons.generated.resources.ic_align_center
@@ -22,16 +32,6 @@ import org.churchpresenter.icons.generated.resources.ic_layer_align_middle
 import org.churchpresenter.icons.generated.resources.ic_layer_align_right
 import org.churchpresenter.icons.generated.resources.ic_layer_align_top
 import org.jetbrains.compose.resources.DrawableResource
-
-enum class TextAlignment { Left, Center, Right, Justify, Top, Middle, Bottom }
-
-enum class LayerAlignment { Left, Center, Right, Top, Middle, Bottom }
-
-internal val HorizontalTextAlignments =
-    listOf(TextAlignment.Left, TextAlignment.Center, TextAlignment.Right, TextAlignment.Justify)
-internal val VerticalTextAlignments = listOf(TextAlignment.Top, TextAlignment.Middle, TextAlignment.Bottom)
-internal val HorizontalLayerAlignments = listOf(LayerAlignment.Left, LayerAlignment.Center, LayerAlignment.Right)
-internal val VerticalLayerAlignments = listOf(LayerAlignment.Top, LayerAlignment.Middle, LayerAlignment.Bottom)
 
 internal fun TextAlignment.icon(): DrawableResource = when (this) {
     TextAlignment.Left -> Res.drawable.ic_align_left

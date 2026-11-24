@@ -25,10 +25,13 @@ import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.hosanna.composables.defaults.HoldRepeatDefaults
+import org.churchpresenter.hosanna.composables.model.NumberFieldActions
+import org.churchpresenter.hosanna.composables.model.NumberRange
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 
 class NumberFieldTest {
 

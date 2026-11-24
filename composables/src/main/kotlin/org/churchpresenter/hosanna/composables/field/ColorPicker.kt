@@ -50,6 +50,24 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import org.churchpresenter.hosanna.HosannaRadius
 import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.defaults.ColorFieldDefaults
+import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
+import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
+import org.churchpresenter.hosanna.composables.model.ColorFieldLabels
+import org.churchpresenter.hosanna.composables.model.Hsv
+import org.churchpresenter.hosanna.composables.model.HueStops
+import org.churchpresenter.hosanna.composables.model.MenuPositionProvider
+import org.churchpresenter.hosanna.composables.model.areaHsv
+import org.churchpresenter.hosanna.composables.model.drawCheckerboard
+import org.churchpresenter.hosanna.composables.model.hexText
+import org.churchpresenter.hosanna.composables.model.hueColor
+import org.churchpresenter.hosanna.composables.model.nudgeHsv
+import org.churchpresenter.hosanna.composables.model.opacityPercent
+import org.churchpresenter.hosanna.composables.model.parseColor
+import org.churchpresenter.hosanna.composables.model.sameRgb
+import org.churchpresenter.hosanna.composables.model.toColor
+import org.churchpresenter.hosanna.composables.model.toHsv
+import org.churchpresenter.hosanna.composables.model.withOpacityPercent
 import org.churchpresenter.hosanna.tabular
 
 private const val HUE_DEGREES = 360f

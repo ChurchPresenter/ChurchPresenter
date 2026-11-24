@@ -1,9 +1,10 @@
-package org.churchpresenter.hosanna.composables.chip
+package org.churchpresenter.hosanna.composables.defaults
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.hosanna.composables.model.ChipSize
 
 @Immutable
 internal data class ChipMetrics(val height: Dp, val padding: Dp, val iconSidePadding: Dp)

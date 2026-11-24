@@ -18,9 +18,11 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.hosanna.composables.model.TimeFieldActions
+import org.churchpresenter.hosanna.composables.model.TimeFieldLabels
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 
 class TimeFieldTest {
 

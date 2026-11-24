@@ -25,9 +25,14 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.hosanna.composables.defaults.PositionPickerDefaults
+import org.churchpresenter.hosanna.composables.model.ScreenPosition
+import org.churchpresenter.hosanna.composables.model.column
+import org.churchpresenter.hosanna.composables.model.positionAt
+import org.churchpresenter.hosanna.composables.model.row
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 
 class PositionPickerTest {
 

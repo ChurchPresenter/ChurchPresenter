@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.chip
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.CubicBezierEasing
@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,37 +36,11 @@ import androidx.compose.ui.unit.Dp
 import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.composables.button.ButtonState
-import org.churchpresenter.hosanna.composables.button.buttonState
-import org.churchpresenter.hosanna.composables.button.focusRing
-
-enum class ChipSize { Default, Small }
-
-enum class ChipColor {
-    Neutral,
-    Verse,
-    Chorus,
-    Bridge,
-    Intro,
-    Voice,
-    OtherSection,
-    Song,
-    Bible,
-    Presentation,
-    Pictures,
-    Media,
-    LowerThird,
-    Announcement,
-}
-
-@Immutable
-internal data class ChipColors(
-    val container: Color,
-    val edge: Color,
-    val content: Color,
-    val sub: Color,
-    val ring: Color?,
-)
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipColors
+import org.churchpresenter.hosanna.composables.model.ChipSize
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 

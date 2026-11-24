@@ -10,11 +10,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.button.ButtonState
-import org.churchpresenter.hosanna.composables.button.frozenSource
+import kotlin.test.Test
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.hosanna.composables.testing.frozenSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.hosanna.composables.testing.testIcon
-import kotlin.test.Test
 
 class ChipsScreenshotTest {
 

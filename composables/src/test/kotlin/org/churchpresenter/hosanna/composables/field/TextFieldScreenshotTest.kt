@@ -7,13 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.button.ButtonState
-import org.churchpresenter.hosanna.composables.button.frozenSource
+import kotlin.test.Test
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.testing.frozenSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_search
 import org.jetbrains.compose.resources.painterResource
-import kotlin.test.Test
 
 class TextFieldScreenshotTest {
 

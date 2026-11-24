@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
@@ -8,12 +8,10 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
 import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
@@ -36,26 +34,6 @@ sealed interface MenuEntry {
 
 @Immutable
 class MenuSearch(val placeholder: String, val clearContentDescription: String, val noMatches: String)
-
-internal object MenuDefaults {
-    val Padding: Dp = 6.dp
-    val RowPadding: Dp = 10.dp
-    val RowHeight: Dp = 36.dp
-    val TwoLineRowHeight: Dp = 46.dp
-    val Check: Dp = 14.dp
-    val Gap: Dp = 6.dp
-    val MaxHeight: Dp = 314.dp
-    val KeyboardRing: Dp = 1.5.dp
-    val HeaderTop: Dp = 10.dp
-    val HeaderBottom: Dp = 5.dp
-    val DividerMargin: Dp = 5.dp
-    val BadgeHeight: Dp = 20.dp
-    val BadgePadding: Dp = 6.dp
-    val ScrollbarThickness: Dp = 6.dp
-    const val SEARCH_AFTER: Int = 10
-    const val OPEN_MILLIS: Int = 120
-    val OpenSlide: Dp = 4.dp
-}
 
 internal fun MenuEntry.isPickable(): Boolean = this is MenuEntry.Item && enabled
 

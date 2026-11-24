@@ -13,11 +13,12 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.button.ButtonState
-import org.churchpresenter.hosanna.composables.button.frozenSource
+import kotlin.test.Test
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.model.ScreenPosition
+import org.churchpresenter.hosanna.composables.testing.frozenSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.hosanna.composables.testing.hosannaPopup
-import kotlin.test.Test
 
 class PositionPickerScreenshotTest {
 

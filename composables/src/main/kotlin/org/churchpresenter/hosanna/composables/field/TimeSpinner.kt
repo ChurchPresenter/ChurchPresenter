@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,55 +29,31 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.composables.button.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
+import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
+import org.churchpresenter.hosanna.composables.defaults.TimeSpinnerDefaults
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.MenuPositionProvider
+import org.churchpresenter.hosanna.composables.model.SpinValues
+import org.churchpresenter.hosanna.composables.model.TimeFieldActions
+import org.churchpresenter.hosanna.composables.model.TimeFieldLabels
+import org.churchpresenter.hosanna.composables.model.TimePart
+import org.churchpresenter.hosanna.composables.model.spinValues
+import org.churchpresenter.hosanna.composables.model.stepTime
+import org.churchpresenter.hosanna.composables.model.timeParts
+import org.churchpresenter.hosanna.composables.model.wrapDay
 import org.churchpresenter.hosanna.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-
-internal object TimeSpinnerDefaults {
-    val Padding: Dp = 8.dp
-    val ColumnWidth: Dp = 52.dp
-    val ColumnGap: Dp = 4.dp
-    val ArrowHeight: Dp = 28.dp
-    val RowHeight: Dp = 32.dp
-    val Arrow: Dp = 12.dp
-}
-
-@Immutable
-internal class SpinValues(val previous: String, val current: String, val next: String)
-
-internal fun spinValues(
-    minutes: Int,
-    part: TimePart,
-    use24Hour: Boolean,
-    labels: TimeFieldLabels,
-): SpinValues = when (part) {
-    TimePart.Hour -> SpinValues(
-        hourText(stepTime(minutes, TimePart.Hour, up = false), use24Hour),
-        hourText(minutes, use24Hour),
-        hourText(stepTime(minutes, TimePart.Hour, up = true), use24Hour),
-    )
-    TimePart.Minute -> SpinValues(
-        minuteText(stepTime(minutes, TimePart.Minute, up = false)),
-        minuteText(minutes),
-        minuteText(stepTime(minutes, TimePart.Minute, up = true)),
-    )
-    TimePart.Period -> if (isPm(minutes)) {
-        SpinValues(labels.am, labels.pm, "")
-    } else {
-        SpinValues("", labels.am, labels.pm)
-    }
-}
 
 @Composable
 internal fun TimeSpinner(

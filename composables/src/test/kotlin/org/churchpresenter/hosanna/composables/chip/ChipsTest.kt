@@ -24,12 +24,16 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
-import org.churchpresenter.hosanna.composables.testing.testIcon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
+import org.churchpresenter.hosanna.composables.testing.testIcon
 
 class ChipsTest {
 

@@ -1,26 +1,12 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import java.math.BigDecimal
 import java.math.RoundingMode
-
-@Immutable
-class NumberFieldActions(val increase: String, val decrease: String)
+import org.churchpresenter.hosanna.composables.defaults.NumberFieldDefaults
 
 @Immutable
 data class NumberRange(val min: Double, val max: Double, val step: Double = 1.0, val decimals: Int = 0)
-
-internal object NumberFieldDefaults {
-    val ArrowWidth: Dp = 20.dp
-    val ArrowHeight: Dp = 16.dp
-    val Arrow: Dp = 10.dp
-    val ArrowInset: Dp = 4.dp
-    val UnitWidth: Dp = 76.dp
-    val UnitGap: Dp = 4.dp
-    const val BIG_STEP: Int = 10
-}
 
 internal fun formatNumber(value: Double, decimals: Int): String =
     BigDecimal.valueOf(value).setScale(decimals, RoundingMode.HALF_UP).toPlainString()

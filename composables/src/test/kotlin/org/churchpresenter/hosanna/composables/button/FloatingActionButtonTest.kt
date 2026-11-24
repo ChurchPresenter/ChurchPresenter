@@ -19,10 +19,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
-import org.churchpresenter.hosanna.composables.testing.testIcon
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.hosanna.composables.defaults.FabDefaults
+import org.churchpresenter.hosanna.composables.defaults.FabMetrics
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.FabSize
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
+import org.churchpresenter.hosanna.composables.testing.testIcon
 
 class FloatingActionButtonTest {
 

@@ -27,10 +27,17 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
+import org.churchpresenter.hosanna.composables.model.HorizontalLayerAlignments
+import org.churchpresenter.hosanna.composables.model.HorizontalTextAlignments
+import org.churchpresenter.hosanna.composables.model.LayerAlignment
+import org.churchpresenter.hosanna.composables.model.TextAlignment
+import org.churchpresenter.hosanna.composables.model.VerticalLayerAlignments
+import org.churchpresenter.hosanna.composables.model.VerticalTextAlignments
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 
 class AlignmentButtonsTest {
 

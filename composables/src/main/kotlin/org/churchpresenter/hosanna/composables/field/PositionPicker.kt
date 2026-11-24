@@ -33,90 +33,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.hosanna.HosannaRadius
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.composables.button.focusRing
-
-enum class ScreenPosition {
-    TopLeft,
-    TopCenter,
-    TopRight,
-    MiddleLeft,
-    Center,
-    MiddleRight,
-    BottomLeft,
-    BottomCenter,
-    BottomRight,
-}
-
-private const val GRID = 3
-
-internal class PositionMetrics(
-    val width: Dp,
-    val height: Dp,
-    val inset: Dp,
-    val radius: Dp,
-    val dot: Dp,
-    val selectedDot: Dp,
-)
-
-internal object PositionPickerDefaults {
-    val Regular = PositionMetrics(
-        width = 224.dp,
-        height = 126.dp,
-        inset = 3.dp,
-        radius = HosannaRadius.S,
-        dot = 6.dp,
-        selectedDot = 8.dp,
-    )
-    val Compact = PositionMetrics(
-        width = 112.dp,
-        height = 63.dp,
-        inset = 2.dp,
-        radius = HosannaRadius.XS,
-        dot = 4.dp,
-        selectedDot = 6.dp,
-    )
-    val LabelGap: Dp = 8.dp
-    val Line: Dp = 1.dp
-    val Dash: Dp = 1.5.dp
-    val DashOn: Dp = 4.dp
-    val DashOff: Dp = 3.dp
-
-    fun metrics(compact: Boolean): PositionMetrics = if (compact) Compact else Regular
-}
-
-internal fun ScreenPosition.row(): Int = ordinal / GRID
-
-internal fun ScreenPosition.column(): Int = ordinal % GRID
-
-internal fun positionAt(row: Int, column: Int): ScreenPosition =
-    ScreenPosition.entries[row.coerceIn(0, GRID - 1) * GRID + column.coerceIn(0, GRID - 1)]
-
-internal fun movePosition(position: ScreenPosition, event: KeyEvent): ScreenPosition? {
-    if (event.type != KeyEventType.KeyDown) return null
-    return when (event.key) {
-        Key.DirectionLeft -> positionAt(position.row(), position.column() - 1)
-        Key.DirectionRight -> positionAt(position.row(), position.column() + 1)
-        Key.DirectionUp -> positionAt(position.row() - 1, position.column())
-        Key.DirectionDown -> positionAt(position.row() + 1, position.column())
-        Key.MoveHome -> ScreenPosition.TopLeft
-        Key.MoveEnd -> ScreenPosition.BottomRight
-        else -> null
-    }
-}
+import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
+import org.churchpresenter.hosanna.composables.defaults.PositionMetrics
+import org.churchpresenter.hosanna.composables.defaults.PositionPickerDefaults
+import org.churchpresenter.hosanna.composables.foundation.focusRing
+import org.churchpresenter.hosanna.composables.model.GRID
+import org.churchpresenter.hosanna.composables.model.ScreenPosition
+import org.churchpresenter.hosanna.composables.model.column
+import org.churchpresenter.hosanna.composables.model.movePosition
+import org.churchpresenter.hosanna.composables.model.positionAt
+import org.churchpresenter.hosanna.composables.model.row
 
 @Composable
 fun PositionPicker(

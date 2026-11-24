@@ -41,8 +41,12 @@ import androidx.compose.ui.semantics.Role
 import org.churchpresenter.hosanna.HosannaRadius
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.composables.button.Spinner
-import org.churchpresenter.hosanna.composables.button.focusRing
+import org.churchpresenter.hosanna.composables.button.icon
+import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
+import org.churchpresenter.hosanna.composables.foundation.Spinner
+import org.churchpresenter.hosanna.composables.foundation.fieldColors
+import org.churchpresenter.hosanna.composables.foundation.fieldState
+import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_search
 import org.jetbrains.compose.resources.painterResource

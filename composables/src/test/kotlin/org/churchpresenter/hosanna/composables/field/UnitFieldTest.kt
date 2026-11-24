@@ -20,9 +20,11 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.hosanna.composables.defaults.NumberFieldDefaults
+import org.churchpresenter.hosanna.composables.model.NumberRange
+import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 
 class UnitFieldTest {
 

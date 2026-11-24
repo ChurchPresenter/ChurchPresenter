@@ -1,28 +1,22 @@
-package org.churchpresenter.hosanna.composables.field
+package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 
 enum class TimerUnit { Hours, Minutes, Seconds }
-
-@Immutable
-class TimerSpinnerLabels(
-    val hours: String,
-    val minutes: String,
-    val seconds: String,
-    val increase: String,
-    val decrease: String,
-)
 
 @Immutable
 data class TimerPreset(val label: String, val seconds: Int)
 
 internal const val SECONDS_PER_MINUTE = 60
+
 internal const val SECONDS_PER_HOUR = 3600
+
 internal const val MAX_HOURS = 99
+
 internal const val MAX_TIMER_SECONDS = MAX_HOURS * SECONDS_PER_HOUR + 59 * SECONDS_PER_MINUTE + 59
+
 internal const val FAST_SECONDS_STEP = 5
+
 private const val MAX_MINUTES_OR_SECONDS = 59
 
 internal fun unitSeconds(unit: TimerUnit): Int = when (unit) {
@@ -54,16 +48,3 @@ internal fun setUnit(total: Int, unit: TimerUnit, value: Int): Int {
 }
 
 internal fun parseUnit(text: String): Int? = text.filter { it.isDigit() }.take(2).toIntOrNull()
-
-internal object TimerSpinnerDefaults {
-    val Width: Dp = 84.dp
-    val ButtonHeight: Dp = 36.dp
-    val NumberHeight: Dp = 60.dp
-    val Icon: Dp = 16.dp
-    val LabelGap: Dp = 6.dp
-    val Dot: Dp = 5.dp
-    val DotGap: Dp = 12.dp
-    val ColonPadding: Dp = 14.dp
-    val PresetGap: Dp = 12.dp
-    val ChipGap: Dp = 6.dp
-}
