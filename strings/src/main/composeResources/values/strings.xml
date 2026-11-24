@@ -925,6 +925,11 @@
     <string name="song_look_size_down">Smaller</string>
     <string name="song_look_size_up">Larger</string>
     <string name="song_look_color">Text color</string>
+    <string name="color_field_pick">Pick a color</string>
+    <string name="color_field_theme">Theme colors</string>
+    <string name="color_field_recent">Recent colors</string>
+    <string name="color_field_invalid">Not a color: use #RRGGBB</string>
+    <string name="font_search_none">No fonts match</string>
     <string name="song_look_voice2">Voice 2 color</string>
     <string name="song_look_voice3">Voice 3 color</string>
     <string name="song_look_use_profile">Use the profile's</string>

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,10 +38,7 @@ import org.churchpresenter.strings.generated.resources.new_song
 import org.churchpresenter.strings.generated.resources.save
 import org.churchpresenter.strings.generated.resources.song_stats
 import org.churchpresenter.strings.generated.resources.song_typical_live
-import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.theme.components.GhostButton
-import org.churchpresenter.theme.components.RaisedButton
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 import org.churchpresenter.settings.AppSettings
@@ -53,6 +49,9 @@ import org.churchpresenter.strings.generated.resources.song_chords
 import org.churchpresenter.strings.generated.resources.song_pane_in_order
 import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
+import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 /** The Background button's slot: the app draws `:profiles`' `SongBackgroundButton` in it. */
 typealias SongBackgroundButtonSlot = @Composable (SongBackgroundButtonState) -> Unit
@@ -352,7 +351,7 @@ private fun EditSongFooter(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .height(58.dp)
-            .padding(horizontal = 18.dp),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -364,16 +363,12 @@ private fun EditSongFooter(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        GhostButton(shape = AppShape(9.dp), onClick = onDismiss) {
-            Text(stringResource(Res.string.cancel))
-        }
-        RaisedButton(
-            shape = AppShape(9.dp),
-            enabled = saveEnabled,
-            onClick = onSave,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-        ) {
-            Text(stringResource(Res.string.save))
-        }
+        StandardButton(
+            stringResource(Res.string.cancel),
+            onDismiss,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
+        StandardButton(stringResource(Res.string.save), onSave, enabled = saveEnabled)
     }
 }

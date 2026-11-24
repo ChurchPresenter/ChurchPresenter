@@ -2,11 +2,9 @@ package org.churchpresenter.songs
 
 import org.churchpresenter.theme.semantic
 import org.churchpresenter.songchords.SecondVoice
-import androidx.compose.foundation.ExperimentalFoundationApi
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.setValue
@@ -25,7 +22,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.core.models.songs.MAX_SONG_EXTRA_TRANSLATIONS
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.sharedui.composables.PaneTab
 import org.churchpresenter.sharedui.composables.PaneTabRow
 import org.churchpresenter.sharedui.composables.SectionInk
@@ -65,12 +60,14 @@ import org.churchpresenter.sharedui.composables.ColorPickerDialog
 import org.churchpresenter.strings.generated.resources.song_insert_third_voice_hint
 import org.churchpresenter.strings.generated.resources.song_language_names_where
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.RaisedSwitch
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.raisedHover
 import org.jetbrains.compose.resources.stringResource
-
-private const val CHORD_PREVIEW_SCALE = 0.75f
+import org.churchpresenter.hosanna.composables.chip.ActionChip
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.selection.Switch
+import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.hosanna.composables.model.SwitchLayout
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 
 /**
  * The editor's left-hand column: the pane tabs with the background and chord controls, the section
@@ -90,7 +87,7 @@ internal fun EditSongEditorColumn(
             text = stringResource(Res.string.song_language_names_where),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 14.dp, top = 8.dp),
         )
 
         SectionMarkerChips(state)
@@ -103,7 +100,7 @@ internal fun EditSongEditorColumn(
                     insertSnippet(state.paneValue, ChordSheetImporter.convert(sheet), ownLine = false)
                 )
             },
-            modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 14.dp)
+            modifier = Modifier.weight(1f).fillMaxWidth().padding(start = 16.dp, end = 14.dp)
                 .guideTarget(GuideTargets.SONG_LYRICS),
             placeholder = {
                 Text(
@@ -117,7 +114,9 @@ internal fun EditSongEditorColumn(
             visualTransformation = rememberLyricsHighlight(),
         )
 
-        SyntaxLegend(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp))
+        SyntaxLegend(
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
+        )
     }
 }
 
@@ -139,38 +138,39 @@ internal fun EditSongToolbar(
     val scopeNames = listOf(stringResource(Res.string.song_background_whole_song)) +
         sectionSlots.map { it.label.ifBlank { untitledSection } }
 
-    // A flow, not a row: in a narrow column the tabs take their room first, and the background
-    // button and the chords switch move to a line of their own instead of being squeezed.
-    FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 9.dp),
+    // One line: the tabs take what the background button and the chords switch leave, and scroll
+    // sideways when there are more languages than fit.
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 14.dp, top = 9.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        PaneTabRow {
-            val primaryName = names[0].trim()
-                .ifBlank { stringResource(Res.string.song_pane_lyrics) }
-            PaneTab(primaryName, state.pane == 0) { state.pane = 0 }
-            repeat(state.visibleTranslations) { index ->
-                val paneLabel = translationPaneLabel(index, state.languageName(index, names))
-                PaneTab(paneLabel, state.pane == index + 1) {
-                    state.pane = index + 1
+        Box(Modifier.weight(1f)) {
+            PaneTabRow(Modifier.horizontalScroll(rememberScrollState())) {
+                val primaryName = names[0].trim()
+                    .ifBlank { stringResource(Res.string.song_pane_lyrics) }
+                PaneTab(primaryName, state.pane == 0) { state.pane = 0 }
+                repeat(state.visibleTranslations) { index ->
+                    val paneLabel = translationPaneLabel(index, state.languageName(index, names))
+                    PaneTab(paneLabel, state.pane == index + 1) {
+                        state.pane = index + 1
+                    }
                 }
-            }
-            if (state.visibleTranslations < MAX_SONG_EXTRA_TRANSLATIONS) {
-                PaneTab(
-                    stringResource(Res.string.song_add_translation),
-                    selected = false,
-                    modifier = Modifier.guideTarget(GuideTargets.ADD_SONG_LANGUAGE),
-                ) {
-                    state.addTranslationPane()
+                if (state.visibleTranslations < MAX_SONG_EXTRA_TRANSLATIONS) {
+                    PaneTab(
+                        stringResource(Res.string.song_add_translation),
+                        selected = false,
+                        modifier = Modifier.guideTarget(GuideTargets.ADD_SONG_LANGUAGE),
+                    ) {
+                        state.addTranslationPane()
+                    }
                 }
             }
         }
-        // Kept together, and pushed to the end of whichever line they land on.
+        // Kept together at the end of the line.
         Row(
-            modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(Modifier.guideTarget(GuideTargets.SONG_BACKGROUND)) {
                 backgroundButton(
@@ -187,7 +187,7 @@ internal fun EditSongToolbar(
 @Composable
 private fun SectionMarkerChips(state: EditSongState) {
     FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
@@ -261,69 +261,26 @@ private const val DEFAULT_MARK_COLOR = "#E91E63"
 /** The switch that decides whether the preview shows chords at all. */
 @Composable
 private fun ChordsToggle(on: Boolean, onToggle: () -> Unit) {
-    HoverLabel(stringResource(Res.string.song_chords_toggle)) {
-        Row(
-            modifier = Modifier
-                .guideTarget(GuideTargets.SONG_CHORDS_SWITCH)
-                .clickable(onClick = onToggle)
-                .padding(start = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.song_chords),
-                fontSize = 12.sp,
-                maxLines = 1,
-                softWrap = false,
-                fontWeight = FontWeight.SemiBold,
-                color = if (on) MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            RaisedSwitch(
-                checked = on,
-                onCheckedChange = { onToggle() },
-                modifier = Modifier.scale(CHORD_PREVIEW_SCALE),
-            )
-        }
+    Tooltip(stringResource(Res.string.song_chords_toggle), Modifier.guideTarget(GuideTargets.SONG_CHORDS_SWITCH)) {
+        Switch(
+            checked = on,
+            onCheckedChange = { onToggle() },
+            label = stringResource(Res.string.song_chords),
+            layout = SwitchLayout.Inline,
+        )
     }
 }
 
 /** A plain hover label, matching the ones the tabs use. */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HoverLabel(text: String, content: @Composable () -> Unit) {
-    ConditionalTooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = AppShape(6.dp),
-                shadowElevation = 4.dp,
-            ) {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-            }
-        },
-        content = content,
-    )
+    Tooltip(text, content = content)
 }
 
 /** A section marker offered for insertion. */
 @Composable
 private fun InsertChip(label: String, onClick: () -> Unit) {
-    val palette = elevationPalette()
-    Text(
-        text = label,
-        fontSize = 11.sp,
-        color = palette.key.ink,
-        modifier = Modifier
-            .raisedHover(AppShape(6.dp), palette.key, palette, lift = 2.dp)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 9.dp, vertical = 4.dp),
-    )
+    ActionChip(label, onClick, size = ChipSize.Small)
 }
 
 /** Reminds the writer of the three things brackets can mean, in the colours the editor uses. */

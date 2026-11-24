@@ -67,6 +67,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_palette
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import androidx.compose.foundation.layout.fillMaxWidth
 
 internal fun fieldText(color: Color?, none: String): String = color?.let(::hexText) ?: none
 
@@ -136,7 +137,7 @@ fun ColorField(
             Row(
                 modifier = Modifier
                     .widthIn(min = if (allowOpacity) ColorFieldDefaults.WidthWithOpacity else ColorFieldDefaults.Width)
-                    .width(IntrinsicSize.Max)
+                    .fillMaxWidth()
                     .then(colors.ring?.let { Modifier.focusRing(it, HosannaRadius.M) } ?: Modifier)
                     .hoverable(interactionSource, enabled)
                     .background(container, shape)

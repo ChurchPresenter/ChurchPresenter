@@ -174,7 +174,7 @@ fun UnitField(
         Row(
             modifier = Modifier
                 .widthIn(min = NumberFieldDefaults.UnitWidth)
-                .width(IntrinsicSize.Max)
+                .fillMaxWidth()
                 .numberFrame(colors, shape, interactionSource, enabled)
                 .height(FieldDefaults.CompactHeight)
                 .padding(horizontal = FieldDefaults.HorizontalPadding),

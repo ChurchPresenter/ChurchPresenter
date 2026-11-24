@@ -5,10 +5,8 @@ import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.composables.sectionKindOf
-import org.churchpresenter.sharedui.composables.SectionLabelRow
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.ZoneLabel
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,7 +27,6 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
@@ -67,8 +64,8 @@ import org.churchpresenter.icons.generated.resources.ic_add
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.Icon
-import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 
 /**
  * A section of the song as the preview draws it: a label, and its lines already split into runs.
@@ -262,7 +259,7 @@ fun SongChordPreview(
                 sections.forEach { section ->
                     Column(verticalArrangement = Arrangement.spacedBy(if (showChords) 5.dp else 2.dp)) {
                         if (section.label.isNotBlank()) {
-                            SectionLabelRow(
+                            SectionTagRow(
                                 section.label,
                                 modifier = Modifier.padding(bottom = 3.dp),
                                 slideIndex = section.slideIndex,
@@ -401,27 +398,10 @@ private fun Stepper(label: String, value: String?, down: StepAction, up: StepAct
     }
 }
 
-/** A plain hover label, shaped like the ones the tabs use. */
-@OptIn(ExperimentalFoundationApi::class)
+/** A plain hover label, as the tabs use. */
 @Composable
 internal fun TooltipWrapper(tooltip: String, content: @Composable () -> Unit) {
-    ConditionalTooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = AppShape(6.dp),
-                shadowElevation = 4.dp,
-            ) {
-                Text(
-                    text = tooltip,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-            }
-        },
-        content = content,
-    )
+    Tooltip(tooltip, content = content)
 }
 
 @Composable

@@ -6,7 +6,6 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,16 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import org.churchpresenter.sharedui.composables.SectionInk
-import org.churchpresenter.sharedui.composables.SectionLabelRow
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.ZoneLabel
 import org.churchpresenter.strings.generated.resources.Res
@@ -72,11 +66,18 @@ import org.churchpresenter.strings.generated.resources.song_order_repeat
 import org.churchpresenter.strings.generated.resources.song_order_slides
 import org.churchpresenter.strings.generated.resources.song_order_unused
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyButton
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
-import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.field.Dropdown
+import org.churchpresenter.hosanna.composables.field.DropdownMenu
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.model.MenuEntry
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 internal val ORDER_COLUMN_WIDTH = 176.dp
 private val CHIP_HEIGHT = 30.dp
@@ -240,12 +241,16 @@ private fun OrderChip(key: String, section: WrittenSection?, onRemove: () -> Uni
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        KeyIconButton(onClick = onRemove, modifier = Modifier.size(20.dp)) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = stringResource(Res.string.song_order_remove, name),
-                tint = ink,
-                modifier = Modifier.size(12.dp),
+        val removeStr = stringResource(Res.string.song_order_remove, name)
+        Tooltip(removeStr) {
+            IconButton(
+                rememberVectorPainter(Icons.Default.Close),
+                removeStr,
+                onRemove,
+                Modifier.size(20.dp),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
             )
         }
     }
@@ -254,49 +259,20 @@ private fun OrderChip(key: String, section: WrittenSection?, onRemove: () -> Uni
 /** The preset menu: each ready-made order with the sections it plays, the one in force ticked. */
 @Composable
 private fun PresetsButton(state: EditSongState, sections: EditSongSections) {
-    var open by remember { mutableStateOf(false) }
-    Box {
-        KeyButton(
-            onClick = { open = true },
-            modifier = Modifier.fillMaxWidth().height(28.dp).testTag(ORDER_PRESETS_TAG),
-            contentPadding = PaddingValues(horizontal = 10.dp),
-        ) {
-            Text(stringResource(Res.string.song_order_presets), fontSize = 12.sp, modifier = Modifier.weight(1f))
-            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-        }
-        val checkInk = MaterialTheme.colorScheme.primary
-        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            orderPresetsOf(sections).forEach { preset ->
-                val selected = preset.keys == state.order
-                val sequence = preset.keys.ifEmpty { sections.defaultOrder }
-                DropdownMenuItem(
-                    text = {
-                        Column(Modifier.widthIn(min = 240.dp)) {
-                            MenuTitle(presetName(preset.kind))
-                            Text(
-                                text = sequenceOf(sections, sequence),
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    },
-                    trailingIcon = if (selected) {
-                        { Icon(Icons.Default.Check, contentDescription = null, tint = checkInk) }
-                    } else {
-                        null
-                    },
-                    onClick = { state.order = preset.keys; open = false },
-                )
-            }
-        }
-    }
-}
-
-/** A menu entry's name, above its detail line. */
-@Composable
-private fun MenuTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+    val presets = orderPresetsOf(sections)
+    Dropdown(
+        entries = presets.mapIndexed { index, preset ->
+            MenuEntry.Item(
+                key = index.toString(),
+                label = presetName(preset.kind),
+                supporting = sequenceOf(sections, preset.keys.ifEmpty { sections.defaultOrder }),
+            )
+        },
+        selectedKey = presets.indexOfFirst { it.keys == state.order }.takeIf { it >= 0 }?.toString(),
+        onSelect = { state.order = presets[it.toInt()].keys },
+        modifier = Modifier.fillMaxWidth().testTag(ORDER_PRESETS_TAG),
+        label = stringResource(Res.string.song_order_presets),
+    )
 }
 
 /** [keys] as their short names, the first few only. */
@@ -320,63 +296,35 @@ private fun presetName(kind: OrderPresetKind): String = stringResource(
 private fun AddSectionButton(sections: EditSongSections, effective: List<String>, onAdd: (String) -> Unit) {
     var open by remember { mutableStateOf(false) }
     val untitled = stringResource(Res.string.song_background_untitled_section)
+    val unused = stringResource(Res.string.song_order_unused)
     Box {
-        KeyButton(
-            onClick = { open = true },
+        StandardButton(
+            stringResource(Res.string.song_order_add_section),
+            { open = true },
+            Modifier.fillMaxWidth().testTag(ORDER_ADD_SECTION_TAG),
+            hierarchy = ButtonHierarchy.Secondary,
+            icon = rememberVectorPainter(Icons.Default.Add),
             enabled = sections.written.isNotEmpty(),
-            modifier = Modifier.fillMaxWidth().height(28.dp).testTag(ORDER_ADD_SECTION_TAG),
-            contentPadding = PaddingValues(horizontal = 10.dp),
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
-            Text(
-                stringResource(Res.string.song_order_add_section),
-                fontSize = 12.sp,
-                modifier = Modifier.padding(start = 6.dp),
+        )
+        if (open) {
+            DropdownMenu(
+                entries = sections.written.map { section ->
+                    val count = effective.count { it == section.key }
+                    MenuEntry.Item(
+                        key = section.key,
+                        label = listOf(section.abbreviation, section.label.ifBlank { untitled })
+                            .filter { it.isNotEmpty() }
+                            .joinToString("  "),
+                        supporting = section.lines.firstOrNull(),
+                        count = if (count > 0) "×$count" else unused,
+                    )
+                },
+                onPick = { key ->
+                    onAdd(key)
+                    open = false
+                },
+                onDismiss = { open = false },
             )
-        }
-        AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            sections.written.forEach { section ->
-                val ink = SectionInk.of(section.kind)
-                val count = effective.count { it == section.key }
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Text(
-                            text = section.abbreviation.ifEmpty { "·" },
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = ink,
-                            modifier = Modifier.background(ink.copy(alpha = 0.16f), AppShape(4.dp))
-                                .padding(horizontal = 5.dp, vertical = 3.dp),
-                        )
-                    },
-                    text = {
-                        Column(Modifier.widthIn(min = 180.dp, max = 260.dp)) {
-                            MenuTitle(section.label.ifBlank { untitled })
-                            Text(
-                                text = section.lines.firstOrNull().orEmpty(),
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    },
-                    trailingIcon = {
-                        Text(
-                            text = if (count > 0) "×$count" else stringResource(Res.string.song_order_unused),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (count > 0) {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                        )
-                    },
-                    onClick = { onAdd(section.key); open = false },
-                )
-            }
         }
     }
 }
@@ -425,7 +373,7 @@ private fun OrderPreviewSections(state: EditSongState, sections: EditSongSection
                         )
                     } else {
                         Box(Modifier.weight(1f)) {
-                            SectionLabelRow(label = section.label.ifBlank { untitled })
+                            SectionTagRow(label = section.label.ifBlank { untitled })
                         }
                         if (repeat) {
                             Text(

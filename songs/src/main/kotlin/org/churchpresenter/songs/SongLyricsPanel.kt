@@ -55,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import org.churchpresenter.sharedui.composables.SectionLabelRow
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.label
@@ -629,7 +628,7 @@ private fun TitleSlideEntry(
     ) {
         // Same chip the lyric sections use, so the title slide reads as
         // one more entry in the list rather than a differently-styled one.
-        SectionLabelRow(
+        SectionTagRow(
             label = stringResource(Res.string.song_title_slide),
             modifier = Modifier.padding(vertical = 4.dp),
         )
@@ -716,7 +715,7 @@ private fun LyricSectionEntry(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                SectionLabelRow(
+                SectionTagRow(
                     label = sectionLabelOf(header),
                     modifier = Modifier.weight(1f),
                     slideIndex = section.slideIndex,

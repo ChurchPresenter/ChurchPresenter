@@ -2,15 +2,12 @@ package org.churchpresenter.songs
 
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Reorder
-import androidx.compose.foundation.background
 import org.churchpresenter.settings.SongColumnId
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -22,12 +19,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.ui.graphics.painter.Painter
-import org.churchpresenter.sharedui.composables.ContextMenu
-import org.churchpresenter.sharedui.composables.ContextMenuDivider
-import org.churchpresenter.sharedui.composables.ToggleMenuHeader
-import org.churchpresenter.sharedui.composables.ToggleMenuItem
 import org.churchpresenter.strings.generated.resources.song_columns_show_in_list
-import org.churchpresenter.theme.semantic
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -38,10 +30,15 @@ import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import org.churchpresenter.strings.generated.resources.song_columns
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.sharedui.composables.bibleListCardFill
 import org.churchpresenter.hosanna.composables.button.IconToggleButton
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.field.DropdownMenu
+import org.churchpresenter.hosanna.composables.model.MenuEntry
+import org.churchpresenter.strings.generated.resources.toggle_menu_always
+import org.churchpresenter.strings.generated.resources.toggle_menu_count
+import org.churchpresenter.strings.generated.resources.toggle_menu_show_all
+import androidx.compose.foundation.layout.offset
 
 /** The floating column filter button, on the right. */
 @Composable
@@ -51,9 +48,7 @@ internal fun SongListScope.SongColumnsButton(
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
-    // Floating column filter button — right side
-    Box(modifier = modifier.background(bibleListCardFill())) {
-        // Styled as the schedule's options button and the tab bar's: all three open a toggle menu.
+    Box(modifier = modifier) {
         val columnsStr = stringResource(Res.string.song_columns)
         Tooltip(columnsStr) {
             IconToggleButton(
@@ -64,17 +59,11 @@ internal fun SongListScope.SongColumnsButton(
                 hierarchy = ButtonHierarchy.Tertiary,
             )
         }
-        ContextMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) },
-            width = COLUMNS_MENU_WIDTH,
-        ) {
-            ColumnVisibilityItems(allColLabels)
-        }
+        if (expanded) ColumnsMenu(allColLabels) { onExpandedChange(false) }
     }
 }
 
-/** Right-click dropdown — toggle column visibility. */
+/** Right-click menu — toggle column visibility, opened where the click was. */
 @Composable
 internal fun SongListScope.SongColumnsContextMenu(
     allColLabels: Map<String, String>,
@@ -82,57 +71,72 @@ internal fun SongListScope.SongColumnsContextMenu(
     offset: DpOffset,
     onDismiss: () -> Unit,
 ) {
-    ContextMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-        offset = offset,
-        width = COLUMNS_MENU_WIDTH,
-    ) {
-        ColumnVisibilityItems(allColLabels)
-    }
+    if (!expanded) return
+    Box(Modifier.offset(offset.x, offset.y)) { ColumnsMenu(allColLabels, onDismiss) }
 }
-
-private val COLUMNS_MENU_WIDTH = 240.dp
 
 /**
- * A count header, then one item per column with the column's own icon; the row buttons (Add to
- * Schedule, Favorites) follow the data columns after a divider. Title cannot be hidden, so it is
- * locked rather than offered as a check that does nothing.
+ * A count header and Show all, then one checkable line per column with the column's own icon; the
+ * row buttons (Add to Schedule, Favorites) follow the data columns after a divider. Title cannot be
+ * hidden, so it is shown ticked and locked rather than offered as a check that does nothing. The
+ * menu stays open while columns are ticked.
  */
 @Composable
-private fun SongListScope.ColumnVisibilityItems(allColLabels: Map<String, String>) {
+private fun SongListScope.ColumnsMenu(allColLabels: Map<String, String>, onDismiss: () -> Unit) {
     val dataCols = availableCols.filter { it !in actionCols }
     val rowButtonCols = availableCols.filter { it in actionCols }
-    ToggleMenuHeader(
-        title = stringResource(Res.string.song_columns_show_in_list),
-        shown = availableCols.count { it !in columns.hidden },
-        total = availableCols.size,
-        onShowAll = {
-            columns.hidden = columns.hidden - availableCols.toSet()
+    val shown = availableCols.count { it !in columns.hidden }
+    val always = stringResource(Res.string.toggle_menu_always)
+
+    @Composable
+    fun line(colId: String): MenuEntry.Item {
+        val visible = colId !in columns.hidden
+        // A Title hidden by an older version can still be turned back on.
+        val locked = colId == SongColumnId.TITLE && visible
+        return MenuEntry.Item(
+            key = colId,
+            label = allColLabels[colId] ?: colId,
+            count = if (locked) always else null,
+            enabled = !locked,
+            checked = visible,
+            icon = songColumnPainter(colId),
+        )
+    }
+    val entries = buildList {
+        add(
+            MenuEntry.Header(
+                stringResource(Res.string.song_columns_show_in_list) + "  " +
+                    stringResource(Res.string.toggle_menu_count, shown, availableCols.size),
+            ),
+        )
+        add(
+            MenuEntry.Item(
+                SHOW_ALL_KEY,
+                stringResource(Res.string.toggle_menu_show_all),
+                enabled = shown < availableCols.size,
+            ),
+        )
+        dataCols.forEach { add(line(it)) }
+        if (dataCols.isNotEmpty() && rowButtonCols.isNotEmpty()) add(MenuEntry.Divider)
+        rowButtonCols.forEach { add(line(it)) }
+    }
+    DropdownMenu(
+        entries = entries,
+        onPick = { key ->
+            columns.hidden = when (key) {
+                SHOW_ALL_KEY -> columns.hidden - availableCols.toSet()
+                in columns.hidden -> columns.hidden - key
+                else -> columns.hidden + key
+            }
             onSaveHiddenColumns()
         },
+        onDismiss = onDismiss,
+        width = COLUMNS_MENU_WIDTH,
     )
-    dataCols.forEach { ColumnVisibilityItem(it, allColLabels) }
-    if (dataCols.isNotEmpty() && rowButtonCols.isNotEmpty()) ContextMenuDivider()
-    rowButtonCols.forEach { ColumnVisibilityItem(it, allColLabels) }
 }
 
-@Composable
-private fun SongListScope.ColumnVisibilityItem(colId: String, allColLabels: Map<String, String>) {
-    val isVisible = colId !in columns.hidden
-    ToggleMenuItem(
-        label = allColLabels[colId] ?: colId,
-        checked = isVisible,
-        onCheckedChange = { visible ->
-            columns.hidden = if (visible) columns.hidden - colId else columns.hidden + colId
-            onSaveHiddenColumns()
-        },
-        icon = songColumnPainter(colId),
-        accent = songColumnAccent(colId),
-        // A Title hidden by an older version can still be turned back on.
-        locked = colId == SongColumnId.TITLE && isVisible,
-    )
-}
+private const val SHOW_ALL_KEY = "\u0000showAll"
+private val COLUMNS_MENU_WIDTH = 240.dp
 
 /** The icon for a column in the menu; the row-button columns use the icon their header draws. */
 @Composable
@@ -149,23 +153,4 @@ private fun songColumnPainter(colId: String): Painter = when (colId) {
     SongColumnId.ADD_TO_SCHEDULE -> painterResource(IconRes.drawable.ic_playlist_add)
     SongColumnId.FAVORITES -> painterResource(IconRes.drawable.ic_star)
     else -> rememberVectorPainter(Icons.Default.Tune)
-}
-
-/** Each column takes its own hue, so the list is easy to scan. */
-@Composable
-private fun songColumnAccent(colId: String): Color {
-    val semantic = MaterialTheme.semantic
-    return when (colId) {
-        SongColumnId.NUMBER, SongColumnId.TITLE -> semantic.contentBible
-        SongColumnId.SONGBOOK -> semantic.contentPictures
-        SongColumnId.TUNE -> semantic.contentSongs
-        SongColumnId.PLAY_COUNT -> semantic.contentLowerThird
-        SongColumnId.AUTHOR -> semantic.contentCalendar
-        SongColumnId.COMPOSER -> semantic.contentPresentation
-        SongColumnId.ORDER -> semantic.contentSongs
-        SongColumnId.ALIAS -> semantic.contentBible
-        SongColumnId.ADD_TO_SCHEDULE -> semantic.success
-        SongColumnId.FAVORITES -> semantic.favorite
-        else -> MaterialTheme.colorScheme.primary
-    }
 }

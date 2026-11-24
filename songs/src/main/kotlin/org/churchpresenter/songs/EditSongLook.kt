@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,23 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.churchpresenter.core.models.songs.SongTextOverrides
-import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_remove
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.songSettingsFor
-import org.churchpresenter.sharedui.composables.ColorPickerField
-import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.song_look_color
 import org.churchpresenter.strings.generated.resources.song_look_font
 import org.churchpresenter.strings.generated.resources.song_look_size
-import org.churchpresenter.strings.generated.resources.song_look_size_down
-import org.churchpresenter.strings.generated.resources.song_look_size_up
 import org.churchpresenter.strings.generated.resources.song_look_sub
 import org.churchpresenter.strings.generated.resources.song_look_title
 import org.churchpresenter.strings.generated.resources.song_look_use_profile
@@ -47,6 +38,31 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.field.UnitField
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.model.NumberRange
+import org.churchpresenter.hosanna.composables.field.ColorField
+import org.churchpresenter.hosanna.composables.model.ColorFieldLabels
+import org.churchpresenter.sharedui.utils.Utils
+import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.remember
+import kotlin.math.roundToInt
+import org.churchpresenter.strings.generated.resources.color_field_pick
+import org.churchpresenter.strings.generated.resources.color_field_theme
+import org.churchpresenter.strings.generated.resources.color_field_recent
+import org.churchpresenter.strings.generated.resources.color_field_invalid
+import org.churchpresenter.strings.generated.resources.none
+import org.churchpresenter.strings.generated.resources.customize_background_opacity
+import org.churchpresenter.hosanna.composables.field.Dropdown
+import org.churchpresenter.hosanna.composables.model.MenuEntry
+import org.churchpresenter.hosanna.composables.model.MenuSearch
+import org.churchpresenter.strings.generated.resources.search
+import org.churchpresenter.strings.generated.resources.search_clear
+import org.churchpresenter.strings.generated.resources.font_search_none
 
 /** Test handles for the song look card's controls. */
 internal const val SONG_LOOK_SIZE_TAG = "song_look_size"
@@ -55,8 +71,6 @@ internal const val SONG_LOOK_RESET_TAG = "song_look_reset_"
 private const val SIZE_STEP = 10
 private val CardShape = AppShape(9.dp)
 private val LABEL_WIDTH = 96.dp
-private val FIELD_WIDTH = 190.dp
-private val FIELD_HEIGHT = 30.dp
 
 /**
  * This song's own font, size and colours over the profile's — written into the song file, so the
@@ -94,12 +108,18 @@ internal fun SongLookCard(state: EditSongState, appSettings: AppSettings, profil
             onReset = { edit { it.copy(font = "") } },
             key = "font",
         ) {
-            FontSettingsDropdown(
-                value = own.font.ifBlank { if (lowerThird) song.lyricsLowerThirdFontType else song.lyricsFontType },
-                fonts = rememberSystemFonts(),
-                onValueChange = { v -> edit { it.copy(font = v) } },
-                modifier = Modifier.width(FIELD_WIDTH).height(FIELD_HEIGHT),
-                fillWidth = true,
+            val fonts = rememberSystemFonts()
+            val profileFont = if (lowerThird) song.lyricsLowerThirdFontType else song.lyricsFontType
+            Dropdown(
+                entries = fonts.map { MenuEntry.Item(it, it) },
+                selectedKey = own.font.ifBlank { profileFont },
+                onSelect = { v -> edit { it.copy(font = v) } },
+                modifier = Modifier.fillMaxWidth(),
+                search = MenuSearch(
+                    stringResource(Res.string.search),
+                    stringResource(Res.string.search_clear),
+                    stringResource(Res.string.font_search_none),
+                ),
             )
         }
         LookRow(
@@ -116,10 +136,10 @@ internal fun SongLookCard(state: EditSongState, appSettings: AppSettings, profil
             onReset = { edit { it.copy(color = "") } },
             key = "color",
         ) {
-            ColorPickerField(
+            SongColorField(
                 color = own.color.ifBlank { if (lowerThird) song.lyricsLowerThirdColor else song.lyricsColor },
                 onColorChange = { v -> edit { it.copy(color = v) } },
-                modifier = Modifier.width(FIELD_WIDTH).height(FIELD_HEIGHT),
+                label = stringResource(Res.string.song_look_color),
             )
         }
         LookRow(
@@ -128,10 +148,10 @@ internal fun SongLookCard(state: EditSongState, appSettings: AppSettings, profil
             onReset = { edit { it.copy(secondVoiceColor = "") } },
             key = "voice2",
         ) {
-            ColorPickerField(
+            SongColorField(
                 color = own.secondVoiceColor.ifBlank { song.layoutExtras.secondVoiceColor },
                 onColorChange = { v -> edit { it.copy(secondVoiceColor = v) } },
-                modifier = Modifier.width(FIELD_WIDTH).height(FIELD_HEIGHT),
+                label = stringResource(Res.string.song_look_voice2),
             )
         }
         LookRow(
@@ -140,10 +160,10 @@ internal fun SongLookCard(state: EditSongState, appSettings: AppSettings, profil
             onReset = { edit { it.copy(thirdVoiceColor = "") } },
             key = "voice3",
         ) {
-            ColorPickerField(
+            SongColorField(
                 color = own.thirdVoiceColor.ifBlank { song.layoutExtras.thirdVoiceColor },
                 onColorChange = { v -> edit { it.copy(thirdVoiceColor = v) } },
-                modifier = Modifier.width(FIELD_WIDTH).height(FIELD_HEIGHT),
+                label = stringResource(Res.string.song_look_voice3),
             )
         }
     }
@@ -158,21 +178,30 @@ private fun LookRow(
     key: String,
     control: @Composable () -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         Text(
             text = stringResource(label),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = if (custom) FontWeight.SemiBold else FontWeight.Normal,
             modifier = Modifier.width(LABEL_WIDTH),
         )
-        control()
+        Box(Modifier.weight(1f)) { control() }
         Box(Modifier.size(28.dp)) {
             if (custom) {
-                IconButton(onClick = onReset, modifier = Modifier.size(28.dp).testTag(SONG_LOOK_RESET_TAG + key)) {
-                    Icon(
-                        painter = painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.song_look_use_profile),
-                        modifier = Modifier.size(14.dp),
+                val reset = stringResource(Res.string.song_look_use_profile)
+                Tooltip(reset) {
+                    IconButton(
+                        painterResource(IconRes.drawable.ic_close),
+                        reset,
+                        onReset,
+                        Modifier.testTag(SONG_LOOK_RESET_TAG + key),
+                        size = IconButtonSize.Small,
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Neutral,
                     )
                 }
             }
@@ -183,38 +212,42 @@ private fun LookRow(
 /** The size as a percentage of the profile's, a step at a time within the range a song may take. */
 @Composable
 private fun SizeStepper(percent: Int, onChange: (Int) -> Unit) {
-    val range = SongTextOverrides.MIN_SIZE_PERCENT..SongTextOverrides.MAX_SIZE_PERCENT
-    Row(
-        modifier = Modifier.width(FIELD_WIDTH).testTag(SONG_LOOK_SIZE_TAG),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(
-            onClick = { onChange((percent - SIZE_STEP).coerceIn(range)) },
-            enabled = percent > range.first,
-            modifier = Modifier.size(28.dp),
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_remove),
-                contentDescription = stringResource(Res.string.song_look_size_down),
-                modifier = Modifier.size(14.dp),
-            )
-        }
-        Text(
-            text = "$percent%",
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 8.dp),
-        )
-        IconButton(
-            onClick = { onChange((percent + SIZE_STEP).coerceIn(range)) },
-            enabled = percent < range.last,
-            modifier = Modifier.size(28.dp),
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_add),
-                contentDescription = stringResource(Res.string.song_look_size_up),
-                modifier = Modifier.size(14.dp),
-            )
-        }
-    }
+    UnitField(
+        value = percent.toDouble(),
+        onValueChange = { onChange(it.toInt()) },
+        unit = "%",
+        range = NumberRange(
+            SongTextOverrides.MIN_SIZE_PERCENT.toDouble(),
+            SongTextOverrides.MAX_SIZE_PERCENT.toDouble(),
+            SIZE_STEP.toDouble(),
+        ),
+        modifier = Modifier.fillMaxWidth().testTag(SONG_LOOK_SIZE_TAG),
+    )
 }
+
+/** A color override, kept as the "#RRGGBB" text the song stores. */
+@Composable
+private fun SongColorField(color: String, onColorChange: (String) -> Unit, label: String) {
+    ColorField(
+        color = remember(color) { Utils.parseHexColor(color) },
+        onColorChange = { picked -> picked?.let { onColorChange(it.toHexString()) } },
+        label = label,
+        modifier = Modifier.fillMaxWidth(),
+        labels = ColorFieldLabels(
+            pick = stringResource(Res.string.color_field_pick),
+            none = stringResource(Res.string.none),
+            opacity = stringResource(Res.string.customize_background_opacity),
+            theme = stringResource(Res.string.color_field_theme),
+            recent = stringResource(Res.string.color_field_recent),
+            invalid = stringResource(Res.string.color_field_invalid),
+        ),
+    )
+}
+
+private fun Color.toHexString(): String = "#%02X%02X%02X".format(
+    (red * COLOR_CHANNEL_MAX).roundToInt(),
+    (green * COLOR_CHANNEL_MAX).roundToInt(),
+    (blue * COLOR_CHANNEL_MAX).roundToInt(),
+)
+
+private const val COLOR_CHANNEL_MAX = 255f

@@ -5,10 +5,8 @@
  */
 package org.churchpresenter.profiles
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -20,29 +18,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.ButtonDefaults
-import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
@@ -52,6 +43,10 @@ import org.churchpresenter.strings.generated.resources.save
 import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.core.models.songs.SongBackground
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.field.DropdownButton
 
 const val SONG_BACKGROUND_BUTTON_TAG = "song_background_button"
 
@@ -79,48 +74,15 @@ fun SongBackgroundButton(
     scopeIndex: Int = 0,
     onScopeChange: (Int) -> Unit = {},
 ) {
-    val custom = background.isCustom || lowerThirdBackground.isCustom
     val shown = if (background.isCustom || !lowerThirdBackground.isCustom) background else lowerThirdBackground
-    val tint = when {
-        expanded -> MaterialTheme.colorScheme.primary
-        custom -> MaterialTheme.colorScheme.primary.copy(alpha = QUIET_TINT_ALPHA)
-        else -> MaterialTheme.colorScheme.outlineVariant
-    }
-    val ink = if (custom || expanded) MaterialTheme.colorScheme.primary
-              else MaterialTheme.colorScheme.onSurfaceVariant
-    val caret by animateFloatAsState(if (expanded) CARET_OPEN_DEGREES else 0f, label = "bgCaret")
-
     Box {
-        Row(
-            modifier = Modifier
-                .testTag(SONG_BACKGROUND_BUTTON_TAG)
-                .height(28.dp)
-                .clip(AppShape(8.dp))
-                .background(
-                    if (expanded || custom) MaterialTheme.colorScheme.primary.copy(alpha = CHIP_FILL_ALPHA)
-                    else MaterialTheme.colorScheme.surfaceContainerHigh
-                )
-                .border(1.dp, tint, AppShape(8.dp))
-                .clickable { onExpandedChange(!expanded) }
-                .padding(start = 5.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-            BackgroundChipSwatch(shown)
-            Text(
-                text = stringResource(Res.string.background),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                color = ink,
-            )
-            Text(
-                text = "⌄",
-                fontSize = 11.sp,
-                color = ink,
-                modifier = Modifier.rotate(caret),
-            )
-        }
+        DropdownButton(
+            text = stringResource(Res.string.background),
+            expanded = expanded,
+            onClick = { onExpandedChange(!expanded) },
+            modifier = Modifier.testTag(SONG_BACKGROUND_BUTTON_TAG),
+            leading = { BackgroundChipSwatch(shown) },
+        )
         if (expanded) {
             Popup(
                 popupPositionProvider = remember { SongBackgroundPanelPosition },
@@ -188,22 +150,15 @@ private fun SongBackgroundPanelFooter(onCancel: () -> Unit, onSave: () -> Unit) 
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        GhostButton(
-            shape = AppShape(6.dp),
-            onClick = onCancel,
-            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-            modifier = Modifier.testTag(SONG_BACKGROUND_CANCEL_TAG),
-        ) {
-            Text(stringResource(Res.string.cancel))
-        }
+        StandardButton(
+            stringResource(Res.string.cancel),
+            onCancel,
+            Modifier.testTag(SONG_BACKGROUND_CANCEL_TAG),
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
         Spacer(Modifier.width(8.dp))
-        RaisedButton(
-            shape = AppShape(6.dp),
-            onClick = onSave,
-            modifier = Modifier.testTag(SONG_BACKGROUND_SAVE_TAG),
-        ) {
-            Text(stringResource(Res.string.save))
-        }
+        StandardButton(stringResource(Res.string.save), onSave, Modifier.testTag(SONG_BACKGROUND_SAVE_TAG))
     }
 }
 
@@ -262,6 +217,3 @@ internal object SongBackgroundPanelPosition : PopupPositionProvider {
 
 private const val GAP_PX = 6
 private const val EDGE_PAD_PX = 12
-private const val CARET_OPEN_DEGREES = 180f
-private const val CHIP_FILL_ALPHA = 0.14f
-private const val QUIET_TINT_ALPHA = 0.55f

@@ -2,6 +2,7 @@ package org.churchpresenter.hosanna.composables.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -28,6 +29,9 @@ sealed interface MenuEntry {
      * @property supporting an optional second line.
      * @property count an optional count shown at the end of the line.
      * @property enabled whether the line can be picked.
+ * @property checked draws a checkbox at the end, ticked or not, for a menu of things to show or hide;
+ * null draws none.
+ * @property icon an optional icon at the start.
      */
     @Immutable
     data class Item(
@@ -36,6 +40,8 @@ sealed interface MenuEntry {
         val supporting: String? = null,
         val count: String? = null,
         val enabled: Boolean = true,
+        val checked: Boolean? = null,
+        val icon: Painter? = null,
     ) : MenuEntry
 
     /**

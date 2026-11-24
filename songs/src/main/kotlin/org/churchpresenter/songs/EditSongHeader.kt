@@ -3,7 +3,6 @@ package org.churchpresenter.songs
 import androidx.compose.foundation.background
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,17 +10,8 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,18 +21,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.semantics.editableText
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
-import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.platform.testTag
 import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.strings.generated.resources.song_comments
@@ -62,9 +45,16 @@ import org.churchpresenter.strings.generated.resources.song_tempo
 import org.churchpresenter.strings.generated.resources.tune
 import org.churchpresenter.strings.generated.resources.unit_bpm
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.theme.components.AppExposedDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.field.Dropdown
+import org.churchpresenter.hosanna.composables.field.TextField
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.model.MenuEntry
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 internal val EditSongCardShape = AppShape(9.dp)
 
@@ -85,7 +75,7 @@ internal fun EditSongMetadata(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(horizontal = 18.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         EditSongTitleRow(state, names, songbooks, isVisible)
@@ -113,7 +103,6 @@ private fun EditSongTitleRow(
             value = state.title,
             onValueChange = { state.editTitle(it) },
             weight = 2.4f,
-            emphasis = true,
         )
         // Every language that has a pane gets its own card, rather than one card following the
         // open pane: a song's titles are read together -- checking that the four languages are the
@@ -232,34 +221,16 @@ internal fun CardLabel(text: String) {
     )
 }
 
-/** A metadata field: its caption above, its value typed straight into the card. */
+/** A metadata field: its caption above, its value typed straight into the field. */
 @Composable
 private fun RowScope.FieldCard(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
     weight: Float,
-    emphasis: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .weight(weight)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
-            .padding(horizontal = 11.dp, vertical = 6.dp),
-        verticalArrangement = Arrangement.spacedBy(1.dp),
-    ) {
-        CardLabel(label)
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            textStyle = fieldValueStyle(emphasis),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
+    TextField(value, onValueChange, modifier.weight(weight), label = label)
 }
 
 /**
@@ -272,39 +243,18 @@ internal fun EditSongComments(notes: String, onNotesChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(horizontal = 18.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
     ) {
-        CardLabel(stringResource(Res.string.song_comments))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
-                .padding(horizontal = 11.dp, vertical = 8.dp),
-        ) {
-            if (notes.isEmpty()) {
-                Text(
-                    text = stringResource(Res.string.song_comments_placeholder),
-                    style = fieldValueStyle(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                )
-            }
-            BasicTextField(
-                value = notes,
-                onValueChange = onNotesChange,
-                minLines = 2,
-                maxLines = NOTES_MAX_LINES,
-                textStyle = fieldValueStyle(),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth().tabMovesFocus().testTag(EDIT_SONG_NOTES_TAG),
-            )
-        }
+        TextField(
+            value = notes,
+            onValueChange = onNotesChange,
+            modifier = Modifier.fillMaxWidth().tabMovesFocus().testTag(EDIT_SONG_NOTES_TAG),
+            label = stringResource(Res.string.song_comments),
+            placeholder = stringResource(Res.string.song_comments_placeholder),
+            multiline = true,
+        )
     }
 }
-
-/** How many lines of comments the editor shows before the field scrolls. */
-private const val NOTES_MAX_LINES = 3
 
 /** The editor's comments field. */
 const val EDIT_SONG_NOTES_TAG = "editSongNotes"
@@ -315,7 +265,6 @@ const val EDIT_SONG_NOTES_TAG = "editSongNotes"
  * first: the song is kept at the top of the songs folder, where imported songs already sit, so a
  * library with no song book folders can still take a new song.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RowScope.SongbookCard(
     songbook: String,
@@ -326,133 +275,63 @@ private fun RowScope.SongbookCard(
     weight: Float,
     modifier: Modifier = Modifier,
 ) {
-    var expanded by remember { mutableStateOf(false) }
     var isAddingNew by remember(isVisible) { mutableStateOf(false) }
-
-    val cardModifier = Modifier
-        .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
-        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
-        .padding(horizontal = 11.dp, vertical = 6.dp)
-
+    val label = stringResource(Res.string.song_book)
     if (isAddingNew) {
-        Column(
-            modifier = modifier.weight(weight).then(cardModifier),
-            verticalArrangement = Arrangement.spacedBy(1.dp),
+        Row(
+            modifier.weight(weight),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            CardLabel(stringResource(Res.string.song_book))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                BasicTextField(
-                    value = songbook,
-                    onValueChange = onSongbookChange,
-                    singleLine = true,
-                    textStyle = fieldValueStyle(),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.weight(1f),
+            TextField(songbook, onSongbookChange, Modifier.weight(1f), label = label)
+            val cancel = stringResource(Res.string.cancel)
+            Tooltip(cancel) {
+                IconButton(
+                    rememberVectorPainter(Icons.Default.Close),
+                    cancel,
+                    { onSongbookChange(originalSongbook); isAddingNew = false },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
                 )
-                KeyIconButton(
-                    onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
-                    modifier = Modifier.size(20.dp),
-                ) {
-                    Icon(
-                        Icons.Default.Close,
-                        contentDescription = stringResource(Res.string.cancel),
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
             }
         }
     } else {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = it },
+        // The library lists its top-level songs as "/"; here that is the first entry.
+        val books = songbooks.filter { it.isNotBlank() && it != ROOT_SONGBOOK }
+        Dropdown(
+            entries = listOf(MenuEntry.Item(NO_SONGBOOK_KEY, stringResource(Res.string.song_book_none))) +
+                books.map { MenuEntry.Item(it, it) } +
+                listOf(MenuEntry.Divider, MenuEntry.Item(NEW_SONGBOOK_KEY, stringResource(Res.string.song_book_new))),
+            selectedKey = songbook.ifBlank { NO_SONGBOOK_KEY },
+            onSelect = { key ->
+                when (key) {
+                    NO_SONGBOOK_KEY -> onSongbookChange("")
+                    NEW_SONGBOOK_KEY -> {
+                        onSongbookChange("")
+                        isAddingNew = true
+                    }
+                    else -> onSongbookChange(key)
+                }
+            },
             modifier = modifier.weight(weight),
-        ) {
-            // The anchor is the whole card, not the line of text inside it: a card that looks like
-            // one control has to answer a click anywhere on it, including its label and its margins.
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    .then(cardModifier),
-                verticalArrangement = Arrangement.spacedBy(1.dp),
-            ) {
-                CardLabel(stringResource(Res.string.song_book))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val shown = songbook.ifBlank { stringResource(Res.string.song_book_none) }
-                    Text(
-                        text = shown,
-                        style = fieldValueStyle(),
-                        color = if (songbook.isBlank()) {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                            Color.Unspecified
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f).semantics { editableText = AnnotatedString(shown) },
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
-            }
-            AppExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.song_book_none)) },
-                    onClick = { onSongbookChange(""); expanded = false },
-                )
-                // The library lists its top-level songs as "/"; here that is the entry above.
-                songbooks.filter { it.isNotBlank() && it != ROOT_SONGBOOK }.forEach { book ->
-                    DropdownMenuItem(
-                        text = { Text(book) },
-                        onClick = { onSongbookChange(book); expanded = false },
-                    )
-                }
-                HorizontalDivider()
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.song_book_new)) },
-                    onClick = { expanded = false; onSongbookChange(""); isAddingNew = true },
-                )
-            }
-        }
+            label = label,
+        )
     }
 }
+
+// Keys no song book can have: a book name never starts with a NUL.
+private const val NO_SONGBOOK_KEY = "\u0000none"
+private const val NEW_SONGBOOK_KEY = "\u0000new"
 
 /** Tempo: the number the stage monitor's metronome flashes at. */
 @Composable
 private fun RowScope.TempoCard(bpm: String, onBpmChange: (String) -> Unit, weight: Float) {
-    Column(
-        modifier = Modifier
-            .weight(weight)
-            .guideTarget(GuideTargets.SONG_TEMPO)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
-            .padding(horizontal = 11.dp, vertical = 6.dp),
-        verticalArrangement = Arrangement.spacedBy(1.dp),
-    ) {
-        CardLabel(stringResource(Res.string.song_tempo))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            BasicTextField(
-                value = bpm,
-                onValueChange = onBpmChange,
-                singleLine = true,
-                textStyle = fieldValueStyle(),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.width(30.dp),
-            )
-            // Same line box as the value beside it, so the two sit on one line rather than the
-            // taller default pushing the number off the row's baseline.
-            Text(
-                text = stringResource(Res.string.unit_bpm),
-                style = fieldValueStyle().copy(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-            )
-        }
-    }
+    TextField(
+        bpm,
+        onBpmChange,
+        Modifier.weight(weight).guideTarget(GuideTargets.SONG_TEMPO),
+        label = stringResource(Res.string.song_tempo),
+        suffix = stringResource(Res.string.unit_bpm),
+    )
 }

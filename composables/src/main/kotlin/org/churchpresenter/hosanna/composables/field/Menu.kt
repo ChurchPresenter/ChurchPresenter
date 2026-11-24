@@ -71,15 +71,31 @@ import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 import org.churchpresenter.hosanna.composables.foundation.firstPassClick
+import androidx.compose.ui.state.ToggleableState
+import androidx.compose.foundation.selection.toggleable
+import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.foundation.checkboxColors
+import org.churchpresenter.hosanna.composables.selection.CheckboxBox
 
+/**
+ * A menu under the composable it is placed in, such as a button that opens it. ↑ ↓ move the
+ * highlight, Enter picks and Esc closes.
+ *
+ * @param entries the menu's lines.
+ * @param onPick called with the key of the item picked.
+ * @param onDismiss called when the menu should close: a click outside it, or Esc.
+ * @param selected the key of an item to mark as picked, or null.
+ * @param width the menu's width; null fits the widest line.
+ * @param search turns on a search field at the top of a long menu.
+ */
 @Composable
-internal fun DropdownMenu(
+fun DropdownMenu(
     entries: List<MenuEntry>,
-    selected: String?,
     onPick: (String) -> Unit,
     onDismiss: () -> Unit,
-    width: Dp,
-    search: MenuSearch?,
+    selected: String? = null,
+    width: Dp? = null,
+    search: MenuSearch? = null,
 ) {
     var query by remember { mutableStateOf("") }
     val searchable = search != null && itemCount(entries) > MenuDefaults.SEARCH_AFTER
@@ -257,12 +273,19 @@ private fun MenuRow(
             .background(colors.menuRowContainer(selected, item.enabled && (hovered || active)), shape)
             .then(if (active && item.enabled) Modifier.keyboardRing(colors.primary, shape) else Modifier)
             .firstPassClick(item.enabled, onClick)
-            .clickable(source, null, item.enabled, role = Role.DropdownList, onClick = onClick)
+            .then(
+                if (item.checked != null) {
+                    Modifier.toggleable(item.checked, source, null, item.enabled, Role.Checkbox) { onClick() }
+                } else {
+                    Modifier.clickable(source, null, item.enabled, role = Role.DropdownList, onClick = onClick)
+                },
+            )
             .semantics { this.selected = selected }
             .padding(horizontal = MenuDefaults.RowPadding),
         horizontalArrangement = Arrangement.spacedBy(MenuDefaults.Gap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        item.icon?.let { FieldGlyph(it, if (item.enabled) colors.onSurfaceVariant else ink, MenuDefaults.Icon) }
         Column(Modifier.weight(1f)) {
             BasicText(
                 item.label,
@@ -275,6 +298,11 @@ private fun MenuRow(
             }
         }
         item.count?.let { CountBadge(it, selected) }
+        item.checked?.let { checked ->
+            val state = if (checked) ToggleableState.On else ToggleableState.Off
+            val look = if (item.enabled) ButtonState.Rest else ButtonState.Disabled
+            CheckboxBox(state, colors.checkboxColors(state, look, error = false))
+        }
         if (selected) FieldGlyph(painterResource(Res.drawable.ic_check), colors.primary, MenuDefaults.Check)
     }
 }

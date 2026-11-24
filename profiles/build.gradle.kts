@@ -17,6 +17,7 @@ compose.resources {
 
 dependencies {
     implementation(projects.sharedUi)
+    implementation(projects.composables)
     implementation(projects.strings)
     implementation(projects.icons)
     implementation(projects.coreModels)

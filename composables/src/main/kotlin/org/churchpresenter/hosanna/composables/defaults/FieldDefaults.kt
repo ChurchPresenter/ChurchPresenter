@@ -46,6 +46,7 @@ internal object MenuDefaults {
     val RowHeight: Dp = 36.dp
     val TwoLineRowHeight: Dp = 46.dp
     val Check: Dp = 14.dp
+    val Icon: Dp = 16.dp
     val Gap: Dp = 6.dp
     val MaxHeight: Dp = 314.dp
     val KeyboardRing: Dp = 1.5.dp

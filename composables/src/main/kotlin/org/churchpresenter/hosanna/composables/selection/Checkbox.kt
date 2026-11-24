@@ -154,7 +154,7 @@ fun TriStateCheckbox(
 }
 
 @Composable
-private fun CheckboxBox(state: ToggleableState, colors: CheckboxColors) {
+internal fun CheckboxBox(state: ToggleableState, colors: CheckboxColors) {
     val fill by animateColorAsState(colors.fill, tween(CheckboxDefaults.TRANSITION_MILLIS))
     val shape = RoundedCornerShape(CheckboxDefaults.BoxRadius)
     val halo = colors.halo

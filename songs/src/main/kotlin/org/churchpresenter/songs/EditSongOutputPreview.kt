@@ -129,7 +129,8 @@ internal fun EditSongOutputPane(state: EditSongState, appSettings: AppSettings, 
     val scrollState = rememberScrollState()
     Box(modifier) {
         Column(
-            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(14.dp),
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)
+                .padding(start = 14.dp, top = 14.dp, end = 16.dp, bottom = 14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (slide == null) {
