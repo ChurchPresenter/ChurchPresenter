@@ -49,11 +49,11 @@ class AlignmentButtonsTest {
     fun `segments are 32 by 30, or 28 by 26 when compact`() = runComposeUiTest {
         var compact by mutableStateOf(false)
         setContent { HosannaSurface { TextAlignmentButtons(null, null, {}, { it.name }, compact = compact) } }
-        val regular = AlignmentButtonDefaults.Regular
+        val regular = IconSegmentDefaults.Regular
         onNodeWithContentDescription("Left").assertWidthIsEqualTo(regular.width).assertHeightIsEqualTo(regular.height)
         compact = true
         waitForIdle()
-        val small = AlignmentButtonDefaults.Compact
+        val small = IconSegmentDefaults.Compact
         onNodeWithContentDescription("Left").assertWidthIsEqualTo(small.width).assertHeightIsEqualTo(small.height)
     }
 

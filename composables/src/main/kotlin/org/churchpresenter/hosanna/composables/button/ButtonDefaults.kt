@@ -92,14 +92,25 @@ internal object SegmentedButtonDefaults {
 }
 
 @Immutable
-internal data class AlignmentMetrics(val width: Dp, val height: Dp, val icon: Dp)
+internal data class IconSegmentMetrics(val width: Dp, val height: Dp, val icon: Dp)
 
-internal object AlignmentButtonDefaults {
-    val Regular = AlignmentMetrics(width = 32.dp, height = 30.dp, icon = 18.dp)
-    val Compact = AlignmentMetrics(width = 28.dp, height = 26.dp, icon = 16.dp)
+internal object IconSegmentDefaults {
+    val Regular = IconSegmentMetrics(width = 32.dp, height = 30.dp, icon = 18.dp)
+    val Compact = IconSegmentMetrics(width = 28.dp, height = 26.dp, icon = 16.dp)
     val SegmentRadius: Dp = HosannaRadius.M
     val TrackRadius: Dp = HosannaRadius.nested(SegmentRadius, SegmentedButtonDefaults.TrackPadding)
     val GroupGap: Dp = 8.dp
 
-    fun metrics(compact: Boolean): AlignmentMetrics = if (compact) Compact else Regular
+    fun metrics(compact: Boolean): IconSegmentMetrics = if (compact) Compact else Regular
+}
+
+internal object SplitButtonDefaults {
+    val ChevronWidth: Dp = 18.dp
+    val ChevronIcon: Dp = 14.dp
+    val Divider: Dp = 1.dp
+    val DividerHeight: Dp = 18.dp
+    val Indicator: Dp = 3.dp
+    val IndicatorWidth: Dp = 14.dp
+    val IndicatorGap: Dp = 1.dp
+    val IndicatedIcon: Dp = 15.dp
 }

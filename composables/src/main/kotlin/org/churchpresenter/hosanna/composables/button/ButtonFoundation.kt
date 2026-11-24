@@ -56,6 +56,10 @@ enum class FabSize { Regular, Small }
 
 enum class SegmentedButtonSize { Default, Small }
 
+enum class TextStyleToggle { Bold, Italic, Underline, Strikethrough }
+
+internal enum class SegmentRole { Radio, Action, Toggle }
+
 class SegmentedOption(
     val label: String,
     val icon: Painter? = null,
