@@ -64,7 +64,10 @@ internal fun HosannaColors.menuRowContainer(selected: Boolean, highlighted: Bool
     return if (highlighted) onSurface.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(base) else base
 }
 
-internal class MenuPositionProvider(private val gap: Int) : PopupPositionProvider {
+internal class MenuPositionProvider(
+    private val gap: Int,
+    private val alignEnd: Boolean = false,
+) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
@@ -75,7 +78,8 @@ internal class MenuPositionProvider(private val gap: Int) : PopupPositionProvide
         val above = anchorBounds.top - gap - popupContentSize.height
         val fitsBelow = below + popupContentSize.height <= windowSize.height
         val y = if (fitsBelow || above < 0) below else above
-        val x = anchorBounds.left.coerceIn(0, maxOf(0, windowSize.width - popupContentSize.width))
+        val start = if (alignEnd) anchorBounds.right - popupContentSize.width else anchorBounds.left
+        val x = start.coerceIn(0, maxOf(0, windowSize.width - popupContentSize.width))
         return IntOffset(x, y)
     }
 }

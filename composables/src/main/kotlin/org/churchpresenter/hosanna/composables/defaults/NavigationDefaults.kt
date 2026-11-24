@@ -27,3 +27,11 @@ internal object NavigationDefaults {
     val BadgePadding: Dp = 5.dp
     val Fade: Dp = 28.dp
 }
+
+internal object TabMenuDefaults {
+    val Width: Dp = 260.dp
+    val Handle: Dp = 16.dp
+    val RowPadding: Dp = 10.dp
+    val SectionGap: Dp = 4.dp
+    const val DRAG_LIFT: Float = 0.96f
+}

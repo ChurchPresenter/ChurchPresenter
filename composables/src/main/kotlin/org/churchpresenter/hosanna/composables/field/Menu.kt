@@ -205,7 +205,7 @@ internal fun MenuSurface(width: Dp?, padding: Dp = MenuDefaults.Padding, content
 }
 
 @Composable
-private fun MenuHeader(title: String) {
+internal fun MenuHeader(title: String) {
     BasicText(
         title.asOverline(),
         Modifier.padding(
@@ -219,7 +219,7 @@ private fun MenuHeader(title: String) {
 }
 
 @Composable
-private fun MenuDivider() {
+internal fun MenuDivider() {
     Box(
         Modifier
             .fillMaxWidth()
