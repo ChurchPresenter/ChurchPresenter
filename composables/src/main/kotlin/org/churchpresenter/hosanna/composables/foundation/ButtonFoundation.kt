@@ -57,6 +57,8 @@ internal enum class ButtonState { Rest, Hovered, Pressed, Focused, Loading, Disa
 @Immutable
 internal data class ButtonColors(val container: Color, val content: Color, val ring: Color?)
 
+internal const val FULL_TURN = 360f
+
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
 internal fun buttonState(enabled: Boolean, loading: Boolean, hovered: Boolean, pressed: Boolean, focused: Boolean) =
@@ -203,12 +205,18 @@ internal fun ButtonIcon(icon: Painter, tint: Color, size: Dp) {
 }
 
 @Composable
-internal fun Spinner(color: Color, diameter: Dp) {
+internal fun Spinner(
+    color: Color,
+    diameter: Dp,
+    stroke: Dp = ButtonFoundationDefaults.SpinnerStroke,
+    millis: Int = ButtonFoundationDefaults.SPIN_MILLIS,
+    track: Color = Color.Transparent,
+) {
     val turn by rememberInfiniteTransition().animateFloat(
         initialValue = 0f,
-        targetValue = 360f,
+        targetValue = FULL_TURN,
         animationSpec = infiniteRepeatable(
-            tween(ButtonFoundationDefaults.SPIN_MILLIS, easing = LinearEasing),
+            tween(millis, easing = LinearEasing),
             RepeatMode.Restart,
         ),
     )
@@ -218,15 +226,17 @@ internal fun Spinner(color: Color, diameter: Dp) {
             .progressSemantics()
             .rotate(turn),
     ) {
-        val stroke = ButtonFoundationDefaults.SpinnerStroke.toPx()
+        val width = stroke.toPx()
+        val ring = Size(size.width - width, size.height - width)
+        drawArc(track, 0f, FULL_TURN, false, Offset(width / 2, width / 2), ring, style = Stroke(width))
         drawArc(
             color = color,
             startAngle = 0f,
             sweepAngle = ButtonFoundationDefaults.SPINNER_SWEEP,
             useCenter = false,
-            topLeft = Offset(stroke / 2, stroke / 2),
-            size = Size(size.width - stroke, size.height - stroke),
-            style = Stroke(stroke, cap = StrokeCap.Round),
+            topLeft = Offset(width / 2, width / 2),
+            size = ring,
+            style = Stroke(width, cap = StrokeCap.Round),
         )
     }
 }
