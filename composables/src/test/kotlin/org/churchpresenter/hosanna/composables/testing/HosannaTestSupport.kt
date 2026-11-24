@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -77,6 +78,26 @@ fun hosannaComponent(section: String, name: String, content: @Composable () -> U
             captureTo(file)
         }
     }
+
+fun hosannaPopup(
+    section: String,
+    name: String,
+    keepHover: Boolean = false,
+    drive: ComposeUiTest.() -> Unit,
+    content: @Composable () -> Unit,
+) = bothThemes(section, name, trim = true) { mode, file ->
+    runComposeUiTest {
+        mainClock.autoAdvance = false
+        setContent {
+            PinnedFonts { HosannaSurface(dark = mode == ThemeMode.DARK, content = content) }
+        }
+        settle()
+        drive()
+        settle()
+        val roots = onAllNodes(isRoot()).fetchSemanticsNodes(atLeastOneRootRequired = false).size
+        captureTo(file, rootIndex = roots - 1, keepHover = keepHover)
+    }
+}
 
 fun ComposeUiTest.settle() {
     mainClock.advanceTimeBy(SETTLE_MS)

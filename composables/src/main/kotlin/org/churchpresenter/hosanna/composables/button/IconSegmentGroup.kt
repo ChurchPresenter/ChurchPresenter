@@ -93,26 +93,29 @@ internal fun IconSegmentTrack(
     )
 }
 
+internal class IconSegmentOption(
+    val icon: DrawableResource,
+    val contentDescription: String,
+    val value: ToggleableState,
+    val enabled: Boolean,
+    val interactionSource: MutableInteractionSource,
+    val onClick: () -> Unit,
+)
+
 @Composable
-internal fun <T> IconSegmentGroup(
-    options: List<T>,
+internal fun IconSegmentGroup(
+    options: List<IconSegmentOption>,
     role: SegmentRole,
-    value: (T) -> ToggleableState,
-    onClick: (T) -> Unit,
-    icon: (T) -> DrawableResource,
-    contentDescription: (T) -> String,
-    interactionSources: Map<T, MutableInteractionSource>,
     metrics: IconSegmentMetrics,
     enabled: Boolean,
-    disabled: Set<T>,
     modifier: Modifier = Modifier,
 ) {
-    val enabledFlags = options.map { enabled && it !in disabled }
-    val values = options.map(value)
+    val enabledFlags = options.map { enabled && it.enabled }
+    val values = options.map { it.value }
     val selectedIndex = if (role == SegmentRole.Radio) values.indexOf(ToggleableState.On) else -1
     var current by remember { mutableIntStateOf(startSegment(role, values, enabledFlags)) }
     var moved by remember { mutableStateOf(false) }
-    val requesters = remember(options) { options.map { FocusRequester() } }
+    val requesters = remember(options.size) { List(options.size) { FocusRequester() } }
     LaunchedEffect(selectedIndex) { if (selectedIndex >= 0) current = selectedIndex }
     LaunchedEffect(current) {
         if (moved) requesters.getOrNull(current)?.requestFocus()
@@ -132,7 +135,7 @@ internal fun <T> IconSegmentGroup(
                 nextEnabledSegment(enabledFlags, focusIndex, step)?.let {
                     moved = true
                     current = it
-                    if (role == SegmentRole.Radio) onClick(options[it])
+                    if (role == SegmentRole.Radio) options[it].onClick()
                 }
                 true
             }
@@ -142,14 +145,14 @@ internal fun <T> IconSegmentGroup(
             IconSegment(
                 value = values[index],
                 role = role,
-                onClick = { onClick(option) },
-                contentDescription = contentDescription(option),
-                interactionSource = interactionSources.getValue(option),
+                onClick = option.onClick,
+                contentDescription = option.contentDescription,
+                interactionSource = option.interactionSource,
                 metrics = metrics,
                 enabled = enabledFlags[index],
                 focusable = index == focusIndex,
                 requester = requesters[index],
-            ) { colors -> SegmentGlyph(painterResource(icon(option)), colors.content, metrics.icon) }
+            ) { colors -> SegmentGlyph(painterResource(option.icon), colors.content, metrics.icon) }
         }
     }
 }

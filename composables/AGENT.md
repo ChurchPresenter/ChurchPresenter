@@ -38,6 +38,8 @@ The composables built on the Hosanna theme. A real Gradle module of this build �
 - **No color, size or radius literal** that a token already names. A value the theme lacks is added
   to `:hosanna-theme` first, then used here.
 
+- **No generic functions or classes** (`fun <T>`, `class Foo<T>`): a list is keyed by `String`
+  (`MenuEntry.Item(key, …)`), or by the component's own enum, never by a type parameter.
 - **Glyphs a composable draws itself** (a check, a ×, a star) come from `:icons`
   (`painterResource(Res.drawable.ic_…)`), never drawn by hand or as text.
 

@@ -22,17 +22,21 @@ class AlignmentButtonsScreenshotTest {
         ButtonState.Focused to "focused",
     )
 
-    private fun <T> sources(all: List<T>, frozen: Set<T>, state: ButtonState): Map<T, MutableInteractionSource> =
-        all.associateWith { if (it in frozen) frozenSource(state) else MutableInteractionSource() }
+    private fun source(frozen: Boolean, state: ButtonState): MutableInteractionSource =
+        if (frozen) frozenSource(state) else MutableInteractionSource()
 
     @Composable
     private fun textSources(state: ButtonState) = remember {
-        sources(TextAlignment.entries, setOf(TextAlignment.Right, TextAlignment.Middle), state)
+        TextAlignment.entries.associateWith {
+            source(it == TextAlignment.Right || it == TextAlignment.Middle, state)
+        }
     }
 
     @Composable
     private fun layerSources(state: ButtonState) = remember {
-        sources(LayerAlignment.entries, setOf(LayerAlignment.Center, LayerAlignment.Bottom), state)
+        LayerAlignment.entries.associateWith {
+            source(it == LayerAlignment.Center || it == LayerAlignment.Bottom, state)
+        }
     }
 
     @Composable

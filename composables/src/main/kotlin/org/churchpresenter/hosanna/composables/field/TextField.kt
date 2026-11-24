@@ -169,7 +169,7 @@ private fun fieldHeight(multiline: Boolean, labeled: Boolean): Modifier = when {
 }
 
 @Composable
-private fun Supporting(value: String, helper: String?, error: String?, maxLength: Int?, enabled: Boolean) {
+internal fun Supporting(value: String, helper: String?, error: String?, maxLength: Int?, enabled: Boolean) {
     val message = error ?: helper
     if (message == null && maxLength == null) return
     val colors = HosannaTheme.colors
@@ -229,6 +229,6 @@ internal fun ClearButton(
 }
 
 @Composable
-internal fun FieldGlyph(icon: Painter, tint: Color, size: Dp) {
-    Image(icon, null, Modifier.size(size), colorFilter = ColorFilter.tint(tint))
+internal fun FieldGlyph(icon: Painter, tint: Color, size: Dp, modifier: Modifier = Modifier) {
+    Image(icon, null, modifier.size(size), colorFilter = ColorFilter.tint(tint))
 }

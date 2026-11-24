@@ -73,16 +73,19 @@ fun TextAlignmentButtons(
         val groups = listOf(HorizontalTextAlignments to horizontal, VerticalTextAlignments to vertical)
         groups.forEach { (options, chosen) ->
             IconSegmentGroup(
-                options = options,
+                options = options.map {
+                    IconSegmentOption(
+                        icon = it.icon(),
+                        contentDescription = contentDescription(it),
+                        value = if (it == chosen) ToggleableState.On else ToggleableState.Off,
+                        enabled = it !in disabled,
+                        interactionSource = interactionSources.getValue(it),
+                        onClick = { onAlignmentChange(it) },
+                    )
+                },
                 role = SegmentRole.Radio,
-                value = { if (it == chosen) ToggleableState.On else ToggleableState.Off },
-                onClick = onAlignmentChange,
-                icon = { it.icon() },
-                contentDescription = contentDescription,
-                interactionSources = interactionSources,
                 metrics = IconSegmentDefaults.metrics(compact),
                 enabled = enabled,
-                disabled = disabled,
             )
         }
     }
@@ -105,16 +108,19 @@ fun LayerAlignmentButtons(
     ) {
         listOf(HorizontalLayerAlignments, VerticalLayerAlignments).forEach { options ->
             IconSegmentGroup(
-                options = options,
+                options = options.map {
+                    IconSegmentOption(
+                        icon = it.icon(),
+                        contentDescription = contentDescription(it),
+                        value = ToggleableState.Off,
+                        enabled = true,
+                        interactionSource = interactionSources.getValue(it),
+                        onClick = { onAlign(it) },
+                    )
+                },
                 role = SegmentRole.Action,
-                value = { ToggleableState.Off },
-                onClick = onAlign,
-                icon = { it.icon() },
-                contentDescription = contentDescription,
-                interactionSources = interactionSources,
                 metrics = IconSegmentDefaults.metrics(compact),
                 enabled = enabled,
-                disabled = emptySet(),
             )
         }
     }

@@ -61,16 +61,19 @@ fun TextStyleToggles(
     disabled: Set<TextStyleToggle> = emptySet(),
 ) {
     IconSegmentGroup(
-        options = TextStyleToggle.entries,
+        options = TextStyleToggle.entries.map {
+            IconSegmentOption(
+                icon = it.icon(),
+                contentDescription = contentDescription(it),
+                value = states[it] ?: ToggleableState.Off,
+                enabled = it !in disabled,
+                interactionSource = interactionSources.getValue(it),
+                onClick = { onToggle(it) },
+            )
+        },
         role = SegmentRole.Toggle,
-        value = { states[it] ?: ToggleableState.Off },
-        onClick = onToggle,
-        icon = { it.icon() },
-        contentDescription = contentDescription,
-        interactionSources = interactionSources,
         metrics = IconSegmentDefaults.Regular,
         enabled = enabled,
-        disabled = disabled,
         modifier = modifier,
     )
 }
