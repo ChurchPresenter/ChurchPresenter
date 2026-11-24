@@ -3,7 +3,6 @@ package org.churchpresenter.hosanna.composables.list
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +48,7 @@ import org.churchpresenter.hosanna.composables.model.listKey
 import org.churchpresenter.hosanna.composables.model.moveIndex
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 import org.churchpresenter.hosanna.composables.foundation.firstPassClick
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 /**
  * A list to pick one item from, such as Bible books or chapters. ↑ ↓, Home, End and the page keys move the
@@ -72,7 +72,7 @@ fun NavigationList(
     centered: Boolean = false,
     state: LazyListState = rememberLazyListState(),
 ) {
-    val listFocused by interactionSource.collectIsFocusedAsState()
+    val listFocused by interactionSource.collectIsFocusVisibleAsState()
     val selectedIndex = items.indexOfFirst { it.key == selectedKey }
     val current by rememberUpdatedState(selectedIndex)
     val select by rememberUpdatedState(onSelect)

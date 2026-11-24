@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +51,7 @@ import org.churchpresenter.hosanna.composables.model.movePosition
 import org.churchpresenter.hosanna.composables.model.positionAt
 import org.churchpresenter.hosanna.composables.model.row
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 /**
  * A small screen with nine spots to pick where something goes on the output. Arrows move between spots.
@@ -79,7 +79,7 @@ fun PositionPicker(
     val colors = ThemeColors.current
     val typography = HosannaTheme.typography
     val metrics = PositionPickerDefaults.metrics(compact)
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val shape = HosannaTheme.shapes.m
     val ink = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(PositionPickerDefaults.LabelGap)) {

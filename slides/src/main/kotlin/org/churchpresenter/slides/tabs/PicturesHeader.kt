@@ -10,31 +10,18 @@ import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.ui.draw.alpha
-import org.churchpresenter.sharedui.composables.AddToScheduleButton
-import org.churchpresenter.sharedui.composables.SavePresetButton
-import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -71,8 +57,23 @@ import java.io.File
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.sharedui.composables.RecentChip
 import org.churchpresenter.sharedui.composables.topBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.chip.FavoriteFileChip
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.Tv
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.label
+import org.churchpresenter.strings.generated.resources.recent_pin
+import org.churchpresenter.strings.generated.resources.recent_unpin
 
 /** The top card: the folder bar, the recent folders, the playback controls and the key hints. */
 @Composable
@@ -99,37 +100,12 @@ private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        RaisedButton(
-            onClick = {
-                viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
-                    onSettingsChange { s ->
-                        s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath))
-                    }
-                    RecentPictureFolders.add(folderPath)
-                }
-            },
-            modifier = Modifier.height(32.dp).guideTarget(GuideTargets.PICTURES_SELECT_FOLDER),
-            shape = AppShape(7.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_folder),
-                contentDescription = null,
-                modifier = Modifier.size(13.dp),
-            )
-            Spacer(Modifier.width(7.dp))
-            Text(
-                stringResource(Res.string.select_folder),
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontSize = TextUnit(PICTURES_CAPTION_FONT_SP, TextUnitType.Sp),
-                    fontWeight = FontWeight.SemiBold
-                )
-            )
-        }
+        StandardButton(
+            stringResource(Res.string.select_folder),
+            { chooseFolder(viewModel) },
+            Modifier.guideTarget(GuideTargets.PICTURES_SELECT_FOLDER),
+            icon = painterResource(IconRes.drawable.ic_folder),
+        )
         Text(
             text = viewModel.selectedFolderDisplayPath ?: stringResource(Res.string.no_folder_selected),
             style = MaterialTheme.typography.bodySmall,
@@ -138,35 +114,52 @@ private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+        val hasImages = viewModel.images.isNotEmpty()
         if (onSavePreset != null) {
-            SavePresetButton(
-                onClick = {
-                    viewModel.getScheduleData()?.let { (path, name, count) ->
-                        onSavePreset(path, name, count)
-                    }
-                },
-                enabled = viewModel.images.isNotEmpty(),
-                tooltipText = stringResource(Res.string.save_preset)
-            )
+            val savePresetStr = stringResource(Res.string.save_preset)
+            Tooltip(savePresetStr) {
+                IconButton(
+                    rememberVectorPainter(Icons.Filled.BookmarkAdd),
+                    savePresetStr,
+                    {
+                        viewModel.getScheduleData()?.let { (path, name, count) ->
+                            onSavePreset(path, name, count)
+                        }
+                    },
+                    hierarchy = ButtonHierarchy.Secondary,
+                    enabled = hasImages,
+                )
+            }
         }
         if (onAddToSchedule != null) {
-            AddToScheduleButton(
-                onClick = {
-                    viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) }
-                },
-                enabled = viewModel.images.isNotEmpty(),
-                tooltipText = stringResource(Res.string.add_to_schedule),
-                modifier = Modifier.guideTarget(GuideTargets.PICTURES_ADD_TO_SCHEDULE),
-            )
+            val addScheduleStr = stringResource(Res.string.add_to_schedule)
+            Tooltip(addScheduleStr, Modifier.guideTarget(GuideTargets.PICTURES_ADD_TO_SCHEDULE)) {
+                IconButton(
+                    painterResource(IconRes.drawable.ic_playlist_add),
+                    addScheduleStr,
+                    {
+                        viewModel.getScheduleData()?.let { (path, name, count) ->
+                            onAddToSchedule(path, name, count)
+                        }
+                    },
+                    hierarchy = ButtonHierarchy.Primary,
+                    intent = ButtonIntent.Neutral,
+                    enabled = hasImages,
+                )
+            }
         }
         if (presenterManager != null) {
-            GoLiveButton(
-                onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive) },
-                enabled = viewModel.images.isNotEmpty(),
-                tooltipText = stringResource(Res.string.go_live),
-                modifier = Modifier.guideTarget(GuideTargets.PICTURES_GO_LIVE),
-                showsShortcut = true,
-            )
+            val goLiveStr = stringResource(Res.string.go_live)
+            val goLiveKey = LocalShortcuts.current.label(ShortcutAction.GO_LIVE).ifEmpty { null }
+            Tooltip(goLiveStr, Modifier.guideTarget(GuideTargets.PICTURES_GO_LIVE), shortcut = goLiveKey) {
+                IconButton(
+                    rememberVectorPainter(Icons.Default.Tv),
+                    goLiveStr,
+                    { viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive) },
+                    hierarchy = ButtonHierarchy.Primary,
+                    enabled = hasImages,
+                )
+            }
         }
     }
 }
@@ -191,34 +184,16 @@ private fun PicturesTabScope.PicturesRecentBar(viewModel: PicturesViewModel) {
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp,
-                    ) {
-                        Text(
-                            stringResource(Res.string.clear_recents),
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp),
+            val clearStr = stringResource(Res.string.clear_recents)
+            Tooltip(clearStr) {
+                IconButton(
+                    painterResource(IconRes.drawable.ic_close),
+                    clearStr,
+                    { RecentPictureFolders.clear() },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
                 )
-            ) {
-                KeyIconButton(onClick = { RecentPictureFolders.clear() }, modifier = Modifier.size(20.dp)) {
-                    Icon(
-                        painter = painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.clear),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                }
             }
             LazyRow(
                 modifier = Modifier.weight(1f),
@@ -229,11 +204,9 @@ private fun PicturesTabScope.PicturesRecentBar(viewModel: PicturesViewModel) {
                 lazyItems(recentOrdered) { path ->
                     val isPinned = path in RecentPictureFolders.pinned
                     val isActive = viewModel.selectedFolderDisplayPath == path
-                    RecentChip(
+                    FavoriteFileChip(
                         name = File(path).name,
-                        isActive = isActive,
-                        isPinned = isPinned,
-                        onOpen = {
+                        onClick = {
                             val folder = File(path)
                             // A recent folder on a share can take seconds to answer: ask off the event thread.
                             scope.launch {
@@ -245,7 +218,13 @@ private fun PicturesTabScope.PicturesRecentBar(viewModel: PicturesViewModel) {
                                 RecentPictureFolders.add(path)
                             }
                         },
-                        onTogglePin = { RecentPictureFolders.togglePin(path) },
+                        favorite = isPinned,
+                        onFavoriteChange = { RecentPictureFolders.togglePin(path) },
+                        starContentDescription = stringResource(
+                            if (isPinned) Res.string.recent_unpin else Res.string.recent_pin,
+                        ),
+                        icon = painterResource(IconRes.drawable.ic_folder),
+                        open = isActive,
                     )
                 }
             }
@@ -293,5 +272,15 @@ private fun PicturesTabScope.PicturesHintRow() {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+/** Asks for a folder of pictures, opens it and remembers it. */
+internal fun PicturesTabScope.chooseFolder(viewModel: PicturesViewModel) {
+    viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
+        onSettingsChange { s ->
+            s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath))
+        }
+        RecentPictureFolders.add(folderPath)
     }
 }

@@ -13,6 +13,7 @@ dependencies {
     // The port to the live output this tab declares against.
     api(projects.outputApi)
     implementation(projects.sharedUi)
+    implementation(projects.composables)
     implementation(projects.strings)
     implementation(projects.icons)
     implementation(projects.coreModels)

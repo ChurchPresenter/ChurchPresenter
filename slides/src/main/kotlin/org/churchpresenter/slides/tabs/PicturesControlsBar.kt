@@ -13,19 +13,12 @@ import org.churchpresenter.sharedui.utils.ScaleButtonContent
 import org.churchpresenter.sharedui.utils.scaleButtonLabel
 import org.churchpresenter.sharedui.utils.withPictureScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -33,26 +26,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
-import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_refresh
@@ -62,7 +43,6 @@ import org.churchpresenter.strings.generated.resources.animation_none
 import org.churchpresenter.strings.generated.resources.animation_slide_left
 import org.churchpresenter.strings.generated.resources.animation_slide_right
 import org.churchpresenter.strings.generated.resources.animation_type
-import org.churchpresenter.strings.generated.resources.auto_scroll_interval
 import org.churchpresenter.icons.generated.resources.ic_pause
 import org.churchpresenter.icons.generated.resources.ic_play
 import org.churchpresenter.icons.generated.resources.ic_skip_next
@@ -75,10 +55,6 @@ import org.churchpresenter.strings.generated.resources.next_image
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.play
 import org.churchpresenter.strings.generated.resources.previous_image
-import org.churchpresenter.strings.generated.resources.transition_duration
-import org.churchpresenter.strings.generated.resources.unit_s
-import org.churchpresenter.strings.generated.resources.unit_ms
-import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.OutputScaleMode
@@ -87,10 +63,25 @@ import org.churchpresenter.sharedui.utils.icon
 import org.churchpresenter.sharedui.utils.label
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.sunken
-import androidx.compose.material3.IconButtonColors
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.button.CircularButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.field.Dropdown
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.model.MenuEntry
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.CircularButtonGroup
+import org.churchpresenter.hosanna.composables.field.NumberField
+import org.churchpresenter.hosanna.composables.model.NumberRange
+import org.churchpresenter.hosanna.composables.model.NumberFieldActions
+import org.churchpresenter.strings.generated.resources.number_increase
+import org.churchpresenter.strings.generated.resources.number_decrease
+import org.churchpresenter.strings.generated.resources.number_out_of_range
+import org.churchpresenter.strings.generated.resources.pictures_interval_label
+import org.churchpresenter.strings.generated.resources.pictures_transition_label
+import androidx.compose.foundation.layout.IntrinsicSize
 
 /** Transport, the counter, loop, scale, and the interval, transition and animation settings. */
 @Composable
@@ -102,24 +93,16 @@ internal fun PicturesTabScope.PicturesControlsBar(viewModel: PicturesViewModel) 
             .heightIn(min = 52.dp)
             .padding(horizontal = 16.dp, vertical = 5.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        val neutralKeyColors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        )
-        val accentKeyColors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-        )
-        PicturesTransport(viewModel, neutralKeyColors)
+        PicturesTransport(viewModel)
 
         PicturesImageCounter(viewModel)
 
-        PicturesLoopButton(viewModel, accentKeyColors, neutralKeyColors)
+        PicturesLoopButton(viewModel)
 
-        PicturesScaleButton(accentKeyColors, neutralKeyColors)
+        PicturesScaleButton()
 
         // Divider
         Box(modifier = Modifier.width(1.dp).height(30.dp).background(MaterialTheme.colorScheme.outlineVariant))
@@ -135,79 +118,33 @@ internal fun PicturesTabScope.PicturesControlsBar(viewModel: PicturesViewModel) 
     }
 }
 
-/** Raised keys either side of the biggest one, Play. */
+/** Previous and next either side of the biggest key, Play, in one pill. */
 @Composable
-private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neutralKeyColors: IconButtonColors) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.previous_image),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            RaisedIconButton(
-                onClick = { viewModel.previousImage(onInstanceLinkSendPreviousPicture) },
+private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel) {
+    // One pill, Play in the middle, as the transport is drawn in the design.
+    CircularButtonGroup {
+        val previousStr = stringResource(Res.string.previous_image)
+        Tooltip(previousStr) {
+            CircularButton(
+                painterResource(IconRes.drawable.ic_skip_previous),
+                previousStr,
+                { viewModel.previousImage(onInstanceLinkSendPreviousPicture) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendPreviousPicture != null,
-                modifier = Modifier.size(PICTURES_TRANSPORT_KEY_SIZE),
-                colors = neutralKeyColors
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_skip_previous),
-                    contentDescription = stringResource(Res.string.previous_image),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            )
         }
         PicturesPlayKey(viewModel)
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.next_image),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            RaisedIconButton(
-                onClick = { viewModel.nextImage(onInstanceLinkSendNextPicture) },
+        val nextStr = stringResource(Res.string.next_image)
+        Tooltip(nextStr) {
+            CircularButton(
+                painterResource(IconRes.drawable.ic_skip_next),
+                nextStr,
+                { viewModel.nextImage(onInstanceLinkSendNextPicture) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendNextPicture != null,
-                modifier = Modifier.size(PICTURES_TRANSPORT_KEY_SIZE),
-                colors = neutralKeyColors
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_skip_next),
-                    contentDescription = stringResource(Res.string.next_image),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            )
         }
     }
 }
@@ -215,44 +152,17 @@ private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neu
 /** The biggest key, Play/Pause. */
 @Composable
 private fun PicturesTabScope.PicturesPlayKey(viewModel: PicturesViewModel) {
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp,
-            ) {
-                Text(
-                    stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
-    ) {
-        RaisedIconButton(
-            onClick = { viewModel.togglePlayPause() },
+    val playStr = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play)
+    Tooltip(playStr, Modifier.guideTarget(GuideTargets.PICTURES_PLAY)) {
+        CircularButton(
+            painterResource(if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
+            playStr,
+            { viewModel.togglePlayPause() },
+            size = IconButtonSize.Large,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Default,
             enabled = viewModel.images.isNotEmpty(),
-            modifier = Modifier.size(PICTURES_PLAY_KEY_SIZE).guideTarget(GuideTargets.PICTURES_PLAY),
-            shape = CircleShape,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Icon(
-                painter = painterResource(
-                    if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play,
-                ),
-                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                modifier = Modifier.size(15.dp)
-            )
-        }
+        )
     }
 }
 
@@ -283,48 +193,19 @@ private fun PicturesTabScope.PicturesImageCounter(viewModel: PicturesViewModel) 
 }
 
 @Composable
-private fun PicturesTabScope.PicturesLoopButton(
-    viewModel: PicturesViewModel,
-    accentKeyColors: IconButtonColors,
-    neutralKeyColors: IconButtonColors,
-) {
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp,
-            ) {
-                Text(
-                    stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
-    ) {
-        RaisedIconButton(
-            onClick = {
-                viewModel.isLooping = !viewModel.isLooping
-                onSettingsChange { s -> s.copy(
-                    pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping),
-                ) }
+private fun PicturesTabScope.PicturesLoopButton(viewModel: PicturesViewModel) {
+    val loopStr = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off)
+    Tooltip(loopStr) {
+        IconToggleButton(
+            painterResource(IconRes.drawable.ic_refresh),
+            loopStr,
+            viewModel.isLooping,
+            { looping ->
+                viewModel.isLooping = looping
+                onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(isLooping = looping)) }
             },
-            modifier = Modifier.size(PICTURES_LOOP_KEY_SIZE),
-            shape = CircleShape,
-            colors = if (viewModel.isLooping) accentKeyColors else neutralKeyColors
-        ) {
-            // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
-            // semantics, so without this the button has no name at all.
-            Icon(painterResource(IconRes.drawable.ic_refresh), contentDescription = stringResource(
-                if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off,
-            ), modifier = Modifier.size(16.dp))
-        }
+            hierarchy = ButtonHierarchy.Tertiary,
+        )
     }
 }
 
@@ -334,164 +215,79 @@ private fun PicturesTabScope.PicturesLoopButton(
  * which it says rather than naming one of them.
  */
 @Composable
-private fun PicturesTabScope.PicturesScaleButton(
-    accentKeyColors: IconButtonColors,
-    neutralKeyColors: IconButtonColors,
-) {
+private fun PicturesTabScope.PicturesScaleButton() {
     val shared = appSettings?.let { s ->
         sharedScaleMode(s.projectionSettings.outputProfiles) { it.pictureScaleMode }
     }
     val scaleMode = shared ?: OutputScaleMode.FIT
-    val scaled = shared != OutputScaleMode.FIT
     val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.PICTURES)
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                Text(
-                    scaleLabel,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
-    ) {
-        RaisedIconButton(
-            onClick = {
+    Tooltip(scaleLabel) {
+        IconToggleButton(
+            rememberVectorPainter(scaleMode.icon),
+            scaleLabel,
+            shared != OutputScaleMode.FIT,
+            {
                 val next = if (shared == null) scaleMode else scaleMode.next()
                 onSettingsChange { s -> s.withPictureScaleEverywhere(next) }
             },
-            modifier = Modifier.size(PICTURES_LOOP_KEY_SIZE),
-            colors = if (scaled) accentKeyColors else neutralKeyColors
-        ) {
-            Icon(
-                scaleMode.icon,
-                contentDescription = scaleLabel,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+            hierarchy = ButtonHierarchy.Tertiary,
+        )
     }
 }
 
-/** The auto-scroll interval box and the dialog that edits it. */
+/** Seconds between pictures while the slideshow plays, typed or stepped. */
 @Composable
 private fun PicturesTabScope.PicturesIntervalSetting(viewModel: PicturesViewModel, appSettings: AppSettings) {
-    var editingInterval by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .height(42.dp)
-            .width(PICTURES_SETTING_BOX_WIDTH)
-            .sunken(AppShape(8.dp), elevationPalette())
-            .clickable { editingInterval = true }
-            .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(Res.string.auto_scroll_interval).removeSuffix(":").uppercase(),
-            fontSize = 10.sp,
-            lineHeight = 11.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.height(1.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "${appSettings.pictureSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 13.sp,
-                    lineHeight = 14.sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
-        }
-    }
-
-    if (editingInterval) {
-        AutoScrollIntervalDialog(
-            initial = appSettings.pictureSettings.autoScrollInterval.toInt(),
-            maxSeconds = PICTURES_MAX_AUTO_SCROLL_SECONDS,
-            onConfirm = { v ->
-                viewModel.autoScrollInterval = v.toFloat()
-                onSettingsChange { s ->
-                    s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = v.toFloat()))
-                }
-                editingInterval = false
-            },
-            onDismiss = { editingInterval = false },
-        )
+    PicturesWholeNumberField(
+        label = stringResource(Res.string.pictures_interval_label),
+        value = appSettings.pictureSettings.autoScrollInterval.toInt(),
+        range = 1..PICTURES_MAX_AUTO_SCROLL_SECONDS,
+        step = 1,
+    ) { v ->
+        viewModel.autoScrollInterval = v.toFloat()
+        onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = v.toFloat())) }
     }
 }
 
-/** The transition duration box and the dialog that edits it. */
+/** How long one picture takes to give way to the next, typed or stepped. */
 @Composable
 private fun PicturesTabScope.PicturesTransitionSetting(viewModel: PicturesViewModel, appSettings: AppSettings) {
-    var editingTransition by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .height(42.dp)
-            .width(PICTURES_SETTING_BOX_WIDTH)
-            .sunken(AppShape(8.dp), elevationPalette())
-            .clickable { editingTransition = true }
-            .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(Res.string.transition_duration).removeSuffix(":").uppercase(),
-            fontSize = 10.sp,
-            lineHeight = 11.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.height(1.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "${appSettings.pictureSettings.transitionDuration.toInt()} " +
-                    stringResource(Res.string.unit_ms),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 13.sp,
-                    lineHeight = 14.sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
-        }
-    }
-
-    if (editingTransition) {
-        TransitionDurationDialog(
-            initial = appSettings.pictureSettings.transitionDuration.toInt(),
-            minMs = PICTURES_MIN_TRANSITION_MS,
-            maxMs = PICTURES_MAX_TRANSITION_MS,
-            onConfirm = { v ->
-                viewModel.transitionDuration = v.toFloat()
-                onSettingsChange { s ->
-                    s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = v.toFloat()))
-                }
-                editingTransition = false
-            },
-            onDismiss = { editingTransition = false },
-        )
+    PicturesWholeNumberField(
+        label = stringResource(Res.string.pictures_transition_label),
+        value = appSettings.pictureSettings.transitionDuration.toInt(),
+        range = PICTURES_MIN_TRANSITION_MS..PICTURES_MAX_TRANSITION_MS,
+        step = PICTURES_TRANSITION_STEP_MS,
+    ) { v ->
+        viewModel.transitionDuration = v.toFloat()
+        onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = v.toFloat())) }
     }
 }
+
+/** A labelled field of whole numbers within [range]; anything outside it is refused and says so. */
+@Composable
+private fun PicturesWholeNumberField(
+    label: String,
+    value: Int,
+    range: IntRange,
+    step: Int,
+    onValueChange: (Int) -> Unit,
+) {
+    NumberField(
+        value = value.toDouble(),
+        onValueChange = { onValueChange(it.toInt().coerceIn(range)) },
+        label = label,
+        range = NumberRange(range.first.toDouble(), range.last.toDouble(), step.toDouble()),
+        actions = NumberFieldActions(
+            stringResource(Res.string.number_increase),
+            stringResource(Res.string.number_decrease),
+        ),
+        // As wide as its one-line label, so a longer translation does not wrap it.
+        modifier = Modifier.width(IntrinsicSize.Max),
+        rangeError = stringResource(Res.string.number_out_of_range, range.first, range.last),
+    )
+}
+
+private const val PICTURES_TRANSITION_STEP_MS = 100
 
 @Composable
 private fun PicturesTabScope.PicturesAnimationDropdown(viewModel: PicturesViewModel, appSettings: AppSettings) {
@@ -507,11 +303,11 @@ private fun PicturesTabScope.PicturesAnimationDropdown(viewModel: PicturesViewMo
         Constants.ANIMATION_NONE -> noneText
         else -> crossfadeText
     }
-    DropdownSelector(
-        label = stringResource(Res.string.animation_type),
-        items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
-        selected = currentAnimationLabel,
-        onSelectedChange = { selected ->
+    Dropdown(
+        entries = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText)
+            .map { MenuEntry.Item(it, it) },
+        selectedKey = currentAnimationLabel,
+        onSelect = { selected ->
             viewModel.animationType = when (selected) {
                 fadeText -> AnimationType.FADE
                 slideLeftText -> AnimationType.SLIDE_LEFT
@@ -529,6 +325,8 @@ private fun PicturesTabScope.PicturesAnimationDropdown(viewModel: PicturesViewMo
                 }
                 s.copy(pictureSettings = s.pictureSettings.copy(animationType = newType))
             }
-        }
+        },
+        modifier = Modifier.widthIn(min = PICTURES_SETTING_BOX_WIDTH),
+        label = stringResource(Res.string.animation_type).removeSuffix(":"),
     )
 }

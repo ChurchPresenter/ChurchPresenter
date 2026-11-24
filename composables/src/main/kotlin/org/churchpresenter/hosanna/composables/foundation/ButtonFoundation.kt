@@ -13,7 +13,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -157,7 +156,7 @@ internal fun ButtonFrame(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val state = buttonState(enabled, loading, hovered, pressed, focused)
     val colors = ThemeColors.current.buttonColors(look.hierarchy, look.intent, state)
     val container by animateColorAsState(

@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -119,7 +118,7 @@ internal fun ChipFrame(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val colors = ThemeColors.current.chipColors(color, selected, buttonState(enabled, false, hovered, pressed, focused))
     val container by animateColorAsState(colors.container, tween(ChipDefaults.TRANSITION_MILLIS, easing = EaseOut))
     val shape = RoundedCornerShape(ChipDefaults.Radius)
@@ -157,7 +156,7 @@ internal fun ChipCircleButton(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val active = enabled && (hovered || pressed || focused)
     Box(
         modifier = Modifier

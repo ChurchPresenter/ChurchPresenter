@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +57,7 @@ import org.churchpresenter.hosanna.composables.model.SegmentedButtonSize
 import org.churchpresenter.hosanna.composables.model.SegmentedOption
 import org.churchpresenter.hosanna.hosannaElevation
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -192,7 +192,7 @@ private fun Segment(
     val metrics = SegmentedButtonDefaults.metrics(size)
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
     val colors = ThemeColors.current.segmentColors(selected, state)
     val container = remember(selected, controlEnabled) { Animatable(colors.container) }

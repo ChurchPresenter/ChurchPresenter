@@ -10,7 +10,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +58,7 @@ import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 import org.churchpresenter.hosanna.composables.foundation.ClickTargets
 import org.churchpresenter.hosanna.composables.foundation.ProvideClickTargets
 import org.churchpresenter.hosanna.composables.foundation.firstPassClick
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -77,7 +77,7 @@ internal fun TableRowItem(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val state = buttonState(true, false, hovered, pressed, focused)
     val colors = ThemeColors.current.listRowColors(selected, live = false, marker = false, state = state)
     val height = if (compact) TableDefaults.CompactRowHeight else TableDefaults.RowHeight

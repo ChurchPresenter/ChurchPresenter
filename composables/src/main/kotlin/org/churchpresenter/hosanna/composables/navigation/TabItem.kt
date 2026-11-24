@@ -3,7 +3,6 @@ package org.churchpresenter.hosanna.composables.navigation
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +53,7 @@ import org.churchpresenter.hosanna.composables.model.NavigationTab
 import org.churchpresenter.hosanna.composables.model.TabStyle
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 import org.churchpresenter.hosanna.composables.foundation.firstPassClick
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 @Composable
 internal fun TabItem(
@@ -67,7 +67,7 @@ internal fun TabItem(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val colors = ThemeColors.current.tabColors(selected, buttonState(true, false, hovered, pressed, focused))
     val reveal = remember { BringIntoViewRequester() }
     LaunchedEffect(selected) { if (selected) reveal.bringIntoView() }

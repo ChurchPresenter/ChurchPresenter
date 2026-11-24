@@ -8,7 +8,6 @@ import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -61,6 +60,7 @@ import org.churchpresenter.hosanna.composables.model.sliderKey
 import org.churchpresenter.hosanna.composables.model.sliderValueAt
 import org.churchpresenter.hosanna.tabular
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 /**
  * A slider with two thumbs that pick a start and an end. The thumbs cannot cross, and each has its own keys.
@@ -182,7 +182,7 @@ fun RangeSlider(
 private fun thumbState(source: MutableInteractionSource, enabled: Boolean): ButtonState {
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
-    val focused by source.collectIsFocusedAsState()
+    val focused by source.collectIsFocusVisibleAsState()
     return buttonState(enabled, false, hovered, pressed, focused)
 }
 

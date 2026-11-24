@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -35,6 +34,10 @@ import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -48,6 +51,7 @@ private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
  * @param onClick called when pressed, to open or close the panel.
  * @param modifier applied to the outermost layout.
  * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
+ * @param label an optional caption above the text, as a labelled [Dropdown] has.
  * @param leading an optional preview before the text, such as a swatch of what is picked.
  * @param enabled whether it can be pressed.
  */
@@ -58,11 +62,12 @@ fun DropdownButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    label: String? = null,
     leading: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val state = if (expanded) FieldState.Focused else fieldState(enabled, false, hovered, focused)
     val colors = ThemeColors.current.fieldColors(state, error = false)
     val spec = tween<Color>(FieldDefaults.TRANSITION_MILLIS, easing = EaseOut)
@@ -75,15 +80,37 @@ fun DropdownButton(
             .then(colors.ring?.let { Modifier.focusRing(it, HosannaRadius.M) } ?: Modifier)
             .background(container, shape)
             .border(FieldDefaults.Border, border, shape)
-            .height(FieldDefaults.CompactHeight)
+            .height(if (label != null) FieldDefaults.LabeledHeight else FieldDefaults.CompactHeight)
             .firstPassClick(enabled, onClick)
             .clickable(interactionSource, null, enabled, role = Role.DropdownList, onClick = onClick)
             .padding(horizontal = FieldDefaults.HorizontalPadding),
-        horizontalArrangement = Arrangement.spacedBy(FieldDefaults.IconGap),
+        // Between, so a field given a width keeps its chevron at the end.
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        leading?.invoke()
-        BasicText(text, style = HosannaTheme.typography.body.copy(color = colors.value), maxLines = 1)
-        FieldGlyph(painterResource(Res.drawable.ic_arrow_down), colors.icon, FieldDefaults.Icon, Modifier.rotate(turn))
+        Row(
+            Modifier.weight(1f, fill = false),
+            horizontalArrangement = Arrangement.spacedBy(FieldDefaults.IconGap),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            leading?.invoke()
+            Column(verticalArrangement = Arrangement.Center) {
+                if (label != null) {
+                    BasicText(
+                        label.asOverline(),
+                        style = HosannaTheme.typography.overline.copy(color = colors.label),
+                        maxLines = 1,
+                    )
+                    Spacer(Modifier.height(FieldDefaults.LabelGap))
+                }
+                BasicText(text, style = HosannaTheme.typography.body.copy(color = colors.value), maxLines = 1)
+            }
+        }
+        FieldGlyph(
+            painterResource(Res.drawable.ic_arrow_down),
+            colors.icon,
+            FieldDefaults.Icon,
+            Modifier.padding(start = FieldDefaults.IconGap).rotate(turn),
+        )
     }
 }

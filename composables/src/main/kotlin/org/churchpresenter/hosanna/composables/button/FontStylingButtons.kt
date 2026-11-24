@@ -3,7 +3,6 @@ package org.churchpresenter.hosanna.composables.button
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +51,7 @@ import org.churchpresenter.icons.generated.resources.ic_format_underline
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 internal fun TextStyleToggle.icon(): DrawableResource = when (this) {
     TextStyleToggle.Bold -> Res.drawable.ic_format_bold
@@ -213,7 +213,7 @@ private fun SplitPart(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
     val ring = if (state == ButtonState.Focused) {
         Modifier.focusRing(

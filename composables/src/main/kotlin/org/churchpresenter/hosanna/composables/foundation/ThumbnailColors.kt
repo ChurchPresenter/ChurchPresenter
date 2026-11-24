@@ -40,7 +40,8 @@ internal fun ThemeColors.thumbnailColors(selected: Boolean, live: Boolean, state
         badge = screen.copy(alpha = HosannaStateAlpha.OVERLAY),
         onBadge = onScreen,
         placeholder = outlineVariant,
-        shine = surfaceContainerHigh,
+        // A wash of the ink over the placeholder, so the sweep shows in both themes.
+        shine = onSurface.copy(alpha = HosannaStateAlpha.DRAGGED),
         placeholderInk = onSurfaceVariant,
         letterbox = screen,
         caption = if (selected && !live) primary else onSurface,

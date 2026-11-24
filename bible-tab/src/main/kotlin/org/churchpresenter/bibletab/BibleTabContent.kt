@@ -42,7 +42,6 @@ import org.churchpresenter.strings.generated.resources.exact_match
 import org.churchpresenter.strings.generated.resources.bible_no_results_bible
 import org.churchpresenter.strings.generated.resources.bible_no_results_book
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
-import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.swapBibleTranslations
@@ -310,9 +309,8 @@ private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabSco
         val crossRefCountStr = stringResource(Res.string.bible_cross_references_count)
         val crossRefPopoverTitleStr = stringResource(Res.string.bible_cross_references_popover_title)
 
-        // No top gap of its own: the search card above already ends in an 8dp margin, which
-        // matches the banner's 8dp below.
-        FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost), topPadding = 0.dp)
+        // No top gap of its own: the search card above already ends in an 8dp margin.
+        FocusLostButton(focusRescue, stringResource(Res.string.tab_focus_lost))
         // The other way the step keys stand down: the caret is in the search box, browsing.
         if (searchFieldFocused) {
             BibleSearchHint(somethingLive = currentIsPresenting, onClick = { switchSearchLive(viewModel) })
@@ -488,6 +486,26 @@ private fun BibleSearchHint(somethingLive: Boolean, onClick: () -> Unit) {
         Modifier
             .fillMaxWidth()
             // The same 4dp inset as the cards above and below, so its edges line up with theirs.
+            .padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
+            .focusProperties { canFocus = false },
+        hierarchy = ButtonHierarchy.Secondary,
+        intent = ButtonIntent.Warning,
+    )
+}
+
+/**
+ * Says the keyboard has lost the tab and takes it back when clicked: the Bible tab's hint button,
+ * full width at the cards' 4dp inset. Never focusable -- taking focus would hide it, which would
+ * drop that focus and show it again.
+ */
+@Composable
+private fun FocusLostButton(state: FocusLostRescueState, text: String) {
+    if (!state.bannerVisible) return
+    StandardButton(
+        text,
+        { state.rescue() },
+        Modifier
+            .fillMaxWidth()
             .padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
             .focusProperties { canFocus = false },
         hierarchy = ButtonHierarchy.Secondary,

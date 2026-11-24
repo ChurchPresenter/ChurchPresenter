@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -46,6 +45,9 @@ import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 import org.churchpresenter.hosanna.composables.foundation.ClickTargets
 import org.churchpresenter.hosanna.composables.foundation.ProvideClickTargets
 import org.churchpresenter.hosanna.composables.foundation.firstPassClick
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.aspectRatio
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 private fun ThumbnailStatus.showsImage() = this == ThumbnailStatus.Ready || this == ThumbnailStatus.Offline
 
@@ -56,9 +58,10 @@ private fun ThumbnailStatus.showsImage() = this == ThumbnailStatus.Ready || this
  * @param image the picture, fitted inside without cropping; null while loading or missing.
  * @param onClick called when it is clicked, to select it.
  * @param labels the tile's texts.
- * @param modifier applied to the outermost layout.
+ * @param modifier applied to the outermost layout; a width given here (such as a grid cell's) is filled,
+ * at the tile's 16:9 shape.
  * @param interactionSource drives the hover, pressed and focus looks; pass one to watch or freeze them.
- * @param size the tile's size.
+ * @param size the tile's size: its width when [modifier] gives none, its corner radius and badges.
  * @param caption optional text under the tile, also its screen-reader name.
  * @param subtitle an optional second caption line.
  * @param selected marks it as picked for preview.
@@ -68,7 +71,7 @@ private fun ThumbnailStatus.showsImage() = this == ThumbnailStatus.Ready || this
  * @param progress an optional playback bar from 0 to 1.
  * @param status whether the picture is ready, loading, missing or of an offline screen.
  * @param hidden fades it and skips it when presenting; it cannot go live.
- * @param onGoLive turns on going live.
+ * @param onGoLive turns on going live; not offered while [live].
  * @param onHiddenChange turns on the hide button and is called with the new state.
  * @param onLocate turns on the Locate button on a missing file.
  */
@@ -96,12 +99,13 @@ fun Thumbnail(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val state = buttonState(true, false, hovered, pressed, focused)
     val colors = ThemeColors.current.thumbnailColors(selected, live, state)
     val metrics = ThumbnailDefaults.metrics(size)
     val shape = RoundedCornerShape(metrics.radius)
-    val goLive = onGoLive?.takeIf { canGoLive(status, hidden) }
+    // Nothing to put live on the item already on screen.
+    val goLive = onGoLive?.takeIf { canGoLive(status, hidden) && !live }
     val currentGoLive by rememberUpdatedState(goLive)
     val active = state == ButtonState.Hovered || state == ButtonState.Pressed || state == ButtonState.Focused
     val look = ThumbnailLook(size, status, hidden, colors, active && showsHoverActions(size, status), active)
@@ -109,7 +113,9 @@ fun Thumbnail(
     Column(modifier.width(metrics.width)) {
         Box(
             Modifier
-                .size(metrics.width, metrics.height)
+                // The size's width unless the caller gives one; the picture keeps the tile's shape.
+                .fillMaxWidth()
+                .aspectRatio(metrics.width / metrics.height)
                 .then(colors.ring?.let { Modifier.focusRing(it, metrics.radius) } ?: Modifier)
                 .onPreviewKeyEvent { event ->
                     val shiftEnter = event.key == Key.Enter && event.isShiftPressed &&

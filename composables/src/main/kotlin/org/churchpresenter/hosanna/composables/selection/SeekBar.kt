@@ -8,7 +8,6 @@ import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +60,7 @@ import org.churchpresenter.hosanna.composables.model.seekTimeAt
 import org.churchpresenter.hosanna.composables.model.sliderKey
 import org.churchpresenter.hosanna.tabular
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.collectIsFocusVisibleAsState
 
 /**
  * A media seek bar with the elapsed and total time either side. Hovering shows the time under the pointer.
@@ -91,7 +91,7 @@ fun SeekBar(
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val focused by interactionSource.collectIsFocusedAsState()
+    val focused by interactionSource.collectIsFocusVisibleAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
     val colors = ThemeColors.current.sliderColors(state)
     val timeStyle = HosannaTheme.typography.captionStrong.tabular().copy(color = colors.value)

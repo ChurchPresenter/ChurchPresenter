@@ -3,28 +3,19 @@ package org.churchpresenter.slides.tabs
 import org.churchpresenter.sharedui.composables.ContextMenuDivider
 import org.churchpresenter.sharedui.composables.SetAsBackgroundItems
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
-import org.churchpresenter.sharedui.composables.HIDDEN_TILE_ALPHA
-import org.churchpresenter.sharedui.composables.HiddenBadge
-import org.churchpresenter.sharedui.composables.finalPassCombinedClickable
-import org.churchpresenter.sharedui.composables.SlideshowHideToggle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,7 +27,6 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.lazy.grid.items
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,11 +41,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.zIndex
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.loading
 import org.churchpresenter.strings.generated.resources.picture_thumbnail_unreadable
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -80,9 +67,21 @@ import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.go_live
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import org.churchpresenter.sharedui.composables.bibleListCard
-import org.churchpresenter.sharedui.composables.hoverLift
+import org.churchpresenter.hosanna.composables.media.Thumbnail
+import org.churchpresenter.hosanna.composables.model.ThumbnailLabels
+import org.churchpresenter.hosanna.composables.model.ThumbnailFileLabels
+import org.churchpresenter.hosanna.composables.model.ThumbnailSize
+import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import org.churchpresenter.strings.generated.resources.hide_from_slideshow
+import org.churchpresenter.strings.generated.resources.show_in_slideshow
+import org.churchpresenter.strings.generated.resources.slideshow_hidden
+import org.churchpresenter.strings.generated.resources.thumbnail_live
+import org.churchpresenter.strings.generated.resources.thumbnail_locate
+import org.churchpresenter.strings.generated.resources.thumbnail_offline
+import androidx.compose.foundation.layout.fillMaxWidth
+import org.churchpresenter.sharedui.models.Presenting
 
 /** The thumbnail grid, its drag-to-reorder ghost, and the scroll to the selected picture. */
 @Composable
@@ -103,7 +102,7 @@ internal fun PicturesTabScope.PicturesGrid(viewModel: PicturesViewModel) {
             .bibleListCard()
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(200.dp),
+            columns = GridCells.Fixed(PICTURES_PER_ROW),
             state = gridState,
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -111,7 +110,8 @@ internal fun PicturesTabScope.PicturesGrid(viewModel: PicturesViewModel) {
             contentPadding = PaddingValues(vertical = 18.dp)
         ) {
             items(shownImages, key = { it.absolutePath }) { imageFile ->
-                PictureThumbnail(viewModel, shownImages, imageFile, drag, Modifier.animateItem())
+                val cell = Modifier.animateItem().fillMaxWidth()
+                PictureThumbnail(viewModel, shownImages, imageFile, drag, cell)
             }
         }
 
@@ -146,49 +146,53 @@ private fun PicturesTabScope.PictureThumbnail(
         val isDraggingThis = draggingFile == imageFile
         val isDropTarget = isDragActive && dropTargetIndex == index && !isDraggingThis
 
-        val borderColor = when {
-            isDropTarget -> MaterialTheme.colorScheme.tertiary
-            isSelected -> MaterialTheme.colorScheme.secondary
-            else -> MaterialTheme.colorScheme.outlineVariant
-        }
-
         val menuOpen = remember { mutableStateOf(false) }
         var menuAt by remember { mutableStateOf(IntOffset.Zero) }
+        val thumbnail = viewModel.thumbnails[imageFile]
+        val painter = remember(thumbnail) { thumbnail?.let { BitmapPainter(it) } }
         Box {
-        Column(
+        Thumbnail(
+            image = painter,
+            onClick = { if (!isDragActive) viewModel.selectImage(viewModel.images.indexOf(imageFile)) },
+            labels = pictureThumbnailLabels(),
             modifier = modifier
                 .alpha(if (isDraggingThis) PICTURES_DRAGGED_ITEM_ALPHA else 1f)
-                .hoverLift(AppShape(8.dp))
-                .border(2.dp, borderColor, AppShape(8.dp))
-                .clip(AppShape(8.dp))
+                .then(if (isDropTarget) Modifier.dropTargetMark() else Modifier)
                 .then(reorderDrag(viewModel, imageFile, drag))
                 // A plain drag carries the picture out as a file, which the schedule takes as one
-                // row; Shift+drag is still the reorder above, which takes the press first.
-                .dragAndDropSource { _ -> if (isDragActive) null else fileDragData(listOf(imageFile)) }
+                // row; Shift+drag is still the reorder above, which takes the press first. The drag
+                // image is the thumbnail itself: the default one records the tile into a picture that
+                // is what gets drawn, and the tile's own layers then change without it being redrawn
+                // -- a tile stayed on its placeholder after loading, and hover never showed.
+                .dragAndDropSource(
+                    drawDragDecoration = { painter?.run { draw(size) } },
+                ) { _ -> if (isDragActive) null else fileDragData(listOf(imageFile)) }
                 .onSecondaryPress { pos ->
                     menuAt = IntOffset(pos.x.roundToInt(), pos.y.roundToInt())
                     menuOpen.value = true
-                }
-                // Final pass, so the hide eye in the nameplate gets its own click
-                // first: taken in the initial pass, a click on the eye selected the
-                // picture instead, and put it on screen when live.
-                .finalPassCombinedClickable(
-                    onClick = {
-                        if (!isDragActive) viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                    },
-                    onDoubleClick = {
-                        if (!isDragActive) {
-                            viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                            if (presenterManager != null) {
-                                viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive)
-                            }
-                        }
+                },
+            size = ThumbnailSize.Large,
+            caption = imageFile.nameWithoutExtension,
+            selected = isSelected,
+            // The tab shows the selected picture while it is live.
+            live = isSelected && presenterManager?.isLive(Presenting.PICTURES) == true,
+            number = (index + 1).toString(),
+            status = when {
+                thumbnail != null -> ThumbnailStatus.Ready
+                imageFile in viewModel.thumbnailFailures -> ThumbnailStatus.Missing
+                else -> ThumbnailStatus.Loading
+            },
+            hidden = isHidden,
+            onGoLive = presenterManager?.let { manager ->
+                {
+                    if (!isDragActive) {
+                        viewModel.selectImage(viewModel.images.indexOf(imageFile))
+                        viewModel.goLive(manager, onInstanceLinkSendProject, wentLive)
                     }
-                )
-        ) {
-            PictureTileImage(viewModel, imageFile, isHidden)
-            PictureNameplate(viewModel, imageFile, index, isSelected, isHidden)
-        }
+                }
+            },
+            onHiddenChange = { viewModel.toggleHidden(imageFile) },
+        )
         // A menu opens below what it is anchored to, so it is anchored to the point that was
         // pressed: anchored to the whole tile, it opened a tile's height below the cursor.
         Box(Modifier.offset { menuAt }.size(0.dp)) {
@@ -350,77 +354,27 @@ private suspend fun AwaitPointerEventScope.followReorderDrag(
     }
 }
 
+/** The texts of a picture's tile; a picture that would not decode says so where the image would be. */
 @Composable
-private fun PicturesTabScope.PictureTileImage(viewModel: PicturesViewModel, imageFile: File, isHidden: Boolean) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(148.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentAlignment = Alignment.Center
-    ) {
-        val thumbnail = viewModel.thumbnails[imageFile]
-        when {
-            thumbnail != null -> Image(
-                bitmap = thumbnail,
-                contentDescription = imageFile.name,
-                modifier = Modifier.fillMaxSize()
-                    .alpha(if (isHidden) HIDDEN_TILE_ALPHA else 1f),
-                contentScale = ContentScale.Crop
-            )
-            // A decode that failed used to leave "Loading..." on the tile for
-            // the rest of the session, so a corrupt file looked like a slow
-            // one for ever. Say so instead.
-            imageFile in viewModel.thumbnailFailures -> Text(
-                text = stringResource(Res.string.picture_thumbnail_unreadable),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
-            )
-            else -> Text(
-                text = stringResource(Res.string.loading),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        if (isHidden) HiddenBadge(Modifier.align(Alignment.TopStart).padding(6.dp))
-    }
-}
+private fun pictureThumbnailLabels() = ThumbnailLabels(
+    goLive = stringResource(Res.string.go_live),
+    hide = stringResource(Res.string.hide_from_slideshow),
+    showAgain = stringResource(Res.string.show_in_slideshow),
+    hiddenNote = stringResource(Res.string.slideshow_hidden),
+    live = stringResource(Res.string.thumbnail_live),
+    file = ThumbnailFileLabels(
+        missing = stringResource(Res.string.picture_thumbnail_unreadable),
+        locate = stringResource(Res.string.thumbnail_locate),
+        offline = stringResource(Res.string.thumbnail_offline),
+    ),
+)
 
+/** Where a Shift-dragged picture will land: a ring in the drop color around the tile. */
 @Composable
-private fun PicturesTabScope.PictureNameplate(
-    viewModel: PicturesViewModel,
-    imageFile: File,
-    index: Int,
-    isSelected: Boolean,
-    isHidden: Boolean,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(start = 10.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = imageFile.nameWithoutExtension,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = TextUnit(PICTURES_SMALL_LABEL_FONT_SP, TextUnitType.Sp),
-                fontWeight = if (isSelected) FontWeight.SemiBold
-                             else FontWeight.Medium
-            ),
-            color = if (isSelected) MaterialTheme.colorScheme.onSurface
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        SlideshowHideToggle(
-            hidden = isHidden,
-            position = index,
-            onToggle = { viewModel.toggleHidden(imageFile) },
-        )
-    }
-}
+private fun Modifier.dropTargetMark(): Modifier =
+    border(2.dp, MaterialTheme.colorScheme.tertiary, AppShape(8.dp))
+
+private const val PICTURES_PER_ROW = 4
 
 /** The floating preview that follows the cursor, drawn above the grid. */
 @Composable

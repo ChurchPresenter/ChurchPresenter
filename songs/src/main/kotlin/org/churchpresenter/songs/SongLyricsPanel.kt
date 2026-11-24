@@ -60,7 +60,6 @@ import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.sharedui.utils.labelOrUnbound
 import org.churchpresenter.sharedui.utils.sectionLabelOf
-import org.churchpresenter.sharedui.composables.FocusLostBanner
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -189,7 +188,7 @@ internal fun RowScope.SongLyricsPanel(
             onRenameLanguage = onRenameLanguage,
             onShowLanguageInPanel = onShowLanguageInPanel,
         )
-        FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
+        FocusLostButton(focusRescue, stringResource(Res.string.tab_focus_lost))
 
         // "Back to Live" button — shown when browsing a different song than what's live.
         // Compares songId, not index/position, so this stays correct even when the live
@@ -206,7 +205,7 @@ internal fun RowScope.SongLyricsPanel(
             StandardButton(
                 backToLiveStr,
                 onBackToLiveSong,
-                Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, bottom = 8.dp),
                 intent = ButtonIntent.Critical,
             )
         }
@@ -426,7 +425,7 @@ private fun KeyboardHintButton(text: String, onClick: () -> Unit) {
         onClick,
         Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            .padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
             .focusProperties { canFocus = false },
         hierarchy = ButtonHierarchy.Secondary,
         intent = ButtonIntent.Warning,
@@ -769,3 +768,23 @@ private fun LyricSectionEntry(
 }
 
 private val LyricSectionShape = AppShape(11.dp)
+
+/**
+ * Says the keyboard has lost the tab and takes it back when clicked: the Bible tab's hint button,
+ * full width at the cards' 4dp inset. Never focusable -- taking focus would hide it, which would
+ * drop that focus and show it again.
+ */
+@Composable
+private fun FocusLostButton(state: FocusLostRescueState, text: String) {
+    if (!state.bannerVisible) return
+    StandardButton(
+        text,
+        { state.rescue() },
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
+            .focusProperties { canFocus = false },
+        hierarchy = ButtonHierarchy.Secondary,
+        intent = ButtonIntent.Warning,
+    )
+}

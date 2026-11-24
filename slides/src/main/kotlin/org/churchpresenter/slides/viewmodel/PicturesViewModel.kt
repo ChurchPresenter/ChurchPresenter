@@ -20,6 +20,10 @@ import java.io.File
 import java.util.UUID
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 /**
  * The Pictures tab's state and what the operator does with it.
@@ -161,11 +165,15 @@ class PicturesViewModel private constructor(
             imageFiles.forEach { state.addUniqueLocked(it) }
         }
 
-        // Load thumbnails in background
+        // Load thumbnails in background, a few at once: one at a time left a large folder's later
+        // tiles waiting long after the first rows had filled in. Started in folder order, so the
+        // top of the grid still fills first.
         scope.launch {
-            parts.thumbnails.reportThumbnailFailures(
-                imageFiles.mapNotNull { file -> parts.thumbnails.decodeThumbnail(file) }
-            )
+            val decoders = Semaphore(THUMBNAIL_DECODERS)
+            val failures = imageFiles.map { file ->
+                async { decoders.withPermit { parts.thumbnails.decodeThumbnail(file) } }
+            }.awaitAll()
+            parts.thumbnails.reportThumbnailFailures(failures.filterNotNull())
         }
     }
 
@@ -289,3 +297,6 @@ internal class PicturesParts(
     val live = PicturesLive(state)
     val watcher = PictureFolderWatcher(state, thumbnails, mainDispatcher, scope)
 }
+
+/** How many thumbnails decode at once. */
+private const val THUMBNAIL_DECODERS = 4
