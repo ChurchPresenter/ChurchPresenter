@@ -1,0 +1,173 @@
+package org.churchpresenter.hosanna
+
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Color
+
+val HosannaLightColorScheme: ColorScheme = lightColorScheme(
+    primary = Color(0xFF2F6FD0),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFE4EDFB),
+    onPrimaryContainer = Color(0xFF1F5BB0),
+    secondary = Color(0xFF3A3F47),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFEEF0F3),
+    onSecondaryContainer = Color(0xFF1B1F24),
+    tertiary = Color(0xFF8A5A10),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFFBEBD0),
+    onTertiaryContainer = Color(0xFF8A5A10),
+    error = Color(0xFFC43030),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFDEAEA),
+    onErrorContainer = Color(0xFFC43030),
+    background = Color(0xFFECEEF2),
+    onBackground = Color(0xFF1B1F24),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF1B1F24),
+    surfaceVariant = Color(0xFFF3F5F8),
+    onSurfaceVariant = Color(0xFF5A616B),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF6F7F9),
+    surfaceContainer = Color(0xFFFFFFFF),
+    surfaceContainerHigh = Color(0xFFFFFFFF),
+    surfaceContainerHighest = Color(0xFFF3F5F8),
+    surfaceDim = Color(0xFFECEEF2),
+    surfaceBright = Color(0xFFFFFFFF),
+    surfaceTint = Color(0xFFFFFFFF),
+    outline = Color(0xFFCFD4DB),
+    outlineVariant = Color(0xFFE2E5EA),
+    inverseSurface = Color(0xFF1B1F24),
+    inverseOnSurface = Color(0xFFFFFFFF),
+    inversePrimary = Color(0xFF9CC6F7),
+    scrim = Color(0xFF000000),
+)
+
+val HosannaDarkColorScheme: ColorScheme = darkColorScheme(
+    primary = Color(0xFF9CC6F7),
+    onPrimary = Color(0xFF0F2F52),
+    primaryContainer = Color(0xFF38404E),
+    onPrimaryContainer = Color(0xFFA9CBFF),
+    secondary = Color(0xFFE4E6EA),
+    onSecondary = Color(0xFF1B1F24),
+    secondaryContainer = Color(0xFF3A3A3D),
+    onSecondaryContainer = Color(0xFFECECEF),
+    tertiary = Color(0xFFF0C27A),
+    onTertiary = Color(0xFF3A2604),
+    tertiaryContainer = Color(0xFF4D4131),
+    onTertiaryContainer = Color(0xFFF0C27A),
+    error = Color(0xFFFF8B8B),
+    onError = Color(0xFF3B0A0A),
+    errorContainer = Color(0xFF493437),
+    onErrorContainer = Color(0xFFFF8B8B),
+    background = Color(0xFF1C1C1F),
+    onBackground = Color(0xFFECECEF),
+    surface = Color(0xFF2B2B2E),
+    onSurface = Color(0xFFECECEF),
+    surfaceVariant = Color(0xFF18181B),
+    onSurfaceVariant = Color(0xFFA4A7AE),
+    surfaceContainerLowest = Color(0xFF141416),
+    surfaceContainerLow = Color(0xFF262629),
+    surfaceContainer = Color(0xFF323236),
+    surfaceContainerHigh = Color(0xFF38383D),
+    surfaceContainerHighest = Color(0xFF18181B),
+    surfaceDim = Color(0xFF1C1C1F),
+    surfaceBright = Color(0xFF38383D),
+    surfaceTint = Color(0xFF2B2B2E),
+    outline = Color(0xFF3E3E45),
+    outlineVariant = Color(0xFF3A3A40),
+    inverseSurface = Color(0xFFECECEF),
+    inverseOnSurface = Color(0xFF1B1F24),
+    inversePrimary = Color(0xFF2F6FD0),
+    scrim = Color(0xFF000000),
+)
+
+@Immutable
+data class HosannaColors(
+    val success: Color,
+    val onSuccess: Color,
+    val successContainer: Color,
+    val onSuccessContainer: Color,
+    val live: Color,
+    val onLive: Color,
+    val star: Color,
+    val onSurfaceFaint: Color,
+    val link: Color,
+    val song: Color,
+    val bible: Color,
+    val presentation: Color,
+    val pictures: Color,
+    val media: Color,
+    val lowerThird: Color,
+    val announcement: Color,
+    val verse: Color,
+    val chorus: Color,
+    val bridge: Color,
+    val intro: Color,
+    val voice: Color,
+    val otherSection: Color,
+)
+
+val HosannaLightColors = HosannaColors(
+    success = Color(0xFF0E7546),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFE0F4EA),
+    onSuccessContainer = Color(0xFF0E7546),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    star = Color(0xFFE0A526),
+    onSurfaceFaint = Color(0xFF878E97),
+    link = Color(0xFF2F6FD0),
+    song = Color(0xFF2F6FD0),
+    bible = Color(0xFF14855A),
+    presentation = Color(0xFFC2416A),
+    pictures = Color(0xFFC8501E),
+    media = Color(0xFF5B4FC7),
+    lowerThird = Color(0xFF0F7F86),
+    announcement = Color(0xFFA43A9C),
+    verse = Color(0xFF9A6512),
+    chorus = Color(0xFF8340B5),
+    bridge = Color(0xFF1C7F5A),
+    intro = Color(0xFF4F6B8A),
+    voice = Color(0xFF0F7F86),
+    otherSection = Color(0xFF6B7079),
+)
+
+val HosannaDarkColors = HosannaColors(
+    success = Color(0xFF6FDCAE),
+    onSuccess = Color(0xFF0B3324),
+    successContainer = Color(0xFF32433E),
+    onSuccessContainer = Color(0xFF6FDCAE),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    star = Color(0xFFE0A526),
+    onSurfaceFaint = Color(0xFF7C7F87),
+    link = Color(0xFF8EBBF8),
+    song = Color(0xFF7AB0F8),
+    bible = Color(0xFF5FD3A0),
+    presentation = Color(0xFFF08AA8),
+    pictures = Color(0xFFF4A072),
+    media = Color(0xFFA99CF7),
+    lowerThird = Color(0xFF5CCFD4),
+    announcement = Color(0xFFE597DE),
+    verse = Color(0xFFE8B45A),
+    chorus = Color(0xFFC79CF0),
+    bridge = Color(0xFF6FD6A8),
+    intro = Color(0xFF9DB6D3),
+    voice = Color(0xFF5CCFD4),
+    otherSection = Color(0xFFA4A7AE),
+)
+
+object HosannaStateAlpha {
+    const val HOVER = 0.08f
+    const val FOCUS = 0.10f
+    const val PRESSED = 0.10f
+    const val DRAGGED = 0.16f
+    const val DISABLED_CONTENT = 0.38f
+    const val DISABLED_CONTAINER = 0.12f
+    const val FOCUS_RING = 0.22f
+    const val SCRIM = 0.32f
+    const val CONTENT_TYPE_CONTAINER = 0.15f
+}
