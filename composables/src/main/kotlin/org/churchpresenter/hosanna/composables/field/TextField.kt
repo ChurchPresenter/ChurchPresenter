@@ -204,12 +204,18 @@ private fun Supporting(value: String, helper: String?, error: String?, maxLength
 }
 
 @Composable
-private fun ClearButton(contentDescription: String, tint: Color, modifier: Modifier, onClear: () -> Unit) {
+internal fun ClearButton(
+    contentDescription: String,
+    tint: Color,
+    modifier: Modifier,
+    side: Dp = FieldDefaults.ClearCircle,
+    onClear: () -> Unit,
+) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     Box(
         modifier = modifier
-            .size(FieldDefaults.ClearCircle)
+            .size(side)
             .background(
                 if (hovered) tint.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
                 HosannaTheme.shapes.full,
@@ -223,6 +229,6 @@ private fun ClearButton(contentDescription: String, tint: Color, modifier: Modif
 }
 
 @Composable
-private fun FieldGlyph(icon: Painter, tint: Color, size: Dp) {
+internal fun FieldGlyph(icon: Painter, tint: Color, size: Dp) {
     Image(icon, null, Modifier.size(size), colorFilter = ColorFilter.tint(tint))
 }

@@ -47,6 +47,14 @@ internal object FieldDefaults {
     val Dash: Dp = 4.dp
     val DashGap: Dp = 3.dp
     const val TRANSITION_MILLIS: Int = 120
+    val SearchHeight: Dp = 40.dp
+    val SearchCompactHeight: Dp = 32.dp
+    val SearchClear: Dp = 28.dp
+    val Spinner: Dp = 14.dp
+    val KeyCapHeight: Dp = 20.dp
+    val KeyCapPadding: Dp = 6.dp
+    val DetectionHeight: Dp = 22.dp
+    val DetectionPadding: Dp = 8.dp
 }
 
 internal fun fieldState(enabled: Boolean, readOnly: Boolean, hovered: Boolean, focused: Boolean): FieldState = when {
