@@ -66,7 +66,4 @@ internal object TimerSpinnerDefaults {
     val ColonPadding: Dp = 14.dp
     val PresetGap: Dp = 12.dp
     val ChipGap: Dp = 6.dp
-    const val HOLD_DELAY_MILLIS: Long = 400
-    const val REPEAT_MILLIS: Long = 80
-    const val FAST_AFTER_MILLIS: Long = 2000
 }

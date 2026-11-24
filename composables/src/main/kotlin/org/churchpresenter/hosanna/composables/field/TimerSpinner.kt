@@ -27,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -53,7 +52,6 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import kotlinx.coroutines.delay
 import org.churchpresenter.hosanna.HosannaRadius
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
@@ -187,20 +185,7 @@ private fun StepButton(
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val hovered by source.collectIsHoveredAsState()
-    val step by rememberUpdatedState(onStep)
-    var repeated by remember { mutableStateOf(false) }
-    LaunchedEffect(pressed, enabled) {
-        if (!pressed || !enabled) return@LaunchedEffect
-        repeated = false
-        delay(TimerSpinnerDefaults.HOLD_DELAY_MILLIS)
-        var held = TimerSpinnerDefaults.HOLD_DELAY_MILLIS
-        while (true) {
-            repeated = true
-            step(held >= TimerSpinnerDefaults.FAST_AFTER_MILLIS)
-            delay(TimerSpinnerDefaults.REPEAT_MILLIS)
-            held += TimerSpinnerDefaults.REPEAT_MILLIS
-        }
-    }
+    val hold = rememberHoldRepeat(source, enabled, onStep)
     val fill = when {
         enabled && pressed -> colors.onSurface.copy(alpha = HosannaStateAlpha.PRESSED)
         enabled && hovered -> colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER)
@@ -211,10 +196,7 @@ private fun StepButton(
             .fillMaxWidth()
             .height(TimerSpinnerDefaults.ButtonHeight)
             .background(fill)
-            .clickable(source, null, enabled, role = Role.Button) {
-                if (!repeated) step(false)
-                repeated = false
-            }
+            .clickable(source, null, enabled, role = Role.Button) { hold.click(onStep) }
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {

@@ -67,16 +67,16 @@ class TimerSpinnerTest {
         val value = spinner(0)
         mainClock.advanceTimeByFrame()
         plus(seconds).performMouseInput { moveTo(center); press() }
-        mainClock.advanceTimeBy(TimerSpinnerDefaults.HOLD_DELAY_MILLIS + TimerSpinnerDefaults.REPEAT_MILLIS * 2)
+        mainClock.advanceTimeBy(HoldRepeatDefaults.DELAY_MILLIS + HoldRepeatDefaults.REPEAT_MILLIS * 2)
         val held = value()
         assertTrue(held >= 2, "held for ${held}s")
-        mainClock.advanceTimeBy(TimerSpinnerDefaults.FAST_AFTER_MILLIS)
+        mainClock.advanceTimeBy(HoldRepeatDefaults.FAST_AFTER_MILLIS)
         val fast = value()
         assertTrue(fast >= held + 5 * 3, "fast steps of five: $held → $fast")
         plus(seconds).performMouseInput { release() }
         mainClock.advanceTimeByFrame()
         val released = value()
-        mainClock.advanceTimeBy(TimerSpinnerDefaults.HOLD_DELAY_MILLIS * 2)
+        mainClock.advanceTimeBy(HoldRepeatDefaults.DELAY_MILLIS * 2)
         assertEquals(released, value())
     }
 
