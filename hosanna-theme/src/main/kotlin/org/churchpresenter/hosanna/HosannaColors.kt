@@ -244,4 +244,5 @@ object HosannaStateAlpha {
     const val FOCUS_RING = 0.22f
     const val SCRIM = 0.32f
     const val CONTENT_TYPE_CONTAINER = 0.15f
+    const val CONTENT_TYPE_EDGE = 0.30f
 }

@@ -38,8 +38,12 @@ The composables built on the Hosanna theme. A real Gradle module of this build �
 - **No color, size or radius literal** that a token already names. A value the theme lacks is added
   to `:hosanna-theme` first, then used here.
 
-The build file is the guard: its main dependencies are `:hosanna-theme` and Compose runtime,
-foundation and ui. Adding `:theme` or `compose.material3` to them breaks this rule.
+- **Glyphs a composable draws itself** (a check, a ×, a star) come from `:icons`
+  (`painterResource(Res.drawable.ic_…)`), never drawn by hand or as text.
+
+The build file is the guard: its main dependencies are `:hosanna-theme`, `:icons` (drawables only)
+and Compose runtime, foundation and ui. Adding `:theme` or `compose.material3` to them breaks this
+rule.
 
 ## Layout
 

@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation(projects.hosannaTheme)
+    implementation(projects.icons)
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)

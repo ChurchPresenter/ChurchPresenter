@@ -24,6 +24,7 @@ class HosannaRulesTest {
         assertEquals(HosannaStateAlpha.FOCUS, HosannaStateAlpha.PRESSED)
         assertTrue(HosannaStateAlpha.DISABLED_CONTAINER < HosannaStateAlpha.DISABLED_CONTENT)
         assertEquals(0.32f, HosannaStateAlpha.SCRIM)
+        assertTrue(HosannaStateAlpha.CONTENT_TYPE_CONTAINER < HosannaStateAlpha.CONTENT_TYPE_EDGE)
     }
 
     @Test

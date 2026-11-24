@@ -24,7 +24,7 @@ foundation.
 | File | Owns |
 |---|---|
 | `HosannaTheme.kt` | `HosannaTheme { }` (Material 3 colors, typography and shapes, plus the locals below) and the `HosannaTheme.colors` / `.typography` / `.shapes` / `.elevation` accessors |
-| `HosannaColors.kt` | `HosannaColors` — every Material role plus success, live, star, faint, link, content types and song sections, `toMaterial(dark)` that builds the Material schemes from it, and `HosannaStateAlpha` (hover, focus, pressed, dragged, disabled, scrim) |
+| `HosannaColors.kt` | `HosannaColors` — every Material role plus success, live, star, faint, link, content types and song sections, `toMaterial(dark)` that builds the Material schemes from it, and `HosannaStateAlpha` (hover, focus, pressed, dragged, disabled, scrim, content-type container and edge) |
 | `HosannaTypography.kt` | The ten styles (Display … Overline), `toMaterial()`, `tabular()` for numbers that line up |
 | `HosannaShapes.kt` | The radius scale XS 4 · S 6 · M 8 · L 12 · XL 16 · Full as `HosannaRadius` (dp) and `HosannaShapes` (shapes), and the Material `Shapes` built from it |
 | `HosannaElevation.kt` | Levels 0–5, the two-layer shadows per theme, the 1dp edge, `Modifier.hosannaElevation` |
