@@ -6,7 +6,7 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 The Hosanna theme: a palette of its own, used by the composables built on it and by nothing else.
-A real Gradle module of this build — `include(":hosanna-theme")`,
+Its only consumer by design is `:composables`. A real Gradle module of this build — `include(":hosanna-theme")`,
 `implementation(projects.hosannaTheme)` — in the package `org.churchpresenter.hosanna`. Layer:
 foundation.
 
@@ -24,7 +24,7 @@ foundation.
 | File | Owns |
 |---|---|
 | `HosannaTheme.kt` | `HosannaTheme { }` (Material 3 colors, typography and shapes, plus the locals below) and the `HosannaTheme.colors` / `.typography` / `.shapes` / `.elevation` accessors |
-| `HosannaColors.kt` | The light and dark `ColorScheme`s, `HosannaColors` (success, live, star, faint, link, content types, song sections) and `HosannaStateAlpha` (hover, focus, pressed, dragged, disabled, scrim) |
+| `HosannaColors.kt` | `HosannaColors` — every Material role plus success, live, star, faint, link, content types, song sections and the output `screen`/`onScreen` (the same in both themes), `toMaterial(dark)` that builds the Material schemes from it, and `HosannaStateAlpha` (hover, focus, pressed, dragged, the secondary fill a track shows behind its main one, disabled, muted content (a quieter line of text on the same ink, such as a shortcut), scrim, overlay (a badge or button drawn on `screen` over picture content), content-type container and edge) |
 | `HosannaTypography.kt` | The ten styles (Display … Overline), `toMaterial()`, `tabular()` for numbers that line up |
 | `HosannaShapes.kt` | The radius scale XS 4 · S 6 · M 8 · L 12 · XL 16 · Full as `HosannaRadius` (dp) and `HosannaShapes` (shapes), and the Material `Shapes` built from it |
 | `HosannaElevation.kt` | Levels 0–5, the two-layer shadows per theme, the 1dp edge, `Modifier.hosannaElevation` |

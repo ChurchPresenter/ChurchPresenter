@@ -113,6 +113,7 @@ module-specific notes there, not here.**
 | `companion-satellite/` | `:companion-satellite` | Bitfocus Companion Satellite protocol client                                      | [AGENT.md](companion-satellite/AGENT.md) |
 | `theme/`               | `:theme`               | The nine color schemes, semantic colors, type and shape scales                    | [AGENT.md](theme/AGENT.md)               |
 | `hosanna-theme/`       | `:hosanna-theme`       | The Hosanna theme — its own palette, used only by the composables built on it     | [AGENT.md](hosanna-theme/AGENT.md)       |
+| `composables/`         | `:composables`         | The composables built on the Hosanna theme — its tokens and Compose foundation only | [AGENT.md](composables/AGENT.md)         |
 | `core-models/`         | `:core-models`         | The shared data models                                                            | [AGENT.md](core-models/AGENT.md)         |
 | `bible-engine/`        | `:bible-engine`        | Bible Lookup Engine — speech-to-reference detection                               | [AGENT.md](bible-engine/AGENT.md)        |
 | `lottieGenerator/`     | `:lottieGenerator`     | Animated lower-third generator, also a standalone app                             | [AGENT.md](lottieGenerator/AGENT.md)     |
@@ -210,7 +211,7 @@ fixtures declare; a test's own classpath may reach anything.
 
 | Layer | Modules | May depend on |
 |---|---|---|
-| foundation | theme, hosanna-theme, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
+| foundation | theme, hosanna-theme, composables, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
 | engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, output-guard, calendar-core, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
 | feature | a tab or a window with its view model | foundation, engine |
 | output | live-output | foundation, engine |
