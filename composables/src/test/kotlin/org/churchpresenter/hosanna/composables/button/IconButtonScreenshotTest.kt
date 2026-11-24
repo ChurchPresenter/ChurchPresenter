@@ -1,18 +1,12 @@
 package org.churchpresenter.hosanna.composables.button
 
-import androidx.compose.foundation.interaction.FocusInteraction
-import androidx.compose.foundation.interaction.HoverInteraction
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.testing.FrozenInteractionSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.hosanna.composables.testing.testIcon
 import kotlin.test.Test
@@ -20,13 +14,6 @@ import kotlin.test.Test
 class IconButtonScreenshotTest {
 
     private val section = "button/iconButton"
-
-    private fun source(state: ButtonState): MutableInteractionSource = when (state) {
-        ButtonState.Hovered -> FrozenInteractionSource(HoverInteraction.Enter())
-        ButtonState.Pressed -> FrozenInteractionSource(PressInteraction.Press(Offset.Zero))
-        ButtonState.Focused -> FrozenInteractionSource(FocusInteraction.Focus())
-        else -> MutableInteractionSource()
-    }
 
     @Composable
     private fun Grid(state: ButtonState, selected: Boolean = false) {
@@ -38,7 +25,7 @@ class IconButtonScreenshotTest {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         IconButtonSize.entries.forEach { size ->
-                            val source = remember { source(state) }
+                            val source = remember { frozenSource(state) }
                             val enabled = state != ButtonState.Disabled
                             val loading = state == ButtonState.Loading
                             if (selected) {

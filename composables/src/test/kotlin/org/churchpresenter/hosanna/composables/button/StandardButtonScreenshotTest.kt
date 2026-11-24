@@ -1,18 +1,12 @@
 package org.churchpresenter.hosanna.composables.button
 
-import androidx.compose.foundation.interaction.FocusInteraction
-import androidx.compose.foundation.interaction.HoverInteraction
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.composables.testing.FrozenInteractionSource
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import org.churchpresenter.hosanna.composables.testing.testIcon
 import kotlin.test.Test
@@ -20,13 +14,6 @@ import kotlin.test.Test
 class StandardButtonScreenshotTest {
 
     private val section = "button/standardButton"
-
-    private fun source(state: ButtonState): MutableInteractionSource = when (state) {
-        ButtonState.Hovered -> FrozenInteractionSource(HoverInteraction.Enter())
-        ButtonState.Pressed -> FrozenInteractionSource(PressInteraction.Press(Offset.Zero))
-        ButtonState.Focused -> FrozenInteractionSource(FocusInteraction.Focus())
-        else -> MutableInteractionSource()
-    }
 
     private fun label(intent: ButtonIntent) = when (intent) {
         ButtonIntent.Default -> "Save"
@@ -46,16 +33,16 @@ class StandardButtonScreenshotTest {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         StandardButton(
-                            label(intent), {}, interactionSource = remember { source(state) },
+                            label(intent), {}, interactionSource = remember { frozenSource(state) },
                             hierarchy = hierarchy, intent = intent, enabled = enabled, loading = loading,
                         )
                         StandardButton(
-                            label(intent), {}, interactionSource = remember { source(state) },
+                            label(intent), {}, interactionSource = remember { frozenSource(state) },
                             hierarchy = hierarchy, intent = intent, icon = testIcon(),
                             enabled = enabled, loading = loading,
                         )
                         StandardButton(
-                            testIcon(), label(intent), {}, interactionSource = remember { source(state) },
+                            testIcon(), label(intent), {}, interactionSource = remember { frozenSource(state) },
                             hierarchy = hierarchy, intent = intent, enabled = enabled, loading = loading,
                         )
                     }

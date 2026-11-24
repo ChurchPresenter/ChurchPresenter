@@ -52,6 +52,8 @@ enum class ButtonIntent { Default, Critical, Neutral }
 
 enum class IconButtonSize { Large, Medium, Small }
 
+enum class FabSize { Regular, Small }
+
 internal enum class ButtonState { Rest, Hovered, Pressed, Focused, Loading, Disabled }
 
 @Immutable
@@ -121,12 +123,20 @@ internal fun buttonLevel(hierarchy: ButtonHierarchy, state: ButtonState): Hosann
 
 private val RaisedStates = setOf(ButtonState.Rest, ButtonState.Hovered, ButtonState.Loading)
 
+internal fun floatingLevel(state: ButtonState): HosannaLevel = when (state) {
+    ButtonState.Rest, ButtonState.Focused, ButtonState.Loading -> HosannaLevel.Level3
+    ButtonState.Hovered -> HosannaLevel.Level4
+    ButtonState.Pressed -> HosannaLevel.Level1
+    ButtonState.Disabled -> HosannaLevel.Level0
+}
+
 @Immutable
 internal data class ButtonLook(
     val hierarchy: ButtonHierarchy,
     val intent: ButtonIntent,
     val height: Dp,
-    val cornerRadius: Dp,
+    val cornerRadius: Dp?,
+    val floating: Boolean = false,
 )
 
 @Composable
@@ -149,11 +159,12 @@ internal fun ButtonFrame(
         colors.container,
         tween(ButtonFoundationDefaults.TRANSITION_MILLIS, easing = EaseOut),
     )
-    val shape = RoundedCornerShape(look.cornerRadius)
+    val shape = look.cornerRadius?.let { RoundedCornerShape(it) } ?: HosannaTheme.shapes.full
+    val level = if (look.floating) floatingLevel(state) else buttonLevel(look.hierarchy, state)
     val interactive = enabled && !loading
     Box(
         modifier = modifier
-            .hosannaElevation(buttonLevel(look.hierarchy, state), shape, HosannaTheme.elevation)
+            .hosannaElevation(level, shape, HosannaTheme.elevation)
             .then(colors.ring?.let { Modifier.focusRing(it, look.cornerRadius) } ?: Modifier)
             .height(look.height)
             .background(container, shape)
@@ -170,10 +181,10 @@ internal fun ButtonFrame(
     }
 }
 
-private fun Modifier.focusRing(color: Color, cornerRadius: Dp): Modifier = drawBehind {
+private fun Modifier.focusRing(color: Color, cornerRadius: Dp?): Modifier = drawBehind {
     val width = HosannaTheme.focusRingWidth.toPx()
     val half = width / 2
-    val radius = cornerRadius.toPx() + half
+    val radius = (cornerRadius?.toPx() ?: (size.minDimension / 2)) + half
     drawRoundRect(
         color = color,
         topLeft = Offset(-half, -half),

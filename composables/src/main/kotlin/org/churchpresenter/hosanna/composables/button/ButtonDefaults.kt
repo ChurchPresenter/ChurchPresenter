@@ -23,7 +23,7 @@ internal object StandardButtonDefaults {
 }
 
 @Immutable
-internal data class IconButtonMetrics(val side: Dp, val icon: Dp, val spinner: Dp, val cornerRadius: Dp)
+internal data class IconButtonMetrics(val side: Dp, val icon: Dp, val spinner: Dp, val cornerRadius: Dp?)
 
 internal object IconButtonDefaults {
     val Large = IconButtonMetrics(side = 40.dp, icon = 20.dp, spinner = 18.dp, cornerRadius = HosannaRadius.M)
@@ -34,5 +34,39 @@ internal object IconButtonDefaults {
         IconButtonSize.Large -> Large
         IconButtonSize.Medium -> Medium
         IconButtonSize.Small -> Small
+    }
+}
+
+internal object CircularButtonDefaults {
+    val Large = IconButtonMetrics(side = 44.dp, icon = 20.dp, spinner = 18.dp, cornerRadius = null)
+    val Medium = IconButtonMetrics(side = 36.dp, icon = 16.dp, spinner = 16.dp, cornerRadius = null)
+    val Small = IconButtonMetrics(side = 28.dp, icon = 14.dp, spinner = 14.dp, cornerRadius = null)
+    val GroupPadding: Dp = 4.dp
+    val GroupGap: Dp = 2.dp
+
+    fun metrics(size: IconButtonSize): IconButtonMetrics = when (size) {
+        IconButtonSize.Large -> Large
+        IconButtonSize.Medium -> Medium
+        IconButtonSize.Small -> Small
+    }
+}
+
+@Immutable
+internal data class FabMetrics(val side: Dp, val icon: Dp)
+
+internal object FabDefaults {
+    val Regular = FabMetrics(side = 56.dp, icon = 24.dp)
+    val Small = FabMetrics(side = 40.dp, icon = 20.dp)
+    val ExtendedHeight: Dp = 48.dp
+    val ExtendedIcon: Dp = 20.dp
+    val ExtendedStart: Dp = 16.dp
+    val ExtendedEnd: Dp = 20.dp
+    val ExtendedGap: Dp = 8.dp
+    const val APPEAR_MILLIS: Int = 150
+    const val APPEAR_SCALE: Float = 0.8f
+
+    fun metrics(size: FabSize): FabMetrics = when (size) {
+        FabSize.Regular -> Regular
+        FabSize.Small -> Small
     }
 }

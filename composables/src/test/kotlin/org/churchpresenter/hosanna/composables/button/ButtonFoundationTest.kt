@@ -113,4 +113,14 @@ class ButtonFoundationTest {
             assertEquals(HosannaLevel.Level0, buttonLevel(ButtonHierarchy.Tertiary, state))
         }
     }
+
+    @Test
+    fun `a floating button lifts on hover, drops when pressed and is flat when disabled`() {
+        assertEquals(HosannaLevel.Level3, floatingLevel(ButtonState.Rest))
+        assertEquals(HosannaLevel.Level3, floatingLevel(ButtonState.Focused))
+        assertEquals(HosannaLevel.Level3, floatingLevel(ButtonState.Loading))
+        assertEquals(HosannaLevel.Level4, floatingLevel(ButtonState.Hovered))
+        assertEquals(HosannaLevel.Level1, floatingLevel(ButtonState.Pressed))
+        assertEquals(HosannaLevel.Level0, floatingLevel(ButtonState.Disabled))
+    }
 }

@@ -23,7 +23,8 @@ fun IconButton(
     loading: Boolean = false,
 ) {
     IconButtonBody(
-        icon, contentDescription, onClick, interactionSource, modifier, size, hierarchy, intent, enabled, loading,
+        icon, contentDescription, onClick, interactionSource, modifier,
+        IconButtonDefaults.metrics(size), hierarchy, intent, enabled, loading,
     )
 }
 
@@ -47,7 +48,7 @@ fun IconToggleButton(
         onClick = { onCheckedChange(!checked) },
         interactionSource = interactionSource,
         modifier = modifier,
-        size = size,
+        metrics = IconButtonDefaults.metrics(size),
         hierarchy = toggleHierarchy(hierarchy, checked),
         intent = intent,
         enabled = enabled,
@@ -60,20 +61,19 @@ internal fun toggleHierarchy(hierarchy: ButtonHierarchy, checked: Boolean): Butt
     if (checked) ButtonHierarchy.Primary else hierarchy
 
 @Composable
-private fun IconButtonBody(
+internal fun IconButtonBody(
     icon: Painter,
     contentDescription: String,
     onClick: () -> Unit,
     interactionSource: MutableInteractionSource,
     modifier: Modifier,
-    size: IconButtonSize,
+    metrics: IconButtonMetrics,
     hierarchy: ButtonHierarchy,
     intent: ButtonIntent,
     enabled: Boolean,
     loading: Boolean,
     checked: Boolean? = null,
 ) {
-    val metrics = IconButtonDefaults.metrics(size)
     ButtonFrame(
         onClick = onClick,
         interactionSource = interactionSource,
