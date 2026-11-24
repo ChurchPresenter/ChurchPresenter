@@ -9,6 +9,7 @@ import org.churchpresenter.hosanna.HosannaStateAlpha
 internal data class SliderColors(
     val track: Color,
     val fill: Color,
+    val buffered: Color,
     val thumb: Color,
     val thumbRing: Color,
     val halo: Color,
@@ -27,6 +28,7 @@ internal fun HosannaColors.sliderColors(state: ButtonState): SliderColors {
         return SliderColors(
             track = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER),
             fill = ink,
+            buffered = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER),
             thumb = surfaceContainerHigh,
             thumbRing = ink,
             halo = Color.Transparent,
@@ -42,6 +44,7 @@ internal fun HosannaColors.sliderColors(state: ButtonState): SliderColors {
     return SliderColors(
         track = outlineVariant,
         fill = primary,
+        buffered = primary.copy(alpha = HosannaStateAlpha.SECONDARY_FILL),
         thumb = onPrimary,
         thumbRing = primary,
         halo = when (state) {

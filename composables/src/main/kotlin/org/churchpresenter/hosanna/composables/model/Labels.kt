@@ -40,3 +40,6 @@ class ColorFieldLabels(
 
 @Immutable
 class NumberFieldActions(val increase: String, val decrease: String)
+
+@Immutable
+class VolumeLabels(val volume: String, val mute: String, val unmute: String)

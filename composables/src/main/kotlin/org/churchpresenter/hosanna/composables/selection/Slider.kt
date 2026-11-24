@@ -5,8 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -19,17 +17,13 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,7 +40,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
@@ -55,14 +48,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaLevel
 import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.SliderDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
+import org.churchpresenter.hosanna.composables.foundation.SliderBubble
 import org.churchpresenter.hosanna.composables.foundation.SliderColors
+import org.churchpresenter.hosanna.composables.foundation.SliderThumb
 import org.churchpresenter.hosanna.composables.foundation.buttonState
-import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.hosanna.composables.foundation.sliderColors
 import org.churchpresenter.hosanna.composables.model.NumberRange
 import org.churchpresenter.hosanna.composables.model.applySliderKey
@@ -74,7 +66,6 @@ import org.churchpresenter.hosanna.composables.model.sliderOrigin
 import org.churchpresenter.hosanna.composables.model.sliderStepDots
 import org.churchpresenter.hosanna.composables.model.sliderValueAt
 import org.churchpresenter.hosanna.composables.model.snapToOrigin
-import org.churchpresenter.hosanna.hosannaElevation
 import org.churchpresenter.hosanna.tabular
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
@@ -219,8 +210,8 @@ private fun SliderTrack(
     ) {
         val thumbX = SliderDefaults.Thumb / 2 + (maxWidth - SliderDefaults.Thumb) * fraction
         TrackCanvas(fraction, if (centered) sliderFraction(sliderOrigin(range), range) else null, range, colors)
-        Thumb(thumbX, colors, state, enabled)
-        if (dragging) Bubble(thumbX, bubbleText, colors)
+        SliderThumb(thumbX, SliderDefaults.Thumb, colors, state, enabled)
+        if (dragging) SliderBubble(thumbX, SliderDefaults.Thumb / 2, bubbleText, colors)
     }
 }
 
@@ -253,50 +244,4 @@ private fun TrackCanvas(fraction: Float, origin: Float?, range: NumberRange, col
             )
         }
     }
-}
-
-@Composable
-private fun Thumb(x: Dp, colors: SliderColors, state: ButtonState, enabled: Boolean) {
-    val size = SliderDefaults.Thumb
-    val halo = when (state) {
-        ButtonState.Pressed -> SliderDefaults.DragHalo
-        else -> SliderDefaults.HoverHalo
-    }
-    Box(
-        Modifier
-            .offset(x = x - size / 2 - halo)
-            .size(size + halo * 2)
-            .background(colors.halo, CircleShape),
-    )
-    Box(
-        Modifier
-            .offset(x = x - size / 2)
-            .size(size)
-            .then(colors.ring?.let { Modifier.focusRing(it, null) } ?: Modifier)
-            .then(if (enabled) Modifier.thumbShadow() else Modifier)
-            .background(colors.thumb, CircleShape)
-            .border(if (enabled) SliderDefaults.ThumbRing else SliderDefaults.ThumbEdge, colors.thumbRing, CircleShape),
-    )
-}
-
-@Composable
-private fun Modifier.thumbShadow(): Modifier =
-    hosannaElevation(HosannaLevel.Level1, CircleShape, HosannaTheme.elevation)
-
-@Composable
-private fun Bubble(x: Dp, text: String, colors: SliderColors) {
-    BasicText(
-        text,
-        modifier = Modifier
-            .layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints.copy(minWidth = 0, maxWidth = Int.MAX_VALUE))
-                layout(0, 0) {
-                    val bottom = SliderDefaults.Thumb / 2 + SliderDefaults.BubbleGap
-                    placeable.place(x.roundToPx() - placeable.width / 2, -bottom.roundToPx() - placeable.height)
-                }
-            }
-            .background(colors.bubble, RoundedCornerShape(SliderDefaults.BubbleRadius))
-            .padding(horizontal = SliderDefaults.BubblePaddingX, vertical = SliderDefaults.BubblePaddingY),
-        style = HosannaTheme.typography.captionStrong.tabular().copy(color = colors.bubbleInk),
-    )
 }
