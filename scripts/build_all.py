@@ -43,6 +43,11 @@ def publish_source(repo, base_branch):
     # Publish committed source only: never stage files, include untracked files, or force-push.
     command(["git", "diff", "--quiet", "HEAD", "--"])
     base = api(repo, f"git/ref/heads/{base_branch}")["object"]["sha"]
+    # Keep snapshot ancestry increasing so commit-count versions advance between releases.
+    recent = api(repo, "actions/runs?event=push&per_page=30").get("workflow_runs", [])
+    previous = next((run for run in recent if run.get("head_branch", "").startswith("codex/build-")), None)
+    if previous:
+        base = previous["head_sha"]
     base_tree = api(repo, f"git/commits/{base}")["tree"]["sha"]
     remote = api(repo, f"git/trees/{base_tree}?recursive=1")
     if remote.get("truncated"):
@@ -167,6 +172,7 @@ def wait_for_packages(repo, branch, commit, no_wait):
             if not {"windows-msi", "macos-dmg", "macos-dmg-x64"}.issubset(names):
                 raise RuntimeError("任务结束，但缺少预期的三平台安装包。")
             print("三平台构建成功。未配置 Apple 签名凭据时，Mac 包未签名、未公证。")
+            print(f"Release： https://github.com/{repo}/releases")
             return
         time.sleep(30)
 

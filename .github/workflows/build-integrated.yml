@@ -18,6 +18,6 @@ jobs:
       macos_arm64: true
       macos_x64: true
       linux: false
-      release: false
+      release: true
       prerelease: false
     secrets: inherit

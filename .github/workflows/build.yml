@@ -788,7 +788,12 @@ jobs:
           retention-days: 2
 
   release:
-    if: ${{ always() && inputs.release && needs.version.result == 'success' }}
+    if: >-
+      ${{ always() && inputs.release && needs.version.result == 'success'
+          && (!inputs.windows || needs.build-windows.result == 'success')
+          && (!inputs.macos_arm64 || needs.build-macos.result == 'success')
+          && (!inputs.macos_x64 || needs.build-macos-x64.result == 'success')
+          && (!inputs.linux || needs.build-linux.result == 'success') }}
     needs: [version, build-windows, build-macos, build-macos-x64, build-linux]
     runs-on: ubuntu-latest
     permissions:
@@ -869,6 +874,7 @@ jobs:
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ needs.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
           name: ChurchPresenter ${{ needs.version.outputs.version }}
           body: ${{ steps.body.outputs.BODY }}
           prerelease: ${{ inputs.prerelease }}
