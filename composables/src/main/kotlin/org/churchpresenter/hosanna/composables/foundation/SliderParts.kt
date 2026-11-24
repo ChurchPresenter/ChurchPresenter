@@ -36,8 +36,9 @@ internal fun SliderThumb(
             .background(colors.halo, CircleShape),
     )
     Box(
-        modifier
+        Modifier
             .offset(x = x - size / 2)
+            .then(modifier)
             .size(size)
             .then(colors.ring?.let { Modifier.focusRing(it, null) } ?: Modifier)
             .then(if (enabled) Modifier.thumbShadow() else Modifier)

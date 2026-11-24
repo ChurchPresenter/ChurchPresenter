@@ -42,12 +42,10 @@ class RangeSliderTest {
             HosannaSurface {
                 RangeSlider(
                     range.first, range.second, { a, b -> range = a to b }, "Trim start", "Trim end",
-                    Modifier.width(width), valueText = "${range.first.toInt()}–${range.second.toInt()}",
-                    onRangeChangeFinished = { finished++ },
+                    Modifier.width(width), onRangeChangeFinished = { finished++ },
                 )
             }
         }
-        onNodeWithText("20–70").assertExists()
         val step = with(density) { (width - 16.dp).toPx() } / 100f
         onNodeWithContentDescription("Trim start").performMouseInput {
             moveTo(center)
@@ -77,9 +75,11 @@ class RangeSliderTest {
             HosannaSurface {
                 RangeSlider(
                     range.first, range.second, { a, b -> range = a to b }, "Start", "End", Modifier.width(width),
+                    valueText = "${range.first.toInt()}–${range.second.toInt()}",
                 )
             }
         }
+        onNodeWithText("20–22").assertExists()
         val start = onNodeWithContentDescription("Start")
         start.requestFocus()
         start.performKeyInput { pressKey(Key.DirectionRight) }
