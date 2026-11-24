@@ -59,6 +59,7 @@ internal fun HosannaColors.accent(color: ChipColor): Color? = when (color) {
     ChipColor.Media -> media
     ChipColor.LowerThird -> lowerThird
     ChipColor.Announcement -> announcement
+    ChipColor.Live -> live
 }
 
 internal fun HosannaColors.restChipColors(color: ChipColor, selected: Boolean): ChipColors {

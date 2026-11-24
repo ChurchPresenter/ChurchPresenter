@@ -21,6 +21,7 @@ enum class ChipColor {
     Media,
     LowerThird,
     Announcement,
+    Live,
 }
 
 @Immutable

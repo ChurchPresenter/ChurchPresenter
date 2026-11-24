@@ -36,6 +36,7 @@ class ChipFoundationTest {
                 ChipColor.Media to colors.media,
                 ChipColor.LowerThird to colors.lowerThird,
                 ChipColor.Announcement to colors.announcement,
+                ChipColor.Live to colors.live,
             )
             assertNull(colors.accent(ChipColor.Neutral))
             expected.forEach { (chip, role) -> assertEquals(role, colors.accent(chip), "$chip") }
