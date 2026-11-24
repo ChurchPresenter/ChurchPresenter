@@ -42,7 +42,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.window.PopupProperties
 import kotlinx.coroutines.awaitCancellation
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.button.SegmentedButton
 import org.churchpresenter.hosanna.composables.button.StandardButton
@@ -67,6 +67,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_drag_handle
 import org.churchpresenter.icons.generated.resources.ic_visibility
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * The eye button that opens the "Show tabs" menu: the tab style, a checkbox per tab, drag handles to reorder
@@ -199,7 +200,7 @@ private fun TabRow(
     val canMoveUp by rememberUpdatedState(!first)
     val canMoveDown by rememberUpdatedState(!last)
     val row = with(LocalDensity.current) { MenuDefaults.RowHeight.toPx() }
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -262,7 +263,7 @@ private fun TabRow(
                         }
                     }
                 },
-            colorFilter = ColorFilter.tint(colors.onSurfaceFaint),
+            colorFilter = ColorFilter.tint(colors.faint),
         )
     }
 }

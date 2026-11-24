@@ -407,11 +407,6 @@ private fun rememberScheduleFileDrop(viewModel: ScheduleViewModel): ScheduleFile
     return drop
 }
 
-internal val ACTION_BUTTON_SIZE = 30.dp
-internal val ACTION_ICON_SIZE = 13.dp
-internal val SECTION_ACTION_BUTTON_SIZE = 22.dp
-internal val SECTION_ACTION_ICON_SIZE = 12.dp
-
 internal val SECTION_ROW_PADDING = 3.dp
 
 /** How every row is drawn: the density and layout chosen, when each is due, and which is live. */

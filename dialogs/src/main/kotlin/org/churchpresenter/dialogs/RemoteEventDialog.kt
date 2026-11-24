@@ -2,7 +2,6 @@ package org.churchpresenter.dialogs
 
 import org.churchpresenter.server.RemoteEvent
 import org.churchpresenter.server.RemoteEventType
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,18 +33,11 @@ import androidx.compose.material.icons.filled.Star
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,6 +88,11 @@ import org.churchpresenter.strings.generated.resources.remote_queue_waiting_many
 import org.churchpresenter.strings.generated.resources.remote_queue_waiting_one
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 @Composable
 fun resolveRemoteEventPresentation(
@@ -324,47 +321,53 @@ fun RemoteEventDialogContent(
                 ) {
                     // Left: block actions
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        ActionIconButton(
+                        RemoteActionButton(
                             tooltip = stringResource(Res.string.block_permanently),
                             onClick = onBlockPermanently,
                             icon = Icons.Filled.Block,
-                            style = ActionIconStyle.ErrorOutlined
+                            hierarchy = ButtonHierarchy.Secondary,
+                            intent = ButtonIntent.Critical
                         )
-                        ActionIconButton(
+                        RemoteActionButton(
                             tooltip = stringResource(Res.string.block_for_session),
                             onClick = onBlockForSession,
                             icon = Icons.Filled.RemoveCircle,
-                            style = ActionIconStyle.ErrorFilled
+                            hierarchy = ButtonHierarchy.Primary,
+                            intent = ButtonIntent.Critical
                         )
                     }
 
                     // Right: deny + allow actions
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        ActionIconButton(
+                        RemoteActionButton(
                             tooltip = stringResource(Res.string.deny),
                             onClick = onDeny,
                             icon = Icons.Filled.Close,
-                            style = ActionIconStyle.Outlined
+                            hierarchy = ButtonHierarchy.Secondary,
+                            intent = ButtonIntent.Neutral
                         )
-                        ActionIconButton(
+                        RemoteActionButton(
                             tooltip = stringResource(Res.string.allow_for_session),
                             onClick = onAllowForSession,
                             icon = Icons.Filled.Schedule,
-                            style = ActionIconStyle.PrimaryOutlined
+                            hierarchy = ButtonHierarchy.Secondary,
+                            intent = ButtonIntent.Default
                         )
                         if (showAllowPermanently) {
-                            ActionIconButton(
+                            RemoteActionButton(
                                 tooltip = stringResource(Res.string.allow_permanently),
                                 onClick = onAllowPermanently,
                                 icon = Icons.Filled.Star,
-                                style = ActionIconStyle.SuccessFilled
+                                hierarchy = ButtonHierarchy.Primary,
+                                intent = ButtonIntent.Success
                             )
                         }
-                        ActionIconButton(
+                        RemoteActionButton(
                             tooltip = stringResource(Res.string.allow),
                             onClick = onAllow,
                             icon = Icons.Filled.Check,
-                            style = ActionIconStyle.PrimaryFilled
+                            hierarchy = ButtonHierarchy.Primary,
+                            intent = ButtonIntent.Default
                         )
                     }
                 }
@@ -372,73 +375,22 @@ fun RemoteEventDialogContent(
         }
     }
 
-private enum class ActionIconStyle {
-    ErrorOutlined,
-    ErrorFilled,
-    Outlined,
-    PrimaryOutlined,
-    SuccessFilled,
-    PrimaryFilled
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ActionIconButton(
+private fun RemoteActionButton(
     tooltip: String,
     onClick: () -> Unit,
     icon: ImageVector,
-    style: ActionIconStyle
+    hierarchy: ButtonHierarchy,
+    intent: ButtonIntent,
 ) {
-    val errorColor = MaterialTheme.colorScheme.error
-    val primaryColor = MaterialTheme.colorScheme.primary
-
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text(tooltip) } },
-        state = rememberTooltipState()
-    ) {
-        when (style) {
-            ActionIconStyle.ErrorOutlined -> RaisedIconButton(
-                onClick = onClick,
-                colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = errorColor),
-                border = BorderStroke(1.dp, errorColor.copy(alpha = 0.5f))
-            ) { Icon(icon, contentDescription = tooltip) }
-
-            ActionIconStyle.ErrorFilled -> RaisedIconButton(
-                onClick = onClick,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = errorColor,
-                    contentColor = MaterialTheme.colorScheme.onError
-                )
-            ) { Icon(icon, contentDescription = tooltip) }
-
-            ActionIconStyle.Outlined -> RaisedIconButton(
-                onClick = onClick,
-                colors = IconButtonDefaults.outlinedIconButtonColors()
-            ) { Icon(icon, contentDescription = tooltip) }
-
-            ActionIconStyle.PrimaryOutlined -> RaisedIconButton(
-                onClick = onClick,
-                colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = primaryColor),
-                border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.5f))
-            ) { Icon(icon, contentDescription = tooltip) }
-
-            ActionIconStyle.SuccessFilled -> RaisedIconButton(
-                onClick = onClick,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.semantic.success,
-                    contentColor = MaterialTheme.semantic.onSuccess
-                )
-            ) { Icon(icon, contentDescription = tooltip) }
-
-            ActionIconStyle.PrimaryFilled -> RaisedIconButton(
-                onClick = onClick,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = primaryColor,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) { Icon(icon, contentDescription = tooltip) }
-        }
+    Tooltip(text = tooltip) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = tooltip,
+            onClick = onClick,
+            hierarchy = hierarchy,
+            intent = intent,
+        )
     }
 }
 

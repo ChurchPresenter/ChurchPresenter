@@ -1,7 +1,5 @@
 package org.churchpresenter.theme.components
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -83,63 +81,6 @@ fun KeyIconButton(
             filled -> colors.contentColor
             else -> colors.disabledContentColor
         }
-        CompositionLocalProvider(LocalContentColor provides ink, content = content)
-    }
-}
-
-/**
- * `FilledIconButton` / `OutlinedIconButton` in the elevated look: a raised key in the container
- * color when there is one, the neutral key when it is transparent but outlined, and a flat
- * [KeyIconButton] when it is neither.
- */
-@Composable
-fun RaisedIconButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    shape: Shape = AppShape(ICON_KEY_RADIUS),
-    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
-    border: BorderStroke? = null,
-    interactionSource: MutableInteractionSource? = null,
-    content: @Composable () -> Unit,
-) {
-    // A transparent button with no outline was flat to begin with -- a clear-field ✕, say -- so it
-    // behaves as a toolbar icon rather than growing a key it never had.
-    if (colors.containerColor.alpha == 0f && border == null) {
-        KeyIconButton(onClick, modifier, enabled, shape, colors, interactionSource, content)
-        return
-    }
-    val palette = elevationPalette()
-    val interaction = interactionSource ?: remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val pressed by interaction.collectIsPressedAsState()
-    val fill = if (colors.containerColor.alpha > 0f) {
-        palette.tinted(colors.containerColor, colors.contentColor)
-    } else {
-        palette.key
-    }
-    Box(
-        modifier = modifier
-            .minimumInteractiveComponentSize()
-            .size(ICON_BUTTON_SIZE)
-            .then(
-                if (enabled) {
-                    Modifier.raised(shape, fill, palette, pressed, hovered)
-                } else {
-                    Modifier.flatDisabled(shape, palette)
-                }
-            )
-            .then(if (border != null) Modifier.border(border, shape) else Modifier)
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
-                enabled = enabled,
-                role = Role.Button,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        val ink = if (enabled) colors.contentColor else colors.disabledContentColor
         CompositionLocalProvider(LocalContentColor provides ink, content = content)
     }
 }

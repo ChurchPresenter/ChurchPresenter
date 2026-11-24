@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.foundation.border
 import androidx.compose.runtime.Immutable
@@ -35,26 +35,20 @@ private fun layers(vararg pairs: Pair<HosannaShadowLayer, HosannaShadowLayer>) =
 
 private fun layer(offsetY: Int, blur: Int, alpha: Float) = HosannaShadowLayer(offsetY.dp, blur.dp, alpha)
 
-val HosannaLightElevation = HosannaElevation(
-    layers = layers(
-        layer(1, 2, 0.10f) to layer(1, 3, 0.08f),
-        layer(2, 6, 0.12f) to layer(12, 28, 0.18f),
-        layer(4, 10, 0.14f) to layer(18, 40, 0.25f),
-        layer(6, 14, 0.16f) to layer(24, 52, 0.28f),
-        layer(8, 18, 0.18f) to layer(32, 64, 0.32f),
-    ),
-    edge = Color(0x1F141923),
+internal val HosannaLightShadows = layers(
+    layer(1, 2, 0.10f) to layer(1, 3, 0.08f),
+    layer(2, 6, 0.12f) to layer(12, 28, 0.18f),
+    layer(4, 10, 0.14f) to layer(18, 40, 0.25f),
+    layer(6, 14, 0.16f) to layer(24, 52, 0.28f),
+    layer(8, 18, 0.18f) to layer(32, 64, 0.32f),
 )
 
-val HosannaDarkElevation = HosannaElevation(
-    layers = layers(
-        layer(1, 2, 0.35f) to layer(1, 3, 0.25f),
-        layer(2, 6, 0.35f) to layer(12, 28, 0.45f),
-        layer(4, 10, 0.40f) to layer(18, 40, 0.55f),
-        layer(6, 14, 0.45f) to layer(24, 52, 0.60f),
-        layer(8, 18, 0.50f) to layer(32, 64, 0.65f),
-    ),
-    edge = Color(0x1CFFFFFF),
+internal val HosannaDarkShadows = layers(
+    layer(1, 2, 0.35f) to layer(1, 3, 0.25f),
+    layer(2, 6, 0.35f) to layer(12, 28, 0.45f),
+    layer(4, 10, 0.40f) to layer(18, 40, 0.55f),
+    layer(6, 14, 0.45f) to layer(24, 52, 0.60f),
+    layer(8, 18, 0.50f) to layer(32, 64, 0.65f),
 )
 
 fun Modifier.hosannaElevation(level: HosannaLevel, shape: Shape, elevation: HosannaElevation): Modifier {

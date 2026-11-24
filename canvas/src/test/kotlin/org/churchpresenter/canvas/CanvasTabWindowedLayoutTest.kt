@@ -6,7 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
@@ -51,7 +51,7 @@ class CanvasTabWindowedLayoutTest {
                     }
                 }
                 waitForIdle()
-                val node = onNodeWithText("◆").fetchSemanticsNode()
+                val node = onNodeWithContentDescription("Select").fetchSemanticsNode()
                 left = node.boundsInRoot.left / density.density
             }
         } finally {

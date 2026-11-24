@@ -52,6 +52,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
@@ -88,7 +89,10 @@ import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.settings.OWN_SECTION
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
@@ -255,16 +259,15 @@ private fun ProfileListHeader(onNew: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GroupCaption(stringResource(Res.string.output_profiles_tab), Modifier.weight(1f))
-        KeyIconButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.Add),
+            contentDescription = stringResource(Res.string.profile_list_new),
             onClick = onNew,
-            modifier = Modifier.size(30.dp).testTag(NEW_PROFILE_TAG).guideTarget(GuideTargets.PROFILE_NEW),
-        ) {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = stringResource(Res.string.profile_list_new),
-                modifier = Modifier.size(17.dp),
-            )
-        }
+            modifier = Modifier.testTag(NEW_PROFILE_TAG).guideTarget(GuideTargets.PROFILE_NEW),
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

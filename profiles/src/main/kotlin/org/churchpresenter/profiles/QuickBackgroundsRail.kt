@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -62,6 +61,11 @@ import org.churchpresenter.settings.QuickBackground
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 import org.churchpresenter.sharedui.utils.previewOutputSize
+import org.churchpresenter.hosanna.composables.button.CircularButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /**
  * The backgrounds the preview panel's quick tray keeps one click away, under the preview because
@@ -259,23 +263,18 @@ private fun QuickBackgroundStripTile(
                 SongBackgroundFill(shown.background, Modifier.fillMaxSize(), stills = true)
                 SlotChip(slot, Modifier.align(Alignment.TopStart).padding(3.dp))
                 SongBackgroundVideoBadge(shown.background, Modifier.align(Alignment.BottomEnd).padding(3.dp))
-                Box(
+                CircularButton(
+                    icon = rememberVectorPainter(Icons.Default.Close),
+                    contentDescription = stringResource(Res.string.remove),
+                    onClick = onRemove,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(3.dp)
-                        .size(15.dp)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = QUICK_SCRIM_ALPHA))
-                        .clickable(onClick = onRemove),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(Res.string.remove),
-                        modifier = Modifier.size(9.dp),
-                        tint = Color.White
-                    )
-                }
+                        .size(15.dp),
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Secondary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
             Text(
                 text = quickBackgroundLabel(shown),

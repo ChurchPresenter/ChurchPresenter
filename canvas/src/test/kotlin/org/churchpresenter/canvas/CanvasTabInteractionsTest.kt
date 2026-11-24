@@ -105,7 +105,7 @@ class CanvasTabInteractionsTest {
     @Test
     fun `a rectangle drawn on the canvas becomes a layer`() =
         canvasTab(seed = { addScene("Scene") }) { vm, _ ->
-            onAllNodesWithText("□")[0].performSemanticsAction(SemanticsActions.OnClick)
+            onAllNodesWithContentDescription("Rectangle")[0].performSemanticsAction(SemanticsActions.OnClick)
             waitForIdle()
 
             onNodeWithTag(SCENE_CANVAS_TAG).performMouseInput {

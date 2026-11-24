@@ -2,15 +2,10 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_left
@@ -23,15 +18,16 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 internal const val TAB_STRIP_ARROW_BACK_TAG = "tabStripArrowBack"
 internal const val TAB_STRIP_ARROW_FORWARD_TAG = "tabStripArrowForward"
 
 /** How far one press of an overflow arrow scrolls a tab strip. */
 private const val TAB_SCROLL_STEP = 200
-
-private val ARROW_BUTTON_SIZE = 28.dp
-private val ARROW_ICON_SIZE = 18.dp
 
 /**
  * The overflow arrows for a scrollable tab strip, for the strip to place either side of its
@@ -96,17 +92,13 @@ private fun TabStripArrow(
     scrollState: ScrollState,
     target: () -> Int,
 ) {
-    KeyIconButton(
+    IconButton(
+        icon = painterResource(icon),
+        contentDescription = stringResource(description),
         onClick = { coroutineScope.launch { scrollState.animateScrollTo(target()) } },
-        modifier = Modifier.size(ARROW_BUTTON_SIZE).testTag(tag),
-        colors = IconButtonDefaults.iconButtonColors(
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = stringResource(description),
-            modifier = Modifier.size(ARROW_ICON_SIZE),
-        )
-    }
+        modifier = Modifier.testTag(tag),
+        size = IconButtonSize.Small,
+        hierarchy = ButtonHierarchy.Tertiary,
+        intent = ButtonIntent.Neutral,
+    )
 }

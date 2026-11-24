@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,6 +50,9 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.semantics.Role
 import org.churchpresenter.theme.raisedHover
 import org.churchpresenter.sharedui.composables.searchBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * The smart search box, its scope and mode selectors, and the search button.
@@ -61,21 +63,13 @@ import org.churchpresenter.sharedui.composables.searchBarCard
 /** The square search button that ends the row, in both of its layouts. */
 @Composable
 private fun SearchSubmitButton(onSubmit: () -> Unit) {
-    Box(
-        modifier = Modifier.size(42.dp)
-            .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                onSubmit()
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(IconRes.drawable.ic_search),
-            contentDescription = stringResource(Res.string.search),
-            modifier = Modifier.size(16.dp),
-            tint = elevationPalette().accent.ink
-        )
-    }
+    IconButton(
+        icon = painterResource(IconRes.drawable.ic_search),
+        contentDescription = stringResource(Res.string.search),
+        onClick = onSubmit,
+        size = IconButtonSize.Large,
+        hierarchy = ButtonHierarchy.Primary,
+    )
 }
 
 @Composable

@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +51,11 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 // The line above each preview: the output's name and mode, the fold caret and the profile picker.
 
@@ -135,18 +139,14 @@ private fun OutputProfileSwapMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        KeyIconButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.SwapHoriz),
+            contentDescription = stringResource(Res.string.output_profile_swap_menu_tooltip),
             onClick = { expanded = true },
-            modifier = Modifier.size(18.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Default.SwapHoriz,
-                contentDescription = stringResource(Res.string.output_profile_swap_menu_tooltip),
-                modifier = Modifier.size(14.dp),
-                tint = if (activeProfileId != null) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+            size = IconButtonSize.Small,
+            hierarchy = if (activeProfileId != null) ButtonHierarchy.Primary else ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
         ProfileMenu(expanded, { expanded = false }, profiles, activeProfileId, heading, onPick)
     }
 }

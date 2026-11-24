@@ -26,12 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.LocalContentColor
 import org.churchpresenter.lottiegen.ui.Tokens
-import org.churchpresenter.theme.RaisedFill
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.theme.components.SegmentTrack
 import org.churchpresenter.theme.components.SegmentTrackItem
 import org.churchpresenter.theme.elevationPalette
@@ -208,29 +212,24 @@ fun SubtleButton(
 /** The small ✕ used to remove a saved preset or color theme -- a destructive key. */
 @Composable
 fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = "Delete") {
-    SmallIconButton(Icons.Default.Close, onClick, contentDescription, elevationPalette().danger)
+    SmallIconButton(Icons.Default.Close, onClick, contentDescription, ButtonIntent.Critical)
 }
 
 /** The small pencil that opens a row's fuller controls. */
 @Composable
 fun EditIconButton(onClick: () -> Unit, contentDescription: String = "Edit") {
-    SmallIconButton(Icons.Default.Edit, onClick, contentDescription, elevationPalette().key)
+    SmallIconButton(Icons.Default.Edit, onClick, contentDescription, ButtonIntent.Neutral)
 }
 
-/** A 24dp raised key around one icon, the shape the ✕ and the pencil share. */
+/** A small raised key around one icon, the shape the ✕ and the pencil share. */
 @Composable
-private fun SmallIconButton(icon: ImageVector, onClick: () -> Unit, contentDescription: String, fill: RaisedFill) {
-    Box(
-        modifier = Modifier
-            .size(24.dp)
-            .raisedKey(AppShape(6.dp), fill, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            icon,
-            contentDescription = contentDescription,
-            tint = fill.ink,
-            modifier = Modifier.size(13.dp)
-        )
-    }
+private fun SmallIconButton(icon: ImageVector, onClick: () -> Unit, contentDescription: String, intent: ButtonIntent) {
+    IconButton(
+        icon = rememberVectorPainter(icon),
+        contentDescription = contentDescription,
+        onClick = onClick,
+        size = IconButtonSize.Small,
+        hierarchy = ButtonHierarchy.Secondary,
+        intent = intent,
+    )
 }

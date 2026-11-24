@@ -5,6 +5,7 @@ import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import org.churchpresenter.strings.generated.resources.add_label
 import org.churchpresenter.strings.generated.resources.menu_clear_schedule
 import org.churchpresenter.theme.AppShape
@@ -17,13 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -49,8 +48,11 @@ import org.churchpresenter.strings.generated.resources.tooltip_schedule_zoom_in
 import org.churchpresenter.strings.generated.resources.tooltip_schedule_zoom_out
 import org.churchpresenter.strings.generated.resources.tooltip_undo
 import org.churchpresenter.strings.generated.resources.tooltip_undo_unbound
-import org.churchpresenter.sharedui.composables.ToolbarKey
-import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.label
@@ -83,11 +85,9 @@ internal fun ScheduleZoomPill(
             painter = painterResource(IconRes.drawable.ic_remove),
             text = stringResource(Res.string.tooltip_schedule_zoom_out),
             onClick = onZoomOut,
+            modifier = Modifier.size(24.dp),
             enabled = canZoomOut,
-            buttonSize = 24.dp,
-            iconSize = 13.dp,
-            style = ToolbarKeyStyle.RAISED,
-            tint = MaterialTheme.colorScheme.onSurface,
+            hierarchy = ButtonHierarchy.Secondary,
         )
         val compactName = stringResource(Res.string.schedule_density_compact)
         val normalName = stringResource(Res.string.schedule_density_normal)
@@ -126,11 +126,9 @@ internal fun ScheduleZoomPill(
             painter = painterResource(IconRes.drawable.ic_add),
             text = stringResource(Res.string.tooltip_schedule_zoom_in),
             onClick = onZoomIn,
+            modifier = Modifier.size(24.dp),
             enabled = canZoomIn,
-            buttonSize = 24.dp,
-            iconSize = 13.dp,
-            style = ToolbarKeyStyle.RAISED,
-            tint = MaterialTheme.colorScheme.onSurface,
+            hierarchy = ButtonHierarchy.Secondary,
         )
     }
 }
@@ -149,7 +147,7 @@ internal fun ScheduleFileButtons(
     if (ScheduleToolbarButton.NEW.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(IconRes.drawable.ic_add), stringResource(Res.string.tooltip_new_schedule), onNewSchedule,
-            buttonSize = size.buttonSize, iconSize = size.iconSize,
+            size = size.iconButtonSize,
             modifier = Modifier.guideTarget(GuideTargets.SCHEDULE_NEW),
         )
     }
@@ -158,14 +156,14 @@ internal fun ScheduleFileButtons(
             painterResource(IconRes.drawable.ic_folder),
             stringResource(Res.string.tooltip_open_schedule),
             onOpenSchedule,
-            buttonSize = size.buttonSize, iconSize = size.iconSize,
+            size = size.iconButtonSize,
             modifier = Modifier.guideTarget(GuideTargets.SCHEDULE_OPEN),
         )
     }
     if (ScheduleToolbarButton.SAVE.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(IconRes.drawable.ic_save), stringResource(Res.string.tooltip_save_schedule), onSaveSchedule,
-            buttonSize = size.buttonSize, iconSize = size.iconSize,
+            size = size.iconButtonSize,
             modifier = Modifier.guideTarget(GuideTargets.SCHEDULE_SAVE),
         )
     }
@@ -175,9 +173,8 @@ internal fun ScheduleFileButtons(
             text = stringResource(Res.string.menu_clear_schedule),
             onClick = onClearSchedule,
             enabled = canClear,
-            tint = MaterialTheme.colorScheme.error,
-            buttonSize = size.buttonSize,
-            iconSize = size.iconSize,
+            intent = ButtonIntent.Critical,
+            size = size.iconButtonSize,
         )
     }
 }
@@ -204,8 +201,7 @@ internal fun ScheduleHistoryButtons(
                 onClick = onUndo,
                 modifier = Modifier.testTag(ScheduleToolbarTags.UNDO),
                 enabled = canUndo,
-                buttonSize = size.buttonSize,
-                iconSize = size.iconSize,
+                size = size.iconButtonSize,
             )
         }
         if (ScheduleToolbarButton.REDO.shownIn(hiddenButtons)) {
@@ -216,8 +212,7 @@ internal fun ScheduleHistoryButtons(
                 onClick = onRedo,
                 modifier = Modifier.testTag(ScheduleToolbarTags.REDO),
                 enabled = canRedo,
-                buttonSize = size.buttonSize,
-                iconSize = size.iconSize,
+                size = size.iconButtonSize,
             )
         }
     }
@@ -235,7 +230,7 @@ internal fun SchedulePlanningButtons(
     if (ScheduleToolbarButton.ADD_LABEL.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(IconRes.drawable.ic_label), stringResource(Res.string.add_label), onAddLabel,
-            buttonSize = size.buttonSize, iconSize = size.iconSize,
+            size = size.iconButtonSize,
         )
     }
     if (ScheduleToolbarButton.PLANNING_CENTER.shownIn(hiddenButtons)) {
@@ -243,8 +238,7 @@ internal fun SchedulePlanningButtons(
             painter = rememberVectorPainter(Icons.Default.CloudDownload),
             text = stringResource(Res.string.planning_center_import_title),
             onClick = onImportPlanningCenter,
-            buttonSize = size.buttonSize,
-            iconSize = size.iconSize,
+            size = size.iconButtonSize,
             modifier = Modifier.guideTarget(GuideTargets.PLANNING_CENTER_IMPORT),
         )
     }
@@ -253,11 +247,17 @@ internal fun SchedulePlanningButtons(
             painter = rememberVectorPainter(Icons.Default.CalendarMonth),
             text = stringResource(Res.string.open_calendar_manager),
             onClick = onOpenCalendar,
-            buttonSize = size.buttonSize,
-            iconSize = size.iconSize,
+            size = size.iconButtonSize,
         )
     }
 }
+
+private val ScheduleToolbarIconSize.iconButtonSize: IconButtonSize
+    get() = when (this) {
+        ScheduleToolbarIconSize.SMALL -> IconButtonSize.Small
+        ScheduleToolbarIconSize.MEDIUM -> IconButtonSize.Medium
+        ScheduleToolbarIconSize.LARGE -> IconButtonSize.Large
+    }
 
 /** One toolbar icon at the toolbar's size: flat in its strip, lit on hover, dimmed when disabled. */
 @Composable
@@ -267,20 +267,20 @@ private fun ToolbarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    buttonSize: Dp = 26.dp,
-    iconSize: Dp = 14.dp,
-    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    style: ToolbarKeyStyle = ToolbarKeyStyle.FLAT,
+    size: IconButtonSize = IconButtonSize.Small,
+    hierarchy: ButtonHierarchy = ButtonHierarchy.Tertiary,
+    intent: ButtonIntent = ButtonIntent.Neutral,
 ) {
-    ToolbarKey(
-        painter = painter,
-        text = text,
-        onClick = onClick,
-        modifier = modifier,
-        style = style,
-        enabled = enabled,
-        buttonSize = buttonSize,
-        iconSize = iconSize,
-        tint = tint,
-    )
+    Tooltip(text = text) {
+        IconButton(
+            icon = painter,
+            contentDescription = text,
+            onClick = onClick,
+            modifier = modifier,
+            size = size,
+            hierarchy = hierarchy,
+            intent = intent,
+            enabled = enabled,
+        )
+    }
 }

@@ -1,6 +1,5 @@
 package org.churchpresenter.announcements
 
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
@@ -65,6 +64,12 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.sharedui.composables.DragHandle
 import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /*
  * The Announcements tab's left column: the text card, with its actions, input and formatting, and
@@ -141,25 +146,25 @@ private fun AnnouncementsTabScope.AnnouncementsTextActions(viewModel: Announceme
     ) {
         if (output != null) {
             if (canSendToStageMonitor) {
-                ActionIconButton(
-                modifier = Modifier.guideTarget(GuideTargets.ANNOUNCEMENT_TO_STAGE),
-                    onClick = { toggleStageMonitor(viewModel, viewModel.text, stopTicker = true) },
-                    enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
-                    tooltipText = if (isSentToStageMonitor) stringResource(
-                        Res.string.tooltip_hide_from_stage_monitor,
-                    ) else stringResource(Res.string.tooltip_send_to_stage_monitor),
-                    icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
-                    containerColor = if (isSentToStageMonitor) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    contentColor = if (isSentToStageMonitor) {
-                        MaterialTheme.colorScheme.onSecondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
+                val stageText = if (isSentToStageMonitor) {
+                    stringResource(Res.string.tooltip_hide_from_stage_monitor)
+                } else {
+                    stringResource(Res.string.tooltip_send_to_stage_monitor)
+                }
+                Tooltip(text = stageText, modifier = Modifier.guideTarget(GuideTargets.ANNOUNCEMENT_TO_STAGE)) {
+                    IconToggleButton(
+                        icon = rememberVectorPainter(
+                            if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast
+                        ),
+                        contentDescription = stageText,
+                        checked = isSentToStageMonitor,
+                        onCheckedChange = { toggleStageMonitor(viewModel, viewModel.text, stopTicker = true) },
+                        enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
+                        size = IconButtonSize.Medium,
+                        hierarchy = ButtonHierarchy.Secondary,
+                        intent = ButtonIntent.Neutral,
+                    )
+                }
             }
         }
         if (onSavePreset != null) {

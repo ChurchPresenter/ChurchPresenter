@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -59,6 +57,10 @@ import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * Puts a message up (`docs/SHOW_CONTROL.md`, Messages): a saved one or one typed here, its
@@ -206,13 +208,15 @@ private fun OnAirRow(message: Cue.Message, onClear: () -> Unit) {
             color = MaterialTheme.colorScheme.error,
             modifier = Modifier.weight(1f),
         )
-        IconButton(onClick = onClear, modifier = Modifier.testTag(MESSAGE_CLEAR_TAG)) {
-            Icon(
-                painterResource(IconRes.drawable.ic_close),
-                contentDescription = stringResource(Res.string.message_clear),
-                tint = MaterialTheme.colorScheme.error,
-            )
-        }
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_close),
+            contentDescription = stringResource(Res.string.message_clear),
+            onClick = onClear,
+            modifier = Modifier.testTag(MESSAGE_CLEAR_TAG),
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Critical,
+        )
     }
 }
 

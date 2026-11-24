@@ -69,6 +69,7 @@ import org.churchpresenter.songlibrary.generated.resources.edit_song
 import org.churchpresenter.songlibrary.generated.resources.empty_title
 import org.churchpresenter.songlibrary.generated.resources.library_empty
 import org.churchpresenter.songlibrary.generated.resources.reset_filters
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 // The grid itself: the header row, one row per song, and what stands in when there are none.
 
@@ -274,9 +275,13 @@ private fun SongRow(
                         onClick = onCompare,
                     )
                     if (onEdit != null) {
-                        RowAction(Icons.Default.Edit, stringResource(Res.string.edit_song), scheme.primary, onEdit)
+                        RowAction(
+                            Icons.Default.Edit, stringResource(Res.string.edit_song), ButtonIntent.Default, onEdit,
+                        )
                     }
-                    RowAction(Icons.Default.Delete, stringResource(Res.string.delete_song), scheme.error, onDelete)
+                    RowAction(
+                        Icons.Default.Delete, stringResource(Res.string.delete_song), ButtonIntent.Critical, onDelete,
+                    )
                 }
             },
         )

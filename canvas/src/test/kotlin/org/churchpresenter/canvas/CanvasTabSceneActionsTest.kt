@@ -4,6 +4,7 @@ package org.churchpresenter.canvas
 
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.sharedui.testing.confirmColorDialogWith
 import androidx.compose.ui.test.performClick
@@ -67,7 +68,7 @@ class CanvasTabSceneActionsTest {
     @Test
     fun `a drawing tool brings up its stroke and fill colours, and the stroke can be changed`() =
         canvasTab(seed = { addScene("Welcome") }) { _, _ ->
-            onNodeWithText("□").performClick()
+            onNodeWithContentDescription("Rectangle").performClick()
             waitForIdle()
 
             onAllNodes(hasClickAction() and hasText("#FFFFFF", ignoreCase = true))[0].performClick()
@@ -81,7 +82,7 @@ class CanvasTabSceneActionsTest {
     @Test
     fun `a shape drawn on the canvas takes the toolbar's colours and becomes a layer`() =
         canvasTab(seed = { addScene("Welcome") }) { vm, _ ->
-            onNodeWithText("□").performClick()
+            onNodeWithContentDescription("Rectangle").performClick()
             waitForIdle()
             recolorTool(fromHex = "#FFFFFF", toHex = "#FF0000")
             recolorTool(fromHex = "#00000000", toHex = "#00FF00")

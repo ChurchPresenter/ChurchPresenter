@@ -43,7 +43,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.hoverable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,6 +82,11 @@ import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val CROSS_REF_POPOVER_WIDTH = 380.dp
 
@@ -213,7 +217,7 @@ private fun CrossReferenceCard(
                     painter = painterResource(IconRes.drawable.ic_playlist_add),
                     tooltipText = addStr,
                     contentDescription = "$addStr ${row.label}",
-                    tint = MaterialTheme.colorScheme.secondary,
+                    intent = ButtonIntent.Default,
                     onClick = onAddToSchedule,
                 )
             }
@@ -221,45 +225,23 @@ private fun CrossReferenceCard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CrossRefActionButton(
+    painter: Painter,
     tooltipText: String,
-    tint: Color,
     onClick: () -> Unit,
-    icon: ImageVector? = null,
-    painter: Painter? = null,
-
+    intent: ButtonIntent = ButtonIntent.Neutral,
     contentDescription: String = tooltipText,
 ) {
-    TooltipArea(
-        tooltip = {
-            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-                Text(
-                    tooltipText,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        ),
-    ) {
-        Box(
-            modifier = Modifier.size(22.dp)
-                .clip(AppShape(6.dp))
-                .initialPassClickable(onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (icon != null) {
-                Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(13.dp), tint = tint)
-            } else if (painter != null) {
-                Icon(painter, contentDescription = contentDescription, modifier = Modifier.size(13.dp), tint = tint)
-            }
-        }
+    Tooltip(text = tooltipText) {
+        IconButton(
+            icon = painter,
+            contentDescription = contentDescription,
+            onClick = onClick,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = intent,
+        )
     }
 }
 
@@ -357,14 +339,12 @@ private fun CrossReferenceHeader(
             CrossRefActionButton(
                 painter = painterResource(IconRes.drawable.ic_link),
                 tooltipText = dockTooltip,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onDock,
             )
         }
         CrossRefActionButton(
             painter = painterResource(IconRes.drawable.ic_close),
             tooltipText = closeTooltip,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             onClick = onClose,
         )
     }

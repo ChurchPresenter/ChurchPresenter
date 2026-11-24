@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +45,10 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** Test handles for the song look card's controls. */
 internal const val SONG_LOOK_SIZE_TAG = "song_look_size"
@@ -168,13 +170,15 @@ private fun LookRow(
         control()
         Box(Modifier.size(28.dp)) {
             if (custom) {
-                IconButton(onClick = onReset, modifier = Modifier.size(28.dp).testTag(SONG_LOOK_RESET_TAG + key)) {
-                    Icon(
-                        painter = painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.song_look_use_profile),
-                        modifier = Modifier.size(14.dp),
-                    )
-                }
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.song_look_use_profile),
+                    onClick = onReset,
+                    modifier = Modifier.testTag(SONG_LOOK_RESET_TAG + key),
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         }
     }
@@ -189,16 +193,14 @@ private fun SizeStepper(percent: Int, onChange: (Int) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
+            icon = painterResource(IconRes.drawable.ic_remove),
+            contentDescription = stringResource(Res.string.song_look_size_down),
             onClick = { onChange((percent - SIZE_STEP).coerceIn(range)) },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
             enabled = percent > range.first,
-            modifier = Modifier.size(28.dp),
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_remove),
-                contentDescription = stringResource(Res.string.song_look_size_down),
-                modifier = Modifier.size(14.dp),
-            )
-        }
+        )
         Text(
             text = "$percent%",
             fontSize = 13.sp,
@@ -206,15 +208,13 @@ private fun SizeStepper(percent: Int, onChange: (Int) -> Unit) {
             modifier = Modifier.padding(horizontal = 8.dp),
         )
         IconButton(
+            icon = painterResource(IconRes.drawable.ic_add),
+            contentDescription = stringResource(Res.string.song_look_size_up),
             onClick = { onChange((percent + SIZE_STEP).coerceIn(range)) },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
             enabled = percent < range.last,
-            modifier = Modifier.size(28.dp),
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_add),
-                contentDescription = stringResource(Res.string.song_look_size_up),
-                modifier = Modifier.size(14.dp),
-            )
-        }
+        )
     }
 }

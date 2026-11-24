@@ -45,6 +45,7 @@ import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 import org.churchpresenter.lottiegen.ui.components.LottieSlider
 import org.churchpresenter.lottiegen.ui.PlayButton
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val STAGE_MAX_WIDTH = 880.dp
 private const val GUIDE_DASH = 4f
@@ -188,7 +189,7 @@ private fun Transport(
         horizontalArrangement = Arrangement.spacedBy(13.dp),
     ) {
         // The main generator's own transport key, so the two windows play from one control.
-        PlayButton(isPlaying, onPlayPause, size = 38.dp, iconSize = 18.dp)
+        PlayButton(isPlaying, onPlayPause, size = IconButtonSize.Large)
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             LottieSlider(
                 value = seekValue,

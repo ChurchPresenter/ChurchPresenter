@@ -8,8 +8,6 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,8 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.ScreenHold
 import org.churchpresenter.sharedui.models.Presenting
@@ -31,9 +27,13 @@ import org.churchpresenter.strings.generated.resources.screen_hold_menu
 import org.churchpresenter.strings.generated.resources.screen_release
 import org.churchpresenter.strings.generated.resources.screen_release_all
 import org.churchpresenter.strings.generated.resources.unlock_screen
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** The hold menu for screen [screenIndex]. */
 @Composable
@@ -73,24 +73,21 @@ internal fun ScreenHoldMenuButton(
     var open by remember { mutableStateOf(false) }
     val active = menu.hold != null || lockedMode != null
     Box(modifier = modifier) {
-        KeyIconButton(
-            onClick = { open = true },
-            modifier = Modifier.size(24.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = if (active) Color(LOCK_BADGE_COLOR) else Color.White.copy(alpha = 0.5f),
-            ),
-        ) {
-            Icon(
-                imageVector = when {
+        IconButton(
+            icon = rememberVectorPainter(
+                when {
                     menu.hold == ScreenHold.HOLD -> Icons.Filled.Pause
                     menu.hold == ScreenHold.BLANK -> Icons.Filled.VisibilityOff
                     lockedMode != null -> Icons.Filled.Lock
                     else -> Icons.Filled.LockOpen
-                },
-                contentDescription = stringResource(Res.string.screen_hold_menu),
-                modifier = Modifier.size(13.dp),
-            )
-        }
+                }
+            ),
+            contentDescription = stringResource(Res.string.screen_hold_menu),
+            onClick = { open = true },
+            size = IconButtonSize.Small,
+            hierarchy = if (active) ButtonHierarchy.Primary else ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
         AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             fun pick(action: () -> Unit) {
                 open = false

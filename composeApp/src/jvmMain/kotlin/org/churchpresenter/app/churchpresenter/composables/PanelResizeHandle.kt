@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +27,10 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import java.awt.Cursor
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private const val GRIP_ALPHA = 0.16f
 private const val HOVER_ALPHA = 0.05f
@@ -120,13 +122,15 @@ internal fun PanelResizeHandle(
             Grip(gripColor, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             Grip(gripColor, Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp))
         }
-        KeyIconButton(onClick = onToggleCollapsed, modifier = Modifier.wrapContentHeight()) {
-            Icon(
-                painter = icon,
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        IconButton(
+            icon = icon,
+            contentDescription = contentDescription,
+            onClick = onToggleCollapsed,
+            modifier = Modifier.wrapContentHeight(),
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

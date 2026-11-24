@@ -19,6 +19,7 @@ dependencies {
     // What an obsScene or atemKey cue does is an action, run by the app.
     api(projects.showControl)
     implementation(projects.theme)
+    implementation(projects.composables)
 
     implementation(libs.kotlinx.coroutines.core)
     // The run-of-show PDF export. Already on the build for :presentation-engine and :converter, so

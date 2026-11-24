@@ -46,7 +46,10 @@ import org.churchpresenter.strings.generated.resources.move_translation_up
 import org.churchpresenter.strings.generated.resources.none
 import org.churchpresenter.strings.generated.resources.remove
 import org.churchpresenter.strings.generated.resources.scanning_directory
-import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.sharedui.composables.DropdownSettingsField
 import org.churchpresenter.sharedui.composables.LabeledCheckbox
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
@@ -65,7 +68,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.ScanningRow
 
-/** [ActionIconButton]'s own default size, which the reorder buttons take and their gaps stand in for. */
+/** [IconButtonSize.Medium]'s side, which the reorder buttons take and their gaps stand in for. */
 private val REORDER_BUTTON_SIZE = 34.dp
 
 /** Past two translations every row keeps three button slots, a gap standing in for a missing one. */
@@ -278,28 +281,37 @@ private fun TranslationRow(
         // short of the same one button, so they line up as they are.
         val padsReorderButtons = translations.size > 2
         if (index > 0) {
-            ActionIconButton(
-                onClick = { onSettingsChange { app -> app.moveBibleTranslation(index, -1) } },
-                tooltipText = stringResource(Res.string.move_translation_up),
-                painter = painterResource(IconRes.drawable.ic_arrow_up),
-            )
+            Tooltip(text = stringResource(Res.string.move_translation_up)) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_arrow_up),
+                    contentDescription = stringResource(Res.string.move_translation_up),
+                    onClick = { onSettingsChange { app -> app.moveBibleTranslation(index, -1) } },
+                    hierarchy = ButtonHierarchy.Primary,
+                )
+            }
         } else if (padsReorderButtons) {
             Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
         }
         if (index < translations.lastIndex) {
-            ActionIconButton(
-                onClick = { onSettingsChange { app -> app.moveBibleTranslation(index, 1) } },
-                tooltipText = stringResource(Res.string.move_translation_down),
-                painter = painterResource(IconRes.drawable.ic_arrow_down),
-            )
+            Tooltip(text = stringResource(Res.string.move_translation_down)) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_arrow_down),
+                    contentDescription = stringResource(Res.string.move_translation_down),
+                    onClick = { onSettingsChange { app -> app.moveBibleTranslation(index, 1) } },
+                    hierarchy = ButtonHierarchy.Primary,
+                )
+            }
         } else if (padsReorderButtons) {
             Spacer(modifier = Modifier.size(REORDER_BUTTON_SIZE))
         }
-        ActionIconButton(
-            onClick = { onSettingsChange { app -> app.removeBibleTranslation(index) } },
-            tooltipText = stringResource(Res.string.remove),
-            painter = painterResource(IconRes.drawable.ic_delete),
-        )
+        Tooltip(text = stringResource(Res.string.remove)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_delete),
+                contentDescription = stringResource(Res.string.remove),
+                onClick = { onSettingsChange { app -> app.removeBibleTranslation(index) } },
+                hierarchy = ButtonHierarchy.Primary,
+            )
+        }
         if (damagedCount > 0) DamagedVersesMark(damagedCount)
     }
     TranslationIdentityRow(

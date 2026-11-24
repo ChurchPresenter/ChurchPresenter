@@ -2,7 +2,6 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +41,11 @@ import org.churchpresenter.calendar.model.canPlayRepeatedly
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val TOAST_WIDTH = 310.dp
 private val TOAST_ICON = 24.dp
@@ -136,20 +140,14 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
                     )
                 }
             }
-            Box(
-                Modifier
-                    .size(SheetMetrics.smallButton)
-                    .clip(CalendarMetrics.smallRadius)
-                    .clickable(onClick = onDismiss),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Filled.Close,
-                    contentDescription = stringResource(Res.string.calendar_cue_toast_close),
-                    tint = scheme.onSurfaceVariant,
-                    modifier = Modifier.size(11.dp),
-                )
-            }
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Close),
+                contentDescription = stringResource(Res.string.calendar_cue_toast_close),
+                onClick = onDismiss,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

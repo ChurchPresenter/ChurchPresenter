@@ -61,7 +61,6 @@ import org.churchpresenter.strings.generated.resources.dictionary_pronunciation
 import org.churchpresenter.strings.generated.resources.dictionary_select_entry
 import org.churchpresenter.strings.generated.resources.dictionary_transliteration
 import org.churchpresenter.strings.generated.resources.go_live
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.dictionary.data.InterlinearVerse
@@ -72,6 +71,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -211,22 +213,24 @@ private fun DictionaryDetailActionRow(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        ActionIconButton(
-            onClick = onGoBack,
-            enabled = canGoBack,
-            tooltipText = backStr,
-            painter = painterResource(IconRes.drawable.ic_undo),
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        ActionIconButton(
-            onClick = onGoForward,
-            enabled = canGoForward,
-            tooltipText = forwardStr,
-            painter = painterResource(IconRes.drawable.ic_redo),
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Tooltip(text = backStr) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_undo),
+                contentDescription = backStr,
+                onClick = onGoBack,
+                intent = ButtonIntent.Neutral,
+                enabled = canGoBack,
+            )
+        }
+        Tooltip(text = forwardStr) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_redo),
+                contentDescription = forwardStr,
+                onClick = onGoForward,
+                intent = ButtonIntent.Neutral,
+                enabled = canGoForward,
+            )
+        }
         TooltipArea(
             tooltip = {
                 Surface(

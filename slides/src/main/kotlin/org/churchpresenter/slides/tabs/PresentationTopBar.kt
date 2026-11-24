@@ -4,10 +4,7 @@ import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.material3.Surface
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
@@ -26,7 +23,6 @@ import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -62,7 +57,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.SavePresetButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
@@ -81,6 +75,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.composables.RecentChip
 import org.churchpresenter.sharedui.composables.topBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /* The Presentation tab's top bar: the file bar, the recent files, and the playback controls. */
 
@@ -297,34 +298,15 @@ private fun PresentationTabScope.PresentationRecentFiles(viewModel: Presentation
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp,
-                    ) {
-                        Text(
-                            stringResource(Res.string.clear_recents),
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp),
+            Tooltip(text = stringResource(Res.string.clear_recents)) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.clear),
+                    onClick = { RecentPresentationFiles.clear() },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
                 )
-            ) {
-                KeyIconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                    Icon(
-                        painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.clear),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    )
-                }
             }
             LazyRow(
                 modifier = Modifier.weight(1f),
@@ -358,43 +340,42 @@ private fun PresentationTabScope.PresentationRecentFiles(viewModel: Presentation
 /** Remote, blank and clear. */
 @Composable
 private fun PresentationTabScope.PresentationOutputButtons(viewModel: PresentationViewModel) {
-    ActionIconButton(
-        onClick = { showRemoteDialog = true },
-        tooltipText = stringResource(Res.string.tooltip_presentation_remote),
-        icon = Icons.Default.SettingsRemote,
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-    )
-    if (presenterManager != null) {
-        ActionIconButton(
-            onClick = onFreezeToggle,
-            enabled = viewModel.slideFiles.isNotEmpty(),
-            tooltipText = stringResource(
-                if (presentationFrozen) {
-                    Res.string.presentation_unfreeze_output
-                } else {
-                    Res.string.presentation_freeze_output
-                }
-            ),
-            icon = if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-            containerColor = if (presentationFrozen) {
-                MaterialTheme.colorScheme.errorContainer
-            } else {
-                MaterialTheme.colorScheme.secondaryContainer
-            },
-            contentColor = if (presentationFrozen) {
-                MaterialTheme.colorScheme.onErrorContainer
-            } else {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            }
+    Tooltip(text = stringResource(Res.string.tooltip_presentation_remote)) {
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.SettingsRemote),
+            contentDescription = stringResource(Res.string.tooltip_presentation_remote),
+            onClick = { showRemoteDialog = true },
+            intent = ButtonIntent.Neutral,
         )
     }
-    ActionIconButton(
-        onClick = { viewModel.clearPresentations(); onClearPresentation() },
-        enabled = viewModel.slideFiles.isNotEmpty(),
-        tooltipText = stringResource(Res.string.presentation_clear),
-        painter = painterResource(IconRes.drawable.ic_stop),
-        containerColor = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer
-    )
+    if (presenterManager != null) {
+        val freezeStr = stringResource(
+            if (presentationFrozen) {
+                Res.string.presentation_unfreeze_output
+            } else {
+                Res.string.presentation_freeze_output
+            }
+        )
+        Tooltip(text = freezeStr) {
+            IconToggleButton(
+                icon = rememberVectorPainter(
+                    if (presentationFrozen) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                ),
+                contentDescription = freezeStr,
+                checked = presentationFrozen,
+                onCheckedChange = { onFreezeToggle() },
+                intent = if (presentationFrozen) ButtonIntent.Critical else ButtonIntent.Neutral,
+                enabled = viewModel.slideFiles.isNotEmpty(),
+            )
+        }
+    }
+    Tooltip(text = stringResource(Res.string.presentation_clear)) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_stop),
+            contentDescription = stringResource(Res.string.presentation_clear),
+            onClick = { viewModel.clearPresentations(); onClearPresentation() },
+            intent = ButtonIntent.Critical,
+            enabled = viewModel.slideFiles.isNotEmpty(),
+        )
+    }
 }

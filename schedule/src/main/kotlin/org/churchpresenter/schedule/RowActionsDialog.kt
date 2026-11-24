@@ -31,7 +31,6 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.strings.generated.resources.Res
@@ -57,6 +56,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * Edits what a schedule row does when it goes live (`docs/SHOW_CONTROL.md`, Cue actions): a list of
@@ -221,19 +225,17 @@ private fun CardButton(
     error: Boolean = false,
     onClick: () -> Unit,
 ) {
-    TooltipIconButton(
-        painter = painterResource(icon),
-        text = stringResource(tooltip),
-        onClick = onClick,
-        enabled = enabled,
-        buttonSize = CARD_BUTTON_SIZE,
-        iconSize = CARD_ICON_SIZE,
-        iconTint = when {
-            !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA)
-            error -> MaterialTheme.colorScheme.error
-            else -> MaterialTheme.colorScheme.onSurfaceVariant
-        },
-    )
+    Tooltip(text = stringResource(tooltip)) {
+        IconButton(
+            icon = painterResource(icon),
+            contentDescription = stringResource(tooltip),
+            onClick = onClick,
+            enabled = enabled,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = if (error) ButtonIntent.Critical else ButtonIntent.Neutral,
+        )
+    }
 }
 
 /** Add action, and the menu of every kind it can add. */
@@ -278,6 +280,3 @@ internal fun addActionKindTag(kind: ActionKind) = "row_action_add_${kind.name}"
 
 private val ROW_ACTIONS_WIDTH = 620.dp
 private val ROW_ACTIONS_HEIGHT = 560.dp
-private val CARD_BUTTON_SIZE = 28.dp
-private val CARD_ICON_SIZE = 14.dp
-private const val DISABLED_ALPHA = 0.3f

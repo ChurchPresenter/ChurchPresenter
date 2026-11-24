@@ -160,7 +160,6 @@ private fun LogoRow(path: String, onChoose: () -> Unit, onRemove: () -> Unit) {
                 description = stringResource(Res.string.calendar_export_logo_remove),
                 onClick = onRemove,
                 destructive = true,
-                size = SheetMetrics.rowButton,
             )
         }
     }

@@ -2,9 +2,6 @@ package org.churchpresenter.slides.tabs
 
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.material3.Surface
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,12 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.RaisedIconButton
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,13 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -84,6 +74,13 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.CircularButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /* The Presentation tab's playback controls: transport, counter, loop, timings, animation and the key hint. */
 
@@ -169,100 +166,38 @@ internal fun PresentationTabScope.PresentationControlsBar(viewModel: Presentatio
 private fun PresentationTabScope.PresentationTransport(viewModel: PresentationViewModel) {
     // Transport (inner gap: 4dp)
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.previous_image),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
+        Tooltip(text = stringResource(Res.string.previous_image)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_skip_previous),
+                contentDescription = stringResource(Res.string.previous_image),
+                onClick = { goPrevious(viewModel) },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
             )
-        ) {
-            KeyIconButton(onClick = { goPrevious(viewModel) }, modifier = Modifier.size(30.dp)) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_skip_previous),
-                    contentDescription = stringResource(Res.string.previous_image),
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                )
-            }
         }
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            RaisedIconButton(
+        Tooltip(text = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play)) {
+            CircularButton(
+                icon = painterResource(
+                    if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
+                ),
+                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                 onClick = { viewModel.togglePlayPause() },
+                size = IconButtonSize.Large,
+                hierarchy = ButtonHierarchy.Primary,
+                intent = ButtonIntent.Default,
                 enabled = viewModel.slideFiles.isNotEmpty(),
-                modifier = Modifier.size(38.dp),
-                shape = CircleShape,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Icon(
-                    painterResource(if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
-                    contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                    modifier = Modifier.size(15.dp),
-                )
-            }
-        }
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.next_image),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
             )
-        ) {
-            KeyIconButton(onClick = { goNext(viewModel) }, modifier = Modifier.size(30.dp)) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_skip_next),
-                    contentDescription = stringResource(Res.string.next_image),
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                )
-            }
+        }
+        Tooltip(text = stringResource(Res.string.next_image)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_skip_next),
+                contentDescription = stringResource(Res.string.next_image),
+                onClick = { goNext(viewModel) },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }
@@ -311,50 +246,21 @@ private fun PresentationTabScope.PresentationSlideCounter(viewModel: Presentatio
 @Composable
 private fun PresentationTabScope.PresentationLoopButton(viewModel: PresentationViewModel) {
     // Loop button
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp,
-            ) {
-                Text(
-                    stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
-    ) {
-        KeyIconButton(
-            onClick = {
+    Tooltip(text = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off)) {
+        IconToggleButton(
+            icon = painterResource(IconRes.drawable.ic_refresh),
+            contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+            checked = viewModel.isLooping,
+            onCheckedChange = {
                 viewModel.isLooping = !viewModel.isLooping
                 onSettingsChange { s -> s.copy(
                     presentationSettings = s.presentationSettings.copy(isLooping = viewModel.isLooping),
                 ) }
             },
-            modifier = Modifier.size(28.dp),
-            colors = if (viewModel.isLooping) IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) else IconButtonDefaults.iconButtonColors(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-            )
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_refresh),
-                contentDescription = stringResource(
-                    if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off,
-                ),
-                modifier = Modifier.size(16.dp),
-            )
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

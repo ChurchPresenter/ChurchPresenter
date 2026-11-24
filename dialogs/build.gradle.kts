@@ -12,6 +12,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.telemetry)
     implementation(projects.liveShow)
     implementation(projects.liveOutput)

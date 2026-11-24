@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.FabDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonFrame
 import org.churchpresenter.hosanna.composables.foundation.ButtonIcon

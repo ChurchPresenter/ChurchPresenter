@@ -1,16 +1,18 @@
 package org.churchpresenter.sharedui.composables
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_copy
 import org.churchpresenter.strings.generated.resources.tooltip_copy_link
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * Copies [url] to the clipboard, shown beside a button that opens the same address.
@@ -29,16 +31,17 @@ fun CopyLinkIconButton(
     url: String,
     onCopy: (String) -> Unit,
     modifier: Modifier = Modifier,
-    buttonSize: Dp = 28.dp,
-    iconSize: Dp = 15.dp
+    size: IconButtonSize = IconButtonSize.Small,
 ) {
-    TooltipIconButton(
-        painter = painterResource(IconRes.drawable.ic_copy),
-        text = stringResource(Res.string.tooltip_copy_link),
-        onClick = { onCopy(url) },
-        modifier = modifier,
-        iconSize = iconSize,
-        buttonSize = buttonSize,
-        iconTint = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    val text = stringResource(Res.string.tooltip_copy_link)
+    Tooltip(text = text, modifier = modifier) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_copy),
+            contentDescription = text,
+            onClick = { onCopy(url) },
+            size = size,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
 }

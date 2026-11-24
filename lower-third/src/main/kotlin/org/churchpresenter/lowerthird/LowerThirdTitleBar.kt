@@ -16,12 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,8 +54,14 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.strings.generated.resources.aspect_ratio_mismatch
 import org.churchpresenter.sharedui.utils.PreviewOutput
-import androidx.compose.material3.IconButtonColors
 import org.churchpresenter.sharedui.composables.topBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip as HosannaTooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** The one bar over the preview: the preset name, then ATEM, then Play, Add to Schedule and Go Live. */
 @Composable
@@ -131,49 +133,31 @@ internal fun LowerThirdTabScope.LowerThirdTitleBar(previewOutput: PreviewOutput)
 @Composable
 private fun LowerThirdTabScope.LowerThirdAtemButtons() {
     if (atemConfigured && atemEverConnected) {
-        val atemButtonColors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        )
         val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
         val goLiveKey = appSettings.atemSettings.goLiveKey
         // One string for the tooltip and the button's name, so they cannot drift apart.
         val goLiveKeyLabel = stringResource(Res.string.atem_golive_key)
-        Tooltip(goLiveKeyLabel) {
-            RaisedIconButton(
-                onClick = { onSettingsChangeState.value { s -> s.copy(
+        HosannaTooltip(goLiveKeyLabel) {
+            IconToggleButton(
+                icon = painterResource(IconRes.drawable.ic_key),
+                contentDescription = goLiveKeyLabel,
+                checked = goLiveKey,
+                onCheckedChange = { onSettingsChangeState.value { s -> s.copy(
                     atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey),
                 ) } },
-                modifier = Modifier.size(34.dp),
-                shape = AppShape(8.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = if (goLiveKey) {
-                        MaterialTheme.colorScheme.tertiary
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    contentColor = if (goLiveKey) {
-                        MaterialTheme.colorScheme.onTertiary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    }
-                )
-            ) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_key),
-                    contentDescription = goLiveKeyLabel,
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Secondary,
+                intent = ButtonIntent.Neutral,
+            )
         }
 
         if (appSettings.atemSettings.quickUpload) {
-            LowerThirdQuickUploadButtons(atemButtonColors, unreachableTooltip)
+            LowerThirdQuickUploadButtons(unreachableTooltip)
         } else {
-            Tooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
-                RaisedIconButton(
+            HosannaTooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_upload),
+                    contentDescription = stringResource(Res.string.atem_send_to_atem),
                     onClick = {
                         atemSlot = if (atemIsClip) {
                             appSettings.atemSettings.defaultClipSlot
@@ -185,16 +169,9 @@ private fun LowerThirdTabScope.LowerThirdAtemButtons() {
                         showAtemDialog = true
                     },
                     enabled = canPlay && !atemBusy && atemReachable,
-                    modifier = Modifier.size(34.dp),
-                    shape = AppShape(8.dp),
-                    colors = atemButtonColors
-                ) {
-                    Icon(
-                        painterResource(IconRes.drawable.ic_upload),
-                        contentDescription = stringResource(Res.string.atem_send_to_atem),
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
+                    size = IconButtonSize.Medium,
+                    hierarchy = ButtonHierarchy.Primary,
+                )
             }
         }
     }
@@ -202,7 +179,6 @@ private fun LowerThirdTabScope.LowerThirdAtemButtons() {
 
 @Composable
 private fun LowerThirdTabScope.LowerThirdQuickUploadButtons(
-    atemButtonColors: IconButtonColors,
     unreachableTooltip: String,
 ) {
     val stillSlot = appSettings.atemSettings.defaultStillSlot
@@ -215,8 +191,10 @@ private fun LowerThirdTabScope.LowerThirdQuickUploadButtons(
 
     val quickStillLabel =
         if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
-    Tooltip(quickStillLabel) {
-        RaisedIconButton(
+    HosannaTooltip(quickStillLabel) {
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.Image),
+            contentDescription = quickStillLabel,
             onClick = {
                 startAtemUpload(
                     atemVariant(isClip = false, useDetectedFps = false),
@@ -225,12 +203,9 @@ private fun LowerThirdTabScope.LowerThirdQuickUploadButtons(
                 )
             },
             enabled = quickEnabled,
-            modifier = Modifier.size(34.dp),
-            shape = AppShape(8.dp),
-            colors = atemButtonColors
-        ) {
-            Icon(Icons.Filled.Image, contentDescription = quickStillLabel, modifier = Modifier.size(16.dp))
-        }
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Primary,
+        )
     }
     val quickClipLabel = when {
         !atemReachable -> unreachableTooltip
@@ -246,27 +221,28 @@ private fun LowerThirdTabScope.LowerThirdQuickUploadButtons(
         }
         else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1)
     }
-    Tooltip(quickClipLabel) {
-        RaisedIconButton(
+    HosannaTooltip(quickClipLabel) {
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.Movie),
+            contentDescription = quickClipLabel,
             onClick = {
                 quickClipVariant?.let { variant ->
                     startAtemUpload(variant, clipSlot, closeDialogOnSuccess = false)
                 }
             },
             enabled = quickEnabled && !quickClipTooLong,
-            modifier = Modifier.size(34.dp),
-            shape = AppShape(8.dp),
-            colors = atemButtonColors
-        ) {
-            Icon(Icons.Filled.Movie, contentDescription = quickClipLabel, modifier = Modifier.size(16.dp))
-        }
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Primary,
+        )
     }
 }
 
 @Composable
 private fun LowerThirdTabScope.LowerThirdPlayButton() {
-    Tooltip(stringResource(if (isPlaying) Res.string.pause else Res.string.play)) {
-        RaisedIconButton(
+    HosannaTooltip(stringResource(if (isPlaying) Res.string.pause else Res.string.play)) {
+        IconButton(
+            icon = painterResource(if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
+            contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
             onClick = {
                 if (canPlay) {
                     if (isPlaying) {
@@ -279,19 +255,9 @@ private fun LowerThirdTabScope.LowerThirdPlayButton() {
                 }
             },
             enabled = canPlay,
-            modifier = Modifier.size(34.dp),
-            shape = AppShape(8.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Icon(
-                painterResource(if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
-                contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
-                modifier = Modifier.size(15.dp),
-            )
-        }
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Primary,
+        )
     }
 }
 

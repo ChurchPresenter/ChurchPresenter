@@ -33,7 +33,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.save
@@ -228,23 +231,35 @@ private fun StepRow(
                 onValueChange = { onChange(step.copy(seconds = it.takeIf { seconds -> seconds > 0 })) },
             )
         }
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.ArrowUpward),
-            text = stringResource(Res.string.signage_rotation_move_up),
-            onClick = { onMove(-1) },
-            enabled = !isFirst,
-        )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.ArrowDownward),
-            text = stringResource(Res.string.signage_rotation_move_down),
-            onClick = { onMove(1) },
-            enabled = !isLast,
-        )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Close),
-            text = stringResource(Res.string.signage_rotation_remove_step),
-            onClick = onRemove,
-        )
+        Tooltip(text = stringResource(Res.string.signage_rotation_move_up)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.ArrowUpward),
+                contentDescription = stringResource(Res.string.signage_rotation_move_up),
+                onClick = { onMove(-1) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+                enabled = !isFirst,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.signage_rotation_move_down)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.ArrowDownward),
+                contentDescription = stringResource(Res.string.signage_rotation_move_down),
+                onClick = { onMove(1) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+                enabled = !isLast,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.signage_rotation_remove_step)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Close),
+                contentDescription = stringResource(Res.string.signage_rotation_remove_step),
+                onClick = onRemove,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 

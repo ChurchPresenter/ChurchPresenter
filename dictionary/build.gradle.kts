@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.icons)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.bible)
 
     implementation(libs.kotlinx.coroutines.core)

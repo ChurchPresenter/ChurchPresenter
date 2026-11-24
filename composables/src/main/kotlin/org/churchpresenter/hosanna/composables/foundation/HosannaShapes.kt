@@ -1,8 +1,7 @@
-package org.churchpresenter.hosanna
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -35,12 +34,4 @@ val HosannaDefaultShapes = HosannaShapes(
     l = RoundedCornerShape(HosannaRadius.L),
     xl = RoundedCornerShape(HosannaRadius.XL),
     full = CircleShape,
-)
-
-fun HosannaShapes.toMaterial(): Shapes = Shapes(
-    extraSmall = RoundedCornerShape(HosannaRadius.XS),
-    small = RoundedCornerShape(HosannaRadius.S),
-    medium = RoundedCornerShape(HosannaRadius.M),
-    large = RoundedCornerShape(HosannaRadius.L),
-    extraLarge = RoundedCornerShape(HosannaRadius.XL),
 )

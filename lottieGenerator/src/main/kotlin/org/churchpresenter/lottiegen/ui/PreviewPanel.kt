@@ -25,7 +25,6 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,8 +50,11 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.lottiegen.ui.components.LottieSlider
-import org.churchpresenter.lottiegen.ui.components.raisedKey
-import org.churchpresenter.theme.elevationPalette
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.CircularButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** Dotted outlines over the composition: where the host's text will go, so the margins can be judged. */
 @Composable
@@ -114,23 +116,16 @@ private fun CheckerBoard(modifier: Modifier = Modifier) {
 internal fun PlayButton(
     isPlaying: Boolean,
     onClick: () -> Unit,
-    size: Dp = 36.dp,
-    iconSize: Dp = 17.dp,
+    size: IconButtonSize = IconButtonSize.Medium,
 ) {
-    val fill = elevationPalette().accent
-    Box(
-        modifier = Modifier
-            .size(size)
-            .raisedKey(CircleShape, fill, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-            contentDescription = if (isPlaying) "Pause" else "Play",
-            tint = fill.ink,
-            modifier = Modifier.size(iconSize)
-        )
-    }
+    CircularButton(
+        icon = rememberVectorPainter(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow),
+        contentDescription = if (isPlaying) Strings.editorPause else Strings.editorPlay,
+        onClick = onClick,
+        size = size,
+        hierarchy = ButtonHierarchy.Primary,
+        intent = ButtonIntent.Default,
+    )
 }
 
 @Composable

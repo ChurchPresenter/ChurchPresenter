@@ -12,11 +12,8 @@ import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import org.churchpresenter.settings.SongColumnId
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.rememberScrollState
@@ -45,13 +42,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,7 +70,6 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -111,10 +104,14 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.keyboardFocusRing
-import org.churchpresenter.theme.raisedHover
 import androidx.compose.foundation.layout.ColumnScope
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.searchBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 internal const val SONG_LIST_REBUILD_CLICK_WINDOW_MS = 800
 internal const val SONG_LIST_REBUILD_CLICK_COUNT = 3
@@ -352,37 +349,23 @@ private fun SongListScope.SongSearchBar() {
         // Hidden rebuild: 3 rapid clicks on the search button force-reloads songs from disk
         var rebuildClickCount by remember { mutableStateOf(0) }
         var rebuildClickTime by remember { mutableStateOf(0L) }
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .raisedHover(AppShape(8.dp), elevationPalette().accent, elevationPalette())
-                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                    val now = System.currentTimeMillis()
-                    if (now - rebuildClickTime > SONG_LIST_REBUILD_CLICK_WINDOW_MS) rebuildClickCount = 0
-                    rebuildClickCount++
-                    rebuildClickTime = now
-                    if (rebuildClickCount >= SONG_LIST_REBUILD_CLICK_COUNT) {
-                        rebuildClickCount = 0
-                        onReloadSongs()
-                    }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            } else {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_search),
-                    contentDescription = stringResource(Res.string.search),
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                )
-            }
-        }
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_search),
+            contentDescription = stringResource(Res.string.search),
+            onClick = {
+                val now = System.currentTimeMillis()
+                if (now - rebuildClickTime > SONG_LIST_REBUILD_CLICK_WINDOW_MS) rebuildClickCount = 0
+                rebuildClickCount++
+                rebuildClickTime = now
+                if (rebuildClickCount >= SONG_LIST_REBUILD_CLICK_COUNT) {
+                    rebuildClickCount = 0
+                    onReloadSongs()
+                }
+            },
+            size = IconButtonSize.Large,
+            hierarchy = ButtonHierarchy.Primary,
+            loading = isLoading,
+        )
     }
 }
 
@@ -447,17 +430,14 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
         if (searchQuery.isNotEmpty()) {
             // Focus goes back to the tab, not to this button — left on the IconButton, a
             // following Enter or Space would just re-fire the clear. Matches BibleTab.
-            KeyIconButton(
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.search_clear),
                 onClick = { onSearchQueryChange(""); tabFocusRequester.requestFocus() },
-                modifier = Modifier.size(30.dp),
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.search_clear),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }
@@ -540,36 +520,14 @@ private fun SongListScope.SongFavoritesHeader() {
             modifier = Modifier.padding(start = 4.dp)
         )
         Spacer(modifier = Modifier.weight(1f))
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.song_favorites_clear),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
+        Tooltip(text = stringResource(Res.string.song_favorites_clear)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_delete),
+                contentDescription = stringResource(Res.string.song_favorites_clear),
+                onClick = { onClearFavorites() },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
             )
-        ) {
-            KeyIconButton(onClick = {
-                onClearFavorites()
-            }) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_delete),
-                    contentDescription = stringResource(Res.string.song_favorites_clear),
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }
@@ -600,19 +558,16 @@ private fun SongListScope.SongFavoriteItem(song: SongItem) {
             modifier = Modifier.weight(1f, fill = false)
         )
         if (onAddToSchedule != null) {
-            KeyIconButton(
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_playlist_add),
+                contentDescription = stringResource(Res.string.add_to_schedule),
                 onClick = {
                     onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
                 },
-                modifier = Modifier.size(20.dp)
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_playlist_add),
-                    contentDescription = stringResource(Res.string.add_to_schedule),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.secondary
-                )
-            }
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

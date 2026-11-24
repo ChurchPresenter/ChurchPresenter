@@ -56,8 +56,11 @@ import org.churchpresenter.strings.generated.resources.tooltip_undo_unbound
 import org.churchpresenter.strings.generated.resources.tooltip_new_schedule
 import org.churchpresenter.strings.generated.resources.tooltip_open_schedule
 import org.churchpresenter.strings.generated.resources.tooltip_save_schedule
-import org.churchpresenter.sharedui.composables.ToolbarKey
-import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import org.churchpresenter.sharedui.composables.ContextMenu
@@ -107,15 +110,19 @@ internal fun ScheduleOptionsButton(
         // Styled as the tab-visibility button in `MainDesktop`, not as the toolbar strip's icons:
         // both open a toggle menu of panel-level options, so they read as the same
         // control -- a panel toggle, raised with an accent dot while its menu is open.
-        ToolbarKey(
-            painter = rememberVectorPainter(Icons.Default.Tune),
-            text = stringResource(Res.string.tooltip_schedule_options),
-            onClick = { expanded = true },
-            modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS),
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            open = expanded,
-            buttonSize = 36.dp,
-        )
+        val optionsLabel = stringResource(Res.string.tooltip_schedule_options)
+        Tooltip(text = optionsLabel) {
+            IconToggleButton(
+                icon = rememberVectorPainter(Icons.Default.Tune),
+                contentDescription = optionsLabel,
+                checked = expanded,
+                onCheckedChange = { expanded = true },
+                modifier = Modifier.testTag(ScheduleToolbarTags.OPTIONS),
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
         ContextMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },

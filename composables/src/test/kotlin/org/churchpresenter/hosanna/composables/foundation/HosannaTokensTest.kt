@@ -1,4 +1,4 @@
-package org.churchpresenter.hosanna
+package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.geometry.Size
@@ -33,15 +33,6 @@ class HosannaTokensTest {
     }
 
     @Test
-    fun `material shapes use the same scale`() {
-        val m = HosannaDefaultShapes.toMaterial()
-        assertEquals(
-            listOf(4f, 6f, 8f, 12f, 16f),
-            listOf(m.extraSmall, m.small, m.medium, m.large, m.extraLarge).map(::topLeftRadius),
-        )
-    }
-
-    @Test
     fun `the type scale matches the spec`() {
         val t = hosannaTypography(FontFamily.Monospace)
         val expected = listOf(
@@ -68,21 +59,6 @@ class HosannaTokensTest {
     }
 
     @Test
-    fun `material typography maps onto the ten styles`() {
-        val t = hosannaTypography(FontFamily.Default)
-        val m = t.toMaterial()
-        assertEquals(t.display, m.displayLarge)
-        assertEquals(t.headline, m.headlineSmall)
-        assertEquals(t.title, m.titleLarge)
-        assertEquals(t.subtitle, m.titleMedium)
-        assertEquals(t.body, m.bodyMedium)
-        assertEquals(t.caption, m.bodySmall)
-        assertEquals(t.label, m.labelLarge)
-        assertEquals(t.captionStrong, m.labelMedium)
-        assertEquals(t.overline, m.labelSmall)
-    }
-
-    @Test
     fun `tabular and overline helpers`() {
         assertEquals("tnum", hosannaTypography(FontFamily.Default).body.tabular().fontFeatureSettings)
         assertEquals("SONG BOOK", "Song book".asOverline())
@@ -93,17 +69,17 @@ class HosannaTokensTest {
     @Test
     fun `elevation levels follow material`() {
         assertEquals(listOf(0, 1, 3, 6, 8, 12).map { it.dp }, HosannaLevel.entries.map { it.dp })
-        listOf(HosannaLightElevation, HosannaDarkElevation).forEach { e ->
-            assertTrue(e.layers.getValue(HosannaLevel.Level0).isEmpty())
-            HosannaLevel.entries.drop(1).forEach { assertEquals(2, e.layers.getValue(it).size) }
+        listOf(HosannaLightShadows, HosannaDarkShadows).forEach { e ->
+            assertTrue(e.getValue(HosannaLevel.Level0).isEmpty())
+            HosannaLevel.entries.drop(1).forEach { assertEquals(2, e.getValue(it).size) }
         }
     }
 
     @Test
     fun `dark shadows are stronger than light ones`() {
         HosannaLevel.entries.drop(1).forEach { level ->
-            val light = HosannaLightElevation.layers.getValue(level).sumOf { it.alpha.toDouble() }
-            val dark = HosannaDarkElevation.layers.getValue(level).sumOf { it.alpha.toDouble() }
+            val light = HosannaLightShadows.getValue(level).sumOf { it.alpha.toDouble() }
+            val dark = HosannaDarkShadows.getValue(level).sumOf { it.alpha.toDouble() }
             assertTrue(dark > light, "$level")
         }
     }

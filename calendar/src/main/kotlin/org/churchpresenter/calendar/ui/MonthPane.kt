@@ -22,7 +22,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +48,12 @@ import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate
 import java.time.YearMonth
 import org.churchpresenter.theme.elevationPalette
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private const val WEEK_LENGTH = 7
 private const val MAX_DOTS = 3
@@ -170,21 +175,15 @@ private fun NavButton(
     description: String,
     onClick: () -> Unit,
 ) {
-    val key = elevationPalette().key
-    Hint(description) {
-        Box(
-            Modifier
-                .size(CalendarMetrics.monthNavButton)
-                .raisedKey(AppShape(7.dp), key, onClick = onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                icon,
-                contentDescription = description,
-                tint = key.ink,
-                modifier = Modifier.size(14.dp),
-            )
-        }
+    Tooltip(text = description) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = description,
+            onClick = onClick,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

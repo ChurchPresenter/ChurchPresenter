@@ -3,15 +3,14 @@ package org.churchpresenter.hosanna.composables.foundation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.state.ToggleableState
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class CheckboxColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
     private val off = ToggleableState.Off
     private val on = ToggleableState.On
     private val mixed = ToggleableState.Indeterminate
@@ -20,7 +19,7 @@ class CheckboxColorsTest {
     fun `an unchecked box is the lowest surface with a faint edge`() {
         val rest = c.checkboxColors(off, ButtonState.Rest, error = false)
         assertEquals(c.surfaceContainerLowest, rest.fill)
-        assertEquals(c.onSurfaceFaint, rest.edge)
+        assertEquals(c.faint, rest.edge)
         assertEquals(Color.Transparent, rest.halo)
         assertEquals(c.onSurface, rest.label)
         assertEquals(c.onSurfaceVariant, rest.description)

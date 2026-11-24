@@ -17,8 +17,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.StandardButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonFrame
 import org.churchpresenter.hosanna.composables.foundation.ButtonIcon

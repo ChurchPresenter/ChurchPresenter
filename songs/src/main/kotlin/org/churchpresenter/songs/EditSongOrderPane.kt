@@ -73,10 +73,14 @@ import org.churchpresenter.strings.generated.resources.song_order_slides
 import org.churchpresenter.strings.generated.resources.song_order_unused
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyButton
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 internal val ORDER_COLUMN_WIDTH = 176.dp
 private val CHIP_HEIGHT = 30.dp
@@ -240,14 +244,14 @@ private fun OrderChip(key: String, section: WrittenSection?, onRemove: () -> Uni
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        KeyIconButton(onClick = onRemove, modifier = Modifier.size(20.dp)) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = stringResource(Res.string.song_order_remove, name),
-                tint = ink,
-                modifier = Modifier.size(12.dp),
-            )
-        }
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Close),
+            contentDescription = stringResource(Res.string.song_order_remove, name),
+            onClick = onRemove,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

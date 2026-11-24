@@ -25,8 +25,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.SplitButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonColors
@@ -37,10 +36,11 @@ import org.churchpresenter.hosanna.composables.foundation.startSegment
 import org.churchpresenter.hosanna.composables.model.TextStyleToggle
 import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import org.churchpresenter.hosanna.composables.testing.testIcon
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class FontStylingButtonsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
     private val checkbox = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Checkbox)
     private val button = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)
     private fun toggleState(state: ToggleableState) =
@@ -186,7 +186,7 @@ class FontStylingButtonsTest {
             HosannaSurface {
                 SplitToggleButton(
                     testIcon(), "Backing", true, { changes++ }, { changes++ }, "Backing options",
-                    indicatorColor = c.star, enabled = false,
+                    indicatorColor = c.favorite, enabled = false,
                 )
             }
         }

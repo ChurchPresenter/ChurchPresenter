@@ -28,7 +28,6 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -95,6 +94,10 @@ import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
 import org.churchpresenter.sharedui.composables.rowSpan
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 @Composable
 internal fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifier = Modifier) {
@@ -301,18 +304,15 @@ internal fun BibleSearchField(
             )
         }
         if (value.isNotEmpty()) {
-            KeyIconButton(
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.search_clear),
                 onClick = onClear,
-
-                modifier = Modifier.size(30.dp).testTag("bible_searchClear")
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.search_clear),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+                modifier = Modifier.testTag("bible_searchClear"),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
         Box(modifier = Modifier.padding(end = 6.dp)) {
             modeChip()

@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,11 +34,13 @@ import org.churchpresenter.strings.generated.resources.text_outline_width
 import org.churchpresenter.core.models.text.TextOutline
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val DIALOG_WIDTH = 300.dp
 private val SECTION_PADDING = 12.dp
-private val CLOSE_BUTTON_SIZE = 28.dp
-private val CLOSE_ICON_SIZE = 14.dp
 private val WIDTH_FIELD_WIDTH = 104.dp
 
 /**
@@ -81,14 +81,14 @@ fun TextOutlineDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
-                    KeyIconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
-                        Icon(
-                            painter = painterResource(IconRes.drawable.ic_close),
-                            contentDescription = stringResource(Res.string.close),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(CLOSE_ICON_SIZE),
-                        )
-                    }
+                    IconButton(
+                        icon = painterResource(IconRes.drawable.ic_close),
+                        contentDescription = stringResource(Res.string.close),
+                        onClick = onDismiss,
+                        size = IconButtonSize.Small,
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Neutral,
+                    )
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Column(

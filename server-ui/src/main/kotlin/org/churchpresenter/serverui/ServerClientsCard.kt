@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -46,7 +45,12 @@ import androidx.compose.ui.window.DialogWindow
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.server.DevicePermission
 import org.churchpresenter.server.DevicePermissions
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.strings.generated.resources.Res
@@ -259,7 +263,7 @@ private fun ClientRowLine(
                     )
                 },
             )
-            RowIconButton(Icons.Filled.Check, stringResource(Res.string.save), MaterialTheme.colorScheme.primary) {
+            RowIconButton(Icons.Filled.Check, stringResource(Res.string.save), ButtonIntent.Default) {
                 onSetLabel(editText)
                 editing = false
             }
@@ -276,13 +280,17 @@ private fun ClientRowLine(
             ClientIdentity(clientId, label, isInstanceLinkFollower, modifier = Modifier.weight(1f))
             if (permissions != null) {
                 PermissionsSummary(permissions)
-                val tint = if (showPermissions) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-                RowIconButton(Icons.Outlined.Tune, stringResource(Res.string.remote_client_permissions), tint) {
-                    onTogglePermissions()
+                val permissionsName = stringResource(Res.string.remote_client_permissions)
+                Tooltip(text = permissionsName) {
+                    IconToggleButton(
+                        icon = rememberVectorPainter(Icons.Outlined.Tune),
+                        contentDescription = permissionsName,
+                        checked = showPermissions,
+                        onCheckedChange = { onTogglePermissions() },
+                        size = IconButtonSize.Small,
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Neutral,
+                    )
                 }
             }
             RowIconButton(Icons.Outlined.Edit, stringResource(Res.string.client_label_edit_tooltip)) {
@@ -299,17 +307,19 @@ private fun ClientRowLine(
 private fun RowIconButton(
     icon: ImageVector,
     name: String,
-    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    intent: ButtonIntent = ButtonIntent.Neutral,
     onClick: () -> Unit,
 ) {
-    TooltipIconButton(
-        painter = rememberVectorPainter(icon),
-        text = name,
-        onClick = onClick,
-        iconSize = 16.dp,
-        buttonSize = 30.dp,
-        iconTint = tint,
-    )
+    Tooltip(text = name) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = name,
+            onClick = onClick,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = intent,
+        )
+    }
 }
 
 @Composable

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,10 +32,12 @@ import org.churchpresenter.strings.generated.resources.recent_pin
 import org.churchpresenter.strings.generated.resources.recent_unpin
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
-import org.churchpresenter.theme.semantic
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val RECENT_CHIP_HEIGHT = 30.dp
 
@@ -83,14 +84,15 @@ fun RecentChip(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = RECENT_CHIP_MAX_TEXT),
         )
-        KeyIconButton(onClick = onTogglePin, modifier = Modifier.size(24.dp)) {
-            Icon(
-                painter = painterResource(if (isPinned) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
-                contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
-                modifier = Modifier.size(13.dp),
-                tint = if (isPinned) MaterialTheme.semantic.favorite else fill.ink.copy(alpha = STAR_OFF_ALPHA)
-            )
-        }
+        IconToggleButton(
+            icon = painterResource(if (isPinned) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
+            contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
+            checked = isPinned,
+            onCheckedChange = { onTogglePin() },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
     }
 }
@@ -127,8 +129,6 @@ private fun RecentChipTooltip(name: String, content: @Composable () -> Unit) {
         content = content,
     )
 }
-
-private const val STAR_OFF_ALPHA = 0.45f
 
 /**
  * As much of a name as one chip shows before it is ellipsised.

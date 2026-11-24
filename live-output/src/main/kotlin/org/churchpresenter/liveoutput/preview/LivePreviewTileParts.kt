@@ -22,9 +22,6 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,6 +61,11 @@ import org.churchpresenter.liveoutput.unlockedModeFor
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.mode
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** A stage monitor output's preview: its confidence layout, scaled into the tile. */
 @Composable
@@ -199,26 +201,22 @@ private fun BoxScope.LockControl(
         )
         return
     }
-    KeyIconButton(
-        onClick = { onToggleLock(if (lockedMode != null) null else effectiveMode) },
+    IconToggleButton(
+        icon = rememberVectorPainter(if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen),
+        contentDescription = if (lockedMode != null) {
+            stringResource(Res.string.unlock_screen)
+        } else {
+            stringResource(Res.string.lock_screen_to_tab)
+        },
+        checked = lockedMode != null,
+        onCheckedChange = { onToggleLock(if (lockedMode != null) null else effectiveMode) },
         modifier = Modifier
             .align(Alignment.BottomEnd)
-            .padding(2.dp)
-            .size(24.dp),
-        colors = IconButtonDefaults.iconButtonColors(
-            contentColor = if (lockedMode != null) Color(LOCK_BADGE_COLOR) else Color.White.copy(alpha = 0.5f)
-        )
-    ) {
-        Icon(
-            imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
-            contentDescription = if (lockedMode != null) {
-                stringResource(Res.string.unlock_screen)
-            } else {
-                stringResource(Res.string.lock_screen_to_tab)
-            },
-            modifier = Modifier.size(13.dp)
-        )
-    }
+            .padding(2.dp),
+        size = IconButtonSize.Small,
+        hierarchy = ButtonHierarchy.Tertiary,
+        intent = ButtonIntent.Neutral,
+    )
 }
 
 /**

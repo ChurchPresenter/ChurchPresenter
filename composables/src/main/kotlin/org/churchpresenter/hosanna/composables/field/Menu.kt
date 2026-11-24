@@ -49,10 +49,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.asOverline
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
 import org.churchpresenter.hosanna.composables.model.MenuEntry
@@ -65,10 +65,11 @@ import org.churchpresenter.hosanna.composables.model.itemCount
 import org.churchpresenter.hosanna.composables.model.menuKey
 import org.churchpresenter.hosanna.composables.model.menuRowContainer
 import org.churchpresenter.hosanna.composables.model.nextPickable
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 @Composable
 internal fun DropdownMenu(
@@ -142,7 +143,7 @@ internal fun DropdownMenu(
                     BasicText(
                         search.noMatches,
                         Modifier.padding(MenuDefaults.RowPadding),
-                        style = HosannaTheme.typography.body.copy(color = HosannaTheme.colors.onSurfaceFaint),
+                        style = HosannaTheme.typography.body.copy(color = ThemeColors.current.faint),
                     )
                 }
                 Box(Modifier.heightIn(max = MenuDefaults.MaxHeight)) {
@@ -179,7 +180,7 @@ internal fun DropdownMenu(
 
 @Composable
 private fun menuScrollbarStyle(): ScrollbarStyle {
-    val thumb = HosannaTheme.colors.onSurfaceFaint
+    val thumb = ThemeColors.current.faint
     return ScrollbarStyle(
         minimalHeight = MenuDefaults.RowHeight,
         thickness = MenuDefaults.ScrollbarThickness,
@@ -197,7 +198,7 @@ internal fun MenuSurface(width: Dp?, padding: Dp = MenuDefaults.Padding, content
         modifier = Modifier
             .then(width?.let { Modifier.width(it) } ?: Modifier.width(IntrinsicSize.Max))
             .hosannaElevation(HosannaLevel.Level3, shape, HosannaTheme.elevation)
-            .background(HosannaTheme.colors.surfaceContainerHigh, shape)
+            .background(ThemeColors.current.surfaceContainerHigh, shape)
             .padding(padding),
     ) {
         content()
@@ -214,7 +215,7 @@ internal fun MenuHeader(title: String) {
             top = MenuDefaults.HeaderTop,
             bottom = MenuDefaults.HeaderBottom,
         ),
-        style = HosannaTheme.typography.overline.copy(color = HosannaTheme.colors.onSurfaceFaint),
+        style = HosannaTheme.typography.overline.copy(color = ThemeColors.current.faint),
     )
 }
 
@@ -225,7 +226,7 @@ internal fun MenuDivider() {
             .fillMaxWidth()
             .padding(horizontal = MenuDefaults.Padding, vertical = MenuDefaults.DividerMargin)
             .height(FieldDefaults.Border)
-            .background(HosannaTheme.colors.outlineVariant),
+            .background(ThemeColors.current.outlineVariant),
     )
 }
 
@@ -237,7 +238,7 @@ private fun MenuRow(
     onHover: () -> Unit,
     onClick: () -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val typography = HosannaTheme.typography
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
@@ -268,7 +269,7 @@ private fun MenuRow(
                 overflow = TextOverflow.Ellipsis,
             )
             item.supporting?.let {
-                BasicText(it, style = typography.caption.copy(color = colors.onSurfaceFaint), maxLines = 1)
+                BasicText(it, style = typography.caption.copy(color = colors.faint), maxLines = 1)
             }
         }
         item.count?.let { CountBadge(it, selected) }
@@ -278,7 +279,7 @@ private fun MenuRow(
 
 @Composable
 private fun CountBadge(text: String, selected: Boolean) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Box(
         modifier = Modifier
             .height(MenuDefaults.BadgeHeight)
@@ -296,7 +297,7 @@ private fun CountBadge(text: String, selected: Boolean) {
         BasicText(
             text,
             style = HosannaTheme.typography.captionStrong.copy(
-                color = if (selected) colors.primary else colors.onSurfaceFaint,
+                color = if (selected) colors.primary else colors.faint,
             ),
         )
     }

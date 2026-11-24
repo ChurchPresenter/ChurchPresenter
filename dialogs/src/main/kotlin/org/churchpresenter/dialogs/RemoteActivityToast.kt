@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
@@ -73,6 +72,11 @@ import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 internal const val TOAST_AUTO_DISMISS_MS = 10_000L
 
@@ -297,13 +301,14 @@ private fun ToastButtons(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        KeyButton(shape = AppShape(6.dp), onClick = onBlockForSession) {
-            Icon(
-                Icons.Filled.RemoveCircle,
-                contentDescription = stringResource(Res.string.block_for_session),
-                tint = MaterialTheme.colorScheme.error
-            )
-        }
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.RemoveCircle),
+            contentDescription = stringResource(Res.string.block_for_session),
+            onClick = onBlockForSession,
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Critical,
+        )
         GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
             Text(
                 stringResource(Res.string.remote_activity_dismiss),

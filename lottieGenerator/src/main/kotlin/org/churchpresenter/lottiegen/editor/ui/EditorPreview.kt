@@ -19,9 +19,7 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +36,11 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.lottiegen.ui.Strings
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * The preview's own chrome. Deliberately fixed rather than themed: this is the neutral ground a
@@ -45,8 +48,6 @@ import org.churchpresenter.lottiegen.ui.Strings
  */
 private val PREVIEW_BORDER = Color(0xFF2A2D35)
 private val PREVIEW_BACKDROP = Color(0xFF10131A)
-
-private val ButtonShape = AppShape(6.dp)
 
 /**
  * The Style Editor's live preview — the generator PreviewPanel's Compottie mechanics
@@ -125,13 +126,14 @@ fun EditorPreview(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            KeyButton(onClick = { onPlayingChange(!isPlaying) }, shape = ButtonShape) {
-                Icon(
-                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) Strings.editorPause else Strings.editorPlay,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            IconButton(
+                icon = rememberVectorPainter(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow),
+                contentDescription = if (isPlaying) Strings.editorPause else Strings.editorPlay,
+                onClick = { onPlayingChange(!isPlaying) },
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Secondary,
+                intent = ButtonIntent.Neutral,
+            )
 
             Slider(
                 value = seek,

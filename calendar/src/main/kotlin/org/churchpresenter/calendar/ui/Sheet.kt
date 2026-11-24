@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -37,6 +38,11 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.calendar.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.theme.sunken
 
 /**
@@ -111,19 +117,14 @@ fun SheetScaffold(
                     }
                 }
                 if (showClose) {
-                    Box(
-                        Modifier
-                            .size(SheetMetrics.closeButton)
-                            .raisedKey(AppShape(7.dp), elevationPalette().key, onClick = onDismiss),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            Icons.Filled.Close,
-                            contentDescription = stringResource(Res.string.calendar_close),
-                            tint = scheme.onSurfaceVariant,
-                            modifier = Modifier.size(12.dp),
-                        )
-                    }
+                    IconButton(
+                        icon = rememberVectorPainter(Icons.Filled.Close),
+                        contentDescription = stringResource(Res.string.calendar_close),
+                        onClick = onDismiss,
+                        size = IconButtonSize.Small,
+                        hierarchy = ButtonHierarchy.Secondary,
+                        intent = ButtonIntent.Neutral,
+                    )
                 }
             }
             HorizontalDivider()
@@ -248,24 +249,16 @@ fun SmallIconButton(
     description: String,
     onClick: () -> Unit,
     destructive: Boolean = false,
-    size: Dp = SheetMetrics.smallButton,
 ) {
-    val palette = elevationPalette()
-    val fill = if (destructive) palette.danger else palette.key
-    Hint(description) {
-        Box(
-            Modifier
-                .size(size)
-                .raisedKey(AppShape(6.dp), fill, onClick = onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                icon,
-                contentDescription = description,
-                tint = fill.ink,
-                modifier = Modifier.size(size * ICON_RATIO),
-            )
-        }
+    Tooltip(text = description) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = description,
+            onClick = onClick,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = if (destructive) ButtonIntent.Critical else ButtonIntent.Neutral,
+        )
     }
 }
 
@@ -350,4 +343,3 @@ private const val ICON_TINT = 0.16f
 private const val CARD_TINT = 0.4f
 private const val CARD_BORDER = 0.6f
 private const val DASHED_BORDER = 0.45f
-private const val ICON_RATIO = 0.5f

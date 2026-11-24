@@ -38,9 +38,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.PositionMetrics
 import org.churchpresenter.hosanna.composables.defaults.PositionPickerDefaults
@@ -51,6 +51,7 @@ import org.churchpresenter.hosanna.composables.model.column
 import org.churchpresenter.hosanna.composables.model.movePosition
 import org.churchpresenter.hosanna.composables.model.positionAt
 import org.churchpresenter.hosanna.composables.model.row
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A small screen with nine spots to pick where something goes on the output. Arrows move between spots.
@@ -75,7 +76,7 @@ fun PositionPicker(
     compact: Boolean = false,
     enabled: Boolean = true,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val typography = HosannaTheme.typography
     val metrics = PositionPickerDefaults.metrics(compact)
     val focused by interactionSource.collectIsFocusedAsState()
@@ -149,7 +150,7 @@ private fun PositionCell(
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()

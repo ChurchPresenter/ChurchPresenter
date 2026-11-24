@@ -17,7 +17,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +38,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -64,8 +62,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -94,7 +90,6 @@ import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.helperDayOf
 import org.churchpresenter.settings.tipDue
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_clear
@@ -106,12 +101,17 @@ import org.churchpresenter.strings.generated.resources.helper_name
 import org.churchpresenter.strings.generated.resources.helper_send
 import org.churchpresenter.strings.generated.resources.helper_send_chat
 import org.churchpresenter.strings.generated.resources.helper_status
-import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.semantic
 import org.churchpresenter.theme.sunken
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.button.CircularButton
 
 /** How long nothing has to be live before the lamp offers a tip. */
 private const val TIP_IDLE_MS = 60_000L
@@ -363,22 +363,30 @@ private fun PanelHeader(
             }
         }
         HeaderMenu(canClear, onClear, onShareChat)
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.VisibilityOff),
-            text = stringResource(Res.string.helper_hide),
-            onClick = onHide,
-            iconSize = 17.dp,
-            buttonSize = 30.dp,
-            modifier = Modifier.testTag("helper.hide"),
-        )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Close),
-            text = stringResource(Res.string.helper_close_bubble),
-            onClick = onClose,
-            iconSize = 15.dp,
-            buttonSize = 30.dp,
-            modifier = Modifier.testTag("helper.close"),
-        )
+        val hideText = stringResource(Res.string.helper_hide)
+        Tooltip(text = hideText) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.VisibilityOff),
+                contentDescription = hideText,
+                onClick = onHide,
+                modifier = Modifier.testTag("helper.hide"),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        val closeText = stringResource(Res.string.helper_close_bubble)
+        Tooltip(text = closeText) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Close),
+                contentDescription = closeText,
+                onClick = onClose,
+                modifier = Modifier.testTag("helper.close"),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 
@@ -387,14 +395,18 @@ private fun PanelHeader(
 private fun HeaderMenu(canClear: Boolean, onClear: () -> Unit, onShareChat: (() -> Unit)?) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.MoreVert),
-            text = stringResource(Res.string.helper_more),
-            onClick = { expanded = true },
-            iconSize = 17.dp,
-            buttonSize = 30.dp,
-            modifier = Modifier.testTag("helper.menu"),
-        )
+        val moreText = stringResource(Res.string.helper_more)
+        Tooltip(text = moreText) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.MoreVert),
+                contentDescription = moreText,
+                onClick = { expanded = true },
+                modifier = Modifier.testTag("helper.menu"),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
         AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.helper_clear)) },
@@ -507,34 +519,18 @@ private fun Composer(state: HelperState, ask: Ask) {
                         .onPreviewKeyEvent { event -> state.onComposerKey(event, send) },
                 )
             }
-            val sendLabel = stringResource(Res.string.helper_send)
-            val sendModifier = Modifier.size(34.dp).semantics { contentDescription = sendLabel }.testTag("helper.send")
-            if (hasText) {
-                RaisedButton(
-                    onClick = { send() },
-                    shape = CircleShape,
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = sendModifier,
-                ) {
-                    SendArrow(colors.onPrimary)
-                }
-            } else {
-                // Nothing to send: a flat, quiet circle, the arrow in the muted ink rather than the
-                // button's white, which all but vanished on it.
-                Box(
-                    sendModifier.background(lifted(CARD_LIFT), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    SendArrow(colors.onSurfaceVariant)
-                }
-            }
+            CircularButton(
+                icon = rememberVectorPainter(Icons.Filled.ArrowUpward),
+                contentDescription = stringResource(Res.string.helper_send),
+                onClick = { send() },
+                modifier = Modifier.testTag("helper.send"),
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Primary,
+                intent = ButtonIntent.Default,
+                enabled = hasText,
+            )
         }
     }
-}
-
-@Composable
-private fun SendArrow(tint: Color) {
-    Icon(Icons.Filled.ArrowUpward, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
 }
 
 private val EDGE = 16.dp

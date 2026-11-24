@@ -19,8 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.SunkenOutlinedTextField
@@ -55,6 +53,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** How long a status line stays on screen before it clears itself. */
 private const val STATUS_MESSAGE_MS = 3_000L
@@ -124,11 +128,16 @@ private fun LevelHeader(state: AdminState) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Tip("Go to previous level") {
-            KeyIconButton(
+        Tooltip("Go to previous level") {
+            IconButton(
+                icon = rememberVectorPainter(Icons.AutoMirrored.Filled.ArrowBack),
+                contentDescription = Strings.navPrev,
                 onClick = { state.loadLevel(state.levels[index - 1]) },
-                enabled = index > 0
-            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = Strings.navPrev) }
+                enabled = index > 0,
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
 
         Text(
@@ -138,11 +147,16 @@ private fun LevelHeader(state: AdminState) {
             modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-        Tip("Go to next level") {
-            KeyIconButton(
+        Tooltip("Go to next level") {
+            IconButton(
+                icon = rememberVectorPainter(Icons.AutoMirrored.Filled.ArrowForward),
+                contentDescription = Strings.navNext,
                 onClick = { state.loadLevel(state.levels[index + 1]) },
-                enabled = index < state.levels.size - 1
-            ) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = Strings.navNext) }
+                enabled = index < state.levels.size - 1,
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
 
         Spacer(Modifier.width(16.dp))

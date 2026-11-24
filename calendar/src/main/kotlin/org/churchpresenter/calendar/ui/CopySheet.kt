@@ -2,9 +2,7 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -86,6 +83,11 @@ import org.churchpresenter.theme.components.SegmentTrackItem
 import org.churchpresenter.theme.components.SegmentTrack
 import java.time.format.FormatStyle
 import java.time.format.DateTimeFormatter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val SHEET_WIDTH = 450.dp
 private val TARGET_HEIGHT = 30.dp
@@ -296,20 +298,16 @@ private fun StepButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(
-        Modifier
-            .size(width = STEPPER_BUTTON, height = STEPPER_BUTTON - 2.dp)
-            .clip(AppShape(3.dp))
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            icon,
-            contentDescription = description,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else CARD_TINT),
-            modifier = Modifier.size(STEPPER_BUTTON),
-        )
-    }
+    IconButton(
+        icon = rememberVectorPainter(icon),
+        contentDescription = description,
+        onClick = onClick,
+        modifier = Modifier.size(width = STEPPER_BUTTON, height = STEPPER_BUTTON - 2.dp),
+        size = IconButtonSize.Small,
+        hierarchy = ButtonHierarchy.Tertiary,
+        intent = ButtonIntent.Neutral,
+        enabled = enabled,
+    )
 }
 
 /**

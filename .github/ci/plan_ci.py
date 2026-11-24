@@ -28,7 +28,6 @@ MODULES = [
     ("crossword", "Crossword", 0.1),
     ("presentation-engine", "Presentation Engine", 0.4),
     ("theme", "Theme", 0.2),
-    ("hosanna-theme", "Hosanna theme", 0.2),
     ("composables", "Composables", 0.2),
     ("core-models", "Core models", 0.2),
     ("songlibrary", "Song library", 0.5),

@@ -46,9 +46,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.arrowStep
 import org.churchpresenter.hosanna.composables.button.focusableSegment
 import org.churchpresenter.hosanna.composables.button.icon
@@ -60,13 +57,12 @@ import org.churchpresenter.hosanna.composables.defaults.ButtonFoundationDefaults
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentMetrics
 import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
-import org.churchpresenter.hosanna.hosannaElevation
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
-internal fun HosannaColors.iconSegmentColors(value: ToggleableState, state: ButtonState): ButtonColors {
+internal fun ThemeColors.iconSegmentColors(value: ToggleableState, state: ButtonState): ButtonColors {
     if (value != ToggleableState.Indeterminate || state == ButtonState.Disabled) {
         return segmentColors(value == ToggleableState.On, state)
     }
@@ -95,8 +91,8 @@ internal fun IconSegmentTrack(
     val trackShape = RoundedCornerShape(IconSegmentDefaults.TrackRadius)
     Row(
         modifier = modifier
-            .background(HosannaTheme.colors.trackColor(enabled), trackShape)
-            .border(SegmentedButtonDefaults.TrackEdge, HosannaTheme.colors.outlineVariant, trackShape)
+            .background(ThemeColors.current.trackColor(enabled), trackShape)
+            .border(SegmentedButtonDefaults.TrackEdge, ThemeColors.current.outlineVariant, trackShape)
             .padding(SegmentedButtonDefaults.TrackPadding),
         horizontalArrangement = Arrangement.spacedBy(SegmentedButtonDefaults.TrackGap),
         verticalAlignment = Alignment.CenterVertically,
@@ -186,7 +182,7 @@ internal fun IconSegment(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.iconSegmentColors(value, state)
+    val colors = ThemeColors.current.iconSegmentColors(value, state)
     val container = remember(value) { Animatable(colors.container) }
     LaunchedEffect(colors.container) {
         container.animateTo(colors.container, tween(ButtonFoundationDefaults.TRANSITION_MILLIS, easing = EaseOut))

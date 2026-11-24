@@ -24,10 +24,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import org.churchpresenter.theme.components.RaisedIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -75,8 +70,15 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlinx.coroutines.launch
-import androidx.compose.material3.IconButtonColors
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.CircularButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** Transport, loop, scale, subtitles and volume. */
 @Composable
@@ -93,22 +95,7 @@ internal fun MediaTabScope.MediaControlsBar(viewModel: MediaViewModel) {
         // heightIn box, so the controls sat high in the bar instead of centred in it.
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
     ) {
-        // One tint for every transport control, so the enabled/disabled ramp cannot drift
-        // between the rewind, stop, forward and volume buttons.
-        val transportTint = MaterialTheme.colorScheme.onSurface
-            .copy(alpha = if (viewModel.isLoaded) 1f else MEDIA_DISABLED_TRANSPORT_ALPHA)
-        val keyColors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Transparent,
-            contentColor = transportTint,
-            disabledContentColor = transportTint,
-        )
-        val litKeyColors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContentColor = transportTint,
-        )
-
-        MediaTransport(viewModel, keyColors, litKeyColors)
+        MediaTransport(viewModel)
 
         // (Elapsed / total time now flank the seek bar below, so the combined time is
         // no longer shown here.)
@@ -116,154 +103,99 @@ internal fun MediaTabScope.MediaControlsBar(viewModel: MediaViewModel) {
         // Divider
         Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
-        MediaLoopControls(viewModel, keyColors, litKeyColors)
+        MediaLoopControls(viewModel)
 
-        MediaScaleButton(viewModel, keyColors, litKeyColors)
-
-        // Divider
-        Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
-
-        MediaSubtitlesButton(viewModel, keyColors, litKeyColors)
+        MediaScaleButton(viewModel)
 
         // Divider
         Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
-        MediaVolume(viewModel, keyColors)
+        MediaSubtitlesButton(viewModel)
+
+        // Divider
+        Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+        MediaVolume(viewModel)
     }
 }
 
 /** Raised keys, Play the biggest and lit. */
 @Composable
-private fun MediaTabScope.MediaTransport(
-    viewModel: MediaViewModel,
-    keyColors: IconButtonColors,
-    litKeyColors: IconButtonColors,
-) {
+private fun MediaTabScope.MediaTransport(viewModel: MediaViewModel) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        TooltipArea(
-            tooltip = { TransportTooltip(stringResource(Res.string.media_seek_backward)) },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            RaisedIconButton(
+        Tooltip(text = stringResource(Res.string.media_seek_backward)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_fast_rewind),
+                contentDescription = stringResource(Res.string.media_seek_backward),
                 onClick = { viewModel.position.seekBackward() },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
-                colors = keyColors
-            ) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_fast_rewind),
-                    contentDescription = stringResource(Res.string.media_seek_backward),
-                    modifier = Modifier.size(16.dp),
-                )
-            }
-        }
-        MediaPlayKey(viewModel, litKeyColors)
-        TooltipArea(
-            tooltip = { TransportTooltip(stringResource(Res.string.stop)) },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
             )
-        ) {
-            RaisedIconButton(
+        }
+        MediaPlayKey(viewModel)
+        Tooltip(text = stringResource(Res.string.stop)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_stop),
+                contentDescription = stringResource(Res.string.stop),
                 onClick = { viewModel.stop() },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
-                colors = keyColors
-            ) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_stop),
-                    contentDescription = stringResource(Res.string.stop),
-                    modifier = Modifier.size(16.dp),
-                )
-            }
-        }
-        TooltipArea(
-            tooltip = { TransportTooltip(stringResource(Res.string.media_seek_forward)) },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
             )
-        ) {
-            RaisedIconButton(
+        }
+        Tooltip(text = stringResource(Res.string.media_seek_forward)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_fast_forward),
+                contentDescription = stringResource(Res.string.media_seek_forward),
                 onClick = { viewModel.position.seekForward() },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
-                colors = keyColors
-            ) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_fast_forward),
-                    contentDescription = stringResource(Res.string.media_seek_forward),
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+            )
         }
     }
 }
 
 @Composable
-private fun MediaTabScope.MediaPlayKey(viewModel: MediaViewModel, litKeyColors: IconButtonColors) {
-    TooltipArea(
-        tooltip = { TransportTooltip(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play)) },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
-    ) {
-        RaisedIconButton(
+private fun MediaTabScope.MediaPlayKey(viewModel: MediaViewModel) {
+    Tooltip(text = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play)) {
+        CircularButton(
+            icon = painterResource(
+                if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
+            ),
+            contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
             onClick = { viewModel.togglePlayPause() },
+            size = IconButtonSize.Large,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Default,
             enabled = viewModel.isLoaded,
-            modifier = Modifier.size(MEDIA_PLAY_KEY_SIZE),
-            shape = CircleShape,
-            colors = litKeyColors
-        ) {
-            Icon(
-                painterResource(
-                    if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
-                ),
-                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                modifier = Modifier.size(15.dp),
-            )
-        }
+        )
     }
 }
 
 /** The loop key, and while looping the count of repeats beside it. */
 @Composable
-private fun MediaTabScope.MediaLoopControls(
-    viewModel: MediaViewModel,
-    keyColors: IconButtonColors,
-    litKeyColors: IconButtonColors,
-) {
+private fun MediaTabScope.MediaLoopControls(viewModel: MediaViewModel) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         val loopLabel = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off)
-        TooltipArea(
-            tooltip = { TransportTooltip(loopLabel) },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp)
-            )
-        ) {
-            RaisedIconButton(
-                onClick = { viewModel.looping.toggleLooping() },
+        Tooltip(text = loopLabel) {
+            IconToggleButton(
+                icon = painterResource(IconRes.drawable.ic_refresh),
+                contentDescription = loopLabel,
+                checked = viewModel.isLooping,
+                onCheckedChange = { viewModel.looping.toggleLooping() },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
-                colors = if (viewModel.isLooping) litKeyColors else keyColors
-            ) {
-                // TooltipArea is a hover popup and contributes no semantics, so without
-                // this the button would have no name at all.
-                Icon(
-                    painterResource(IconRes.drawable.ic_refresh),
-                    contentDescription = loopLabel,
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+            )
         }
         if (viewModel.isLooping) {
             val loopCountHint = stringResource(Res.string.media_loop_count_tooltip)
@@ -290,72 +222,47 @@ private fun MediaTabScope.MediaLoopControls(
 
 /** Each click moves Fit → Fill → Stretch on every profile at once, like the Pictures tab's button. */
 @Composable
-private fun MediaTabScope.MediaScaleButton(
-    viewModel: MediaViewModel,
-    keyColors: IconButtonColors,
-    litKeyColors: IconButtonColors,
-) {
+private fun MediaTabScope.MediaScaleButton(viewModel: MediaViewModel) {
     val shared = sharedScaleMode(appSettings.projectionSettings.outputProfiles) { it.mediaScaleMode }
     val scaleMode = shared ?: OutputScaleMode.FIT
     val scaled = shared != OutputScaleMode.FIT
     val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.MEDIA)
-    TooltipArea(
-        tooltip = { TransportTooltip(scaleLabel) },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        )
-    ) {
-        RaisedIconButton(
-            onClick = {
+    Tooltip(text = scaleLabel) {
+        IconToggleButton(
+            icon = rememberVectorPainter(scaleMode.icon),
+            contentDescription = scaleLabel,
+            checked = scaled,
+            onCheckedChange = {
                 val next = if (shared == null) scaleMode else scaleMode.next()
                 onSettingsChange { s -> s.withMediaScaleEverywhere(next) }
             },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
             enabled = viewModel.isLoaded,
-            modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
-            colors = if (scaled) litKeyColors else keyColors
-        ) {
-            Icon(
-                scaleMode.icon,
-                contentDescription = scaleLabel,
-                modifier = Modifier.size(16.dp),
-            )
-        }
+        )
     }
 }
 
 /** Subtitles: off, one of the tracks VLC found, or a file of the operator's own. */
 @Composable
-private fun MediaTabScope.MediaSubtitlesButton(
-    viewModel: MediaViewModel,
-    keyColors: IconButtonColors,
-    litKeyColors: IconButtonColors,
-) {
+private fun MediaTabScope.MediaSubtitlesButton(viewModel: MediaViewModel) {
     var subtitlesExpanded by remember { mutableStateOf(false) }
     val subtitlesLabel = stringResource(Res.string.media_subtitles)
     val subtitlesShowing = viewModel.subtitlesVisible
     val subtitleFilesLabel = stringResource(Res.string.media_subtitles_files)
     val subtitleFileTitle = stringResource(Res.string.media_subtitles_load_file)
     Box {
-        TooltipArea(
-            tooltip = { TransportTooltip(subtitlesLabel) },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp)
-            )
-        ) {
-            RaisedIconButton(
+        Tooltip(text = subtitlesLabel) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_subtitles),
+                contentDescription = subtitlesLabel,
                 onClick = { subtitlesExpanded = true },
+                size = IconButtonSize.Small,
+                hierarchy = if (subtitlesShowing) ButtonHierarchy.Primary else ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.isLoaded && !viewModel.isAudioFile,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
-                colors = if (subtitlesShowing) litKeyColors else keyColors
-            ) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_subtitles),
-                    contentDescription = subtitlesLabel,
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+            )
         }
         AppDropdownMenu(expanded = subtitlesExpanded, onDismissRequest = { subtitlesExpanded = false }) {
             SubtitleMenuItems(
@@ -400,7 +307,7 @@ private fun MediaTabScope.MediaSubtitlesButton(
 
 /** A mute key with the slider beside it, both always in the bar. */
 @Composable
-private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel, keyColors: IconButtonColors) {
+private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -408,26 +315,17 @@ private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel, keyColors: Icon
         val muteLabel = stringResource(
             if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute
         )
-        TooltipArea(
-            tooltip = { TransportTooltip(muteLabel) },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            RaisedIconButton(
+        Tooltip(text = muteLabel) {
+            IconButton(
+                icon = painterResource(if (viewModel.isMuted ||
+                    viewModel.volume == 0f) IconRes.drawable.ic_volume_off else IconRes.drawable.ic_volume_up),
+                contentDescription = muteLabel,
                 onClick = { viewModel.audio.toggleMute() },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.isLoaded,
-                modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
-                colors = keyColors
-            ) {
-                Icon(
-                    painter = painterResource(if (viewModel.isMuted ||
-                        viewModel.volume == 0f) IconRes.drawable.ic_volume_off else IconRes.drawable.ic_volume_up),
-                    contentDescription = muteLabel,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            )
         }
         SlimSlider(
             value = if (viewModel.isMuted) 0f else viewModel.volume,

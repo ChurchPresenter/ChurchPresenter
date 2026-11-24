@@ -1,6 +1,5 @@
 package org.churchpresenter.announcements
 
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
@@ -71,6 +70,13 @@ import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.sharedui.composables.bibleInsetFill
 import org.churchpresenter.core.models.schedule.formatTimer
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /* The Announcements tab's timer: its mode, its display, its steppers, its controls. */
 
@@ -343,36 +349,35 @@ private fun AnnouncementsTabScope.TimerControls(viewModel: AnnouncementsViewMode
         // stops any other timer/clock ticker AND the announcement text (mutually
         // exclusive, see isTimerRunning/announcementTextIsLive above) since they
         // all share the same announcementText slot.
-        ActionIconButton(
-            onClick = {
-                viewModel.saveToSettings(onSettingsChange)
-                viewModel.startPauseTimer(output)
-            },
-            enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
-            tooltipText = if (isTimerRunning) pauseLabel else startLabel,
-            painter = painterResource(if (isTimerRunning) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
-            containerColor = if (isTimerRunning) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                MaterialTheme.colorScheme.primaryContainer
-            },
-            contentColor = if (isTimerRunning) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onPrimaryContainer
-            }
-        )
+        val playText = if (isTimerRunning) pauseLabel else startLabel
+        Tooltip(text = playText) {
+            IconToggleButton(
+                icon = painterResource(if (isTimerRunning) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
+                contentDescription = playText,
+                checked = isTimerRunning,
+                onCheckedChange = {
+                    viewModel.saveToSettings(onSettingsChange)
+                    viewModel.startPauseTimer(output)
+                },
+                enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Secondary,
+            )
+        }
         // Reset only makes sense for Timer/Duration, which count down/up from a
         // starting point. Specific Time and the live Clock always track the wall
         // clock automatically — there's nothing to reset back to.
         if (viewModel.isDurationOrCountUp) {
-            ActionIconButton(
-                onClick = { viewModel.resetTimer(output) },
-                tooltipText = resetLabel,
-                painter = painterResource(IconRes.drawable.ic_refresh),
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Tooltip(text = resetLabel) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_refresh),
+                    contentDescription = resetLabel,
+                    onClick = { viewModel.resetTimer(output) },
+                    size = IconButtonSize.Medium,
+                    hierarchy = ButtonHierarchy.Secondary,
+                    intent = ButtonIntent.Neutral,
+                )
+            }
         }
         // Stage Monitor already shows its own always-on clock, so the plain
         // "Clock" timer mode has nothing extra to send there.
@@ -387,41 +392,41 @@ private fun AnnouncementsTabScope.TimerStageMonitorButton(viewModel: Announcemen
     if (output != null &&
         canSendToStageMonitor &&
         viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
-        ActionIconButton(
-                modifier = Modifier.guideTarget(GuideTargets.TIMER_TO_STAGE),
-            onClick = {
-                // Sending is the only thing (besides Go Live) allowed to mark the
-                // ticker live — the play/pause button above stays preview-only.
-                if (!isSentToStageMonitor) {
-                    // Sending Specific Time to Stage Monitor also (re)starts its
-                    // ticker if it wasn't already running via the play/pause button.
-                    if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
-                        output.startAnnouncementSpecificTime(
-                            viewModel.targetHour,
-                            viewModel.targetMinute,
-                            viewModel.targetSecond,
-                        )
+        val stageText = if (isSentToStageMonitor) {
+            stringResource(Res.string.tooltip_hide_from_stage_monitor)
+        } else {
+            stringResource(Res.string.tooltip_send_to_stage_monitor)
+        }
+        Tooltip(text = stageText, modifier = Modifier.guideTarget(GuideTargets.TIMER_TO_STAGE)) {
+            IconToggleButton(
+                icon = rememberVectorPainter(
+                    if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast
+                ),
+                contentDescription = stageText,
+                checked = isSentToStageMonitor,
+                onCheckedChange = {
+                    // Sending is the only thing (besides Go Live) allowed to mark the
+                    // ticker live — the play/pause button above stays preview-only.
+                    if (!isSentToStageMonitor) {
+                        // Sending Specific Time to Stage Monitor also (re)starts its
+                        // ticker if it wasn't already running via the play/pause button.
+                        if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
+                            output.startAnnouncementSpecificTime(
+                                viewModel.targetHour,
+                                viewModel.targetMinute,
+                                viewModel.targetSecond,
+                            )
+                        }
+                        output.setAnnouncementTickerLive(true)
                     }
-                    output.setAnnouncementTickerLive(true)
-                }
-                val liveText = formatTimer(viewModel.timerDisplayValue)
-                toggleStageMonitor(viewModel, liveText)
-            },
-            tooltipText = if (isSentToStageMonitor) stringResource(
-                Res.string.tooltip_hide_from_stage_monitor,
-            ) else stringResource(Res.string.tooltip_send_to_stage_monitor),
-            icon = if (isSentToStageMonitor) Icons.Default.CastConnected else Icons.Default.Cast,
-            containerColor = if (isSentToStageMonitor) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-            contentColor = if (isSentToStageMonitor) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            }
-        )
+                    val liveText = formatTimer(viewModel.timerDisplayValue)
+                    toggleStageMonitor(viewModel, liveText)
+                },
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Secondary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 

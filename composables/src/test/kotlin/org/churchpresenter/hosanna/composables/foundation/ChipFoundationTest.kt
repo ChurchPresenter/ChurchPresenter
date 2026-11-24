@@ -6,36 +6,35 @@ import androidx.compose.ui.graphics.compositeOver
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.churchpresenter.hosanna.HosannaDarkColors
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.chip.chipPadding
 import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.model.ChipColor
 import org.churchpresenter.hosanna.composables.model.ChipColors
 import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
+import org.churchpresenter.hosanna.composables.testing.DarkThemeColors
 
 class ChipFoundationTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `every chip color is a theme role, neutral has none`() {
-        listOf(c, HosannaDarkColors).forEach { colors ->
+        listOf(c, DarkThemeColors).forEach { colors ->
             val expected = mapOf(
-                ChipColor.Verse to colors.verse,
-                ChipColor.Chorus to colors.chorus,
-                ChipColor.Bridge to colors.bridge,
-                ChipColor.Intro to colors.intro,
-                ChipColor.Voice to colors.voice,
-                ChipColor.OtherSection to colors.otherSection,
-                ChipColor.Song to colors.song,
-                ChipColor.Bible to colors.bible,
-                ChipColor.Presentation to colors.presentation,
-                ChipColor.Pictures to colors.pictures,
-                ChipColor.Media to colors.media,
-                ChipColor.LowerThird to colors.lowerThird,
-                ChipColor.Announcement to colors.announcement,
+                ChipColor.Verse to colors.chordVerse,
+                ChipColor.Chorus to colors.chordChorus,
+                ChipColor.Bridge to colors.chordBridge,
+                ChipColor.Intro to colors.sectionIntro,
+                ChipColor.Voice to colors.sectionVoice,
+                ChipColor.OtherSection to colors.sectionOther,
+                ChipColor.Song to colors.contentSongs,
+                ChipColor.Bible to colors.contentBible,
+                ChipColor.Presentation to colors.contentPresentation,
+                ChipColor.Pictures to colors.contentPictures,
+                ChipColor.Media to colors.contentMedia,
+                ChipColor.LowerThird to colors.contentLowerThird,
+                ChipColor.Announcement to colors.contentAnnouncement,
                 ChipColor.Live to colors.live,
             )
             assertNull(colors.accent(ChipColor.Neutral))
@@ -62,10 +61,10 @@ class ChipFoundationTest {
         )
         assertEquals(
             ChipColors(
-                c.verse.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_CONTAINER),
-                c.verse.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_EDGE),
-                c.verse,
-                c.verse,
+                c.chordVerse.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_CONTAINER),
+                c.chordVerse.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_EDGE),
+                c.chordVerse,
+                c.chordVerse,
                 null,
             ),
             c.restChipColors(ChipColor.Verse, selected = false),

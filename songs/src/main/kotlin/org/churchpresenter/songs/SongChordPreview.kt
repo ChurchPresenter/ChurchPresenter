@@ -36,7 +36,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,9 +65,13 @@ import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_add
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import androidx.compose.material3.Icon
 import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.songchords.SecondVoice
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * A section of the song as the preview draws it: a label, and its lines already split into runs.
@@ -396,8 +399,8 @@ private fun Stepper(label: String, value: String?, down: StepAction, up: StepAct
                 modifier = Modifier.widthIn(min = 26.dp),
             )
         }
-        StepButton(down, accent)
-        StepButton(up, accent)
+        StepButton(down)
+        StepButton(up)
     }
 }
 
@@ -425,21 +428,16 @@ internal fun TooltipWrapper(tooltip: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun StepButton(action: StepAction, accent: Color) {
-    TooltipWrapper(tooltip = action.tooltip) {
-        Box(
-            modifier = Modifier
-                .size(width = 22.dp, height = 20.dp)
-                .background(accent.copy(alpha = 0.16f), AppShape(5.dp))
-                .clickable(onClick = action.onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(action.icon),
-                contentDescription = action.tooltip,
-                tint = accent,
-                modifier = Modifier.size(14.dp),
-            )
-        }
+private fun StepButton(action: StepAction) {
+    Tooltip(text = action.tooltip) {
+        IconButton(
+            icon = painterResource(action.icon),
+            contentDescription = action.tooltip,
+            onClick = action.onClick,
+            modifier = Modifier.size(width = 22.dp, height = 20.dp),
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Default,
+        )
     }
 }

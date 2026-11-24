@@ -58,7 +58,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import org.churchpresenter.sharedui.composables.SectionLabelRow
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.FocusHintBanner
 import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
@@ -111,6 +110,9 @@ import org.churchpresenter.strings.generated.resources.song_add_translation
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableIntStateOf
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 
 /**
  * The lyrics panel down the right of the Songs tab.
@@ -341,25 +343,25 @@ private fun LyricsActionBar(
         )
 
         if (currentSong != null) {
-            ActionIconButton(
-                onClick = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },
-                tooltipText = editSongStr,
-                painter = painterResource(IconRes.drawable.ic_edit),
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.guideTarget(GuideTargets.EDIT_SONG),
-            )
+            Tooltip(text = editSongStr, modifier = Modifier.guideTarget(GuideTargets.EDIT_SONG)) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_edit),
+                    contentDescription = editSongStr,
+                    onClick = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },
+                    hierarchy = ButtonHierarchy.Secondary,
+                )
+            }
         }
 
         // New Song button
-        ActionIconButton(
-            onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
-            tooltipText = newSongStr,
-            painter = painterResource(IconRes.drawable.ic_add),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            modifier = Modifier.guideTarget(GuideTargets.NEW_SONG),
-        )
+        Tooltip(text = newSongStr, modifier = Modifier.guideTarget(GuideTargets.NEW_SONG)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_add),
+                contentDescription = newSongStr,
+                onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
+                hierarchy = ButtonHierarchy.Secondary,
+            )
+        }
 
         if (onAddToSchedule != null && currentSong != null) {
             AddToScheduleButton(

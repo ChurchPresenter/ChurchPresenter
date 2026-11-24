@@ -403,7 +403,6 @@ internal fun ResultRow(
                 icon = Icons.Filled.Edit,
                 description = stringResource(Res.string.calendar_edit_song),
                 onClick = onEdit,
-                size = ADD_BADGE,
             )
         }
         if (onToggle != null) {
@@ -411,7 +410,6 @@ internal fun ResultRow(
                 icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                 description = stringResource(Res.string.calendar_preview_toggle),
                 onClick = onToggle,
-                size = ADD_BADGE,
             )
         }
         val addTip = stringResource(Res.string.calendar_pick_add_tip)

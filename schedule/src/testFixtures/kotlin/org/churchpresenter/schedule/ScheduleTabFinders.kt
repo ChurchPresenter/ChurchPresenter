@@ -18,7 +18,7 @@ import androidx.compose.ui.test.onNodeWithTag
 // the other tab suites in this package.
 
 /**
- * A toolbar or row button, addressed by the content description [TooltipIconButton] gives it —
+ * A toolbar or row button, addressed by the content description its icon button gives it —
  * which is its tooltip text, so the label a user would see is also the test's selector.
  */
 internal fun ComposeUiTest.button(label: String) = onNodeWithContentDescription(label)

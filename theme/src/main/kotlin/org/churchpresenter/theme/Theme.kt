@@ -166,35 +166,44 @@ fun Typography.withFontFamily(family: FontFamily): Typography = copy(
  * that shape: adding one without these two roles silently falls back to the baseline lavender again.
  */
 
-// Light theme colors — neutral grey palette
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF4A5568),           // muted slate-grey
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFDDE1E7),  // light grey-blue container
-    onPrimaryContainer = Color(0xFF1A202C),
-    secondary = Color(0xFF607D8B),         // blue-grey accent
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFCFD8DC),
-    onSecondaryContainer = Color(0xFF263238),
-    tertiary = Color(0xFF78909C),          // lighter blue-grey
-    onTertiary = Color.White,
-    error = Color(0xFFB00020),
-    onError = Color.White,
-    errorContainer = Color(0xFFFDE7E7),
-    onErrorContainer = Color(0xFF790000),
-    background = Color(0xFFF4F4F5),        // very light grey, no blue tint
-    onBackground = Color(0xFF1A1A1A),
-    surface = Color(0xFFEFEFF1),           // neutral light grey surface
-    onSurface = Color(0xFF1A1A1A),
-    surfaceVariant = Color(0xFFE2E2E5),    // slightly darker grey, no purple
-    onSurfaceVariant = Color(0xFF44444A),
-    surfaceContainer = Color(0xFFF9F9FA),
-    surfaceContainerHigh = Color(0xFFEDEDEE),
-    outline = Color(0xFF8A8A94),
-    outlineVariant = Color(0xFFCCCCD0),
-    // Custom colors for buttons
-    inverseSurface = Color(0xFF4CAF50),    // Success button background
-    inverseOnSurface = Color.White,        // Success button text
+// Light theme colors — the Hosanna light palette
+internal val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF2F6FD0),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFE4EDFB),
+    onPrimaryContainer = Color(0xFF1F5BB0),
+    inversePrimary = Color(0xFF9CC6F7),
+    secondary = Color(0xFF3A3F47),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFEEF0F3),
+    onSecondaryContainer = Color(0xFF1B1F24),
+    tertiary = Color(0xFF8A5A10),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFFBEBD0),
+    onTertiaryContainer = Color(0xFF8A5A10),
+    background = Color(0xFFECEEF2),
+    onBackground = Color(0xFF1B1F24),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF1B1F24),
+    surfaceVariant = Color(0xFFF3F5F8),
+    onSurfaceVariant = Color(0xFF5A616B),
+    surfaceTint = Color(0xFFFFFFFF),
+    inverseSurface = Color(0xFF1B1F24),
+    inverseOnSurface = Color(0xFFFFFFFF),
+    error = Color(0xFFC43030),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFDEAEA),
+    onErrorContainer = Color(0xFFC43030),
+    outline = Color(0xFFCFD4DB),
+    outlineVariant = Color(0xFFE2E5EA),
+    scrim = Color(0xFF000000),
+    surfaceBright = Color(0xFFFFFFFF),
+    surfaceContainer = Color(0xFFFFFFFF),
+    surfaceContainerHigh = Color(0xFFFFFFFF),
+    surfaceContainerHighest = Color(0xFFF3F5F8),
+    surfaceContainerLow = Color(0xFFF6F7F9),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceDim = Color(0xFFECEEF2),
 )
 
 // Warm light theme — cream/amber tones
@@ -287,34 +296,44 @@ private val RoseColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
-// Dark theme colors — classic neutral dark
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF90CAF9),
-    onPrimary = Color(0xFF003258),
-    primaryContainer = Color(0xFF004881),
-    onPrimaryContainer = Color(0xFFD1E4FF),
-    secondary = Color(0xFF4DB6AC),
-    onSecondary = Color(0xFF003D36),
-    secondaryContainer = Color(0xFF005B4F),
-    onSecondaryContainer = Color(0xFF70F0DD),
-    tertiary = Color(0xFFE1BEE7),
-    onTertiary = Color(0xFF4A148C),
-    error = Color(0xFFF44336),
-    onError = Color.White,
-    errorContainer = Color(0xFFD32F2F),
-    onErrorContainer = Color.White,
-    background = Color(0xFF10131A),
-    onBackground = Color(0xFFE6E1E5),
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color(0xFFE6E1E5),
-    surfaceVariant = Color(0xFF49454F),
-    onSurfaceVariant = Color(0xFFCAC4D0),
-    surfaceContainer = Color(0xFF2E2E2E),
-    surfaceContainerHigh = Color(0xFF363636),
-    outline = Color(0xFF938F99),
-    outlineVariant = Color(0xFF49454F),
-    inverseSurface = Color(0xFF66BB6A),
-    inverseOnSurface = Color.Black,
+// Dark theme colors — the Hosanna dark palette
+internal val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF9CC6F7),
+    onPrimary = Color(0xFF0F2F52),
+    primaryContainer = Color(0xFF38404E),
+    onPrimaryContainer = Color(0xFFA9CBFF),
+    inversePrimary = Color(0xFF2F6FD0),
+    secondary = Color(0xFFE4E6EA),
+    onSecondary = Color(0xFF1B1F24),
+    secondaryContainer = Color(0xFF3A3A3D),
+    onSecondaryContainer = Color(0xFFECECEF),
+    tertiary = Color(0xFFF0C27A),
+    onTertiary = Color(0xFF3A2604),
+    tertiaryContainer = Color(0xFF4D4131),
+    onTertiaryContainer = Color(0xFFF0C27A),
+    background = Color(0xFF1C1C1F),
+    onBackground = Color(0xFFECECEF),
+    surface = Color(0xFF2B2B2E),
+    onSurface = Color(0xFFECECEF),
+    surfaceVariant = Color(0xFF18181B),
+    onSurfaceVariant = Color(0xFFA4A7AE),
+    surfaceTint = Color(0xFF2B2B2E),
+    inverseSurface = Color(0xFFECECEF),
+    inverseOnSurface = Color(0xFF1B1F24),
+    error = Color(0xFFFF8B8B),
+    onError = Color(0xFF3B0A0A),
+    errorContainer = Color(0xFF493437),
+    onErrorContainer = Color(0xFFFF8B8B),
+    outline = Color(0xFF3E3E45),
+    outlineVariant = Color(0xFF3A3A40),
+    scrim = Color(0xFF000000),
+    surfaceBright = Color(0xFF38383D),
+    surfaceContainer = Color(0xFF323236),
+    surfaceContainerHigh = Color(0xFF38383D),
+    surfaceContainerHighest = Color(0xFF18181B),
+    surfaceContainerLow = Color(0xFF262629),
+    surfaceContainerLowest = Color(0xFF141416),
+    surfaceDim = Color(0xFF1C1C1F),
 )
 
 // Studio dark theme — amber accent, deep navy panels
@@ -586,8 +605,10 @@ fun ChurchPresenterTheme(
         colorSchemeFor(themeMode, systemDark, customization)
     }
     val semanticColors = remember(colorScheme, themeMode, customization) {
-        semanticColorsFor(colorScheme).let {
-            if (themeMode == ThemeMode.CUSTOM) customSemanticColors(it, customization) else it
+        if (themeMode == ThemeMode.CUSTOM) {
+            customSemanticColors(presetSemanticColors(customization.dark), customization)
+        } else {
+            semanticColorsFor(colorScheme)
         }
     }
     val typography = remember(customization.fontFamily) {

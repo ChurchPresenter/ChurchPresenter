@@ -15,6 +15,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)

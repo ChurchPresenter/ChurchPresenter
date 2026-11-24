@@ -25,8 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -69,6 +67,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raisedHover
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val DIALOG_WIDTH = 320.dp
 private val OPACITY_FIELD_WIDTH = 104.dp
@@ -85,8 +87,6 @@ private val SECTION_PADDING = 12.dp
 /** The close button, at the size the rest of the app draws a close icon at rather than the
  *  10dp glyph in a 20dp target this opened with -- which was smaller than anything else in
  *  the dialog and hard to hit. */
-private val CLOSE_BUTTON_SIZE = 28.dp
-private val CLOSE_ICON_SIZE = 14.dp
 
 /**
  * Everything that goes behind and around a piece of text, in one dialog.
@@ -126,14 +126,14 @@ fun TextBackdropDialog(
                 Column(Modifier.padding(SECTION_PADDING)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SectionLabel(stringResource(Res.string.backdrop_style), Modifier.weight(1f))
-                        KeyIconButton(onClick = onDismiss, modifier = Modifier.size(CLOSE_BUTTON_SIZE)) {
-                            Icon(
-                                painter = painterResource(IconRes.drawable.ic_close),
-                                contentDescription = stringResource(Res.string.close),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(CLOSE_ICON_SIZE),
-                            )
-                        }
+                        IconButton(
+                            icon = painterResource(IconRes.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.close),
+                            onClick = onDismiss,
+                            size = IconButtonSize.Small,
+                            hierarchy = ButtonHierarchy.Tertiary,
+                            intent = ButtonIntent.Neutral,
+                        )
                     }
                     Spacer(Modifier.height(8.dp))
                     BackdropModeRow(draft) { draft = draft.withMode(it) }

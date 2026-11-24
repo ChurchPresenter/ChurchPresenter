@@ -44,6 +44,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /*
  * A cue row of the run of show -- what a cue looks like inside the list.
@@ -125,21 +131,16 @@ private fun CueTick(enabled: Boolean, onToggle: () -> Unit) {
 /** The small `▶` that fires a cue by hand. */
 @Composable
 private fun FireButton(onFire: () -> Unit) {
-    val accent = elevationPalette().accent
-    Hint(stringResource(Res.string.calendar_cue_fire_now)) {
-        Box(
-            Modifier
-                .size(CalendarMetrics.rowAction)
-                .raisedKey(CalendarMetrics.smallRadius, accent, onClick = onFire),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Filled.PlayArrow,
-                contentDescription = stringResource(Res.string.calendar_cue_fire_now),
-                tint = accent.ink,
-                modifier = Modifier.size(12.dp),
-            )
-        }
+    val fireNow = stringResource(Res.string.calendar_cue_fire_now)
+    Tooltip(text = fireNow) {
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.PlayArrow),
+            contentDescription = fireNow,
+            onClick = onFire,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Default,
+        )
     }
 }
 

@@ -27,9 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,13 +37,13 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.output_profile_move_down
 import org.churchpresenter.strings.generated.resources.output_profile_move_up
 import org.churchpresenter.strings.generated.resources.output_profile_remove_translation
-import org.churchpresenter.theme.components.KeyIconButton
-import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.jetbrains.compose.resources.stringResource
 
-private const val DISABLED_KEY_ALPHA = 0.3f
 private val MENU_WIDTH = 380.dp
-private val ROW_KEY = 26.dp
 private val ROW_ICON = 16.dp
 
 /**
@@ -221,7 +220,7 @@ private fun OrderRow(
             stringResource(Res.string.output_profile_remove_translation),
             enabled = true,
             onClick = onRemove,
-            tint = elevationPalette().danger.ink,
+            intent = ButtonIntent.Critical,
         )
     }
 }
@@ -291,16 +290,17 @@ private fun RowKey(
     description: String,
     enabled: Boolean,
     onClick: () -> Unit,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
+    intent: ButtonIntent = ButtonIntent.Neutral,
 ) {
-    KeyIconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(ROW_KEY)) {
-        Icon(
-            icon,
-            contentDescription = description,
-            tint = if (enabled) tint else tint.copy(alpha = DISABLED_KEY_ALPHA),
-            modifier = Modifier.size(ROW_ICON),
-        )
-    }
+    IconButton(
+        icon = rememberVectorPainter(icon),
+        contentDescription = description,
+        onClick = onClick,
+        size = IconButtonSize.Small,
+        hierarchy = ButtonHierarchy.Tertiary,
+        intent = intent,
+        enabled = enabled,
+    )
 }
 
 @Composable

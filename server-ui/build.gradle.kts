@@ -13,6 +13,7 @@ dependencies {
     implementation(projects.strings)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.calendar)
     implementation(projects.profiles)
     implementation(projects.lowerThirdEngine)

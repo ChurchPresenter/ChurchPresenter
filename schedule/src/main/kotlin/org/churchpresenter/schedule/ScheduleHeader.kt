@@ -1,8 +1,5 @@
 package org.churchpresenter.schedule
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -21,11 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.material3.Text
@@ -39,14 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -54,7 +44,6 @@ import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.strings.generated.resources.schedule
 import org.churchpresenter.strings.generated.resources.schedule_item_count
 import org.churchpresenter.strings.generated.resources.schedule_add_files
-import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -64,9 +53,13 @@ import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raised
 import org.churchpresenter.sharedui.composables.bibleListCardFill
 import org.churchpresenter.sharedui.composables.topBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
-private const val MENU_OFFSET_DP = 8
-private const val TOOLTIP_GAP_DP = 4
 private const val DASH_ON_PX = 6f
 private const val DASH_OFF_PX = 4f
 
@@ -203,59 +196,34 @@ internal fun PillDivider() {
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun ScheduleRowActionButton(
     painter: Painter,
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-
-    buttonSize: Dp = 30.dp,
-    iconSize: Dp = 13.dp,
-    iconTint: Color? = null,
-    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
-    /**
-     * Below the button instead of to its left. A button at the panel's left edge has no room on
-     * that side, so its tooltip would be pushed back over the button and take its clicks.
-     */
-    tooltipBelow: Boolean = false,
+    intent: ButtonIntent = ButtonIntent.Neutral,
+    checked: Boolean? = null,
 ) {
-    ConditionalTooltipArea(
-        tooltipPlacement = if (tooltipBelow) {
-            TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                alignment = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, TOOLTIP_GAP_DP.dp)
+    Tooltip(text = text, modifier = modifier) {
+        if (checked == null) {
+            IconButton(
+                icon = painter,
+                contentDescription = text,
+                onClick = onClick,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = intent,
             )
         } else {
-            TooltipPlacement.ComponentRect(
-                anchor = Alignment.CenterStart,
-                alignment = Alignment.CenterStart,
-                offset = DpOffset((-MENU_OFFSET_DP).dp, 0.dp)
-            )
-        },
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                Text(
-                    text = text,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        }
-    ) {
-        KeyIconButton(onClick = onClick, modifier = modifier.size(buttonSize), colors = colors) {
-            Image(
-                painter = painter,
+            IconToggleButton(
+                icon = painter,
                 contentDescription = text,
-                modifier = Modifier.size(iconSize),
-                colorFilter = iconTint?.let { ColorFilter.tint(it) }
+                checked = checked,
+                onCheckedChange = { onClick() },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = intent,
             )
         }
     }

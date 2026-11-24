@@ -2,7 +2,6 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -29,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.foundation.PointerMatcher
@@ -62,6 +60,12 @@ import org.churchpresenter.calendar.model.parseStoredTime
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalTime
 import org.churchpresenter.theme.elevationPalette
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * The pane's header, as the design has it: the service's span (`10:00 – 11:09 AM · 69 min`), then
@@ -108,20 +112,20 @@ internal fun RunOfShowHeader(
         HeaderIcon(
             icon = Icons.Filled.Timeline,
             tooltip = stringResource(Res.string.calendar_lay_out_times_tip),
-            tint = scheme.tertiary,
+            intent = ButtonIntent.Default,
             onClick = actions.onLayOutTimes,
         )
         Box(Modifier.width(1.dp).height(HEADER_RULE_HEIGHT).background(scheme.outlineVariant))
         HeaderIcon(
             icon = Icons.Filled.ContentCopy,
             tooltip = stringResource(Res.string.calendar_copy_service_tip),
-            tint = scheme.onSurfaceVariant,
+            intent = ButtonIntent.Neutral,
             onClick = actions.onCopy,
         )
         HeaderIcon(
             icon = Icons.Filled.Dashboard,
             tooltip = stringResource(Res.string.calendar_save_template_tip),
-            tint = scheme.onSurfaceVariant,
+            intent = ButtonIntent.Neutral,
             onClick = actions.onSaveTemplate,
         )
     }
@@ -170,20 +174,15 @@ private fun ClockChip(now: LocalTime?, previewing: Boolean, onStep: () -> Unit, 
                 softWrap = false,
             )
             if (previewing) {
-                Box(
-                    Modifier
-                        .size(CLOCK_RESET_BOX)
-                        .clip(AppShape(4.dp))
-                        .clickable(onClick = onReset),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(Res.string.calendar_run_clock_reset),
-                        tint = ink,
-                        modifier = Modifier.size(9.dp),
-                    )
-                }
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Filled.Close),
+                    contentDescription = stringResource(Res.string.calendar_run_clock_reset),
+                    onClick = onReset,
+                    modifier = Modifier.size(CLOCK_RESET_BOX),
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         }
     }
@@ -225,16 +224,16 @@ private fun ArmSwitch(armed: Boolean, onArmed: (Boolean) -> Unit) {
  * itself, and Copy and Template were reaching the screen with neither.
  */
 @Composable
-private fun HeaderIcon(icon: ImageVector, tooltip: String, tint: Color, onClick: () -> Unit) {
-    Hint(tooltip) {
-        Box(
-            modifier = Modifier
-                .size(HEADER_ACTION_HEIGHT)
-                .raisedKey(AppShape(6.dp), elevationPalette().key, onClick = onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(icon, contentDescription = tooltip, tint = tint, modifier = Modifier.size(11.dp))
-        }
+private fun HeaderIcon(icon: ImageVector, tooltip: String, intent: ButtonIntent, onClick: () -> Unit) {
+    Tooltip(text = tooltip) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = tooltip,
+            onClick = onClick,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = intent,
+        )
     }
 }
 

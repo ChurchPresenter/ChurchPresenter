@@ -22,9 +22,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,13 +54,18 @@ import org.churchpresenter.strings.generated.resources.obs_mode_stt
 import org.churchpresenter.strings.generated.resources.stt_translation_label
 import org.churchpresenter.strings.generated.resources.stt_waiting_for_transcription
 import org.churchpresenter.strings.generated.resources.tooltip_stt_settings
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.sharedui.composables.StyledTextField
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.core.models.stt.HighlightedWord
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 private const val IN_PROGRESS_ALPHA = 0.6f
 
@@ -96,18 +98,14 @@ internal fun ConnectionBar(
             enabled = !connected && !connecting,
             trailingIcon = {
                 if (!connected && !connecting && urlInput.isNotEmpty()) {
-                    KeyIconButton(
+                    IconButton(
+                        icon = rememberVectorPainter(Icons.Filled.Clear),
+                        contentDescription = stringResource(Res.string.clear),
                         onClick = { urlInput = "" },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Clear,
-                            contentDescription = stringResource(Res.string.clear),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                        size = IconButtonSize.Medium,
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Neutral,
+                    )
                 }
             }
         )
@@ -124,34 +122,46 @@ internal fun ConnectionBar(
         )
 
         if (connected) {
-            ActionIconButton(
-                onClick = { sttManager.disconnect() },
-                tooltipText = stringResource(Res.string.stt_disconnect),
-                icon = Icons.Default.Stop,
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError
-            )
+            val disconnectText = stringResource(Res.string.stt_disconnect)
+            Tooltip(text = disconnectText) {
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Default.Stop),
+                    contentDescription = disconnectText,
+                    onClick = { sttManager.disconnect() },
+                    size = IconButtonSize.Medium,
+                    hierarchy = ButtonHierarchy.Primary,
+                    intent = ButtonIntent.Critical,
+                )
+            }
         } else {
-            ActionIconButton(
-                onClick = {
-                    urlInput = connectUrl(urlInput)
-                    onConnect(urlInput)
-                },
-                enabled = !connecting && urlInput.isNotBlank(),
-                tooltipText = stringResource(Res.string.stt_connect),
-                icon = Icons.Default.PlayArrow,
-                containerColor = MaterialTheme.semantic.success,
-                contentColor = MaterialTheme.semantic.onSuccess
-            )
+            val connectText = stringResource(Res.string.stt_connect)
+            Tooltip(text = connectText) {
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Default.PlayArrow),
+                    contentDescription = connectText,
+                    onClick = {
+                        urlInput = connectUrl(urlInput)
+                        onConnect(urlInput)
+                    },
+                    size = IconButtonSize.Medium,
+                    hierarchy = ButtonHierarchy.Primary,
+                    intent = ButtonIntent.Success,
+                    enabled = !connecting && urlInput.isNotBlank(),
+                )
+            }
         }
 
-        ActionIconButton(
-            onClick = onOpenSettings,
-            tooltipText = stringResource(Res.string.tooltip_stt_settings),
-            icon = Icons.Default.Tune,
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-        )
+        val settingsText = stringResource(Res.string.tooltip_stt_settings)
+        Tooltip(text = settingsText) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.Tune),
+                contentDescription = settingsText,
+                onClick = onOpenSettings,
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Secondary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
 
         GoLiveButton(
             onClick = onGoLive,

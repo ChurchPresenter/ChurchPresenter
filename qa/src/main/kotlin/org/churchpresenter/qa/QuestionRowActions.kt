@@ -1,8 +1,5 @@
 package org.churchpresenter.qa
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -11,18 +8,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -39,11 +31,14 @@ import org.churchpresenter.strings.generated.resources.qa_confirm_go_live_prompt
 import org.churchpresenter.strings.generated.resources.qa_deny
 import org.churchpresenter.strings.generated.resources.qa_done_clear
 import org.churchpresenter.strings.generated.resources.qa_mark_done
-import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.RaisedIconButton
 import org.jetbrains.compose.resources.stringResource
-
-private const val QA_DISABLED_ALPHA = 0.38f
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 
 /** Approve, deny, done and Go Live, as fit a question that is pending, approved, done or denied. */
 @Composable
@@ -63,16 +58,12 @@ internal fun StatusActions(
         QuestionStatus.APPROVED -> {
             if (!isDisplayed) GoLiveButton(onClick = onDisplay, tooltipText = stringResource(Res.string.go_live))
             val strDone = stringResource(if (isDisplayed) Res.string.qa_done_clear else Res.string.qa_mark_done)
-            QAIconButton(tooltip = strDone, onClick = onMarkDone) {
-                Icon(Icons.Default.Done, contentDescription = strDone, tint = MaterialTheme.colorScheme.secondary)
-            }
+            QAIconButton(tooltip = strDone, icon = Icons.Default.Done, onClick = onMarkDone)
             DenyButton(strDeny, onDeny)
         }
         QuestionStatus.DONE -> {
             val strBack = stringResource(Res.string.qa_back_to_incoming)
-            QAIconButton(tooltip = strBack, onClick = onApprove) {
-                Icon(Icons.Default.Refresh, strBack, tint = MaterialTheme.colorScheme.tertiary)
-            }
+            QAIconButton(tooltip = strBack, icon = Icons.Default.Refresh, onClick = onApprove)
             ConfirmGoLive(state, actions, MaterialTheme.colorScheme.secondary, dimmed = false)
         }
         QuestionStatus.DENIED -> {
@@ -84,16 +75,12 @@ internal fun StatusActions(
 
 @Composable
 private fun ApproveButton(tooltip: String, onApprove: () -> Unit) {
-    QAIconButton(tooltip = tooltip, onClick = onApprove) {
-        Icon(Icons.Default.Check, tooltip, tint = MaterialTheme.colorScheme.inverseSurface)
-    }
+    QAIconButton(tooltip = tooltip, icon = Icons.Default.Check, onClick = onApprove)
 }
 
 @Composable
 private fun DenyButton(tooltip: String, onDeny: () -> Unit) {
-    QAIconButton(tooltip = tooltip, onClick = onDeny) {
-        Icon(Icons.Default.Close, tooltip, tint = MaterialTheme.colorScheme.error)
-    }
+    QAIconButton(tooltip = tooltip, icon = Icons.Default.Close, onClick = onDeny, intent = ButtonIntent.Critical)
 }
 
 /** Go Live for a question already retired, which approves it first, behind a confirmation. */
@@ -124,9 +111,7 @@ private fun ConfirmGoLive(
         },
         tooltipText = stringResource(Res.string.qa_confirm_go_live)
     )
-    QAIconButton(tooltip = strCancel, onClick = { confirmGoLive = false }) {
-        Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
+    QAIconButton(tooltip = strCancel, icon = Icons.Default.Close, onClick = { confirmGoLive = false })
 }
 
 /** Delete, behind a confirmation. */
@@ -135,9 +120,7 @@ internal fun DeleteControl(state: QuestionRowState, onDelete: () -> Unit) = with
     val strCancel = stringResource(Res.string.cancel)
     val strDelete = stringResource(Res.string.delete_saved_string)
     if (!confirmDelete) {
-        QAIconButton(tooltip = strDelete, onClick = { confirmDelete = true }) {
-            Icon(Icons.Default.Delete, strDelete, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        QAIconButton(tooltip = strDelete, icon = Icons.Default.Delete, onClick = { confirmDelete = true })
         return@with
     }
     Text(
@@ -146,53 +129,30 @@ internal fun DeleteControl(state: QuestionRowState, onDelete: () -> Unit) = with
         color = MaterialTheme.colorScheme.error,
         modifier = Modifier.padding(end = 4.dp)
     )
-    QAIconButton(tooltip = strDelete, onClick = { confirmDelete = false; onDelete() }) {
-        Icon(Icons.Default.Delete, strDelete, tint = MaterialTheme.colorScheme.error)
-    }
-    QAIconButton(tooltip = strCancel, onClick = { confirmDelete = false }) {
-        Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
+    QAIconButton(
+        tooltip = strDelete,
+        icon = Icons.Default.Delete,
+        onClick = { confirmDelete = false; onDelete() },
+        intent = ButtonIntent.Critical,
+    )
+    QAIconButton(tooltip = strCancel, icon = Icons.Default.Close, onClick = { confirmDelete = false })
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun QAIconButton(
     tooltip: String,
+    icon: ImageVector,
     onClick: () -> Unit,
-    content: @Composable () -> Unit
+    intent: ButtonIntent = ButtonIntent.Neutral,
 ) {
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                Text(
-                    text = tooltip,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        )
-    ) {
-        RaisedIconButton(
+    Tooltip(text = tooltip) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = tooltip,
             onClick = onClick,
-            modifier = Modifier.size(30.dp),
-            shape = AppShape(5.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                disabledContainerColor = Color.Transparent,
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = QA_DISABLED_ALPHA)
-            )
-        ) {
-            content()
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = intent,
+        )
     }
 }

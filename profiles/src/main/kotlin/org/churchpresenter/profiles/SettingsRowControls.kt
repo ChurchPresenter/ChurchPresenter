@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -43,7 +43,10 @@ import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.sharedui.composables.SegmentedButton
 import org.churchpresenter.sharedui.composables.SegmentedButtonItem
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
@@ -225,20 +228,24 @@ internal fun RowStepper(
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
         RowNumberField(value, onValueChange, range, unit = unit, width = fieldWidth, testTag = testTag)
-        KeyIconButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.Remove),
+            contentDescription = stringResource(Res.string.decrement),
             onClick = { onValueChange((value - step).coerceIn(range)) },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
             enabled = value > range.first,
-            modifier = Modifier.size(STEP_KEY_WIDTH, CONTROL_HEIGHT),
-        ) {
-            Icon(Icons.Filled.Remove, stringResource(Res.string.decrement), Modifier.size(STEP_ICON))
-        }
-        KeyIconButton(
+        )
+        IconButton(
+            icon = rememberVectorPainter(Icons.Filled.Add),
+            contentDescription = stringResource(Res.string.increment),
             onClick = { onValueChange((value + step).coerceIn(range)) },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
             enabled = value < range.last,
-            modifier = Modifier.size(STEP_KEY_WIDTH, CONTROL_HEIGHT),
-        ) {
-            Icon(Icons.Filled.Add, stringResource(Res.string.increment), Modifier.size(STEP_ICON))
-        }
+        )
     }
 }
 
@@ -249,8 +256,6 @@ private val NUMBER_MIN_WIDTH = 24.dp
 // lays a Skia paragraph out on every measure, and a page of number rows paid for it each time.
 private const val DIGIT_WIDTH_DP = 8
 private const val CARET_DP = 2
-private val STEP_KEY_WIDTH = 26.dp
-private val STEP_ICON = 14.dp
 
 /**
  * A typed whole number in a small well, with its unit after it and, optionally, a caption above --

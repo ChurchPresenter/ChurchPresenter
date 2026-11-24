@@ -16,6 +16,7 @@ dependencies {
     // The app's colour schemes, typography and semantic colours — this tool no longer
     // builds its own Material layer, only its hand-drawn panel palette.
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(libs.compose.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.swing)

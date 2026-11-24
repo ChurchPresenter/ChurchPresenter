@@ -24,7 +24,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,6 +60,10 @@ import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.hoverOutline
 import org.churchpresenter.sharedui.composables.DropdownSettingsField
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * A dropdown whose value is also a search box: typing narrows the menu to the options that contain
@@ -229,26 +232,23 @@ fun SearchableDropdownField(
 @Composable
 private fun DropdownFieldIcons(onClear: (() -> Unit)?, onChevron: () -> Unit) {
     if (onClear != null) {
-        Icon(
-            painter = painterResource(IconRes.drawable.ic_close),
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_close),
             contentDescription = stringResource(Res.string.clear),
-            modifier = Modifier
-                .size(14.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                ) { onClear() },
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            onClick = onClear,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
         )
         Spacer(Modifier.width(6.dp))
     }
-    Icon(
-        painter = painterResource(IconRes.drawable.ic_arrow_down),
+    IconButton(
+        icon = painterResource(IconRes.drawable.ic_arrow_down),
         contentDescription = stringResource(Res.string.dropdown_show_list),
-        modifier = Modifier
-            .size(14.dp)
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onChevron() },
-        tint = MaterialTheme.colorScheme.onSurfaceVariant
+        onClick = onChevron,
+        size = IconButtonSize.Small,
+        hierarchy = ButtonHierarchy.Tertiary,
+        intent = ButtonIntent.Neutral,
     )
 }
 

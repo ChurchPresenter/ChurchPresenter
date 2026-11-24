@@ -49,6 +49,12 @@ import java.util.Locale
 import org.churchpresenter.calendar.model.clockText
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raisedHover
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** The selected day's heading — `Sunday, 20 September 2026`, in the machine's own locale. */
 private val DAY_HEADING: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
@@ -240,21 +246,17 @@ private fun ServiceChip(
             }
         }
         Box(Modifier.width(1.dp).fillMaxHeight().background(border))
-        Hint(stringResource(Res.string.calendar_edit_service)) {
-            Box(
-                Modifier
-                    .width(EDIT_TAIL_WIDTH)
-                    .fillMaxHeight()
-                    .clickable(onClick = onEdit),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Filled.Edit,
-                    contentDescription = stringResource(Res.string.calendar_edit_service),
-                    tint = ink,
-                    modifier = Modifier.size(13.dp),
-                )
-            }
+        val editService = stringResource(Res.string.calendar_edit_service)
+        Tooltip(text = editService) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Edit),
+                contentDescription = editService,
+                onClick = onEdit,
+                modifier = Modifier.width(EDIT_TAIL_WIDTH).fillMaxHeight(),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

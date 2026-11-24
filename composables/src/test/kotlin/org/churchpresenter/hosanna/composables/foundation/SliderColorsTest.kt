@@ -1,15 +1,14 @@
 package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class SliderColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `rest is a primary fill on a quiet track`() {

@@ -14,8 +14,6 @@ import org.churchpresenter.sharedui.utils.scaleButtonLabel
 import org.churchpresenter.sharedui.utils.withPictureScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.alpha
@@ -34,13 +32,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,8 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -90,7 +81,15 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
-import androidx.compose.material3.IconButtonColors
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.CircularToggleButton
+import org.churchpresenter.hosanna.composables.button.CircularButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** Transport, the counter, loop, scale, and the interval, transition and animation settings. */
 @Composable
@@ -105,21 +104,13 @@ internal fun PicturesTabScope.PicturesControlsBar(viewModel: PicturesViewModel) 
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        val neutralKeyColors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        )
-        val accentKeyColors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-        )
-        PicturesTransport(viewModel, neutralKeyColors)
+        PicturesTransport(viewModel)
 
         PicturesImageCounter(viewModel)
 
-        PicturesLoopButton(viewModel, accentKeyColors, neutralKeyColors)
+        PicturesLoopButton(viewModel)
 
-        PicturesScaleButton(accentKeyColors, neutralKeyColors)
+        PicturesScaleButton()
 
         // Divider
         Box(modifier = Modifier.width(1.dp).height(30.dp).background(MaterialTheme.colorScheme.outlineVariant))
@@ -137,77 +128,33 @@ internal fun PicturesTabScope.PicturesControlsBar(viewModel: PicturesViewModel) 
 
 /** Raised keys either side of the biggest one, Play. */
 @Composable
-private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neutralKeyColors: IconButtonColors) {
+private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.previous_image),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            RaisedIconButton(
+        Tooltip(text = stringResource(Res.string.previous_image)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_skip_previous),
+                contentDescription = stringResource(Res.string.previous_image),
                 onClick = { viewModel.previousImage(onInstanceLinkSendPreviousPicture) },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendPreviousPicture != null,
-                modifier = Modifier.size(PICTURES_TRANSPORT_KEY_SIZE),
-                colors = neutralKeyColors
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_skip_previous),
-                    contentDescription = stringResource(Res.string.previous_image),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            )
         }
         PicturesPlayKey(viewModel)
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.next_image),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            RaisedIconButton(
+        Tooltip(text = stringResource(Res.string.next_image)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_skip_next),
+                contentDescription = stringResource(Res.string.next_image),
                 onClick = { viewModel.nextImage(onInstanceLinkSendNextPicture) },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
                 enabled = viewModel.images.isNotEmpty() || onInstanceLinkSendNextPicture != null,
-                modifier = Modifier.size(PICTURES_TRANSPORT_KEY_SIZE),
-                colors = neutralKeyColors
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_skip_next),
-                    contentDescription = stringResource(Res.string.next_image),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            )
         }
     }
 }
@@ -215,44 +162,21 @@ private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neu
 /** The biggest key, Play/Pause. */
 @Composable
 private fun PicturesTabScope.PicturesPlayKey(viewModel: PicturesViewModel) {
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp,
-            ) {
-                Text(
-                    stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
+    Tooltip(
+        text = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+        modifier = Modifier.guideTarget(GuideTargets.PICTURES_PLAY),
     ) {
-        RaisedIconButton(
+        CircularButton(
+            icon = painterResource(
+                if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play,
+            ),
+            contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
             onClick = { viewModel.togglePlayPause() },
+            size = IconButtonSize.Large,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Default,
             enabled = viewModel.images.isNotEmpty(),
-            modifier = Modifier.size(PICTURES_PLAY_KEY_SIZE).guideTarget(GuideTargets.PICTURES_PLAY),
-            shape = CircleShape,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Icon(
-                painter = painterResource(
-                    if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play,
-                ),
-                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                modifier = Modifier.size(15.dp)
-            )
-        }
+        )
     }
 }
 
@@ -283,48 +207,22 @@ private fun PicturesTabScope.PicturesImageCounter(viewModel: PicturesViewModel) 
 }
 
 @Composable
-private fun PicturesTabScope.PicturesLoopButton(
-    viewModel: PicturesViewModel,
-    accentKeyColors: IconButtonColors,
-    neutralKeyColors: IconButtonColors,
-) {
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp,
-            ) {
-                Text(
-                    stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
-    ) {
-        RaisedIconButton(
-            onClick = {
+private fun PicturesTabScope.PicturesLoopButton(viewModel: PicturesViewModel) {
+    Tooltip(text = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off)) {
+        CircularToggleButton(
+            icon = painterResource(IconRes.drawable.ic_refresh),
+            contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+            checked = viewModel.isLooping,
+            onCheckedChange = {
                 viewModel.isLooping = !viewModel.isLooping
                 onSettingsChange { s -> s.copy(
                     pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping),
                 ) }
             },
-            modifier = Modifier.size(PICTURES_LOOP_KEY_SIZE),
-            shape = CircleShape,
-            colors = if (viewModel.isLooping) accentKeyColors else neutralKeyColors
-        ) {
-            // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
-            // semantics, so without this the button has no name at all.
-            Icon(painterResource(IconRes.drawable.ic_refresh), contentDescription = stringResource(
-                if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off,
-            ), modifier = Modifier.size(16.dp))
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 
@@ -334,50 +232,26 @@ private fun PicturesTabScope.PicturesLoopButton(
  * which it says rather than naming one of them.
  */
 @Composable
-private fun PicturesTabScope.PicturesScaleButton(
-    accentKeyColors: IconButtonColors,
-    neutralKeyColors: IconButtonColors,
-) {
+private fun PicturesTabScope.PicturesScaleButton() {
     val shared = appSettings?.let { s ->
         sharedScaleMode(s.projectionSettings.outputProfiles) { it.pictureScaleMode }
     }
     val scaleMode = shared ?: OutputScaleMode.FIT
     val scaled = shared != OutputScaleMode.FIT
     val scaleLabel = scaleButtonLabel(shared, scaleMode, ScaleButtonContent.PICTURES)
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                Text(
-                    scaleLabel,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp),
-        )
-    ) {
-        RaisedIconButton(
-            onClick = {
+    Tooltip(text = scaleLabel) {
+        IconToggleButton(
+            icon = rememberVectorPainter(scaleMode.icon),
+            contentDescription = scaleLabel,
+            checked = scaled,
+            onCheckedChange = {
                 val next = if (shared == null) scaleMode else scaleMode.next()
                 onSettingsChange { s -> s.withPictureScaleEverywhere(next) }
             },
-            modifier = Modifier.size(PICTURES_LOOP_KEY_SIZE),
-            colors = if (scaled) accentKeyColors else neutralKeyColors
-        ) {
-            Icon(
-                scaleMode.icon,
-                contentDescription = scaleLabel,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

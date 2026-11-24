@@ -64,9 +64,13 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.web.presenter.rememberWebNavController
 import org.churchpresenter.web.WebOutput
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 
 /** A 16:9 output, for a preview with no output to measure. */
 private const val DEFAULT_PREVIEW_ASPECT_RATIO = 16f / 9f
@@ -240,44 +244,64 @@ internal fun WebEngineUnavailable(
 @Composable
 internal fun WebTabScope.NavButtons() {
     val scope = rememberCoroutineScope()
-    ActionIconButton(
-        onClick = { goBack() },
-        tooltipText = stringResource(Res.string.web_back),
-        painter = painterResource(IconRes.drawable.ic_arrow_left),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-    ActionIconButton(
-        onClick = { goForward() },
-        tooltipText = stringResource(Res.string.web_forward),
-        painter = painterResource(IconRes.drawable.ic_arrow_right),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-    ActionIconButton(
-        onClick = { refresh() },
-        tooltipText = stringResource(Res.string.web_refresh),
-        painter = painterResource(IconRes.drawable.ic_refresh),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-    ActionIconButton(
-        // Chromium's cache can be large: it is deleted off the event thread.
-        onClick = { scope.launch(Dispatchers.IO) { clearWebCache() } },
-        tooltipText = stringResource(Res.string.web_clear_cache),
-        painter = painterResource(IconRes.drawable.ic_clear_cache),
-        containerColor = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer
-    )
+    val webBackText = stringResource(Res.string.web_back)
+    Tooltip(text = webBackText) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_arrow_left),
+            contentDescription = webBackText,
+            onClick = { goBack() },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
+    val webForwardText = stringResource(Res.string.web_forward)
+    Tooltip(text = webForwardText) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_arrow_right),
+            contentDescription = webForwardText,
+            onClick = { goForward() },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
+    val webRefreshText = stringResource(Res.string.web_refresh)
+    Tooltip(text = webRefreshText) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_refresh),
+            contentDescription = webRefreshText,
+            onClick = { refresh() },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
+    val clearCacheText = stringResource(Res.string.web_clear_cache)
+    Tooltip(text = clearCacheText) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_clear_cache),
+            contentDescription = clearCacheText,
+            // Chromium's cache can be large: it is deleted off the event thread.
+            onClick = { scope.launch(Dispatchers.IO) { clearWebCache() } },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Critical,
+        )
+    }
 
     // Zoom out
-    ActionIconButton(
-        onClick = { stepZoom(zoomIn = false) },
-        tooltipText = stringResource(Res.string.web_zoom_out),
-        painter = painterResource(IconRes.drawable.ic_arrow_down),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    val webZoomOutText = stringResource(Res.string.web_zoom_out)
+    Tooltip(text = webZoomOutText) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_arrow_down),
+            contentDescription = webZoomOutText,
+            onClick = { stepZoom(zoomIn = false) },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
     // Zoom percentage
     Text(
         text = "${(Math.pow(ZOOM_FACTOR, zoomLevel) * PERCENT_SCALE).toInt()}%",
@@ -285,13 +309,17 @@ internal fun WebTabScope.NavButtons() {
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Zoom in
-    ActionIconButton(
-        onClick = { stepZoom(zoomIn = true) },
-        tooltipText = stringResource(Res.string.web_zoom_in),
-        painter = painterResource(IconRes.drawable.ic_arrow_up),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    val webZoomInText = stringResource(Res.string.web_zoom_in)
+    Tooltip(text = webZoomInText) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_arrow_up),
+            contentDescription = webZoomInText,
+            onClick = { stepZoom(zoomIn = true) },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
     // Mobile / Desktop toggle
     Surface(
         shape = AppShape(4.dp),

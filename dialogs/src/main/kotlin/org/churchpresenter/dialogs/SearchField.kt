@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +27,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * The app's standard search box: leading magnifier, inline placeholder, trailing clear button.
@@ -91,14 +94,14 @@ fun SearchField(
         }
         // Only drawn when there is something to clear, so the empty field stays quiet.
         if (value.isNotEmpty()) {
-            KeyIconButton(onClick = { onValueChange("") }, modifier = Modifier.size(30.dp)) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.search_clear),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.search_clear),
+                onClick = { onValueChange("") },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

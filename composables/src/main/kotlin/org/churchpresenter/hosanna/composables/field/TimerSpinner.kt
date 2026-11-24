@@ -52,10 +52,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.chip.FilterChip
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
@@ -70,12 +70,13 @@ import org.churchpresenter.hosanna.composables.model.parseUnit
 import org.churchpresenter.hosanna.composables.model.setUnit
 import org.churchpresenter.hosanna.composables.model.stepTimer
 import org.churchpresenter.hosanna.composables.model.unitText
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.hosanna.composables.foundation.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.icons.generated.resources.ic_remove
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A duration set with hours, minutes and seconds columns. Each column can be typed into, stepped with its
@@ -147,7 +148,7 @@ private fun UnitStepper(
     interactionSource: MutableInteractionSource,
     enabled: Boolean,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val hovered by interactionSource.collectIsHoveredAsState()
     var editing by remember { mutableStateOf(false) }
     val shape = HosannaTheme.shapes.l
@@ -205,7 +206,7 @@ private fun StepButton(
     enabled: Boolean,
     onStep: (Boolean) -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val hovered by source.collectIsHoveredAsState()
@@ -241,7 +242,7 @@ private fun NumberCell(
     onEditing: (Boolean) -> Unit,
     onSecondsChange: (Int) -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val ink = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
     val style = HosannaTheme.typography.display.tabular().copy(color = ink, textAlign = TextAlign.Center)
     Box(
@@ -313,14 +314,14 @@ private fun NumberEditor(
             },
         textStyle = style,
         singleLine = true,
-        cursorBrush = SolidColor(HosannaTheme.colors.primary),
+        cursorBrush = SolidColor(ThemeColors.current.primary),
     )
 }
 
 @Composable
 private fun ColonDots(enabled: Boolean) {
-    val colors = HosannaTheme.colors
-    val dot = if (enabled) colors.onSurfaceFaint else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+    val colors = ThemeColors.current
+    val dot = if (enabled) colors.faint else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
     Box(
         modifier = Modifier
             .padding(horizontal = TimerSpinnerDefaults.ColonPadding)

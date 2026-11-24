@@ -41,12 +41,16 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.theme.elevationPalette
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 
 /** The chip behind a live tool's icon, and the icon on it. */
 data class LiveToolTint(val chip: Color, val icon: Color)
@@ -105,14 +109,17 @@ fun LiveToolDialogHeader(tool: LiveTool, painter: Painter, title: String, purpos
             Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Text(purpose, fontSize = 12.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_close),
-            text = stringResource(Res.string.close),
-            onClick = onClose,
-            iconSize = 15.dp,
-            buttonSize = 30.dp,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        val closeText = stringResource(Res.string.close)
+        Tooltip(text = closeText) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = closeText,
+                onClick = onClose,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 

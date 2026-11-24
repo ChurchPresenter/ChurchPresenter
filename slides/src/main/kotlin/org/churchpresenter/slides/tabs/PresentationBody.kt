@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +68,10 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raisedHover
 import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /* The Presentation tab's body: the slide grid, or the loading, error and empty states, and the open files. */
 
@@ -113,18 +115,18 @@ internal fun PresentationTabScope.PresentationBody(viewModel: PresentationViewMo
                                 color = openFill.ink,
                                 maxLines = 1
                             )
-                            KeyIconButton(onClick = {
-                                val inRecents = f.absolutePath in RecentPresentationFiles.files
-                                val inPinned = f.absolutePath in RecentPresentationFiles.pinned
-                                viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
-                            }, modifier = Modifier.size(16.dp)) {
-                                Icon(
-                                    painterResource(IconRes.drawable.ic_close),
-                                    contentDescription = stringResource(Res.string.remove),
-                                    modifier = Modifier.size(10.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                )
-                            }
+                            IconButton(
+                                icon = painterResource(IconRes.drawable.ic_close),
+                                contentDescription = stringResource(Res.string.remove),
+                                onClick = {
+                                    val inRecents = f.absolutePath in RecentPresentationFiles.files
+                                    val inPinned = f.absolutePath in RecentPresentationFiles.pinned
+                                    viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
+                                },
+                                size = IconButtonSize.Small,
+                                hierarchy = ButtonHierarchy.Tertiary,
+                                intent = ButtonIntent.Neutral,
+                            )
                         }
                     }
                 }

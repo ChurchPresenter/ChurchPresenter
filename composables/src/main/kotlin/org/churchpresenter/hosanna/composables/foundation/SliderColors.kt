@@ -2,8 +2,6 @@ package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 
 @Immutable
 internal data class SliderColors(
@@ -22,7 +20,7 @@ internal data class SliderColors(
     val endLabel: Color,
 )
 
-internal fun HosannaColors.sliderColors(state: ButtonState): SliderColors {
+internal fun ThemeColors.sliderColors(state: ButtonState): SliderColors {
     if (state == ButtonState.Disabled) {
         val ink = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
         return SliderColors(
@@ -53,11 +51,11 @@ internal fun HosannaColors.sliderColors(state: ButtonState): SliderColors {
             else -> Color.Transparent
         },
         ring = if (state == ButtonState.Focused) primary.copy(alpha = HosannaStateAlpha.FOCUS_RING) else null,
-        tick = onSurfaceFaint,
+        tick = faint,
         tickOn = onPrimary,
         bubble = inverseSurface,
         bubbleInk = inverseOnSurface,
         value = onSurfaceVariant,
-        endLabel = onSurfaceFaint,
+        endLabel = faint,
     )
 }

@@ -1,8 +1,6 @@
 package org.churchpresenter.canvas
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +14,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -42,10 +38,15 @@ import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyButton
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** Test handle for a scene row's canvas-size button. */
 internal const val CANVAS_SIZE_BUTTON_TAG = "canvas_size_button"
@@ -89,37 +90,16 @@ internal fun CanvasSizeMenu(
 ) {
     var open by remember { mutableStateOf(false) }
     Box {
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.canvas_size_tooltip, sizeText(width, height)),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            ),
-        ) {
-            KeyIconButton(
+        Tooltip(text = stringResource(Res.string.canvas_size_tooltip, sizeText(width, height))) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.AspectRatio),
+                contentDescription = stringResource(Res.string.canvas_size),
                 onClick = { open = true },
-                modifier = Modifier.size(20.dp).testTag(CANVAS_SIZE_BUTTON_TAG),
-            ) {
-                Icon(
-                    Icons.Filled.AspectRatio,
-                    contentDescription = stringResource(Res.string.canvas_size),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+                modifier = Modifier.testTag(CANVAS_SIZE_BUTTON_TAG),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
         AppDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             val choose: (Int, Int) -> Unit = { w, h ->

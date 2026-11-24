@@ -1,6 +1,5 @@
 package org.churchpresenter.calendar.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -9,7 +8,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.calendar.generated.resources.Res
 import org.churchpresenter.calendar.generated.resources.calendar_fix_locate_file
@@ -25,6 +23,12 @@ import org.churchpresenter.calendar.model.PreflightProblem
 import org.churchpresenter.calendar.model.ProblemFix
 import org.churchpresenter.calendar.model.fix
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** What a [PreflightProblem] says to the planner -- the hint on the row's warning mark. */
 @Composable
@@ -62,16 +66,25 @@ internal fun problemHint(problem: PreflightProblem, fixable: Boolean): String {
 @Composable
 internal fun ProblemMark(problem: PreflightProblem, onFix: (() -> Unit)? = null) {
     val hint = problemHint(problem, fixable = onFix != null)
-    Hint(hint) {
-        Icon(
-            Icons.Filled.Warning,
-            contentDescription = hint,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier
-                .size(16.dp)
-                .clip(CalendarMetrics.smallRadius)
-                .then(if (onFix != null) Modifier.clickable(onClick = onFix) else Modifier)
-                .padding(2.dp),
-        )
+    if (onFix != null) {
+        Tooltip(text = hint) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Warning),
+                contentDescription = hint,
+                onClick = onFix,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Critical,
+            )
+        }
+    } else {
+        Hint(hint) {
+            Icon(
+                Icons.Filled.Warning,
+                contentDescription = hint,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(16.dp).padding(2.dp),
+            )
+        }
     }
 }

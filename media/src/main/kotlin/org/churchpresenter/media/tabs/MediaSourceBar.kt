@@ -7,7 +7,6 @@ package org.churchpresenter.media.tabs
 
 import org.churchpresenter.settings.BackgroundContent
 import java.io.File
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.ContextMenu
 import org.churchpresenter.sharedui.composables.SetAsBackgroundItems
 import org.churchpresenter.strings.generated.resources.set_as_background
@@ -19,8 +18,6 @@ import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,9 +39,7 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import org.churchpresenter.media.MediaOutput
@@ -55,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -93,6 +87,11 @@ import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.sharedui.composables.RecentChip
 import org.churchpresenter.sharedui.composables.topBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** The top card: the source bar, the recent files, and the playback controls. */
 @Composable
@@ -337,15 +336,16 @@ private fun MediaTabScope.SetAsBackgroundButton(
         File(viewModel.mediaUrl).extension.lowercase() !in Constants.AUDIO_EXTENSIONS
     var menuOpen by remember { mutableStateOf(false) }
     Box {
-        ActionIconButton(
-            onClick = { menuOpen = true },
-            tooltipText = stringResource(Res.string.set_as_background),
-            painter = painterResource(IconRes.drawable.ic_layer_image),
-            enabled = canBeBackground,
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            modifier = Modifier.testTag(MEDIA_SET_AS_BACKGROUND_TAG),
-        )
+        Tooltip(text = stringResource(Res.string.set_as_background)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_layer_image),
+                contentDescription = stringResource(Res.string.set_as_background),
+                onClick = { menuOpen = true },
+                modifier = Modifier.testTag(MEDIA_SET_AS_BACKGROUND_TAG),
+                hierarchy = ButtonHierarchy.Secondary,
+                enabled = canBeBackground,
+            )
+        }
         ContextMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             SetAsBackgroundItems(
                 backgroundTargets,
@@ -381,34 +381,15 @@ private fun MediaTabScope.MediaRecentBar(viewModel: MediaViewModel) {
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             )
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp,
-                    ) {
-                        Text(
-                            stringResource(Res.string.clear_recents),
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp),
+            Tooltip(text = stringResource(Res.string.clear_recents)) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.clear),
+                    onClick = { RecentMediaFiles.clear() },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
                 )
-            ) {
-                KeyIconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
-                    Icon(
-                        painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.clear),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    )
-                }
             }
             LazyRow(
                 modifier = Modifier.weight(1f),

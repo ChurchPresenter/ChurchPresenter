@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -303,6 +302,7 @@ private fun EditButtons(question: Question, state: QuestionRowState, onEdit: (St
     val strCancel = stringResource(Res.string.cancel)
     QAIconButton(
         tooltip = if (editing) strSave else strEdit,
+        icon = if (editing) Icons.Default.Check else Icons.Default.Edit,
         onClick = {
             if (editing) {
                 if (editText.isNotBlank() && editText.trim() != question.text) onEdit(editText)
@@ -312,17 +312,13 @@ private fun EditButtons(question: Question, state: QuestionRowState, onEdit: (St
                 editing = true
             }
         }
-    ) {
-        Icon(
-            imageVector = if (editing) Icons.Default.Check else Icons.Default.Edit,
-            contentDescription = if (editing) strSave else strEdit,
-            tint = if (editing) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.tertiary
-        )
-    }
+    )
     if (editing) {
-        QAIconButton(tooltip = strCancel, onClick = { editText = question.text; editing = false }) {
-            Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        QAIconButton(
+            tooltip = strCancel,
+            icon = Icons.Default.Close,
+            onClick = { editText = question.text; editing = false },
+        )
     }
 }
 

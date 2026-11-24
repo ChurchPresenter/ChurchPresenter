@@ -3,7 +3,7 @@
 package org.churchpresenter.canvas.screenshot
 
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
@@ -318,13 +318,13 @@ class CanvasTabScreenshotTest {
     /** Choosing a drawing tool opens the stroke and fill colour fields beside the tool row. */
     @Test
     fun `the rectangle tool chosen`() = shoot("tool_rectangle") { _ ->
-        toolButton(RECTANGLE_GLYPH).performClick()
+        toolButton(RECTANGLE_TOOL).performClick()
         waitForIdle()
     }
 
     @Test
     fun `the freehand tool chosen`() = shoot("tool_freehand") { _ ->
-        toolButton(FREEHAND_GLYPH).performClick()
+        toolButton(FREEHAND_TOOL).performClick()
         waitForIdle()
     }
 
@@ -373,8 +373,7 @@ class CanvasTabScreenshotTest {
         currentSceneId.value?.let { setDualLayout(it, true) }
     }
 
-    /** The tool buttons are drawn as the shapes they make, which is also how they are addressed. */
-    private fun ComposeUiTest.toolButton(glyph: String) = onAllNodesWithText(glyph)[0]
+    private fun ComposeUiTest.toolButton(name: String) = onAllNodesWithContentDescription(name)[0]
 
     /** A real, decodable image: the canvas decodes the file, and one that will not is a different state. */
     private fun photo(): File {
@@ -395,8 +394,8 @@ class CanvasTabScreenshotTest {
         /** A lower-third band, so a text/clock/shape source is seen where one would really sit. */
         val BANNER = SourceTransform(x = 0.1f, y = 0.62f, width = 0.8f, height = 0.22f)
 
-        const val RECTANGLE_GLYPH = "□"
-        const val FREEHAND_GLYPH = "✎"
+        const val RECTANGLE_TOOL = "Rectangle"
+        const val FREEHAND_TOOL = "Freehand"
 
         // Fixed path, not a temp dir: the properties panel prints the file's path, so a random name
         // would make every recording a diff.

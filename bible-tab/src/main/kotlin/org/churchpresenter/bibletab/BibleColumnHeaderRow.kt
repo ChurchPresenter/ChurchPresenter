@@ -7,7 +7,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -50,17 +49,21 @@ import org.churchpresenter.icons.generated.resources.ic_pause
 import org.churchpresenter.icons.generated.resources.ic_swap
 import org.churchpresenter.strings.generated.resources.stt_connect
 import org.churchpresenter.strings.generated.resources.stt_disconnect
-import org.churchpresenter.strings.generated.resources.swap_bibles_hint
 import org.churchpresenter.strings.generated.resources.verse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.bible.bibleDisplayNames
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.RaisedFilterChip
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -127,23 +130,15 @@ internal fun BibleVerseHeader(
             } else {
                 stringResource(Res.string.stt_connect)
             }
-            ActionIconButton(
-                onClick = {
-                    onSttToggle()
-                },
-                tooltipText = sttActionStr,
-                icon = Icons.Filled.Mic,
-                containerColor = if (sttConnected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-                contentColor = if (sttConnected) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
+            Tooltip(text = sttActionStr) {
+                IconToggleButton(
+                    icon = rememberVectorPainter(Icons.Filled.Mic),
+                    contentDescription = sttActionStr,
+                    checked = sttConnected,
+                    onCheckedChange = { onSttToggle() },
+                    intent = ButtonIntent.Neutral,
+                )
+            }
         }
 
         AddToScheduleButton(
@@ -252,33 +247,14 @@ private fun TranslationControls(
     val swapBiblesStr = stringResource(Res.string.swap_bibles)
     val translationOrderStr = stringResource(Res.string.bible_translation_order)
     if (translations.size == 2) {
-        ActionIconButton(
-            onClick = {
-                onSwapTranslations()
-            },
-            tooltipText = swapBiblesStr,
-            painter = painterResource(IconRes.drawable.ic_swap),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            tooltipContent = {
-                val pair = translations
-                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                    Text(
-                        stringResource(Res.string.swap_bibles_hint),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    pair.forEachIndexed { position, item ->
-                        Text(
-                            "${position + 1}. ${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}",
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            }
-        )
+        Tooltip(text = swapBiblesStr) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_swap),
+                contentDescription = swapBiblesStr,
+                onClick = { onSwapTranslations() },
+                hierarchy = ButtonHierarchy.Secondary,
+            )
+        }
     } else if (translations.size > 2) {
         // The renames come in on `translations` -- each entry carries its own --
         // so this reads them without a parameter of its own.

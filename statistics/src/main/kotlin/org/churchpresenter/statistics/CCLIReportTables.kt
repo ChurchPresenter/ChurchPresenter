@@ -61,12 +61,16 @@ import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.strings.generated.resources.stats_clear_item
 import org.churchpresenter.strings.generated.resources.ccli_songs_chart
 import org.churchpresenter.strings.generated.resources.ccli_songs_summary
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 
 @Composable
 internal fun SongsReportContent(songs: List<SongSummary>, onClear: (SongSummary) -> Unit) {
@@ -290,15 +294,18 @@ private fun VerseTable(verses: List<VerseSummary>, onClear: (VerseSummary) -> Un
  */
 @Composable
 private fun RowClearButton(label: String, alpha: Float, onClear: () -> Unit) {
-    TooltipIconButton(
-        painter = painterResource(IconRes.drawable.ic_delete),
-        text = stringResource(Res.string.stats_clear_item),
-        onClick = onClear,
-        iconSize = 13.dp,
-        buttonSize = CLEAR_COLUMN_WIDTH,
-        iconTint = MaterialTheme.colorScheme.error,
-        modifier = Modifier.alpha(alpha).testTag(REPORT_CLEAR_ROW_TAG + label)
-    )
+    val text = stringResource(Res.string.stats_clear_item)
+    Tooltip(text = text, modifier = Modifier.alpha(alpha)) {
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_delete),
+            contentDescription = text,
+            onClick = onClear,
+            modifier = Modifier.testTag(REPORT_CLEAR_ROW_TAG + label),
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Critical,
+        )
+    }
 }
 
 @Composable

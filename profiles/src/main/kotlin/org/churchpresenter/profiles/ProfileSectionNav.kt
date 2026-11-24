@@ -46,6 +46,12 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.strings.generated.resources.clear
 
 /** The section list is this wide: the longest page name and a count beside it. */
 private val SECTION_NAV_WIDTH = 200.dp
@@ -184,11 +190,13 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit, modifier
             )
         }
         if (query.isNotEmpty()) {
-            Icon(
-                Icons.Filled.Close,
-                contentDescription = null,
-                tint = faint,
-                modifier = Modifier.size(14.dp).clickable { onQueryChange("") },
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Close),
+                contentDescription = stringResource(Res.string.clear),
+                onClick = { onQueryChange("") },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
             )
         }
     }

@@ -16,6 +16,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.calendarCore)
     // What a row does when it goes live is a list of show-control actions.
     api(projects.showControl)

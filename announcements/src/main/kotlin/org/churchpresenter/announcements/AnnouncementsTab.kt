@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.foundation.text.BasicTextField
@@ -62,6 +61,11 @@ import org.churchpresenter.theme.elevationPalette
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.LocalContentColor
 import org.churchpresenter.sharedui.composables.DragHandle
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 internal val ANNOUNCEMENT_STEP_KEY_HEIGHT = 20.dp
 internal val ANNOUNCEMENT_TRANSPARENT_KEY_PADDING = 10.dp
@@ -264,24 +268,20 @@ internal fun TimerColumn(
     onDecrement: () -> Unit,
     onValueChange: (String) -> Unit
 ) {
-    val keyShape = AppShape(9.dp)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(ANNOUNCEMENT_STEP_GAP)
     ) {
-        KeyButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Add),
+            contentDescription = stringResource(Res.string.timer_step_increase, label),
             onClick = onIncrement,
             modifier = Modifier.height(ANNOUNCEMENT_STEP_KEY_HEIGHT).width(ANNOUNCEMENT_STEP_KEY_WIDTH)
                 .testTag(timerStepTag(label, up = true)),
-            shape = keyShape,
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = stringResource(Res.string.timer_step_increase, label),
-                modifier = Modifier.size(12.dp),
-            )
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
@@ -302,19 +302,16 @@ internal fun TimerColumn(
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { inner() }
             }
         )
-        KeyButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Remove),
+            contentDescription = stringResource(Res.string.timer_step_decrease, label),
             onClick = onDecrement,
             modifier = Modifier.height(ANNOUNCEMENT_STEP_KEY_HEIGHT).width(ANNOUNCEMENT_STEP_KEY_WIDTH)
                 .testTag(timerStepTag(label, up = false)),
-            shape = keyShape,
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            Icon(
-                Icons.Default.Remove,
-                contentDescription = stringResource(Res.string.timer_step_decrease, label),
-                modifier = Modifier.size(12.dp),
-            )
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
         Text(
             label.uppercase(),
             style = MaterialTheme.typography.labelSmall,

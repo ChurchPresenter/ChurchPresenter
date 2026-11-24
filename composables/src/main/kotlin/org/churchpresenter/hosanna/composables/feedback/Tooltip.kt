@@ -38,11 +38,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
 import org.churchpresenter.hosanna.composables.model.TooltipWarmth
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * Shows a short label beside [content] on hover or keyboard focus, such as an icon button's name. It works on
@@ -146,7 +147,7 @@ private fun TooltipPopup(text: String, shortcut: String?, shown: MutableTransiti
 
 @Composable
 internal fun TooltipLabel(text: String, shortcut: String?) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val style = HosannaTheme.typography.captionStrong
     Row(
         modifier = Modifier

@@ -1,15 +1,14 @@
 package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class ThumbnailColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `rest has a hairline, hover a firmer one and a scrim`() {
@@ -21,7 +20,7 @@ class ThumbnailColorsTest {
         assertEquals(c.screen, rest.letterbox)
         assertEquals(c.onSurface, rest.caption)
         val hovered = c.thumbnailColors(selected = false, live = false, state = ButtonState.Hovered)
-        assertEquals(c.onSurfaceFaint, hovered.edge)
+        assertEquals(c.faint, hovered.edge)
         assertEquals(c.screen.copy(alpha = HosannaStateAlpha.SCRIM), hovered.scrim)
         val pressed = c.thumbnailColors(selected = false, live = false, state = ButtonState.Pressed)
         assertEquals(c.screen.copy(alpha = HosannaStateAlpha.OVERLAY), pressed.scrim)

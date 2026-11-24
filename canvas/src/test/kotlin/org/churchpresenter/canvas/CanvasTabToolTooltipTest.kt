@@ -3,6 +3,7 @@
 package org.churchpresenter.canvas
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performMouseInput
 import kotlin.test.Test
@@ -12,37 +13,27 @@ import kotlin.test.assertTrue
 /**
  * The drawing toolbar's tooltips — which are the **only** name those buttons have.
  *
- * Each tool is an `IconButton` whose entire visible content is one glyph (`◆`, `□`, `○`, `∕`, `→`,
- * `✎`). Nothing else on screen says which is which, and the glyphs for line and freehand in
- * particular are not self-explanatory, so a tooltip that stopped drawing would leave an operator
- * guessing at six identical-looking buttons rather than merely losing a convenience.
+ * Each tool is an icon-only toggle. Nothing else on screen says which is which, so a tooltip that
+ * stopped drawing would leave an operator guessing at six icons rather than merely losing a
+ * convenience. The buttons are addressed by their content description; the tooltip is text.
  *
  * Assertions are **differential** — a count before the hover against a count after. Unlike most
  * tooltips these names appear nowhere else, so a bare `assertExists` would in fact detect them; the
  * differential form is kept anyway because it also proves the tooltip belongs to *the button that
  * was hovered*, which is the part that would break if the loop that builds them lost its binding.
- *
- * The glyph is what a test can address the button by, and that is a symptom rather than a
- * convenience: `AGENT.md` forbids text-as-icon (`Text("⏸")`) precisely here. Reported with the PR;
- * not changed by it, since real icon assets are a production change of their own.
  */
 class CanvasTabToolTooltipTest {
 
-    /** Glyph on the button, and the name only its tooltip gives. */
-    private val tools = listOf(
-        "◆" to "Select",
-        "□" to "Rectangle",
-        "○" to "Ellipse",
-        "∕" to "Line",
-        "→" to "Arrow",
-        "✎" to "Freehand",
-    )
+    private val tools = listOf("Select", "Rectangle", "Ellipse", "Line", "Arrow", "Freehand")
 
     private fun ComposeUiTest.countOf(text: String) =
         onAllNodesWithText(text, substring = true).fetchSemanticsNodes(false).size
 
-    private fun ComposeUiTest.hover(glyph: String) {
-        onAllNodesWithText(glyph)[0].performMouseInput { moveTo(center) }
+    private fun ComposeUiTest.buttonCount(name: String) =
+        onAllNodesWithContentDescription(name).fetchSemanticsNodes(false).size
+
+    private fun ComposeUiTest.hover(name: String) {
+        onAllNodesWithContentDescription(name)[0].performMouseInput { moveTo(center) }
         waitForIdle()
         mainClock.advanceTimeBy(2_000)
         waitForIdle()
@@ -51,15 +42,15 @@ class CanvasTabToolTooltipTest {
     @Test
     fun `every drawing tool is named by its tooltip`() {
         // One test per tool would be six near-identical bodies; the loop that builds them is one
-        // site, so the thing worth asserting is that each glyph carries its *own* name.
-        tools.forEach { (glyph, name) ->
+        // site, so the thing worth asserting is that each button carries its *own* name.
+        tools.forEach { name ->
             canvasTab(seed = { addScene("Tools") }) { _, _ ->
-                assertTrue(countOf(glyph) > 0, "the $name button should be on the toolbar")
+                assertTrue(buttonCount(name) > 0, "the $name button should be on the toolbar")
                 val before = countOf(name)
 
-                hover(glyph)
+                hover(name)
 
-                assertEquals(before + 1, countOf(name), "hovering $glyph should name it '$name'")
+                assertEquals(before + 1, countOf(name), "hovering $name should name it '$name'")
             }
         }
     }
@@ -72,7 +63,7 @@ class CanvasTabToolTooltipTest {
         canvasTab(seed = { addScene("Tools") }) { _, _ ->
             val beforeRectangle = countOf("Rectangle")
 
-            hover("◆") // Select
+            hover("Select")
 
             assertEquals(
                 beforeRectangle, countOf("Rectangle"),

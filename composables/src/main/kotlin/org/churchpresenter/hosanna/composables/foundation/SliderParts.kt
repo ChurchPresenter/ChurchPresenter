@@ -13,11 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.SliderDefaults
-import org.churchpresenter.hosanna.hosannaElevation
-import org.churchpresenter.hosanna.tabular
 
 @Composable
 internal fun SliderThumb(

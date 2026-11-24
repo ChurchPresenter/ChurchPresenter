@@ -1,6 +1,5 @@
 package org.churchpresenter.sharedui.composables
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +44,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 @Composable
 fun NumberSettingsTextField(
@@ -144,12 +145,13 @@ fun NumberSettingsTextField(
 
 @Composable
 private fun StepArrow(icon: DrawableResource, description: String, onClick: () -> Unit) {
-    KeyIconButton(onClick = onClick, modifier = Modifier.size(20.dp, 16.dp)) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription = description,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
-            modifier = Modifier.size(12.dp)
-        )
-    }
+    IconButton(
+        icon = painterResource(icon),
+        contentDescription = description,
+        onClick = onClick,
+        modifier = Modifier.size(20.dp, 16.dp),
+        size = IconButtonSize.Small,
+        hierarchy = ButtonHierarchy.Tertiary,
+        intent = ButtonIntent.Neutral,
+    )
 }

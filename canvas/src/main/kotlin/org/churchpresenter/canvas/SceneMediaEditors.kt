@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -84,6 +82,10 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.sharedui.composables.HorizontalAlignmentButtons
@@ -148,7 +150,9 @@ internal fun ImageProperties(
         PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
-        RaisedButton(
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_folder),
+            contentDescription = strBrowse,
             onClick = {
                 scope.launch {
                     val imageFilter = FileNameExtensionFilter(
@@ -169,17 +173,10 @@ internal fun ImageProperties(
                     }
                 }
             },
-            // A square icon key: the default text-button padding made it far wider than its icon.
-            modifier = Modifier.size(40.dp),
-            shape = AppShape(8.dp),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_folder),
-                contentDescription = strBrowse,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+            size = IconButtonSize.Large,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Default,
+        )
     }
     val scaleOptions = listOf(fitLabel, fillLabel, stretchLabel, noneLabel)
     val scaleMap = mapOf("FIT" to fitLabel, "FILL" to fillLabel, "STRETCH" to stretchLabel, "NONE" to noneLabel)
@@ -455,7 +452,9 @@ internal fun VideoProperties(
         PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
-        RaisedButton(
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_folder),
+            contentDescription = strBrowse,
             onClick = {
                 scope.launch {
                     val videoFilter = FileNameExtensionFilter(
@@ -476,17 +475,10 @@ internal fun VideoProperties(
                     }
                 }
             },
-            // A square icon key: the default text-button padding made it far wider than its icon.
-            modifier = Modifier.size(40.dp),
-            shape = AppShape(8.dp),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Icon(
-                painterResource(IconRes.drawable.ic_folder),
-                contentDescription = strBrowse,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+            size = IconButtonSize.Large,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Default,
+        )
     }
 
     LabeledCheckbox(

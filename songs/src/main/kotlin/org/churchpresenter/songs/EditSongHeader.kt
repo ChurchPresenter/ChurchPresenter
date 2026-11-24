@@ -62,9 +62,13 @@ import org.churchpresenter.strings.generated.resources.song_tempo
 import org.churchpresenter.strings.generated.resources.tune
 import org.churchpresenter.strings.generated.resources.unit_bpm
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.AppExposedDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 internal val EditSongCardShape = AppShape(9.dp)
 
@@ -349,16 +353,14 @@ private fun RowScope.SongbookCard(
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.weight(1f),
                 )
-                KeyIconButton(
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Default.Close),
+                    contentDescription = stringResource(Res.string.cancel),
                     onClick = { onSongbookChange(originalSongbook); isAddingNew = false },
-                    modifier = Modifier.size(20.dp),
-                ) {
-                    Icon(
-                        Icons.Default.Close,
-                        contentDescription = stringResource(Res.string.cancel),
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         }
     } else {

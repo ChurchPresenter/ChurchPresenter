@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -61,7 +60,6 @@ import org.churchpresenter.strings.generated.resources.value_dialog_keys_hint
 import org.churchpresenter.strings.generated.resources.value_dialog_out_of_range
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.GhostButton
-import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.isDarkScheme
@@ -69,6 +67,10 @@ import org.churchpresenter.theme.sunken
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private val ValueDialogShape = AppShape(18.dp)
 private val ValueFieldShape = AppShape(12.dp)
@@ -285,15 +287,15 @@ private fun ValueStepper(
 
 @Composable
 private fun ValueStepKey(icon: Painter, description: String, onClick: () -> Unit) {
-    KeyButton(
+    IconButton(
+        icon = icon,
+        contentDescription = description,
         onClick = onClick,
         modifier = Modifier.width(44.dp).height(52.dp),
-        shape = ValueFieldShape,
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-        contentPadding = PaddingValues(0.dp),
-    ) {
-        Icon(icon, contentDescription = description, modifier = Modifier.size(20.dp))
-    }
+        size = IconButtonSize.Large,
+        hierarchy = ButtonHierarchy.Secondary,
+        intent = ButtonIntent.Neutral,
+    )
 }
 
 @Composable

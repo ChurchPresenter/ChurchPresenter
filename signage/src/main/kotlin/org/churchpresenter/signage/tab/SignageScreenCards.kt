@@ -37,7 +37,10 @@ import org.churchpresenter.signage.core.Features
 import org.churchpresenter.signage.core.PowerAction
 import org.churchpresenter.signage.core.Platform
 import org.churchpresenter.signage.hub.PendingScreen
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.signage_approve
@@ -364,34 +367,54 @@ private fun CardButtons(
 ) {
     val screen = row.screen
     Row(verticalAlignment = Alignment.CenterVertically) {
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Visibility),
-            text = stringResource(Res.string.signage_identify),
-            onClick = { actions.onIdentify(screen.id) },
-            enabled = row.link != null,
-        )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Schedule),
-            text = stringResource(Res.string.signage_schedule),
-            onClick = { onAsk(CardQuestion.SCHEDULE) },
-        )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Speed),
-            text = stringResource(Res.string.signage_web_test),
-            onClick = { actions.onTestWebPages(screen.id) },
-            enabled = row.link?.let { Features.WEB_TEST in it.features && it.webTestStartedAtMs == null } == true,
-        )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Settings),
-            text = stringResource(Res.string.signage_screen_settings),
-            onClick = onRename,
-        )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.DeleteSweep),
-            text = stringResource(Res.string.signage_wipe),
-            onClick = { onAsk(CardQuestion.WIPE) },
-            enabled = row.link?.features?.contains(Features.WIPE) == true,
-        )
+        Tooltip(text = stringResource(Res.string.signage_identify)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Visibility),
+                contentDescription = stringResource(Res.string.signage_identify),
+                onClick = { actions.onIdentify(screen.id) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+                enabled = row.link != null,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.signage_schedule)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Schedule),
+                contentDescription = stringResource(Res.string.signage_schedule),
+                onClick = { onAsk(CardQuestion.SCHEDULE) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.signage_web_test)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Speed),
+                contentDescription = stringResource(Res.string.signage_web_test),
+                onClick = { actions.onTestWebPages(screen.id) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+                enabled = row.link?.let { Features.WEB_TEST in it.features && it.webTestStartedAtMs == null } == true,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.signage_screen_settings)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Settings),
+                contentDescription = stringResource(Res.string.signage_screen_settings),
+                onClick = onRename,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.signage_wipe)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.DeleteSweep),
+                contentDescription = stringResource(Res.string.signage_wipe),
+                onClick = { onAsk(CardQuestion.WIPE) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+                enabled = row.link?.features?.contains(Features.WIPE) == true,
+            )
+        }
     }
 }
 

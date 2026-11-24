@@ -42,9 +42,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.foundation.FieldState
@@ -57,6 +57,7 @@ import org.churchpresenter.hosanna.composables.model.MenuSearch
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -103,7 +104,7 @@ fun Dropdown(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = if (expanded) FieldState.Focused else fieldState(enabled, readOnly, hovered, focused)
-    val colors = HosannaTheme.colors.fieldColors(state, error != null)
+    val colors = ThemeColors.current.fieldColors(state, error != null)
     val spec = tween<Color>(FieldDefaults.TRANSITION_MILLIS, easing = EaseOut)
     val container by animateColorAsState(colors.container, spec)
     val border by animateColorAsState(colors.border, spec)

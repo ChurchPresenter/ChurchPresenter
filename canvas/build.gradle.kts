@@ -16,6 +16,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.ndi)
     implementation(projects.omt)
     implementation(projects.bible)

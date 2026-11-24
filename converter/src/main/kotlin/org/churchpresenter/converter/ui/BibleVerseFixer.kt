@@ -23,7 +23,11 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -362,12 +366,22 @@ private fun VerseEditRow(row: WorkRow, onAdd: () -> Unit, onRemove: () -> Unit) 
         }
         ConverterTextField(value = row.text, onValueChange = { row.text = it }, modifier = Modifier.weight(1f))
         if (row.isDamaged) SuggestionButton(row)
-        IconButton(onClick = onAdd, modifier = Modifier.size(28.dp)) {
-            Icon(Icons.Default.Add, Strings.verseFixerAdd, Modifier.size(18.dp))
-        }
-        IconButton(onClick = onRemove, modifier = Modifier.size(28.dp)) {
-            Icon(Icons.Default.Delete, Strings.verseFixerRemove, Modifier.size(18.dp))
-        }
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Add),
+            contentDescription = Strings.verseFixerAdd,
+            onClick = onAdd,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Delete),
+            contentDescription = Strings.verseFixerRemove,
+            onClick = onRemove,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

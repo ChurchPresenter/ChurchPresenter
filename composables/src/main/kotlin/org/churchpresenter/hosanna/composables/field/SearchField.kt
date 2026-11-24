@@ -38,9 +38,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaRadius
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.foundation.Spinner
@@ -50,6 +50,7 @@ import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_search
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -106,11 +107,11 @@ fun SearchField(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val focusManager = LocalFocusManager.current
-    val colors = HosannaTheme.colors.fieldColors(fieldState(enabled, false, hovered, focused), error = false)
+    val colors = ThemeColors.current.fieldColors(fieldState(enabled, false, hovered, focused), error = false)
     val spec = tween<Color>(FieldDefaults.TRANSITION_MILLIS, easing = EaseOut)
     val container by animateColorAsState(colors.container, spec)
     val border by animateColorAsState(colors.border, spec)
-    val muted = if (enabled) HosannaTheme.colors.onSurfaceVariant else colors.icon
+    val muted = if (enabled) ThemeColors.current.onSurfaceVariant else colors.icon
     val shape = HosannaTheme.shapes.m
     val typography = HosannaTheme.typography
     val requester = remember { FocusRequester() }
@@ -178,7 +179,7 @@ private fun KeyCap(text: String, color: Color) {
     Box(
         modifier = Modifier
             .height(FieldDefaults.KeyCapHeight)
-            .background(HosannaTheme.colors.secondaryContainer, HosannaTheme.shapes.s)
+            .background(ThemeColors.current.secondaryContainer, HosannaTheme.shapes.s)
             .padding(horizontal = FieldDefaults.KeyCapPadding),
         contentAlignment = Alignment.Center,
     ) {
@@ -188,7 +189,7 @@ private fun KeyCap(text: String, color: Color) {
 
 @Composable
 private fun DetectionChip(text: String, enabled: Boolean, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val fill = if (hovered && enabled) {

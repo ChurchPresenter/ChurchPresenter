@@ -1,14 +1,14 @@
 package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.hosanna.HosannaLightColors
 import org.churchpresenter.hosanna.composables.model.MessageIntent
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class MessageColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `each intent uses its soft container role`() {

@@ -102,6 +102,12 @@ import org.jetbrains.compose.resources.stringResource
 import java.time.LocalTime
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private const val ROW_ALPHA = 0.45f
 private const val BADGE_ALPHA = 0.18f
@@ -454,27 +460,16 @@ private fun RowAction(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    val scheme = MaterialTheme.colorScheme
-    Hint(description) {
-        Box(
-            Modifier
-                .size(CalendarMetrics.rowAction)
-                .then(
-                    if (enabled) {
-                        Modifier.raisedKey(CalendarMetrics.smallRadius, elevationPalette().key, onClick = onClick)
-                    } else {
-                        Modifier.clip(CalendarMetrics.smallRadius).clickable(enabled = false, onClick = onClick)
-                    }
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                icon,
-                contentDescription = description,
-                tint = scheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else DIM_ALPHA * 0.6f),
-                modifier = Modifier.size(11.dp),
-            )
-        }
+    Tooltip(text = description) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = description,
+            onClick = onClick,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+            enabled = enabled,
+        )
     }
 }
 

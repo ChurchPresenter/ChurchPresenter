@@ -58,7 +58,11 @@ import org.churchpresenter.settings.updateLayout
 import org.churchpresenter.theme.components.KeyButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** Test handles for the switches, which carry no text of their own. */
 internal const val TAG_SHOW_LABELS = "preview_show_labels"
@@ -212,25 +216,29 @@ private fun LayoutHeader(proj: ProjectionSettings, onChange: (ProjectionSettings
             },
             modifier = Modifier.weight(1f).focusRequester(focus),
         )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_edit),
-            text = stringResource(Res.string.preview_layout_rename),
-            onClick = { focus.requestFocus() },
-            iconSize = 13.dp,
-            buttonSize = 26.dp,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_delete),
-            text = stringResource(Res.string.preview_layout_delete),
-            onClick = {
-                val rest = proj.previewLayouts.filterNot { it.id == active.id }
-                onChange(proj.copy(previewLayouts = rest, activePreviewLayout = rest.firstOrNull()?.id.orEmpty()))
-            },
-            iconSize = 13.dp,
-            buttonSize = 26.dp,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Tooltip(text = stringResource(Res.string.preview_layout_rename)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_edit),
+                contentDescription = stringResource(Res.string.preview_layout_rename),
+                onClick = { focus.requestFocus() },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.preview_layout_delete)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_delete),
+                contentDescription = stringResource(Res.string.preview_layout_delete),
+                onClick = {
+                    val rest = proj.previewLayouts.filterNot { it.id == active.id }
+                    onChange(proj.copy(previewLayouts = rest, activePreviewLayout = rest.firstOrNull()?.id.orEmpty()))
+                },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
     if (active == null) {
         Text(
@@ -267,16 +275,18 @@ private fun OtherLayouts(proj: ProjectionSettings, onChange: (ProjectionSettings
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            TooltipIconButton(
-                painter = painterResource(IconRes.drawable.ic_delete),
-                text = stringResource(Res.string.preview_layout_delete),
-                onClick = {
-                    onChange(proj.copy(previewLayouts = proj.previewLayouts.filterNot { it.id == layout.id }))
-                },
-                iconSize = 13.dp,
-                buttonSize = 26.dp,
-                iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Tooltip(text = stringResource(Res.string.preview_layout_delete)) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_delete),
+                    contentDescription = stringResource(Res.string.preview_layout_delete),
+                    onClick = {
+                        onChange(proj.copy(previewLayouts = proj.previewLayouts.filterNot { it.id == layout.id }))
+                    },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
+            }
         }
     }
 }

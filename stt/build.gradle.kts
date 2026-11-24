@@ -16,6 +16,7 @@ dependencies {
     implementation(projects.strings)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)

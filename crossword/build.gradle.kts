@@ -11,6 +11,7 @@ extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/ComposableSingl
 
 dependencies {
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)

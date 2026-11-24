@@ -68,6 +68,11 @@ import org.churchpresenter.songlibrary.generated.resources.new_song_book_placeho
 import org.churchpresenter.songlibrary.generated.resources.new_song_book_subhead
 import org.churchpresenter.songlibrary.generated.resources.no_song_book
 import org.churchpresenter.songlibrary.generated.resources.song_count
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * The panel every dialog in this window is: an icon, a title and a line under it, a body, and a
@@ -108,15 +113,14 @@ fun LibraryDialog(
                     Text(title, style = LibraryType.bodyStrong, color = scheme.onSurface)
                     Text(subtitle, style = LibraryType.small, color = scheme.onSurfaceVariant)
                 }
-                Box(
-                    Modifier.size(28.dp)
-                        .clip(AppShape(7.dp))
-                        .background(scheme.surfaceContainerHigh)
-                        .clickable(onClick = onDismiss),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(Icons.Default.Close, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(12.dp))
-                }
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Default.Close),
+                    contentDescription = stringResource(Res.string.cancel),
+                    onClick = onDismiss,
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Secondary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
             Box(Modifier.fillMaxWidth().height(1.dp).background(scheme.outlineVariant))
             Column(Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) { body() }

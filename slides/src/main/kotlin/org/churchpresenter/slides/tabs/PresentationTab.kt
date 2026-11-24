@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -76,6 +75,9 @@ import org.jetbrains.compose.resources.stringResource
 import java.awt.Window as AwtWindow
 import java.io.File
 import org.churchpresenter.sharedui.composables.hoverLift
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 internal const val PRESENTATION_MILLIS_PER_SECOND = 1000
 internal const val PRESENTATION_MAX_AUTO_SCROLL_SECONDS = 30
@@ -274,9 +276,13 @@ internal fun VlcMissingBanner(detail: String, onDismiss: () -> Unit, modifier: M
                 Text(stringResource(Res.string.media_vlc_required), style = MaterialTheme.typography.titleSmall)
                 Text(detail, style = MaterialTheme.typography.bodySmall)
             }
-            KeyIconButton(onClick = onDismiss) {
-                Icon(painterResource(IconRes.drawable.ic_close), contentDescription = stringResource(Res.string.clear))
-            }
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.clear),
+                onClick = onDismiss,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

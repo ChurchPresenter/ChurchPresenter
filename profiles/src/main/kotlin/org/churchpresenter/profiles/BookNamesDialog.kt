@@ -45,7 +45,11 @@ import org.churchpresenter.bibletab.BibleBookNames
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_search
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.book_names
 import org.churchpresenter.strings.generated.resources.book_names_clear
@@ -181,13 +185,16 @@ private fun DialogHeader(title: String, onClose: () -> Unit) {
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_close),
-            text = stringResource(Res.string.close),
-            onClick = onClose,
-            iconSize = 14.dp,
-            buttonSize = 28.dp,
-        )
+        Tooltip(text = stringResource(Res.string.close)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.close),
+                onClick = onClose,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 

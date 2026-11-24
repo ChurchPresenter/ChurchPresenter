@@ -40,8 +40,12 @@ import org.churchpresenter.strings.generated.resources.tooltip_settings
 import org.churchpresenter.sharedui.composables.ContextMenu
 import org.churchpresenter.sharedui.composables.ToggleMenuHeader
 import org.churchpresenter.sharedui.composables.ToggleMenuItem
-import org.churchpresenter.sharedui.composables.ToolbarKey
-import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
@@ -50,7 +54,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val CONTENT_CROSSFADE_MS = 120
-private val TOOLBAR_KEY_SIZE = 40.dp
 private val TAB_MENU_WIDTH = 220.dp
 
 /** The tab bar's bottom corners, matching the cards below it; the divider under it stops where they start. */
@@ -124,22 +127,28 @@ private fun TabBar(tabBar: TabBarState, actions: TabBarActions) {
             onTabSelected = actions.onTabSelected
         )
         TabVisibilityMenu(tabBar.hiddenTabs, actions.onToggleTabHidden)
-        ToolbarKey(
-            painter = rememberVectorPainter(Icons.Default.Wallpaper),
-            text = stringResource(Res.string.background),
-            onClick = actions.onShowBackgroundSettings,
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            buttonSize = TOOLBAR_KEY_SIZE,
-            modifier = Modifier.guideTarget(GuideTargets.BACKGROUND_BUTTON),
-        )
-        ToolbarKey(
-            painter = painterResource(IconRes.drawable.ic_settings),
-            text = stringResource(Res.string.tooltip_settings),
-            onClick = actions.onShowSettings,
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            buttonSize = TOOLBAR_KEY_SIZE,
-            modifier = Modifier.guideTarget(GuideTargets.SETTINGS_BUTTON),
-        )
+        val backgroundLabel = stringResource(Res.string.background)
+        Tooltip(text = backgroundLabel, modifier = Modifier.guideTarget(GuideTargets.BACKGROUND_BUTTON)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.Wallpaper),
+                contentDescription = backgroundLabel,
+                onClick = actions.onShowBackgroundSettings,
+                size = IconButtonSize.Large,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        val settingsLabel = stringResource(Res.string.tooltip_settings)
+        Tooltip(text = settingsLabel, modifier = Modifier.guideTarget(GuideTargets.SETTINGS_BUTTON)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_settings),
+                contentDescription = settingsLabel,
+                onClick = actions.onShowSettings,
+                size = IconButtonSize.Large,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 
@@ -148,14 +157,18 @@ private fun TabBar(tabBar: TabBarState, actions: TabBarActions) {
 private fun TabVisibilityMenu(hiddenTabs: Set<String>, onToggleTabHidden: (Tabs) -> Unit) {
     var showTabVisibilityMenu by remember { mutableStateOf(false) }
     Box {
-        ToolbarKey(
-            painter = rememberVectorPainter(Icons.Default.Tune),
-            text = stringResource(Res.string.tab_visibility),
-            onClick = { showTabVisibilityMenu = true },
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            open = showTabVisibilityMenu,
-            buttonSize = TOOLBAR_KEY_SIZE,
-        )
+        val label = stringResource(Res.string.tab_visibility)
+        Tooltip(text = label) {
+            IconToggleButton(
+                icon = rememberVectorPainter(Icons.Default.Tune),
+                contentDescription = label,
+                checked = showTabVisibilityMenu,
+                onCheckedChange = { showTabVisibilityMenu = true },
+                size = IconButtonSize.Large,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
         ContextMenu(
             expanded = showTabVisibilityMenu,
             onDismissRequest = { showTabVisibilityMenu = false },

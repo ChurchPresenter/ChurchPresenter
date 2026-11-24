@@ -6,15 +6,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.field.counterText
 import org.churchpresenter.hosanna.composables.field.isOverLimit
 import org.churchpresenter.hosanna.composables.field.showClear
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class FieldFoundationTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `disabled outranks read-only, which outranks focus and hover`() {
@@ -34,7 +33,7 @@ class FieldFoundationTest {
                 null,
                 c.onSurfaceVariant,
                 c.onSurface,
-                c.onSurfaceFaint,
+                c.faint,
                 c.primary,
             ),
             c.fieldColors(FieldState.Rest, error = false),
@@ -47,7 +46,7 @@ class FieldFoundationTest {
                 null,
                 c.onSurfaceVariant,
                 c.onSurface,
-                c.onSurfaceFaint,
+                c.faint,
                 c.primary,
             ),
             c.fieldColors(FieldState.Hovered, error = false),
@@ -59,7 +58,7 @@ class FieldFoundationTest {
                 c.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
                 c.primary,
                 c.onSurface,
-                c.onSurfaceFaint,
+                c.faint,
                 c.primary,
             ),
             c.fieldColors(FieldState.Focused, error = false),
@@ -87,7 +86,7 @@ class FieldFoundationTest {
                 null,
                 c.onSurfaceVariant,
                 c.onSurface,
-                c.onSurfaceFaint,
+                c.faint,
                 Color.Transparent,
             ),
             c.fieldColors(FieldState.ReadOnly, error = true),

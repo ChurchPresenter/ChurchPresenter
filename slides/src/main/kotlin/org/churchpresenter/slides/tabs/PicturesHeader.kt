@@ -10,8 +10,6 @@ import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.ui.draw.alpha
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.SavePresetButton
@@ -32,9 +30,7 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +41,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -73,6 +68,11 @@ import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.ui.text.style.TextOverflow
 import org.churchpresenter.sharedui.composables.RecentChip
 import org.churchpresenter.sharedui.composables.topBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** The top card: the folder bar, the recent folders, the playback controls and the key hints. */
 @Composable
@@ -191,34 +191,15 @@ private fun PicturesTabScope.PicturesRecentBar(viewModel: PicturesViewModel) {
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp,
-                    ) {
-                        Text(
-                            stringResource(Res.string.clear_recents),
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp),
+            Tooltip(text = stringResource(Res.string.clear_recents)) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.clear),
+                    onClick = { RecentPictureFolders.clear() },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
                 )
-            ) {
-                KeyIconButton(onClick = { RecentPictureFolders.clear() }, modifier = Modifier.size(20.dp)) {
-                    Icon(
-                        painter = painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.clear),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                }
             }
             LazyRow(
                 modifier = Modifier.weight(1f),

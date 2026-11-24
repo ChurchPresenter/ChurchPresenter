@@ -13,6 +13,7 @@ dependencies {
     // use them without depending on this Compose application module.
     implementation(projects.bibleFormats)
     implementation(projects.theme)
+    implementation(projects.composables)
     // The chord grammar songs are written in, shared with the app rather than repeated here.
     implementation(projects.songChords)
     // The song-file decode (UTF-8, else Windows-1251), shared with the app's song library.

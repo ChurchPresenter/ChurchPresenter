@@ -132,7 +132,7 @@ class RaisedControlsTest {
     }
 
     @Test
-    fun `icon keys click, a transparent unbordered one stays flat, and disabled ones ignore clicks`() =
+    fun `icon keys click, and disabled ones ignore clicks`() =
         runComposeUiTest {
             var clicks = 0
             setContent {
@@ -153,28 +153,15 @@ class RaisedControlsTest {
                             enabled = false,
                             colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Blue),
                         ) { Text("filled off") }
-                        RaisedIconButton(onClick = { clicks++ }) { Text("raised") }
-                        RaisedIconButton(
-                            onClick = { clicks++ },
-                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Transparent),
-                        ) { Text("clear") }
-                        RaisedIconButton(
-                            onClick = { clicks++ },
-                            colors = IconButtonDefaults.outlinedIconButtonColors(),
-                            border = BorderStroke(1.dp, Color.Gray),
-                        ) { Text("outlined") }
-                        RaisedIconButton(onClick = { clicks++ }, enabled = false) {
-                            Text("raised off")
-                        }
                     }
                 }
             }
             onNodeWithTag("flat").performMouseInput { enter(center) }
             waitForIdle()
-            listOf("flat", "filled", "flat off", "filled off", "raised", "clear", "outlined", "raised off").forEach {
+            listOf("flat", "filled", "flat off", "filled off").forEach {
                 onNodeWithText(it).performClick()
             }
-            assertEquals(5, clicks)
+            assertEquals(2, clicks)
         }
 
     @Test

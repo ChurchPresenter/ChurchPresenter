@@ -366,7 +366,6 @@ private fun SectionRow(
                 description = stringResource(Res.string.calendar_section_remove),
                 onClick = onRemove,
                 destructive = true,
-                size = SheetMetrics.rowButton,
             )
         }
         if (paletteOpen) {

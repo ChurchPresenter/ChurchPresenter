@@ -26,8 +26,6 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import org.churchpresenter.theme.components.RaisedIconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
@@ -75,7 +73,6 @@ import org.churchpresenter.strings.generated.resources.qa_approved
 import org.churchpresenter.strings.generated.resources.qa_denied
 import org.churchpresenter.strings.generated.resources.qa_done
 import org.churchpresenter.strings.generated.resources.qa_incoming_approved
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -85,6 +82,13 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** Session, counts, the display and voting toggles and Clear All, above the questions. */
 @Composable
@@ -176,67 +180,66 @@ private fun RowScope.SessionButtons(tab: QATabScope) = with(tab) {
 /** Remote access, the join QR code on screen, and voting on or off. */
 @Composable
 private fun QATabScope.DisplayButtons() {
-    ActionIconButton(
-        onClick = { showRemoteDialog = true },
-        tooltipText = stringResource(Res.string.tooltip_qa_remote),
+    Tooltip(
+        text = stringResource(Res.string.tooltip_qa_remote),
         modifier = Modifier.guideTarget(GuideTargets.QA_REMOTE),
-        icon = Icons.Default.SettingsRemote,
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-    )
+    ) {
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.SettingsRemote),
+            contentDescription = stringResource(Res.string.tooltip_qa_remote),
+            onClick = { showRemoteDialog = true },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
 
     Spacer(Modifier.width(8.dp))
 
-    ActionIconButton(
-        onClick = {
-            if (showQROnDisplay && isQALocked) return@ActionIconButton
-            qaManager.toggleQRCodeDisplay()
-            output.setShowQRCodeOnDisplay(qaManager.showQRCodeOnDisplay)
-            if (qaManager.showQRCodeOnDisplay) {
-                output.setDisplayedQuestion(null)
-                presenting(Presenting.QA)
-            } else if (qaManager.displayedQuestion == null) {
-                presenting(Presenting.NONE)
-            }
-        },
-        enabled = !(showQROnDisplay && isQALocked),
-        tooltipText = stringResource(if (showQROnDisplay) Res.string.qa_hide_qr else Res.string.qa_show_qr),
-        icon = Icons.Default.Tv,
-        containerColor = if (showQROnDisplay) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.secondaryContainer
-        },
-        contentColor = if (showQROnDisplay) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onSecondaryContainer
-        }
-    )
+    val qrText = stringResource(if (showQROnDisplay) Res.string.qa_hide_qr else Res.string.qa_show_qr)
+    Tooltip(text = qrText) {
+        IconToggleButton(
+            icon = rememberVectorPainter(Icons.Default.Tv),
+            contentDescription = qrText,
+            checked = showQROnDisplay,
+            onCheckedChange = {
+                if (showQROnDisplay && isQALocked) return@IconToggleButton
+                qaManager.toggleQRCodeDisplay()
+                output.setShowQRCodeOnDisplay(qaManager.showQRCodeOnDisplay)
+                if (qaManager.showQRCodeOnDisplay) {
+                    output.setDisplayedQuestion(null)
+                    presenting(Presenting.QA)
+                } else if (qaManager.displayedQuestion == null) {
+                    presenting(Presenting.NONE)
+                }
+            },
+            enabled = !(showQROnDisplay && isQALocked),
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
 
     Spacer(Modifier.width(8.dp))
 
-    ActionIconButton(
-        onClick = {
-            onSettingsChange { s ->
-                s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled))
-            }
-        },
-        tooltipText = stringResource(
-            if (qaSettings.votingEnabled) Res.string.qa_voting_enabled else Res.string.qa_voting_disabled
-        ),
-        icon = Icons.Default.HowToVote,
-        containerColor = if (qaSettings.votingEnabled) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.secondaryContainer
-        },
-        contentColor = if (qaSettings.votingEnabled) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onSecondaryContainer
-        }
+    val votingText = stringResource(
+        if (qaSettings.votingEnabled) Res.string.qa_voting_enabled else Res.string.qa_voting_disabled
     )
+    Tooltip(text = votingText) {
+        IconToggleButton(
+            icon = rememberVectorPainter(Icons.Default.HowToVote),
+            contentDescription = votingText,
+            checked = qaSettings.votingEnabled,
+            onCheckedChange = {
+                onSettingsChange { s ->
+                    s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled))
+                }
+            },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
 }
 
 @Composable
@@ -382,21 +385,14 @@ internal fun QATabScope.AddQuestionField() {
                 )
             }
             if (addQuestionText.isNotEmpty()) {
-                RaisedIconButton(
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.qa_clear_question_text),
                     onClick = { addQuestionText = "" },
-                    modifier = Modifier.size(30.dp),
-                    shape = AppShape(5.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                ) {
-                    Icon(
-                        painter = painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.qa_clear_question_text),
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         }
         RaisedButton(

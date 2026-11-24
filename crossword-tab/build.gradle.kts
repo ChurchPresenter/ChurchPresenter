@@ -9,6 +9,7 @@ plugins {
 dependencies {
     implementation(projects.strings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.settings)
 
     implementation(libs.kotlinx.coroutines.core)

@@ -51,6 +51,12 @@ import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.settings.QuickBackground
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 internal const val QUICK_BACKGROUND_TRAY_TAG = "quick_background_tray"
 internal const val QUICK_BACKGROUND_HEADER_TAG = "quick_background_header"
@@ -164,22 +170,16 @@ private fun TrayHeader(
         }
         if (activeId != null) {
             val resetLabel = stringResource(Res.string.quick_background_reset)
-            ConditionalTooltipArea(tooltip = { TrayTooltip(resetLabel) }) {
-                Box(
-                    modifier = Modifier
-                        .testTag(QUICK_BACKGROUND_RESET_TAG)
-                        .size(18.dp)
-                        .clip(AppShape(4.dp))
-                        .clickable { onPick(null) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = resetLabel,
-                        modifier = Modifier.size(13.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+            Tooltip(text = resetLabel) {
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Default.Refresh),
+                    contentDescription = resetLabel,
+                    onClick = { onPick(null) },
+                    modifier = Modifier.testTag(QUICK_BACKGROUND_RESET_TAG).size(18.dp),
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         }
     }

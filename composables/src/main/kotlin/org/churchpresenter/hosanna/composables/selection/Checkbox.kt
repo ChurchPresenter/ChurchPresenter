@@ -31,17 +31,18 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.state.ToggleableState
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.CheckboxDefaults
 import org.churchpresenter.hosanna.composables.foundation.CheckboxColors
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.checkboxColors
 import org.churchpresenter.hosanna.composables.foundation.focusRing
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.hosanna.composables.foundation.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_remove
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A checkbox with its label. The whole row toggles it.
@@ -115,7 +116,7 @@ fun TriStateCheckbox(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val interaction = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.checkboxColors(state, interaction, error)
+    val colors = ThemeColors.current.checkboxColors(state, interaction, error)
     val typography = HosannaTheme.typography
     val described = description != null && !compact
     Row(

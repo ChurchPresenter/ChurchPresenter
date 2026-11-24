@@ -9,8 +9,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
@@ -106,28 +108,27 @@ private fun SlotEditor(
                 label = Strings.editorSlotId,
                 modifier = Modifier.weight(1f)
             )
-            KeyIconButton(onClick = { onMove(-1) }) {
-                Icon(
-                    Icons.Default.KeyboardArrowUp,
-                    contentDescription = Strings.editorMoveUp,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-            KeyIconButton(onClick = { onMove(+1) }) {
-                Icon(
-                    Icons.Default.KeyboardArrowDown,
-                    contentDescription = Strings.editorMoveDown,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-            KeyIconButton(onClick = onRemove) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = Strings.editorDelete,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.KeyboardArrowUp),
+                contentDescription = Strings.editorMoveUp,
+                onClick = { onMove(-1) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.KeyboardArrowDown),
+                contentDescription = Strings.editorMoveDown,
+                onClick = { onMove(+1) },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.Delete),
+                contentDescription = Strings.editorDelete,
+                onClick = onRemove,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Critical,
+            )
         }
         OptionDropdown(
             label = Strings.editorSlotKind,

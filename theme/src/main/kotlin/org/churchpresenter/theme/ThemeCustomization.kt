@@ -316,4 +316,4 @@ internal data class Hsl(val hue: Float, val saturation: Float, val lightness: Fl
 
 /** The status colours the Custom theme paints with for [custom] — for showing what "automatic" gives. */
 fun customSemanticColorsFor(custom: ThemeCustomization): SemanticColors =
-    customSemanticColors(semanticColorsFor(customColorScheme(custom)), custom)
+    customSemanticColors(presetSemanticColors(custom.dark), custom)

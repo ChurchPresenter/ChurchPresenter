@@ -19,6 +19,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.songChords)
     implementation(projects.bible)
     implementation(projects.diagnostics)

@@ -11,8 +11,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 
 internal enum class FieldState { Rest, Hovered, Focused, Disabled, ReadOnly }
@@ -36,19 +34,19 @@ internal fun fieldState(enabled: Boolean, readOnly: Boolean, hovered: Boolean, f
     else -> FieldState.Rest
 }
 
-internal fun HosannaColors.fieldColors(state: FieldState, error: Boolean): FieldColors {
+internal fun ThemeColors.fieldColors(state: FieldState, error: Boolean): FieldColors {
     val accent = if (error) this.error else primary
     val border = if (error) this.error else outline
     val label = if (error) this.error else onSurfaceVariant
     return when (state) {
-        FieldState.Rest -> FieldColors(surfaceVariant, border, null, label, onSurface, onSurfaceFaint, accent)
+        FieldState.Rest -> FieldColors(surfaceVariant, border, null, label, onSurface, faint, accent)
         FieldState.Hovered -> FieldColors(
             onSurface.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(surfaceVariant),
             if (error) border else onSurface.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(outline),
             null,
             label,
             onSurface,
-            onSurfaceFaint,
+            faint,
             accent,
         )
         FieldState.Focused -> FieldColors(
@@ -57,7 +55,7 @@ internal fun HosannaColors.fieldColors(state: FieldState, error: Boolean): Field
             accent.copy(alpha = HosannaStateAlpha.FOCUS_RING),
             accent,
             onSurface,
-            onSurfaceFaint,
+            faint,
             accent,
         )
         FieldState.ReadOnly -> FieldColors(
@@ -66,7 +64,7 @@ internal fun HosannaColors.fieldColors(state: FieldState, error: Boolean): Field
             null,
             onSurfaceVariant,
             onSurface,
-            onSurfaceFaint,
+            faint,
             Color.Transparent,
         )
         FieldState.Disabled -> {

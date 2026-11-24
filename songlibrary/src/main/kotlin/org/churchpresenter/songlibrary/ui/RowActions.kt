@@ -9,7 +9,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -26,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -38,12 +36,17 @@ import org.churchpresenter.songlibrary.generated.resources.compare_single_langua
 import org.churchpresenter.songlibrary.generated.resources.compare_translations
 import org.churchpresenter.songlibrary.generated.resources.compare_translations_mismatch
 import org.churchpresenter.songlibrary.TranslationProblems
-import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.ControlTooltip
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.PI
 import kotlin.math.sin
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 // The small controls on a song row: its buttons, and the mark that flags a translation problem.
 
@@ -55,7 +58,6 @@ import kotlin.math.sin
  */
 @Composable
 internal fun CompareAction(languages: Int, mismatches: Int, onClick: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
     val mismatched = mismatches > 0
     RowAction(
         Icons.AutoMirrored.Filled.CompareArrows,
@@ -64,16 +66,10 @@ internal fun CompareAction(languages: Int, mismatches: Int, onClick: () -> Unit)
             mismatched -> stringResource(Res.string.compare_translations_mismatch, mismatches)
             else -> stringResource(Res.string.compare_translations)
         },
-        when {
-            languages < 2 -> scheme.onSurfaceVariant.copy(alpha = DISABLED_ALPHA)
-            mismatched -> MaterialTheme.semantic.warning
-            else -> scheme.onSurfaceVariant
-        },
+        if (mismatched) ButtonIntent.Warning else ButtonIntent.Neutral,
         onClick.takeIf { languages >= 2 },
     )
 }
-
-private const val DISABLED_ALPHA = 0.3f
 
 /**
  * The `!` beside the tick of a song whose languages need attention — sections out of step, or a
@@ -142,16 +138,17 @@ private const val GLOW_ALPHA = 0.35f
 
 /** A row's icon button, with [description] as both its tooltip and what a screen reader says. */
 @Composable
-internal fun RowAction(icon: ImageVector, description: String, tint: Color, onClick: (() -> Unit)?) {
-    WithTooltip(description) {
-        Box(
-            Modifier.size(26.dp)
-                .clip(AppShape(7.dp))
-                .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(14.dp))
-        }
+internal fun RowAction(icon: ImageVector, description: String, intent: ButtonIntent, onClick: (() -> Unit)?) {
+    Tooltip(text = description) {
+        IconButton(
+            icon = rememberVectorPainter(icon),
+            contentDescription = description,
+            onClick = { onClick?.invoke() },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = intent,
+            enabled = onClick != null,
+        )
     }
 }
 

@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
@@ -62,6 +61,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.hosanna.composables.button.CircularButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** The panel is a fixed slab: the names it lists are long and must not resize as they are filtered. */
 internal val FONT_PANEL_WIDTH = 378.dp
@@ -124,24 +127,15 @@ internal fun FontSearchRow(
             )
         }
         if (query.isNotEmpty()) {
-            Box(
-                modifier = Modifier
-                    .size(17.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = onClear,
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.font_picker_clear_search),
-                    modifier = Modifier.size(9.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            CircularButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.font_picker_clear_search),
+                onClick = onClear,
+                modifier = Modifier.size(17.dp),
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Secondary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

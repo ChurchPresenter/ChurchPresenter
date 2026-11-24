@@ -1,20 +1,20 @@
 package org.churchpresenter.hosanna.composables.foundation
 
-import org.churchpresenter.hosanna.HosannaLightColors
 import org.churchpresenter.hosanna.composables.model.ProgressStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class ProgressColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `the fill follows the status`() {
         assertEquals(c.primary, c.progressColors(ProgressStatus.Running).fill)
         assertEquals(c.success, c.progressColors(ProgressStatus.Finished).fill)
         assertEquals(c.error, c.progressColors(ProgressStatus.Failed).fill)
-        assertEquals(c.onSurfaceFaint, c.progressColors(ProgressStatus.Paused).fill)
+        assertEquals(c.faint, c.progressColors(ProgressStatus.Paused).fill)
     }
 
     @Test

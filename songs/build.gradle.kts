@@ -14,6 +14,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.songChords)
     // The song editor: its chord preview draws `ChordLine`, and its footer formats the typical
     // live time the way the calendar does. The Background button is the app's, passed in as a slot,

@@ -43,7 +43,6 @@ import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.material.icons.outlined.SwitchAccount
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -74,9 +73,6 @@ import org.churchpresenter.liveoutput.preview.LivePreviewPanel
 import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
 import org.churchpresenter.liveoutput.preview.ProfileSetsPopover
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
-import org.churchpresenter.sharedui.composables.ToolbarKey
-import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.previewOutputSize
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.CompanionSatelliteSettings
@@ -98,6 +94,12 @@ import org.churchpresenter.dialogs.LiveActionButton
 import org.churchpresenter.dialogs.LiveTool
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.AppDropdownMenu
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 
 /**
  * A Companion surface drawn in one of the main screen's sidebars: the connection it shows and where.
@@ -339,25 +341,33 @@ internal fun SidebarButtons(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Default.Monitor),
+        Tooltip(
             text = stringResource(Res.string.tooltip_toggle_displays),
-            onClick = { presenterManager.togglePresenterWindow() },
-            buttonSize = 36.dp,
             modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
-            iconTint = if (presenterManager.showPresenterWindow.value)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_close),
+        ) {
+            IconToggleButton(
+                icon = rememberVectorPainter(Icons.Default.Monitor),
+                contentDescription = stringResource(Res.string.tooltip_toggle_displays),
+                checked = presenterManager.showPresenterWindow.value,
+                onCheckedChange = { presenterManager.togglePresenterWindow() },
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        Tooltip(
             text = stringResource(Res.string.tooltip_clear_display),
-            onClick = onClearDisplay,
-            buttonSize = 36.dp,
             modifier = Modifier.guideTarget(GuideTargets.CLEAR_OUTPUT),
-            iconTint = MaterialTheme.colorScheme.error
-        )
+        ) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.tooltip_clear_display),
+                onClick = onClearDisplay,
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Critical,
+            )
+        }
         PreviewSettingsButton(appSettings.projectionSettings, onEditPreviewLayout) { updated ->
             onSettingsChange { s -> s.copy(projectionSettings = updated) }
         }
@@ -514,15 +524,18 @@ internal const val CLEAR_LAYERS_BUTTON_TAG = "preview_clear_layers"
 @Composable
 private fun ClearTextButton(presenterManager: PresenterManager) {
     val cleared = presenterManager.textCleared
-    ToolbarKey(
-        painter = rememberVectorPainter(if (cleared) Icons.Outlined.TextFields else Icons.Outlined.FormatClear),
-        text = stringResource(if (cleared) Res.string.tooltip_restore_text else Res.string.tooltip_clear_text),
-        onClick = { if (cleared) presenterManager.restoreText() else presenterManager.clearTextOnly() },
-        style = ToolbarKeyStyle.PANEL_TOGGLE,
-        open = cleared,
-        buttonSize = 40.dp,
-        tint = if (cleared) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-    )
+    val label = stringResource(if (cleared) Res.string.tooltip_restore_text else Res.string.tooltip_clear_text)
+    Tooltip(text = label) {
+        IconToggleButton(
+            icon = rememberVectorPainter(if (cleared) Icons.Outlined.TextFields else Icons.Outlined.FormatClear),
+            contentDescription = label,
+            checked = cleared,
+            onCheckedChange = { if (cleared) presenterManager.restoreText() else presenterManager.clearTextOnly() },
+            size = IconButtonSize.Large,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
+    }
 }
 
 /** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
@@ -534,14 +547,18 @@ private fun PreviewSettingsButton(
 ) {
     Box {
         var open by remember { mutableStateOf(false) }
-        ToolbarKey(
-            painter = rememberVectorPainter(Icons.Outlined.DisplaySettings),
-            text = stringResource(Res.string.tooltip_preview_settings),
-            onClick = { open = true },
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            open = open,
-            buttonSize = 40.dp,
-        )
+        val label = stringResource(Res.string.tooltip_preview_settings)
+        Tooltip(text = label) {
+            IconToggleButton(
+                icon = rememberVectorPainter(Icons.Outlined.DisplaySettings),
+                contentDescription = label,
+                checked = open,
+                onCheckedChange = { open = true },
+                size = IconButtonSize.Large,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
         PreviewGroupsPopover(
             expanded = open,
             onDismiss = { open = false },
@@ -557,15 +574,19 @@ private fun PreviewSettingsButton(
 private fun ProfileSetsButton(proj: ProjectionSettings, onChange: (ProjectionSettings) -> Unit) {
     Box {
         var open by remember { mutableStateOf(false) }
-        ToolbarKey(
-            painter = rememberVectorPainter(Icons.Outlined.SwitchAccount),
-            text = stringResource(Res.string.profile_sets),
-            onClick = { open = true },
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            open = open,
-            buttonSize = 40.dp,
-            modifier = Modifier.testTag(PROFILE_SETS_BUTTON_TAG),
-        )
+        val label = stringResource(Res.string.profile_sets)
+        Tooltip(text = label) {
+            IconToggleButton(
+                icon = rememberVectorPainter(Icons.Outlined.SwitchAccount),
+                contentDescription = label,
+                checked = open,
+                onCheckedChange = { open = true },
+                modifier = Modifier.testTag(PROFILE_SETS_BUTTON_TAG),
+                size = IconButtonSize.Large,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
         ProfileSetsPopover(expanded = open, onDismiss = { open = false }, proj = proj, onChange = onChange)
     }
 }

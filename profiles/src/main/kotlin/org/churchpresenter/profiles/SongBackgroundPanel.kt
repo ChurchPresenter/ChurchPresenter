@@ -7,10 +7,8 @@ package org.churchpresenter.profiles
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
 import org.churchpresenter.strings.generated.resources.close
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.theme.AppShape
@@ -38,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +60,10 @@ import org.churchpresenter.strings.generated.resources.song_background_preset_ci
 import org.churchpresenter.strings.generated.resources.song_background_preset_legible
 import org.churchpresenter.strings.generated.resources.none
 import org.churchpresenter.strings.generated.resources.song_background_preset_soft
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 internal const val SONG_BACKGROUND_PANEL_TAG = "song_background_panel"
 
@@ -324,17 +324,14 @@ private fun PanelHeader(
             ) { onTarget(SongBackgroundTarget.LOWER_THIRD) }
         }
         Spacer(Modifier.weight(1f))
-        Box(
-            modifier = Modifier.size(24.dp).clip(AppShape(6.dp)).clickable(onClick = onDismiss),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_close),
-                contentDescription = stringResource(Res.string.close),
-                modifier = Modifier.size(11.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_close),
+            contentDescription = stringResource(Res.string.close),
+            onClick = onDismiss,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

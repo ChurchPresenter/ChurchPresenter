@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -107,6 +106,10 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.LocalContentColor
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private const val SELECTION_BAR_WIDTH = 4f
 
@@ -231,17 +234,14 @@ private fun DetectionStatusRow(
             DetectionFlagButtons(canFlagLive, onFlag)
         }
         if (hasDetections) {
-            KeyIconButton(
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.bible_stt_clear),
                 onClick = onClearDetections,
-                modifier = Modifier.size(27.dp)
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.bible_stt_clear),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            }
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

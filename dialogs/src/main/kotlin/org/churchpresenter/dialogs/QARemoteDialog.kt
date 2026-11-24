@@ -26,10 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,7 +35,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -93,6 +89,11 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 @Composable
 fun QARemoteDialog(
@@ -476,23 +477,16 @@ Column(modifier = modifier) {
                 }
             )
         }
-        RaisedIconButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Refresh),
+            contentDescription = stringResource(Res.string.qa_qr_message_reset),
             onClick = {
                 onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) }
             },
-            modifier = Modifier.size(30.dp),
-            shape = AppShape(5.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        ) {
-            Icon(
-                Icons.Default.Refresh,
-                contentDescription = stringResource(Res.string.qa_qr_message_reset),
-                modifier = Modifier.size(16.dp)
-            )
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
     Spacer(Modifier.height(8.dp))
 }
@@ -633,23 +627,16 @@ private fun QaAdminPasswordField(
                     visualTransformation = if (shown) VisualTransformation.None else PasswordVisualTransformation(),
                 )
             }
-            RaisedIconButton(
+            IconButton(
+                icon = rememberVectorPainter(if (shown) Icons.Default.VisibilityOff else Icons.Default.Visibility),
+                contentDescription = stringResource(
+                    if (shown) Res.string.qa_hide_password else Res.string.qa_show_password
+                ),
                 onClick = { shown = !shown },
-                modifier = Modifier.size(30.dp),
-                shape = AppShape(5.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            ) {
-                Icon(
-                    if (shown) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = stringResource(
-                        if (shown) Res.string.qa_hide_password else Res.string.qa_show_password
-                    ),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
         Spacer(Modifier.height(4.dp))
         Text(

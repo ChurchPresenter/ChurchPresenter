@@ -41,8 +41,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -378,43 +381,35 @@ private fun Modifier.songCellClicks(scope: SongListScope, index: Int): Modifier 
 private fun SongListScope.SongActionCell(colId: String, song: SongItem) {
     Box(modifier = Modifier.width(6.dp))
     when (colId) {
-        SongColumnId.ADD_TO_SCHEDULE -> KeyIconButton(
+        SongColumnId.ADD_TO_SCHEDULE -> IconButton(
+            icon = painterResource(IconRes.drawable.ic_playlist_add),
+            contentDescription = stringResource(Res.string.add_to_schedule),
             onClick = { onAddToSchedule?.invoke(
                 song.number.toIntOrNull() ?: 0,
                 song.title,
                 song.songbook,
                 song.songId,
             ) },
-            modifier = Modifier.size(24.dp)
-        ) {
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_playlist_add),
-                contentDescription = stringResource(Res.string.add_to_schedule),
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.secondary
-            )
-        }
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
         SongColumnId.FAVORITES -> {
             val isFav = song.songId in favorites
-            KeyIconButton(
-                onClick = {
-                    onToggleFavorite(song.songId)
-                },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star
-                    ),
-                    contentDescription = if (isFav)
-                        stringResource(Res.string.remove_from_favorites)
-                    else
-                        stringResource(Res.string.add_to_favorites),
-                    modifier = Modifier.size(16.dp),
-                    tint = if (isFav) MaterialTheme.semantic.favorite
-                           else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            IconToggleButton(
+                icon = painterResource(
+                    if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star
+                ),
+                contentDescription = if (isFav)
+                    stringResource(Res.string.remove_from_favorites)
+                else
+                    stringResource(Res.string.add_to_favorites),
+                checked = isFav,
+                onCheckedChange = { onToggleFavorite(song.songId) },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

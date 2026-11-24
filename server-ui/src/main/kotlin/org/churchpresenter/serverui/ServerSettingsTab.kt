@@ -54,7 +54,10 @@ import org.churchpresenter.settings.serverPortOrNull
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.utils.SystemClipboard
@@ -318,13 +321,15 @@ private fun ServerPortField(
                 placeholder = { Text(stringResource(Res.string.server_port_hint)) },
             )
             if (isRunning) {
-                TooltipIconButton(
-                    painter = rememberVectorPainter(Icons.Outlined.Refresh),
-                    text = stringResource(Res.string.server_restart),
-                    onClick = onRestart,
-                    iconSize = 16.dp,
-                    buttonSize = 32.dp,
-                )
+                Tooltip(text = stringResource(Res.string.server_restart)) {
+                    IconButton(
+                        icon = rememberVectorPainter(Icons.Outlined.Refresh),
+                        contentDescription = stringResource(Res.string.server_restart),
+                        onClick = onRestart,
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Neutral,
+                    )
+                }
             }
         }
     }

@@ -214,6 +214,7 @@ kotlin {
             // OmtFrameCache are the app-side wiring.
             implementation(projects.omt)
             implementation(projects.theme)
+            implementation(projects.composables)
             implementation(projects.coreModels)
             implementation(projects.lottieGenerator)
             implementation(projects.bibleEngine)

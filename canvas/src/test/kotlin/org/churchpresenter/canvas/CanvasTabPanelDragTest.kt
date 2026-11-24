@@ -3,7 +3,7 @@ package org.churchpresenter.canvas
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.unit.dp
@@ -15,7 +15,8 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class CanvasTabPanelDragTest {
 
-    private fun ComposeUiTest.selectToolLeft(): Float = onNodeWithText("◆").fetchSemanticsNode().boundsInRoot.left
+    private fun ComposeUiTest.selectToolLeft(): Float =
+        onNodeWithContentDescription("Select").fetchSemanticsNode().boundsInRoot.left
 
     private fun ComposeUiTest.dragAcross(fromX: Float, byX: Float) {
         onRoot().performMouseInput {

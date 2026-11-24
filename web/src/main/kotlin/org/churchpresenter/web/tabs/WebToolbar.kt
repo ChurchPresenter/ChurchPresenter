@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,8 +60,6 @@ import org.churchpresenter.strings.generated.resources.web_url_hint
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.sharedui.composables.TooltipIconButton
-import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.jetbrains.compose.resources.painterResource
@@ -71,6 +68,13 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.sharedui.composables.searchBarCard
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 /** The top card: the toolbar, the bookmarks, and while live, the live bar and typing to the page. */
 @Composable
@@ -201,17 +205,14 @@ private fun WebTabScope.WebUrlBar(modifier: Modifier) {
             )
         }
         if (urlInput.isNotEmpty() && urlInput != "https://") {
-            KeyIconButton(
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.web_clear_url),
                 onClick = { urlInput = "" },
-                modifier = Modifier.size(30.dp)
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.web_clear_url),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }
@@ -220,22 +221,19 @@ private fun WebTabScope.WebUrlBar(modifier: Modifier) {
 @Composable
 private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCapableOutput: Boolean) {
     // Star bookmark toggle
-    ActionIconButton(
-        onClick = { toggleBookmark() },
-        enabled = hasAddress,
-        tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
-        icon = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
-        containerColor = if (isBookmarked) {
-            MaterialTheme.colorScheme.tertiaryContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant
-        },
-        contentColor = if (isBookmarked) {
-            MaterialTheme.colorScheme.onTertiaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
-    )
+    val bookmarkText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add)
+    Tooltip(text = bookmarkText) {
+        IconToggleButton(
+            icon = rememberVectorPainter(if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder),
+            contentDescription = bookmarkText,
+            checked = isBookmarked,
+            onCheckedChange = { toggleBookmark() },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Secondary,
+            intent = ButtonIntent.Neutral,
+            enabled = hasAddress,
+        )
+    }
 
     // Add to Schedule
     if (onAddToSchedule != null) {
@@ -390,21 +388,27 @@ private fun WebTabScope.WebTypeToPage() {
                 )
             }
             if (typeBuffer.isNotEmpty()) {
-                KeyIconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
-                    Icon(
-                        painter = painterResource(IconRes.drawable.ic_close),
-                        contentDescription = stringResource(Res.string.web_clear_typed_text),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.web_clear_typed_text),
+                    onClick = { typeBuffer = "" },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         }
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_cast),
-            text = stringResource(Res.string.web_focus_first_input),
-            onClick = { focusFirstInput() }
-        )
+        val focusText = stringResource(Res.string.web_focus_first_input)
+        Tooltip(text = focusText) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_cast),
+                contentDescription = focusText,
+                onClick = { focusFirstInput() },
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 

@@ -36,7 +36,10 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.signage.smugmug.SmugMugProgress
 import org.churchpresenter.signage.smugmug.SmugMugState
@@ -226,36 +229,49 @@ private fun PlaylistRow(
         Spacer(Modifier.width(12.dp))
         if (playlist.kind == SourceKind.SMUGMUG) {
             SlideshowText(playlist, slideshow, picking, clock, Modifier.weight(1f), progress)
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Refresh),
-                text = stringResource(Res.string.signage_smugmug_pick_now),
-                onClick = onPickNew,
-                enabled = !picking,
-            )
+            Tooltip(text = stringResource(Res.string.signage_smugmug_pick_now)) {
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Filled.Refresh),
+                    contentDescription = stringResource(Res.string.signage_smugmug_pick_now),
+                    onClick = onPickNew,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                    enabled = !picking,
+                )
+            }
         } else {
             PlaylistText(playlist, Modifier.weight(1f))
         }
         if (playlist.missing) {
             RingedGhostButton(onClick = onLocate) { Text(stringResource(Res.string.signage_locate)) }
         }
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Edit),
-            text = stringResource(
-                when (playlist.kind) {
-                    SourceKind.WEB, SourceKind.STREAM -> Res.string.signage_link_title_edit
-                    SourceKind.ROTATION -> Res.string.signage_rotation_title_edit
-                    SourceKind.FOLDER -> Res.string.signage_folder_title_edit
-                    SourceKind.SMUGMUG -> Res.string.signage_smugmug_title_edit
-                    SourceKind.PICTURE, SourceKind.VIDEO -> Res.string.signage_file_title_edit
-                },
-            ),
-            onClick = onRename,
+        val renameText = stringResource(
+            when (playlist.kind) {
+                SourceKind.WEB, SourceKind.STREAM -> Res.string.signage_link_title_edit
+                SourceKind.ROTATION -> Res.string.signage_rotation_title_edit
+                SourceKind.FOLDER -> Res.string.signage_folder_title_edit
+                SourceKind.SMUGMUG -> Res.string.signage_smugmug_title_edit
+                SourceKind.PICTURE, SourceKind.VIDEO -> Res.string.signage_file_title_edit
+            },
         )
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Filled.Delete),
-            text = stringResource(Res.string.signage_remove_playlist),
-            onClick = onDelete,
-        )
+        Tooltip(text = renameText) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Edit),
+                contentDescription = renameText,
+                onClick = onRename,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.signage_remove_playlist)) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Delete),
+                contentDescription = stringResource(Res.string.signage_remove_playlist),
+                onClick = onDelete,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }
 

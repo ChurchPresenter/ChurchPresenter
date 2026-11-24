@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,9 +20,12 @@ import org.churchpresenter.strings.generated.resources.preview_transpose
 import org.churchpresenter.strings.generated.resources.song_transpose_down
 import org.churchpresenter.strings.generated.resources.song_transpose_up
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * A Browser Source tile's musician transpose, drawn over its live preview: a step down, the
@@ -44,14 +45,14 @@ internal fun TransposeOverlay(steps: Int, onStep: (Int?) -> Unit, modifier: Modi
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-        KeyIconButton(onClick = { onStep(-1) }, modifier = Modifier.size(22.dp)) {
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_remove),
-                contentDescription = stringResource(Res.string.song_transpose_down),
-                tint = ink,
-                modifier = Modifier.size(12.dp),
-            )
-        }
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_remove),
+            contentDescription = stringResource(Res.string.song_transpose_down),
+            onClick = { onStep(-1) },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
         Text(
             text = stringResource(Res.string.preview_transpose, if (steps > 0) "+$steps" else "$steps"),
             color = if (steps == 0) ink.copy(alpha = 0.6f) else ink,
@@ -60,13 +61,13 @@ internal fun TransposeOverlay(steps: Int, onStep: (Int?) -> Unit, modifier: Modi
                 .clickable(enabled = steps != 0) { onStep(null) }
                 .padding(horizontal = 3.dp, vertical = 2.dp),
         )
-        KeyIconButton(onClick = { onStep(1) }, modifier = Modifier.size(22.dp)) {
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_add),
-                contentDescription = stringResource(Res.string.song_transpose_up),
-                tint = ink,
-                modifier = Modifier.size(12.dp),
-            )
-        }
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_add),
+            contentDescription = stringResource(Res.string.song_transpose_up),
+            onClick = { onStep(1) },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }

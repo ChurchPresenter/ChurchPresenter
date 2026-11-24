@@ -2,7 +2,6 @@ package org.churchpresenter.lottiegen.band.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +47,12 @@ import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
 import org.churchpresenter.lottiegen.ui.components.LottieGenPickers
 import org.churchpresenter.lottiegen.ui.components.raisedKey
 import org.churchpresenter.theme.elevationPalette
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 private const val MAX_ALPHA = 100f
 private const val MAX_BLUR_PX = 60f
@@ -117,10 +122,13 @@ internal fun LookPopover(
                     maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
                 )
                 if (image != null) {
-                    Icon(
-                        Icons.Default.Close, contentDescription = Strings.bandImageClear, tint = Tokens.LabelText,
-                        modifier = Modifier.size(20.dp).clip(AppShape(6.dp))
-                            .clickable { viewModel.clearBandImage(role) }.padding(5.dp),
+                    IconButton(
+                        icon = rememberVectorPainter(Icons.Default.Close),
+                        contentDescription = Strings.bandImageClear,
+                        onClick = { viewModel.clearBandImage(role) },
+                        size = IconButtonSize.Small,
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Neutral,
                     )
                 }
             }
@@ -164,19 +172,21 @@ private fun PictureTransformSliders(viewModel: BibleLottieGenViewModel, role: Ba
         image.scalePercent == DEFAULT_SCALE_PERCENT && image.rotationDegrees == 0
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         Caption(Strings.bandLookPosition, Modifier.weight(1f))
-        Icon(
-            Icons.Default.RestartAlt, contentDescription = Strings.bandLookReset,
-            tint = if (isDefault) Tokens.HintText else Tokens.LabelText,
-            modifier = Modifier.size(18.dp).clip(AppShape(6.dp))
-                .clickable(enabled = !isDefault) {
-                    update {
-                        it.copy(
-                            offsetXPercent = 0, offsetYPercent = 0,
-                            scalePercent = DEFAULT_SCALE_PERCENT, rotationDegrees = 0,
-                        )
-                    }
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.RestartAlt),
+            contentDescription = Strings.bandLookReset,
+            onClick = {
+                update {
+                    it.copy(
+                        offsetXPercent = 0, offsetYPercent = 0,
+                        scalePercent = DEFAULT_SCALE_PERCENT, rotationDegrees = 0,
+                    )
                 }
-                .padding(2.dp),
+            },
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+            enabled = !isDefault,
         )
     }
     InlineSlider(
@@ -254,18 +264,15 @@ internal fun ColorRoleRow(viewModel: BibleLottieGenViewModel, role: BandColorRol
                     format = { it.toInt().toString() },
                 )
             }
-            val lookFill = if (lookOpen) elevationPalette().accent else elevationPalette().key
-            Box(
-                modifier = Modifier
-                    .size(FIELD_HEIGHT)
-                    .raisedKey(FIELD_SHAPE, lookFill) { lookOpen = !lookOpen },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Default.Edit, contentDescription = Strings.bandLookTooltip,
-                    tint = lookFill.ink, modifier = Modifier.size(12.dp),
-                )
-            }
+            IconToggleButton(
+                icon = rememberVectorPainter(Icons.Default.Edit),
+                contentDescription = Strings.bandLookTooltip,
+                checked = lookOpen,
+                onCheckedChange = { lookOpen = !lookOpen },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Secondary,
+                intent = ButtonIntent.Neutral,
+            )
             if (hasImage) {
                 Icon(
                     Icons.Default.Image, contentDescription = cfg.images[role]?.name,

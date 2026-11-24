@@ -1,8 +1,6 @@
 package org.churchpresenter.helper.ui
 
 import org.churchpresenter.strings.generated.resources.helper_teaser_dismiss
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.Row
@@ -68,6 +66,11 @@ import org.churchpresenter.strings.generated.resources.helper_intro_pointer
 import org.churchpresenter.strings.generated.resources.helper_open
 import org.churchpresenter.theme.elevationPalette
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 // Wick's own colours: the teal of its lamp and the gold of its flame, the same in every theme.
 private val TealLight = Color(0xFF1A9A80)
@@ -278,14 +281,15 @@ internal fun Teaser(text: HelperText, caption: String, onOpen: () -> Unit, onDis
                     fontWeight = FontWeight.Bold,
                 )
                 NoticeCaption(caption, Modifier.padding(start = 8.dp).weight(1f))
-                IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp).testTag("helper.teaserDismiss")) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(Res.string.helper_teaser_dismiss),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Filled.Close),
+                    contentDescription = stringResource(Res.string.helper_teaser_dismiss),
+                    onClick = onDismiss,
+                    modifier = Modifier.testTag("helper.teaserDismiss"),
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
             Text(
                 text.resolve(),

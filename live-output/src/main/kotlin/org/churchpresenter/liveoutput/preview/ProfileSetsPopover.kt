@@ -47,7 +47,6 @@ import org.churchpresenter.settings.withProfileSetApplied
 import org.churchpresenter.settings.withProfileSetRenamed
 import org.churchpresenter.settings.withProfileSetSaved
 import org.churchpresenter.settings.withoutProfileSet
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.profile_sets
 import org.churchpresenter.strings.generated.resources.profile_sets_current
@@ -60,6 +59,11 @@ import org.churchpresenter.strings.generated.resources.profile_sets_save
 import org.churchpresenter.theme.components.KeyButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** Test handles for the profile sets menu. */
 internal fun profileSetTag(id: String) = "profile_set_$id"
@@ -204,21 +208,25 @@ private fun SetRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
         )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_edit),
-            text = stringResource(Res.string.profile_sets_rename),
-            onClick = onRename,
-            iconSize = 13.dp,
-            buttonSize = 26.dp,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_delete),
-            text = stringResource(Res.string.profile_sets_delete),
-            onClick = onDelete,
-            iconSize = 13.dp,
-            buttonSize = 26.dp,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Tooltip(text = stringResource(Res.string.profile_sets_rename)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_edit),
+                contentDescription = stringResource(Res.string.profile_sets_rename),
+                onClick = onRename,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.profile_sets_delete)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_delete),
+                contentDescription = stringResource(Res.string.profile_sets_delete),
+                onClick = onDelete,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
+        }
     }
 }

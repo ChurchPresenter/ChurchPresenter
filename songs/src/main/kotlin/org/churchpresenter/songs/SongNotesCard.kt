@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,10 +32,13 @@ import org.churchpresenter.strings.generated.resources.song_notes_edit
 import org.churchpresenter.strings.generated.resources.song_notes_tag
 import org.churchpresenter.strings.generated.resources.song_section_cue
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.keyboardFocusRing
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** Test tag of the open song's notes card. */
 const val SONG_NOTES_TAG = "songNotes"
@@ -51,7 +53,6 @@ internal const val SKIPPED_SELECTED_ALPHA = 0.8f
 private const val NOTES_FILL_ALPHA = 0.08f
 private const val NOTES_RING_ALPHA = 0.2f
 private const val NOTES_TAG_ALPHA = 0.16f
-private const val NOTES_EDIT_ALPHA = 0.7f
 private val NotesShape = AppShape(10.dp)
 private val TagShape = AppShape(5.dp)
 
@@ -94,20 +95,14 @@ internal fun SongNotesCard(notes: String, onEdit: () -> Unit) {
             modifier = Modifier.weight(1f),
         )
         val editLabel = stringResource(Res.string.song_notes_edit)
-        Box(
-            modifier = Modifier.size(22.dp, 20.dp)
-                .keyboardFocusRing(TagShape)
-                .clip(TagShape)
-                .clickable(onClick = onEdit),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_edit),
-                contentDescription = editLabel,
-                tint = accent.copy(alpha = NOTES_EDIT_ALPHA),
-                modifier = Modifier.size(12.dp),
-            )
-        }
+        IconButton(
+            icon = painterResource(IconRes.drawable.ic_edit),
+            contentDescription = editLabel,
+            onClick = onEdit,
+            size = IconButtonSize.Small,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Default,
+        )
     }
 }
 

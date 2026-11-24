@@ -28,7 +28,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -158,9 +162,14 @@ private fun DuplicateFinderState.DuplicateGroupHeader(groupIdx: Int, group: Dupl
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            KeyIconButton(shape = ButtonShape, onClick = { compareLeft = 0; compareRight = minOf(1, group.songs.size - 1); compareGroup = group }, modifier = Modifier.size(28.dp)) {
-                Icon(Icons.AutoMirrored.Filled.CompareArrows, "Compare", Modifier.size(18.dp))
-            }
+            IconButton(
+                icon = rememberVectorPainter(Icons.AutoMirrored.Filled.CompareArrows),
+                contentDescription = "Compare",
+                onClick = { compareLeft = 0; compareRight = minOf(1, group.songs.size - 1); compareGroup = group },
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

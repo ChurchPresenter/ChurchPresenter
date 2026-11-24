@@ -64,6 +64,7 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.RaisedFill
 import androidx.compose.ui.graphics.lerp
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 private const val PALETTE_SIZE = 4
 private const val GRADIENT_MIDPOINT = 0.35f
 
@@ -139,19 +140,13 @@ private fun RowScope.ScheduleRowActionButtons(
     hasActions: Boolean = false,
     onEditActions: () -> Unit = {},
 ) {
-    val actionSize = if (isSection) SECTION_ACTION_BUTTON_SIZE else ACTION_BUTTON_SIZE
-    val actionIcon = if (isSection) SECTION_ACTION_ICON_SIZE else ACTION_ICON_SIZE
-
     @Composable
     fun removeButton() {
         ScheduleRowActionButton(
             painter = painterResource(IconRes.drawable.ic_close),
             text = stringResource(Res.string.tooltip_remove),
             onClick = onRemove,
-            buttonSize = actionSize,
-            iconSize = actionIcon,
-            iconTint = MaterialTheme.colorScheme.error,
-            tooltipBelow = removeFirst
+            intent = ButtonIntent.Critical,
         )
     }
 
@@ -163,29 +158,17 @@ private fun RowScope.ScheduleRowActionButtons(
         painter = painterResource(IconRes.drawable.ic_arrow_up),
         text = stringResource(Res.string.tooltip_move_up),
         onClick = onMoveUp,
-        buttonSize = actionSize,
-        iconSize = actionIcon,
-        iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-        tooltipBelow = removeFirst
     )
     ScheduleRowActionButton(
         painter = painterResource(IconRes.drawable.ic_arrow_down),
         text = stringResource(Res.string.tooltip_move_down),
         onClick = onMoveDown,
-        buttonSize = actionSize,
-        iconSize = actionIcon,
-        iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-        tooltipBelow = removeFirst
     )
     ScheduleRowActionButton(
         painter = painterResource(IconRes.drawable.ic_note),
         text = stringResource(Res.string.tooltip_note),
         onClick = onToggleNote,
-        buttonSize = actionSize,
-        iconSize = actionIcon,
-        iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
-                   else MaterialTheme.colorScheme.onSurfaceVariant,
-        tooltipBelow = removeFirst
+        checked = note.isNotEmpty() || noteExpanded,
     )
     if (!isSection && LocalShowControlEnabled.current) {
         ScheduleRowActionButton(
@@ -193,11 +176,7 @@ private fun RowScope.ScheduleRowActionButtons(
             text = stringResource(Res.string.tooltip_row_actions),
             onClick = onEditActions,
             modifier = Modifier.testTag(SCHEDULE_ROW_ACTIONS_BUTTON_TAG),
-            buttonSize = actionSize,
-            iconSize = actionIcon,
-            iconTint = if (hasActions) MaterialTheme.colorScheme.primary
-                       else MaterialTheme.colorScheme.onSurfaceVariant,
-            tooltipBelow = removeFirst
+            checked = hasActions,
         )
     }
     if (!removeFirst) removeButton()
@@ -208,10 +187,6 @@ private fun RowScope.ScheduleRowActionButtons(
             text = stringResource(Res.string.edit_label),
             onClick = onEditLabel,
             modifier = Modifier.padding(start = 2.dp),
-            buttonSize = actionSize,
-            iconSize = SECTION_ACTION_ICON_SIZE,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-            tooltipBelow = removeFirst
         )
     } else {
         ScheduleRowActionButton(
@@ -219,9 +194,6 @@ private fun RowScope.ScheduleRowActionButtons(
             text = stringResource(Res.string.tooltip_go_live),
             onClick = onPresent,
             modifier = Modifier.padding(start = 2.dp),
-            iconSize = 15.dp,
-            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-            tooltipBelow = removeFirst
         )
     }
 }

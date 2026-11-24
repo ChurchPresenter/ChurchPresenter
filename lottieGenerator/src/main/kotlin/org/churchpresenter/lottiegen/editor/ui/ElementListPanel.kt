@@ -24,7 +24,11 @@ import androidx.compose.material.icons.outlined.ChangeHistory
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
@@ -133,36 +137,35 @@ private fun ElementRow(state: EditorState, element: ElementSpec) {
             else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f).padding(start = 8.dp)
         )
-        EditorTooltip(Strings.editorTipMoveUp) {
-            KeyIconButton(onClick = { state.updateSpec { it.moveElement(element.id, -1) } }) {
-                Icon(
-                    Icons.Default.KeyboardArrowUp,
-                    contentDescription = Strings.editorMoveUp,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+        Tooltip(text = Strings.editorTipMoveUp) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.KeyboardArrowUp),
+                contentDescription = Strings.editorMoveUp,
+                onClick = { state.updateSpec { it.moveElement(element.id, -1) } },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
-        EditorTooltip(Strings.editorTipMoveDown) {
-            KeyIconButton(onClick = { state.updateSpec { it.moveElement(element.id, +1) } }) {
-                Icon(
-                    Icons.Default.KeyboardArrowDown,
-                    contentDescription = Strings.editorMoveDown,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+        Tooltip(text = Strings.editorTipMoveDown) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.KeyboardArrowDown),
+                contentDescription = Strings.editorMoveDown,
+                onClick = { state.updateSpec { it.moveElement(element.id, +1) } },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
-        EditorTooltip(Strings.editorTipDeleteElement) {
-            KeyIconButton(onClick = {
-                if (selected) state.selectElement(null)
-                state.updateSpec { it.removeElement(element.id) }
-            }) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = Strings.editorDelete,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+        Tooltip(text = Strings.editorTipDeleteElement) {
+            IconButton(
+                icon = rememberVectorPainter(Icons.Default.Delete),
+                contentDescription = Strings.editorDelete,
+                onClick = {
+                    if (selected) state.selectElement(null)
+                    state.updateSpec { it.removeElement(element.id) }
+                },
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Critical,
+            )
         }
     }
 }

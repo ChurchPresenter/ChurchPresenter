@@ -32,15 +32,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.RichTooltipDefaults
 import org.churchpresenter.hosanna.composables.defaults.StandardButtonDefaults
 import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A small card with a title, a few lines and an optional action, opened by hovering or clicking [content]. It
@@ -157,7 +158,7 @@ internal fun RichTooltipCard(
     modifier: Modifier = Modifier,
 ) {
     val shape = HosannaTheme.shapes.l
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Column(
         modifier = modifier
             .widthIn(max = RichTooltipDefaults.MaxWidth)

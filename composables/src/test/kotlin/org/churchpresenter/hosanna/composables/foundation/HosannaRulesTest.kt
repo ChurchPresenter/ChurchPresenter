@@ -1,7 +1,5 @@
-package org.churchpresenter.hosanna
+package org.churchpresenter.hosanna.composables.foundation
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -53,28 +51,12 @@ class HosannaRulesTest {
 
     @Test
     fun `shadows deepen with every level`() {
-        listOf(HosannaLightElevation, HosannaDarkElevation).forEach { e ->
+        listOf(HosannaLightShadows, HosannaDarkShadows).forEach { e ->
             HosannaLevel.entries.drop(1).zipWithNext().forEach { (lower, higher) ->
-                val a = e.layers.getValue(lower).last()
-                val b = e.layers.getValue(higher).last()
+                val a = e.getValue(lower).last()
+                val b = e.getValue(higher).last()
                 assertTrue(b.offsetY > a.offsetY && b.blur > a.blur && b.alpha > a.alpha, "$lower → $higher")
             }
         }
-    }
-
-    @Test
-    fun `the edge is a faint line of the opposite brightness`() {
-        val light = HosannaLightElevation.edge
-        val dark = HosannaDarkElevation.edge
-        assertEquals(Color(0x14, 0x19, 0x23).copy(alpha = light.alpha), light)
-        assertEquals(Color.White.copy(alpha = dark.alpha), dark)
-        assertTrue(light.alpha in 0.11f..0.13f && dark.alpha in 0.10f..0.12f)
-    }
-
-    @Test
-    fun `the output screen looks the same in both themes`() {
-        assertEquals(HosannaLightColors.screen, HosannaDarkColors.screen)
-        assertEquals(HosannaLightColors.onScreen, HosannaDarkColors.onScreen)
-        assertTrue(HosannaLightColors.screen.luminance() < HosannaLightColors.onScreen.luminance())
     }
 }

@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.diagnostics)
     api(projects.presentationEngine)
     // The pictures' and presentation's presenters and the picture decoder the tabs preview with.

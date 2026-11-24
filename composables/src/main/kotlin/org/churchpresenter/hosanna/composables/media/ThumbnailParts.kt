@@ -46,8 +46,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.ThumbnailDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
@@ -57,7 +57,7 @@ import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ThumbnailLabels
 import org.churchpresenter.hosanna.composables.model.ThumbnailSize
 import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.hosanna.composables.foundation.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_broken_image
 import org.churchpresenter.icons.generated.resources.ic_play
@@ -65,6 +65,7 @@ import org.churchpresenter.icons.generated.resources.ic_visibility
 import org.churchpresenter.icons.generated.resources.ic_visibility_off
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 @Composable
 internal fun BoxScope.ThumbnailContent(
@@ -170,7 +171,7 @@ internal fun BoxScope.ThumbnailOverlay(
                 .align(Alignment.BottomStart)
                 .fillMaxWidth(it.coerceIn(0f, 1f))
                 .height(ThumbnailDefaults.Progress)
-                .background(HosannaTheme.colors.primary),
+                .background(ThemeColors.current.primary),
         )
     }
     val inset = Modifier.padding(ThumbnailDefaults.BadgeInset)
@@ -181,10 +182,10 @@ internal fun BoxScope.ThumbnailOverlay(
                 inset
                     .align(Alignment.TopStart)
                     .size(ThumbnailDefaults.LiveDot)
-                    .background(HosannaTheme.colors.live, CircleShape),
+                    .background(ThemeColors.current.live, CircleShape),
             )
         } else {
-            Badge(labels.live, HosannaTheme.colors.live, HosannaTheme.colors.onLive, inset.align(Alignment.TopStart))
+            Badge(labels.live, ThemeColors.current.live, ThemeColors.current.onLive, inset.align(Alignment.TopStart))
         }
     }
     if (!small) {

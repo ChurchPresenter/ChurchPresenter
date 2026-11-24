@@ -50,7 +50,6 @@ include(":core-models")
 include(":companion-satellite")
 include(":theme")
 // The Hosanna theme: its own palette, used only by the composables built on it.
-include(":hosanna-theme")
 // The composables built on the Hosanna theme, and on nothing else.
 include(":composables")
 // The animated lower-third generator: its own module, compiled and packaged separately, and

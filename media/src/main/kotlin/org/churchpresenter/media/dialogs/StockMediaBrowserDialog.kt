@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
@@ -99,6 +98,10 @@ import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.sharedui.utils.rememberCenteredDialogState
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 private const val HALF_WIDTH = 0.5f
 private const val THUMB_ASPECT_W = 4f
@@ -309,9 +312,13 @@ private fun StockSourcePane(
                     keyboardActions = KeyboardActions(onSearch = { viewModel.search(apiKey) })
                 )
                 Spacer(Modifier.width(8.dp))
-                KeyIconButton(onClick = { viewModel.search(apiKey) }) {
-                    Icon(Icons.Default.Search, contentDescription = searchPlaceholder)
-                }
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Default.Search),
+                    contentDescription = searchPlaceholder,
+                    onClick = { viewModel.search(apiKey) },
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
             Spacer(Modifier.height(12.dp))
 
@@ -446,23 +453,22 @@ private fun StockMediaThumbnail(
             )
         }
 
-        KeyIconButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.Default.Download),
+            contentDescription = downloadTooltip,
             onClick = onDownload,
-            enabled = !isDownloading,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(4.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
                     shape = AppShape(4.dp)
-                )
-        ) {
-            if (isDownloading) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp))
-            } else {
-                Icon(Icons.Default.Download, contentDescription = downloadTooltip)
-            }
-        }
+                ),
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+            enabled = !isDownloading,
+            loading = isDownloading,
+        )
     }
 }
 
@@ -498,14 +504,17 @@ private fun ApiKeyField(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (showKey) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                KeyIconButton(onClick = { showKey = !showKey }) {
-                    Icon(
-                        imageVector = if (showKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = stringResource(
-                            if (showKey) Res.string.stock_photo_hide_key else Res.string.stock_photo_show_key
-                        )
-                    )
-                }
+                IconButton(
+                    icon = rememberVectorPainter(
+                        if (showKey) Icons.Default.VisibilityOff else Icons.Default.Visibility
+                    ),
+                    contentDescription = stringResource(
+                        if (showKey) Res.string.stock_photo_hide_key else Res.string.stock_photo_show_key
+                    ),
+                    onClick = { showKey = !showKey },
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         )
         Spacer(Modifier.width(8.dp))

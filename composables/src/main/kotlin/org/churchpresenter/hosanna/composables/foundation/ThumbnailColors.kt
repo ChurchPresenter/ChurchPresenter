@@ -2,8 +2,6 @@ package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.model.ThumbnailSize
 import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
 
@@ -23,10 +21,10 @@ internal data class ThumbnailColors(
     val captionDim: Color,
 )
 
-internal fun HosannaColors.thumbnailColors(selected: Boolean, live: Boolean, state: ButtonState): ThumbnailColors {
+internal fun ThemeColors.thumbnailColors(selected: Boolean, live: Boolean, state: ButtonState): ThumbnailColors {
     val lifted = state == ButtonState.Hovered || state == ButtonState.Pressed
     return ThumbnailColors(
-        edge = if (lifted) onSurfaceFaint else onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER),
+        edge = if (lifted) faint else onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER),
         border = when {
             live -> this.live
             selected -> primary

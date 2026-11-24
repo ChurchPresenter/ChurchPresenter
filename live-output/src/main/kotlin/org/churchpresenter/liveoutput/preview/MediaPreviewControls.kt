@@ -17,10 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +31,10 @@ import org.churchpresenter.strings.generated.resources.play
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.SlimSlider
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 // The media transport under a preview showing a video: play, pause, seek and the audio level.
 
@@ -87,25 +87,15 @@ internal fun MediaPreviewControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        KeyIconButton(
-            onClick = onTogglePlayPause,
-            modifier = Modifier.size(32.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = if (isPlaying) MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
-                else MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-            )
-        ) {
-            Icon(
-                painter = painterResource(
-                    if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
-                ),
-                contentDescription = stringResource(
-                    if (isPlaying) Res.string.pause else Res.string.play
-                ),
-                modifier = Modifier.size(18.dp),
-                tint = Color.White
-            )
-        }
+        IconToggleButton(
+            icon = painterResource(if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
+            contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
+            checked = isPlaying,
+            onCheckedChange = { onTogglePlayPause() },
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = if (isPlaying) ButtonIntent.Critical else ButtonIntent.Default,
+        )
 
         if (duration > 0) {
             SlimSlider(

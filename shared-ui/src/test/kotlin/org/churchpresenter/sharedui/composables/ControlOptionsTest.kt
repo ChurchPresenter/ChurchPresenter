@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -15,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -47,23 +45,6 @@ class ControlOptionsTest {
             }
         }
         onNodeWithContentDescription("Go live").performClick()
-        waitForIdle()
-        assertEquals(1, clicks)
-    }
-
-    @Test
-    fun `a tooltip icon button takes every size, tint and color option`() = runComposeUiTest {
-        var clicks = 0
-        setContent {
-            MaterialTheme {
-                TooltipIconButton(
-                    painter = ColorPainter(Color.Blue), text = "Refresh", onClick = { clicks++ },
-                    modifier = Modifier, enabled = true, iconSize = 18.dp, buttonSize = 30.dp,
-                    iconTint = Color.Green, colors = IconButtonDefaults.iconButtonColors(),
-                )
-            }
-        }
-        onNodeWithContentDescription("Refresh").performClick()
         waitForIdle()
         assertEquals(1, clicks)
     }

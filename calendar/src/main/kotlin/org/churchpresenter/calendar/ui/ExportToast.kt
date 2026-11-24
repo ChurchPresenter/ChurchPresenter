@@ -2,7 +2,6 @@ package org.churchpresenter.calendar.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,11 @@ import org.churchpresenter.calendar.generated.resources.calendar_cue_toast_close
 import org.churchpresenter.calendar.generated.resources.calendar_export_failed_title
 import org.churchpresenter.calendar.generated.resources.calendar_export_saved_title
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * `PDF SAVED` and the file's name, or `COULDN'T SAVE THE PDF` and why -- in the corner, the way a
@@ -102,20 +106,14 @@ fun ExportToast(outcome: ExportOutcome, onDismiss: () -> Unit, modifier: Modifie
                     )
                 }
             }
-            Box(
-                Modifier
-                    .size(SheetMetrics.smallButton)
-                    .clip(CalendarMetrics.smallRadius)
-                    .clickable(onClick = onDismiss),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Filled.Close,
-                    contentDescription = stringResource(Res.string.calendar_cue_toast_close),
-                    tint = scheme.onSurfaceVariant,
-                    modifier = Modifier.size(11.dp),
-                )
-            }
+            IconButton(
+                icon = rememberVectorPainter(Icons.Filled.Close),
+                contentDescription = stringResource(Res.string.calendar_cue_toast_close),
+                onClick = onDismiss,
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
     }
 }

@@ -41,7 +41,6 @@ import org.churchpresenter.strings.generated.resources.schedule_note_placeholder
 import org.churchpresenter.strings.generated.resources.tooltip_note
 import org.churchpresenter.strings.generated.resources.tooltip_note_clear
 import org.churchpresenter.strings.generated.resources.tooltip_note_done
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.painterResource
@@ -49,6 +48,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /**
  * What sits under a row's title: the chip listing its cue actions, then its note -- closed as a
@@ -109,9 +113,7 @@ private fun ScheduleRowActionsChip(actions: List<Action>, rows: List<ScheduleIte
         ScheduleRowActionButton(
             painter = painterResource(IconRes.drawable.ic_edit),
             text = stringResource(Res.string.tooltip_row_actions),
-            onClick = onEdit,
-            iconSize = 11.dp,
-            iconTint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            onClick = onEdit
         )
     }
 }
@@ -139,9 +141,7 @@ private fun ScheduleRowNoteChip(note: String, onEdit: () -> Unit) {
         ScheduleRowActionButton(
             painter = painterResource(IconRes.drawable.ic_edit),
             text = stringResource(Res.string.tooltip_note),
-            onClick = onEdit,
-            iconSize = 11.dp,
-            iconTint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+            onClick = onEdit
         )
     }
 }
@@ -198,28 +198,30 @@ private fun ScheduleRowNoteEditor(
                 }
             }
         )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_check),
-            text = stringResource(Res.string.tooltip_note_done),
-            onClick = {
-                onCommit(noteText)
-                onClose()
-            },
-            buttonSize = 32.dp,
-            iconSize = 15.dp,
-            iconTint = MaterialTheme.colorScheme.primary
-        )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_close),
-            text = stringResource(Res.string.tooltip_note_clear),
-            onClick = {
-                onNoteTextChange("")
-                onCommit("")
-            },
-            modifier = Modifier.padding(end = 4.dp),
-            buttonSize = 32.dp,
-            iconSize = 15.dp,
-            iconTint = MaterialTheme.colorScheme.error
-        )
+        Tooltip(text = stringResource(Res.string.tooltip_note_done)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_check),
+                contentDescription = stringResource(Res.string.tooltip_note_done),
+                onClick = {
+                    onCommit(noteText)
+                    onClose()
+                },
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+            )
+        }
+        Tooltip(text = stringResource(Res.string.tooltip_note_clear), modifier = Modifier.padding(end = 4.dp)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_close),
+                contentDescription = stringResource(Res.string.tooltip_note_clear),
+                onClick = {
+                    onNoteTextChange("")
+                    onCommit("")
+                },
+                size = IconButtonSize.Medium,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Critical,
+            )
+        }
     }
 }

@@ -56,12 +56,16 @@ import org.churchpresenter.strings.generated.resources.shortcut_settings_clear
 import org.churchpresenter.strings.generated.resources.shortcut_settings_reset
 import org.churchpresenter.strings.generated.resources.shortcut_unbound
 import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.keyCaps
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
 
 /** Chords of a multi-key binding are drawn as two cap groups separated by this. */
 private const val CAP_GROUP_SEPARATOR = "/"
@@ -149,29 +153,35 @@ internal fun ShortcutBindingRow(
         }
 
         if (recording) {
-            TooltipIconButton(
-                painter = painterResource(IconRes.drawable.ic_close),
-                text = stringResource(Res.string.shortcut_recording_stop),
-                onClick = onStopRecording,
-                iconSize = 11.dp,
-                buttonSize = 26.dp,
-                iconTint = colors.primary,
-            )
+            val stopText = stringResource(Res.string.shortcut_recording_stop)
+            Tooltip(text = stopText) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_close),
+                    contentDescription = stopText,
+                    onClick = onStopRecording,
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Default,
+                )
+            }
         } else {
             // One button, two meanings: an untouched row can only be unbound, a customized one can
             // be put back. Offering both at once would widen every row for a control most never
             // need.
-            TooltipIconButton(
-                painter = painterResource(if (customized) IconRes.drawable.ic_undo else IconRes.drawable.ic_close),
-                text = stringResource(
-                    if (customized) Res.string.shortcut_settings_reset else Res.string.shortcut_settings_clear
-                ),
-                onClick = onRevert,
-                iconSize = 13.dp,
-                buttonSize = 26.dp,
-                iconTint = colors.onSurfaceVariant.copy(alpha = if (customized) 1f else 0.4f),
-                modifier = Modifier.testTag(shortcutRevertTag(action)),
+            val revertText = stringResource(
+                if (customized) Res.string.shortcut_settings_reset else Res.string.shortcut_settings_clear
             )
+            Tooltip(text = revertText) {
+                IconButton(
+                    icon = painterResource(if (customized) IconRes.drawable.ic_undo else IconRes.drawable.ic_close),
+                    contentDescription = revertText,
+                    onClick = onRevert,
+                    modifier = Modifier.testTag(shortcutRevertTag(action)),
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
+            }
         }
     }
 }

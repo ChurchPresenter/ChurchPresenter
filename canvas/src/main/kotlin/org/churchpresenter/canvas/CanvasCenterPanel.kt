@@ -1,8 +1,5 @@
 package org.churchpresenter.canvas
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
@@ -26,10 +23,7 @@ import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import org.churchpresenter.theme.components.KeyIconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -38,9 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
@@ -73,6 +65,20 @@ import org.churchpresenter.strings.generated.resources.canvas_layers_outside_one
 import org.churchpresenter.strings.generated.resources.canvas_aspect_ratio_warning
 import org.churchpresenter.strings.generated.resources.canvas_fix_aspect_ratio
 import org.churchpresenter.core.models.scene.Scene
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Gesture
+import androidx.compose.material.icons.filled.HorizontalRule
+import androidx.compose.material.icons.filled.NearMe
+import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.outlined.CropSquare
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.sharedui.composables.bibleListCard
 
 /* The Canvas tab's centre: the toolbar, the warnings, and the scene's canvas (or both layouts). */
@@ -130,8 +136,16 @@ private fun CanvasTabScope.CanvasToolbar(currentScene: Scene) {
     }
 }
 
+private fun toolIcon(id: String): ImageVector = when (id) {
+    "rectangle" -> Icons.Outlined.CropSquare
+    "ellipse" -> Icons.Outlined.Circle
+    "line" -> Icons.Filled.HorizontalRule
+    "arrow" -> Icons.AutoMirrored.Filled.ArrowForward
+    "freehand" -> Icons.Filled.Gesture
+    else -> Icons.Filled.NearMe
+}
+
 /** The drawing tools, and the stroke and fill colours while one other than Select is picked. */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CanvasTabScope.CanvasDrawingTools() {
     // Drawing tools (left)
@@ -151,59 +165,16 @@ private fun CanvasTabScope.CanvasDrawingTools() {
 
         tools.forEach { tool ->
             val isActive = activeTool == tool.id
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp,
-                    ) {
-                        Text(
-                            tool.label,
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp),
+            Tooltip(text = tool.label) {
+                IconToggleButton(
+                    icon = rememberVectorPainter(toolIcon(tool.id)),
+                    contentDescription = tool.label,
+                    checked = isActive,
+                    onCheckedChange = { activeTool = tool.id },
+                    size = IconButtonSize.Medium,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
                 )
-            ) {
-                KeyIconButton(
-                    onClick = { activeTool = tool.id },
-                    modifier = Modifier.size(32.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer
-                        else Color.Transparent,
-                        contentColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer
-                        else MaterialTheme.colorScheme.onSurface
-                    )
-                ) {
-                    // Geometric glyphs, not `painterResource` icons, and kept that
-                    // way deliberately: AGENT.md's "no text as icons" rule is about
-                    // letters and emoji standing in for artwork, and these are the
-                    // shapes the tools draw. Their names live in the TooltipArea
-                    // above — see CanvasTabToolTooltipTest, which addresses the
-                    // buttons by these glyphs.
-                    Text(
-                        when (tool.id) {
-                            "select" -> "\u25C6"
-                            "rectangle" -> "\u25A1"
-                            "ellipse" -> "\u25CB"
-                            "line" -> "\u2215"
-                            "arrow" -> "\u2192"
-                            "freehand" -> "\u270E"
-                            else -> "?"
-                        },
-                        // Trimmed to the glyph, so the shape itself is centred
-                        // in the key rather than the font's line box around it.
-                        style = MaterialTheme.typography.titleSmall.let {
-                            it.copy(lineHeight = it.fontSize, lineHeightStyle = CenteredGlyphLine)
-                        }
-                    )
-                }
             }
         }
 

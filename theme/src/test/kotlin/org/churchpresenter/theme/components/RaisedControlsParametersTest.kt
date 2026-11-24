@@ -86,11 +86,6 @@ class RaisedControlsParametersTest {
                         onClick = { clicks++ }, modifier = Modifier, enabled = true, shape = shape,
                         colors = IconButtonDefaults.iconButtonColors(), interactionSource = MutableInteractionSource(),
                     ) { Text("I") }
-                    RaisedIconButton(
-                        onClick = { clicks++ }, modifier = Modifier, enabled = true, shape = shape,
-                        colors = IconButtonDefaults.filledIconButtonColors(), border = null,
-                        interactionSource = MutableInteractionSource(),
-                    ) { Text("F") }
                     RaisedSwitch(
                         checked = true, onCheckedChange = { clicks++ }, modifier = Modifier.testTag("sw"),
                         enabled = true, interactionSource = MutableInteractionSource(),
@@ -111,11 +106,10 @@ class RaisedControlsParametersTest {
             }
         }
         onNodeWithText("I").performClick()
-        onNodeWithText("F").performClick()
         onNodeWithTag("sw").performClick()
         onNodeWithTag("cb").performClick()
         onNodeWithTag("rb").performClick()
-        assertEquals(5, clicks)
+        assertEquals(4, clicks)
     }
 
     @Test

@@ -4,11 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
@@ -215,13 +216,13 @@ internal fun KeyframeTable(
                         modifier = Modifier.weight(1f)
                     )
                 }
-                KeyIconButton(onClick = { onChange(keyframes.filterIndexed { i, _ -> i != index }) }) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = Strings.editorDelete,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Default.Delete),
+                    contentDescription = Strings.editorDelete,
+                    onClick = { onChange(keyframes.filterIndexed { i, _ -> i != index }) },
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
             }
         }
         GhostButton(onClick = {

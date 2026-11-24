@@ -28,7 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.signage.core.BlockAction
 import org.churchpresenter.signage.core.ClockTime
@@ -223,11 +226,15 @@ private fun TimeBlock(
                 )
             }
             Spacer(Modifier.weight(1f))
-            TooltipIconButton(
-                painter = rememberVectorPainter(Icons.Filled.Close),
-                text = stringResource(Res.string.signage_schedule_remove),
-                onClick = onRemove,
-            )
+            Tooltip(text = stringResource(Res.string.signage_schedule_remove)) {
+                IconButton(
+                    icon = rememberVectorPainter(Icons.Filled.Close),
+                    contentDescription = stringResource(Res.string.signage_schedule_remove),
+                    onClick = onRemove,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
             TimeField(stringResource(Res.string.signage_schedule_from), draft.start) {

@@ -28,10 +28,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.hosanna.composables.foundation.HosannaLevel
+import org.churchpresenter.hosanna.composables.foundation.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.SplitButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -43,7 +42,7 @@ import org.churchpresenter.hosanna.composables.foundation.SegmentRole
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.hosanna.composables.model.TextStyleToggle
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.hosanna.composables.foundation.hosannaElevation
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_format_bold
@@ -52,6 +51,7 @@ import org.churchpresenter.icons.generated.resources.ic_format_strikethrough
 import org.churchpresenter.icons.generated.resources.ic_format_underline
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 internal fun TextStyleToggle.icon(): DrawableResource = when (this) {
     TextStyleToggle.Bold -> Res.drawable.ic_format_bold
@@ -100,7 +100,7 @@ fun TextStyleToggles(
     )
 }
 
-internal fun HosannaColors.splitDivider(checked: Boolean, enabled: Boolean): Color =
+internal fun ThemeColors.splitDivider(checked: Boolean, enabled: Boolean): Color =
     if (checked && enabled) onPrimary.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT) else outlineVariant
 
 internal fun splitPartOverlay(content: Color, state: ButtonState): Color = when (state) {
@@ -140,7 +140,7 @@ fun SplitToggleButton(
     enabled: Boolean = true,
 ) {
     val metrics = IconSegmentDefaults.Regular
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val base = colors.segmentColors(checked, if (enabled) ButtonState.Rest else ButtonState.Disabled)
     val radius = IconSegmentDefaults.SegmentRadius
     val shape = RoundedCornerShape(radius)
@@ -217,7 +217,7 @@ private fun SplitPart(
     val state = buttonState(enabled, false, hovered, pressed, focused)
     val ring = if (state == ButtonState.Focused) {
         Modifier.focusRing(
-            HosannaTheme.colors.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+            ThemeColors.current.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
             IconSegmentDefaults.SegmentRadius,
         )
     } else {

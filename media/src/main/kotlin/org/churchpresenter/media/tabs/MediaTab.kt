@@ -111,9 +111,6 @@ private const val HANDLE_VISIBLE_ALPHA = 0.01f
 
 /** Upper bound of the loop-count field; 0 means repeat forever. */
 internal const val MEDIA_MAX_LOOP_COUNT = 99
-internal const val MEDIA_DISABLED_TRANSPORT_ALPHA = 0.38f
-internal val MEDIA_TRANSPORT_KEY_SIZE = 30.dp
-internal val MEDIA_PLAY_KEY_SIZE = 38.dp
 internal val MEDIA_VOLUME_SLIDER_WIDTH = 150.dp
 
 /**

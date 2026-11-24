@@ -2,8 +2,6 @@ package org.churchpresenter.canvas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -22,7 +20,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -61,13 +57,17 @@ import org.churchpresenter.strings.generated.resources.canvas_layer_group_conten
 import org.churchpresenter.strings.generated.resources.canvas_layer_group_live
 import org.churchpresenter.strings.generated.resources.canvas_layer_group_sources
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /* The Canvas tab's Add source button and its menu of layer kinds, in three groups. */
 
@@ -78,37 +78,15 @@ internal fun CanvasTabScope.AddSourceButton(sceneViewModel: SceneViewModel) {
 
     Box {
         val scheme = MaterialTheme.colorScheme
-        TooltipArea(
-            tooltip = {
-                Surface(
-                    color = scheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp,
-                ) {
-                    Text(
-                        stringResource(Res.string.canvas_add_source),
-                        color = scheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            tooltipPlacement = TooltipPlacement.ComponentRect(
-                anchor = Alignment.BottomCenter,
-                offset = DpOffset(0.dp, 4.dp),
-            )
-        ) {
-            KeyIconButton(
+        Tooltip(text = stringResource(Res.string.canvas_add_source)) {
+            IconButton(
+                icon = painterResource(IconRes.drawable.ic_add),
+                contentDescription = stringResource(Res.string.canvas_add_source),
                 onClick = { showAddMenu = true; activeTool = "select" },
-                modifier = Modifier.size(28.dp)
-            ) {
-                Icon(
-                    painterResource(IconRes.drawable.ic_add),
-                    contentDescription = stringResource(Res.string.canvas_add_source),
-                    modifier = Modifier.size(16.dp),
-                    tint = scheme.onSurface
-                )
-            }
+                size = IconButtonSize.Small,
+                hierarchy = ButtonHierarchy.Tertiary,
+                intent = ButtonIntent.Neutral,
+            )
         }
 
         DropdownMenu(

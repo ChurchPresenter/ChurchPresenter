@@ -5,12 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
@@ -237,17 +238,16 @@ private fun OpenProjectDialog(state: EditorState, onClose: () -> Unit) {
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
                         )
-                        KeyIconButton(onClick = {
-                            StyleSpecStorage.delete(file)
-                            files = StyleSpecStorage.list()
-                        }) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = Strings.editorDelete,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
+                        IconButton(
+                            icon = rememberVectorPainter(Icons.Default.Delete),
+                            contentDescription = Strings.editorDelete,
+                            onClick = {
+                                StyleSpecStorage.delete(file)
+                                files = StyleSpecStorage.list()
+                            },
+                            hierarchy = ButtonHierarchy.Tertiary,
+                            intent = ButtonIntent.Critical,
+                        )
                     }
                 }
             }

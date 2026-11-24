@@ -42,7 +42,11 @@ import androidx.compose.material3.DropdownMenuItem
 import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.MaterialTheme
 import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
@@ -307,14 +311,19 @@ fun BulkRenameTab() {
                                         other.file.parentFile.canonicalPath == entry.file.parentFile.canonicalPath
                                     }
                                     if (sameNameFiles.isNotEmpty()) {
-                                        KeyIconButton(shape = ButtonShape, onClick = {
-                                            val allFiles = listOf(entry.file) + sameNameFiles.map { it.file }
-                                            renameCompareFiles = allFiles
-                                            renameCompareLeft = 0
-                                            renameCompareRight = 1
-                                        }, modifier = Modifier.size(24.dp)) {
-                                            Icon(Icons.AutoMirrored.Filled.CompareArrows, "Compare", Modifier.size(16.dp))
-                                        }
+                                        IconButton(
+                                            icon = rememberVectorPainter(Icons.AutoMirrored.Filled.CompareArrows),
+                                            contentDescription = "Compare",
+                                            onClick = {
+                                                val allFiles = listOf(entry.file) + sameNameFiles.map { it.file }
+                                                renameCompareFiles = allFiles
+                                                renameCompareLeft = 0
+                                                renameCompareRight = 1
+                                            },
+                                            size = IconButtonSize.Small,
+                                            hierarchy = ButtonHierarchy.Tertiary,
+                                            intent = ButtonIntent.Neutral,
+                                        )
                                     }
                                     if (entry.conflict) {
                                         Text(Strings.conflict, style = MaterialTheme.typography.labelSmall,

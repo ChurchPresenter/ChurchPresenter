@@ -16,8 +16,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +36,11 @@ import org.churchpresenter.strings.generated.resources.crossword_no_puzzles
 import org.churchpresenter.crosswordtab.data.RenderedCrossword
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.platform.testTag
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 @Composable
 internal fun LoadingNotice() {
@@ -75,19 +78,15 @@ internal fun LevelHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        KeyIconButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.AutoMirrored.Filled.ArrowBack),
+            contentDescription = stringResource(Res.string.crossword_prev_level),
             onClick = onBack,
-            enabled = canGoBack
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(Res.string.crossword_prev_level),
-                tint = if (canGoBack)
-                    MaterialTheme.colorScheme.onSurface
-                else
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-        }
+            enabled = canGoBack,
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
 
         Text(
             text = stringResource(Res.string.crossword_level_label, level),
@@ -96,19 +95,15 @@ internal fun LevelHeader(
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        KeyIconButton(
+        IconButton(
+            icon = rememberVectorPainter(Icons.AutoMirrored.Filled.ArrowForward),
+            contentDescription = stringResource(Res.string.crossword_next_level),
             onClick = onForward,
-            enabled = canGoForward
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = stringResource(Res.string.crossword_next_level),
-                tint = if (canGoForward)
-                    MaterialTheme.colorScheme.onSurface
-                else
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-        }
+            enabled = canGoForward,
+            size = IconButtonSize.Medium,
+            hierarchy = ButtonHierarchy.Tertiary,
+            intent = ButtonIntent.Neutral,
+        )
     }
 }
 

@@ -34,7 +34,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_undo
-import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.book_names_book
 import org.churchpresenter.strings.generated.resources.book_names_new_testament
@@ -52,7 +56,7 @@ import org.jetbrains.compose.resources.stringResource
 
 private val BUTTON_SHAPE = AppShape(6.dp)
 private val NUMBER_WIDTH = 34.dp
-private val RESET_SIZE = 24.dp
+private val RESET_SIZE = 28.dp
 private val COLUMN_GAP = 10.dp
 private const val SOURCE_WEIGHT = 1f
 private const val FIELD_WEIGHT = 1.25f
@@ -213,15 +217,19 @@ private fun BookRow(
             bold = overridden,
         )
         if (overridden) {
-            TooltipIconButton(
-                painter = painterResource(IconRes.drawable.ic_undo),
-                text = stringResource(
-                    if (fileName != null) Res.string.book_names_use_file_name else Res.string.book_names_use_default,
-                ),
-                onClick = { onEdit("") },
-                iconSize = 13.dp,
-                buttonSize = RESET_SIZE,
+            val resetText = stringResource(
+                if (fileName != null) Res.string.book_names_use_file_name else Res.string.book_names_use_default,
             )
+            Tooltip(text = resetText) {
+                IconButton(
+                    icon = painterResource(IconRes.drawable.ic_undo),
+                    contentDescription = resetText,
+                    onClick = { onEdit("") },
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
+                )
+            }
         } else {
             Spacer(Modifier.size(RESET_SIZE))
         }

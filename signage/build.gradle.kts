@@ -11,6 +11,7 @@ dependencies {
     implementation(projects.sharedUi)
     implementation(projects.strings)
     implementation(projects.theme)
+    implementation(projects.composables)
     implementation(projects.diagnostics)
 
     implementation(libs.kotlinx.coroutines.core)
