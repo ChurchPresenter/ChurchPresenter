@@ -28,6 +28,8 @@ class HosannaRulesTest {
         assertTrue(HosannaStateAlpha.CONTENT_TYPE_CONTAINER < HosannaStateAlpha.CONTENT_TYPE_EDGE)
         assertTrue(HosannaStateAlpha.DRAGGED < HosannaStateAlpha.SECONDARY_FILL)
         assertTrue(HosannaStateAlpha.SECONDARY_FILL < HosannaStateAlpha.DISABLED_CONTENT)
+        assertTrue(HosannaStateAlpha.DISABLED_CONTENT < HosannaStateAlpha.MUTED_CONTENT)
+        assertTrue(HosannaStateAlpha.MUTED_CONTENT < 1f)
     }
 
     @Test
