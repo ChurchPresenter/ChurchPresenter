@@ -5,7 +5,6 @@ import org.churchpresenter.sharedui.models.Presenting
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import org.churchpresenter.settings.SongColumnId
-import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.AlertDialog
-import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,6 +61,9 @@ import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.DragHandle
 import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 /** The tab's effects: play counts, a storage-folder change, schedule selection, opening focus and remote lyrics. */
 @Composable
@@ -469,22 +470,23 @@ internal fun SongsTabController.DeleteSongDialog() {
                     }
                 },
                 confirmButton = {
-                    GhostButton(
-                        shape = AppShape(6.dp),
-                        onClick = {
-                        viewModel.editInBackground({ deleteSong(s) })
-                        dialogs.closeDelete()
-                    }) {
-                        Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error)
-                    }
+                    StandardButton(
+                        stringResource(Res.string.delete_saved_string),
+                        {
+                            viewModel.editInBackground({ deleteSong(s) })
+                            dialogs.closeDelete()
+                        },
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Critical,
+                    )
                 },
                 dismissButton = {
-                    GhostButton(
-                        shape = AppShape(6.dp),
-                        onClick = { dialogs.closeDelete(); dialogs.closeDelete() }
-                    ) {
-                        Text(stringResource(Res.string.cancel))
-                    }
+                    StandardButton(
+                        stringResource(Res.string.cancel),
+                        { dialogs.closeDelete() },
+                        hierarchy = ButtonHierarchy.Tertiary,
+                        intent = ButtonIntent.Neutral,
+                    )
                 }
             )
         }

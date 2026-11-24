@@ -12,8 +12,6 @@ import org.churchpresenter.core.models.songs.sectionOrderAbbreviation
 import org.churchpresenter.sharedui.composables.SectionOrderTokens
 import org.churchpresenter.strings.generated.resources.song_order_as_written
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -41,10 +39,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -111,6 +106,11 @@ import org.churchpresenter.sharedui.composables.BibleListRowShape
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.list.RowAction
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
 
 /** The song rows, their scroll-to-selection, and both scrollbars. */
 @Composable
@@ -322,32 +322,10 @@ private fun SongListScope.SongDataCell(
     Box(modifier = Modifier.width(6.dp))
 }
 
-/** A cell's full [text] in a tooltip under it, on hover; nothing when [text] is empty. */
+/** A cell's full [text] in a tooltip, on hover; nothing when [text] is empty. */
 @Composable
 private fun SongCellTooltip(text: String, content: @Composable () -> Unit) {
-    TooltipArea(
-        tooltip = {
-            if (text.isNotEmpty()) {
-                Surface(
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    tonalElevation = 4.dp
-                ) {
-                    Text(
-                        text,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomStart,
-            offset = DpOffset(0.dp, 4.dp)
-        ),
-        content = content,
-    )
+    Tooltip(text, enabled = text.isNotEmpty(), content = content)
 }
 
 /** A data cell's clicks: select the song, or double-click to put it on screen. */
@@ -378,41 +356,30 @@ private fun Modifier.songCellClicks(scope: SongListScope, index: Int): Modifier 
 private fun SongListScope.SongActionCell(colId: String, song: SongItem) {
     Box(modifier = Modifier.width(6.dp))
     when (colId) {
-        SongColumnId.ADD_TO_SCHEDULE -> KeyIconButton(
-            onClick = { onAddToSchedule?.invoke(
-                song.number.toIntOrNull() ?: 0,
-                song.title,
-                song.songbook,
-                song.songId,
-            ) },
-            modifier = Modifier.size(24.dp)
-        ) {
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_playlist_add),
-                contentDescription = stringResource(Res.string.add_to_schedule),
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.secondary
-            )
-        }
+        SongColumnId.ADD_TO_SCHEDULE -> RowAction(
+            painterResource(IconRes.drawable.ic_playlist_add),
+            stringResource(Res.string.add_to_schedule),
+            {
+                onAddToSchedule?.invoke(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
+            },
+            Modifier.size(SONG_LIST_ACTION_CELL),
+        )
         SongColumnId.FAVORITES -> {
             val isFav = song.songId in favorites
-            KeyIconButton(
-                onClick = {
-                    onToggleFavorite(song.songId)
-                },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star
-                    ),
-                    contentDescription = if (isFav)
-                        stringResource(Res.string.remove_from_favorites)
-                    else
-                        stringResource(Res.string.add_to_favorites),
-                    modifier = Modifier.size(16.dp),
-                    tint = if (isFav) MaterialTheme.semantic.favorite
-                           else MaterialTheme.colorScheme.onSurfaceVariant
+            val label = if (isFav) {
+                stringResource(Res.string.remove_from_favorites)
+            } else {
+                stringResource(Res.string.add_to_favorites)
+            }
+            Tooltip(label) {
+                IconToggleButton(
+                    painterResource(if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
+                    label,
+                    isFav,
+                    { onToggleFavorite(song.songId) },
+                    Modifier.size(SONG_LIST_ACTION_CELL),
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
                 )
             }
         }

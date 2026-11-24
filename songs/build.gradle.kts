@@ -9,6 +9,8 @@ plugins {
 
 dependencies {
     implementation(projects.sharedUi)
+    // The new controls, drawn in the app theme's colors.
+    implementation(projects.composables)
     implementation(projects.strings)
     implementation(projects.icons)
     implementation(projects.coreModels)

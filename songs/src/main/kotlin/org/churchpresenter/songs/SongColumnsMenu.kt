@@ -26,8 +26,6 @@ import org.churchpresenter.sharedui.composables.ContextMenu
 import org.churchpresenter.sharedui.composables.ContextMenuDivider
 import org.churchpresenter.sharedui.composables.ToggleMenuHeader
 import org.churchpresenter.sharedui.composables.ToggleMenuItem
-import org.churchpresenter.sharedui.composables.ToolbarKey
-import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.strings.generated.resources.song_columns_show_in_list
 import org.churchpresenter.theme.semantic
 import androidx.compose.ui.unit.DpOffset
@@ -41,6 +39,9 @@ import org.churchpresenter.strings.generated.resources.song_columns
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.bibleListCardFill
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 
 /** The floating column filter button, on the right. */
 @Composable
@@ -53,14 +54,16 @@ internal fun SongListScope.SongColumnsButton(
     // Floating column filter button — right side
     Box(modifier = modifier.background(bibleListCardFill())) {
         // Styled as the schedule's options button and the tab bar's: all three open a toggle menu.
-        ToolbarKey(
-            painter = rememberVectorPainter(Icons.Default.Tune),
-            text = stringResource(Res.string.song_columns),
-            onClick = { onExpandedChange(true) },
-            style = ToolbarKeyStyle.PANEL_TOGGLE,
-            open = expanded,
-            buttonSize = 36.dp,
-        )
+        val columnsStr = stringResource(Res.string.song_columns)
+        Tooltip(columnsStr) {
+            IconToggleButton(
+                rememberVectorPainter(Icons.Default.Tune),
+                columnsStr,
+                expanded,
+                { onExpandedChange(true) },
+                hierarchy = ButtonHierarchy.Tertiary,
+            )
+        }
         ContextMenu(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },

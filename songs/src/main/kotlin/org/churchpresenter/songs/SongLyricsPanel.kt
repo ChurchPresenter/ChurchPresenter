@@ -43,8 +43,6 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -58,16 +56,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import org.churchpresenter.sharedui.composables.SectionLabelRow
-import org.churchpresenter.sharedui.composables.ActionIconButton
-import org.churchpresenter.sharedui.composables.AddToScheduleButton
-import org.churchpresenter.sharedui.composables.FocusHintBanner
-import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.sharedui.utils.labelOrUnbound
 import org.churchpresenter.sharedui.utils.sectionLabelOf
 import org.churchpresenter.sharedui.composables.FocusLostBanner
-import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -111,6 +105,20 @@ import org.churchpresenter.strings.generated.resources.song_add_translation
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableIntStateOf
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.feedback.Hint
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.strings.generated.resources.keyboard_home_search
+import org.churchpresenter.strings.generated.resources.keyboard_home_search_live
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
+import org.jetbrains.compose.resources.DrawableResource
 
 /**
  * The lyrics panel down the right of the Songs tab.
@@ -196,19 +204,12 @@ internal fun RowScope.SongLyricsPanel(
         val dialogOpen = dialogs.editing != null || dialogs.creatingNew || dialogs.deleting != null
         val showBackToLive = isPresenting && live.songId != null && currentSong?.songId != live.songId
         if (showBackToLive && !dialogOpen) {
-            RaisedButton(
-                shape = AppShape(6.dp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                onClick = onBackToLiveSong,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-            ) {
-                Text(
-                    backToLiveStr,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onError,
-                    maxLines = 1
-                )
-            }
+            StandardButton(
+                backToLiveStr,
+                onBackToLiveSong,
+                Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                intent = ButtonIntent.Critical,
+            )
         }
 
         // Navigation hint — only in line mode, and drawn from the live bindings so a rebind is
@@ -216,12 +217,7 @@ internal fun RowScope.SongLyricsPanel(
         // nothing is worse than no hint.
         val isLineModeHint = isSongLineMode(appSettings.operatorSongSettings())
         if (isLineModeHint && lineNavHintStr.isNotEmpty()) {
-            Text(
-                text = lineNavHintStr,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
-            )
+            Hint(lineNavHintStr, Modifier.padding(start = 8.dp, end = 8.dp, bottom = 4.dp))
         }
 
         // Where the keyboard is, when it is not on the list: in the search box, where the arrow keys
@@ -232,16 +228,29 @@ internal fun RowScope.SongLyricsPanel(
         // goes on every search, and higher up it would shove the Back to Live button down the panel
         // mid-service, which is the one control that must not move while something is live.
         if (searchFieldFocused) {
-            SearchKeyboardBanner(somethingLive = isPresenting, onClick = onSearchBannerClick)
+            val shortcuts = LocalShortcuts.current
+            val goLive = shortcuts.labelOrUnbound(ShortcutAction.GO_LIVE)
+            KeyboardHintButton(
+                if (isPresenting) {
+                    stringResource(
+                        Res.string.keyboard_home_search_live,
+                        goLive,
+                        shortcuts.labelOrUnbound(ShortcutAction.SWITCH_SEARCH_LIVE),
+                    )
+                } else {
+                    stringResource(Res.string.keyboard_home_search, goLive)
+                },
+                onSearchBannerClick,
+            )
         } else if (browsePausedHint && showBackToLive && !dialogOpen) {
             val shortcuts = LocalShortcuts.current
-            FocusHintBanner(
-                text = stringResource(
+            KeyboardHintButton(
+                stringResource(
                     Res.string.songs_browse_paused_hint,
                     shortcuts.labelOrUnbound(ShortcutAction.GO_LIVE),
                     shortcuts.labelOrUnbound(ShortcutAction.SWITCH_SEARCH_LIVE),
                 ),
-                onClick = onBackToLiveSong,
+                onBackToLiveSong,
             )
         }
 
@@ -341,54 +350,88 @@ private fun LyricsActionBar(
         )
 
         if (currentSong != null) {
-            ActionIconButton(
-                onClick = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },
-                tooltipText = editSongStr,
-                painter = painterResource(IconRes.drawable.ic_edit),
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.guideTarget(GuideTargets.EDIT_SONG),
+            ActionButton(
+                IconRes.drawable.ic_edit,
+                editSongStr,
+                { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },
+                Modifier.guideTarget(GuideTargets.EDIT_SONG),
             )
         }
 
-        // New Song button
-        ActionIconButton(
-            onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
-            tooltipText = newSongStr,
-            painter = painterResource(IconRes.drawable.ic_add),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            modifier = Modifier.guideTarget(GuideTargets.NEW_SONG),
+        ActionButton(
+            IconRes.drawable.ic_add,
+            newSongStr,
+            { dialogs.createNew(); tabFocusRequester.requestFocus() },
+            Modifier.guideTarget(GuideTargets.NEW_SONG),
         )
 
         if (onAddToSchedule != null && currentSong != null) {
-            AddToScheduleButton(
-                onClick = {
-                    onAddToSchedule(
-                        currentSong.number.toIntOrNull() ?: 0,
-                        currentSong.title,
-                        currentSong.songbook,
-                        currentSong.songId,
-                    )
-                    tabFocusRequester.requestFocus()
-                },
-                tooltipText = addScheduleStr,
-                // Tagged because "Add to Schedule" is the right name for several controls
-                // here — this one, the per-row buttons and the favourites panel's — and only
-                // this one adds the *selected* song. The name is shared on purpose; the tag
-                // is how a test says which of them it means.
-                modifier = Modifier.testTag(SONGS_ADD_SELECTED_TAG)
-                    .guideTarget(GuideTargets.SONGS_ADD_TO_SCHEDULE)
-            )
+            Tooltip(addScheduleStr, Modifier.guideTarget(GuideTargets.SONGS_ADD_TO_SCHEDULE)) {
+                IconButton(
+                    painterResource(IconRes.drawable.ic_playlist_add),
+                    addScheduleStr,
+                    {
+                        onAddToSchedule(
+                            currentSong.number.toIntOrNull() ?: 0,
+                            currentSong.title,
+                            currentSong.songbook,
+                            currentSong.songId,
+                        )
+                        tabFocusRequester.requestFocus()
+                    },
+                    // Tagged because "Add to Schedule" is the right name for several controls
+                    // here -- this one, the per-row buttons and the favourites panel's -- and only
+                    // this one adds the *selected* song. The tag is how a test says which it means.
+                    Modifier.testTag(SONGS_ADD_SELECTED_TAG),
+                    hierarchy = ButtonHierarchy.Primary,
+                    intent = ButtonIntent.Neutral,
+                )
+            }
         }
 
-        GoLiveButton(
-            onClick = { sendToPresenter(true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
-            enabled = hasSongSelected,
-            tooltipText = goLiveStr,
-            showsShortcut = true,
+        val goLiveKey = LocalShortcuts.current.label(ShortcutAction.GO_LIVE).ifEmpty { null }
+        Tooltip(goLiveStr, shortcut = goLiveKey) {
+            IconButton(
+                rememberVectorPainter(Icons.Default.Tv),
+                goLiveStr,
+                { sendToPresenter(true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
+                hierarchy = ButtonHierarchy.Primary,
+                enabled = hasSongSelected,
+            )
+        }
+    }
+}
+
+/** An action-bar button with its name in a tooltip. */
+@Composable
+private fun ActionButton(icon: DrawableResource, label: String, onClick: () -> Unit, modifier: Modifier) {
+    Tooltip(label, modifier) {
+        IconButton(
+            painterResource(icon),
+            label,
+            onClick,
+            hierarchy = ButtonHierarchy.Primary,
+            intent = ButtonIntent.Warning,
         )
     }
+}
+
+/**
+ * Where the keyboard is when it is not on the list; pressing it does what the search ⇄ live key
+ * does. Never focusable: taking focus would hide it, which would clear focus, which would show it.
+ */
+@Composable
+private fun KeyboardHintButton(text: String, onClick: () -> Unit) {
+    StandardButton(
+        text,
+        onClick,
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            .focusProperties { canFocus = false },
+        hierarchy = ButtonHierarchy.Secondary,
+        intent = ButtonIntent.Warning,
+    )
 }
 
 /** Empty state: no song database configured. */
