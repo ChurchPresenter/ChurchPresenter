@@ -428,7 +428,6 @@ private fun BookCard(
         BibleBrowserColumn(
             items = filteredBooks,
             selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
-            singleLine = true,
             onItemSelected = onBookSelected
         )
     }

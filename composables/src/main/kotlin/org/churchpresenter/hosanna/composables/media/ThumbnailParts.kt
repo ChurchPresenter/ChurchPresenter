@@ -66,6 +66,7 @@ import org.churchpresenter.icons.generated.resources.ic_visibility_off
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 @Composable
 internal fun BoxScope.ThumbnailContent(
@@ -242,6 +243,7 @@ private fun OverlayButton(icon: DrawableResource, label: String, colors: Thumbna
                 .size(ThumbnailDefaults.Action)
                 .background(if (hovered) colors.onBadge.overBadge(colors.badge) else colors.badge, CircleShape)
                 .semantics { contentDescription = label }
+                .firstPassClick(true, onClick)
                 .clickable(source, null, role = Role.Button, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {

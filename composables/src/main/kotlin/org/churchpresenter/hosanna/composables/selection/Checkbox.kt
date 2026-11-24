@@ -43,6 +43,7 @@ import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_remove
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 /**
  * A checkbox with its label. The whole row toggles it.
@@ -122,6 +123,7 @@ fun TriStateCheckbox(
     Row(
         modifier = modifier
             .defaultMinSize(minHeight = if (compact) CheckboxDefaults.CompactHeight else CheckboxDefaults.MinHeight)
+            .firstPassClick(enabled, onClick)
             .triStateToggleable(state, interactionSource, null, enabled, Role.Checkbox, onClick)
             .padding(vertical = if (described) CheckboxDefaults.Gap / 2 else 0.dp),
         horizontalArrangement = Arrangement.spacedBy(

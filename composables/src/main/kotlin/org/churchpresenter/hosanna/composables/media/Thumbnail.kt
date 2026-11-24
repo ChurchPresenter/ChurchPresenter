@@ -43,6 +43,9 @@ import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
 import org.churchpresenter.hosanna.composables.model.canGoLive
 import org.churchpresenter.hosanna.composables.model.showsHoverActions
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.ClickTargets
+import org.churchpresenter.hosanna.composables.foundation.ProvideClickTargets
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 private fun ThumbnailStatus.showsImage() = this == ThumbnailStatus.Ready || this == ThumbnailStatus.Offline
 
@@ -102,6 +105,7 @@ fun Thumbnail(
     val currentGoLive by rememberUpdatedState(goLive)
     val active = state == ButtonState.Hovered || state == ButtonState.Pressed || state == ButtonState.Focused
     val look = ThumbnailLook(size, status, hidden, colors, active && showsHoverActions(size, status), active)
+    val targets = remember { ClickTargets() }
     Column(modifier.width(metrics.width)) {
         Box(
             Modifier
@@ -116,6 +120,7 @@ fun Thumbnail(
                     this.selected = selected
                     caption?.let { contentDescription = it }
                 }
+                .firstPassClick(true, onClick, goLive, container = targets)
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = null,
@@ -126,9 +131,11 @@ fun Thumbnail(
                 .clip(shape)
                 .background(if (status.showsImage()) colors.letterbox else colors.placeholder),
         ) {
-            ThumbnailContent(image, look, labels, onLocate)
-            ThumbnailOverlay(look, labels, live, number, duration, progress)
-            ThumbnailActions(look, labels, goLive, onHiddenChange)
+            ProvideClickTargets(targets) {
+                ThumbnailContent(image, look, labels, onLocate)
+                ThumbnailOverlay(look, labels, live, number, duration, progress)
+                ThumbnailActions(look, labels, goLive, onHiddenChange)
+            }
             Box(
                 Modifier
                     .matchParentSize()

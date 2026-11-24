@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -119,7 +121,7 @@ fun Dropdown(
     fun open() {
         if (System.currentTimeMillis() - dismissedAt > REOPEN_GUARD_MILLIS) expanded = true
     }
-    Column(modifier) {
+    Column(modifier.width(IntrinsicSize.Max)) {
         Box {
             Row(
                 modifier = Modifier

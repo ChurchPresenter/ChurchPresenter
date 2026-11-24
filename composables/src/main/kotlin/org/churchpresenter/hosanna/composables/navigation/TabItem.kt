@@ -53,6 +53,7 @@ import org.churchpresenter.hosanna.composables.foundation.tabColors
 import org.churchpresenter.hosanna.composables.model.NavigationTab
 import org.churchpresenter.hosanna.composables.model.TabStyle
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 @Composable
 internal fun TabItem(
@@ -103,6 +104,7 @@ private fun TabBody(
                 if (event.type == KeyEventType.KeyDown) onMove(forward)
                 true
             }
+            .firstPassClick(true, onClick)
             .selectable(selected, interactionSource, null, role = Role.Tab, onClick = onClick)
             .then(if (iconOnly) Modifier.semantics { contentDescription = tab.label } else Modifier)
             .padding(horizontal = if (iconOnly) NavigationDefaults.IconTabPadding else NavigationDefaults.TabPadding),

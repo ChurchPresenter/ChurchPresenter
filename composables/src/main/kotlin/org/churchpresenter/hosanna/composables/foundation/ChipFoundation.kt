@@ -114,6 +114,7 @@ internal fun ChipFrame(
     enabled: Boolean,
     click: Modifier,
     padding: PaddingValues,
+    targets: ClickTargets? = null,
     content: @Composable RowScope.(ChipColors) -> Unit,
 ) {
     val hovered by interactionSource.collectIsHoveredAsState()
@@ -133,7 +134,7 @@ internal fun ChipFrame(
         horizontalArrangement = Arrangement.spacedBy(ChipDefaults.IconGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        content(colors)
+        if (targets != null) ProvideClickTargets(targets) { content(colors) } else content(colors)
     }
 }
 
@@ -162,6 +163,7 @@ internal fun ChipCircleButton(
         modifier = Modifier
             .size(side)
             .background(if (active) fill else Color.Transparent, HosannaTheme.shapes.full)
+            .firstPassClick(enabled, onClick)
             .clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,

@@ -2,7 +2,8 @@ package org.churchpresenter.hosanna.composables.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -23,6 +24,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +45,9 @@ import org.churchpresenter.hosanna.composables.foundation.listRowColors
 import org.churchpresenter.hosanna.composables.model.ChipColor
 import org.churchpresenter.hosanna.hosannaElevation
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.ClickTargets
+import org.churchpresenter.hosanna.composables.foundation.ProvideClickTargets
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 /**
  * A list row with one to three lines, optional leading and trailing parts, and actions that show on hover.
@@ -60,8 +65,11 @@ import org.churchpresenter.hosanna.composables.foundation.ThemeColors
  * @param selected marks the row as picked.
  * @param liveTag marks the row as on screen with a red bar and this tag.
  * @param dragging lifts the row while it is dragged.
+ * @param onDoubleClick called on a double-click, such as to put the row live; its first click still
+ * reaches [onClick].
  * @param enabled whether the row can be pressed.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListRow(
     headline: String,
@@ -77,8 +85,13 @@ fun ListRow(
     selected: Boolean = false,
     liveTag: String? = null,
     dragging: Boolean = false,
+    onDoubleClick: (() -> Unit)? = null,
     enabled: Boolean = true,
 ) {
+    val click by rememberUpdatedState(onClick)
+    val doubleClick by rememberUpdatedState(onDoubleClick)
+    val stableClick = remember { { click() } }
+    val stableDoubleClick = remember { { doubleClick?.invoke() ?: Unit } }
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
@@ -91,23 +104,39 @@ fun ListRow(
     }
     val showActions = actions != null && (keepActions || selected || state == ButtonState.Hovered ||
         state == ButtonState.Pressed || state == ButtonState.Focused)
+    val targets = remember { ClickTargets() }
     RowFrame(colors, height, dragging, modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = height)
                 .semantics { this.selected = selected }
-                .clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick)
+                .firstPassClick(
+                    enabled,
+                    stableClick,
+                    if (onDoubleClick != null) stableDoubleClick else null,
+                    container = targets,
+                )
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    enabled = enabled,
+                    role = Role.Button,
+                    onDoubleClick = if (onDoubleClick != null) stableDoubleClick else null,
+                    onClick = stableClick,
+                )
                 .padding(horizontal = ListDefaults.RowPadding),
             horizontalArrangement = Arrangement.spacedBy(ListDefaults.PartGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            leading?.invoke()
-            RowText(headline, supporting, threeLine, selected, colors, Modifier.weight(1f))
-            trailing?.invoke(this)
-            liveTag?.let { Tag(it, color = ChipColor.Live) }
-            if (showActions) {
-                Row(horizontalArrangement = Arrangement.spacedBy(ListDefaults.ActionGap), content = actions)
+            ProvideClickTargets(targets) {
+                leading?.invoke()
+                RowText(headline, supporting, threeLine, selected, colors, Modifier.weight(1f))
+                trailing?.invoke(this)
+                liveTag?.let { Tag(it, color = ChipColor.Live) }
+                if (showActions) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(ListDefaults.ActionGap), content = actions)
+                }
             }
         }
     }

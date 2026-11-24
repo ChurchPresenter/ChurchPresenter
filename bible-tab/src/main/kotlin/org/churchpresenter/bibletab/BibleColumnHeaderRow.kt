@@ -4,23 +4,17 @@ import androidx.compose.foundation.layout.Box
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,10 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.BibleTranslationSettings
-import androidx.compose.ui.unit.sp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
@@ -54,13 +46,24 @@ import org.churchpresenter.strings.generated.resources.swap_bibles_hint
 import org.churchpresenter.strings.generated.resources.verse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.sharedui.composables.ActionIconButton
-import org.churchpresenter.sharedui.composables.AddToScheduleButton
-import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.bible.bibleDisplayNames
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.theme.components.RaisedFilterChip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.button.IconToggleButton
+import org.churchpresenter.hosanna.composables.chip.FilterChip
+import org.churchpresenter.hosanna.composables.feedback.RichTooltip
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.label
+import org.churchpresenter.sharedui.models.ShortcutAction
+import androidx.compose.material.icons.filled.Tv
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -127,38 +130,35 @@ internal fun BibleVerseHeader(
             } else {
                 stringResource(Res.string.stt_connect)
             }
-            ActionIconButton(
-                onClick = {
-                    onSttToggle()
-                },
-                tooltipText = sttActionStr,
-                icon = Icons.Filled.Mic,
-                containerColor = if (sttConnected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-                contentColor = if (sttConnected) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
+            Tooltip(sttActionStr) {
+                IconToggleButton(
+                    rememberVectorPainter(Icons.Filled.Mic),
+                    sttActionStr,
+                    sttConnected,
+                    { onSttToggle() },
+                )
+            }
+        }
+
+        Tooltip(addScheduleStr, Modifier.guideTarget(GuideTargets.BIBLE_ADD_TO_SCHEDULE)) {
+            IconButton(
+                painterResource(IconRes.drawable.ic_playlist_add),
+                addScheduleStr,
+                { onAddToSchedule() },
+                hierarchy = ButtonHierarchy.Primary,
+                intent = ButtonIntent.Neutral,
             )
         }
 
-        AddToScheduleButton(
-            onClick = {
-                onAddToSchedule()
-            },
-            tooltipText = addScheduleStr,
-            modifier = Modifier.guideTarget(GuideTargets.BIBLE_ADD_TO_SCHEDULE),
-        )
-
-        GoLiveButton(
-            onClick = onGoLive,
-            tooltipText = goLiveStr,
-            showsShortcut = true,
-        )
+        val goLiveKey = LocalShortcuts.current.label(ShortcutAction.GO_LIVE).ifEmpty { null }
+        Tooltip(goLiveStr, shortcut = goLiveKey) {
+            IconButton(
+                rememberVectorPainter(Icons.Default.Tv),
+                goLiveStr,
+                onGoLive,
+                hierarchy = ButtonHierarchy.Primary,
+            )
+        }
     }
 }
 
@@ -175,32 +175,19 @@ internal fun BibleListHeaderLabel(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CrossRefsPill(crossRefsDocked: Boolean, onCrossReferencesToggle: () -> Unit) {
-    TooltipArea(
-        tooltip = { HeaderTooltip(stringResource(Res.string.bible_cross_references)) },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        ),
-    ) {
-        RaisedFilterChip(
+    Tooltip(stringResource(Res.string.bible_cross_references)) {
+        FilterChip(
+            label = stringResource(Res.string.bible_cross_references_title),
             selected = crossRefsDocked,
-            onClick = onCrossReferencesToggle,
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_link),
-                    contentDescription = stringResource(Res.string.bible_cross_references),
-                    modifier = Modifier.size(12.dp),
-                )
-            },
-            label = { HeaderChipLabel(stringResource(Res.string.bible_cross_references_title)) },
+            onSelectedChange = { onCrossReferencesToggle() },
+            icon = painterResource(IconRes.drawable.ic_link),
+            size = ChipSize.Small,
         )
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HoldLivePill(
     holdAvailable: Boolean,
@@ -209,35 +196,18 @@ private fun HoldLivePill(
     verseSelectionHint: String,
     onHoldLiveToggle: () -> Unit,
 ) {
-    TooltipArea(
-        tooltip = { HeaderTooltip(if (holdAvailable) holdLiveStr else verseSelectionHint) },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        ),
-    ) {
-        val icon: @Composable () -> Unit = {
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_pause),
-                contentDescription = null,
-                modifier = Modifier.size(10.dp),
-            )
-        }
-        val label: @Composable () -> Unit = { HeaderChipLabel(stringResource(Res.string.hold_live_modifier_hint)) }
-        // Red while the hold is live. Where it cannot apply it is shown but not pressable -- its
-        // tooltip then explains Ctrl/Shift selection instead.
-        if (holdAvailable) {
-            RaisedFilterChip(
-                selected = holdLive,
-                onClick = onHoldLiveToggle,
-                selectedContainerColor = MaterialTheme.colorScheme.error,
-                selectedLabelColor = MaterialTheme.colorScheme.onError,
-                leadingIcon = icon,
-                label = label,
-            )
-        } else {
-            InertChip(leadingIcon = icon, label = label)
-        }
+    // Red while the hold is live. Where it cannot apply it is shown but not pressable -- its
+    // tooltip then explains Ctrl/Shift selection instead.
+    Tooltip(if (holdAvailable) holdLiveStr else verseSelectionHint) {
+        FilterChip(
+            label = stringResource(Res.string.hold_live_modifier_hint),
+            selected = holdLive && holdAvailable,
+            onSelectedChange = { onHoldLiveToggle() },
+            icon = painterResource(IconRes.drawable.ic_pause),
+            size = ChipSize.Small,
+            color = ChipColor.Live,
+            enabled = holdAvailable,
+        )
     }
 }
 
@@ -252,33 +222,17 @@ private fun TranslationControls(
     val swapBiblesStr = stringResource(Res.string.swap_bibles)
     val translationOrderStr = stringResource(Res.string.bible_translation_order)
     if (translations.size == 2) {
-        ActionIconButton(
-            onClick = {
-                onSwapTranslations()
-            },
-            tooltipText = swapBiblesStr,
-            painter = painterResource(IconRes.drawable.ic_swap),
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            tooltipContent = {
-                val pair = translations
-                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                    Text(
-                        stringResource(Res.string.swap_bibles_hint),
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    pair.forEachIndexed { position, item ->
-                        Text(
-                            "${position + 1}. ${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}",
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            }
-        )
+        val order = translations.mapIndexed { position, item ->
+            "${position + 1}. ${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}"
+        }
+        RichTooltip(stringResource(Res.string.swap_bibles_hint), order.joinToString("\n")) {
+            IconButton(
+                painterResource(IconRes.drawable.ic_swap),
+                swapBiblesStr,
+                { onSwapTranslations() },
+                hierarchy = ButtonHierarchy.Secondary,
+            )
+        }
     } else if (translations.size > 2) {
         // The renames come in on `translations` -- each entry carries its own --
         // so this reads them without a parameter of its own.
@@ -310,23 +264,6 @@ private fun TranslationControls(
                 .widthIn(min = 127.dp, max = 174.dp),
         )
     }
-}
-
-@Composable
-private fun HeaderTooltip(text: String) {
-    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
-        Text(
-            text,
-            color = MaterialTheme.colorScheme.inverseOnSurface,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.bodySmall,
-        )
-    }
-}
-
-@Composable
-private fun HeaderChipLabel(text: String) {
-    Text(text, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), maxLines = 1)
 }
 
 /** The height of every Bible list card's heading row: the buttons' touch target. */

@@ -1,7 +1,5 @@
 package org.churchpresenter.bibletab
 
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -15,8 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,9 +22,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import org.churchpresenter.theme.AppShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,16 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import org.churchpresenter.sharedui.composables.SearchFieldFocus
-import org.churchpresenter.sharedui.composables.rememberSearchFieldValue
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -59,15 +44,11 @@ import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.isSecondary
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -76,25 +57,18 @@ import org.churchpresenter.strings.generated.resources.bible_load_failed_partial
 import org.churchpresenter.strings.generated.resources.bible_load_failed_partial_title
 import org.churchpresenter.strings.generated.resources.bible_load_failed_report_hint
 import org.churchpresenter.strings.generated.resources.bible_load_failed_title
-import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_search
 import org.churchpresenter.icons.generated.resources.ic_warning
-import org.churchpresenter.strings.generated.resources.search_clear
 import org.churchpresenter.bible.BibleLoadError
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.theme.elevationPalette
-import org.churchpresenter.theme.hoverTint
-import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.keyboardFocusRing
-import org.churchpresenter.sharedui.composables.BibleListRowShape
 import org.churchpresenter.sharedui.composables.BibleVerseRowShape
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleLiveTint
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
-import org.churchpresenter.sharedui.composables.rowSpan
+import org.churchpresenter.hosanna.composables.list.NavigationList
+import org.churchpresenter.hosanna.composables.model.NavigationItem
 
 @Composable
 internal fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifier = Modifier) {
@@ -238,88 +212,6 @@ internal fun LiveChapterPanel(
     }
 }
 
-@Composable
-internal fun BibleSearchField(
-    value: String,
-    placeholder: String,
-    onValueChange: (String) -> Unit,
-    onClear: () -> Unit,
-    onSubmit: () -> Unit,
-    onFocusChanged: (Boolean) -> Unit,
-    modeChip: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-    /** How the tab moves the keyboard in here with the query selected. */
-    focus: SearchFieldFocus = remember { SearchFieldFocus() },
-) {
-    Row(
-        modifier = modifier
-            .height(42.dp)
-            .keyboardFocusRing(AppShape(8.dp), includeChildren = true)
-            .sunken(AppShape(8.dp), elevationPalette())
-            .hoverTint(AppShape(8.dp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(IconRes.drawable.ic_search),
-            contentDescription = null,
-            modifier = Modifier.padding(start = 11.dp).size(14.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-        )
-        Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
-            var fieldValue by rememberSearchFieldValue(value, focus)
-            BasicTextField(
-                value = fieldValue,
-                onValueChange = {
-                    fieldValue = it
-                    if (it.text != value) onValueChange(it.text)
-                },
-                modifier = Modifier.fillMaxWidth()
-                    .focusRequester(focus.requester)
-                    .onFocusChanged { onFocusChanged(it.isFocused) }
-                    .onPreviewKeyEvent { e ->
-                        if (e.type == KeyEventType.KeyDown && e.key == Key.Enter) {
-                            onSubmit(); true
-                        } else false
-                    },
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface
-                ),
-                singleLine = true,
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                decorationBox = { innerTextField ->
-                    if (value.isEmpty()) {
-                        Text(
-                            text = placeholder,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    innerTextField()
-                }
-            )
-        }
-        if (value.isNotEmpty()) {
-            KeyIconButton(
-                onClick = onClear,
-
-                modifier = Modifier.size(30.dp).testTag("bible_searchClear")
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.search_clear),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-        Box(modifier = Modifier.padding(end = 6.dp)) {
-            modeChip()
-        }
-    }
-}
-
 /** Whether row [index] lies wholly inside the list's viewport -- one cut off at an edge does not. */
 internal fun LazyListLayoutInfo.showsWhole(index: Int): Boolean {
     val row = visibleItemsInfo.firstOrNull { it.index == index } ?: return false
@@ -330,59 +222,19 @@ internal fun LazyListLayoutInfo.showsWhole(index: Int): Boolean {
 internal fun BibleBrowserColumn(
     items: List<String>,
     selectedIndex: Int,
-    singleLine: Boolean = false,
     centerText: Boolean = false,
-    rowHeight: Dp = 32.dp,
     onItemSelected: (Int) -> Unit
 ) {
     val listState = rememberLazyListState()
-    // The row the operator just clicked is where they are already looking, so a click never scrolls
-    var clickedIndex by remember { mutableIntStateOf(-1) }
-    LaunchedEffect(selectedIndex) {
-        val clicked = clickedIndex == selectedIndex
-        clickedIndex = -1
-        if (clicked || selectedIndex !in items.indices) return@LaunchedEffect
-        // Selected from anywhere else -- a search, a typed reference, the arrow keys, a detection --
-        // the row is brought into view, but only when it is not already wholly on screen
-        if (!listState.layoutInfo.showsWhole(selectedIndex)) listState.animateScrollToItem(selectedIndex)
-    }
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
+        NavigationList(
+            items = items.mapIndexed { index, item -> NavigationItem(index.toString(), item) },
+            selectedKey = selectedIndex.takeIf { it in items.indices }?.toString(),
+            onSelect = { onItemSelected(it.toInt()) },
+            modifier = Modifier.fillMaxSize().padding(start = 6.dp, end = 10.dp),
+            centered = centerText,
             state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 6.dp, end = 10.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
-        ) {
-            itemsIndexed(items) { index, item ->
-                val isSelected = index == selectedIndex
-                val (hover, hovered) = rememberRowHover()
-                val colors = bibleRowColors(isSelected, hovered)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = rowSpan(rowHeight))
-                        .clip(BibleListRowShape)
-                        .background(colors.background)
-                        .hoverable(hover)
-                        .clickable(interactionSource = hover, indication = null) {
-                            clickedIndex = index
-                            onItemSelected(index)
-                        }
-                        .padding(horizontal = rowPad(10.dp)),
-                    contentAlignment = if (centerText) Alignment.Center else Alignment.CenterStart
-                ) {
-                    Text(
-                        text = item,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = colors.ink,
-                        maxLines = if (singleLine) 1 else Int.MAX_VALUE,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = if (centerText) TextAlign.Center else TextAlign.Start
-                    )
-                }
-            }
-        }
+        )
         VerticalScrollbar(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             adapter = rememberScrollbarAdapter(listState)

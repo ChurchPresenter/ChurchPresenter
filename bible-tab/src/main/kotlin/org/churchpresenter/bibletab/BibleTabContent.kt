@@ -43,7 +43,6 @@ import org.churchpresenter.strings.generated.resources.bible_no_results_bible
 import org.churchpresenter.strings.generated.resources.bible_no_results_book
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
 import org.churchpresenter.sharedui.composables.FocusLostBanner
-import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.swapBibleTranslations
@@ -55,6 +54,15 @@ import org.churchpresenter.sharedui.composables.bibleListCard
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.Icon
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.labelOrUnbound
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.strings.generated.resources.keyboard_home_search
+import org.churchpresenter.strings.generated.resources.keyboard_home_search_live
+import androidx.compose.ui.focus.focusProperties
+import org.churchpresenter.hosanna.composables.button.StandardButton
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 /** The tab's body under its key handler: the search row, detections, and the browser or a notice. */
 @Composable
@@ -307,7 +315,7 @@ private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabSco
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost), topPadding = 0.dp)
         // The other way the step keys stand down: the caret is in the search box, browsing.
         if (searchFieldFocused) {
-            SearchKeyboardBanner(somethingLive = currentIsPresenting, onClick = { switchSearchLive(viewModel) })
+            BibleSearchHint(somethingLive = currentIsPresenting, onClick = { switchSearchLive(viewModel) })
         }
 
         // Provided rather than passed: the verse row that draws it is five levels down.
@@ -454,4 +462,35 @@ private fun BibleTabScope.BibleTabHistory(viewModel: BibleViewModel) {
             },
         )
     }
+}
+
+/**
+ * Says the keyboard is in the search box and which keys take it on from there; pressing it does the
+ * same as the search ⇄ live key. Never focusable: taking focus would hide it, which would clear focus,
+ * which would show it again.
+ */
+@Composable
+private fun BibleSearchHint(somethingLive: Boolean, onClick: () -> Unit) {
+    val shortcuts = LocalShortcuts.current
+    val goLive = shortcuts.labelOrUnbound(ShortcutAction.GO_LIVE)
+    val text = if (somethingLive) {
+        stringResource(
+            Res.string.keyboard_home_search_live,
+            goLive,
+            shortcuts.labelOrUnbound(ShortcutAction.SWITCH_SEARCH_LIVE),
+        )
+    } else {
+        stringResource(Res.string.keyboard_home_search, goLive)
+    }
+    StandardButton(
+        text,
+        onClick,
+        Modifier
+            .fillMaxWidth()
+            // The same 4dp inset as the cards above and below, so its edges line up with theirs.
+            .padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
+            .focusProperties { canFocus = false },
+        hierarchy = ButtonHierarchy.Secondary,
+        intent = ButtonIntent.Warning,
+    )
 }

@@ -49,6 +49,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -114,6 +115,7 @@ fun Switch(
     Row(
         modifier = modifier
             .defaultMinSize(minHeight = minHeight)
+            .firstPassClick(enabled && !isLoading, { onCheckedChange(!checked) })
             .toggleable(checked, interactionSource, null, enabled && !isLoading, Role.Switch, onCheckedChange)
             .padding(vertical = if (described) SwitchDefaults.FormGap / 2 else 0.dp),
         horizontalArrangement = Arrangement.spacedBy(gap),

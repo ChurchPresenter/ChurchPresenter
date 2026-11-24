@@ -173,6 +173,7 @@ internal fun ButtonFrame(
             .then(colors.ring?.let { Modifier.focusRing(it, look.cornerRadius) } ?: Modifier)
             .height(look.height)
             .background(container, shape)
+            .firstPassClick(interactive, onClick)
             .then(
                 if (checked == null) {
                     Modifier.clickable(interactionSource, null, interactive, role = Role.Button, onClick = onClick)

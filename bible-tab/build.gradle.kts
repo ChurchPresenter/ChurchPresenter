@@ -12,6 +12,8 @@ dependencies {
     // The port to the live output this tab declares against.
     api(projects.outputApi)
     implementation(projects.sharedUi)
+    // The new controls, drawn in the app theme's colors.
+    implementation(projects.composables)
     implementation(projects.strings)
     implementation(projects.icons)
     implementation(projects.coreModels)

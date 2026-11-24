@@ -8,7 +8,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 
 /**
  * The right-hand (live chapter) copy of a verse line, in split-browse mode.
@@ -27,8 +27,8 @@ fun ComposeUiTest.livePanelVerse(text: String): SemanticsNodeInteraction {
 fun ComposeUiTest.countOnScreen(text: String): Int =
     onAllNodesWithText(text).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 
-/** The search box's clear (×) button — tagged in the tab because its icon is decorative. */
-fun ComposeUiTest.clearSearchButton() = onNodeWithTag("bible_searchClear")
+/** The search box's clear (×) button, by its screen-reader name. */
+fun ComposeUiTest.clearSearchButton() = onNodeWithContentDescription("Clear search")
 
 /**
  * The verse lines currently listed, in the order shown.

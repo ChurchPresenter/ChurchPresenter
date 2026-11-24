@@ -25,6 +25,8 @@ import org.churchpresenter.icons.generated.resources.ic_star
 import org.churchpresenter.icons.generated.resources.ic_star_filled
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
+import org.churchpresenter.hosanna.composables.foundation.ClickTargets
 
 /**
  * A chip for a file with a star to keep it as a favorite.
@@ -56,14 +58,18 @@ fun FavoriteFileChip(
     enabled: Boolean = true,
 ) {
     val metrics = ChipDefaults.Default
+    val targets = remember { ClickTargets() }
     ChipFrame(
         modifier = modifier,
+        targets = targets,
         interactionSource = interactionSource,
         size = ChipSize.Default,
         color = ChipColor.Neutral,
         selected = open,
         enabled = enabled,
-        click = Modifier.clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick),
+        click = Modifier
+            .firstPassClick(enabled, onClick, container = targets)
+            .clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick),
         padding = PaddingValues(
             start = if (icon != null) metrics.iconSidePadding else metrics.padding,
             end = ChipDefaults.StarEndPadding,

@@ -30,6 +30,11 @@ The composables built on the Hosanna theme. A real Gradle module of this build �
   that order, the source right after the modifier. It draws its hover, pressed and focus states
   from that source; a caller passes its own only to watch or drive them.
 
+- **Clicks are taken at the initial pass** through `Modifier.firstPassClick` (`foundation/`), put just
+  before the `clickable`/`toggleable`/`selectable` that keeps the keyboard, focus and screen-reader
+  action. On ARM Macs a plain `clickable` inside a scrolling list can lose its release to the scroll.
+  A row or tile that holds controls passes `container = ClickTargets()` and wraps its content in
+  `ProvideClickTargets`, so a release on a control inside it goes to that control.
 - **No generic functions or classes** (`fun <T>`, `class Foo<T>`): a list is keyed by `String`
   (`MenuEntry.Item(key, …)`), or by the component's own enum, never by a type parameter.
 - **Glyphs a composable draws itself** (a check, a ×, a star) come from `:icons`

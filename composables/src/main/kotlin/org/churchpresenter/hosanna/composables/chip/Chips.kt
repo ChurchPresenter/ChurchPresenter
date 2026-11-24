@@ -44,6 +44,8 @@ import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_drag_dots
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
+import org.churchpresenter.hosanna.composables.foundation.ClickTargets
 
 internal fun chipPadding(size: ChipSize, leading: Boolean, end: Boolean = true): PaddingValues {
     val metrics = ChipDefaults.metrics(size)
@@ -86,7 +88,9 @@ fun ActionChip(
         color = color,
         selected = false,
         enabled = enabled,
-        click = Modifier.clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick),
+        click = Modifier
+            .firstPassClick(enabled, onClick)
+            .clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick),
         padding = chipPadding(size, leading = icon != null),
     ) { colors ->
         icon?.let { ChipGlyph(it, colors.sub, ChipDefaults.Icon) }
@@ -127,7 +131,9 @@ fun FilterChip(
         color = color,
         selected = selected,
         enabled = enabled,
-        click = Modifier.toggleable(selected, interactionSource, null, enabled, Role.Checkbox, onSelectedChange),
+        click = Modifier
+            .firstPassClick(enabled, { onSelectedChange(!selected) })
+            .toggleable(selected, interactionSource, null, enabled, Role.Checkbox, onSelectedChange),
         padding = chipPadding(size, leading = leading != null),
     ) { colors ->
         leading?.let { ChipGlyph(it, if (selected) colors.content else colors.sub, ChipDefaults.Icon) }
@@ -167,8 +173,11 @@ fun InputChip(
     enabled: Boolean = true,
 ) {
     val removeKeys = Modifier.onKeyEvent { event -> (enabled && isRemoveKey(event)).also { if (it) onRemove() } }
+    val targets = remember { ClickTargets() }
     val click = if (onClick != null) {
-        Modifier.clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick)
+        Modifier
+            .firstPassClick(enabled, onClick, container = targets)
+            .clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick)
     } else {
         Modifier.semantics(mergeDescendants = true) {}.focusable(enabled, interactionSource)
     }
@@ -180,6 +189,7 @@ fun InputChip(
         selected = false,
         enabled = enabled,
         click = removeKeys.then(click),
+        targets = targets,
         padding = chipPadding(size, leading = dragHandle || icon != null, end = false),
     ) { colors ->
         if (dragHandle) {

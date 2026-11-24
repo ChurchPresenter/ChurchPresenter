@@ -70,6 +70,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 @Composable
 internal fun DropdownMenu(
@@ -255,6 +256,7 @@ private fun MenuRow(
             .height(if (item.supporting != null) MenuDefaults.TwoLineRowHeight else MenuDefaults.RowHeight)
             .background(colors.menuRowContainer(selected, item.enabled && (hovered || active)), shape)
             .then(if (active && item.enabled) Modifier.keyboardRing(colors.primary, shape) else Modifier)
+            .firstPassClick(item.enabled, onClick)
             .clickable(source, null, item.enabled, role = Role.DropdownList, onClick = onClick)
             .semantics { this.selected = selected }
             .padding(horizontal = MenuDefaults.RowPadding),

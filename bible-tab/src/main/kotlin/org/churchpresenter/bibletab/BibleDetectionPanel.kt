@@ -1,7 +1,6 @@
 package org.churchpresenter.bibletab
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,9 +33,7 @@ import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -105,8 +102,15 @@ import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.theme.components.RaisedFilterChip
-import androidx.compose.material3.LocalContentColor
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.chip.FilterChip
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 private const val SELECTION_BAR_WIDTH = 4f
 
@@ -231,15 +235,15 @@ private fun DetectionStatusRow(
             DetectionFlagButtons(canFlagLive, onFlag)
         }
         if (hasDetections) {
-            KeyIconButton(
-                onClick = onClearDetections,
-                modifier = Modifier.size(27.dp)
-            ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.bible_stt_clear),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            val clearStr = stringResource(Res.string.bible_stt_clear)
+            Tooltip(clearStr) {
+                IconButton(
+                    painterResource(IconRes.drawable.ic_close),
+                    clearStr,
+                    onClearDetections,
+                    size = IconButtonSize.Small,
+                    hierarchy = ButtonHierarchy.Tertiary,
+                    intent = ButtonIntent.Neutral,
                 )
             }
         }
@@ -308,7 +312,7 @@ private fun DetectionFlagButtons(canFlagLive: Boolean, onFlag: (kind: String) ->
         icon = Icons.Filled.Flag,
         label = stringResource(Res.string.bible_stt_flag_wrong),
         tooltip = stringResource(Res.string.bible_stt_flag_wrong_hint),
-        tint = MaterialTheme.colorScheme.error,
+        color = ChipColor.Live,
 
         enabled = canFlagLive,
         disabledTooltip = stringResource(Res.string.bible_stt_flag_needs_live),
@@ -318,7 +322,7 @@ private fun DetectionFlagButtons(canFlagLive: Boolean, onFlag: (kind: String) ->
         icon = Icons.Filled.FastForward,
         label = stringResource(Res.string.bible_stt_flag_premature),
         tooltip = stringResource(Res.string.bible_stt_flag_premature_hint),
-        tint = MaterialTheme.colorScheme.tertiary,
+        color = ChipColor.Neutral,
         enabled = canFlagLive,
         disabledTooltip = stringResource(Res.string.bible_stt_flag_needs_live),
         onClick = { onFlag("premature") }
@@ -328,7 +332,7 @@ private fun DetectionFlagButtons(canFlagLive: Boolean, onFlag: (kind: String) ->
         label = stringResource(Res.string.bible_stt_flag_missed),
         tooltip = stringResource(Res.string.bible_stt_flag_missed_hint),
 
-        tint = MaterialTheme.colorScheme.secondary,
+        color = ChipColor.Neutral,
         onClick = { onFlag("missed_passage") }
     )
 }
@@ -412,15 +416,7 @@ private fun DetectionRow(
 
         ref.detectedVersion?.let { version ->
             Spacer(Modifier.width(6.dp))
-            TooltipArea(tooltip = {
-                Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-                    Text(
-                        text = stringResource(Res.string.bible_stt_detected_version_tooltip),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }) {
+            Tooltip(stringResource(Res.string.bible_stt_detected_version_tooltip)) {
                 Text(
                     text = version,
                     style = MaterialTheme.typography.labelSmall,
@@ -462,15 +458,7 @@ private fun DetectionBadges(ref: DetectedReference) {
                     MaterialTheme.colorScheme.tertiary
                 )
             }
-            TooltipArea(tooltip = {
-                Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-                    Text(
-                        text = stringResource(descRes),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }) {
+            Tooltip(stringResource(descRes)) {
                 Icon(
                     imageVector = icon,
                     contentDescription = stringResource(descRes),
@@ -494,15 +482,7 @@ private fun DetectionBadges(ref: DetectedReference) {
             ),
         ).forEach { (track, icon, descRes) ->
             if (track in ref.tracks) {
-                TooltipArea(tooltip = {
-                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-                        Text(
-                            text = stringResource(descRes),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }) {
+                Tooltip(stringResource(descRes)) {
                     Icon(
                         imageVector = icon,
                         contentDescription = stringResource(descRes),
@@ -522,7 +502,7 @@ private fun FlagPillButton(
     icon: ImageVector,
     label: String,
     tooltip: String,
-    tint: Color,
+    color: ChipColor,
     onClick: () -> Unit,
     enabled: Boolean = true,
     disabledTooltip: String? = null,
@@ -535,40 +515,21 @@ private fun FlagPillButton(
         }
     }
 
-    TooltipArea(tooltip = { EngineTooltip(if (enabled) tooltip else (disabledTooltip ?: tooltip)) }) {
-        val leading: @Composable () -> Unit = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(12.dp),
-                tint = if (flashing || !enabled) LocalContentColor.current else tint,
-            )
-        }
-        val text: @Composable () -> Unit = {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        // A raised key in the neutral colour, filling with its own colour for a moment when pressed.
-        // With nothing live to describe it is shown but not pressable, rather than swallowing clicks.
-        if (enabled) {
-            RaisedFilterChip(
-                selected = flashing,
-                onClick = {
-                    flashing = true
-                    onClick()
-                },
-                selectedContainerColor = tint,
-                selectedLabelColor = MaterialTheme.colorScheme.surface,
-                leadingIcon = leading,
-                label = text,
-            )
-        } else {
-            InertChip(leadingIcon = leading, label = text)
-        }
+    // Fills with its own colour for a moment when pressed. With nothing live to describe it is shown
+    // but not pressable, rather than swallowing clicks.
+    Tooltip(if (enabled) tooltip else (disabledTooltip ?: tooltip)) {
+        FilterChip(
+            label = label,
+            selected = flashing,
+            onSelectedChange = {
+                flashing = true
+                onClick()
+            },
+            icon = rememberVectorPainter(icon),
+            size = ChipSize.Small,
+            color = color,
+            enabled = enabled,
+        )
     }
 }
 
@@ -584,25 +545,13 @@ private fun EngineChip(
     tooltip: String,
     onClick: () -> Unit,
 ) {
-    TooltipArea(tooltip = { EngineTooltip(tooltip) }) {
-        RaisedFilterChip(
+    Tooltip(tooltip) {
+        FilterChip(
+            label = label,
             selected = selected,
-            onClick = onClick,
-            leadingIcon = { Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(12.dp)) },
-            label = {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
-                    maxLines = 1,
-                )
-            },
+            onSelectedChange = { onClick() },
+            icon = rememberVectorPainter(icon),
+            size = ChipSize.Small,
         )
-    }
-}
-
-@Composable
-private fun EngineTooltip(text: String) {
-    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-        Text(text = text, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(8.dp))
     }
 }

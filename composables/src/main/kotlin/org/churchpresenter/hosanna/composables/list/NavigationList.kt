@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicText
@@ -47,6 +48,7 @@ import org.churchpresenter.hosanna.composables.model.jumpTarget
 import org.churchpresenter.hosanna.composables.model.listKey
 import org.churchpresenter.hosanna.composables.model.moveIndex
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 /**
  * A list to pick one item from, such as Bible books or chapters. ↑ ↓, Home, End and the page keys move the
@@ -58,6 +60,7 @@ import org.churchpresenter.hosanna.composables.foundation.ThemeColors
  * @param modifier applied to the outermost layout.
  * @param interactionSource drives the list's focus.
  * @param centered centers the text, for narrow lists of numbers.
+ * @param state the list's scroll position, such as for a scrollbar beside it.
  */
 @Composable
 fun NavigationList(
@@ -67,9 +70,9 @@ fun NavigationList(
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     centered: Boolean = false,
+    state: LazyListState = rememberLazyListState(),
 ) {
     val listFocused by interactionSource.collectIsFocusedAsState()
-    val state = rememberLazyListState()
     val selectedIndex = items.indexOfFirst { it.key == selectedKey }
     val current by rememberUpdatedState(selectedIndex)
     val select by rememberUpdatedState(onSelect)
@@ -133,6 +136,7 @@ private fun NavigationRow(
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = ListDefaults.NavigationRow)
                 .semantics { this.selected = selected }
+                .firstPassClick(true, onClick)
                 .clickable(source, null, role = Role.Tab, onClick = onClick)
                 .padding(
                     start = if (selected && !centered) ListDefaults.SelectedPadding else ListDefaults.RowPadding,

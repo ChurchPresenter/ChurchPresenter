@@ -56,6 +56,9 @@ import org.churchpresenter.hosanna.composables.model.TableColumn
 import org.churchpresenter.hosanna.composables.model.TableRow
 import org.churchpresenter.hosanna.composables.selection.TriStateCheckbox
 import org.churchpresenter.hosanna.composables.foundation.ThemeColors
+import org.churchpresenter.hosanna.composables.foundation.ClickTargets
+import org.churchpresenter.hosanna.composables.foundation.ProvideClickTargets
+import org.churchpresenter.hosanna.composables.foundation.firstPassClick
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -84,12 +87,14 @@ internal fun TableRowItem(
     val open by rememberUpdatedState(onOpen)
     val stableClick = remember { { click() } }
     val stableOpen = remember { { open() } }
+    val targets = remember { ClickTargets() }
     RowFrame(colors, height, dragging = false, modifier = Modifier) {
         Row(
             Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = height)
                 .semantics { this.selected = selected }
+                .firstPassClick(true, stableClick, stableOpen, container = targets)
                 .combinedClickable(
                     interactionSource,
                     null,
@@ -99,24 +104,26 @@ internal fun TableRowItem(
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (checked != null && onCheckedChange != null) {
-                BulkCell(if (checked) ToggleableState.On else ToggleableState.Off, layout.nameOf(row)) {
-                    onCheckedChange(it)
+            ProvideClickTargets(targets) {
+                if (checked != null && onCheckedChange != null) {
+                    BulkCell(if (checked) ToggleableState.On else ToggleableState.Off, layout.nameOf(row)) {
+                        onCheckedChange(it)
+                    }
                 }
-            }
-            layout.columns.forEachIndexed { index, column ->
-                BodyCell(row.cells.getOrElse(index) { "" }, column, colors, cellWidth(layout, column))
-                if (index < layout.columns.lastIndex) {
-                    CellLine(if (lines) ThemeColors.current.outlineVariant else Color.Transparent)
+                layout.columns.forEachIndexed { index, column ->
+                    BodyCell(row.cells.getOrElse(index) { "" }, column, colors, cellWidth(layout, column))
+                    if (index < layout.columns.lastIndex) {
+                        CellLine(if (lines) ThemeColors.current.outlineVariant else Color.Transparent)
+                    }
                 }
-            }
-            layout.actions?.let { width ->
-                Row(
-                    Modifier.width(width).padding(end = TableDefaults.ActionGap),
-                    horizontalArrangement = Arrangement.spacedBy(TableDefaults.ActionGap, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (showActions) actions?.invoke(this, row.key)
+                layout.actions?.let { width ->
+                    Row(
+                        Modifier.width(width).padding(end = TableDefaults.ActionGap),
+                        horizontalArrangement = Arrangement.spacedBy(TableDefaults.ActionGap, Alignment.End),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (showActions) actions?.invoke(this, row.key)
+                    }
                 }
             }
         }

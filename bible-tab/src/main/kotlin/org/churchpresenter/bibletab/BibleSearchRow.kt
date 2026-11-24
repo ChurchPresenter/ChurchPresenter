@@ -1,56 +1,52 @@
 package org.churchpresenter.bibletab
 
-import org.churchpresenter.sharedui.guide.guideTarget
-import org.churchpresenter.sharedui.guide.GuideTargets
-import org.churchpresenter.sharedui.composables.SearchFieldFocus
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.items
-import org.churchpresenter.theme.AppShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.hosanna.composables.button.IconButton
+import org.churchpresenter.hosanna.composables.chip.ActionChip
+import org.churchpresenter.hosanna.composables.feedback.Tooltip
+import org.churchpresenter.hosanna.composables.field.Dropdown
+import org.churchpresenter.hosanna.composables.field.SearchField
+import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
+import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.model.ChipColor
+import org.churchpresenter.hosanna.composables.model.ChipSize
+import org.churchpresenter.hosanna.composables.model.MenuEntry
+import org.churchpresenter.icons.generated.resources.ic_search
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
+import org.churchpresenter.sharedui.composables.rememberSearchFieldValue
+import org.churchpresenter.sharedui.composables.searchBarCard
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_search_mode_auto
-import org.churchpresenter.strings.generated.resources.customize_group_reference
 import org.churchpresenter.strings.generated.resources.bible_search_mode_text
 import org.churchpresenter.strings.generated.resources.bible_search_mode_tooltip
-import org.churchpresenter.icons.generated.resources.ic_search
+import org.churchpresenter.strings.generated.resources.customize_group_reference
 import org.churchpresenter.strings.generated.resources.mode
 import org.churchpresenter.strings.generated.resources.scope
 import org.churchpresenter.strings.generated.resources.search
-import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.strings.generated.resources.search_clear
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.foundation.ExperimentalFoundationApi
-import org.churchpresenter.theme.elevationPalette
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.ui.semantics.Role
-import org.churchpresenter.theme.raisedHover
-import org.churchpresenter.sharedui.composables.searchBarCard
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 
 /**
  * The smart search box, its scope and mode selectors, and the search button.
@@ -58,26 +54,6 @@ import org.churchpresenter.sharedui.composables.searchBarCard
  * Below 440dp the four cannot share a row, so it stacks into a column — which is why this measures
  * itself rather than being told how wide it is.
  */
-/** The square search button that ends the row, in both of its layouts. */
-@Composable
-private fun SearchSubmitButton(onSubmit: () -> Unit) {
-    Box(
-        modifier = Modifier.size(42.dp)
-            .raisedHover(AppShape(10.dp), elevationPalette().accent, elevationPalette())
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-                onSubmit()
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(IconRes.drawable.ic_search),
-            contentDescription = stringResource(Res.string.search),
-            modifier = Modifier.size(16.dp),
-            tint = elevationPalette().accent.ink
-        )
-    }
-}
-
 @Composable
 internal fun BibleSearchRow(
     searchQuery: String,
@@ -97,156 +73,130 @@ internal fun BibleSearchRow(
     searchFocus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth().searchBarCard()) {
-        val searchIsNarrow = maxWidth < 440.dp
-
-        if (searchIsNarrow) {
-            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                BibleSearchField(
-                    value = searchQuery,
-                    placeholder = searchPlaceholder,
-                    onValueChange = onQueryChange,
-                    onClear = onClear,
-                    onSubmit = onSubmit,
-                    onFocusChanged = onFocusChanged,
-                    modeChip = {
-                        SearchModeChip(
-                            searchMode,
-                            onCycleSearchMode,
-                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.BIBLE_SEARCH),
-                    focus = searchFocus,
+        val field: @Composable (Modifier) -> Unit = { modifier ->
+            BibleSearchField(
+                value = searchQuery,
+                placeholder = searchPlaceholder,
+                onValueChange = onQueryChange,
+                onClear = onClear,
+                onSubmit = onSubmit,
+                onFocusChanged = onFocusChanged,
+                modeChip = {
+                    SearchModeChip(
+                        searchMode,
+                        onCycleSearchMode,
+                        modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
+                    )
+                },
+                modifier = modifier.height(SEARCH_ROW_HEIGHT).guideTarget(GuideTargets.BIBLE_SEARCH),
+                focus = searchFocus,
+            )
+        }
+        val pickers: @Composable () -> Unit = {
+            Picker(stringResource(Res.string.scope), scopeOptions, selectedScope, onScopeSelected)
+            Picker(stringResource(Res.string.mode), modeOptions, selectedMode, onModeSelected)
+            val searchStr = stringResource(Res.string.search)
+            Tooltip(searchStr) {
+                IconButton(
+                    painterResource(IconRes.drawable.ic_search),
+                    searchStr,
+                    onSubmit,
+                    Modifier.size(SEARCH_ROW_HEIGHT),
+                    size = IconButtonSize.Large,
+                    hierarchy = ButtonHierarchy.Primary,
                 )
+            }
+        }
+        if (maxWidth < NARROW_SEARCH) {
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                field(Modifier.fillMaxWidth())
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    DropdownSelector(
-                        label = stringResource(Res.string.scope),
-                        items = scopeOptions,
-                        selected = selectedScope,
-                        onSelectedChange = { newValue ->
-                            onScopeSelected(scopeOptions.indexOf(newValue).coerceAtLeast(0))
-                        }
-                    )
-                    DropdownSelector(
-                        label = stringResource(Res.string.mode),
-                        items = modeOptions,
-                        selected = selectedMode,
-                        onSelectedChange = { newValue ->
-                            onModeSelected(modeOptions.indexOf(newValue).coerceAtLeast(0))
-                        }
-                    )
-                    SearchSubmitButton(onSubmit)
+                    pickers()
                 }
             }
         } else {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                BibleSearchField(
-                    value = searchQuery,
-                    placeholder = searchPlaceholder,
-                    onValueChange = onQueryChange,
-                    onClear = onClear,
-                    onSubmit = onSubmit,
-                    onFocusChanged = onFocusChanged,
-                    modeChip = {
-                        SearchModeChip(
-                            searchMode,
-                            onCycleSearchMode,
-                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
-                        )
-                    },
-                    modifier = Modifier.weight(1f).guideTarget(GuideTargets.BIBLE_SEARCH),
-                    focus = searchFocus,
-                )
-                DropdownSelector(
-                    label = stringResource(Res.string.scope),
-                    items = scopeOptions,
-                    selected = selectedScope,
-                    onSelectedChange = { newValue ->
-                        onScopeSelected(scopeOptions.indexOf(newValue).coerceAtLeast(0))
-                    }
-                )
-                DropdownSelector(
-                    label = stringResource(Res.string.mode),
-                    items = modeOptions,
-                    selected = selectedMode,
-                    onSelectedChange = { newValue ->
-                        onModeSelected(modeOptions.indexOf(newValue).coerceAtLeast(0))
-                    }
-                )
-                SearchSubmitButton(onSubmit)
+                field(Modifier.weight(1f))
+                pickers()
             }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+private val NARROW_SEARCH = 440.dp
+
+// The height of a labelled dropdown, so the search box, the pickers and the button line up.
+private val SEARCH_ROW_HEIGHT = 44.dp
+private val PICKER_WIDTH = 140.dp
+
+/** A scope or mode picker: the options keyed by their position, as the view model takes them. */
+@Composable
+private fun Picker(label: String, options: List<String>, selected: String, onSelected: (Int) -> Unit) {
+    Dropdown(
+        entries = options.mapIndexed { index, option -> MenuEntry.Item(index.toString(), option) },
+        selectedKey = options.indexOf(selected).takeIf { it >= 0 }?.toString(),
+        onSelect = { onSelected(it.toInt()) },
+        modifier = Modifier.widthIn(min = PICKER_WIDTH),
+        label = label,
+    )
+}
+
+/** The search box, with the keyboard moved in and the query selected when the tab asks. */
+@Composable
+internal fun BibleSearchField(
+    value: String,
+    placeholder: String,
+    onValueChange: (String) -> Unit,
+    onClear: () -> Unit,
+    onSubmit: () -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
+    modeChip: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    /** How the tab moves the keyboard in here with the query selected. */
+    focus: SearchFieldFocus = remember { SearchFieldFocus() },
+) {
+    val source = remember { MutableInteractionSource() }
+    val focused by source.collectIsFocusedAsState()
+    val report by rememberUpdatedState(onFocusChanged)
+    LaunchedEffect(focused) { report(focused) }
+    var fieldValue by rememberSearchFieldValue(value, focus)
+    SearchField(
+        value = fieldValue,
+        onValueChange = {
+            fieldValue = it
+            if (it.text != value) onValueChange(it.text)
+        },
+        placeholder = placeholder,
+        clearContentDescription = stringResource(Res.string.search_clear),
+        modifier = modifier,
+        interactionSource = source,
+        onSearch = onSubmit,
+        onClear = onClear,
+        focusRequester = focus.requester,
+        trailing = modeChip,
+    )
+}
+
 @Composable
 private fun SearchModeChip(searchMode: BibleSearchMode, onCycle: () -> Unit, modifier: Modifier = Modifier) {
-    val (label, container, content) = when (searchMode) {
-        BibleSearchMode.AUTO -> Triple(
-            Res.string.bible_search_mode_auto,
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.onPrimary
-        )
-        BibleSearchMode.REFERENCE -> Triple(
-            Res.string.customize_group_reference,
-            MaterialTheme.colorScheme.secondary,
-            MaterialTheme.colorScheme.onSecondary
-        )
-        BibleSearchMode.TEXT -> Triple(
-            Res.string.bible_search_mode_text,
-            MaterialTheme.colorScheme.tertiary,
-            MaterialTheme.colorScheme.onTertiary
-        )
+    val label = when (searchMode) {
+        BibleSearchMode.AUTO -> Res.string.bible_search_mode_auto
+        BibleSearchMode.REFERENCE -> Res.string.customize_group_reference
+        BibleSearchMode.TEXT -> Res.string.bible_search_mode_text
     }
-    TooltipArea(
-        tooltip = {
-            Surface(
-                color = MaterialTheme.colorScheme.inverseSurface,
-                shape = MaterialTheme.shapes.extraSmall,
-                tonalElevation = 4.dp
-            ) {
-                Text(
-                    text = stringResource(Res.string.bible_search_mode_tooltip),
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        },
-        tooltipPlacement = TooltipPlacement.ComponentRect(
-            anchor = Alignment.BottomCenter,
-            offset = DpOffset(0.dp, 4.dp)
-        )
-    ) {
-        val palette = elevationPalette()
-        val fill = if (searchMode == BibleSearchMode.AUTO) palette.accent else palette.tinted(container, content)
-        val interaction = remember { MutableInteractionSource() }
-        val pressed by interaction.collectIsPressedAsState()
-        Box(
-            modifier = modifier
-                .raisedHover(AppShape(8.dp), fill, palette, pressed = pressed, lift = 2.dp)
-                .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onCycle),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stringResource(label),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.05.sp
-                ),
-                color = fill.ink,
-                maxLines = 1,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-            )
-        }
+    val color = when (searchMode) {
+        BibleSearchMode.AUTO -> ChipColor.Neutral
+        BibleSearchMode.REFERENCE -> ChipColor.Bible
+        BibleSearchMode.TEXT -> ChipColor.Song
+    }
+    Tooltip(stringResource(Res.string.bible_search_mode_tooltip), modifier) {
+        ActionChip(stringResource(label), onCycle, size = ChipSize.Small, color = color)
     }
 }
