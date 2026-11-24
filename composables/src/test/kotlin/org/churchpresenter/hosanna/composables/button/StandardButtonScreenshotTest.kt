@@ -23,6 +23,8 @@ class StandardButtonScreenshotTest {
         ButtonIntent.Default -> "Save"
         ButtonIntent.Critical -> "Delete"
         ButtonIntent.Neutral -> "Cancel"
+        ButtonIntent.Success -> "Approve"
+        ButtonIntent.Warning -> "Update"
     }
 
     @Composable

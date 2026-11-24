@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.painter.Painter
 
 enum class ButtonHierarchy { Primary, Secondary, Tertiary }
 
-enum class ButtonIntent { Default, Critical, Neutral }
+enum class ButtonIntent { Default, Critical, Neutral, Success, Warning }
 
 enum class IconButtonSize { Large, Medium, Small }
 

@@ -77,16 +77,22 @@ internal fun HosannaColors.restColors(hierarchy: ButtonHierarchy, intent: Button
             ButtonIntent.Default -> primary to onPrimary
             ButtonIntent.Critical -> error to onError
             ButtonIntent.Neutral -> secondary to onSecondary
+            ButtonIntent.Success -> success to onSuccess
+            ButtonIntent.Warning -> tertiary to onTertiary
         }
         ButtonHierarchy.Secondary -> when (intent) {
             ButtonIntent.Default -> primaryContainer to onPrimaryContainer
             ButtonIntent.Critical -> errorContainer to onErrorContainer
             ButtonIntent.Neutral -> secondaryContainer to onSecondaryContainer
+            ButtonIntent.Success -> successContainer to onSuccessContainer
+            ButtonIntent.Warning -> tertiaryContainer to onTertiaryContainer
         }
         ButtonHierarchy.Tertiary -> when (intent) {
             ButtonIntent.Default -> Color.Transparent to primary
             ButtonIntent.Critical -> Color.Transparent to error
             ButtonIntent.Neutral -> Color.Transparent to secondary
+            ButtonIntent.Success -> Color.Transparent to success
+            ButtonIntent.Warning -> Color.Transparent to tertiary
         }
     }
 

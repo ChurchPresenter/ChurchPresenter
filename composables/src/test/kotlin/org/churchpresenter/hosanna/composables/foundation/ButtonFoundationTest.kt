@@ -38,6 +38,12 @@ class ButtonFoundationTest {
             (ButtonHierarchy.Tertiary to ButtonIntent.Default) to (Color.Transparent to c.primary),
             (ButtonHierarchy.Tertiary to ButtonIntent.Critical) to (Color.Transparent to c.error),
             (ButtonHierarchy.Tertiary to ButtonIntent.Neutral) to (Color.Transparent to c.secondary),
+            (ButtonHierarchy.Primary to ButtonIntent.Success) to (c.success to c.onSuccess),
+            (ButtonHierarchy.Secondary to ButtonIntent.Success) to (c.successContainer to c.onSuccessContainer),
+            (ButtonHierarchy.Tertiary to ButtonIntent.Success) to (Color.Transparent to c.success),
+            (ButtonHierarchy.Primary to ButtonIntent.Warning) to (c.tertiary to c.onTertiary),
+            (ButtonHierarchy.Secondary to ButtonIntent.Warning) to (c.tertiaryContainer to c.onTertiaryContainer),
+            (ButtonHierarchy.Tertiary to ButtonIntent.Warning) to (Color.Transparent to c.tertiary),
         )
         expected.forEach { (key, colors) ->
             assertEquals(colors, c.restColors(key.first, key.second), "$key")
