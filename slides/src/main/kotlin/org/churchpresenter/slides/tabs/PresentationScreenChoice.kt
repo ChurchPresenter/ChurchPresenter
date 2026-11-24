@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +36,7 @@ internal fun PresentationTabScope.PresentationScreenChoice(
     val selected = appSettings.projectionSettings.quickPlayDisplay
     Box {
         if (anchor != null) anchor { expanded = true } else {
-            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.padding(vertical = 2.dp)) {
+            RaisedButton(onClick = { expanded = true }, modifier = Modifier.padding(vertical = 2.dp)) {
                 Text("${stringResource(Res.string.hymn_quick_screen)} · ${screens.getOrNull(selected ?: -1) ?: window}")
             }
         }

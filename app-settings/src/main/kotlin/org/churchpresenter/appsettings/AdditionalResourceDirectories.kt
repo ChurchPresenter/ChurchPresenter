@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -37,10 +37,10 @@ internal fun AdditionalResourceDirectories(
             Row(Modifier.fillMaxWidth()) {
                 Text(path, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                TextButton(onClick = {
+                RaisedButton(onClick = {
                     onSettingsChange { it.withPrimaryResourceDirectory(section, path, primaryDirectory) }
                 }) { Text(stringResource(Res.string.resource_directory_default)) }
-                TextButton(onClick = {
+                RaisedButton(onClick = {
                     onSettingsChange {
                         val remaining = it.additionalResourceDirectories[section].orEmpty()
                             .filterNot { dir -> dir == path }
@@ -51,7 +51,7 @@ internal fun AdditionalResourceDirectories(
                 }) { Text(stringResource(Res.string.resource_directory_remove)) }
             }
         }
-        TextButton(onClick = {
+        RaisedButton(onClick = {
             scope.launch {
                 val path = fileManager.chooseDirectory(currentDirectory = primaryDirectory) ?: return@launch
                 val alreadyDefault = File(path).absoluteFile.normalize() ==

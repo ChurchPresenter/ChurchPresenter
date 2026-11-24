@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
@@ -90,7 +90,7 @@ internal fun PresentationTabScope.PresentationQuickPlay(viewModel: PresentationV
             Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            OutlinedTextField(
+            SunkenOutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
                 label = { Text(stringResource(Res.string.hymn_quick_query)) },
@@ -118,7 +118,7 @@ private fun QuickPlayResults(
     onSelect: (File) -> Unit,
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp,
         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),

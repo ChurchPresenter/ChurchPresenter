@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.OutlinedButton
+import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -49,7 +49,7 @@ internal fun PresentationTabScope.PresentationLibraryFilters(documents: List<Fil
 private fun QuickPlayChoice(label: String, selected: String, choices: List<String>, onSelect: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Column {
-        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.padding(vertical = 2.dp)) {
+        RaisedButton(onClick = { expanded = true }, modifier = Modifier.padding(vertical = 2.dp)) {
             Text("$label · $selected")
         }
         DropdownMenu(expanded, onDismissRequest = { expanded = false }) {

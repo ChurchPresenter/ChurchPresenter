@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.TextButton
+import org.churchpresenter.theme.components.RaisedFilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -112,7 +112,11 @@ internal fun ColumnScope.BibleTabContent(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 items(bookCandidates) { book ->
-                    TextButton(onClick = { searchQueryChanged(viewModel, "$book ") }) { Text(book) }
+                    RaisedFilterChip(
+                        selected = book == books.getOrNull(selectedBookIndex),
+                        onClick = { searchQueryChanged(viewModel, "$book ") },
+                        label = { Text(book) },
+                    )
                 }
             }
         }
