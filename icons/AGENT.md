@@ -5,7 +5,7 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 The app's images, and no Kotlin source. A real Gradle module of this build — `include(":icons")`,
-`implementation(projects.icons)`. `:composeApp` is its only consumer.
+`implementation(projects.icons)`. `:composeApp` and `:composables` use it.
 
 | Path | Holds |
 |---|---|
