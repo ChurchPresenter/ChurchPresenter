@@ -29,6 +29,7 @@ MODULES = [
     ("presentation-engine", "Presentation Engine", 0.4),
     ("theme", "Theme", 0.2),
     ("hosanna-theme", "Hosanna theme", 0.2),
+    ("hosanna-composables", "Hosanna composables", 0.2),
     ("core-models", "Core models", 0.2),
     ("songlibrary", "Song library", 0.5),
     ("bible-engine", "Bible Lookup Engine", 0.3),
