@@ -211,10 +211,10 @@ internal fun PresenterWindows(
             outputSettings = outputSettings,
             crossfadeMs = modeCrossfadeDuration(outputSettings.bibleSettings, outputSettings.songSettings),
             outputKey = outputKey,
-            merge = merges[outputKey],
+            merge = if (quickDisplay != null) null else merges[outputKey],
             // Every tile of one picture shows what its first output shows, lock and all.
             effectiveMode = presenterManager.screenSlotMode(profile, screenLocks, merges, slotIndex, slideContent),
-            unusedScreens = proj.unusedScreens,
+            unusedScreens = if (quickDisplay != null) emptyList() else proj.unusedScreens,
         )
 
         when {
