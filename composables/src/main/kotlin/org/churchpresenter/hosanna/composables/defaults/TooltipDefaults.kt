@@ -20,3 +20,13 @@ internal object TooltipDefaults {
     const val FADE_IN_MILLIS: Int = 120
     const val FADE_OUT_MILLIS: Int = 80
 }
+
+internal object RichTooltipDefaults {
+    val PaddingX: Dp = 14.dp
+    val PaddingY: Dp = 12.dp
+    val MaxWidth: Dp = 300.dp
+    val TitleGap: Dp = 4.dp
+    val ActionGap: Dp = 6.dp
+    const val OPEN_DELAY_MILLIS: Long = 500
+    const val CLOSE_DELAY_MILLIS: Long = 300
+}
