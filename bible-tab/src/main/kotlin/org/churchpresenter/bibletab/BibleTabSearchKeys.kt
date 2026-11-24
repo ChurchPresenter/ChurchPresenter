@@ -104,7 +104,7 @@ private fun BibleTabScope.goLiveWith(viewModel: BibleViewModel, ref: SmartRefere
             ref,
             goLive = true,
             goLiveSource = "manual",
-            requireExactVerses = isChineseQuickReference(searchQuery),
+            requireExactVerses = viewModel.isQuickReference(searchQuery),
         )
     }
     focusRequester.requestFocus()

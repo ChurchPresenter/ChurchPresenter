@@ -38,6 +38,32 @@ private fun matchChapterVerse(input: String): ChapterVerse? {
 internal fun isChineseQuickReference(input: String): Boolean =
     matchChapterVerse(input)?.let { ChineseBookInitials.bookId(it.bookToken) != null } == true
 
+internal fun BibleViewModel.quickBookCandidates(query: String): List<String> =
+    ChineseBookInitials.candidates(query).mapNotNull { id ->
+        canonicalBookIdToIndex(id)?.let { _books.value.getOrNull(it) }
+    }
+
+internal fun BibleViewModel.uniqueQuickBookIndex(token: String): Int? =
+    ChineseBookInitials.candidates(token).mapNotNull(::canonicalBookIdToIndex).singleOrNull()
+
+internal fun BibleViewModel.isQuickReference(input: String): Boolean =
+    isChineseQuickReference(input) || matchChapterVerse(input)?.let {
+        uniqueQuickBookIndex(it.bookToken) != null
+    } == true
+
+/** A live reading aid below the field; keep the typed initials intact for further editing. */
+internal fun BibleViewModel.quickReferenceLabel(query: String): String? {
+    if (!isQuickReference(query)) return null
+    val ref = referenceFor(query) ?: return null
+    val book = _books.value.getOrNull(ref.bookIndex) ?: return null
+    val chapter = ref.chapter ?: return null
+    val verses = ref.verseStart?.let { start ->
+        val end = ref.verseEnd
+        if (end != null && end != start) "$start-${end}节" else "${start}节"
+    }.orEmpty()
+    return "$book ${chapter}章$verses"
+}
+
 internal fun BibleViewModel.parseReference(input: String): SmartReference? {
     val match = matchChapterVerse(input)
     if (match != null) {
@@ -68,7 +94,7 @@ internal fun BibleViewModel.referenceFor(query: String): SmartReference? = when 
     BibleSearchMode.TEXT -> null
     BibleSearchMode.REFERENCE -> parseReference(query)
     BibleSearchMode.AUTO -> when {
-        isChineseQuickReference(query) -> parseReference(query)
+        isQuickReference(query) -> parseReference(query)
         _selectedScopeIndex.value == SCOPE_CURRENT_BOOK -> parseBooklessReference(query)
         else -> parseReference(query)
     }

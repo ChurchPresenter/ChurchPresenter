@@ -179,7 +179,12 @@ internal class BibleTabScope(
         focusRequester.requestFocus()
     }
 
-    fun goLiveWithHistory(viewModel: BibleViewModel, source: String = "manual", matchType: String? = null) {
+    fun goLiveWithHistory(
+        viewModel: BibleViewModel,
+        source: String = "manual",
+        matchType: String? = null,
+        preserveSelection: Boolean = false,
+    ) {
         val selectedVerses = viewModel.getSelectedVerses()
         selectedVerses.firstOrNull()?.let { v ->
             if (viewModel.multiVerseEnabled.value) {
@@ -245,7 +250,7 @@ internal class BibleTabScope(
                 }
             }
         }
-        if (viewModel.multiVerseEnabled.value) {
+        if (viewModel.multiVerseEnabled.value && !preserveSelection) {
             viewModel.clearMultiVerseSelection()
         }
         bibleOutput?.let { if (it.bibleHold.value) {

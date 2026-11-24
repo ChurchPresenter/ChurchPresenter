@@ -17,6 +17,25 @@ import kotlin.test.assertTrue
 
 class BibleTabVerseClickTest {
 
+    @Test
+    fun `selection goes live preserves a passage for the second click`() = bibleTab(
+        settings = { it.copy(selectionGoesLive = true) },
+    ) { vm, reports ->
+        verse(verseTwo).performMouseInput { click() }
+        waitForIdle()
+        assertEquals(2, reports.live?.first()?.verseNumber)
+        assertFalse(vm.multiVerseEnabled.value)
+        verse(verseThree).performMouseInput { click() }
+        waitForIdle()
+        assertEquals(listOf(1, 2), vm.selectedVerseIndices.sorted())
+        assertTrue(vm.multiVerseEnabled.value)
+        assertEquals("2-3", reports.live?.first()?.verseRange)
+        verse(verseTwo).performMouseInput { click() }
+        waitForIdle()
+        assertFalse(vm.multiVerseEnabled.value)
+        assertEquals(2, reports.live?.first()?.verseNumber)
+    }
+
     private val verseTwo = "2. And the earth was without form, and void."
     private val verseThree = "3. And God said, Let there be light."
 

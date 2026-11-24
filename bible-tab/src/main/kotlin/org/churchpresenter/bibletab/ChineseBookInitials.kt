@@ -16,4 +16,24 @@ internal object ChineseBookInitials {
     ).withIndex().associate { (index, initials) -> initials to index + 1 }
 
     fun bookId(token: String): Int? = aliases[token.trim().lowercase()]
+
+    /** Prefixes rank first; missing letters may match in their original order. */
+    fun candidates(token: String): List<Int> {
+        val query = token.trim().lowercase()
+        if (query.length < 2 || query.any { it !in 'a'..'z' }) return emptyList()
+        return aliases.entries.mapNotNull { (initials, id) ->
+            var next = 0
+            for (letter in initials) {
+                if (next < query.length && letter == query[next]) next++
+            }
+            val rank = when {
+                initials == query -> 0
+                initials.startsWith(query) -> 1
+                next == query.length -> 2
+                else -> return@mapNotNull null
+            }
+            Triple(rank, id, initials.length)
+        }.sortedWith(compareBy<Triple<Int, Int, Int>> { it.first }.thenBy { it.third }.thenBy { it.second })
+            .map { it.second }
+    }
 }

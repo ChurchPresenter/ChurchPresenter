@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -101,6 +104,27 @@ internal fun ColumnScope.BibleTabContent(
             onModeSelected = viewModel::updateSelectedModeIndex,
             searchFocus = searchFocus,
         )
+
+        val bookCandidates = viewModel.quickBookCandidates(searchQuery)
+        if (bookCandidates.isNotEmpty()) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(bookCandidates) { book ->
+                    TextButton(onClick = { searchQueryChanged(viewModel, "$book ") }) { Text(book) }
+                }
+            }
+        }
+
+        viewModel.quickReferenceLabel(searchQuery)?.let { label ->
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+        }
 
         if (engineSettings.enabled && sttConnected) {
             sttManager?.let { BibleTabDetection(viewModel, it) }

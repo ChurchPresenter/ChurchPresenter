@@ -3,6 +3,7 @@
 package org.churchpresenter.bibletab
 
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,6 +24,48 @@ import org.churchpresenter.sharedui.testing.showsExactly
  * See `BibleTabTestSupport.kt` for the harness.
  */
 class BibleTabSearchTest {
+    @Test
+    fun `a single available fuzzy candidate is selected and accepts a passage`() = bibleTab { vm, reports ->
+        vm.selectBook(2)
+        vm.onSmartQueryChanged("cs")
+        waitUntil(timeoutMillis = 5_000) { vm.selectedBookIndex.value == 0 }
+        assertEquals("cs", vm.searchQuery.value)
+        vm.onSmartQueryChanged("cs 1 2 3")
+        vm.submitSmartQuery()
+        waitUntil(timeoutMillis = 5_000) { reports.live?.firstOrNull()?.verseRange == "2-3" }
+        waitForIdle()
+        assertEquals("2-3", reports.live?.first()?.verseRange)
+    }
+
+    @Test
+    fun `two pinyin initials offer a book that can be selected`() = bibleTab { vm, _ ->
+        vm.onSmartQueryChanged("cs")
+        waitForIdle()
+        onAllNodesWithText("Genesis")[0].performClick()
+        waitForIdle()
+        assertEquals("Genesis ", vm.searchQuery.value)
+        assertEquals(0, vm.selectedBookIndex.value)
+    }
+
+    @Test
+    fun `submitting Chinese initials projects the entire requested passage`() = bibleTab { vm, reports ->
+        vm.onSmartQueryChanged("csj 1 2 3")
+        vm.submitSmartQuery()
+        waitUntil(timeoutMillis = 5_000) { reports.live?.firstOrNull()?.verseRange == "2-3" }
+        waitForIdle()
+        assertEquals("2-3", reports.live?.first()?.verseRange)
+        assertEquals(listOf(1, 2), vm.selectedVerseIndices.sorted())
+        assertTrue(vm.multiVerseEnabled.value)
+        assertTrue(reports.live!!.first().verseText.contains("Let there be light"))
+    }
+
+    @Test
+    fun `Chinese initials show a passage label without submitting`() = bibleTab { vm, _ ->
+        vm.onSmartQueryChanged("csj 12 2 5")
+        waitForIdle()
+        onNodeWithText("Genesis 12章2-5节").assertExists()
+        assertEquals("csj 12 2 5", vm.searchQuery.value)
+    }
 
     @Test
     fun `the search box starts empty, showing its hint`() = bibleTab { _, _ ->

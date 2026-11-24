@@ -344,7 +344,8 @@ object BibleLabel {
     const val STT_CONNECT = "Connect"
     const val STT_DISCONNECT = "Disconnect"
     const val SEARCH = "Search"
-    const val SEARCH_PLACEHOLDER = "Reference or text — e.g. John 3:16, mat 1, or a word"
+    const val SEARCH_PLACEHOLDER = "Reference or text — e.g. John 3:16. " +
+        "Pinyin quick live: csj 1 12 16 or yhfy 3 16, then Enter"
 }
 
 // ── Reading and driving what was rendered ───────────────────────────────────────────────────────

@@ -64,6 +64,7 @@ internal fun BibleViewModel.rankedBookMatches(token: String): List<Pair<Int, Int
 
 internal fun BibleViewModel.resolveBook(token: String): Int {
     ChineseBookInitials.bookId(token)?.let { return canonicalBookIdToIndex(it) ?: -1 }
+    uniqueQuickBookIndex(token)?.let { return it }
     return rankedBookMatches(token).firstOrNull()?.first ?: -1
 }
 
@@ -157,6 +158,12 @@ internal fun BibleViewModel.onSmartQueryChanged(query: String) {
         _searchResults.value = emptyList()
         return
     }
+    if (_searchMode.value != BibleSearchMode.TEXT) {
+        uniqueQuickBookIndex(trimmed)?.let { index ->
+            navigateToReference(SmartReference(index, null, null, null))
+            return
+        }
+    }
     when (_searchMode.value) {
         BibleSearchMode.TEXT -> scheduleLiveSearch()
         BibleSearchMode.REFERENCE -> {
@@ -183,7 +190,7 @@ internal fun BibleViewModel.submitSmartQuery() {
         clearSearch()
         return
     }
-    if (_searchMode.value != BibleSearchMode.TEXT && isChineseQuickReference(trimmed)) {
+    if (_searchMode.value != BibleSearchMode.TEXT && isQuickReference(trimmed)) {
         parseReference(trimmed)?.takeIf { it.verseStart != null }?.let {
             navigateToReference(it, goLive = true, goLiveSource = "manual", requireExactVerses = true)
         }

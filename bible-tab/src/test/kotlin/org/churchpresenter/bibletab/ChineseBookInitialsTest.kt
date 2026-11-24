@@ -7,6 +7,17 @@ import kotlin.test.assertTrue
 
 class ChineseBookInitialsTest {
     @Test
+    fun `two letters offer prefix and missing-letter candidates with exact matches first`() {
+        assertEquals(40, ChineseBookInitials.candidates(" MT ").first())
+        assertTrue(43 in ChineseBookInitials.candidates("yh"))
+        assertTrue(62 in ChineseBookInitials.candidates("yh"))
+        assertTrue(1 in ChineseBookInitials.candidates("cj"))
+        assertEquals(3, ChineseBookInitials.candidates("lwj").first())
+        assertTrue(ChineseBookInitials.candidates("c").isEmpty())
+        assertTrue(ChineseBookInitials.candidates("csj 12").isEmpty())
+    }
+
+    @Test
     fun `initials identify canonical books regardless of case`() {
         assertEquals(1, ChineseBookInitials.bookId("csj"))
         assertEquals(43, ChineseBookInitials.bookId(" YHFY "))

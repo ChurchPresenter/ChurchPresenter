@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'builds/**'
+      - 'codex/build-**'
   workflow_dispatch:
 
 permissions:

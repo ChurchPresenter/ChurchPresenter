@@ -173,6 +173,7 @@ internal fun BibleTabScope.BibleSelectionEffects(viewModel: BibleViewModel) {
         goLiveWithHistory(viewModel,
             source = viewModel.autoFollowLiveSource.value,
             matchType = viewModel.autoFollowLiveMatchType.value,
+            preserveSelection = true,
         )
     }
 
