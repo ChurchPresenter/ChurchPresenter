@@ -15,7 +15,7 @@ The following are **NOT** acceptable in any commit (each is explained in CODING_
 ❌ Wildcard imports (`import ... .*`)
 ❌ Hardcoded UI strings (`Text("Save")`)
 ❌ Magic strings in logic (`if (type == "song")`)
-❌ Unnamed color values (`Color(0xFF123456)`)
+❌ Unnamed color values (`Color(0xFF123456)`) outside `:theme` and `:hosanna-theme`
 ❌ Material 2 components (`androidx.compose.material.*`, other than `material.icons`)
 ❌ Text or emoji used as an icon (`Text("✕")`)
 ❌ Unused imports

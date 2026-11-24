@@ -49,6 +49,8 @@ include(":core-models")
 // :composeApp, which wraps it in CompanionSatelliteViewModel.
 include(":companion-satellite")
 include(":theme")
+// The Hosanna theme: its own palette, used only by the composables built on it.
+include(":hosanna-theme")
 // The animated lower-third generator: its own module, compiled and packaged separately, and
 // depended on by :composeApp, which opens it in a window from the Lower Third settings.
 include(":lottieGenerator")

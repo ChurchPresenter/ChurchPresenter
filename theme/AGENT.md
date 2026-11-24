@@ -23,7 +23,7 @@ that string, so a future package move has to update it by hand; both tests fail 
 
 ## The one rule that matters
 
-**A color literal belongs in this module or nowhere.** The module depends on Compose and on
+**A color literal belongs in this module (or `:hosanna-theme`, for its own palette) or nowhere.** The module depends on Compose and on
 nothing of the app's own, so nothing here can start reading a setting, a file or a ViewModel — that
 is what keeps the palette a palette. A `Color(0xFF…)` anywhere else in the codebase is a finding
 (see `DEVELOPMENT_GUIDE.md`'s zero-tolerance list).
@@ -52,7 +52,7 @@ Corollaries:
 
 **Every rounded corner in the app is an `AppShape`, never a `RoundedCornerShape`** — in this module,
 the app and every module that draws UI. `CORNER_SCALE` is then the single number for how rounded
-the app is. The one standing exception is audience-facing output (`composeApp/.../presenter/`):
+the app is. `:hosanna-theme` is the other exception: its radii are exact (`HosannaTheme.shapes`). The standing exception is audience-facing output (`composeApp/.../presenter/`):
 those corners are part of what a church shows on its screens, not the app's own chrome.
 
 `ThemeMode.SYSTEM` is **not** a palette of its own — it resolves to Light or Dark, so anything
