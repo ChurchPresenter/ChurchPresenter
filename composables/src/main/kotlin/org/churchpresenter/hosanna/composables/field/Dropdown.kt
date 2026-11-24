@@ -57,6 +57,7 @@ import org.churchpresenter.hosanna.composables.model.MenuSearch
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -103,7 +104,7 @@ fun Dropdown(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = if (expanded) FieldState.Focused else fieldState(enabled, readOnly, hovered, focused)
-    val colors = HosannaTheme.colors.fieldColors(state, error != null)
+    val colors = ThemeColors.current.fieldColors(state, error != null)
     val spec = tween<Color>(FieldDefaults.TRANSITION_MILLIS, easing = EaseOut)
     val container by animateColorAsState(colors.container, spec)
     val border by animateColorAsState(colors.border, spec)

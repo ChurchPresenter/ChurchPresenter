@@ -67,6 +67,7 @@ import org.churchpresenter.hosanna.composables.model.sliderStepDots
 import org.churchpresenter.hosanna.composables.model.sliderValueAt
 import org.churchpresenter.hosanna.composables.model.snapToOrigin
 import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -106,7 +107,7 @@ fun Slider(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.sliderColors(state)
+    val colors = ThemeColors.current.sliderColors(state)
     val shown = valueText ?: if (centered) signedText(value, range.decimals) else formatNumber(value, range.decimals)
     val labelStyle = HosannaTheme.typography.caption.copy(color = colors.endLabel)
     Row(

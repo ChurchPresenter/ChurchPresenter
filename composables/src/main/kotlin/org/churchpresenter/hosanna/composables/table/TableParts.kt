@@ -55,6 +55,7 @@ import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.TableColumn
 import org.churchpresenter.hosanna.composables.model.TableRow
 import org.churchpresenter.hosanna.composables.selection.TriStateCheckbox
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -75,7 +76,7 @@ internal fun TableRowItem(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(true, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.listRowColors(selected, live = false, marker = false, state = state)
+    val colors = ThemeColors.current.listRowColors(selected, live = false, marker = false, state = state)
     val height = if (compact) TableDefaults.CompactRowHeight else TableDefaults.RowHeight
     val lines = !selected && state == ButtonState.Rest
     val showActions = keepActions || selected || state != ButtonState.Rest
@@ -106,7 +107,7 @@ internal fun TableRowItem(
             layout.columns.forEachIndexed { index, column ->
                 BodyCell(row.cells.getOrElse(index) { "" }, column, colors, cellWidth(layout, column))
                 if (index < layout.columns.lastIndex) {
-                    CellLine(if (lines) HosannaTheme.colors.outlineVariant else Color.Transparent)
+                    CellLine(if (lines) ThemeColors.current.outlineVariant else Color.Transparent)
                 }
             }
             layout.actions?.let { width ->
@@ -165,7 +166,7 @@ internal fun BulkCell(state: ToggleableState, label: String, onChange: (Boolean)
 
 @Composable
 internal fun TableSkeleton(layout: TableLayout) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val sweep by rememberInfiniteTransition().animateFloat(
         initialValue = -1f,
         targetValue = 2f,
@@ -225,7 +226,7 @@ private const val LONG_BAR = 0.7f
 @Composable
 fun TableEmpty(text: String, modifier: Modifier = Modifier, actionText: String? = null, onAction: () -> Unit = {}) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        BasicText(text, style = HosannaTheme.typography.body.copy(color = HosannaTheme.colors.onSurfaceVariant))
+        BasicText(text, style = HosannaTheme.typography.body.copy(color = ThemeColors.current.onSurfaceVariant))
         actionText?.let { StandardButton(it, onAction, hierarchy = ButtonHierarchy.Tertiary) }
     }
 }

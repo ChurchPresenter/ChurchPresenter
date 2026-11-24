@@ -37,7 +37,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaLightColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonColors
@@ -45,10 +44,11 @@ import org.churchpresenter.hosanna.composables.foundation.ButtonState
 import org.churchpresenter.hosanna.composables.model.SegmentedOption
 import org.churchpresenter.hosanna.composables.testing.HosannaSurface
 import org.churchpresenter.hosanna.composables.testing.testIcon
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class SegmentedButtonTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
     private val radio = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)
     private val three = listOf(SegmentedOption("Timer"), SegmentedOption("Duration"), SegmentedOption("Clock"))
 

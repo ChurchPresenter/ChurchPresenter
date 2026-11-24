@@ -41,6 +41,7 @@ import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
 import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A small card with a title, a few lines and an optional action, opened by hovering or clicking [content]. It
@@ -157,7 +158,7 @@ internal fun RichTooltipCard(
     modifier: Modifier = Modifier,
 ) {
     val shape = HosannaTheme.shapes.l
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Column(
         modifier = modifier
             .widthIn(max = RichTooltipDefaults.MaxWidth)

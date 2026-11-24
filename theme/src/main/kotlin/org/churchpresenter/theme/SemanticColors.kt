@@ -11,6 +11,9 @@ import androidx.compose.ui.graphics.luminance
 
 private const val DARK_LUMINANCE_THRESHOLD = 0.5f
 
+private val OutputScreen = Color(0xFF0B0C0E)
+private val OnOutputScreen = Color(0xFFFFFFFF)
+
 /**
  * The colours that carry a meaning Material 3 has no role for.
  *
@@ -96,6 +99,25 @@ data class SemanticColors(
     val onAdjustAccent: Color,
     /** The line showing where a dragged row will land. */
     val dropIndicator: Color,
+    /** On screen now: the live badge, the bar on a live row. */
+    val live: Color,
+    val onLive: Color,
+    /** Text quieter than `onSurfaceVariant`: hints, placeholders, a disabled-looking edge that still reads. */
+    val faint: Color,
+    /** A link in running text. */
+    val link: Color,
+    /** The announcement content type, beside the eight above. */
+    val contentAnnouncement: Color,
+    /** Song section accents the chord colours do not cover. */
+    val sectionIntro: Color,
+    val sectionVoice: Color,
+    val sectionOther: Color,
+    /**
+     * What an output screen shows behind and on top of content — a thumbnail's letterbox, the badges
+     * drawn over a picture. The same in every theme, as the projector is.
+     */
+    val screen: Color,
+    val onScreen: Color,
 )
 
 private val LightSemanticColors = SemanticColors(
@@ -135,6 +157,16 @@ private val LightSemanticColors = SemanticColors(
     adjustAccent = Color(0xFFFFB74D),
     onAdjustAccent = Color(0xFF3A2600),
     dropIndicator = Color(0xFF2A78D6),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    faint = Color(0xFF878E97),
+    link = Color(0xFF2F6FD0),
+    contentAnnouncement = Color(0xFFA43A9C),
+    sectionIntro = Color(0xFF4F6B8A),
+    sectionVoice = Color(0xFF0F7F86),
+    sectionOther = Color(0xFF6B7079),
+    screen = OutputScreen,
+    onScreen = OnOutputScreen,
 )
 
 private val DarkSemanticColors = SemanticColors(
@@ -174,6 +206,66 @@ private val DarkSemanticColors = SemanticColors(
     adjustAccent = Color(0xFFFFB74D),
     onAdjustAccent = Color(0xFF3A2600),
     dropIndicator = Color(0xFF7FB4F0),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    faint = Color(0xFF7C7F87),
+    link = Color(0xFF8EBBF8),
+    contentAnnouncement = Color(0xFFE597DE),
+    sectionIntro = Color(0xFF9DB6D3),
+    sectionVoice = Color(0xFF5CCFD4),
+    sectionOther = Color(0xFFA4A7AE),
+    screen = OutputScreen,
+    onScreen = OnOutputScreen,
+)
+
+/** [LightSemanticColors] for the Light scheme itself: the same roles in its Hosanna palette. */
+private val StandardLightSemanticColors = LightSemanticColors.copy(
+    success = Color(0xFF0E7546),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFE0F4EA),
+    onSuccessContainer = Color(0xFF0E7546),
+    warning = Color(0xFF8A5A10),
+    onWarning = Color(0xFFFFFFFF),
+    warningContainer = Color(0xFFFBEBD0),
+    onWarningContainer = Color(0xFF8A5A10),
+    info = Color(0xFF2F6FD0),
+    favorite = Color(0xFFE0A526),
+    marker = Color(0xFF2F6FD0),
+    chordVerse = Color(0xFF9A6512),
+    chordChorus = Color(0xFF8340B5),
+    chordBridge = Color(0xFF1C7F5A),
+    contentBible = Color(0xFF14855A),
+    contentSongs = Color(0xFF2F6FD0),
+    contentPictures = Color(0xFFC8501E),
+    contentLowerThird = Color(0xFF0F7F86),
+    contentPresentation = Color(0xFFC2416A),
+    contentMedia = Color(0xFF5B4FC7),
+    dropIndicator = Color(0xFF2F6FD0),
+)
+
+/** [DarkSemanticColors] for the Dark scheme itself: the same roles in its Hosanna palette. */
+private val StandardDarkSemanticColors = DarkSemanticColors.copy(
+    success = Color(0xFF6FDCAE),
+    onSuccess = Color(0xFF0B3324),
+    successContainer = Color(0xFF32433E),
+    onSuccessContainer = Color(0xFF6FDCAE),
+    warning = Color(0xFFF0C27A),
+    onWarning = Color(0xFF3A2604),
+    warningContainer = Color(0xFF4D4131),
+    onWarningContainer = Color(0xFFF0C27A),
+    info = Color(0xFF8EBBF8),
+    favorite = Color(0xFFE0A526),
+    marker = Color(0xFF9CC6F7),
+    chordVerse = Color(0xFFE8B45A),
+    chordChorus = Color(0xFFC79CF0),
+    chordBridge = Color(0xFF6FD6A8),
+    contentBible = Color(0xFF5FD3A0),
+    contentSongs = Color(0xFF7AB0F8),
+    contentPictures = Color(0xFFF4A072),
+    contentLowerThird = Color(0xFF5CCFD4),
+    contentPresentation = Color(0xFFF08AA8),
+    contentMedia = Color(0xFFA99CF7),
+    dropIndicator = Color(0xFF9CC6F7),
 )
 
 /**
@@ -181,13 +273,21 @@ private val DarkSemanticColors = SemanticColors(
  * themes again — a list that would have to be updated in step with `colorSchemeFor` and would
  * silently hand a tenth theme the wrong half if it were not.
  */
-internal fun semanticColorsFor(scheme: ColorScheme): SemanticColors =
-    if (isDarkScheme(scheme)) DarkSemanticColors else LightSemanticColors
+fun semanticColorsFor(scheme: ColorScheme): SemanticColors = when {
+    scheme === LightColorScheme -> StandardLightSemanticColors
+    scheme === DarkColorScheme -> StandardDarkSemanticColors
+    isDarkScheme(scheme) -> DarkSemanticColors
+    else -> LightSemanticColors
+}
+
+/** The Light or Dark preset's own set: what the Custom theme starts from on that base. */
+internal fun presetSemanticColors(dark: Boolean): SemanticColors =
+    if (dark) StandardDarkSemanticColors else StandardLightSemanticColors
 
 fun isDarkScheme(scheme: ColorScheme): Boolean =
     scheme.surface.luminance() < DARK_LUMINANCE_THRESHOLD
 
-internal val LocalSemanticColors = staticCompositionLocalOf { LightSemanticColors }
+internal val LocalSemanticColors = staticCompositionLocalOf { StandardLightSemanticColors }
 
 /** `MaterialTheme.semantic.success` — reads like the M3 roles it sits beside. */
 val MaterialTheme.semantic: SemanticColors

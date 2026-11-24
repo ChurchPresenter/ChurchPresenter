@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.state.ToggleableState
-import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 
 @Immutable
@@ -18,7 +17,7 @@ internal data class CheckboxColors(
     val description: Color,
 )
 
-internal fun HosannaColors.checkboxColors(value: ToggleableState, state: ButtonState, error: Boolean): CheckboxColors {
+internal fun ThemeColors.checkboxColors(value: ToggleableState, state: ButtonState, error: Boolean): CheckboxColors {
     val on = value != ToggleableState.Off
     if (state == ButtonState.Disabled) {
         val ink = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
@@ -37,7 +36,7 @@ internal fun HosannaColors.checkboxColors(value: ToggleableState, state: ButtonS
         ButtonState.Pressed -> HosannaStateAlpha.PRESSED
         else -> 0f
     }
-    val restEdge = if (error) this.error else onSurfaceFaint
+    val restEdge = if (error) this.error else faint
     return CheckboxColors(
         fill = if (on) onPrimary.copy(alpha = layer).compositeOver(primary) else surfaceContainerLowest,
         edge = when {

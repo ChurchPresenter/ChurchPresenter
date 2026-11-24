@@ -2,7 +2,6 @@ package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 
 @Immutable
@@ -15,7 +14,7 @@ internal data class TabColors(
     val onBadge: Color,
 )
 
-internal fun HosannaColors.tabColors(selected: Boolean, state: ButtonState): TabColors = TabColors(
+internal fun ThemeColors.tabColors(selected: Boolean, state: ButtonState): TabColors = TabColors(
     content = when {
         selected || state == ButtonState.Hovered || state == ButtonState.Pressed -> onSurface
         else -> onSurfaceVariant

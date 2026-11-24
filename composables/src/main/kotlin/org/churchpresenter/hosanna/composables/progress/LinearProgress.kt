@@ -45,6 +45,7 @@ import org.churchpresenter.icons.generated.resources.ic_pause
 import org.churchpresenter.icons.generated.resources.ic_warning
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A progress bar with an optional label and detail, and finished, failed and paused states.
@@ -73,7 +74,7 @@ fun LinearProgress(
     retryInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     thin: Boolean = false,
 ) {
-    val colors = HosannaTheme.colors.progressColors(status)
+    val colors = ThemeColors.current.progressColors(status)
     val trailing = if (status == ProgressStatus.Running) detail else statusText
     Column(modifier, verticalArrangement = Arrangement.spacedBy(ProgressDefaults.LabelGap)) {
         if (!thin && (label != null || trailing != null)) {

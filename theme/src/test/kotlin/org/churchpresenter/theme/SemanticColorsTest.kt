@@ -55,12 +55,25 @@ class SemanticColorsTest {
 
     @Test
     fun `every light mode gets the light set and every dark mode the dark one`() {
-        val light = semanticOf(ThemeMode.LIGHT)
-        val dark = semanticOf(ThemeMode.DARK)
+        val light = semanticOf(ThemeMode.WARM)
+        val dark = semanticOf(ThemeMode.MIDNIGHT)
 
         assertNotEquals(light, dark, "one set for both halves means one of them is shown on the wrong surface")
-        lightModes.forEach { assertEquals(light, semanticOf(it), "$it is painted with the dark semantic set") }
-        darkModes.forEach { assertEquals(dark, semanticOf(it), "$it is painted with the light semantic set") }
+        lightModes.drop(1).forEach { assertEquals(light, semanticOf(it), "$it is painted with the dark semantic set") }
+        darkModes.drop(1).forEach { assertEquals(dark, semanticOf(it), "$it is painted with the light semantic set") }
+    }
+
+    @Test
+    fun `Light and Dark get their own sets in the Hosanna palette`() {
+        val light = semanticOf(ThemeMode.LIGHT)
+        val dark = semanticOf(ThemeMode.DARK)
+        assertNotEquals(semanticOf(ThemeMode.WARM), light)
+        assertNotEquals(semanticOf(ThemeMode.MIDNIGHT), dark)
+        assertEquals(Color(0xFF0E7546), light.success)
+        assertEquals(Color(0xFF6FDCAE), dark.success)
+        assertEquals(semanticOf(ThemeMode.WARM).hebrew, light.hebrew)
+        assertEquals(light.screen, dark.screen)
+        assertEquals(light.onScreen, dark.onScreen)
     }
 
     @Test

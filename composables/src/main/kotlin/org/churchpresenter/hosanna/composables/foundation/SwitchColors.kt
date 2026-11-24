@@ -3,7 +3,6 @@ package org.churchpresenter.hosanna.composables.foundation
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 
 @Immutable
@@ -17,7 +16,7 @@ internal data class SwitchColors(
     val description: Color,
 )
 
-internal fun HosannaColors.switchColors(checked: Boolean, state: ButtonState, loading: Boolean = false): SwitchColors {
+internal fun ThemeColors.switchColors(checked: Boolean, state: ButtonState, loading: Boolean = false): SwitchColors {
     if (state == ButtonState.Disabled) {
         val ink = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
         return SwitchColors(
@@ -41,12 +40,12 @@ internal fun HosannaColors.switchColors(checked: Boolean, state: ButtonState, lo
         edge = when {
             checked -> Color.Transparent
             lifted -> onSurfaceVariant
-            else -> onSurfaceFaint
+            else -> faint
         },
         knob = when {
             checked -> onPrimary
             lifted || loading -> onSurfaceVariant
-            else -> onSurfaceFaint
+            else -> faint
         },
         icon = if (checked) primary else surfaceContainerLowest,
         ring = if (state == ButtonState.Focused) primary.copy(alpha = HosannaStateAlpha.FOCUS_RING) else null,

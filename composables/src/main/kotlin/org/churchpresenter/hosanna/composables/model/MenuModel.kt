@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.PopupPositionProvider
-import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * One line of a menu: an [Item] to pick, a [Header] over a group, or a [Divider] between groups.
@@ -86,7 +86,7 @@ internal fun filterEntries(entries: List<MenuEntry>, query: String): List<MenuEn
 
 internal fun itemCount(entries: List<MenuEntry>): Int = entries.count { it is MenuEntry.Item }
 
-internal fun HosannaColors.menuRowContainer(selected: Boolean, highlighted: Boolean): Color {
+internal fun ThemeColors.menuRowContainer(selected: Boolean, highlighted: Boolean): Color {
     val base = if (selected) primaryContainer else Color.Transparent
     return if (highlighted) onSurface.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(base) else base
 }

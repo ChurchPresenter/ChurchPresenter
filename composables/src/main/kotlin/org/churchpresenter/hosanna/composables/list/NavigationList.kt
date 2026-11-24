@@ -46,6 +46,7 @@ import org.churchpresenter.hosanna.composables.model.NavigationItem
 import org.churchpresenter.hosanna.composables.model.jumpTarget
 import org.churchpresenter.hosanna.composables.model.listKey
 import org.churchpresenter.hosanna.composables.model.moveIndex
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A list to pick one item from, such as Bible books or chapters. ↑ ↓, Home, End and the page keys move the
@@ -124,7 +125,7 @@ private fun NavigationRow(
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
     val state = buttonState(true, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.listRowColors(selected, live = false, marker = true, state = state)
+    val colors = ThemeColors.current.listRowColors(selected, live = false, marker = true, state = state)
     val typography = HosannaTheme.typography
     RowFrame(colors, ListDefaults.NavigationRow, dragging = false, modifier = Modifier) {
         Box(

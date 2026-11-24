@@ -28,6 +28,7 @@ import org.churchpresenter.hosanna.composables.model.ProgressStatus
 import org.churchpresenter.hosanna.composables.model.percentText
 import org.churchpresenter.hosanna.tabular
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private const val TOP = -90f
 
@@ -39,7 +40,7 @@ private const val TOP = -90f
  */
 @Composable
 fun ProgressSpinner(modifier: Modifier = Modifier, size: ProgressSpinnerSize = ProgressSpinnerSize.Inline) {
-    val colors = HosannaTheme.colors.progressColors(ProgressStatus.Running)
+    val colors = ThemeColors.current.progressColors(ProgressStatus.Running)
     Box(modifier) {
         Spinner(
             color = colors.fill,
@@ -64,7 +65,7 @@ fun CircularProgress(
     modifier: Modifier = Modifier,
     status: ProgressStatus = ProgressStatus.Running,
 ) {
-    val colors = HosannaTheme.colors.progressColors(status)
+    val colors = ThemeColors.current.progressColors(status)
     val shown by animateFloatAsState(progress.coerceIn(0f, 1f), tween(ProgressDefaults.FILL_MILLIS))
     Box(
         modifier.size(ProgressDefaults.Ring).progressSemantics(progress.coerceIn(0f, 1f)),

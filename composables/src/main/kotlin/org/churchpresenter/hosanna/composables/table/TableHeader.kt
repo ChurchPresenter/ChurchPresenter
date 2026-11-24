@@ -50,6 +50,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 @Composable
 internal fun TableHeader(
@@ -60,7 +61,7 @@ internal fun TableHeader(
     bulk: TableBulk?,
     onResize: (String, Dp) -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Row(
         Modifier
             .fillMaxWidth()
@@ -88,7 +89,7 @@ internal fun TableHeader(
 private fun HeaderCell(column: TableColumn, sort: TableSort?, onSortChange: (TableSort) -> Unit, modifier: Modifier) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val sorted = sort?.column == column.key
     val ink = if (sorted) colors.onSurface else colors.onSurfaceVariant
     val layer = colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER)
@@ -139,7 +140,7 @@ private fun HeaderDivider(
 ) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
     val body = HosannaTheme.typography.body
@@ -183,7 +184,7 @@ private fun HeaderDivider(
             Modifier
                 .width(TableDefaults.Divider)
                 .height(TableDefaults.HeaderDivider)
-                .background(if (hovered) colors.onSurfaceFaint else colors.outlineVariant),
+                .background(if (hovered) colors.faint else colors.outlineVariant),
         )
     }
 }

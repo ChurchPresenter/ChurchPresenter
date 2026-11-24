@@ -79,6 +79,7 @@ import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A number field with up and down arrows. ↑ ↓ step it; held arrows repeat.
@@ -196,7 +197,7 @@ fun UnitField(
 private fun numberFieldColors(source: MutableInteractionSource, enabled: Boolean, error: Boolean): FieldColors {
     val hovered by source.collectIsHoveredAsState()
     val focused by source.collectIsFocusedAsState()
-    return HosannaTheme.colors.fieldColors(fieldState(enabled, false, hovered, focused), error)
+    return ThemeColors.current.fieldColors(fieldState(enabled, false, hovered, focused), error)
 }
 
 @Composable
@@ -280,7 +281,7 @@ private fun NumberInput(
 
 @Composable
 private fun NumberArrow(icon: DrawableResource, contentDescription: String, enabled: Boolean, onStep: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()

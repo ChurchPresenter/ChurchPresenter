@@ -66,6 +66,7 @@ import org.churchpresenter.hosanna.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_palette
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 internal fun fieldText(color: Color?, none: String): String = color?.let(::hexText) ?: none
 
@@ -118,7 +119,7 @@ fun ColorField(
     var open by remember { mutableStateOf(false) }
     var original by remember { mutableStateOf(color) }
     LaunchedEffect(color, focused) { if (!focused) text = fieldText(color, labels.none) }
-    val colors = HosannaTheme.colors.fieldColors(
+    val colors = ThemeColors.current.fieldColors(
         if (open) FieldState.Focused else fieldState(enabled, false, hovered, focused),
         invalid,
     )
@@ -178,7 +179,7 @@ fun ColorField(
             }
             if (open && enabled) {
                 ColorPickerPopover(
-                    color = color ?: original ?: HosannaTheme.colors.primary,
+                    color = color ?: original ?: ThemeColors.current.primary,
                     onColorChange = {
                         invalid = false
                         onColorChange(it)
@@ -201,7 +202,7 @@ fun ColorField(
 
 @Composable
 private fun ColorSwatch(color: Color?, enabled: Boolean, contentDescription: String, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val shape = HosannaTheme.shapes.s
     val light = colors.surfaceContainerLowest
     val dark = colors.outlineVariant

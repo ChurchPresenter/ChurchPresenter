@@ -54,6 +54,7 @@ import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 @Composable
 internal fun TimeSpinner(
@@ -92,7 +93,7 @@ internal fun TimeSpinner(
                     .fillMaxWidth()
                     .padding(vertical = TimeSpinnerDefaults.Padding)
                     .height(FieldDefaults.Border)
-                    .background(HosannaTheme.colors.outlineVariant),
+                    .background(ThemeColors.current.outlineVariant),
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 StandardButton(
@@ -109,7 +110,7 @@ internal fun TimeSpinner(
 
 @Composable
 private fun SpinColumn(title: String, values: SpinValues, actions: TimeFieldActions, onStep: (Boolean) -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val typography = HosannaTheme.typography
     Column(
         modifier = Modifier
@@ -120,7 +121,7 @@ private fun SpinColumn(title: String, values: SpinValues, actions: TimeFieldActi
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BasicText(title, style = typography.caption.copy(color = colors.onSurfaceFaint), maxLines = 1)
+        BasicText(title, style = typography.caption.copy(color = colors.faint), maxLines = 1)
         SpinArrow(Res.drawable.ic_arrow_up, actions.increase) { onStep(true) }
         SpinValue(values.previous, current = false) { onStep(false) }
         SpinValue(values.current, current = true) {}
@@ -138,20 +139,20 @@ private fun SpinArrow(icon: DrawableResource, contentDescription: String, onClic
             .fillMaxWidth()
             .height(TimeSpinnerDefaults.ArrowHeight)
             .background(
-                if (hovered) HosannaTheme.colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
+                if (hovered) ThemeColors.current.onSurface.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
                 HosannaTheme.shapes.m,
             )
             .clickable(source, null, role = Role.Button, onClick = onClick)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
-        FieldGlyph(painterResource(icon), HosannaTheme.colors.onSurfaceVariant, TimeSpinnerDefaults.Arrow)
+        FieldGlyph(painterResource(icon), ThemeColors.current.onSurfaceVariant, TimeSpinnerDefaults.Arrow)
     }
 }
 
 @Composable
 private fun SpinValue(text: String, current: Boolean, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val typography = HosannaTheme.typography
     Box(
         modifier = Modifier
@@ -166,7 +167,7 @@ private fun SpinValue(text: String, current: Boolean, onClick: () -> Unit) {
             style = if (current) {
                 typography.bodyStrong.tabular().copy(color = colors.onPrimary)
             } else {
-                typography.body.tabular().copy(color = colors.onSurfaceFaint)
+                typography.body.tabular().copy(color = colors.faint)
             },
             maxLines = 1,
         )

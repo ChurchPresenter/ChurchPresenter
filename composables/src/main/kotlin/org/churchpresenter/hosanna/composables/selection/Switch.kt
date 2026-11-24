@@ -48,6 +48,7 @@ import org.churchpresenter.hosanna.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -88,7 +89,7 @@ fun Switch(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.switchColors(checked, state, isLoading)
+    val colors = ThemeColors.current.switchColors(checked, state, isLoading)
     val described = description != null && !compact && layout != SwitchLayout.Inline
     val minHeight = when {
         compact -> SwitchDefaults.CompactHeight
@@ -127,7 +128,7 @@ fun Switch(
             fill = trailing != null || layout == SwitchLayout.Row,
         )
         trailing?.let {
-            val color = if (live && checked && enabled) HosannaTheme.colors.success else colors.description
+            val color = if (live && checked && enabled) ThemeColors.current.success else colors.description
             BasicText(
                 it,
                 modifier = Modifier.padding(start = SwitchDefaults.TrailingGap - gap),

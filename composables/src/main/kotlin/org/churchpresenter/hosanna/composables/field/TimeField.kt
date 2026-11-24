@@ -72,6 +72,7 @@ import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private fun nowMinutes(): Int = LocalTime.now().let { it.hour * MINUTES_PER_HOUR + it.minute }
 
@@ -112,7 +113,7 @@ fun TimeField(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val parts = timeParts(use24Hour)
-    val colors = HosannaTheme.colors.fieldColors(
+    val colors = ThemeColors.current.fieldColors(
         if (open) FieldState.Focused else fieldState(enabled, false, hovered, focused),
         error != null,
     )
@@ -228,7 +229,7 @@ private fun TimeText(text: String, ink: Color) {
 
 @Composable
 private fun TimePartText(text: String, active: Boolean, ink: Color, enabled: Boolean, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Box(
         modifier = Modifier
             .background(if (active) colors.primaryContainer else Color.Transparent, HosannaTheme.shapes.xs)
@@ -241,7 +242,7 @@ private fun TimePartText(text: String, active: Boolean, ink: Color, enabled: Boo
 
 @Composable
 private fun NextDayTag(text: String) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Box(
         modifier = Modifier
             .height(TimeFieldDefaults.TagHeight)
@@ -265,13 +266,13 @@ private fun TimeArrow(icon: DrawableResource, contentDescription: String, onClic
         modifier = Modifier
             .size(TimeFieldDefaults.ArrowWidth, TimeFieldDefaults.ArrowHeight)
             .background(
-                if (hovered) HosannaTheme.colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
+                if (hovered) ThemeColors.current.onSurface.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
                 HosannaTheme.shapes.xs,
             )
             .clickable(source, null, role = Role.Button, onClick = onClick)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
-        FieldGlyph(painterResource(icon), HosannaTheme.colors.onSurfaceVariant, TimeFieldDefaults.Arrow)
+        FieldGlyph(painterResource(icon), ThemeColors.current.onSurfaceVariant, TimeFieldDefaults.Arrow)
     }
 }

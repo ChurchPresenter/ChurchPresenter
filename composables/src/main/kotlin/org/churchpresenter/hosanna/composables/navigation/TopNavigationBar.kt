@@ -37,6 +37,7 @@ import org.churchpresenter.hosanna.composables.model.fittedTabStyle
 import org.churchpresenter.hosanna.composables.model.neighbourTab
 import org.churchpresenter.hosanna.composables.model.tabsScroll
 import kotlin.math.abs
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * The tab bar across the top of the window, with optional buttons at the right. Tabs drop to icons when their
@@ -60,7 +61,7 @@ fun TopNavigationBar(
     interactionSources: Map<String, MutableInteractionSource> = emptyMap(),
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -115,7 +116,7 @@ private fun TabRow(
         }.toFloat()
         val style = fittedTabStyle(requested, widthOf(requested), available)
         val scrolls = tabsScroll(style, widthOf(TabStyle.Icon), available)
-        val fade = HosannaTheme.colors.surface
+        val fade = ThemeColors.current.surface
         Row(
             modifier = if (scrolls) Modifier.scrollingTabs(scroll, fade) else Modifier,
             verticalAlignment = Alignment.CenterVertically,

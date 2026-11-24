@@ -2,22 +2,22 @@ package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import org.churchpresenter.hosanna.HosannaLightColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class SwitchColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `off is a quiet track with an edge and a gray knob`() {
         val rest = c.switchColors(checked = false, state = ButtonState.Rest)
         assertEquals(c.surfaceContainerHighest, rest.track)
-        assertEquals(c.onSurfaceFaint, rest.edge)
-        assertEquals(c.onSurfaceFaint, rest.knob)
+        assertEquals(c.faint, rest.edge)
+        assertEquals(c.faint, rest.knob)
         assertEquals(c.onSurface, rest.label)
         assertEquals(c.onSurfaceVariant, rest.description)
         val hovered = c.switchColors(checked = false, state = ButtonState.Hovered)

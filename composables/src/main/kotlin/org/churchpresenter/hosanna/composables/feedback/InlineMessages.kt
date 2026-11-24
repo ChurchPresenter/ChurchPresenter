@@ -49,6 +49,7 @@ import org.churchpresenter.icons.generated.resources.ic_info
 import org.churchpresenter.icons.generated.resources.ic_warning
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A message across the top of a panel: an icon, an optional title, the text, and the fix as a button.
@@ -97,7 +98,7 @@ private fun BannerBody(
     dismiss: MessageAction?,
     extra: (@Composable () -> Unit)?,
 ) {
-    val colors = HosannaTheme.colors.messageColors(intent)
+    val colors = ThemeColors.current.messageColors(intent)
     val shape = RoundedCornerShape(MessageDefaults.BannerRadius)
     BoxWithConstraints(
         Modifier
@@ -163,7 +164,7 @@ private fun BannerActions(intent: MessageIntent, action: MessageAction?, otherAc
  */
 @Composable
 fun InlineMessage(text: String, modifier: Modifier = Modifier, intent: MessageIntent = MessageIntent.Info) {
-    val colors = HosannaTheme.colors.messageColors(intent)
+    val colors = ThemeColors.current.messageColors(intent)
     val shape = RoundedCornerShape(MessageDefaults.InlineRadius)
     Row(
         modifier = modifier
@@ -186,7 +187,7 @@ fun InlineMessage(text: String, modifier: Modifier = Modifier, intent: MessageIn
  */
 @Composable
 fun Hint(text: String, modifier: Modifier = Modifier) {
-    val ink = HosannaTheme.colors.onSurfaceVariant
+    val ink = ThemeColors.current.onSurfaceVariant
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(MessageDefaults.HintGap),

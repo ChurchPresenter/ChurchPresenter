@@ -52,6 +52,7 @@ import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.tabColors
 import org.churchpresenter.hosanna.composables.model.NavigationTab
 import org.churchpresenter.hosanna.composables.model.TabStyle
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 @Composable
 internal fun TabItem(
@@ -66,7 +67,7 @@ internal fun TabItem(
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
-    val colors = HosannaTheme.colors.tabColors(selected, buttonState(true, false, hovered, pressed, focused))
+    val colors = ThemeColors.current.tabColors(selected, buttonState(true, false, hovered, pressed, focused))
     val reveal = remember { BringIntoViewRequester() }
     LaunchedEffect(selected) { if (selected) reveal.bringIntoView() }
     val iconOnly = style == TabStyle.Icon

@@ -2,15 +2,15 @@ package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import org.churchpresenter.hosanna.HosannaLightColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class ListRowColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `rest rows are clear, hover and press tint them`() {

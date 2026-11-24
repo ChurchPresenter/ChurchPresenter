@@ -11,6 +11,7 @@ import org.churchpresenter.hosanna.composables.model.MessageAction
 import org.churchpresenter.hosanna.composables.model.MessageIntent
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
 import kotlin.test.Test
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 class InlineMessagesScreenshotTest {
 
@@ -57,7 +58,7 @@ class InlineMessagesScreenshotTest {
             Banner("Pair this screen with the code below.", title = "Pairing code") {
                 BasicText(
                     "4821",
-                    style = HosannaTheme.typography.headline.copy(color = HosannaTheme.colors.onPrimaryContainer),
+                    style = HosannaTheme.typography.headline.copy(color = ThemeColors.current.onPrimaryContainer),
                 )
             }
         }

@@ -42,12 +42,12 @@ Corollaries:
 
 | File | Owns |
 |---|---|
-| `Theme.kt` | The nine `ColorScheme`s (Light, Warm, Ocean, Rose light; Dark, Studio, Midnight, Forest, Mocha dark), `AppTypography`, the shape scale, `colorSchemeFor(mode, systemDark)` and the `ChurchPresenterTheme` composable that also provides the scrollbar style |
+| `Theme.kt` | The `ColorScheme`s (Light, Warm, Ocean, Rose, Slate, Sand light; Dark, Studio, Midnight, Forest, Mocha, Plum dark) — **Light and Dark are the Hosanna palette**, the values the new composables were designed in — `AppTypography`, the shape scale, `colorSchemeFor(mode, systemDark)` and the `ChurchPresenterTheme` composable that also provides the scrollbar style |
 | `ThemeManager.kt` | `ThemeMode` (the fixed palettes plus `SYSTEM` and `CUSTOM`), `ThemeManager`, `LocalThemeManager`/`ProvideThemeManager`/`rememberThemeManager`, and `themeFromSettings(saved)` |
 | `ThemeCustomization.kt` | `ThemeCustomization` (accent, light/dark base, the optional background/text/secondary/selection/success/warning/error colours, UI font family, UI font scale, list-row spacing — the Margin), `LocalThemeCustomization`, `customColorScheme(custom)` — the HSL-generated palette behind `ThemeMode.CUSTOM` — `customSemanticColorsFor(custom)` `UI_FONT_SCALES` and `DEFAULT_ROW_SPACING` (Normal) |
 | `AppShape.kt` | `AppShape(...)` — the app's corner: a `RoundedCornerShape` at `CORNER_SCALE` of the radius written. Percent corners are not scaled, so a pill stays a pill. Plain circular corners on purpose — a squircle was tried and drew animated screens about four times slower (see the constant's KDoc) |
 | `UiScale.kt` | `ProvideUiScale` — the interface size and UI text size on `LocalDensity`, applied once per window; the Ctrl +/− steps and the screen's cap |
-| `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, staged…) derived per scheme — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
+| `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, faint, link, content types, song sections, the output `screen`/`onScreen`…) — one set for the light schemes, one for the dark, and Light's and Dark's own Hosanna sets, which the Custom theme starts from — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
 | `AppThemeWrapper.kt` | The one-call wrapper (`ProvideThemeManager` + `ChurchPresenterTheme`) used by app entry points, previews and screenshot tests |
 
 **Every rounded corner in the app is an `AppShape`, never a `RoundedCornerShape`** — in this module,
@@ -82,6 +82,9 @@ every theme. Each window starts from the display's density, so a dialog that ope
 without going through the theme wraps its body in `ProvideUiScale`; a second call in the same
 window is a no-op, so nesting never scales twice. **Output windows never call it**: the audience's
 screen does not follow the operator's interface or text size.
+
+`ThemeSurfaceRampTest` leaves Light and Dark out for now: Hosanna separates the settings layers with
+edges and shadows, not tone steps. They go back in when the settings screens move to the new composables.
 
 Adding a theme means: a `ColorScheme` in `Theme.kt`, an entry in `ThemeMode`, a branch in
 `colorSchemeFor`, and whatever `SemanticColorsTest`/`ThemeSurfaceRampTest` assert about ramps and

@@ -16,6 +16,7 @@ import org.churchpresenter.hosanna.composables.defaults.CircularButtonDefaults
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.hosanna.composables.model.IconButtonSize
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A round icon button, as used for transport controls.
@@ -107,7 +108,7 @@ fun CircularButtonGroup(
 ) {
     Row(
         modifier = modifier
-            .background(HosannaTheme.colors.secondaryContainer, HosannaTheme.shapes.full)
+            .background(ThemeColors.current.secondaryContainer, HosannaTheme.shapes.full)
             .padding(CircularButtonDefaults.GroupPadding),
         horizontalArrangement = Arrangement.spacedBy(CircularButtonDefaults.GroupGap),
         verticalAlignment = Alignment.CenterVertically,

@@ -42,6 +42,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_remove
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A checkbox with its label. The whole row toggles it.
@@ -115,7 +116,7 @@ fun TriStateCheckbox(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val interaction = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.checkboxColors(state, interaction, error)
+    val colors = ThemeColors.current.checkboxColors(state, interaction, error)
     val typography = HosannaTheme.typography
     val described = description != null && !compact
     Row(

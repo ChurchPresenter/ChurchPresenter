@@ -43,6 +43,7 @@ import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_drag_dots
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 internal fun chipPadding(size: ChipSize, leading: Boolean, end: Boolean = true): PaddingValues {
     val metrics = ChipDefaults.metrics(size)
@@ -218,7 +219,7 @@ fun Tag(
     modifier: Modifier = Modifier,
     color: ChipColor = ChipColor.Neutral,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val accent = colors.accent(color)
     Box(
         modifier = modifier

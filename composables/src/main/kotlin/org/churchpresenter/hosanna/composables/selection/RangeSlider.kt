@@ -60,6 +60,7 @@ import org.churchpresenter.hosanna.composables.model.sliderFraction
 import org.churchpresenter.hosanna.composables.model.sliderKey
 import org.churchpresenter.hosanna.composables.model.sliderValueAt
 import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A slider with two thumbs that pick a start and an end. The thumbs cannot cross, and each has its own keys.
@@ -94,7 +95,7 @@ fun RangeSlider(
 ) {
     val startState = thumbState(startInteractionSource, enabled)
     val endState = thumbState(endInteractionSource, enabled)
-    val trackColors = HosannaTheme.colors.sliderColors(if (enabled) ButtonState.Rest else ButtonState.Disabled)
+    val trackColors = ThemeColors.current.sliderColors(if (enabled) ButtonState.Rest else ButtonState.Disabled)
     val current by rememberUpdatedState(start to end)
     val change by rememberUpdatedState(onRangeChange)
     val finished by rememberUpdatedState(onRangeChangeFinished)
@@ -141,7 +142,7 @@ fun RangeSlider(
                 Triple(RangeThumb.Start, startState, start),
                 Triple(RangeThumb.End, endState, end),
             ).forEach { (which, state, value) ->
-                val colors = HosannaTheme.colors.sliderColors(state)
+                val colors = ThemeColors.current.sliderColors(state)
                 val x = xOf(if (which == RangeThumb.Start) startF else endF)
                 SliderThumb(
                     x, thumb, colors, state, enabled,

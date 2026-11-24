@@ -4,16 +4,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.churchpresenter.hosanna.HosannaDarkColors
 import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaLightColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
+import org.churchpresenter.hosanna.composables.testing.DarkThemeColors
 
 class ButtonFoundationTest {
 
-    private val c = HosannaLightColors
+    private val c = LightThemeColors
 
     @Test
     fun `disabled outranks loading, loading outranks every interaction`() {
@@ -56,7 +56,7 @@ class ButtonFoundationTest {
 
     @Test
     fun `hover pressed and focus lay the content color over the container`() {
-        listOf(c, HosannaDarkColors).forEach { colors ->
+        listOf(c, DarkThemeColors).forEach { colors ->
             ButtonHierarchy.entries.forEach { h ->
                 ButtonIntent.entries.forEach { i ->
                     val (container, content) = colors.restColors(h, i)

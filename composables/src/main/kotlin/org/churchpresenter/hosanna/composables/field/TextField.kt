@@ -55,6 +55,7 @@ import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_warning
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -109,7 +110,7 @@ fun TextField(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val overLimit = isOverLimit(value, maxLength)
-    val colors = HosannaTheme.colors.fieldColors(
+    val colors = ThemeColors.current.fieldColors(
         fieldState(enabled, readOnly, hovered, focused),
         error = error != null || overLimit,
     )
@@ -198,7 +199,7 @@ private fun fieldHeight(multiline: Boolean, labeled: Boolean): Modifier = when {
 internal fun Supporting(value: String, helper: String?, error: String?, maxLength: Int?, enabled: Boolean) {
     val message = error ?: helper
     if (message == null && maxLength == null) return
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val caption = HosannaTheme.typography.caption
     val muted = if (enabled) {
         colors.onSurfaceVariant

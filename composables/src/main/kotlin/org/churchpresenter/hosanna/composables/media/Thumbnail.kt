@@ -31,7 +31,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.hosanna.composables.defaults.ThumbnailDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
 import org.churchpresenter.hosanna.composables.foundation.ThumbnailLook
@@ -43,6 +42,7 @@ import org.churchpresenter.hosanna.composables.model.ThumbnailSize
 import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
 import org.churchpresenter.hosanna.composables.model.canGoLive
 import org.churchpresenter.hosanna.composables.model.showsHoverActions
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private fun ThumbnailStatus.showsImage() = this == ThumbnailStatus.Ready || this == ThumbnailStatus.Offline
 
@@ -95,7 +95,7 @@ fun Thumbnail(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(true, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.thumbnailColors(selected, live, state)
+    val colors = ThemeColors.current.thumbnailColors(selected, live, state)
     val metrics = ThumbnailDefaults.metrics(size)
     val shape = RoundedCornerShape(metrics.radius)
     val goLive = onGoLive?.takeIf { canGoLive(status, hidden) }

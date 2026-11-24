@@ -44,7 +44,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
-import org.churchpresenter.hosanna.HosannaColors
 import org.churchpresenter.hosanna.HosannaLevel
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.HosannaTheme
@@ -58,6 +57,7 @@ import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.hosanna.composables.model.SegmentedButtonSize
 import org.churchpresenter.hosanna.composables.model.SegmentedOption
 import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -108,8 +108,8 @@ fun SegmentedButton(
                 }
                 true
             }
-            .background(HosannaTheme.colors.trackColor(enabled), trackShape)
-            .border(SegmentedButtonDefaults.TrackEdge, HosannaTheme.colors.outlineVariant, trackShape)
+            .background(ThemeColors.current.trackColor(enabled), trackShape)
+            .border(SegmentedButtonDefaults.TrackEdge, ThemeColors.current.outlineVariant, trackShape)
             .padding(SegmentedButtonDefaults.TrackPadding)
             .selectableGroup(),
     ) {
@@ -153,10 +153,10 @@ internal fun segmentShare(available: Int, gap: Int, widths: List<Int>): Int? {
     return share.takeIf { widths.all { it <= share } }
 }
 
-internal fun HosannaColors.trackColor(enabled: Boolean): Color =
+internal fun ThemeColors.trackColor(enabled: Boolean): Color =
     if (enabled) secondaryContainer else onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER)
 
-internal fun HosannaColors.segmentColors(selected: Boolean, state: ButtonState): ButtonColors {
+internal fun ThemeColors.segmentColors(selected: Boolean, state: ButtonState): ButtonColors {
     val container = if (selected) primary else Color.Transparent
     val content = if (selected) onPrimary else onSurfaceVariant
     val active = if (selected) onPrimary else onSurface
@@ -194,7 +194,7 @@ private fun Segment(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.segmentColors(selected, state)
+    val colors = ThemeColors.current.segmentColors(selected, state)
     val container = remember(selected, controlEnabled) { Animatable(colors.container) }
     LaunchedEffect(colors.container) {
         container.animateTo(colors.container, tween(ButtonFoundationDefaults.TRANSITION_MILLIS, easing = EaseOut))

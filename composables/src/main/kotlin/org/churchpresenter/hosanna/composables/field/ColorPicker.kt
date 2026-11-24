@@ -69,6 +69,7 @@ import org.churchpresenter.hosanna.composables.model.toColor
 import org.churchpresenter.hosanna.composables.model.toHsv
 import org.churchpresenter.hosanna.composables.model.withOpacityPercent
 import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private const val HUE_DEGREES = 360f
 private const val PERCENT_MAX = 100
@@ -109,8 +110,8 @@ internal fun ColorPickerPopover(
                 ) { pick(hsv.copy(hue = it * HUE_DEGREES)) }
                 if (allowOpacity) {
                     val solid = color.copy(alpha = 1f)
-                    val light = HosannaTheme.colors.surfaceContainerLowest
-                    val dark = HosannaTheme.colors.outlineVariant
+                    val light = ThemeColors.current.surfaceContainerLowest
+                    val dark = ThemeColors.current.outlineVariant
                     ColorSlider(
                         fraction = color.alpha,
                         thumb = color,
@@ -220,7 +221,7 @@ private fun ColorSlider(fraction: Float, thumb: Color, track: DrawScope.() -> Un
 
 @Composable
 private fun PickerInput(text: String, modifier: Modifier, accept: (String) -> Unit, suffix: String? = null) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val shape = HosannaTheme.shapes.m
     var value by remember(text) { mutableStateOf(text) }
     Row(
@@ -250,7 +251,7 @@ private fun PickerInput(text: String, modifier: Modifier, accept: (String) -> Un
 private fun SwatchRow(title: String, swatches: List<Color>, current: Color, onPick: (Color) -> Unit) {
     if (swatches.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(ColorFieldDefaults.SwatchGap)) {
-        BasicText(title, style = HosannaTheme.typography.caption.copy(color = HosannaTheme.colors.onSurfaceFaint))
+        BasicText(title, style = HosannaTheme.typography.caption.copy(color = ThemeColors.current.faint))
         Row(horizontalArrangement = Arrangement.spacedBy(ColorFieldDefaults.SwatchGap)) {
             swatches.take(ColorFieldDefaults.SWATCHES_PER_ROW).forEach { swatch ->
                 PaletteSwatch(swatch, selected = sameRgb(swatch, current)) { onPick(swatch) }
@@ -261,7 +262,7 @@ private fun SwatchRow(title: String, swatches: List<Color>, current: Color, onPi
 
 @Composable
 private fun PaletteSwatch(color: Color, selected: Boolean, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = ThemeColors.current
     val ring = ColorFieldDefaults.Ring
     val outer = RoundedCornerShape(HosannaRadius.nested(HosannaRadius.S, ring * 2))
     Box(

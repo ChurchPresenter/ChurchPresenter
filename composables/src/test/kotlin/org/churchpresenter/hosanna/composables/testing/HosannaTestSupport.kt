@@ -26,7 +26,9 @@ import org.churchpresenter.hosanna.HosannaTheme
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 private const val SETTLE_MS = 500L
 
@@ -62,8 +64,10 @@ fun testIcon(): Painter = rememberVectorPainter(
 
 @Composable
 fun HosannaSurface(dark: Boolean = false, content: @Composable () -> Unit) {
-    HosannaTheme(darkTheme = dark) {
-        Box(Modifier.background(HosannaTheme.colors.surface).padding(12.dp)) { content() }
+    ChurchPresenterTheme(themeMode = if (dark) ThemeMode.DARK else ThemeMode.LIGHT) {
+        HosannaTheme(darkTheme = dark) {
+            Box(Modifier.background(ThemeColors.current.surface).padding(12.dp)) { content() }
+        }
     }
 }
 

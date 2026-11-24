@@ -60,6 +60,7 @@ import org.churchpresenter.hosanna.composables.model.seekFraction
 import org.churchpresenter.hosanna.composables.model.seekTimeAt
 import org.churchpresenter.hosanna.composables.model.sliderKey
 import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.hosanna.composables.foundation.ThemeColors
 
 /**
  * A media seek bar with the elapsed and total time either side. Hovering shows the time under the pointer.
@@ -92,7 +93,7 @@ fun SeekBar(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.sliderColors(state)
+    val colors = ThemeColors.current.sliderColors(state)
     val timeStyle = HosannaTheme.typography.captionStrong.tabular().copy(color = colors.value)
     Row(
         modifier = modifier,

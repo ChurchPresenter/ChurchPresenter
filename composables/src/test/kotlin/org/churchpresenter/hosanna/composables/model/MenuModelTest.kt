@@ -9,9 +9,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.churchpresenter.hosanna.HosannaLightColors
 import org.churchpresenter.hosanna.HosannaStateAlpha
 import org.churchpresenter.hosanna.composables.field.labelOf
+import org.churchpresenter.hosanna.composables.testing.LightThemeColors
 
 class MenuModelTest {
 
@@ -61,7 +61,7 @@ class MenuModelTest {
 
     @Test
     fun `a row is tinted when selected and lifted when highlighted`() {
-        val c = HosannaLightColors
+        val c = LightThemeColors
         val hover = c.onSurface.copy(alpha = HosannaStateAlpha.HOVER)
         assertEquals(Color.Transparent, c.menuRowContainer(selected = false, highlighted = false))
         assertEquals(c.primaryContainer, c.menuRowContainer(selected = true, highlighted = false))
