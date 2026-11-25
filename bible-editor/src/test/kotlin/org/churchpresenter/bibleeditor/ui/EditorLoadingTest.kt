@@ -41,6 +41,8 @@ class EditorLoadingTest {
         withEditor(io = gate, openMatthew17 = false) { _, _ ->
             click("Validate")
             assertTrue(isShowing("Checking…"))
+            click("All (0)")
+            assertTrue(isShowing("Checking…"))
             runOnIdle { gate.release() }
             awaitText("Russian Synodal · Synodal numbering · 3 books checked")
         }

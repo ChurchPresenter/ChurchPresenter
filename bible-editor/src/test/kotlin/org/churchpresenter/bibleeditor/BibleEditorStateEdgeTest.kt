@@ -151,6 +151,28 @@ class BibleEditorStateEdgeTest {
     }
 
     @Test
+    fun `a gap stays a gap until a verse is added there`() {
+        val state = started()
+        state.goToChapter(17)
+        val gap = VerseAddress("rst.spb", MATTHEW, 17, 11)
+        state.history.commit(gap, VerseChange(text = "Not added."), null)
+        assertTrue(state.chapterRows()[10] is ChapterRow.Gap)
+        state.history.commit(gap, VerseChange(added = true), null)
+        assertEquals("", (state.chapterRows()[10] as ChapterRow.Verse).text)
+        assertEquals("", textOf(VerseChange(added = true), "file"))
+        assertEquals("", textOf(VerseChange(removed = true), "file"))
+        assertEquals("file", textOf(null, "file"))
+    }
+
+    @Test
+    fun `before a Bible is open nothing is past the chapter's end and no Bible has history`() {
+        val state = unstarted()
+        assertEquals(emptySet(), state.missingPastEnd())
+        state.historyScope = HistoryScope.BIBLE
+        assertEquals(emptyList(), state.visibleHistory())
+    }
+
+    @Test
     fun `the history for one verse leaves the others out`() {
         fixture.saveHistory(EditorFixture.savedFixes() + EditEntry(3, 0, "rst.spb", MATTHEW, 16, 2,
             after = VerseChange(text = "x")))
