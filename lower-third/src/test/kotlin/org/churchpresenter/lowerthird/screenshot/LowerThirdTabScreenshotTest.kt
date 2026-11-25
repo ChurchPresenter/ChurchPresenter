@@ -32,7 +32,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 /**
  * Every state of the Lower Third tab, in both themes.
@@ -82,7 +82,7 @@ class LowerThirdTabScreenshotTest {
         width: Dp? = null,
         rootIndex: Int = 0,
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         lowerThirdTab(
             folder = folder(),
             queryAtemState = queryAtemState,

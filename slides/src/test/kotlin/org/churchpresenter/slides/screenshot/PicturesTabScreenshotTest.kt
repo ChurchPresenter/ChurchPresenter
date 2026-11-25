@@ -31,7 +31,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 class PicturesTabScreenshotTest {
 
@@ -68,7 +68,7 @@ class PicturesTabScreenshotTest {
         width: Dp? = null,
         rootIndex: Int = 0,
         drive: ComposeUiTest.(PicturesViewModel) -> Unit = { awaitAll(it) },
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         picturesTab(
             folder = folder(),
             settings = settings,

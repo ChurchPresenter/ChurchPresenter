@@ -20,7 +20,7 @@ import org.churchpresenter.stt.translateInProgress
 import org.churchpresenter.stt.STTManager
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 /**
  * Every state of the live-captions tab, in both themes.
@@ -38,7 +38,7 @@ class STTTabScreenshotTest {
         seed: STTManager.() -> Unit = {},
         width: Dp? = null,
         drive: ComposeUiTest.(STTManager) -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         sttTab(settings = settings, seed = seed, width = width, themeMode = mode) { stt, _, _ ->
             drive(stt)
             waitForIdle()

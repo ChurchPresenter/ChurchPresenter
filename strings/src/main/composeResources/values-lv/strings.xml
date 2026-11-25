@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Noņemt no programmas</string>
     <string name="shortcut_description_go_live">Rādīt ekrānā (dubultklikšķis uz vienības)</string>
     <string name="shortcut_description_escape">Notīrīt / pārtraukt rādīšanu</string>
+    <string name="shortcut_description_clear_text">Notīrīt tekstu, saglabāt fonu</string>
+    <string name="shortcut_description_clear_text_and_background">Notīrīt tekstu un fonu</string>
     <string name="shortcut_description_prev_verse">Iepriekšējais pants</string>
     <string name="shortcut_description_next_verse">Nākamais pants</string>
     <string name="shortcut_description_prev_chapter">Iepriekšējā nodaļa</string>

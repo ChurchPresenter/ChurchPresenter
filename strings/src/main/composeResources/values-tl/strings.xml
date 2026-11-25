@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Alisin sa Schedule</string>
     <string name="shortcut_description_go_live">I-Live (i-double-click ang item)</string>
     <string name="shortcut_description_escape">I-clear / Itigil ang pagpapakita</string>
+    <string name="shortcut_description_clear_text">I-clear ang Teksto, Panatilihin ang Background</string>
+    <string name="shortcut_description_clear_text_and_background">I-clear ang Teksto at Background</string>
     <string name="shortcut_description_prev_verse">Nakaraang Talata</string>
     <string name="shortcut_description_next_verse">Susunod na Talata</string>
     <string name="shortcut_description_prev_chapter">Nakaraang Kabanata</string>

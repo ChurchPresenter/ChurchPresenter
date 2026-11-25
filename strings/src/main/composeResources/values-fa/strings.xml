@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">حذف از برنامه</string>
     <string name="shortcut_description_go_live">پخش زنده (دوبار کلیک روی مورد)</string>
     <string name="shortcut_description_escape">پاک کردن / توقف نمایش</string>
+    <string name="shortcut_description_clear_text">پاک کردن متن، حفظ پس‌زمینه</string>
+    <string name="shortcut_description_clear_text_and_background">پاک کردن متن و پس‌زمینه</string>
     <string name="shortcut_description_prev_verse">آیه پیشین</string>
     <string name="shortcut_description_next_verse">آیه بعدی</string>
     <string name="shortcut_description_prev_chapter">باب پیشین</string>

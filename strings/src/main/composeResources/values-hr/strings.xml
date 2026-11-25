@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Ukloni iz rasporeda</string>
     <string name="shortcut_description_go_live">Prikaži uživo (dvoklik na stavku)</string>
     <string name="shortcut_description_escape">Očisti / prekini prikazivanje</string>
+    <string name="shortcut_description_clear_text">Očisti tekst, zadrži pozadinu</string>
+    <string name="shortcut_description_clear_text_and_background">Očisti tekst i pozadinu</string>
     <string name="shortcut_description_prev_verse">Prethodni stih</string>
     <string name="shortcut_description_next_verse">Sljedeći stih</string>
     <string name="shortcut_description_prev_chapter">Prethodno poglavlje</string>

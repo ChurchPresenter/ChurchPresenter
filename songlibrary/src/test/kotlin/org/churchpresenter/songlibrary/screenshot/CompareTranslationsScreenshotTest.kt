@@ -16,7 +16,7 @@ import org.churchpresenter.songlibrary.ui.CompareTranslationsContent
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -49,7 +49,7 @@ class CompareTranslationsScreenshotTest {
     fun `two languages that line up`() = shoot("all_lined_up", song = BILINGUAL)
 
     private fun shoot(name: String, song: SongItem = GRACE, drive: ComposeUiTest.() -> Unit = {}) =
-        stackedThemes(SECTION, name) { mode, file ->
+        bothThemes(SECTION, name) { mode, file ->
             val width = COMPARE_WINDOW_WIDTH.value.toInt()
             val height = COMPARE_WINDOW_HEIGHT.value.toInt()
             runDesktopComposeUiTest(width = width, height = height) {

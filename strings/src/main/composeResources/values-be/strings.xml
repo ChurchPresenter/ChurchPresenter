@@ -485,6 +485,8 @@
     <string name="shortcut_description_remove_from_schedule">Выдаліць з расклада</string>
     <string name="shortcut_description_go_live">У прамы эфір (двайны клік)</string>
     <string name="shortcut_description_escape">Ачысціць / Спыніць</string>
+    <string name="shortcut_description_clear_text">Ачысціць тэкст, пакінуць фон</string>
+    <string name="shortcut_description_clear_text_and_background">Ачысціць тэкст і фон</string>
     <string name="shortcut_description_prev_verse">Папярэдні верш</string>
     <string name="shortcut_description_next_verse">Наступны верш</string>
     <string name="shortcut_description_prev_chapter">Папярэдні раздзел</string>

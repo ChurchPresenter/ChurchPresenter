@@ -112,6 +112,8 @@ module-specific notes there, not here.**
 | `converter/`           | `:converter`           | Song/Bible format converter, opened from the Help menu                            | [AGENT.md](converter/AGENT.md)           |
 | `companion-satellite/` | `:companion-satellite` | Bitfocus Companion Satellite protocol client                                      | [AGENT.md](companion-satellite/AGENT.md) |
 | `theme/`               | `:theme`               | The nine color schemes, semantic colors, type and shape scales                    | [AGENT.md](theme/AGENT.md)               |
+| `hosanna-theme/`       | `:hosanna-theme`       | The Hosanna theme — its own palette, used only by the composables built on it     | [AGENT.md](hosanna-theme/AGENT.md)       |
+| `composables/`         | `:composables`         | The composables built on the Hosanna theme — its tokens and Compose foundation only | [AGENT.md](composables/AGENT.md)         |
 | `core-models/`         | `:core-models`         | The shared data models                                                            | [AGENT.md](core-models/AGENT.md)         |
 | `bible-engine/`        | `:bible-engine`        | Bible Lookup Engine — speech-to-reference detection                               | [AGENT.md](bible-engine/AGENT.md)        |
 | `lottieGenerator/`     | `:lottieGenerator`     | Animated lower-third generator, also a standalone app                             | [AGENT.md](lottieGenerator/AGENT.md)     |
@@ -211,7 +213,7 @@ fixtures declare; a test's own classpath may reach anything.
 
 | Layer | Modules | May depend on |
 |---|---|---|
-| foundation | theme, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
+| foundation | theme, hosanna-theme, composables, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
 | engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, output-guard, calendar-core, bible-edits, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
 | feature | a tab or a window with its view model | foundation, engine |
 | output | live-output | foundation, engine |
@@ -263,8 +265,8 @@ The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all si
 **once**, in `build-logic`'s `cp.test`. A module's build file carries only what differs, set right
 after its `plugins { }` block:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
-  counters that need a different number. No module names any today; every one is on the
-  shared 85%.
+  counters that need a different number. Only `:hosanna-theme` names one today (BRANCH 0.65);
+  every other module is on the shared 85%.
   Each is the measured value rounded down — a ratchet, raised as tests are added and deleted once
   the counter clears 85%. Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
@@ -352,7 +354,7 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
 ### Screenshots
 - **Committed, beside the module that shoots them** — `composeApp/screenshots/` for the app's tabs,
   dialogs and outputs, `<module>/screenshots/` for each module's own (`shared-ui`, `slides`, `media`).
-  The harness (`ScreenshotSupport`, `captureComponent`, `stackedThemes`) is `:shared-ui`'s test
+  The harness (`ScreenshotSupport`, `captureComponent`, `bothThemes`) is `:shared-ui`'s test
   fixtures, used by all of them. They are what
   a reviewer opens and approves before a UI change merges. **Re-record and commit the images
   whenever a state you touched changed.**
@@ -378,15 +380,16 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
   capture is taken inside `PinnedFonts` (`:shared-ui`'s test fixtures), which answers the system
   font's name with bundled Inter and JetBrains Mono. A new suite wraps its `setContent` body in it;
   `captureTo` fails a capture that is not inside it.
-- Every state is shot in **both themes stacked into one image** — go through `stackedThemes` or
-  `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture written elsewhere is never
-  compared). One folder per test class. **Name the class `…ScreenshotTest`** or CI never renders it.
+- Every state is shot in **both themes, one image each** — `<name>_light.png` and `<name>_dark.png`
+  — through `bothThemes` or `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture
+  written elsewhere is never compared). One folder per test class. **Name the class
+  `…ScreenshotTest`** or CI never renders it.
 - An open popup is its own compose root: pass `rootIndex = 1`. Byte-identical captures mean a state
   was never reached (`md5 -q <module>/screenshots/<section>/*.png | sort | uniq -d`).
 - Shoot a shared composable in its own suite via `captureComponent` — in `:shared-ui` when the
   composable lives there, so its pictures sit with its code; a tab's own `private` composables stay
   private and are covered through the tab.
-- `<module>/screenshots/.parts` (per-theme halves) is git-ignored and cleaned in a `finally`;
+- `<module>/screenshots/.parts` (scratch renders) is git-ignored and cleaned in a `finally`;
   never commit it.
 - The `reg_actions` branch holds the PR-comment images; retention is `retention-days` in
   `screenshots.yml`, and `cleanup.yml` squashes the branch monthly. It is not the

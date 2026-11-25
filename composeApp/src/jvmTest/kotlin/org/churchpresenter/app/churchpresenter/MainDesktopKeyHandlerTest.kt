@@ -51,6 +51,8 @@ class MainDesktopKeyHandlerTest {
         actions.redo()
         actions.pickQuickBackground(null)
         actions.clearOutput()
+        actions.clearText()
+        actions.clearTextAndBackground()
         actions.runMacro(Macro(id = "m", name = "m"))
         actions.take()
         actions.clickPresentation(true)
@@ -72,6 +74,33 @@ class MainDesktopKeyHandlerTest {
         assertTrue(handleMainDesktopKey(keyDown(Key.Z, ctrl = true), ctx))
         assertTrue(handleMainDesktopKey(keyDown(Key.Z, ctrl = true, shift = true), ctx))
         assertEquals(listOf("undo", "redo"), seen)
+    }
+
+    @Test
+    fun `each clear key runs its own clear through the default bindings`() {
+        val seen = mutableListOf<String>()
+        val ctx = context(
+            MainDesktopKeyActions(
+                clearOutput = { seen += "all" },
+                clearText = { seen += "text" },
+                clearTextAndBackground = { seen += "text and background" },
+            ),
+            devMode = false,
+        )
+        assertTrue(handleMainDesktopKey(keyDown(Key.F3), ctx))
+        assertTrue(handleMainDesktopKey(keyDown(Key.F4), ctx))
+        assertTrue(handleMainDesktopKey(keyDown(Key.Escape), ctx))
+        assertEquals(listOf("text", "text and background", "all"), seen)
+    }
+
+    @Test
+    fun `a clear key moved to another key answers there and not on its default`() {
+        var cleared = 0
+        val actions = MainDesktopKeyActions(clearTextAndBackground = { cleared++ })
+        val ctx = context(actions, settings = bound(ShortcutAction.CLEAR_TEXT_AND_BACKGROUND, Key.Insert))
+        assertFalse(handleMainDesktopKey(keyDown(Key.F4), ctx))
+        assertTrue(handleMainDesktopKey(keyDown(Key.Insert), ctx))
+        assertEquals(1, cleared)
     }
 
     @Test

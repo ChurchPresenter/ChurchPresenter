@@ -485,6 +485,8 @@
     <string name="shortcut_description_remove_from_schedule">Usuń z harmonogramu</string>
     <string name="shortcut_description_go_live">Na żywo (podwójne kliknięcie)</string>
     <string name="shortcut_description_escape">Wyczyść / Zatrzymaj</string>
+    <string name="shortcut_description_clear_text">Wyczyść tekst, zachowaj tło</string>
+    <string name="shortcut_description_clear_text_and_background">Wyczyść tekst i tło</string>
     <string name="shortcut_description_prev_verse">Poprzedni werset</string>
     <string name="shortcut_description_next_verse">Następny werset</string>
     <string name="shortcut_description_prev_chapter">Poprzedni rozdział</string>

@@ -20,7 +20,7 @@ import org.churchpresenter.announcements.timerButton
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 
 /**
  * Every state of the Announcements tab, in both themes.
@@ -44,7 +44,7 @@ class AnnouncementsTabScreenshotTest {
         width: Dp? = null,
         rootIndex: Int = 0,
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         announcementsTab(
             // Every state is shot with the entrance animation off. The shipped default slides the
             // preview text across the frame for twelve seconds, so a shot of it catches the text

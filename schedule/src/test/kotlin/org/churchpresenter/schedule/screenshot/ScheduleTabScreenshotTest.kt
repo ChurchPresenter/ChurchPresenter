@@ -14,6 +14,8 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import org.churchpresenter.schedule.SCHEDULE_ROW_THUMBNAIL_TAG
 import org.churchpresenter.schedule.ScheduleThumbnails
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.calendar.ScheduleServiceLink
 import org.churchpresenter.calendar.model.UpcomingLoad
@@ -40,7 +42,7 @@ import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.schedule.undo
 import org.churchpresenter.schedule.setServiceStart
 import org.churchpresenter.schedule.selectItem
@@ -93,8 +95,9 @@ class ScheduleTabScreenshotTest {
         showThumbnails: Boolean = false,
         highlightLive: Boolean = false,
         isOnAir: (ScheduleItem) -> Boolean = { false },
+        keepHover: Boolean = false,
         drive: ComposeUiTest.(ScheduleViewModel) -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         // A feed left over from another shot would mark this one's cue rows.
         CueFeed.clear()
         scheduleTab(
@@ -115,7 +118,7 @@ class ScheduleTabScreenshotTest {
             isOnAir = isOnAir,
         ) { vm, _ ->
             drive(vm)
-            captureTo(file, rootIndex)
+            captureTo(file, rootIndex, keepHover = keepHover)
         }
     }
 
@@ -410,6 +413,12 @@ class ScheduleTabScreenshotTest {
 
     @Test
     fun `density detailed`() = shoot("density_detailed", itemZoomPercent = 150)
+
+    @Test
+    fun `a row under the pointer`() = shoot("row_hovered", itemZoomPercent = 150, keepHover = true) {
+        onAllNodes(hasText("Amazing Grace", substring = true))[0].performMouseInput { moveTo(center) }
+        waitForIdle()
+    }
 
     @Test
     fun `density extra detailed`() = shoot("density_extra_detailed", itemZoomPercent = 200)

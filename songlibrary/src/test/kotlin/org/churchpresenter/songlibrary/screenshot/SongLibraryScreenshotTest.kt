@@ -33,7 +33,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -242,7 +242,7 @@ class SongLibraryScreenshotTest {
         /** How long a song has usually stayed on screen -- the Duration column; nothing measured by default. */
         typicalSeconds: (SongItem) -> Int? = { null },
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name, trim) { mode, file ->
+    ) = bothThemes(SECTION, name, trim) { mode, file ->
         val folder = Files.createTempDirectory("songlibrary-shot").toFile()
         try {
             val library = SongLibrary(folder)

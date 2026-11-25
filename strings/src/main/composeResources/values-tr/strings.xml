@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Programdan Çıkar</string>
     <string name="shortcut_description_go_live">Yayına Al (Öğeye çift tıkla)</string>
     <string name="shortcut_description_escape">Temizle / Sunumu Durdur</string>
+    <string name="shortcut_description_clear_text">Metni Temizle, Arka Planı Koru</string>
+    <string name="shortcut_description_clear_text_and_background">Metni ve Arka Planı Temizle</string>
     <string name="shortcut_description_prev_verse">Önceki Ayet</string>
     <string name="shortcut_description_next_verse">Sonraki Ayet</string>
     <string name="shortcut_description_prev_chapter">Önceki Bölüm</string>

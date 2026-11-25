@@ -515,6 +515,8 @@
     <string name="shortcut_description_remove_from_schedule">Удалить из расписания</string>
     <string name="shortcut_description_go_live">В эфир (двойной клик)</string>
     <string name="shortcut_description_escape">Очистить / Остановить</string>
+    <string name="shortcut_description_clear_text">Очистить текст, оставить фон</string>
+    <string name="shortcut_description_clear_text_and_background">Очистить текст и фон</string>
     <string name="shortcut_description_prev_verse">Предыдущий стих</string>
     <string name="shortcut_description_next_verse">Следующий стих</string>
     <string name="shortcut_description_prev_chapter">Предыдущая глава</string>

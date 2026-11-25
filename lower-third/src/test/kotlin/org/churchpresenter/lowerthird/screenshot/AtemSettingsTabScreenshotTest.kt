@@ -12,6 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
@@ -19,7 +22,7 @@ import org.churchpresenter.lowerthird.AtemSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -51,6 +54,11 @@ class AtemSettingsTabScreenshotTest {
      */
     @Test
     fun `as it opens`() = shoot("defaults")
+
+    @Test
+    fun `a field with focus`() = shoot("field_focused") {
+        onAllNodes(hasSetTextAction() and hasText("30"))[0].performClick()
+    }
 
     /** A host typed in, which is all it takes to arm Test Connection. */
     @Test
@@ -143,7 +151,7 @@ class AtemSettingsTabScreenshotTest {
         name: String,
         settings: AppSettings = AppSettings(),
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
                 PinnedFonts {

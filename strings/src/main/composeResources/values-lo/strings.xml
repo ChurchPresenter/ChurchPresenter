@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">ເອົາອອກຈາກລາຍການ</string>
     <string name="shortcut_description_go_live">ຂຶ້ນຈໍ (ຄລິກສອງເທື່ອທີ່ລາຍການ)</string>
     <string name="shortcut_description_escape">ລ້າງ / ຢຸດການສະແດງ</string>
+    <string name="shortcut_description_clear_text">ລ້າງຂໍ້ຄວາມ, ຮັກສາພື້ນຫຼັງ</string>
+    <string name="shortcut_description_clear_text_and_background">ລ້າງຂໍ້ຄວາມ ແລະ ພື້ນຫຼັງ</string>
     <string name="shortcut_description_prev_verse">ຂໍ້ກ່ອນ</string>
     <string name="shortcut_description_next_verse">ຂໍ້ຕໍ່ໄປ</string>
     <string name="shortcut_description_prev_chapter">ບົດກ່ອນ</string>

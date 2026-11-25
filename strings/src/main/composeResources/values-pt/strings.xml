@@ -101,6 +101,8 @@
     <string name="shortcut_description_remove_from_schedule">Remover do Roteiro</string>
     <string name="shortcut_description_go_live">Transmitir (Duplo clique no item)</string>
     <string name="shortcut_description_escape">Limpar / Parar Apresentação</string>
+    <string name="shortcut_description_clear_text">Limpar Texto, Manter Fundo</string>
+    <string name="shortcut_description_clear_text_and_background">Limpar Texto e Fundo</string>
     <string name="shortcut_description_prev_verse">Versículo Anterior</string>
     <string name="shortcut_description_next_verse">Próximo Versículo</string>
     <string name="shortcut_description_prev_chapter">Capítulo Anterior</string>

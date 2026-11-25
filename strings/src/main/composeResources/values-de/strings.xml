@@ -485,6 +485,8 @@
     <string name="shortcut_description_remove_from_schedule">Aus Zeitplan entfernen</string>
     <string name="shortcut_description_go_live">Live schalten (Doppelklick)</string>
     <string name="shortcut_description_escape">Löschen / Stoppen</string>
+    <string name="shortcut_description_clear_text">Text löschen, Hintergrund behalten</string>
+    <string name="shortcut_description_clear_text_and_background">Text und Hintergrund löschen</string>
     <string name="shortcut_description_prev_verse">Vorheriger Vers</string>
     <string name="shortcut_description_next_verse">Nächster Vers</string>
     <string name="shortcut_description_prev_chapter">Vorheriges Kapitel</string>

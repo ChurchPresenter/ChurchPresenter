@@ -101,6 +101,8 @@
     <string name="shortcut_description_remove_from_schedule">Eliminar del programa</string>
     <string name="shortcut_description_go_live">Presentar en vivo (doble clic)</string>
     <string name="shortcut_description_escape">Borrar / Detener presentación</string>
+    <string name="shortcut_description_clear_text">Borrar texto, mantener fondo</string>
+    <string name="shortcut_description_clear_text_and_background">Borrar texto y fondo</string>
     <string name="shortcut_description_prev_verse">Versículo anterior</string>
     <string name="shortcut_description_next_verse">Versículo siguiente</string>
     <string name="shortcut_description_prev_chapter">Capítulo anterior</string>

@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Ta bort från programmet</string>
     <string name="shortcut_description_go_live">Gå live (dubbelklicka på posten)</string>
     <string name="shortcut_description_escape">Rensa / sluta visa</string>
+    <string name="shortcut_description_clear_text">Rensa text, behåll bakgrund</string>
+    <string name="shortcut_description_clear_text_and_background">Rensa text och bakgrund</string>
     <string name="shortcut_description_prev_verse">Föregående vers</string>
     <string name="shortcut_description_next_verse">Nästa vers</string>
     <string name="shortcut_description_prev_chapter">Föregående kapitel</string>

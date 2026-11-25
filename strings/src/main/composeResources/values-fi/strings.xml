@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">Poista ohjelmasta</string>
     <string name="shortcut_description_go_live">Näytä livenä (kaksoisnapsauta kohdetta)</string>
     <string name="shortcut_description_escape">Tyhjennä / lopeta esittäminen</string>
+    <string name="shortcut_description_clear_text">Tyhjennä teksti, säilytä tausta</string>
+    <string name="shortcut_description_clear_text_and_background">Tyhjennä teksti ja tausta</string>
     <string name="shortcut_description_prev_verse">Edellinen jae</string>
     <string name="shortcut_description_next_verse">Seuraava jae</string>
     <string name="shortcut_description_prev_chapter">Edellinen luku</string>

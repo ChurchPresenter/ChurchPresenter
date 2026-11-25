@@ -245,6 +245,8 @@
     <string name="shortcut_description_remove_from_schedule">Remove from Schedule</string>
     <string name="shortcut_description_go_live">Go Live (Double-click item)</string>
     <string name="shortcut_description_escape">Clear / Stop Presenting</string>
+    <string name="shortcut_description_clear_text">Clear Text, Keep Background</string>
+    <string name="shortcut_description_clear_text_and_background">Clear Text and Background</string>
     <string name="shortcut_description_prev_verse">Previous Verse</string>
     <string name="shortcut_description_next_verse">Next Verse</string>
     <string name="shortcut_description_prev_chapter">Previous Chapter</string>

@@ -23,7 +23,7 @@ import javax.imageio.ImageIO
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -75,7 +75,7 @@ class BackgroundMediaDialogsScreenshotTest {
         downloaded: List<File>,
         bundled: List<String>,
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         render(mode, file, drive) {
             LocalLibraryDialogContent(
                 mediaType = StockMediaClient.StockMediaType.PHOTO,

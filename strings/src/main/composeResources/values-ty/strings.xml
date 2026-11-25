@@ -231,6 +231,8 @@
     <string name="shortcut_description_remove_from_schedule">Iriti mai te fāʻanahoraʻa</string>
     <string name="shortcut_description_go_live">Faʻaʻite (pata piti i te mea)</string>
     <string name="shortcut_description_escape">Tāmā / Faʻaea i te faʻaʻiteraʻa</string>
+    <string name="shortcut_description_clear_text">Tāmā i te pāpaʻi, vaiiho i te tāpoʻi</string>
+    <string name="shortcut_description_clear_text_and_background">Tāmā i te pāpaʻi e te tāpoʻi</string>
     <string name="shortcut_description_prev_verse">ʻIrava nā mua</string>
     <string name="shortcut_description_next_verse">ʻIrava i muri</string>
     <string name="shortcut_description_prev_chapter">Pene nā mua</string>

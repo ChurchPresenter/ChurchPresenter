@@ -31,6 +31,8 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_clea
 import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_7
 import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_8
 import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_9
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_text
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_text_and_background
 import org.churchpresenter.strings.generated.resources.shortcut_description_clicker_next
 import org.churchpresenter.strings.generated.resources.shortcut_description_clicker_prev
 import org.churchpresenter.strings.generated.resources.shortcut_description_close_schedule
@@ -201,6 +203,10 @@ enum class ShortcutAction(
     // ── Global ───────────────────────────────────────────────────────────────
     CLEAR_OUTPUT(ShortcutScope.GLOBAL, Res.string.shortcut_description_escape,
         listOf(KeyChord.of(Key.Escape))),
+    CLEAR_TEXT(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_text,
+        listOf(KeyChord.of(Key.F3))),
+    CLEAR_TEXT_AND_BACKGROUND(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_text_and_background,
+        listOf(KeyChord.of(Key.F4))),
 
     // ── Every tab with a Go Live button ──────────────────────────────────────
     GO_LIVE(ShortcutScope.TABS, Res.string.shortcut_description_go_live_key,

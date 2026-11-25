@@ -37,7 +37,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -105,7 +105,7 @@ class LottieGenScreenshotTest {
         // machine set to one of the eight translated locales every caption would differ.
         Strings.setLocale(Locale.ENGLISH)
         seedLibrary()
-        stackedThemes(section, name) { mode, file ->
+        bothThemes(section, name) { mode, file ->
             // Read only if the thumbnail never arrives: what the build did, style by style.
             val thumbnailDiagnostics = ThumbnailDiagnostics()
             runSkikoComposeUiTest(size = window, density = Density(1f)) {

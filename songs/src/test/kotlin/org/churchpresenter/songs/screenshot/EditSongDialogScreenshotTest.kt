@@ -34,7 +34,7 @@ import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
@@ -65,7 +65,7 @@ class EditSongDialogScreenshotTest {
         /** What the outputs draw by: given, the right pane opens on the Output tab, as it does from the Songs tab. */
         appSettings: AppSettings? = null,
         drive: ComposeUiTest.() -> Unit = {},
-    ) = stackedThemes(SECTION, name) { mode, file ->
+    ) = bothThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
                 PinnedFonts {

@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">إزالة من البرنامج</string>
     <string name="shortcut_description_go_live">عرض مباشر (نقر مزدوج على العنصر)</string>
     <string name="shortcut_description_escape">مسح / إيقاف العرض</string>
+    <string name="shortcut_description_clear_text">مسح النص مع إبقاء الخلفية</string>
+    <string name="shortcut_description_clear_text_and_background">مسح النص والخلفية</string>
     <string name="shortcut_description_prev_verse">الآية السابقة</string>
     <string name="shortcut_description_next_verse">الآية التالية</string>
     <string name="shortcut_description_prev_chapter">الإصحاح السابق</string>

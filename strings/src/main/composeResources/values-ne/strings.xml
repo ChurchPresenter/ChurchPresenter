@@ -186,6 +186,8 @@
     <string name="shortcut_description_remove_from_schedule">तालिकाबाट हटाउनुहोस्</string>
     <string name="shortcut_description_go_live">प्रस्तुत गर्नुहोस् (वस्तुमा डबल-क्लिक)</string>
     <string name="shortcut_description_escape">खाली गर्ने / प्रस्तुति रोक्ने</string>
+    <string name="shortcut_description_clear_text">पाठ खाली गर्नुहोस्, पृष्ठभूमि राख्नुहोस्</string>
+    <string name="shortcut_description_clear_text_and_background">पाठ र पृष्ठभूमि खाली गर्नुहोस्</string>
     <string name="shortcut_description_prev_verse">अघिल्लो पद</string>
     <string name="shortcut_description_next_verse">अर्को पद</string>
     <string name="shortcut_description_prev_chapter">अघिल्लो अध्याय</string>
