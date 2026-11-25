@@ -150,6 +150,8 @@ object LiveMapReporter {
     /**
      * @param screenCount displays attached, from [detectScreenCount] — taken as a parameter so the
      * derivation itself stays pure and testable on a machine with no display.
+     * @param loadedBibles translations the Bible tab loaded; the larger of it and the settings' stack
+     * is reported, so a follower's copies of the primary's count.
      */
     fun setupFacts(
         settings: AppSettings,
@@ -159,6 +161,7 @@ object LiveMapReporter {
         liveMinutes: Int = 0,
         liveStalls: Int = 0,
         signageScreens: Map<String, Int> = emptyMap(),
+        loadedBibles: Int = 0,
     ): SetupFacts {
         // Outputs with no display chosen, or on a monitor marked "Don't use", are configuration the
         // operator has switched off. Reading
@@ -168,7 +171,7 @@ object LiveMapReporter {
         return SetupFacts(
             language = settings.language,
             screens = screenCount,
-            bibles = settings.bibleSettings.translationList().size,
+            bibles = maxOf(settings.bibleSettings.translationList().size, loadedBibles),
             stageMonitor = activeProfiles.any { it.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR },
             lowerThird = activeProfiles.any { it.isLowerThird },
             songbooks = songCounts.first,
@@ -181,17 +184,38 @@ object LiveMapReporter {
     }
 
     /**
-     * The events this instance may report — all of them, or none at all.
+     * The events this instance may report.
      *
      * An instance with Instance Link enabled is attached to another one: it either mirrors that
-     * primary or drives it, and either way the same service is already being reported by the
-     * primary's own launch. Only the master reports, so one Sunday is counted once rather than once
-     * per room.
+     * primary or drives it, and either way what goes live is the primary's service, already reported
+     * by the primary's own launch. So a linked instance leaves out [SERVICE_EVENTS], and one Sunday is
+     * counted once rather than once per room. What the operator did on the linked machine itself --
+     * opened the calendar, edited a song, used the converter -- is its own, and is reported.
      */
     fun eventsToReport(
         settings: AppSettings,
         pending: Map<UsageEvent, Int>,
-    ): Map<UsageEvent, Int> = if (settings.instanceLink.enabled) emptyMap() else pending
+    ): Map<UsageEvent, Int> =
+        if (settings.instanceLink.enabled) pending.filterKeys { it !in SERVICE_EVENTS } else pending
+
+    /** The events about what went live, which a linked instance leaves to its primary. */
+    val SERVICE_EVENTS: Set<UsageEvent> = setOf(
+        UsageEvent.SONG_LIVE,
+        UsageEvent.SONG_DUAL_LANGUAGE,
+        UsageEvent.SONG_THREE_LANGUAGES,
+        UsageEvent.SONG_FOUR_LANGUAGES,
+        UsageEvent.SONG_CHORD_CHART,
+        UsageEvent.SONG_SPLIT_SCREEN,
+        UsageEvent.SONG_LOTTIE_BAND,
+        UsageEvent.BIBLE_MULTI_TRANSLATION,
+        UsageEvent.BIBLE_SPLIT_SCREEN,
+        UsageEvent.BIBLE_LOTTIE_BAND,
+        UsageEvent.BIBLE_BOOK_OVERRIDE,
+        UsageEvent.STAGE_MONITOR,
+        UsageEvent.MOBILE_DRAWING_LIVE,
+        UsageEvent.REMOTE_PUT_LIVE,
+        UsageEvent.CALENDAR_CUE_FIRED,
+    )
 
     /**
      * @param repoSlug The git origin this build was made from, as "owner/name"

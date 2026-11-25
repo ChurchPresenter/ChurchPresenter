@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.telemetry.SongLibraryTally
+import org.churchpresenter.telemetry.LibraryTally
 import org.churchpresenter.signage.tab.SignageController
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.sharedui.utils.DevFlags
@@ -74,8 +74,8 @@ internal class AppRootState(
     private val secondaryDisplays: () -> List<ResolvedDisplay> = ::nonPrimaryDisplays,
     // main hands over one that has already read the file, so the first composition does not.
     val settingsManager: SettingsManager = SettingsManager(),
-    // What the launch ping counts the song library from, as the Songs tab loads it.
-    val songLibraryTally: SongLibraryTally = SongLibraryTally(),
+    // What the launch ping counts the songs and Bibles from, as their tabs load them.
+    val libraryTally: LibraryTally = LibraryTally(),
 ) {
     var appReady by mutableStateOf(false)
     val statisticsManager = StatisticsManager()

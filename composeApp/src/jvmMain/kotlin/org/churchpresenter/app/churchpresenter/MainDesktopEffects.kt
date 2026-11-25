@@ -7,6 +7,7 @@ import org.churchpresenter.songs.ScheduleSongAction
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +74,12 @@ internal fun MainDesktopScope.LeadingEffects() {
  */
 @Composable
 internal fun MainDesktopScope.TrailingEffects() {
+    // The translations the Bible tab actually loaded, a follower's copies of the primary's
+    // included, for the launch ping's count.
+    LaunchedEffect(bibleViewModel) {
+        snapshotFlow { bibleViewModel.loadedTranslations.value.size }
+            .collect { publish.onBibleTranslationsLoaded?.invoke(it) }
+    }
     LaunchedEffect(scheduleViewModel) {
         scheduleViewModel.onItemPresented = live.onRowWentLive
         scheduleViewModel.onRowActions = live.onRowActions

@@ -299,10 +299,27 @@ class LiveMapReporterTest {
     }
 
     @Test
-    fun `a linked instance reports none of them, so one service is counted once`() {
+    fun `a linked instance leaves what went live to its primary, so one service is counted once`() {
         val pending = mapOf(UsageEvent.SONG_DUAL_LANGUAGE to 3)
         val linked = AppSettings(instanceLink = InstanceLinkSettings(enabled = true))
         assertTrue(LiveMapReporter.eventsToReport(linked, pending).isEmpty())
+    }
+
+    @Test
+    fun `a linked instance still reports what was done on it`() {
+        val pending = mapOf(UsageEvent.SONG_LIVE to 4, UsageEvent.CALENDAR_OPENED to 1, UsageEvent.SONG_EDITED to 2)
+        val linked = AppSettings(instanceLink = InstanceLinkSettings(enabled = true))
+        assertEquals(
+            mapOf(UsageEvent.CALENDAR_OPENED to 1, UsageEvent.SONG_EDITED to 2),
+            LiveMapReporter.eventsToReport(linked, pending),
+        )
+    }
+
+    @Test
+    fun `the Bibles reported are the larger of the settings' stack and what the tab loaded`() {
+        val settings = settings(bibles = listOf("kjv.spb"))
+        assertEquals(3, LiveMapReporter.setupFacts(settings, screenCount = 1, loadedBibles = 3).bibles)
+        assertEquals(1, LiveMapReporter.setupFacts(settings, screenCount = 1, loadedBibles = 0).bibles)
     }
 
     @Test

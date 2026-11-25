@@ -21,7 +21,6 @@ import org.churchpresenter.diagnostics.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import org.churchpresenter.app.churchpresenter.utils.AppWindowIcons
-import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 import org.churchpresenter.updater.StorePackage
 import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.updater.UpdaterIdentity
@@ -51,7 +50,7 @@ import org.churchpresenter.settings.signageFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.telemetry.SongLibraryTally
+import org.churchpresenter.telemetry.LibraryTally
 import org.churchpresenter.appsettings.AutoStartManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.EventThreadIoMonitor
@@ -65,7 +64,6 @@ import org.churchpresenter.outputguard.runOutputGuard
 import org.churchpresenter.diagnostics.UiStallSpec
 import org.churchpresenter.diagnostics.UiWatchdog
 import org.churchpresenter.telemetry.LiveMapReporter
-import org.churchpresenter.sharedui.utils.RunRecord
 import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
 import java.lang.invoke.MethodHandles
@@ -74,10 +72,8 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.liveoutput.AppNetworkInputs
 import org.churchpresenter.canvas.CameraDeviceCatalog
 import org.churchpresenter.canvas.NetworkInputs
-import org.churchpresenter.canvas.ResourceCensus
 import org.jetbrains.compose.resources.MissingResourceException
 
-private const val MILLIS_PER_MINUTE = 60_000L
 internal const val OPTIONS_TAB_BACKGROUND = 2
 internal const val UPDATE_CHECK_DELAY_MS = 5_000L
 internal const val STORY_PROMPT_DELAY_MS = 8_000L
@@ -165,25 +161,6 @@ private fun bundleDefaultBible(settings: AppSettings) {
 }
 
 /** System properties the JDK and skiko each read once, on first use, so they are set before anything runs. */
-/**
- * At shutdown, what this run tells the next launch's ping about itself: how long it lasted, how long
- * an output was live and how many live stalls passed half a second. Together they say how often a
- * service stalls, which decides whether outputs move to a process of their own (docs/SHOW_CONTROL.md,
- * Output isolation).
- */
-private fun recordRunAtShutdown(startedAt: Long) = addGuardedShutdownHook("session") {
-    UsageEvents.recordRun(
-        RunRecord(
-            sessionMinutes = ((System.currentTimeMillis() - startedAt) / MILLIS_PER_MINUTE).toInt(),
-            liveMinutes = uiStallReporter.liveMinutes(),
-            liveStalls = uiStallReporter.liveStallsPastGate(),
-        )
-    )
-    // Shutdown is when the high-water marks are final. Reports only when they are higher than a
-    // scene can account for — see ResourceCensus, and why counts rather than CPU or heap.
-    ResourceCensus.reportIfLeaky()
-}
-
 /**
  * Runs this process as the app's own output guard, if [args] ask for it, and says whether it did:
  * nothing of the app is started in a guard's process -- see OutputGuard.
@@ -291,18 +268,21 @@ fun main(args: Array<String>) {
 
     if (shouldBundleDefaultBible(startupSettings.bibleSettings)) bundleDefaultBible(startupSettings)
 
-    val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
+    val unreportedEvents = UsageEvents.unreported()
+    val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, unreportedEvents)
     val previousRun = UsageEvents.lastRun()
-    val songLibraryTally = SongLibraryTally()
+    val libraryTally = LibraryTally()
     LiveMapReporter.pingOnOpen(
         identity = appTelemetryIdentity,
         installId = analyticsInstallId(startupSettings.analyticsReportingEnabled) { CrashReporter.installId() },
         updateCheckInterval = startupSettings.updateCheckInterval,
         setup = {
+            val library = launchLibrary(startupSettings, libraryTally)
             LiveMapReporter.setupFacts(
                 startupSettings,
-                screenCount = LiveMapReporter.detectScreenCount(),
-                songCounts = launchSongCounts(startupSettings, songLibraryTally),
+                screenCount = library.screens,
+                songCounts = library.songs,
+                loadedBibles = library.bibles,
                 sessionMinutes = previousRun.sessionMinutes,
                 liveMinutes = previousRun.liveMinutes,
                 liveStalls = previousRun.liveStalls,
@@ -311,7 +291,9 @@ fun main(args: Array<String>) {
         },
         events = pendingUsageEvents,
         onDelivered = {
-            UsageEvents.markReported(pendingUsageEvents)
+            // Everything that was waiting, not only what was sent: a linked instance leaves out the
+            // primary's share (see eventsToReport), and that share must not pile up for later.
+            UsageEvents.markReported(unreportedEvents)
             if (!previousRun.isEmpty) UsageEvents.clearLastRun()
         }
     )
@@ -327,7 +309,9 @@ fun main(args: Array<String>) {
         runCatching { runBlocking { CameraDeviceCatalog.refresh() } }
     }.apply { isDaemon = true }.start()
 
-    recordRunAtShutdown(startedAt = System.currentTimeMillis())
+    val startedAt = System.currentTimeMillis()
+    recordRunAtShutdown(startedAt)
+    recordRunEveryMinute(startedAt)
 
     val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")
@@ -374,7 +358,7 @@ fun main(args: Array<String>) {
 
     exitIfSystemFontsUnavailable(olderThanWindows10 = CefManager.windowsUnsupported)
     runApplication(
-        startupSettings, coroutineExceptionHandler, relaunchedByGuard = RELAUNCHED_ARGUMENT in args, songLibraryTally,
+        startupSettings, coroutineExceptionHandler, relaunchedByGuard = RELAUNCHED_ARGUMENT in args, libraryTally,
     )
 }
 
@@ -384,7 +368,7 @@ private fun runApplication(
     startupSettings: AppSettings,
     coroutineExceptionHandler: CoroutineExceptionHandler,
     relaunchedByGuard: Boolean,
-    songLibraryTally: SongLibraryTally,
+    libraryTally: LibraryTally,
 ) {
     // Read here, on this thread, so the manager the app keeps already holds the settings and the
     // first composition does not read the file on the event thread. Not main's first read:
@@ -407,7 +391,7 @@ private fun runApplication(
                 toleratingDisposedOwnerRace(windowExceptions)
             },
         ) {
-            ChurchPresenterApp(coroutineExceptionHandler, settingsManager, relaunchedByGuard, songLibraryTally) {
+            ChurchPresenterApp(coroutineExceptionHandler, settingsManager, relaunchedByGuard, libraryTally) {
                 themeCustomization = it
             }
         }
@@ -425,13 +409,13 @@ private fun ApplicationScope.ChurchPresenterApp(
     coroutineExceptionHandler: CoroutineExceptionHandler,
     settingsManager: SettingsManager,
     relaunchedByGuard: Boolean,
-    songLibraryTally: SongLibraryTally,
+    libraryTally: LibraryTally,
     onThemeCustomizationChange: (ThemeCustomization) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope { coroutineExceptionHandler }
     val application = this
     val root = remember { AppRootState(
-            application, coroutineScope, settingsManager = settingsManager, songLibraryTally = songLibraryTally,
+            application, coroutineScope, settingsManager = settingsManager, libraryTally = libraryTally,
         ) }
     with(root) {
         // The desktop's end of calendar sync with phones. Made here, beside the settings it writes

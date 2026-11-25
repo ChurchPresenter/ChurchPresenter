@@ -11,37 +11,46 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * The song library as the Songs tab loaded it, for the launch ping: songbooks and songs.
+ * The song library and the Bibles as the Songs and Bible tabs loaded them, for the launch ping.
  *
- * The folder scan at launch can count short — a song folder on a share not mounted yet, or an
- * Instance Link follower whose library is the primary's catalog — so the app reports each list the
- * tab loads here, and the ping waits for it. Where two counts disagree the one with the most songs
- * wins.
+ * What the settings and the song folder say at launch can fall short: a song folder on a share not
+ * mounted yet, or an Instance Link follower whose songs and Bibles are the primary's. So the app
+ * reports each list the tabs load here, and the ping waits for it. Where two counts disagree the
+ * larger one wins.
  */
-class SongLibraryTally {
-    private val most = MutableStateFlow<Pair<Int, Int>?>(null)
+class LibraryTally {
+    private val songs = MutableStateFlow<Pair<Int, Int>?>(null)
+    private val bibles = MutableStateFlow(0)
 
     /** One list the Songs tab loaded, by each song's songbook. */
-    fun loaded(songbooks: List<String>) {
+    fun songsLoaded(songbooks: List<String>) {
         val counts = songCountsOf(songbooks)
-        most.update { old -> mostSongs(old, counts) }
+        songs.update { old -> mostSongs(old, counts) }
+    }
+
+    /** How many translations the Bible tab has loaded. */
+    fun biblesLoaded(count: Int) {
+        bibles.update { maxOf(it, count) }
     }
 
     /**
-     * The most the tab has loaded: waits up to [first] for its first list, then [settle] more for
-     * one that arrives later. Null when nothing loaded in time.
+     * The most the tabs have loaded: waits up to [first] for the Songs tab's first list, then
+     * [settle] more for one that arrives later. Songs are null when none loaded in time.
      */
-    suspend fun await(first: Duration, settle: Duration = Duration.ZERO): Pair<Int, Int>? {
-        withTimeoutOrNull(first) { most.first { it != null } } ?: return null
+    suspend fun await(first: Duration, settle: Duration = Duration.ZERO): Loaded {
+        withTimeoutOrNull(first) { songs.first { it != null } }
         if (settle > Duration.ZERO) delay(settle)
-        return most.value
+        return Loaded(songs.value, bibles.value)
     }
+
+    /** What the tabs had loaded when the ping asked. */
+    data class Loaded(val songs: Pair<Int, Int>?, val bibles: Int)
 
     companion object {
         /** How long the ping waits for the Songs tab's first list. */
         val FIRST_LOAD_WAIT: Duration = 60.seconds
 
-        /** How much longer a follower waits, for the primary's catalog to arrive. */
+        /** How much longer a follower waits, for the primary's catalog and Bibles to arrive. */
         val FOLLOWER_SETTLE: Duration = 30.seconds
 
         /** The extra wait [settings] call for: only a follower that connects at launch gets one. */

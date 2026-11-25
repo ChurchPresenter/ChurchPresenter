@@ -6,7 +6,7 @@ import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.songs.bundledSongCount
 import org.churchpresenter.telemetry.LiveMapReporter
-import org.churchpresenter.telemetry.SongLibraryTally
+import org.churchpresenter.telemetry.LibraryTally
 import org.churchpresenter.telemetry.mostSongs
 import java.io.File
 
@@ -34,20 +34,30 @@ internal fun startCrashReporting(enabled: Boolean) {
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
 }
 
+/** What the launch ping reports of the library and the screens, gathered by [launchLibrary]. */
+internal data class LaunchLibrary(val songs: Pair<Int, Int>, val bibles: Int, val screens: Int)
+
 /**
- * The song library the launch ping reports: the song folder as it is at launch or the Songs tab's
- * library once it has loaded, whichever has more songs. Logged, and left in the crash report's
- * trail, so a report says what library the app was running on.
+ * The library and the screens the launch ping reports, each the larger of two counts: the song
+ * folder and the settings as they are at launch, or what the Songs and Bible tabs loaded once they
+ * have; the displays at launch, or once the tabs have loaded, so a projector switched on after the
+ * app counts. Logged, and left in the crash report's trail, so a report says what the app ran on.
  */
-internal suspend fun launchSongCounts(settings: AppSettings, tally: SongLibraryTally): Pair<Int, Int> {
+internal suspend fun launchLibrary(settings: AppSettings, tally: LibraryTally): LaunchLibrary {
+    val screensAtLaunch = LiveMapReporter.detectScreenCount()
     val folder = LiveMapReporter.gatherSongCounts(settings, ::bundledSongCount)
-    val tab = tally.await(SongLibraryTally.FIRST_LOAD_WAIT, SongLibraryTally.settleFor(settings))
-    val counts = mostSongs(folder, tab) ?: folder
-    val line = "Song library: ${counts.second} songs in ${counts.first} songbooks " +
-        "(folder ${folder.second}, Songs tab ${tab?.second ?: "not loaded"})"
+    val loaded = tally.await(LibraryTally.FIRST_LOAD_WAIT, LibraryTally.settleFor(settings))
+    val library = LaunchLibrary(
+        songs = mostSongs(folder, loaded.songs) ?: folder,
+        bibles = maxOf(settings.bibleSettings.translationList().size, loaded.bibles),
+        screens = maxOf(screensAtLaunch, LiveMapReporter.detectScreenCount()),
+    )
+    val line = "Library: ${library.songs.second} songs in ${library.songs.first} songbooks " +
+        "(folder ${folder.second}, Songs tab ${loaded.songs?.second ?: "not loaded"}), " +
+        "${library.bibles} Bibles, ${library.screens} screens"
     Log.info("Startup", line)
     CrashReporter.breadcrumb(line, category = "lifecycle")
-    return counts
+    return library
 }
 
 /**

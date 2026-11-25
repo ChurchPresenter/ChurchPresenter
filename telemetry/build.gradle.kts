@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.ktor.client.cio)
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(projects.diagnostics))
 }
 
