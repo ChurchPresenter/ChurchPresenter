@@ -16,6 +16,7 @@ import org.churchpresenter.sharedui.utils.UsageEvents
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
+import javax.imageio.stream.MemoryCacheImageOutputStream
 import org.churchpresenter.sharedui.models.Presenting
 
 private const val ALPHA_SHIFT = 24
@@ -239,15 +240,12 @@ class BrowserSourceVideoRenderer(
                 }
             }
             val out = ByteArrayOutputStream()
-            if (fullyOpaque) {
-                val image = BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
-                image.setRGB(0, 0, w, h, argb, 0, w)
-                ImageIO.write(image, "jpg", out)
-            } else {
-                val image = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
-                image.setRGB(0, 0, w, h, argb, 0, w)
-                ImageIO.write(image, "png", out)
-            }
+            val type = if (fullyOpaque) BufferedImage.TYPE_INT_RGB else BufferedImage.TYPE_INT_ARGB
+            val image = BufferedImage(w, h, type)
+            image.setRGB(0, 0, w, h, argb, 0, w)
+            // Buffered in memory: ImageIO's default stream caches through a temp file, so a full
+            // disk would otherwise stop the output.
+            MemoryCacheImageOutputStream(out).use { ImageIO.write(image, if (fullyOpaque) "jpg" else "png", it) }
             return out.toByteArray()
         }
 
