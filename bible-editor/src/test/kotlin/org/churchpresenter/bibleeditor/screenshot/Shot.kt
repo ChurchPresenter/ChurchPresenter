@@ -19,7 +19,7 @@ import org.churchpresenter.bibleeditor.ui.awaitText
 import org.churchpresenter.bibleeditor.ui.goToChapter
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import org.churchpresenter.sharedui.screenshot.captureTo
-import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import java.util.Locale
@@ -52,7 +52,7 @@ internal data class Shot(
  * with the test fixtures), and times read as US English.
  */
 internal fun shootEditor(section: String, name: String, shot: Shot = Shot(), drive: ComposeUiTest.() -> Unit = {}) =
-    stackedThemes(section, name) { mode, file ->
+    bothThemes(section, name) { mode, file ->
         val fixture = EditorFixture(shot.rst)
         val locale = Locale.getDefault()
         Locale.setDefault(Locale.US)
