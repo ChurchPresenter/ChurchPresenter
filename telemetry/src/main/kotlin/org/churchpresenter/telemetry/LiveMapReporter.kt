@@ -252,7 +252,7 @@ object LiveMapReporter {
         identity: TelemetryIdentity,
         installId: String? = null,
         updateCheckInterval: UpdateCheckInterval? = null,
-        setup: () -> SetupFacts = { SetupFacts() },
+        setup: suspend () -> SetupFacts = { SetupFacts() },
         events: Map<UsageEvent, Int> = emptyMap(),
         onDelivered: () -> Unit = {},
         send: suspend (url: String, installId: String?) -> Boolean = ::ping,

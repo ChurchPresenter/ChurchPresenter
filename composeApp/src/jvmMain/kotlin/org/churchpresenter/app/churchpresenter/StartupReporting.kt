@@ -3,6 +3,11 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.songs.bundledSongCount
+import org.churchpresenter.telemetry.LiveMapReporter
+import org.churchpresenter.telemetry.SongLibraryTally
+import org.churchpresenter.telemetry.mostSongs
 import java.io.File
 
 /*
@@ -27,6 +32,22 @@ internal fun startCrashReporting(enabled: Boolean) {
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+}
+
+/**
+ * The song library the launch ping reports: the song folder as it is at launch or the Songs tab's
+ * library once it has loaded, whichever has more songs. Logged, and left in the crash report's
+ * trail, so a report says what library the app was running on.
+ */
+internal suspend fun launchSongCounts(settings: AppSettings, tally: SongLibraryTally): Pair<Int, Int> {
+    val folder = LiveMapReporter.gatherSongCounts(settings, ::bundledSongCount)
+    val tab = tally.await(SongLibraryTally.FIRST_LOAD_WAIT, SongLibraryTally.settleFor(settings))
+    val counts = mostSongs(folder, tab) ?: folder
+    val line = "Song library: ${counts.second} songs in ${counts.first} songbooks " +
+        "(folder ${folder.second}, Songs tab ${tab?.second ?: "not loaded"})"
+    Log.info("Startup", line)
+    CrashReporter.breadcrumb(line, category = "lifecycle")
+    return counts
 }
 
 /**

@@ -262,6 +262,7 @@ private fun MainWindowScope.mainDesktopPublishers(): MainDesktopPublishers = wit
         onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
         onSongsLoaded = { songs ->
             helperSongCount = songs.size
+            songLibraryTally.loaded(songs.map { it.songbook })
             helperSongs = songs
             companionServer.publishSongs(songs)
         },

@@ -51,7 +51,7 @@ import org.churchpresenter.settings.signageFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.signage.hub.SignageHub
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.songs.bundledSongCount
+import org.churchpresenter.telemetry.SongLibraryTally
 import org.churchpresenter.appsettings.AutoStartManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.EventThreadIoMonitor
@@ -293,6 +293,7 @@ fun main(args: Array<String>) {
 
     val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
     val previousRun = UsageEvents.lastRun()
+    val songLibraryTally = SongLibraryTally()
     LiveMapReporter.pingOnOpen(
         identity = appTelemetryIdentity,
         installId = analyticsInstallId(startupSettings.analyticsReportingEnabled) { CrashReporter.installId() },
@@ -301,7 +302,7 @@ fun main(args: Array<String>) {
             LiveMapReporter.setupFacts(
                 startupSettings,
                 screenCount = LiveMapReporter.detectScreenCount(),
-                songCounts = LiveMapReporter.gatherSongCounts(startupSettings, ::bundledSongCount),
+                songCounts = launchSongCounts(startupSettings, songLibraryTally),
                 sessionMinutes = previousRun.sessionMinutes,
                 liveMinutes = previousRun.liveMinutes,
                 liveStalls = previousRun.liveStalls,
@@ -372,7 +373,9 @@ fun main(args: Array<String>) {
     )
 
     exitIfSystemFontsUnavailable(olderThanWindows10 = CefManager.windowsUnsupported)
-    runApplication(startupSettings, coroutineExceptionHandler, relaunchedByGuard = RELAUNCHED_ARGUMENT in args)
+    runApplication(
+        startupSettings, coroutineExceptionHandler, relaunchedByGuard = RELAUNCHED_ARGUMENT in args, songLibraryTally,
+    )
 }
 
 /** Opens the windows, once [main] has done everything that comes before them. */
@@ -381,6 +384,7 @@ private fun runApplication(
     startupSettings: AppSettings,
     coroutineExceptionHandler: CoroutineExceptionHandler,
     relaunchedByGuard: Boolean,
+    songLibraryTally: SongLibraryTally,
 ) {
     // Read here, on this thread, so the manager the app keeps already holds the settings and the
     // first composition does not read the file on the event thread. Not main's first read:
@@ -403,7 +407,7 @@ private fun runApplication(
                 toleratingDisposedOwnerRace(windowExceptions)
             },
         ) {
-            ChurchPresenterApp(coroutineExceptionHandler, settingsManager, relaunchedByGuard) {
+            ChurchPresenterApp(coroutineExceptionHandler, settingsManager, relaunchedByGuard, songLibraryTally) {
                 themeCustomization = it
             }
         }
@@ -421,11 +425,14 @@ private fun ApplicationScope.ChurchPresenterApp(
     coroutineExceptionHandler: CoroutineExceptionHandler,
     settingsManager: SettingsManager,
     relaunchedByGuard: Boolean,
+    songLibraryTally: SongLibraryTally,
     onThemeCustomizationChange: (ThemeCustomization) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope { coroutineExceptionHandler }
     val application = this
-    val root = remember { AppRootState(application, coroutineScope, settingsManager = settingsManager) }
+    val root = remember { AppRootState(
+            application, coroutineScope, settingsManager = settingsManager, songLibraryTally = songLibraryTally,
+        ) }
     with(root) {
         // The desktop's end of calendar sync with phones. Made here, beside the settings it writes
         // back to, so the startup round and the Settings card talk to the same object.
