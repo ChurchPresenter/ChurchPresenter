@@ -7,6 +7,8 @@ import org.churchpresenter.songs.ScheduleSongAction
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,16 @@ import java.awt.GraphicsEnvironment
  */
 @Composable
 internal fun MainDesktopScope.LeadingEffects() {
+    // The Bible editor saved, or dev mode turned its corrections on or off: load the Bibles again.
+    val verseEditsKey = live.devMode to live.bibleEditsRevision
+    val loadedVerseEditsKey = remember { mutableStateOf(verseEditsKey) }
+    LaunchedEffect(verseEditsKey) {
+        if (verseEditsKey != loadedVerseEditsKey.value) {
+            loadedVerseEditsKey.value = verseEditsKey
+            bibleViewModel.reloadForVerseEdits()
+        }
+    }
+
     // Persist the clamped value back into state after composition.
     LaunchedEffect(effectiveTabIndex) {
         if (state.selectedTabIndex != effectiveTabIndex) state.selectedTabIndex = effectiveTabIndex

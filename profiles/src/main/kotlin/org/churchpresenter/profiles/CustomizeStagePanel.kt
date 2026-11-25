@@ -214,14 +214,19 @@ private fun BackgroundStage(
         val band = settings.bandFractionFor(scope)
         val above = resolveAboveBand(settings.backgroundSettings, config).fill
         Column(Modifier.fillMaxSize()) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f - band)
-                    .then(if (above != null && !checker) Modifier.background(above) else Modifier)
-            ) {
-                if (checker) PreviewCheckerboard(Modifier.fillMaxSize())
+            // A weight must be above zero: a band of the whole screen has nothing above it, and a
+            // band of none has nothing to draw.
+            if (band < 1f) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f - band)
+                        .then(if (above != null && !checker) Modifier.background(above) else Modifier)
+                ) {
+                    if (checker) PreviewCheckerboard(Modifier.fillMaxSize())
+                }
             }
+            if (band <= 0f) return@Column
             // Clipped for the reason the presenter clips its band: a blurred fill is overscanned,
             // and without this it spills up over the band line.
             Box(Modifier.fillMaxWidth().weight(band).clipToBounds()) {

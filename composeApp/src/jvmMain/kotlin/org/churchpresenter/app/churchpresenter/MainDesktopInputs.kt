@@ -50,6 +50,8 @@ data class LiveOutputCallbacks(
     val controlHub: ControlHub? = null,
     /** Dev mode: the features not ready for production are offered -- see `AppRootState.devMode`. */
     val devMode: Boolean = false,
+    /** Goes up each time the Bible editor saves, so the Bible tab loads the corrections. */
+    val bibleEditsRevision: Int = 0,
 )
 
 /** The planned service the Schedule works against, from the calendar. */

@@ -42,6 +42,8 @@ MODULES = [
     ("bible-formats", "Bible formats", 0.1),
     ("song-chords", "Song chords", 0.1),
     ("bible", "Bible", 0.1),
+    ("bible-edits", "Bible edits", 0.1),
+    ("bible-editor", "Bible editor", 0.4),
     ("calendar", "Calendar", 1.4),
     ("calendar-core", "Calendar model", 0.9),
     ("output-api", "Output ports", 0.1),

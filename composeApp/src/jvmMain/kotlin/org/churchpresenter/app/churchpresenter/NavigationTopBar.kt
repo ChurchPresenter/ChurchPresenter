@@ -59,7 +59,7 @@ import org.churchpresenter.strings.generated.resources.menu_developer_simulate_m
 import org.churchpresenter.strings.generated.resources.menu_developer_style_editor
 import org.churchpresenter.strings.generated.resources.menu_developer_memory_monitor
 import org.churchpresenter.strings.generated.resources.menu_developer_story_prompt
-import org.churchpresenter.strings.generated.resources.menu_developer_verse_fixer
+import org.churchpresenter.strings.generated.resources.menu_developer_bible_editor
 import org.churchpresenter.strings.generated.resources.menu_developer_wick_intro
 import org.churchpresenter.strings.generated.resources.menu_disconnect
 import org.churchpresenter.strings.generated.resources.menu_edit
@@ -145,7 +145,7 @@ fun FrameWindowScope.NavigationTopBar(
     onOpenMemoryMonitor: () -> Unit = {},
     onOpenStoryPrompt: () -> Unit = {},
     onOpenWickIntro: () -> Unit = {},
-    onOpenVerseFixer: () -> Unit = {},
+    onOpenBibleEditor: () -> Unit = {},
 ) {
     val fileLabel = stringResource(Res.string.menu_file)
     val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
@@ -185,7 +185,7 @@ fun FrameWindowScope.NavigationTopBar(
                     isPresenterWindowVisible, onSetPresenterWindowVisible, isDevWindowAlwaysOnTop,
                     onSetDevWindowAlwaysOnTop, isSimulatingMissingOutputs, onSetSimulatingMissingOutputs,
                 ),
-                onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt, onOpenWickIntro, onOpenVerseFixer,
+                onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt, onOpenWickIntro, onOpenBibleEditor,
             )
         }
     }
@@ -483,7 +483,7 @@ private fun MenuBarScope.DeveloperMenu(
     onOpenMemoryMonitor: () -> Unit,
     onOpenStoryPrompt: () -> Unit,
     onOpenWickIntro: () -> Unit,
-    onOpenVerseFixer: () -> Unit,
+    onOpenBibleEditor: () -> Unit,
 ) {
     Menu(stringResource(Res.string.menu_developer), mnemonic = 'D') {
         Menu(stringResource(Res.string.menu_developer_display), mnemonic = 'S') {
@@ -507,6 +507,6 @@ private fun MenuBarScope.DeveloperMenu(
         Item(stringResource(Res.string.menu_developer_memory_monitor), onClick = onOpenMemoryMonitor)
         Item(stringResource(Res.string.menu_developer_story_prompt), onClick = onOpenStoryPrompt)
         Item(stringResource(Res.string.menu_developer_wick_intro), onClick = onOpenWickIntro)
-        Item(stringResource(Res.string.menu_developer_verse_fixer), onClick = onOpenVerseFixer)
+        Item(stringResource(Res.string.menu_developer_bible_editor), onClick = onOpenBibleEditor)
     }
 }
