@@ -3,6 +3,11 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.songs.bundledSongCount
+import org.churchpresenter.telemetry.LiveMapReporter
+import org.churchpresenter.telemetry.LibraryTally
+import org.churchpresenter.telemetry.mostSongs
 import java.io.File
 
 /*
@@ -27,6 +32,32 @@ internal fun startCrashReporting(enabled: Boolean) {
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+}
+
+/** What the launch ping reports of the library and the screens, gathered by [launchLibrary]. */
+internal data class LaunchLibrary(val songs: Pair<Int, Int>, val bibles: Int, val screens: Int)
+
+/**
+ * The library and the screens the launch ping reports, each the larger of two counts: the song
+ * folder and the settings as they are at launch, or what the Songs and Bible tabs loaded once they
+ * have; the displays at launch, or once the tabs have loaded, so a projector switched on after the
+ * app counts. Logged, and left in the crash report's trail, so a report says what the app ran on.
+ */
+internal suspend fun launchLibrary(settings: AppSettings, tally: LibraryTally): LaunchLibrary {
+    val screensAtLaunch = LiveMapReporter.detectScreenCount()
+    val folder = LiveMapReporter.gatherSongCounts(settings, ::bundledSongCount)
+    val loaded = tally.await(LibraryTally.FIRST_LOAD_WAIT, LibraryTally.settleFor(settings))
+    val library = LaunchLibrary(
+        songs = mostSongs(folder, loaded.songs) ?: folder,
+        bibles = maxOf(settings.bibleSettings.translationList().size, loaded.bibles),
+        screens = maxOf(screensAtLaunch, LiveMapReporter.detectScreenCount()),
+    )
+    val line = "Library: ${library.songs.second} songs in ${library.songs.first} songbooks " +
+        "(folder ${folder.second}, Songs tab ${loaded.songs?.second ?: "not loaded"}), " +
+        "${library.bibles} Bibles, ${library.screens} screens"
+    Log.info("Startup", line)
+    CrashReporter.breadcrumb(line, category = "lifecycle")
+    return library
 }
 
 /**

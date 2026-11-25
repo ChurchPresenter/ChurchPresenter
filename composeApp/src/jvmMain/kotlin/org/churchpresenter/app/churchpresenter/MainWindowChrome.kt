@@ -263,11 +263,13 @@ private fun MainWindowScope.mainDesktopPublishers(): MainDesktopPublishers = wit
         onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
         onSongsLoaded = { songs ->
             helperSongCount = songs.size
+            libraryTally.songsLoaded(songs.map { it.songbook })
             helperSongs = songs
             companionServer.publishSongs(songs)
         },
         onCurrentTabChange = { tab -> helperCurrentTab = tab },
         onScenesChanged = { scenes -> scenesForInstanceLink = scenes },
+        onBibleTranslationsLoaded = { count -> libraryTally.biblesLoaded(count) },
         onBibleLoaded = { bible, translation ->
             primaryBibleForInstanceLink = bible
             companionServer.publishBible(
