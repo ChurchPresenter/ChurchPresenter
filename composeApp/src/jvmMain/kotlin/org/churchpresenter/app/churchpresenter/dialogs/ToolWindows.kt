@@ -40,10 +40,9 @@ import org.churchpresenter.sharedui.filechooser.OwnedFileDialog
 import org.churchpresenter.profiles.isMacOs
 import org.jetbrains.compose.resources.getString
 import org.churchpresenter.strings.generated.resources.converter_window_title
-import org.churchpresenter.strings.generated.resources.verse_fixer_choose_title
-import org.churchpresenter.strings.generated.resources.verse_fixer_window_title
-import org.churchpresenter.sharedui.filechooser.FileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.strings.generated.resources.bible_editor_window_title
+import org.churchpresenter.bibleeditor.ui.BibleEditorApp
+import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.strings.generated.resources.open_calendar_manager
 import org.churchpresenter.strings.generated.resources.open_song_library
 import org.churchpresenter.strings.generated.resources.lottie_gen_window_title
@@ -59,7 +58,6 @@ import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.calendar.ui.CalendarApp
 import org.churchpresenter.songlibrary.ui.SongLibraryApp
-import org.churchpresenter.converter.ui.BibleVerseFixerApp
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.converter.ui.App as ConverterApp
 import org.churchpresenter.converter.ui.Strings as ConverterStrings
@@ -102,35 +100,30 @@ fun ConverterWindow(
 }
 
 /**
- * The Bible verse fixer, in a window of its own: Developer menu only.
+ * The Bible editor, in a window of its own: Developer menu only.
  *
- * It lists the verses of a chosen `.spb` whose id the app cannot read, with the verse before and
- * after each, and rewrites the ids the person edits. Like the converter it keeps its own strings,
- * so the locale is set from the app's before it composes.
+ * Its own module. It reads every `.spb` in [bibleFolder] and keeps its changes in the app's data
+ * folder, never in the Bible files themselves.
  */
 @Composable
-fun BibleVerseFixerWindow(
+fun BibleEditorWindow(
     theme: ThemeMode,
-    /** The Bibles set in Settings, for the fixer to offer first. */
-    bibleFiles: List<File>,
+    bibleFolder: String,
+    /** The Bibles set in Settings, for the editor to open first. */
+    preferred: List<File>,
     onClose: () -> Unit,
+    /** After each save has reached the disk — where the app reloads the Bible tab. */
+    onSaved: () -> Unit = {},
     frame: ToolWindowFrame = appToolWindowFrame,
 ) {
-    val language = LocalLanguage.current
-    remember(language) { ConverterStrings.setLocale(Locale.forLanguageTag(language.code)) }
-    frame(ToolWindowSpec(stringResource(Res.string.verse_fixer_window_title), DpSize(960.dp, 760.dp), onClose)) {
+    frame(ToolWindowSpec(stringResource(Res.string.bible_editor_window_title), DpSize(1240.dp, 820.dp), onClose)) {
         AppWindowRoot(theme = theme) {
-            BibleVerseFixerApp(
-                bibleFiles = bibleFiles,
-                // The app's own chooser, as every other tab uses, not the converter's Swing one.
-                chooseFile = {
-                    FileChooser.platformInstance.chooseSingle(
-                        path = bibleFiles.firstOrNull()?.parentFile?.toPath(),
-                        filters = listOf(FileNameExtensionFilter("Bible (.spb)", "spb")),
-                        title = getString(Res.string.verse_fixer_choose_title),
-                        selectDirectory = false,
-                    )?.toFile()
-                },
+            BibleEditorApp(
+                bibleFolder = File(bibleFolder),
+                dataFolder = remember { AppDataDir.resolvedThisRun() },
+                onClose = onClose,
+                preferred = preferred,
+                onSaved = onSaved,
             )
         }
     }

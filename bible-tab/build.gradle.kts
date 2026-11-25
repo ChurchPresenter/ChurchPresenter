@@ -18,6 +18,8 @@ dependencies {
     implementation(projects.settings)
     implementation(projects.theme)
     implementation(projects.bible)
+    // The Bible editor's saved corrections, laid over each translation as it loads (dev mode only).
+    implementation(projects.bibleEdits)
     implementation(projects.diagnostics)
     implementation(projects.sttEngine)
     implementation(projects.bibleFormats)
