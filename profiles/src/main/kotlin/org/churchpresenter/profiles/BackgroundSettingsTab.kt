@@ -471,8 +471,14 @@ private fun BackgroundCoverageFill(
     modifier: Modifier = Modifier,
     blurRadius: Dp = 0.dp
 ) {
+    val bandWeight = when (coverage) {
+        BackgroundCoverage.FULL_SCREEN -> 1f
+        BackgroundCoverage.BAND -> bandFraction
+    }
     Column(modifier) {
-        if (coverage == BackgroundCoverage.BAND) {
+        // A weight must be above zero: a band of the whole screen has nothing above it, and a band
+        // of none has nothing to draw.
+        if (coverage == BackgroundCoverage.BAND && bandFraction < 1f) {
             // Not empty any more when the surface washes the area above its band: the operator has
             // to be able to see that choice here, since it is the one part of a lower third the
             // band below it cannot show.
@@ -483,15 +489,11 @@ private fun BackgroundCoverageFill(
                     .then(if (aboveBand != null) Modifier.background(aboveBand) else Modifier)
             )
         }
+        if (bandWeight <= 0f) return@Column
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(
-                    when (coverage) {
-                        BackgroundCoverage.FULL_SCREEN -> 1f
-                        BackgroundCoverage.BAND -> bandFraction
-                    }
-                )
+                .weight(bandWeight)
                 // Clipped for the same reason the presenter clips its band: a blurred fill is
                 // overscanned, and without this it spills above the band line.
                 .clipToBounds()
