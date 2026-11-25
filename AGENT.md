@@ -129,6 +129,8 @@ module-specific notes there, not here.**
 | `bible-formats/`       | `:bible-formats`       | The `.spb` converters and the Bible download catalogues (eBible, Zefania, Beblia)  | [AGENT.md](bible-formats/AGENT.md)       |
 | `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
 | `bible/`               | `:bible`               | The Bible itself: a loaded `.spb` translation, its books, verses and search        | [AGENT.md](bible/AGENT.md)               |
+| `bible-edits/`         | `:bible-edits`         | The Bible editor's corrections: the change model, `bible-edits.json`, laying them over a loaded Bible | [AGENT.md](bible-edits/AGENT.md)         |
+| `bible-editor/`        | `:bible-editor`        | The Bible editor window (Developer menu): restore missing verses, fix typos, history | [AGENT.md](bible-editor/AGENT.md)        |
 | `calendar/`            | `:calendar`            | The Calendar Manager — planned services on a month grid, each with a run of show   | [AGENT.md](calendar/AGENT.md)            |
 | `calendar-core/`       | `:calendar-core`       | The Calendar Manager's model without its window: run of show, clocks, cues, reference parser, PDF export | [AGENT.md](calendar-core/AGENT.md)       |
 | `strings/`             | `:strings`             | The app's user-facing strings, every locale, and the `Res` class generated from them | [AGENT.md](strings/AGENT.md)             |
@@ -212,7 +214,7 @@ fixtures declare; a test's own classpath may reach anything.
 | Layer | Modules | May depend on |
 |---|---|---|
 | foundation | theme, hosanna-theme, composables, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
-| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, output-guard, calendar-core, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
+| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, output-guard, calendar-core, bible-edits, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
 | feature | a tab or a window with its view model | foundation, engine |
 | output | live-output | foundation, engine |
 | integration | server, server-ui, profiles, dialogs, app-settings, telemetry | everything below, and integration |
