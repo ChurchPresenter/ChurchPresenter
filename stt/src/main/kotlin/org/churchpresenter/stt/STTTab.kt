@@ -41,6 +41,14 @@ fun STTTab(
     // The server and the tab's own view are the install's; the outputs' captions are their profiles'.
     val sttSettings = appSettings.sttSettings
     var showSettingsDialog by remember { mutableStateOf(false) }
+    var urlInput by remember(sttSettings.serverUrl) { mutableStateOf(sttSettings.serverUrl.ifEmpty { "http://" }) }
+    // What was typed, with a scheme, saved as the server and connected to.
+    val connect: (String) -> Unit = { typed ->
+        val url = connectUrl(typed)
+        urlInput = url
+        onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
+        sttManager.connect(url)
+    }
 
     val goLive = { presenting(Presenting.STT) }
     // Go Live on a key, under the same condition as the button: connected, and captions not up yet.
@@ -53,12 +61,10 @@ fun STTTab(
         ) {
             ConnectionBar(
                 sttManager = sttManager,
-                savedUrl = sttSettings.serverUrl,
+                urlInput = urlInput,
+                onUrlInputChange = { urlInput = it },
                 isLive = captionsLive.value,
-                onConnect = { url ->
-                    onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
-                    sttManager.connect(url)
-                },
+                onConnect = connect,
                 onOpenSettings = { showSettingsDialog = true },
                 onGoLive = goLive,
             )
@@ -72,7 +78,7 @@ fun STTTab(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            LivePreview(sttManager, sttSettings.tab)
+            LivePreview(sttManager, sttSettings.tab, urlInput, connect)
         }
     }
 

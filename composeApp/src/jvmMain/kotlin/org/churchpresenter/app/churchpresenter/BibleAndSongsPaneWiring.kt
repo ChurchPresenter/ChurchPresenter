@@ -29,6 +29,7 @@ internal fun MainDesktopScope.BibleTabPane() {
         viewModel = bibleViewModel,
         appSettings = appSettings,
         onSettingsChange = onSettingsChange,
+        onOpenBibleSettings = onShowBibleSettings,
         onAddToSchedule = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
             currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
         },
@@ -72,6 +73,8 @@ internal fun MainDesktopScope.SongsTabPane() {
         titleSlideFor = ::titleSlideSection,
         songEditor = { request -> AppSongEditor(request, theme, appSettings) },
         onSettingsChange = onSettingsChange,
+        // The song folder is on the System page, which is the one Settings opens on.
+        onOpenSettings = onShowSettings,
         onAddToSchedule = { songNumber, title, songbook, songId ->
             currentScheduleActions.addSong(songNumber, title, songbook, songId)
         },

@@ -1,5 +1,23 @@
 package org.churchpresenter.qa
 
+import org.churchpresenter.strings.generated.resources.qa_join_hide
+import org.churchpresenter.strings.generated.resources.qa_join_show
+import org.churchpresenter.strings.generated.resources.qa_waiting_body
+import org.churchpresenter.strings.generated.resources.qa_waiting_title
+import org.churchpresenter.strings.generated.resources.qa_empty_resume_last
+import org.churchpresenter.strings.generated.resources.qa_empty_start
+import org.churchpresenter.strings.generated.resources.qa_empty_body
+import org.churchpresenter.strings.generated.resources.qa_empty_title
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.icons.generated.resources.ic_layer_qr
+import org.churchpresenter.icons.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_chat_bubble
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import org.churchpresenter.sharedui.composables.EmptyStateSecondaryButton
+import org.churchpresenter.sharedui.composables.EmptyStateContent
+import org.churchpresenter.sharedui.composables.EmptyStateButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -48,7 +66,6 @@ import org.churchpresenter.strings.generated.resources.qa_no_denied
 import org.churchpresenter.strings.generated.resources.qa_no_finished
 import org.churchpresenter.strings.generated.resources.qa_no_history
 import org.churchpresenter.strings.generated.resources.qa_start_session_hint
-import org.churchpresenter.strings.generated.resources.qa_waiting
 import org.churchpresenter.strings.generated.resources.save
 import org.churchpresenter.strings.generated.resources.qa_clear
 import org.churchpresenter.strings.generated.resources.qa_clear_all_confirm_message
@@ -66,20 +83,69 @@ import org.churchpresenter.sharedui.composables.rowPad
 /** What an empty list says, which depends on the filter and on whether a session is running. */
 @Composable
 internal fun QATabScope.EmptyNotice() {
+    val questionsView = selectedFilter == 0 || selectedFilter == 1 || selectedFilter == FILTER_QUEUED
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            when (selectedFilter) {
-                0, 1, FILTER_QUEUED -> stringResource(
-                    if (sessionActive) Res.string.qa_waiting else Res.string.qa_start_session_hint
-                )
-                2 -> stringResource(Res.string.qa_no_approved)
-                FILTER_FINISHED -> stringResource(Res.string.qa_no_finished)
-                FILTER_DENIED -> stringResource(Res.string.qa_no_denied)
-                FILTER_HISTORY -> stringResource(Res.string.qa_no_history)
-                else -> ""
-            },
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        when {
+            questionsView && sessionActive -> WaitingForQuestions()
+            questionsView && isServerRunning -> NoSessionRunning()
+            else -> Text(
+                when (selectedFilter) {
+                    0, 1, FILTER_QUEUED -> stringResource(Res.string.qa_start_session_hint)
+                    2 -> stringResource(Res.string.qa_no_approved)
+                    FILTER_FINISHED -> stringResource(Res.string.qa_no_finished)
+                    FILTER_DENIED -> stringResource(Res.string.qa_no_denied)
+                    FILTER_HISTORY -> stringResource(Res.string.qa_no_history)
+                    else -> ""
+                },
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** No session yet: what one does, and starting one -- or picking the last one up again. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun QATabScope.NoSessionRunning() {
+    EmptyStateContent(
+        icon = IconRes.drawable.ic_chat_bubble,
+        neutral = false,
+        title = stringResource(Res.string.qa_empty_title),
+        body = stringResource(Res.string.qa_empty_body),
+    ) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            EmptyStateButton(stringResource(Res.string.qa_empty_start), IconRes.drawable.ic_play) {
+                showNewSessionDialog = true
+            }
+            // Sessions are filed newest first.
+            sessions.firstOrNull()?.let { last ->
+                EmptyStateSecondaryButton(
+                    stringResource(Res.string.qa_empty_resume_last),
+                    IconRes.drawable.ic_refresh,
+                ) { qaManager.resumeSession(last.id) }
+            }
+        }
+    }
+}
+
+/** A session with no questions yet: where people join, and putting that on screen. */
+@Composable
+private fun QATabScope.WaitingForQuestions() {
+    EmptyStateContent(
+        icon = IconRes.drawable.ic_chat_bubble,
+        neutral = true,
+        title = stringResource(Res.string.qa_waiting_title),
+        body = stringResource(Res.string.qa_waiting_body),
+        hint = "$serverUrl/qa",
+    ) {
+        EmptyStateSecondaryButton(
+            stringResource(if (showQROnDisplay) Res.string.qa_join_hide else Res.string.qa_join_show),
+            IconRes.drawable.ic_layer_qr,
+            ::toggleJoinInfoOnScreen,
         )
     }
 }

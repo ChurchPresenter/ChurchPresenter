@@ -39,13 +39,13 @@ class QATabViewsTest {
     @Test
     fun `before a session the empty list says to start one, under every waiting filter`() =
         qaTab { _, _, _ ->
-            assertTrue(showsExactly(QALabel.START_SESSION_HINT), "All")
+            assertTrue(showsExactly(QALabel.NO_SESSION_TITLE), "All")
 
             selectFilter(QALabel.INCOMING)
-            assertTrue(showsExactly(QALabel.START_SESSION_HINT), QALabel.INCOMING)
+            assertTrue(showsExactly(QALabel.NO_SESSION_TITLE), QALabel.INCOMING)
 
             selectFilter(QALabel.INCOMING_APPROVED)
-            assertTrue(showsExactly(QALabel.START_SESSION_HINT), QALabel.INCOMING_APPROVED)
+            assertTrue(showsExactly(QALabel.NO_SESSION_TITLE), QALabel.INCOMING_APPROVED)
         }
 
     @Test

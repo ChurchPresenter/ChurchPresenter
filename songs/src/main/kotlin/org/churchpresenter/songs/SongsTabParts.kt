@@ -265,16 +265,16 @@ private fun SongsTabController.SongListSide(row: RowScope) = with(row) {
         favoriteSongs = { viewModel.getFavoriteSongs() },
         playCountFor = { id -> playCounts?.getSongPlayCount(id) },
         searchMatchFor = viewModel::searchMatchFor,
-        onSearchQueryChange = { searchFor(it) },
+        onSearchQueryChange = { libraryJustLoaded = false; searchFor(it) },
         onSearchFocusChanged = { searchFieldFocused = it },
         onFilterTypeChange = { viewModel.updateFilterType(it) },
         onSongbookChange = { pickSongbook(it) },
         onSortChange = { viewModel.updateSort(it) },
-        onSelectSong = { viewModel.selectSong(it) },
+        onSelectSong = { libraryJustLoaded = false; viewModel.selectSong(it) },
         onSelectSongByDetails = { number, title, songbook, songId ->
             viewModel.selectSongByDetails(number, title, songbook, songId)
         },
-        onSelectSection = { viewModel.selectSection(it) },
+        onSelectSection = { libraryJustLoaded = false; viewModel.selectSection(it) },
         onToggleFavorite = { songId ->
             viewModel.toggleFavorite(songId)
             onSettingsChange { s -> s.copy(songFavorites = viewModel.favorites.value.toList()) }
@@ -358,6 +358,14 @@ private fun SongsTabController.SongLyricsSide(row: RowScope) = with(row) {
         onShowLanguageInPanel = { slot, shown ->
             onSettingsChange { s -> s.withPanelLanguageShown(slot, shown) }
         },
+        library = SongLibraryActions(
+            onChooseFolder = { folder ->
+                libraryJustLoaded = true
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(storageDirectory = folder)) }
+            },
+            onOpenSettings = onOpenSettings,
+        ),
+        justLoadedSongs = if (libraryJustLoaded) viewModel.allSongItemsState.value.size else 0,
     )
 }
 

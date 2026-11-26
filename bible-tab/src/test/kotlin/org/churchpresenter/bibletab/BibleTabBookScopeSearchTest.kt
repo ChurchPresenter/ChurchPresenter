@@ -71,7 +71,7 @@ class BibleTabBookScopeSearchTest {
         searchNow()
 
         assertTrue(
-            showsExactly("""No results found for "shepherd" in Genesis"""),
+            showsExactly("No verses in Genesis match “shepherd”"),
             "Psalms has it, Genesis does not: ${renderedText().take(20)}",
         )
     }
@@ -104,7 +104,7 @@ class BibleTabBookScopeSearchTest {
         searchNow()
 
         assertEquals(0, vm.selectedBookIndex.value, "the browser did not move to John")
-        assertTrue(showsExactly("""No results found for "John 3" in Genesis"""), renderedText().take(20).toString())
+        assertTrue(showsExactly("No verses in Genesis match “John 3”"), renderedText().take(20).toString())
     }
 
     @Test

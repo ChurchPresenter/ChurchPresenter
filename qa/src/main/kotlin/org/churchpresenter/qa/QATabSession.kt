@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.qa_new_session
-import org.churchpresenter.strings.generated.resources.qa_no_session_banner
 import org.churchpresenter.strings.generated.resources.qa_resume_session
 import org.churchpresenter.strings.generated.resources.qa_session_name_label
 import org.churchpresenter.strings.generated.resources.qa_session_option
@@ -84,21 +83,6 @@ internal fun ResumeMenu(tab: QATabScope) = with(tab) {
 @Composable
 internal fun sessionLabel(session: QASession): String =
     stringResource(Res.string.qa_session_option, session.name, session.questions.size)
-
-/** Says, for as long as no session runs, that phones cannot send questions yet. */
-@Composable
-internal fun QATabScope.NoSessionBanner() {
-    Text(
-        stringResource(Res.string.qa_no_session_banner),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onErrorContainer,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp)
-            .background(MaterialTheme.colorScheme.errorContainer, AppShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    )
-}
 
 /** Names a new session before it starts; the start time is the name already typed in. */
 @Composable

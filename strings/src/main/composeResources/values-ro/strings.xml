@@ -441,6 +441,8 @@
     <string name="tooltip_collapse_schedule">Restrânge Programul</string>
     <string name="tooltip_expand_schedule">Extinde Programul</string>
     <string name="schedule_drop_hint">Glisați fișiere aici pentru a le adăuga la program</string>
+    <string name="schedule_empty_title">Programul este gol</string>
+    <string name="schedule_empty_body">Adăugați cântări, versete sau media cu + sau trageți-le aici.</string>
     <string name="schedule_drop_unsupported">Nu se poate adăuga %1$s</string>
     <string name="schedule_note_placeholder">Adaugă notă…</string>
     <string name="schedule_add_files">Adaugă Fișiere…</string>
@@ -501,6 +503,18 @@
     <string name="loading">Se încarcă...</string>
     <string name="select_folder_to_view">Selectați un dosar pentru a vedea imaginile</string>
     <string name="select_image_folder_dialog">Selectați Dosarul cu Imagini</string>
+    <string name="pictures_empty_body">Alegeți un dosar cu imagini pentru a le afișa ca diapozitive.</string>
+    <string name="pictures_empty_choose_folder">Alegeți dosarul</string>
+    <string name="pictures_empty_drag_hint">sau trageți un dosar aici</string>
+    <string name="pictures_empty_folder_title">Nicio imagine în „%1$s”</string>
+    <string name="pictures_empty_folder_body">Adăugați fișiere JPG, PNG sau GIF în acest dosar sau alegeți altul.</string>
+    <string name="pictures_empty_choose_another">Alegeți alt dosar</string>
+    <string name="pictures_drop_title">Plasați aici pentru a adăuga dosarul</string>
+    <string name="pictures_drop_body">Imaginile lui vor apărea aici ca diapozitive.</string>
+    <string name="pictures_cant_open_title">Acest dosar nu poate fi deschis</string>
+    <string name="pictures_cant_open_body">ChurchPresenter nu are permisiunea de a citi „%1$s”.</string>
+    <string name="pictures_cant_open_retry">Reîncercați</string>
+    <string name="pictures_cant_open_choose">Alegeți altul</string>
     <string name="loop">Buclă</string>
     <string name="loop_on">Buclă Activată</string>
     <string name="loop_off">Buclă Dezactivată</string>
@@ -539,6 +553,12 @@
     <string name="select_presentation_file">Selectați un fișier de prezentare pentru a vedea slide-urile</string>
     <string name="supported_formats">Suportate: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Slide-urile sunt redate ca imagini statice — animațiile, tranzițiile, videoclipurile și sunetul nu sunt acceptate.</string>
+    <string name="presentation_empty_title">Nicio prezentare deschisă</string>
+    <string name="presentation_empty_body">Deschideți un fișier PowerPoint, Keynote sau PDF. Animațiile, apariția treptată, tranzițiile și videoclipurile Keynote rulează exact ca în original.</string>
+    <string name="presentation_empty_open">Deschideți prezentarea</string>
+    <string name="presentation_empty_drag_hint">sau trageți un fișier aici</string>
+    <string name="presentation_drop_title">Plasați aici pentru a deschide prezentarea</string>
+    <string name="presentation_drop_body">PowerPoint, Keynote sau PDF.</string>
     <string name="presentation_error_password_protected">Acest PDF este protejat prin parolă și nu poate fi deschis. Eliminați parola și încercați din nou.</string>
     <string name="presentation_error_empty_document">Acest fișier nu are pagini de afișat.</string>
     <string name="presentation_error_library_missing">Suportul pentru PDF nu este disponibil în această versiune.</string>
@@ -734,10 +754,38 @@
     <string name="bible_no_primary_hint">Deschideți ⚙ Setări și mergeți la fila Biblie, apoi:</string>
     <string name="bible_no_primary_step1">1. Setați directorul de stocare a Bibliei</string>
     <string name="bible_no_primary_step2">2. Selectați un fișier de Biblie Principală</string>
+    <string name="bible_empty_title">Nicio Biblie selectată</string>
+    <string name="bible_empty_body">Alegeți dosarul cu Biblii și Biblia principală în Setări › Biblie.</string>
+    <string name="bible_empty_open_settings">Deschideți setările Bibliei</string>
+    <string name="bible_no_match_title">Niciun verset nu corespunde cu „%1$s”</string>
+    <string name="bible_no_match_title_book">Niciun verset din %2$s nu corespunde cu „%1$s”</string>
+    <string name="bible_no_match_body">Verificați ortografia sau încercați mai puține cuvinte.</string>
+    <string name="bible_no_match_body_book">Verificați ortografia sau căutați în toată Biblia.</string>
+    <string name="bible_no_match_clear">Ștergeți căutarea</string>
+    <string name="bible_no_match_body_exact">Au fost căutate doar cuvinte întregi. Verificați ortografia sau căutați și în interiorul cuvintelor.</string>
+    <string name="bible_no_match_inside_words">Căutați în interiorul cuvintelor</string>
     <string name="songs_indexing">Se indexează cântările…</string>
     <string name="songs_no_db_title">Nicio Bază de Date de Cântări Configurată</string>
     <string name="songs_no_db_hint">Deschideți ⚙ Setări și mergeți la fila Cântări, apoi:</string>
     <string name="songs_no_db_step">Setați un director care conține un fișier de bază de date de cântări</string>
+    <string name="songs_empty_title">Încă nu există o bibliotecă de cântări</string>
+    <string name="songs_empty_body">Alegeți dosarul cu fișierul bazei de date de cântări. Îl puteți schimba mai târziu din Setări.</string>
+    <string name="songs_empty_choose_folder">Alegeți dosarul</string>
+    <string name="songs_empty_open_settings">Deschideți Setări</string>
+    <string name="songs_empty_folder_dialog">Selectați dosarul de cântări</string>
+    <string name="songs_no_match_title">Nicio cântare nu corespunde cu „%1$s”</string>
+    <string name="songs_no_match_body">Nimic nici în versuri. Verificați ortografia.</string>
+    <string name="songs_no_match_body_lyrics">Verificați ortografia sau căutați în versuri.</string>
+    <string name="songs_no_match_clear">Ștergeți căutarea</string>
+    <string name="songs_no_selection_title">Nicio cântare selectată</string>
+    <string name="songs_no_selection_body">Alegeți o cântare din listă pentru a-i vedea versurile.</string>
+    <string name="songs_no_match_search_lyrics">Căutați în versuri</string>
+    <plurals name="songs_loaded_title">
+        <item quantity="one">%1$d cântare încărcată</item>
+        <item quantity="few">%1$d cântări încărcate</item>
+        <item quantity="other">%1$d de cântări încărcate</item>
+    </plurals>
+    <string name="songs_loaded_body">Alegeți o cântare din listă sau căutați una pentru a-i vedea versurile.</string>
 
     <!-- Output role (fill+key) -->
     <string name="key_output">Ieșire Key</string>
@@ -1319,6 +1367,14 @@
     <string name="qa_displaying">Se afișează: %1$s…</string>
     <string name="qa_waiting">Se așteaptă întrebări…</string>
     <string name="qa_start_session_hint">Porniți o sesiune pentru a primi întrebări</string>
+    <string name="qa_empty_title">Nicio sesiune Î&amp;R în desfășurare</string>
+    <string name="qa_empty_body">Porniți o sesiune și oamenii vor putea trimite întrebări de pe telefoane. Acestea vor apărea aici.</string>
+    <string name="qa_empty_start">Porniți sesiunea</string>
+    <string name="qa_empty_resume_last">Reluați ultima sesiune</string>
+    <string name="qa_waiting_title">Se așteaptă întrebări</string>
+    <string name="qa_waiting_body">Întrebările noi apar aici imediat ce cineva trimite una.</string>
+    <string name="qa_join_show">Afișați pe ecran informațiile de participare</string>
+    <string name="qa_join_hide">Ascundeți informațiile de participare</string>
     <string name="qa_no_approved">Nicio întrebare aprobată</string>
     <string name="qa_no_finished">Nicio întrebare finalizată</string>
     <string name="qa_no_denied">Nicio întrebare respinsă</string>
@@ -1386,6 +1442,16 @@
     <string name="stt_live_preview">Previzualizare Live</string>
     <string name="stt_not_connected">Neconectat. Introduceți URL-ul serverului STT și faceți clic pe Conectare.</string>
     <string name="stt_waiting_for_transcription">Se așteaptă transcrierea…</string>
+    <string name="stt_empty_title">Nu există conexiune la un server de transcriere vocală</string>
+    <string name="stt_empty_body">Subtitrările live vor apărea aici după ce ChurchPresenter se conectează la serverul STT.</string>
+    <string name="stt_empty_connecting_body">Conectare la %1$s…</string>
+    <string name="stt_empty_connect">Conectare</string>
+    <string name="stt_empty_connecting">Se conectează…</string>
+    <string name="stt_listening_title">Se ascultă…</string>
+    <string name="stt_listening_body">Începeți să vorbiți și cuvintele vor apărea aici.</string>
+    <string name="stt_error_title">%1$s nu poate fi accesat</string>
+    <string name="stt_error_body">Verificați dacă serverul STT rulează și dacă adresa este corectă.</string>
+    <string name="stt_error_retry">Reîncercați</string>
     <string name="stt_translation_label">Traducere</string>
 
     <!-- CCLI Report -->
@@ -1567,6 +1633,8 @@
     <string name="dictionary_kjv_usage">Utilizare KJV</string>
     <string name="dictionary_no_results">Nu s-au găsit rezultate</string>
     <string name="dictionary_select_entry">Selectați o intrare pentru a vedea detaliile</string>
+    <string name="dictionary_empty_title">Niciun cuvânt selectat</string>
+    <string name="dictionary_empty_body">Alegeți o intrare din listă sau căutați după numărul Strong, cuvânt sau definiție.</string>
     <string name="dictionary_loading">Se încarcă dicționarul…</string>
     <string name="dictionary_entry_count">%1$d intrări</string>
 

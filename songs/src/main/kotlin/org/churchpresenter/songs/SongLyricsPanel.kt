@@ -1,5 +1,20 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.strings.generated.resources.songs_empty_folder_dialog
+import org.churchpresenter.strings.generated.resources.songs_empty_open_settings
+import org.churchpresenter.strings.generated.resources.songs_empty_choose_folder
+import org.churchpresenter.strings.generated.resources.songs_empty_body
+import org.churchpresenter.strings.generated.resources.songs_empty_title
+import org.churchpresenter.icons.generated.resources.ic_settings
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_storage_songs
+import kotlin.io.path.absolutePathString
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.composables.EmptyStateSecondaryButton
+import org.churchpresenter.sharedui.composables.EmptyStateContent
+import org.churchpresenter.sharedui.composables.EmptyStateButton
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.OrderEntry
@@ -45,10 +60,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,10 +83,6 @@ import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.strings.generated.resources.songs_no_db_title
-import org.churchpresenter.strings.generated.resources.songs_no_db_hint
-import org.churchpresenter.strings.generated.resources.songs_no_db_step
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -82,7 +90,6 @@ import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.edit_song
 import org.churchpresenter.strings.generated.resources.go_live
 import org.churchpresenter.icons.generated.resources.ic_add
-import org.churchpresenter.icons.generated.resources.ic_note
 import org.churchpresenter.icons.generated.resources.ic_edit
 import org.churchpresenter.strings.generated.resources.no_lyrics_available
 import org.churchpresenter.strings.generated.resources.songs_browse_paused_hint
@@ -156,6 +163,10 @@ internal fun RowScope.SongLyricsPanel(
     onRenameLanguage: (slot: Int, name: String) -> Unit = { _, _ -> },
     /** Shows language [slot] in this panel, or hides it; the outputs are not affected. */
     onShowLanguageInPanel: (slot: Int, shown: Boolean) -> Unit = { _, _ -> },
+    /** What the empty library's buttons do. */
+    library: SongLibraryActions = SongLibraryActions(),
+    /** How many songs a folder chosen from the empty library loaded; 0 once a song is picked. */
+    justLoadedSongs: Int = 0,
 ) {
     val density = LocalDensity.current
     // Right panel — Lyrics display (fixed width, resizable via drag handle)
@@ -231,7 +242,8 @@ internal fun RowScope.SongLyricsPanel(
         // Sits here, directly above the words, rather than up with the rescue banner: it comes and
         // goes on every search, and higher up it would shove the Back to Live button down the panel
         // mid-service, which is the one control that must not move while something is live.
-        if (searchFieldFocused) {
+        // Only with a song to send: with none, Go Live has nothing to put up.
+        if (searchFieldFocused && currentSong != null) {
             SearchKeyboardBanner(somethingLive = isPresenting, onClick = onSearchBannerClick)
         } else if (browsePausedHint && showBackToLive && !dialogOpen) {
             val shortcuts = LocalShortcuts.current
@@ -248,7 +260,9 @@ internal fun RowScope.SongLyricsPanel(
         // Lyrics content
         val noSongsLoaded = filteredSongs.isEmpty() && searchQuery.isBlank()
         if (noSongsLoaded) {
-            NoSongDatabaseCard()
+            NoSongLibrary(library)
+        } else if (justLoadedSongs > 0) {
+            SongsLoaded(justLoadedSongs)
         } else {
             currentSong?.notes?.takeIf { it.isNotBlank() }?.let { notes ->
                 SongNotesCard(notes, onEdit = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() })
@@ -391,48 +405,45 @@ private fun LyricsActionBar(
     }
 }
 
-/** Empty state: no song database configured. */
+/** What the empty library's buttons do: save a chosen song folder, and open Settings. */
+internal class SongLibraryActions(
+    val onChooseFolder: (folder: String) -> Unit = {},
+    val onOpenSettings: () -> Unit = {},
+)
+
+/** Empty state: no song library yet, with the folder one click away. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun NoSongDatabaseCard() {
-    Box(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            modifier = Modifier.widthIn(max = 320.dp),
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = 3.dp,
-            color = MaterialTheme.colorScheme.surfaceVariant
+private fun NoSongLibrary(library: SongLibraryActions) {
+    val scope = rememberCoroutineScope()
+    val dialogTitle = stringResource(Res.string.songs_empty_folder_dialog)
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        EmptyStateContent(
+            icon = IconRes.drawable.ic_storage_songs,
+            neutral = false,
+            title = stringResource(Res.string.songs_empty_title),
+            body = stringResource(Res.string.songs_empty_body),
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            // Side by side where they fit; one under the other in a narrow panel.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_note),
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                )
-                Text(
-                    text = stringResource(Res.string.songs_no_db_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                Text(
-                    text = stringResource(Res.string.songs_no_db_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = stringResource(Res.string.songs_no_db_step),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
+                EmptyStateButton(stringResource(Res.string.songs_empty_choose_folder), IconRes.drawable.ic_folder) {
+                    scope.launch {
+                        val dir = FileChooser.platformInstance.chooseSingle(
+                            path = null,
+                            title = dialogTitle,
+                            selectDirectory = true,
+                            filters = emptyList(),
+                        )
+                        dir?.let { library.onChooseFolder(it.absolutePathString()) }
+                    }
+                }
+                EmptyStateSecondaryButton(
+                    stringResource(Res.string.songs_empty_open_settings),
+                    IconRes.drawable.ic_settings,
+                    library.onOpenSettings,
                 )
             }
         }
@@ -455,6 +466,10 @@ private fun LyricsList(
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
 ) {
+    if (currentSong == null) {
+        NoSongSelected()
+        return
+    }
     Box {
         val lyricsListState = rememberLazyListState()
         val titleSlideEnabled = appSettings.operatorSongSettings().titleSlideEnabled
@@ -465,17 +480,17 @@ private fun LyricsList(
             if (live.titleSlideSelected) {
                 lyricsListState.followLyricsEntry(0)
             } else if (selectedSectionIndex >= 0) {
-                val offset = if (titleSlideEnabled && currentSong != null) 1 else 0
+                val offset = if (titleSlideEnabled) 1 else 0
                 lyricsListState.followLyricsEntry(selectedSectionIndex + offset)
             }
         }
 
         // Get lyric sections from ViewModel — no parsing in UI
-        val sections = if (currentSong != null) lyricSections() else emptyList()
+        val sections = lyricSections()
         // The languages the operator keeps in this panel, less any the song never fills.
         val columns = panelColumnSlots(
             sections,
-            appSettings.panelLanguageSlots(currentSong?.translationCount ?: 1),
+            appSettings.panelLanguageSlots(currentSong.translationCount),
         )
 
         LazyColumn(
@@ -485,7 +500,7 @@ private fun LyricsList(
             verticalArrangement = Arrangement.spacedBy(rowPad(4.dp)),
         ) {
             // ── Title slide entry ────────────────────────────────────
-            if (titleSlideEnabled && currentSong != null && sections.isNotEmpty()) {
+            if (titleSlideEnabled && sections.isNotEmpty()) {
                 item {
                     TitleSlideEntry(
                         currentSong = currentSong,
@@ -504,7 +519,7 @@ private fun LyricsList(
                 itemsIndexed(sections) { sectionIndex, section ->
                     LyricSectionEntry(
                         section = section,
-                        cue = currentSong?.sectionNotes?.get(section.sectionKey)
+                        cue = currentSong.sectionNotes.get(section.sectionKey)
                             ?.takeIf { section.slideIndex == 0 }.orEmpty(),
                         sectionIndex = sectionIndex,
                         columns = columns,

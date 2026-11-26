@@ -55,6 +55,8 @@ fun SongsTab(
     /** Draws the song editor; the app's is `EditSongDialog`. */
     songEditor: @Composable (SongEditorRequest) -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    /** Opens the settings page that holds the song folder, from the empty library's button. */
+    onOpenSettings: () -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
     /** Instance Link Controller mode — non-null only when connected and controlling. Go-live with a
      *  *new* song (approval-gated the first time on the primary, instant afterwards). */
@@ -102,6 +104,7 @@ fun SongsTab(
     controller.onSectionIndexChanged = onSectionIndexChanged
     controller.onLineIndexChanged = onLineIndexChanged
     controller.onSettingsChange = onSettingsChange
+    controller.onOpenSettings = onOpenSettings
     controller.onAddToSchedule = onAddToSchedule
     controller.onPresenting = onPresenting
     controller.typicalSongSeconds = typicalSongSeconds

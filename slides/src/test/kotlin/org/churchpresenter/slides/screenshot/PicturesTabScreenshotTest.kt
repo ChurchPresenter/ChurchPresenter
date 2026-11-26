@@ -134,6 +134,17 @@ class PicturesTabScreenshotTest {
     fun `no folder chosen yet`() = shoot("no_folder", folder = { null })
 
     @Test
+    fun `a folder that cannot be read`() {
+        val locked = folderOf("Locked Folder", "One.png")
+        try {
+            locked.setReadable(false)
+            shoot("folder_unreadable", folder = { locked })
+        } finally {
+            locked.setReadable(true)
+        }
+    }
+
+    @Test
     fun browsing() = shoot("browsing")
 
     @Test

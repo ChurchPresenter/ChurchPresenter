@@ -77,6 +77,7 @@ class BibleLivePanelEdgeCasesTest {
                     states = vm.tabStates(),
                     appSettings = settings(),
                     onSettingsChange = {},
+                    onOpenBibleSettings = {},
                     onAddToSchedule = null,
                     onVerseSelected = {},
                     onInstanceLinkSendVerse = null,

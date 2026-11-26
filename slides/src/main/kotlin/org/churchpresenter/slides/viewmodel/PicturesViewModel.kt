@@ -70,6 +70,9 @@ class PicturesViewModel private constructor(
 
     val selectedFolder: File? get() = state.selectedFolder.value
 
+    /** Whether the chosen folder could not be read, as opposed to holding no pictures. */
+    val folderUnreadable: Boolean get() = state.folderUnreadable.value
+
     /**
      * What the tab shows for the current folder: the primary's path verbatim when this folder is
      * mirrored over Instance Link, the local absolute path otherwise. Null when nothing is selected.
@@ -150,10 +153,12 @@ class PicturesViewModel private constructor(
             return
         }
 
-        // Load images from folder
-        val imageFiles = folder.listFiles { file ->
+        // Load images from folder; a folder that cannot be listed is told apart from an empty one.
+        val listed = folder.listFiles { file ->
             file.isFile && file.extension.lowercase() in PICTURE_EXTENSIONS && !isSystemArtifact(file.name)
-        }?.sortedBy { it.name } ?: emptyList()
+        }
+        state.folderUnreadable.value = listed == null
+        val imageFiles = listed?.sortedBy { it.name } ?: emptyList()
 
         // Add only files not already present so a re-entrant/repeated load stays idempotent — a
         // duplicate path in the images would crash the LazyVerticalGrid keyed by absolutePath.
@@ -268,6 +273,25 @@ class PicturesViewModel private constructor(
         }
     }
 
+    /** Reads the chosen folder again, off the event thread, after it could not be read. */
+    fun retryFolder() {
+        val folder = state.selectedFolder.value ?: return
+        scope.launch { selectFolder(folder) }
+    }
+
+    /**
+     * Opens what was dropped on the tab: a dropped folder, or the folder of a dropped picture on
+     * that picture. Read off the event thread, as the folder chooser's choice is; the job is
+     * returned so a caller can wait for it.
+     */
+    fun openDropped(files: List<File>, onFolderSelected: (String) -> Unit = {}): Job =
+        scope.launch {
+            val (folder, picture) = droppedPictureFolder(files) ?: return@launch
+            selectFolder(folder)
+            picture?.let { selectImagePath(it.absolutePath) }
+            onFolderSelected(folder.absolutePath)
+        }
+
     fun dispose() {
         parts.watcher.cancel()
         scope.cancel()
@@ -288,4 +312,14 @@ internal class PicturesParts(
     val navigator = PictureNavigator(state, playback)
     val live = PicturesLive(state)
     val watcher = PictureFolderWatcher(state, thumbnails, mainDispatcher, scope)
+}
+
+/**
+ * The folder a drop opens, and the picture to open it on: the first dropped folder, else the folder
+ * of the first dropped picture. Null when the drop holds neither.
+ */
+internal fun droppedPictureFolder(files: List<File>): Pair<File, File?>? {
+    files.firstOrNull { it.isDirectory }?.let { return it to null }
+    val picture = files.firstOrNull { it.isFile && it.extension.lowercase() in PICTURE_EXTENSIONS }
+    return picture?.absoluteFile?.parentFile?.let { it to picture }
 }

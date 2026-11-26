@@ -215,6 +215,22 @@ class PresentationViewModel private constructor(
         }
     }
 
+    /**
+     * Opens the presentations among files dropped on the tab, read off the event thread, and hands
+     * each one opened to [onOpened] -- the tab keeps it as a recent file.
+     */
+    fun openDropped(files: List<File>, onOpened: (File) -> Unit = {}) {
+        scope.launch {
+            val decks = files.filter { it.isFile && isPresentationFile(it) }
+            withContext(Dispatchers.Main) {
+                decks.forEach { file ->
+                    addPresentation(file)
+                    onOpened(file)
+                }
+            }
+        }
+    }
+
     fun addPresentation(file: File) {
         if (file.exists() && isValidPresentationFile(file)) {
             val existingFile = state.presentations.find { it.absolutePath == file.absolutePath }
@@ -291,7 +307,10 @@ internal fun DeckLoadError.toUiError(): PresentationLoadError = when (this) {
     DeckLoadError.UNSUPPORTED_FORMAT, DeckLoadError.PARSE_FAILED -> PresentationLoadError.RENDER_FAILED
 }
 
-private fun isValidPresentationFile(file: File): Boolean =
+private fun isValidPresentationFile(file: File): Boolean = isPresentationFile(file)
+
+/** Whether [file] has an extension the presentation loader reads. */
+internal fun isPresentationFile(file: File): Boolean =
     file.extension.lowercase() in PresentationLoader.SUPPORTED_EXTENSIONS
 
 /**

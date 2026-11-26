@@ -141,7 +141,7 @@ class ScheduleTabActionsTest {
             waitForIdle()
 
             assertTrue(vm.scheduleItems.isEmpty())
-            assertTrue(showsExactly(ScheduleLabel.DROP_HINT), "and the empty state comes back")
+            assertTrue(showsExactly(ScheduleLabel.EMPTY), "and the empty state comes back")
         }
 
     @Test

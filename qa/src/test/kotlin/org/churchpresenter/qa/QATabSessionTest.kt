@@ -109,18 +109,18 @@ class QATabSessionTest {
 
     @Test
     fun `with no session running the tab says nobody can send questions`() = qaTab { qa, _, _ ->
-        onNodeWithText(QALabel.NO_SESSION_BANNER).assertExists()
+        onNodeWithText(QALabel.NO_SESSION_TITLE).assertExists()
 
         qa.startSession("Open")
         waitForIdle()
 
-        onNodeWithText(QALabel.NO_SESSION_BANNER).assertDoesNotExist()
+        onNodeWithText(QALabel.NO_SESSION_TITLE).assertDoesNotExist()
     }
 
     @Test
     fun `with no server the no-session note gives way to the server one`() =
         qaTab(serverUrl = "") { _, _, _ ->
-            onNodeWithText(QALabel.NO_SESSION_BANNER).assertDoesNotExist()
+            onNodeWithText(QALabel.NO_SESSION_TITLE).assertDoesNotExist()
         }
 
     // ── Resuming ────────────────────────────────────────────────────────────────

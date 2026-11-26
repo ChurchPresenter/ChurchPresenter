@@ -122,6 +122,7 @@ fun DictionaryTab(
                 { e -> cb(e.number, e.word, e.transliteration, e.definition) }
             },
             onGoLive = onGoLive,
+            onPickEntry = viewModel::selectByNumber,
         )
     }
 }

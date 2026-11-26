@@ -129,6 +129,8 @@ internal fun SongListScope.SongListBody(hScrollState: ScrollState, contentMinWid
                     )
                 }
             }
+        } else if (filteredSongs.isEmpty() && searchQuery.isNotBlank()) {
+            NoSongsMatch()
         } else {
             val lazyListState = rememberLazyListState()
 

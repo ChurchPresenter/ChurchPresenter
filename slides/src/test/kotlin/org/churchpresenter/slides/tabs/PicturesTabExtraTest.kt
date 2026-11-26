@@ -212,7 +212,7 @@ class PicturesTabExtraTest {
     fun `PicturesTab with no overrides builds its own view model`() = runComposeUiTest {
         setContent { MaterialTheme { PicturesTab() } }
 
-        onNodeWithText(PictureLabel.NO_FOLDER).assertExists()
+        onNodeWithText(PictureLabel.EMPTY_GRID).assertExists()
     }
 
     @Test

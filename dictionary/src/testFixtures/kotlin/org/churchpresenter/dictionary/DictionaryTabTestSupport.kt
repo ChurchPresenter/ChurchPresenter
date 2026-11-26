@@ -188,7 +188,7 @@ object DictionaryLabel {
     const val HEBREW = "Hebrew"
     const val GREEK = "Greek"
     const val NO_RESULTS = "No results found"
-    const val SELECT_ENTRY = "Select an entry to view details"
+    const val SELECT_ENTRY = "No word selected"
     const val TRANSLITERATION = "Transliteration:"
     const val PRONUNCIATION = "Pronunciation:"
     const val DEFINITION = "Definition"

@@ -59,9 +59,9 @@ import org.churchpresenter.calendar.model.PlanDrift
 import org.churchpresenter.calendar.model.RowClock
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.schedule_drop_hint
 import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.schedule_drop_hint
 import org.churchpresenter.strings.generated.resources.schedule_drop_to_remove
 import org.churchpresenter.strings.generated.resources.schedule_drop_unsupported
 import org.churchpresenter.theme.AppShape
@@ -128,13 +128,7 @@ internal fun ScheduleRowList(
         LocateDrops(fileDrop, listState, viewportOrigin)
 
         if (viewModel.scheduleItems.isEmpty() && !fileDrop.dragOver) {
-            Text(
-                text = stringResource(Res.string.schedule_drop_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.Center).padding(32.dp)
-            )
+            Box(modifier = Modifier.align(Alignment.Center)) { ScheduleEmpty() }
         }
 
         val rows = viewModel.scheduleItems.toList()
