@@ -26,9 +26,9 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.foundation.ChipCircleButton
@@ -196,7 +196,7 @@ fun InputChip(
             glyph = ChipDefaults.RemoveGlyph,
             side = ChipDefaults.RemoveCircle,
             tint = colors.sub,
-            fill = colors.content.copy(alpha = HosannaStateAlpha.HOVER),
+            fill = colors.content.copy(alpha = StateAlpha.HOVER),
             contentDescription = removeContentDescription,
             onClick = onRemove,
             interactionSource = removeInteractionSource,
@@ -218,13 +218,13 @@ fun Tag(
     modifier: Modifier = Modifier,
     color: ChipColor = ChipColor.Neutral,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val accent = colors.accent(color)
     Box(
         modifier = modifier
             .height(ChipDefaults.TagHeight)
             .background(
-                accent?.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_CONTAINER) ?: colors.secondaryContainer,
+                accent?.copy(alpha = StateAlpha.CONTENT_TYPE_CONTAINER) ?: colors.secondaryContainer,
                 RoundedCornerShape(ChipDefaults.TagRadius),
             )
             .padding(horizontal = ChipDefaults.TagPadding),
@@ -232,7 +232,7 @@ fun Tag(
     ) {
         BasicText(
             text.asOverline(),
-            style = HosannaTheme.typography.overline.copy(color = accent ?: colors.onSurfaceVariant),
+            style = AppTheme.typography.overline.copy(color = accent ?: colors.onSurfaceVariant),
             maxLines = 1,
             softWrap = false,
         )

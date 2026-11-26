@@ -1,13 +1,14 @@
 package org.churchpresenter.hosanna.composables.foundation
 
-import org.churchpresenter.hosanna.HosannaLightColors
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.hosanna.composables.model.ProgressStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ProgressColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
 
     @Test
     fun `the fill follows the status`() {

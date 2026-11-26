@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.foundation.ChipCircleButton
@@ -82,8 +82,8 @@ fun FavoriteFileChip(
             icon = painterResource(if (favorite) Res.drawable.ic_star_filled else Res.drawable.ic_star),
             glyph = ChipDefaults.StarGlyph,
             side = ChipDefaults.StarCircle,
-            tint = if (favorite && enabled) HosannaTheme.colors.star else colors.sub,
-            fill = colors.content.copy(alpha = HosannaStateAlpha.PRESSED),
+            tint = if (favorite && enabled) AppTheme.colors.star else colors.sub,
+            fill = colors.content.copy(alpha = StateAlpha.PRESSED),
             contentDescription = starContentDescription,
             onClick = { onFavoriteChange(!favorite) },
             interactionSource = starInteractionSource,

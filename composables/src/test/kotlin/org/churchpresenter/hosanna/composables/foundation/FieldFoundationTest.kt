@@ -6,15 +6,16 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.StateAlpha
 import org.churchpresenter.hosanna.composables.field.counterText
 import org.churchpresenter.hosanna.composables.field.isOverLimit
 import org.churchpresenter.hosanna.composables.field.showClear
 
 class FieldFoundationTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
 
     @Test
     fun `disabled outranks read-only, which outranks focus and hover`() {
@@ -39,7 +40,7 @@ class FieldFoundationTest {
             ),
             c.fieldColors(FieldState.Rest, error = false),
         )
-        val hover = c.onSurface.copy(alpha = HosannaStateAlpha.HOVER)
+        val hover = c.onSurface.copy(alpha = StateAlpha.HOVER)
         assertEquals(
             FieldColors(
                 hover.compositeOver(c.surfaceVariant),
@@ -56,7 +57,7 @@ class FieldFoundationTest {
             FieldColors(
                 c.surfaceContainerLowest,
                 c.primary,
-                c.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+                c.primary.copy(alpha = StateAlpha.FOCUS_RING),
                 c.primary,
                 c.onSurface,
                 c.onSurfaceFaint,
@@ -75,7 +76,7 @@ class FieldFoundationTest {
         assertEquals(c.error, c.fieldColors(FieldState.Hovered, error = true).border)
         val focused = c.fieldColors(FieldState.Focused, error = true)
         assertEquals(c.error, focused.border)
-        assertEquals(c.error.copy(alpha = HosannaStateAlpha.FOCUS_RING), focused.ring)
+        assertEquals(c.error.copy(alpha = StateAlpha.FOCUS_RING), focused.ring)
     }
 
     @Test
@@ -92,11 +93,11 @@ class FieldFoundationTest {
             ),
             c.fieldColors(FieldState.ReadOnly, error = true),
         )
-        val ink = c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        val ink = c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         assertEquals(
             FieldColors(
                 c.surfaceVariant,
-                c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER),
+                c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER),
                 null,
                 ink,
                 ink,

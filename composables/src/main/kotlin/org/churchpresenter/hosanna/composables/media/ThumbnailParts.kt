@@ -46,8 +46,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.ThumbnailDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
@@ -57,7 +57,7 @@ import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ThumbnailLabels
 import org.churchpresenter.hosanna.composables.model.ThumbnailSize
 import org.churchpresenter.hosanna.composables.model.ThumbnailStatus
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_broken_image
 import org.churchpresenter.icons.generated.resources.ic_play
@@ -139,7 +139,7 @@ private fun BoxScope.Missing(look: ThumbnailLook, labels: ThumbnailLabels, onLoc
             if (look.hover && onLocate != null) {
                 StandardButton(labels.file.locate, onLocate, hierarchy = ButtonHierarchy.Tertiary)
             } else {
-                BasicText(labels.file.missing, style = HosannaTheme.typography.captionStrong.copy(color = ink))
+                BasicText(labels.file.missing, style = AppTheme.typography.captionStrong.copy(color = ink))
             }
         }
     }
@@ -170,7 +170,7 @@ internal fun BoxScope.ThumbnailOverlay(
                 .align(Alignment.BottomStart)
                 .fillMaxWidth(it.coerceIn(0f, 1f))
                 .height(ThumbnailDefaults.Progress)
-                .background(HosannaTheme.colors.primary),
+                .background(AppTheme.colors.primary),
         )
     }
     val inset = Modifier.padding(ThumbnailDefaults.BadgeInset)
@@ -181,10 +181,10 @@ internal fun BoxScope.ThumbnailOverlay(
                 inset
                     .align(Alignment.TopStart)
                     .size(ThumbnailDefaults.LiveDot)
-                    .background(HosannaTheme.colors.live, CircleShape),
+                    .background(AppTheme.colors.live, CircleShape),
             )
         } else {
-            Badge(labels.live, HosannaTheme.colors.live, HosannaTheme.colors.onLive, inset.align(Alignment.TopStart))
+            Badge(labels.live, AppTheme.colors.live, AppTheme.colors.onLive, inset.align(Alignment.TopStart))
         }
     }
     if (!small) {
@@ -205,7 +205,7 @@ private fun Badge(text: String, background: Color, ink: Color, modifier: Modifie
             .padding(horizontal = ThumbnailDefaults.BadgePadding),
         contentAlignment = Alignment.Center,
     ) {
-        BasicText(text, style = HosannaTheme.typography.captionStrong.tabular().copy(color = ink))
+        BasicText(text, style = AppTheme.typography.captionStrong.tabular().copy(color = ink))
     }
 }
 
@@ -254,7 +254,7 @@ private fun OverlayButton(icon: DrawableResource, label: String, colors: Thumbna
     }
 }
 
-private fun Color.overBadge(badge: Color) = copy(alpha = HosannaStateAlpha.HOVER).compositeOver(badge)
+private fun Color.overBadge(badge: Color) = copy(alpha = StateAlpha.HOVER).compositeOver(badge)
 
 @Composable
 internal fun ThumbnailCaption(
@@ -265,7 +265,7 @@ internal fun ThumbnailCaption(
     modifier: Modifier,
 ) {
     var cut by remember { mutableStateOf(false) }
-    val style = HosannaTheme.typography.captionStrong
+    val style = AppTheme.typography.captionStrong
     Column(modifier) {
         Tooltip(caption, enabled = cut) {
             BasicText(
@@ -284,7 +284,7 @@ internal fun ThumbnailCaption(
                 it,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = HosannaTheme.typography.caption.copy(color = colors.captionDim),
+                style = AppTheme.typography.caption.copy(color = colors.captionDim),
             )
         }
     }

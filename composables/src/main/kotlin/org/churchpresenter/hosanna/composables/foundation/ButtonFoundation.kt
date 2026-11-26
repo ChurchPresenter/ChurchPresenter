@@ -40,15 +40,15 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.ThemeColors
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ButtonFoundationDefaults
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.theme.elevationShadow
 
 internal enum class SegmentRole { Radio, Action, Toggle }
 
@@ -71,7 +71,7 @@ internal fun buttonState(enabled: Boolean, loading: Boolean, hovered: Boolean, p
         else -> ButtonState.Rest
     }
 
-internal fun HosannaColors.restColors(hierarchy: ButtonHierarchy, intent: ButtonIntent): Pair<Color, Color> =
+internal fun ThemeColors.restColors(hierarchy: ButtonHierarchy, intent: ButtonIntent): Pair<Color, Color> =
     when (hierarchy) {
         ButtonHierarchy.Primary -> when (intent) {
             ButtonIntent.Default -> primary to onPrimary
@@ -96,7 +96,7 @@ internal fun HosannaColors.restColors(hierarchy: ButtonHierarchy, intent: Button
         }
     }
 
-internal fun HosannaColors.buttonColors(
+internal fun ThemeColors.buttonColors(
     hierarchy: ButtonHierarchy,
     intent: ButtonIntent,
     state: ButtonState,
@@ -105,35 +105,35 @@ internal fun HosannaColors.buttonColors(
     fun layer(alpha: Float) = content.copy(alpha = alpha).compositeOver(container)
     return when (state) {
         ButtonState.Rest, ButtonState.Loading -> ButtonColors(container, content, null)
-        ButtonState.Hovered -> ButtonColors(layer(HosannaStateAlpha.HOVER), content, null)
-        ButtonState.Pressed -> ButtonColors(layer(HosannaStateAlpha.PRESSED), content, null)
+        ButtonState.Hovered -> ButtonColors(layer(StateAlpha.HOVER), content, null)
+        ButtonState.Pressed -> ButtonColors(layer(StateAlpha.PRESSED), content, null)
         ButtonState.Focused -> ButtonColors(
-            layer(HosannaStateAlpha.FOCUS),
+            layer(StateAlpha.FOCUS),
             content,
-            primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+            primary.copy(alpha = StateAlpha.FOCUS_RING),
         )
         ButtonState.Disabled -> ButtonColors(
             if (hierarchy == ButtonHierarchy.Tertiary) {
                 Color.Transparent
             } else {
-                onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER)
+                onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER)
             },
-            onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT),
+            onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT),
             null,
         )
     }
 }
 
-internal fun buttonLevel(hierarchy: ButtonHierarchy, state: ButtonState): HosannaLevel =
-    if (hierarchy == ButtonHierarchy.Primary && state in RaisedStates) HosannaLevel.Level1 else HosannaLevel.Level0
+internal fun buttonLevel(hierarchy: ButtonHierarchy, state: ButtonState): ElevationLevel =
+    if (hierarchy == ButtonHierarchy.Primary && state in RaisedStates) ElevationLevel.Level1 else ElevationLevel.Level0
 
 private val RaisedStates = setOf(ButtonState.Rest, ButtonState.Hovered, ButtonState.Loading)
 
-internal fun floatingLevel(state: ButtonState): HosannaLevel = when (state) {
-    ButtonState.Rest, ButtonState.Focused, ButtonState.Loading -> HosannaLevel.Level3
-    ButtonState.Hovered -> HosannaLevel.Level4
-    ButtonState.Pressed -> HosannaLevel.Level1
-    ButtonState.Disabled -> HosannaLevel.Level0
+internal fun floatingLevel(state: ButtonState): ElevationLevel = when (state) {
+    ButtonState.Rest, ButtonState.Focused, ButtonState.Loading -> ElevationLevel.Level3
+    ButtonState.Hovered -> ElevationLevel.Level4
+    ButtonState.Pressed -> ElevationLevel.Level1
+    ButtonState.Disabled -> ElevationLevel.Level0
 }
 
 @Immutable
@@ -160,17 +160,17 @@ internal fun ButtonFrame(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, loading, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.buttonColors(look.hierarchy, look.intent, state)
+    val colors = AppTheme.colors.buttonColors(look.hierarchy, look.intent, state)
     val container by animateColorAsState(
         colors.container,
         tween(ButtonFoundationDefaults.TRANSITION_MILLIS, easing = EaseOut),
     )
-    val shape = look.cornerRadius?.let { RoundedCornerShape(it) } ?: HosannaTheme.shapes.full
+    val shape = look.cornerRadius?.let { RoundedCornerShape(it) } ?: AppTheme.shapes.full
     val level = if (look.floating) floatingLevel(state) else buttonLevel(look.hierarchy, state)
     val interactive = enabled && !loading
     Box(
         modifier = modifier
-            .hosannaElevation(level, shape, HosannaTheme.elevation)
+            .elevationShadow(level, shape, AppTheme.elevation)
             .then(colors.ring?.let { Modifier.focusRing(it, look.cornerRadius) } ?: Modifier)
             .height(look.height)
             .background(container, shape)
@@ -188,7 +188,7 @@ internal fun ButtonFrame(
 }
 
 internal fun Modifier.focusRing(color: Color, cornerRadius: Dp?): Modifier = drawBehind {
-    val width = HosannaTheme.focusRingWidth.toPx()
+    val width = AppTheme.focusRingWidth.toPx()
     val half = width / 2
     val radius = (cornerRadius?.toPx() ?: (size.minDimension / 2)) + half
     drawRoundRect(

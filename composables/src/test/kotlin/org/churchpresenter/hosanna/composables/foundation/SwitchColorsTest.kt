@@ -2,15 +2,16 @@ package org.churchpresenter.hosanna.composables.foundation
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.StateAlpha
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class SwitchColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
 
     @Test
     fun `off is a quiet track with an edge and a gray knob`() {
@@ -33,11 +34,11 @@ class SwitchColorsTest {
         assertEquals(c.onPrimary, rest.knob)
         assertEquals(c.primary, rest.icon)
         assertEquals(
-            c.onPrimary.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(c.primary),
+            c.onPrimary.copy(alpha = StateAlpha.HOVER).compositeOver(c.primary),
             c.switchColors(checked = true, state = ButtonState.Hovered).track,
         )
         assertEquals(
-            c.onPrimary.copy(alpha = HosannaStateAlpha.PRESSED).compositeOver(c.primary),
+            c.onPrimary.copy(alpha = StateAlpha.PRESSED).compositeOver(c.primary),
             c.switchColors(checked = true, state = ButtonState.Pressed).track,
         )
     }
@@ -45,7 +46,7 @@ class SwitchColorsTest {
     @Test
     fun `focus shows the ring, nothing else does`() {
         assertEquals(
-            c.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+            c.primary.copy(alpha = StateAlpha.FOCUS_RING),
             c.switchColors(checked = false, state = ButtonState.Focused).ring,
         )
         assertNull(c.switchColors(checked = true, state = ButtonState.Hovered).ring)
@@ -60,7 +61,7 @@ class SwitchColorsTest {
 
     @Test
     fun `disabled fades the track and label but keeps the on knob`() {
-        val ink = c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        val ink = c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         val on = c.switchColors(checked = true, state = ButtonState.Disabled)
         assertEquals(ink, on.track)
         assertEquals(c.surfaceContainerLowest, on.knob)
@@ -68,7 +69,7 @@ class SwitchColorsTest {
         assertNull(on.ring)
         val off = c.switchColors(checked = false, state = ButtonState.Disabled)
         assertEquals(c.surfaceContainerLowest, off.track)
-        assertEquals(c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER), off.edge)
+        assertEquals(c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER), off.edge)
         assertEquals(ink, off.knob)
     }
 }

@@ -29,7 +29,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.NavigationDefaults
 import org.churchpresenter.hosanna.composables.model.NavigationTab
 import org.churchpresenter.hosanna.composables.model.TabStyle
@@ -60,7 +60,7 @@ fun TopNavigationBar(
     interactionSources: Map<String, MutableInteractionSource> = emptyMap(),
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -101,8 +101,8 @@ private fun TabRow(
     modifier: Modifier,
 ) {
     val measurer = rememberTextMeasurer()
-    val label = HosannaTheme.typography.bodyStrong
-    val badge = HosannaTheme.typography.captionStrong
+    val label = AppTheme.typography.bodyStrong
+    val badge = AppTheme.typography.captionStrong
     val density = LocalDensity.current
     val requesters = remember(tabs.map { it.key }) { tabs.associate { it.key to FocusRequester() } }
     val scroll = rememberScrollState()
@@ -115,7 +115,7 @@ private fun TabRow(
         }.toFloat()
         val style = fittedTabStyle(requested, widthOf(requested), available)
         val scrolls = tabsScroll(style, widthOf(TabStyle.Icon), available)
-        val fade = HosannaTheme.colors.surface
+        val fade = AppTheme.colors.surface
         Row(
             modifier = if (scrolls) Modifier.scrollingTabs(scroll, fade) else Modifier,
             verticalAlignment = Alignment.CenterVertically,

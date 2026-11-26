@@ -38,8 +38,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
 import org.churchpresenter.hosanna.composables.model.TooltipWarmth
@@ -146,8 +146,8 @@ private fun TooltipPopup(text: String, shortcut: String?, shown: MutableTransiti
 
 @Composable
 internal fun TooltipLabel(text: String, shortcut: String?) {
-    val colors = HosannaTheme.colors
-    val style = HosannaTheme.typography.captionStrong
+    val colors = AppTheme.colors
+    val style = AppTheme.typography.captionStrong
     Row(
         modifier = Modifier
             .widthIn(max = TooltipDefaults.MaxWidth)
@@ -161,7 +161,7 @@ internal fun TooltipLabel(text: String, shortcut: String?) {
         shortcut?.let {
             BasicText(
                 it,
-                style = style.copy(color = colors.inverseOnSurface.copy(alpha = HosannaStateAlpha.MUTED_CONTENT)),
+                style = style.copy(color = colors.inverseOnSurface.copy(alpha = StateAlpha.MUTED_CONTENT)),
             )
         }
     }

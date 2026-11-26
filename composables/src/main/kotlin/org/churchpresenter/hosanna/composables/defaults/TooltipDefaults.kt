@@ -2,13 +2,13 @@ package org.churchpresenter.hosanna.composables.defaults
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 
 internal object TooltipDefaults {
     val MinHeight: Dp = 24.dp
     val PaddingX: Dp = 8.dp
     val PaddingY: Dp = 4.dp
-    val Radius: Dp = HosannaRadius.S
+    val Radius: Dp = AppRadius.S
     val MaxWidth: Dp = 240.dp
     val ShortcutGap: Dp = 6.dp
     val Gap: Dp = 6.dp

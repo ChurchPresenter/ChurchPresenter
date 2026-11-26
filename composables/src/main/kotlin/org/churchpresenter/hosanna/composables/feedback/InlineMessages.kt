@@ -28,7 +28,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.MessageDefaults
@@ -97,7 +97,7 @@ private fun BannerBody(
     dismiss: MessageAction?,
     extra: (@Composable () -> Unit)?,
 ) {
-    val colors = HosannaTheme.colors.messageColors(intent)
+    val colors = AppTheme.colors.messageColors(intent)
     val shape = RoundedCornerShape(MessageDefaults.BannerRadius)
     BoxWithConstraints(
         Modifier
@@ -116,8 +116,8 @@ private fun BannerBody(
             )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(MessageDefaults.ActionGap)) {
                 Column(verticalArrangement = Arrangement.spacedBy(MessageDefaults.BannerTextGap)) {
-                    title?.let { BasicText(it, style = HosannaTheme.typography.subtitle.copy(color = colors.content)) }
-                    BasicText(body, style = HosannaTheme.typography.body.copy(color = colors.content))
+                    title?.let { BasicText(it, style = AppTheme.typography.subtitle.copy(color = colors.content)) }
+                    BasicText(body, style = AppTheme.typography.body.copy(color = colors.content))
                     extra?.invoke()
                 }
                 if (narrow && hasActions) BannerActions(intent, action, otherActions)
@@ -163,7 +163,7 @@ private fun BannerActions(intent: MessageIntent, action: MessageAction?, otherAc
  */
 @Composable
 fun InlineMessage(text: String, modifier: Modifier = Modifier, intent: MessageIntent = MessageIntent.Info) {
-    val colors = HosannaTheme.colors.messageColors(intent)
+    val colors = AppTheme.colors.messageColors(intent)
     val shape = RoundedCornerShape(MessageDefaults.InlineRadius)
     Row(
         modifier = modifier
@@ -174,7 +174,7 @@ fun InlineMessage(text: String, modifier: Modifier = Modifier, intent: MessageIn
         horizontalArrangement = Arrangement.spacedBy(MessageDefaults.InlineGap),
     ) {
         MessageIcon(intent, colors, MessageDefaults.InlineIcon)
-        BasicText(text, style = HosannaTheme.typography.caption.copy(color = colors.content))
+        BasicText(text, style = AppTheme.typography.caption.copy(color = colors.content))
     }
 }
 
@@ -186,7 +186,7 @@ fun InlineMessage(text: String, modifier: Modifier = Modifier, intent: MessageIn
  */
 @Composable
 fun Hint(text: String, modifier: Modifier = Modifier) {
-    val ink = HosannaTheme.colors.onSurfaceVariant
+    val ink = AppTheme.colors.onSurfaceVariant
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(MessageDefaults.HintGap),
@@ -198,7 +198,7 @@ fun Hint(text: String, modifier: Modifier = Modifier) {
             Modifier.size(MessageDefaults.HintIcon),
             colorFilter = ColorFilter.tint(ink),
         )
-        BasicText(text, style = HosannaTheme.typography.caption.copy(color = ink))
+        BasicText(text, style = AppTheme.typography.caption.copy(color = ink))
     }
 }
 

@@ -13,11 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.SliderDefaults
-import org.churchpresenter.hosanna.hosannaElevation
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.elevationShadow
+import org.churchpresenter.theme.tabular
 
 @Composable
 internal fun SliderThumb(
@@ -49,7 +49,7 @@ internal fun SliderThumb(
 
 @Composable
 private fun Modifier.thumbShadow(): Modifier =
-    hosannaElevation(HosannaLevel.Level1, CircleShape, HosannaTheme.elevation)
+    elevationShadow(ElevationLevel.Level1, CircleShape, AppTheme.elevation)
 
 @Composable
 internal fun SliderBubble(x: Dp, above: Dp, text: String, colors: SliderColors) {
@@ -65,6 +65,6 @@ internal fun SliderBubble(x: Dp, above: Dp, text: String, colors: SliderColors) 
             }
             .background(colors.bubble, RoundedCornerShape(SliderDefaults.BubbleRadius))
             .padding(horizontal = SliderDefaults.BubblePaddingX, vertical = SliderDefaults.BubblePaddingY),
-        style = HosannaTheme.typography.captionStrong.tabular().copy(color = colors.bubbleInk),
+        style = AppTheme.typography.captionStrong.tabular().copy(color = colors.bubbleInk),
     )
 }

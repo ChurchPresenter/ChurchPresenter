@@ -2,11 +2,11 @@ package org.churchpresenter.hosanna.composables.defaults
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 
 internal object CheckboxDefaults {
     val Box: Dp = 18.dp
-    val BoxRadius: Dp = HosannaRadius.XS
+    val BoxRadius: Dp = AppRadius.XS
     val Edge: Dp = 1.5.dp
     val Halo: Dp = 32.dp
     val Check: Dp = 12.dp

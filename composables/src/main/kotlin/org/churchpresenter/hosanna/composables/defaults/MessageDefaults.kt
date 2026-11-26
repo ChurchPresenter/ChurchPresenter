@@ -2,10 +2,10 @@ package org.churchpresenter.hosanna.composables.defaults
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 
 internal object MessageDefaults {
-    val BannerRadius: Dp = HosannaRadius.L
+    val BannerRadius: Dp = AppRadius.L
     val BannerPaddingX: Dp = 14.dp
     val BannerPaddingY: Dp = 12.dp
     val BannerGap: Dp = 12.dp
@@ -13,7 +13,7 @@ internal object MessageDefaults {
     val BannerTextGap: Dp = 2.dp
     val ActionGap: Dp = 8.dp
     val NarrowWidth: Dp = 480.dp
-    val InlineRadius: Dp = HosannaRadius.M
+    val InlineRadius: Dp = AppRadius.M
     val InlinePaddingX: Dp = 10.dp
     val InlinePaddingY: Dp = 8.dp
     val InlineIcon: Dp = 16.dp

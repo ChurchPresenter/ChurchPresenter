@@ -23,7 +23,7 @@ that string, so a future package move has to update it by hand; both tests fail 
 
 ## The one rule that matters
 
-**A color literal belongs in this module (or `:hosanna-theme`, for its own palette) or nowhere.** The module depends on Compose and on
+**A color literal belongs in this module or nowhere.** The module depends on Compose and on
 nothing of the app's own, so nothing here can start reading a setting, a file or a ViewModel — that
 is what keeps the palette a palette. A `Color(0xFF…)` anywhere else in the codebase is a finding
 (see `DEVELOPMENT_GUIDE.md`'s zero-tolerance list).
@@ -48,11 +48,17 @@ Corollaries:
 | `AppShape.kt` | `AppShape(...)` — the app's corner: a `RoundedCornerShape` at `CORNER_SCALE` of the radius written. Percent corners are not scaled, so a pill stays a pill. Plain circular corners on purpose — a squircle was tried and drew animated screens about four times slower (see the constant's KDoc) |
 | `UiScale.kt` | `ProvideUiScale` — the interface size and UI text size on `LocalDensity`, applied once per window; the Ctrl +/− steps and the screen's cap |
 | `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, staged…) derived per scheme — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
+| `AppTheme.kt` | `AppTheme` — the active theme as `:composables` draws with it: `colors` (`ThemeColors`), `typography` (`TypeScale`, in the theme's font), `elevation` (`Shadows`, light or dark by the scheme), `shapes` (`AppShapes`) and `focusRingWidth`. It provides nothing; it reads what `ChurchPresenterTheme` set |
+| `ThemeColors.kt` | `ThemeColors` — the scheme's Material roles and the semantic roles under the names components ask by (`live`, `star`, `onSurfaceFaint`, `song`, `verse`…), the output's fixed black and white (`screen`/`onScreen`), and `themeColorsFor(mode)` for tests |
+| `TypeScale.kt` | `TypeScale` and `typeScale(family)` — the components' sizes and weights (display … overline), in whatever font the theme uses; `tabular()`, `asOverline()` |
+| `AppShapes.kt` | `AppRadius` (XS 4 … XL 16, `nested`) and `AppShapes`/`DefaultAppShapes` — exact radii, unscaled |
+| `Shadows.kt` | `ElevationLevel`, `Shadows` (`LightShadows`/`DarkShadows`) and `Modifier.elevationShadow` — the components' layered drop shadows |
+| `StateAlpha.kt` | `StateAlpha` — how strongly hover, focus, press, drag and disabled show |
 | `AppThemeWrapper.kt` | The one-call wrapper (`ProvideThemeManager` + `ChurchPresenterTheme`) used by app entry points, previews and screenshot tests |
 
 **Every rounded corner in the app is an `AppShape`, never a `RoundedCornerShape`** — in this module,
 the app and every module that draws UI. `CORNER_SCALE` is then the single number for how rounded
-the app is. `:hosanna-theme` is the other exception: its radii are exact (`HosannaTheme.shapes`). The standing exception is audience-facing output (`composeApp/.../presenter/`):
+the app is. `:composables` is the other exception: its radii are exact (`AppTheme.shapes`, `AppRadius`). The standing exception is audience-facing output (`composeApp/.../presenter/`):
 those corners are part of what a church shows on its screens, not the app's own chrome.
 
 `ThemeMode.SYSTEM` is **not** a palette of its own — it resolves to Light or Dark, so anything

@@ -2,6 +2,7 @@
 
 package org.churchpresenter.hosanna.composables.testing
 
+import org.churchpresenter.theme.ChurchPresenterTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -22,7 +23,7 @@ import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableSharedFlow
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.sharedui.screenshot.PinnedFonts
 import org.churchpresenter.sharedui.screenshot.bothThemes
 import org.churchpresenter.sharedui.screenshot.captureTo
@@ -62,8 +63,8 @@ fun testIcon(): Painter = rememberVectorPainter(
 
 @Composable
 fun HosannaSurface(dark: Boolean = false, content: @Composable () -> Unit) {
-    HosannaTheme(darkTheme = dark) {
-        Box(Modifier.background(HosannaTheme.colors.surface).padding(12.dp)) { content() }
+    ChurchPresenterTheme(themeMode = if (dark) ThemeMode.DARK else ThemeMode.LIGHT) {
+        Box(Modifier.background(AppTheme.colors.surface).padding(12.dp)) { content() }
     }
 }
 

@@ -52,10 +52,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.chip.FilterChip
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
@@ -70,7 +70,7 @@ import org.churchpresenter.hosanna.composables.model.parseUnit
 import org.churchpresenter.hosanna.composables.model.setUnit
 import org.churchpresenter.hosanna.composables.model.stepTimer
 import org.churchpresenter.hosanna.composables.model.unitText
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.icons.generated.resources.ic_remove
@@ -147,22 +147,22 @@ private fun UnitStepper(
     interactionSource: MutableInteractionSource,
     enabled: Boolean,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val hovered by interactionSource.collectIsHoveredAsState()
     var editing by remember { mutableStateOf(false) }
-    val shape = HosannaTheme.shapes.l
+    val shape = AppTheme.shapes.l
     val muted = if (enabled) {
         colors.onSurfaceVariant
     } else {
-        colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
     }
     val edge = when {
         editing -> colors.primary
-        hovered && enabled -> colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(colors.outline)
+        hovered && enabled -> colors.onSurface.copy(alpha = StateAlpha.HOVER).compositeOver(colors.outline)
         else -> colors.outline
     }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        BasicText(label.asOverline(), style = HosannaTheme.typography.overline.copy(color = muted))
+        BasicText(label.asOverline(), style = AppTheme.typography.overline.copy(color = muted))
         Spacer(Modifier.height(TimerSpinnerDefaults.LabelGap))
         Column(
             modifier = Modifier
@@ -205,14 +205,14 @@ private fun StepButton(
     enabled: Boolean,
     onStep: (Boolean) -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val hovered by source.collectIsHoveredAsState()
     val hold = rememberHoldRepeat(source, enabled, onStep)
     val fill = when {
-        enabled && pressed -> colors.onSurface.copy(alpha = HosannaStateAlpha.PRESSED)
-        enabled && hovered -> colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER)
+        enabled && pressed -> colors.onSurface.copy(alpha = StateAlpha.PRESSED)
+        enabled && hovered -> colors.onSurface.copy(alpha = StateAlpha.HOVER)
         else -> Color.Transparent
     }
     Box(
@@ -226,7 +226,7 @@ private fun StepButton(
     ) {
         FieldGlyph(
             painterResource(icon),
-            if (enabled) colors.onSurfaceVariant else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT),
+            if (enabled) colors.onSurfaceVariant else colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT),
             TimerSpinnerDefaults.Icon,
         )
     }
@@ -241,9 +241,9 @@ private fun NumberCell(
     onEditing: (Boolean) -> Unit,
     onSecondsChange: (Int) -> Unit,
 ) {
-    val colors = HosannaTheme.colors
-    val ink = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
-    val style = HosannaTheme.typography.display.tabular().copy(color = ink, textAlign = TextAlign.Center)
+    val colors = AppTheme.colors
+    val ink = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
+    val style = AppTheme.typography.display.tabular().copy(color = ink, textAlign = TextAlign.Center)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -313,14 +313,14 @@ private fun NumberEditor(
             },
         textStyle = style,
         singleLine = true,
-        cursorBrush = SolidColor(HosannaTheme.colors.primary),
+        cursorBrush = SolidColor(AppTheme.colors.primary),
     )
 }
 
 @Composable
 private fun ColonDots(enabled: Boolean) {
-    val colors = HosannaTheme.colors
-    val dot = if (enabled) colors.onSurfaceFaint else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+    val colors = AppTheme.colors
+    val dot = if (enabled) colors.onSurfaceFaint else colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
     Box(
         modifier = Modifier
             .padding(horizontal = TimerSpinnerDefaults.ColonPadding)
@@ -328,10 +328,10 @@ private fun ColonDots(enabled: Boolean) {
         contentAlignment = Alignment.Center,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(TimerSpinnerDefaults.DotGap)) {
-            repeat(2) { Box(Modifier.size(TimerSpinnerDefaults.Dot).background(dot, HosannaTheme.shapes.full)) }
+            repeat(2) { Box(Modifier.size(TimerSpinnerDefaults.Dot).background(dot, AppTheme.shapes.full)) }
         }
     }
 }
 
 private fun Modifier.editRing(primary: Color): Modifier =
-    focusRing(primary.copy(alpha = HosannaStateAlpha.FOCUS_RING), HosannaRadius.L)
+    focusRing(primary.copy(alpha = StateAlpha.FOCUS_RING), AppRadius.L)

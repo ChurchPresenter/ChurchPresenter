@@ -32,7 +32,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 import org.churchpresenter.hosanna.composables.defaults.IconButtonDefaults
 import org.churchpresenter.hosanna.composables.defaults.IconButtonMetrics
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
@@ -49,15 +49,15 @@ class IconButtonTest {
     @Test
     fun `the three sizes match the spec`() {
         assertEquals(
-            IconButtonMetrics(40.dp, 20.dp, 18.dp, HosannaRadius.M),
+            IconButtonMetrics(40.dp, 20.dp, 18.dp, AppRadius.M),
             IconButtonDefaults.metrics(IconButtonSize.Large),
         )
         assertEquals(
-            IconButtonMetrics(34.dp, 16.dp, 16.dp, HosannaRadius.M),
+            IconButtonMetrics(34.dp, 16.dp, 16.dp, AppRadius.M),
             IconButtonDefaults.metrics(IconButtonSize.Medium),
         )
         assertEquals(
-            IconButtonMetrics(28.dp, 14.dp, 14.dp, HosannaRadius.S),
+            IconButtonMetrics(28.dp, 14.dp, 14.dp, AppRadius.S),
             IconButtonDefaults.metrics(IconButtonSize.Small),
         )
     }

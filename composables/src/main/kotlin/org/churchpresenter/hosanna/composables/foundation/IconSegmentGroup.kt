@@ -46,9 +46,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.ThemeColors
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.arrowStep
 import org.churchpresenter.hosanna.composables.button.focusableSegment
 import org.churchpresenter.hosanna.composables.button.icon
@@ -60,24 +60,24 @@ import org.churchpresenter.hosanna.composables.defaults.ButtonFoundationDefaults
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentMetrics
 import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.theme.elevationShadow
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
-internal fun HosannaColors.iconSegmentColors(value: ToggleableState, state: ButtonState): ButtonColors {
+internal fun ThemeColors.iconSegmentColors(value: ToggleableState, state: ButtonState): ButtonColors {
     if (value != ToggleableState.Indeterminate || state == ButtonState.Disabled) {
         return segmentColors(value == ToggleableState.On, state)
     }
     fun layer(alpha: Float) = onPrimaryContainer.copy(alpha = alpha).compositeOver(primaryContainer)
     return when (state) {
-        ButtonState.Hovered -> ButtonColors(layer(HosannaStateAlpha.HOVER), onPrimaryContainer, null)
-        ButtonState.Pressed -> ButtonColors(layer(HosannaStateAlpha.PRESSED), onPrimaryContainer, null)
+        ButtonState.Hovered -> ButtonColors(layer(StateAlpha.HOVER), onPrimaryContainer, null)
+        ButtonState.Pressed -> ButtonColors(layer(StateAlpha.PRESSED), onPrimaryContainer, null)
         ButtonState.Focused -> ButtonColors(
             primaryContainer,
             onPrimaryContainer,
-            primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+            primary.copy(alpha = StateAlpha.FOCUS_RING),
         )
         else -> ButtonColors(primaryContainer, onPrimaryContainer, null)
     }
@@ -95,8 +95,8 @@ internal fun IconSegmentTrack(
     val trackShape = RoundedCornerShape(IconSegmentDefaults.TrackRadius)
     Row(
         modifier = modifier
-            .background(HosannaTheme.colors.trackColor(enabled), trackShape)
-            .border(SegmentedButtonDefaults.TrackEdge, HosannaTheme.colors.outlineVariant, trackShape)
+            .background(AppTheme.colors.trackColor(enabled), trackShape)
+            .border(SegmentedButtonDefaults.TrackEdge, AppTheme.colors.outlineVariant, trackShape)
             .padding(SegmentedButtonDefaults.TrackPadding),
         horizontalArrangement = Arrangement.spacedBy(SegmentedButtonDefaults.TrackGap),
         verticalAlignment = Alignment.CenterVertically,
@@ -186,7 +186,7 @@ internal fun IconSegment(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.iconSegmentColors(value, state)
+    val colors = AppTheme.colors.iconSegmentColors(value, state)
     val container = remember(value) { Animatable(colors.container) }
     LaunchedEffect(colors.container) {
         container.animateTo(colors.container, tween(ButtonFoundationDefaults.TRANSITION_MILLIS, easing = EaseOut))
@@ -207,7 +207,7 @@ internal fun IconSegment(
         modifier = Modifier
             .focusRequester(requester)
             .focusProperties { canFocus = focusable }
-            .hosannaElevation(segmentLevel(value == ToggleableState.On, state), shape, HosannaTheme.elevation)
+            .elevationShadow(segmentLevel(value == ToggleableState.On, state), shape, AppTheme.elevation)
             .then(colors.ring?.let { Modifier.focusRing(it, IconSegmentDefaults.SegmentRadius) } ?: Modifier)
             .size(width, metrics.height)
             .background(container.value, shape)

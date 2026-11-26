@@ -40,17 +40,17 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.foundation.dashedBorder
 import org.churchpresenter.hosanna.composables.foundation.fieldColors
 import org.churchpresenter.hosanna.composables.foundation.fieldState
 import org.churchpresenter.hosanna.composables.foundation.focusRing
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_warning
@@ -109,15 +109,15 @@ fun TextField(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val overLimit = isOverLimit(value, maxLength)
-    val colors = HosannaTheme.colors.fieldColors(
+    val colors = AppTheme.colors.fieldColors(
         fieldState(enabled, readOnly, hovered, focused),
         error = error != null || overLimit,
     )
     val spec = tween<Color>(FieldDefaults.TRANSITION_MILLIS, easing = EaseOut)
     val container by animateColorAsState(colors.container, spec)
     val border by animateColorAsState(colors.border, spec)
-    val shape = HosannaTheme.shapes.m
-    val typography = HosannaTheme.typography
+    val shape = AppTheme.shapes.m
+    val typography = AppTheme.typography
     val clear = showClear(clearContentDescription != null, value, enabled && !readOnly, hovered || focused)
     Column(modifier) {
         Box(Modifier.fillMaxWidth().hoverable(interactionSource, enabled)) {
@@ -126,11 +126,11 @@ fun TextField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .then(colors.ring?.let { Modifier.focusRing(it, HosannaRadius.M) } ?: Modifier)
+                .then(colors.ring?.let { Modifier.focusRing(it, AppRadius.M) } ?: Modifier)
                 .background(container, shape)
                 .then(
                     if (readOnly) {
-                        Modifier.dashedBorder(border, FieldDefaults.Border, HosannaRadius.M)
+                        Modifier.dashedBorder(border, FieldDefaults.Border, AppRadius.M)
                     } else {
                         Modifier.border(FieldDefaults.Border, border, shape)
                     },
@@ -198,12 +198,12 @@ private fun fieldHeight(multiline: Boolean, labeled: Boolean): Modifier = when {
 internal fun Supporting(value: String, helper: String?, error: String?, maxLength: Int?, enabled: Boolean) {
     val message = error ?: helper
     if (message == null && maxLength == null) return
-    val colors = HosannaTheme.colors
-    val caption = HosannaTheme.typography.caption
+    val colors = AppTheme.colors
+    val caption = AppTheme.typography.caption
     val muted = if (enabled) {
         colors.onSurfaceVariant
     } else {
-        colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
     }
     Row(
         modifier = Modifier
@@ -243,8 +243,8 @@ internal fun ClearButton(
         modifier = modifier
             .size(side)
             .background(
-                if (hovered) tint.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
-                HosannaTheme.shapes.full,
+                if (hovered) tint.copy(alpha = StateAlpha.HOVER) else Color.Transparent,
+                AppTheme.shapes.full,
             )
             .clickable(source, null, role = Role.Button, onClick = onClear)
             .semantics { this.contentDescription = contentDescription },

@@ -2,7 +2,7 @@ package org.churchpresenter.hosanna.composables.defaults
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 import org.churchpresenter.hosanna.composables.model.NumberRange
 
 internal object SliderDefaults {
@@ -18,7 +18,7 @@ internal object SliderDefaults {
     val CenterMark: Dp = 2.dp
     val CenterMarkHeight: Dp = 12.dp
     val BubbleGap: Dp = 6.dp
-    val BubbleRadius: Dp = HosannaRadius.S
+    val BubbleRadius: Dp = AppRadius.S
     val BubblePaddingX: Dp = 8.dp
     val BubblePaddingY: Dp = 3.dp
     val ValueWidth: Dp = 44.dp

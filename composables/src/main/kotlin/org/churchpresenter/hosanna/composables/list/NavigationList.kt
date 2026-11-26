@@ -38,7 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.ListDefaults
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.listRowColors
@@ -124,8 +124,8 @@ private fun NavigationRow(
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
     val state = buttonState(true, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.listRowColors(selected, live = false, marker = true, state = state)
-    val typography = HosannaTheme.typography
+    val colors = AppTheme.colors.listRowColors(selected, live = false, marker = true, state = state)
+    val typography = AppTheme.typography
     RowFrame(colors, ListDefaults.NavigationRow, dragging = false, modifier = Modifier) {
         Box(
             Modifier

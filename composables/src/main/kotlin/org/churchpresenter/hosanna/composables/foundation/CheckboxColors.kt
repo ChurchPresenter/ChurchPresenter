@@ -4,8 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.state.ToggleableState
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.ThemeColors
+import org.churchpresenter.theme.StateAlpha
 
 @Immutable
 internal data class CheckboxColors(
@@ -18,13 +18,13 @@ internal data class CheckboxColors(
     val description: Color,
 )
 
-internal fun HosannaColors.checkboxColors(value: ToggleableState, state: ButtonState, error: Boolean): CheckboxColors {
+internal fun ThemeColors.checkboxColors(value: ToggleableState, state: ButtonState, error: Boolean): CheckboxColors {
     val on = value != ToggleableState.Off
     if (state == ButtonState.Disabled) {
-        val ink = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        val ink = onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         return CheckboxColors(
             fill = if (on) ink else surfaceContainerLowest,
-            edge = if (on) Color.Transparent else onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER),
+            edge = if (on) Color.Transparent else onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER),
             mark = surfaceContainerLowest,
             halo = Color.Transparent,
             ring = null,
@@ -33,8 +33,8 @@ internal fun HosannaColors.checkboxColors(value: ToggleableState, state: ButtonS
         )
     }
     val layer = when (state) {
-        ButtonState.Hovered -> HosannaStateAlpha.HOVER
-        ButtonState.Pressed -> HosannaStateAlpha.PRESSED
+        ButtonState.Hovered -> StateAlpha.HOVER
+        ButtonState.Pressed -> StateAlpha.PRESSED
         else -> 0f
     }
     val restEdge = if (error) this.error else onSurfaceFaint
@@ -48,7 +48,7 @@ internal fun HosannaColors.checkboxColors(value: ToggleableState, state: ButtonS
         },
         mark = onPrimary,
         halo = if (layer > 0f) onSurface.copy(alpha = layer) else Color.Transparent,
-        ring = if (state == ButtonState.Focused) primary.copy(alpha = HosannaStateAlpha.FOCUS_RING) else null,
+        ring = if (state == ButtonState.Focused) primary.copy(alpha = StateAlpha.FOCUS_RING) else null,
         label = onSurface,
         description = onSurfaceVariant,
     )

@@ -32,8 +32,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.chip.Tag
 import org.churchpresenter.hosanna.composables.defaults.ListDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -41,7 +41,7 @@ import org.churchpresenter.hosanna.composables.foundation.ListRowColors
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.listRowColors
 import org.churchpresenter.hosanna.composables.model.ChipColor
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.theme.elevationShadow
 
 /**
  * A list row with one to three lines, optional leading and trailing parts, and actions that show on hover.
@@ -82,7 +82,7 @@ fun ListRow(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.listRowColors(selected, liveTag != null, marker = false, state = state)
+    val colors = AppTheme.colors.listRowColors(selected, liveTag != null, marker = false, state = state)
     val height = when {
         supporting == null -> ListDefaults.OneLine
         threeLine -> ListDefaults.ThreeLine
@@ -129,8 +129,8 @@ internal fun RowFrame(
                 if (dragging) {
                     Modifier
                         .graphicsLayer { rotationZ = ListDefaults.DRAG_TILT }
-                        .hosannaElevation(HosannaLevel.Level4, shape, HosannaTheme.elevation)
-                        .background(HosannaTheme.colors.surfaceContainerHigh, shape)
+                        .elevationShadow(ElevationLevel.Level4, shape, AppTheme.elevation)
+                        .background(AppTheme.colors.surfaceContainerHigh, shape)
                 } else {
                     Modifier
                 },
@@ -158,7 +158,7 @@ private fun RowText(
     colors: ListRowColors,
     modifier: Modifier,
 ) {
-    val typography = HosannaTheme.typography
+    val typography = AppTheme.typography
     val strong = supporting != null || selected
     Column(modifier) {
         BasicText(
@@ -187,7 +187,7 @@ private fun RowText(
 @Composable
 fun ListPanel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val shape = RoundedCornerShape(ListDefaults.PanelRadius)
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Box(
         modifier
             .clip(shape)
@@ -211,7 +211,7 @@ fun ListDivider(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .padding(horizontal = ListDefaults.RowPadding)
             .height(ListDefaults.Line)
-            .background(HosannaTheme.colors.outlineVariant),
+            .background(AppTheme.colors.outlineVariant),
     )
 }
 
@@ -226,6 +226,6 @@ fun ListDropIndicator(modifier: Modifier = Modifier) {
         modifier
             .fillMaxWidth()
             .height(ListDefaults.DropLine)
-            .background(HosannaTheme.colors.primary, RoundedCornerShape(ListDefaults.DropLine)),
+            .background(AppTheme.colors.primary, RoundedCornerShape(ListDefaults.DropLine)),
     )
 }

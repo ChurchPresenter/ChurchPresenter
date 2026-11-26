@@ -49,6 +49,11 @@ data class SemanticColors(
     val info: Color,
     /** A starred song. */
     val favorite: Color,
+    /** Something that is on air right now: the LIVE badge and the edge round a live thumbnail. */
+    val live: Color,
+    val onLive: Color,
+    /** Text and marks quieter than [ColorScheme.onSurfaceVariant]: placeholders, ticks, a paused bar. */
+    val onSurfaceFaint: Color,
     /** The stripe marking the selected row in a list. */
     val marker: Color,
     /** Strong's original-language accents. */
@@ -59,6 +64,10 @@ data class SemanticColors(
     val chordChorus: Color,
     val chordBridge: Color,
     val chordTag: Color,
+    val chordIntro: Color,
+    val chordVoice: Color,
+    /** A section of no named kind. */
+    val chordOther: Color,
     /**
      * The eight kinds of content the app stores, colour-coded where they are listed side by side —
      * the storage folders in System settings. They carry no state: the hue says *which kind of
@@ -73,6 +82,7 @@ data class SemanticColors(
     val contentMedia: Color,
     val contentCalendar: Color,
     val contentSchedule: Color,
+    val contentAnnouncement: Color,
     /**
      * A setting a linked profile has changed from its master: the dot beside its label, and the
      * "3 changes" chip in the profile list.
@@ -109,6 +119,9 @@ private val LightSemanticColors = SemanticColors(
     onWarningContainer = Color(0xFF3D2800),
     info = Color(0xFF1565C0),
     favorite = Color(0xFFC28800),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    onSurfaceFaint = Color(0xFF878E97),
     marker = Color(0xFFC4972A),
     hebrew = Color(0xFFB45309),
     greek = Color(0xFF1D4ED8),
@@ -116,6 +129,9 @@ private val LightSemanticColors = SemanticColors(
     chordChorus = Color(0xFF7B3FA6),
     chordBridge = Color(0xFF13704C),
     chordTag = Color(0xFF9E3B26),
+    chordIntro = Color(0xFF4F6B8A),
+    chordVoice = Color(0xFF0F7F86),
+    chordOther = Color(0xFF6B7079),
     contentBible = Color(0xFF2F6FD0),
     contentSongs = Color(0xFF6A4FC4),
     contentPictures = Color(0xFF158A76),
@@ -124,6 +140,7 @@ private val LightSemanticColors = SemanticColors(
     contentMedia = Color(0xFF1D78B4),
     contentCalendar = Color(0xFFC0392B),
     contentSchedule = Color(0xFF4E7F1C),
+    contentAnnouncement = Color(0xFFA43A9C),
     override = Color(0xFFC27C0E),
     overrideContainer = Color(0xFFFBEBD0),
     onOverrideContainer = Color(0xFF8A5A0A),
@@ -148,6 +165,9 @@ private val DarkSemanticColors = SemanticColors(
     onWarningContainer = Color(0xFFFBE7C2),
     info = Color(0xFF7FB4F0),
     favorite = Color(0xFFF0C04A),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    onSurfaceFaint = Color(0xFF7C7F87),
     marker = Color(0xFFD8AC45),
     hebrew = Color(0xFFE8A33D),
     greek = Color(0xFF8FB3F5),
@@ -155,6 +175,9 @@ private val DarkSemanticColors = SemanticColors(
     chordChorus = Color(0xFFD9A0F0),
     chordBridge = Color(0xFF6FD69A),
     chordTag = Color(0xFFF5A08E),
+    chordIntro = Color(0xFF9DB6D3),
+    chordVoice = Color(0xFF5CCFD4),
+    chordOther = Color(0xFFA4A7AE),
     contentBible = Color(0xFF7FB2F7),
     contentSongs = Color(0xFFA894F5),
     contentPictures = Color(0xFF63CFBA),
@@ -163,6 +186,7 @@ private val DarkSemanticColors = SemanticColors(
     contentMedia = Color(0xFF6CBDF0),
     contentCalendar = Color(0xFFF08A7E),
     contentSchedule = Color(0xFFA5D37C),
+    contentAnnouncement = Color(0xFFE597DE),
     override = Color(0xFFE8A33D),
     overrideContainer = Color(0xFF4A3413),
     onOverrideContainer = Color(0xFFFBE7C2),
@@ -181,7 +205,7 @@ private val DarkSemanticColors = SemanticColors(
  * themes again — a list that would have to be updated in step with `colorSchemeFor` and would
  * silently hand a tenth theme the wrong half if it were not.
  */
-internal fun semanticColorsFor(scheme: ColorScheme): SemanticColors =
+fun semanticColorsFor(scheme: ColorScheme): SemanticColors =
     if (isDarkScheme(scheme)) DarkSemanticColors else LightSemanticColors
 
 fun isDarkScheme(scheme: ColorScheme): Boolean =
