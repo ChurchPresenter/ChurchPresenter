@@ -22,6 +22,9 @@ internal class PicturesState(appSettings: AppSettings?) {
 
     val selectedFolder = mutableStateOf<File?>(null)
 
+    /** True when the chosen folder exists but its files could not be listed, e.g. no permission. */
+    val folderUnreadable = mutableStateOf(false)
+
     /**
      * The primary's own folder path when this folder came from
      * [PicturesViewModel.loadPictureFromRemote], against the [File] it was stored under.

@@ -70,6 +70,9 @@ class PicturesViewModel private constructor(
 
     val selectedFolder: File? get() = state.selectedFolder.value
 
+    /** Whether the chosen folder could not be read, as opposed to holding no pictures. */
+    val folderUnreadable: Boolean get() = state.folderUnreadable.value
+
     /**
      * What the tab shows for the current folder: the primary's path verbatim when this folder is
      * mirrored over Instance Link, the local absolute path otherwise. Null when nothing is selected.
@@ -150,10 +153,12 @@ class PicturesViewModel private constructor(
             return
         }
 
-        // Load images from folder
-        val imageFiles = folder.listFiles { file ->
+        // Load images from folder; a folder that cannot be listed is told apart from an empty one.
+        val listed = folder.listFiles { file ->
             file.isFile && file.extension.lowercase() in PICTURE_EXTENSIONS && !isSystemArtifact(file.name)
-        }?.sortedBy { it.name } ?: emptyList()
+        }
+        state.folderUnreadable.value = listed == null
+        val imageFiles = listed?.sortedBy { it.name } ?: emptyList()
 
         // Add only files not already present so a re-entrant/repeated load stays idempotent — a
         // duplicate path in the images would crash the LazyVerticalGrid keyed by absolutePath.
@@ -266,6 +271,12 @@ class PicturesViewModel private constructor(
                 onFolderSelected(dir.absolutePathString())
             }
         }
+    }
+
+    /** Reads the chosen folder again, off the event thread, after it could not be read. */
+    fun retryFolder() {
+        val folder = state.selectedFolder.value ?: return
+        scope.launch { selectFolder(folder) }
     }
 
     /**

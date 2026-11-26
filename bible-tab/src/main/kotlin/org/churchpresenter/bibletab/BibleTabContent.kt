@@ -1,5 +1,11 @@
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.strings.generated.resources.bible_no_match_inside_words
+import org.churchpresenter.strings.generated.resources.bible_no_match_body_exact
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import org.churchpresenter.sharedui.composables.EmptyStateSecondaryButton
 import org.churchpresenter.strings.generated.resources.bible_no_match_clear
 import org.churchpresenter.strings.generated.resources.bible_no_match_body_book
 import org.churchpresenter.strings.generated.resources.bible_no_match_body
@@ -141,7 +147,13 @@ internal fun ColumnScope.BibleTabContent(
                 },
             )
         } else if (isSearchMode && searchQuery.isNotEmpty()) {
-            BibleNoMatch(searchQuery, scopeBook) { viewModel.clearSearch(); focusRequester.requestFocus() }
+            BibleNoMatch(
+                query = searchQuery,
+                scopeBook = scopeBook,
+                wholeWords = selectedModeIndex == MODE_EXACT_MATCH,
+                onMatchInsideWords = { viewModel.updateSelectedModeIndex(0); viewModel.performSearch() },
+                onClear = { viewModel.clearSearch(); focusRequester.requestFocus() },
+            )
         } else {
             BibleBrowser(viewModel, tab, focusRescue)
         }
@@ -168,8 +180,15 @@ private fun ColumnScope.BibleNoPrimaryHint(onOpenSettings: () -> Unit) {
 }
 
 /** A search with no verses: what was searched for, where, and the way back. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ColumnScope.BibleNoMatch(query: String, scopeBook: String?, onClear: () -> Unit) {
+private fun ColumnScope.BibleNoMatch(
+    query: String,
+    scopeBook: String?,
+    wholeWords: Boolean,
+    onMatchInsideWords: () -> Unit,
+    onClear: () -> Unit,
+) {
     Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
         EmptyStateContent(
             icon = IconRes.drawable.ic_search,
@@ -181,10 +200,36 @@ private fun ColumnScope.BibleNoMatch(query: String, scopeBook: String?, onClear:
                 stringResource(Res.string.bible_no_match_title_book, query.trim(), scopeBook)
             },
             body = stringResource(
-                if (scopeBook == null) Res.string.bible_no_match_body else Res.string.bible_no_match_body_book,
+                when {
+                    wholeWords -> Res.string.bible_no_match_body_exact
+                    scopeBook == null -> Res.string.bible_no_match_body
+                    else -> Res.string.bible_no_match_body_book
+                },
             ),
         ) {
-            EmptyStateButton(stringResource(Res.string.bible_no_match_clear), IconRes.drawable.ic_close, onClear)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (wholeWords) {
+                    EmptyStateButton(
+                        stringResource(Res.string.bible_no_match_inside_words),
+                        IconRes.drawable.ic_search,
+                        onMatchInsideWords,
+                    )
+                    EmptyStateSecondaryButton(
+                        stringResource(Res.string.bible_no_match_clear),
+                        IconRes.drawable.ic_close,
+                        onClear,
+                    )
+                } else {
+                    EmptyStateButton(
+                        stringResource(Res.string.bible_no_match_clear),
+                        IconRes.drawable.ic_close,
+                        onClear,
+                    )
+                }
+            }
         }
     }
 }
@@ -423,3 +468,6 @@ private fun BibleTabScope.BibleTabHistory(viewModel: BibleViewModel) {
         )
     }
 }
+
+/** The search mode that matches whole words only; 0 is Contains phrase. */
+private const val MODE_EXACT_MATCH = 1

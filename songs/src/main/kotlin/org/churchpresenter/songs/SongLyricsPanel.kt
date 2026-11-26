@@ -165,6 +165,8 @@ internal fun RowScope.SongLyricsPanel(
     onShowLanguageInPanel: (slot: Int, shown: Boolean) -> Unit = { _, _ -> },
     /** What the empty library's buttons do. */
     library: SongLibraryActions = SongLibraryActions(),
+    /** How many songs a folder chosen from the empty library loaded; 0 once a song is picked. */
+    justLoadedSongs: Int = 0,
 ) {
     val density = LocalDensity.current
     // Right panel — Lyrics display (fixed width, resizable via drag handle)
@@ -240,7 +242,8 @@ internal fun RowScope.SongLyricsPanel(
         // Sits here, directly above the words, rather than up with the rescue banner: it comes and
         // goes on every search, and higher up it would shove the Back to Live button down the panel
         // mid-service, which is the one control that must not move while something is live.
-        if (searchFieldFocused) {
+        // Only with a song to send: with none, Go Live has nothing to put up.
+        if (searchFieldFocused && currentSong != null) {
             SearchKeyboardBanner(somethingLive = isPresenting, onClick = onSearchBannerClick)
         } else if (browsePausedHint && showBackToLive && !dialogOpen) {
             val shortcuts = LocalShortcuts.current
@@ -258,6 +261,8 @@ internal fun RowScope.SongLyricsPanel(
         val noSongsLoaded = filteredSongs.isEmpty() && searchQuery.isBlank()
         if (noSongsLoaded) {
             NoSongLibrary(library)
+        } else if (justLoadedSongs > 0) {
+            SongsLoaded(justLoadedSongs)
         } else {
             currentSong?.notes?.takeIf { it.isNotBlank() }?.let { notes ->
                 SongNotesCard(notes, onEdit = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() })

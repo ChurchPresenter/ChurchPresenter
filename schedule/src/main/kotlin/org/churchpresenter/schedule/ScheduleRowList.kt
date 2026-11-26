@@ -1,5 +1,9 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.strings.generated.resources.schedule_empty_body
+import org.churchpresenter.strings.generated.resources.schedule_empty_title
+import org.churchpresenter.icons.generated.resources.ic_storage_schedule
+import org.churchpresenter.sharedui.composables.EmptyStateContent
 import org.churchpresenter.diagnostics.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
@@ -61,7 +65,6 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.schedule_drop_hint
 import org.churchpresenter.strings.generated.resources.schedule_drop_to_remove
 import org.churchpresenter.strings.generated.resources.schedule_drop_unsupported
 import org.churchpresenter.theme.AppShape
@@ -128,13 +131,7 @@ internal fun ScheduleRowList(
         LocateDrops(fileDrop, listState, viewportOrigin)
 
         if (viewModel.scheduleItems.isEmpty() && !fileDrop.dragOver) {
-            Text(
-                text = stringResource(Res.string.schedule_drop_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.Center).padding(32.dp)
-            )
+            Box(modifier = Modifier.align(Alignment.Center)) { ScheduleEmpty() }
         }
 
         val rows = viewModel.scheduleItems.toList()
@@ -571,4 +568,16 @@ internal fun scheduleRowKeys(rows: List<ScheduleItem>): List<String> {
             "${item.id}#$index"
         }
     }
+}
+
+/** An empty schedule: what goes in it, and how. */
+@Composable
+private fun ScheduleEmpty() {
+    EmptyStateContent(
+        icon = IconRes.drawable.ic_storage_schedule,
+        neutral = false,
+        compact = true,
+        title = stringResource(Res.string.schedule_empty_title),
+        body = stringResource(Res.string.schedule_empty_body),
+    )
 }

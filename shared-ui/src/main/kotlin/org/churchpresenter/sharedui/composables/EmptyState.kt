@@ -1,5 +1,6 @@
 package org.churchpresenter.sharedui.composables
 
+import org.churchpresenter.theme.semantic
 import androidx.compose.foundation.background
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
@@ -97,6 +98,8 @@ fun EmptyStateContent(
     hint: String? = null,
     /** A red tile, for something that went wrong; wins over [neutral]. */
     error: Boolean = false,
+    /** A green tile, for something that just worked; wins over [neutral]. */
+    success: Boolean = false,
     /** Smaller tile, type and gaps, for a narrow list such as search results. */
     compact: Boolean = false,
     footer: (@Composable () -> Unit)? = null,
@@ -112,6 +115,7 @@ fun EmptyStateContent(
                 .background(
                     when {
                         error -> colors.errorContainer
+                        success -> MaterialTheme.semantic.successContainer
                         neutral -> colors.secondaryContainer
                         else -> colors.primaryContainer
                     },
@@ -125,6 +129,7 @@ fun EmptyStateContent(
                 modifier = Modifier.size(if (compact) COMPACT_TILE_ICON_SIZE else TILE_ICON_SIZE),
                 tint = when {
                     error -> colors.onErrorContainer
+                    success -> MaterialTheme.semantic.onSuccessContainer
                     neutral -> colors.onSurfaceVariant
                     else -> colors.onPrimaryContainer
                 },

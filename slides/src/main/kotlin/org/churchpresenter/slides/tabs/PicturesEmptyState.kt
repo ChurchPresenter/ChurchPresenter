@@ -1,5 +1,17 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.strings.generated.resources.pictures_cant_open_choose
+import org.churchpresenter.strings.generated.resources.pictures_cant_open_retry
+import org.churchpresenter.strings.generated.resources.pictures_cant_open_body
+import org.churchpresenter.strings.generated.resources.pictures_cant_open_title
+import org.churchpresenter.icons.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_warning_outline
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import org.churchpresenter.sharedui.composables.EmptyStateSecondaryButton
 import org.churchpresenter.sharedui.composables.EmptyStateButton
 import org.churchpresenter.sharedui.composables.EmptyStateContent
 import org.churchpresenter.sharedui.composables.EmptyStatePanel
@@ -29,6 +41,7 @@ import org.churchpresenter.icons.generated.resources.Res as IconRes
  * What the Pictures tab shows with no pictures: no folder chosen yet, or a folder with none in it.
  * The whole panel takes a dropped folder or picture.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun PicturesTabScope.PicturesEmptyState(viewModel: PicturesViewModel) {
     val drop = remember(viewModel, this) { FileDrop { files -> openDropped(viewModel, files) } }
@@ -50,6 +63,26 @@ internal fun PicturesTabScope.PicturesEmptyState(viewModel: PicturesViewModel) {
             ) {
                 EmptyStateButton(stringResource(Res.string.pictures_empty_choose_folder), IconRes.drawable.ic_folder) {
                     chooseFolder(viewModel)
+                }
+            }
+            viewModel.folderUnreadable -> EmptyStateContent(
+                icon = IconRes.drawable.ic_warning_outline,
+                neutral = false,
+                error = true,
+                title = stringResource(Res.string.pictures_cant_open_title),
+                body = stringResource(Res.string.pictures_cant_open_body, folder.name),
+            ) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    EmptyStateButton(stringResource(Res.string.pictures_cant_open_retry), IconRes.drawable.ic_refresh) {
+                        viewModel.retryFolder()
+                    }
+                    EmptyStateSecondaryButton(
+                        stringResource(Res.string.pictures_cant_open_choose),
+                        IconRes.drawable.ic_folder,
+                    ) { chooseFolder(viewModel) }
                 }
             }
             else -> EmptyStateContent(

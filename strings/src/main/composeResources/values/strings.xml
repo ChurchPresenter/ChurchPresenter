@@ -744,6 +744,8 @@
     <string name="tooltip_collapse_schedule">Collapse Schedule</string>
     <string name="tooltip_expand_schedule">Expand Schedule</string>
     <string name="schedule_drop_hint">Drag files here to add to schedule</string>
+    <string name="schedule_empty_title">Schedule is empty</string>
+    <string name="schedule_empty_body">Add songs, verses or media with + or drag them here.</string>
     <string name="schedule_drop_unsupported">Can't add %1$s</string>
     <string name="schedule_add_files">Add Files…</string>
     <string name="schedule_autoload_notice">Loading %1$s in %2$s</string>
@@ -826,6 +828,10 @@
     <string name="pictures_empty_choose_another">Choose another folder</string>
     <string name="pictures_drop_title">Drop to add the folder</string>
     <string name="pictures_drop_body">Its pictures will show here as slides.</string>
+    <string name="pictures_cant_open_title">Can’t open this folder</string>
+    <string name="pictures_cant_open_body">ChurchPresenter doesn’t have permission to read “%1$s”.</string>
+    <string name="pictures_cant_open_retry">Try again</string>
+    <string name="pictures_cant_open_choose">Choose another</string>
     <string name="loop">Loop</string>
     <string name="loop_on">Loop On</string>
     <string name="loop_off">Loop Off</string>
@@ -1372,6 +1378,8 @@
     <string name="bible_no_match_body">Check the spelling, or try fewer words.</string>
     <string name="bible_no_match_body_book">Check the spelling, or search the entire Bible.</string>
     <string name="bible_no_match_clear">Clear search</string>
+    <string name="bible_no_match_body_exact">Only whole words were matched. Check the spelling, or match inside words too.</string>
+    <string name="bible_no_match_inside_words">Match inside words</string>
     <string name="songs_indexing">Indexing songs…</string>
     <string name="songs_no_db_title">No Song Database Configured</string>
     <string name="songs_no_db_hint">Open ⚙ Settings and go to the Songs tab, then:</string>
@@ -1382,11 +1390,17 @@
     <string name="songs_empty_open_settings">Open Settings</string>
     <string name="songs_empty_folder_dialog">Select Song Folder</string>
     <string name="songs_no_match_title">No songs match “%1$s”</string>
-    <string name="songs_no_match_body">Check the spelling, or try fewer words.</string>
+    <string name="songs_no_match_body">Nothing in the lyrics either. Check the spelling.</string>
     <string name="songs_no_match_body_lyrics">Check the spelling, or search the lyrics instead.</string>
     <string name="songs_no_match_clear">Clear search</string>
     <string name="songs_no_selection_title">No song selected</string>
     <string name="songs_no_selection_body">Pick a song from the list to see its lyrics.</string>
+    <string name="songs_no_match_search_lyrics">Search lyrics</string>
+    <plurals name="songs_loaded_title">
+        <item quantity="one">%1$d song loaded</item>
+        <item quantity="other">%1$d songs loaded</item>
+    </plurals>
+    <string name="songs_loaded_body">Pick a song from the list, or search for one, to see its lyrics.</string>
 
     <!-- Output role (fill+key) -->
     <string name="key_output">Key Output</string>

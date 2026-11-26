@@ -72,6 +72,9 @@ internal class SongsTabController(
     var onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
     var onOpenSettings: () -> Unit = {}
 
+    /** True from choosing a song folder in the empty library until a song is picked or searched for. */
+    var libraryJustLoaded by mutableStateOf(false)
+
     val tabFocusRequester = FocusRequester()
     val searchFocus = SearchFieldFocus()
 
