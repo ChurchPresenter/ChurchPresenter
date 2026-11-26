@@ -7,6 +7,8 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -44,7 +46,8 @@ fun ComposeUiTest.dictSearch(query: String) {
  * row and nothing else.
  */
 fun rowOf(entry: StrongsEntry) =
-    hasText(entry.number) and hasText(entry.transliteration)
+    hasText(entry.number) and hasText(entry.transliteration) and
+        !hasAnyAncestor(hasTestTag(EXAMPLE_ENTRIES_TAG))
 
 /** Whether [entry] is in the list right now. */
 fun ComposeUiTest.listShows(entry: StrongsEntry): Boolean =

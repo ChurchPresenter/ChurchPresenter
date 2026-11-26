@@ -13,7 +13,6 @@ import org.churchpresenter.strings.generated.resources.presentation_drop_title
 import org.churchpresenter.strings.generated.resources.presentation_drop_body
 import org.churchpresenter.icons.generated.resources.ic_storage_presentation
 import org.churchpresenter.icons.generated.resources.ic_folder
-import org.churchpresenter.icons.generated.resources.ic_download
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -314,27 +313,25 @@ private fun PresentationTabScope.PresentationLoadingOrError(viewModel: Presentat
 /** No presentation open: what to open, the formats it reads, and a panel that takes a dropped file. */
 @Composable
 private fun PresentationTabScope.PresentationEmptyState(viewModel: PresentationViewModel, modifier: Modifier) {
-    val drop = remember(viewModel, this) { FileDrop { files -> openDroppedPresentations(viewModel, files) } }
-    EmptyStatePanel(drop, modifier) {
-        if (drop.dragOver) {
-            EmptyStateContent(
-                icon = IconRes.drawable.ic_download,
-                neutral = false,
-                title = stringResource(Res.string.presentation_drop_title),
-                body = stringResource(Res.string.presentation_drop_body),
-            )
-        } else {
-            EmptyStateContent(
-                icon = IconRes.drawable.ic_storage_presentation,
-                neutral = false,
-                title = stringResource(Res.string.presentation_empty_title),
-                body = stringResource(Res.string.presentation_empty_body),
-                hint = stringResource(Res.string.presentation_empty_drag_hint),
-                footer = { FormatChips(PRESENTATION_FORMAT_CHIPS) },
-            ) {
-                EmptyStateButton(stringResource(Res.string.presentation_empty_open), IconRes.drawable.ic_folder) {
-                    openPresentationChooser(viewModel)
-                }
+    val drop = remember(viewModel, this) {
+        FileDrop { files -> viewModel.openDropped(files) { RecentPresentationFiles.add(it.absolutePath) } }
+    }
+    EmptyStatePanel(
+        drop,
+        dropTitle = stringResource(Res.string.presentation_drop_title),
+        dropBody = stringResource(Res.string.presentation_drop_body),
+        modifier = modifier,
+    ) {
+        EmptyStateContent(
+            icon = IconRes.drawable.ic_storage_presentation,
+            neutral = false,
+            title = stringResource(Res.string.presentation_empty_title),
+            body = stringResource(Res.string.presentation_empty_body),
+            hint = stringResource(Res.string.presentation_empty_drag_hint),
+            footer = { FormatChips(PRESENTATION_FORMAT_CHIPS) },
+        ) {
+            EmptyStateButton(stringResource(Res.string.presentation_empty_open), IconRes.drawable.ic_folder) {
+                openPresentationChooser(viewModel)
             }
         }
     }

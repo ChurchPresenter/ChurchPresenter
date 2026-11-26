@@ -22,6 +22,12 @@ import org.churchpresenter.songs.search
 import org.churchpresenter.songs.songsTab
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import org.churchpresenter.songs.SongsLoaded
+import org.churchpresenter.sharedui.screenshot.captureComponent
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.bothThemes
 
@@ -312,6 +318,20 @@ class SongsTabScreenshotTest {
 
     @Test
     fun `search with no matches`() = shoot("search_no_matches") { search("zzzznotasong") }
+
+    @Test
+    fun `no matches in a mode that reads only titles`() = shoot("search_no_matches_titles_only") {
+        onNodeWithText("FILTER", substring = true).performClick()
+        waitForIdle()
+        onNodeWithText("Starts With").performClick()
+        waitForIdle()
+        search("zzzznotasong")
+    }
+
+    @Test
+    fun `a library just loaded`() = captureComponent(SECTION, "library_loaded") {
+        Box(Modifier.size(420.dp, 260.dp)) { SongsLoaded(1248) }
+    }
 
     @Test
     fun `favourites panel`() = shoot("favourites") { vm ->

@@ -39,6 +39,9 @@ import org.churchpresenter.stt.STTManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.bibletab.updateSelectedModeIndex
+import org.churchpresenter.bibletab.updateSelectedScopeIndex
+import org.churchpresenter.bibletab.SCOPE_CURRENT_BOOK
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.bothThemes
 
@@ -160,6 +163,19 @@ class BibleTabScreenshotTest {
 
     @Test
     fun `search with no matches`() = shoot("search_no_matches") { runSearch("zzzznotinthisbible") }
+
+    @Test
+    fun `a whole-word search with no matches`() = shoot("search_no_matches_whole_words") { vm ->
+        runOnIdle { vm.updateSelectedModeIndex(1) }
+        runSearch("shepher")
+    }
+
+    @Test
+    fun `a search with no matches in the current book`() = shoot("search_no_matches_book") { vm ->
+        runOnIdle { vm.updateSelectedScopeIndex(SCOPE_CURRENT_BOOK) }
+        waitForIdle()
+        runSearch("shepherd")
+    }
 
     @Test
     fun `a reference in auto mode`() = shoot("search_mode_auto") { bibleSearch("John 3:16") }

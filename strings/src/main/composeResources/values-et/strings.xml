@@ -475,6 +475,8 @@
     <string name="tooltip_collapse_schedule">Ahenda kava</string>
     <string name="tooltip_expand_schedule">Laienda kava</string>
     <string name="schedule_drop_hint">Lohista failid siia, et lisada need kavasse</string>
+    <string name="schedule_empty_title">Kava on tühi</string>
+    <string name="schedule_empty_body">Lisa laule, salme või meediat nupuga + või lohista need siia.</string>
     <string name="schedule_drop_unsupported">%1$s ei saa lisada</string>
     <string name="schedule_add_files">Lisa faile…</string>
     <string name="schedule_autoload_notice">%1$s laaditakse %2$s pärast</string>
@@ -533,6 +535,18 @@
     <string name="loading">Laadimine...</string>
     <string name="select_folder_to_view">Vali kaust piltide vaatamiseks</string>
     <string name="select_image_folder_dialog">Vali piltide kaust</string>
+    <string name="pictures_empty_body">Vali piltide kaust, et näidata neid slaididena.</string>
+    <string name="pictures_empty_choose_folder">Vali kaust</string>
+    <string name="pictures_empty_drag_hint">või lohista kaust siia</string>
+    <string name="pictures_empty_folder_title">Kaustas „%1$s” pole pilte</string>
+    <string name="pictures_empty_folder_body">Lisa sellesse kausta JPG-, PNG- või GIF-faile või vali mõni teine kaust.</string>
+    <string name="pictures_empty_choose_another">Vali teine kaust</string>
+    <string name="pictures_drop_title">Kausta lisamiseks lase lahti</string>
+    <string name="pictures_drop_body">Selle pildid kuvatakse siin slaididena.</string>
+    <string name="pictures_cant_open_title">Seda kausta ei saa avada</string>
+    <string name="pictures_cant_open_body">ChurchPresenteril pole luba kausta „%1$s” lugeda.</string>
+    <string name="pictures_cant_open_retry">Proovi uuesti</string>
+    <string name="pictures_cant_open_choose">Vali teine</string>
     <string name="loop">Korda</string>
     <string name="loop_on">Kordamine sees</string>
     <string name="loop_off">Kordamine väljas</string>
@@ -571,6 +585,12 @@
     <string name="select_presentation_file">Vali esitlusfail slaidide vaatamiseks</string>
     <string name="supported_formats">Toetatud: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Slaidid kuvatakse staatiliste piltidena — animatsioonid, üleminekud, videod ja heli ei ole toetatud.</string>
+    <string name="presentation_empty_title">Ühtegi esitlust pole avatud</string>
+    <string name="presentation_empty_body">Ava PowerPointi, Keynote’i või PDF-fail. Animatsioonid, ehitused, üleminekud ja Keynote’i videod esitatakse täpselt nagu originaalis.</string>
+    <string name="presentation_empty_open">Ava esitlus</string>
+    <string name="presentation_empty_drag_hint">või lohista fail siia</string>
+    <string name="presentation_drop_title">Esitluse avamiseks lase lahti</string>
+    <string name="presentation_drop_body">PowerPoint, Keynote või PDF.</string>
     <string name="presentation_error_password_protected">See PDF on parooliga kaitstud ja seda ei saa avada. Eemalda parool ja proovi uuesti.</string>
     <string name="presentation_error_empty_document">Selles failis ei ole näidatavaid lehekülgi.</string>
     <string name="presentation_error_library_missing">PDF-i tugi ei ole selles versioonis saadaval.</string>
@@ -779,10 +799,37 @@
     <string name="bible_no_primary_hint">Ava ⚙ Seaded ja mine Piibli vahekaardile, seejärel:</string>
     <string name="bible_no_primary_step1">1. Määra Piibli säilituskaust</string>
     <string name="bible_no_primary_step2">2. Vali peamine Piibli fail</string>
+    <string name="bible_empty_title">Piiblit pole valitud</string>
+    <string name="bible_empty_body">Vali Piibli kaust ja oma peamine Piibel jaotises Seaded › Piibel.</string>
+    <string name="bible_empty_open_settings">Ava Piibli seaded</string>
+    <string name="bible_no_match_title">Päringule „%1$s” ei vasta ükski salm</string>
+    <string name="bible_no_match_title_book">Raamatus %2$s ei vasta päringule „%1$s” ükski salm</string>
+    <string name="bible_no_match_body">Kontrolli õigekirja või proovi vähemate sõnadega.</string>
+    <string name="bible_no_match_body_book">Kontrolli õigekirja või otsi kogu Piiblist.</string>
+    <string name="bible_no_match_clear">Tühjenda otsing</string>
+    <string name="bible_no_match_body_exact">Otsiti ainult terveid sõnu. Kontrolli õigekirja või otsi ka sõnade seest.</string>
+    <string name="bible_no_match_inside_words">Otsi sõnade seest</string>
     <string name="songs_indexing">Laulude indekseerimine…</string>
     <string name="songs_no_db_title">Laulude andmebaasi pole seadistatud</string>
     <string name="songs_no_db_hint">Ava ⚙ Seaded ja mine laulude vahekaardile, seejärel:</string>
     <string name="songs_no_db_step">Määra kaust, mis sisaldab laulude andmebaasifaili</string>
+    <string name="songs_empty_title">Lauluraamatukogu pole veel</string>
+    <string name="songs_empty_body">Vali kaust, kus on sinu laulude andmebaasi fail. Saad seda hiljem seadetes muuta.</string>
+    <string name="songs_empty_choose_folder">Vali kaust</string>
+    <string name="songs_empty_open_settings">Ava seaded</string>
+    <string name="songs_empty_folder_dialog">Vali laulude kaust</string>
+    <string name="songs_no_match_title">Päringule „%1$s” ei vasta ükski laul</string>
+    <string name="songs_no_match_body">Ka laulusõnadest ei leitud midagi. Kontrolli õigekirja.</string>
+    <string name="songs_no_match_body_lyrics">Kontrolli õigekirja või otsi hoopis laulusõnadest.</string>
+    <string name="songs_no_match_clear">Tühjenda otsing</string>
+    <string name="songs_no_selection_title">Laulu pole valitud</string>
+    <string name="songs_no_selection_body">Vali loendist laul, et näha selle sõnu.</string>
+    <string name="songs_no_match_search_lyrics">Otsi laulusõnadest</string>
+    <plurals name="songs_loaded_title">
+        <item quantity="one">%1$d laul laaditud</item>
+        <item quantity="other">%1$d laulu laaditud</item>
+    </plurals>
+    <string name="songs_loaded_body">Vali loendist laul või otsi seda, et näha selle sõnu.</string>
 
     <!-- Output role (fill+key) -->
     <string name="key_output">Key väljund</string>
@@ -1364,6 +1411,14 @@
     <string name="qa_displaying">Kuvamisel: %1$s…</string>
     <string name="qa_waiting">Ootab küsimusi…</string>
     <string name="qa_start_session_hint">Küsimuste vastuvõtmiseks alusta seanssi</string>
+    <string name="qa_empty_title">Ükski K&amp;V seanss ei käi</string>
+    <string name="qa_empty_body">Alusta seanssi ja inimesed saavad oma telefonidest küsimusi saata. Need ilmuvad siia.</string>
+    <string name="qa_empty_start">Alusta seanssi</string>
+    <string name="qa_empty_resume_last">Jätka viimast seanssi</string>
+    <string name="qa_waiting_title">Ootab küsimusi</string>
+    <string name="qa_waiting_body">Uued küsimused ilmuvad siia kohe, kui keegi neid saadab.</string>
+    <string name="qa_join_show">Näita liitumisinfot ekraanil</string>
+    <string name="qa_join_hide">Peida liitumisinfo</string>
     <string name="qa_no_approved">Kinnitatud küsimusi pole veel</string>
     <string name="qa_no_finished">Lõpetatud küsimusi pole</string>
     <string name="qa_no_denied">Tagasilükatud küsimusi pole</string>
@@ -1431,6 +1486,16 @@
     <string name="stt_live_preview">Live-eelvaade</string>
     <string name="stt_not_connected">Pole ühendatud. Sisesta STT serveri URL ja klõpsa Ühenda.</string>
     <string name="stt_waiting_for_transcription">Ootan transkriptsiooni…</string>
+    <string name="stt_empty_title">Kõnetuvastuse serveriga pole ühendust</string>
+    <string name="stt_empty_body">Otsesubtiitrid ilmuvad siia, kui ChurchPresenter on sinu STT serveriga ühenduse loonud.</string>
+    <string name="stt_empty_connecting_body">Ühendamine: %1$s…</string>
+    <string name="stt_empty_connect">Ühenda</string>
+    <string name="stt_empty_connecting">Ühendamine…</string>
+    <string name="stt_listening_title">Kuulamine…</string>
+    <string name="stt_listening_body">Hakka rääkima ja sõnad ilmuvad siia.</string>
+    <string name="stt_error_title">%1$s ei vasta</string>
+    <string name="stt_error_body">Kontrolli, et STT server töötab ja aadress on õige.</string>
+    <string name="stt_error_retry">Proovi uuesti</string>
     <string name="stt_translation_label">Tõlge</string>
 
     <!-- CCLI Report -->
@@ -1582,6 +1647,8 @@
     <string name="dictionary_kjv_usage">KJV kasutus</string>
     <string name="dictionary_no_results">Tulemusi ei leitud</string>
     <string name="dictionary_select_entry">Vali kirje detailide vaatamiseks</string>
+    <string name="dictionary_empty_title">Sõna pole valitud</string>
+    <string name="dictionary_empty_body">Vali loendist kirje või otsi Strongi numbri, sõna või definitsiooni järgi.</string>
     <string name="dictionary_loading">Sõnastiku laadimine…</string>
     <string name="dictionary_entry_count">%1$d kirjet</string>
     <string name="dictionary_in_scripture_header">Pühakirjas</string>

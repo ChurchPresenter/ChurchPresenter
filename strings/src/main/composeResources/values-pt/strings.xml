@@ -413,6 +413,8 @@
     <string name="tooltip_collapse_schedule">Recolher Roteiro</string>
     <string name="tooltip_expand_schedule">Expandir Roteiro</string>
     <string name="schedule_drop_hint">Arraste arquivos aqui para adicionar ao roteiro</string>
+    <string name="schedule_empty_title">O roteiro está vazio</string>
+    <string name="schedule_empty_body">Adicione músicas, versículos ou mídia com + ou arraste-os para cá.</string>
     <string name="schedule_drop_unsupported">Não é possível adicionar %1$s</string>
     <string name="schedule_note_placeholder">Adicionar nota…</string>
     <string name="schedule_add_files">Adicionar Arquivos…</string>
@@ -472,6 +474,18 @@
     <string name="loading">Carregando...</string>
     <string name="select_folder_to_view">Selecione uma pasta para ver as imagens</string>
     <string name="select_image_folder_dialog">Selecionar Pasta de Imagens</string>
+    <string name="pictures_empty_body">Escolha uma pasta de imagens para exibi-las como slides.</string>
+    <string name="pictures_empty_choose_folder">Escolher pasta</string>
+    <string name="pictures_empty_drag_hint">ou arraste uma pasta para cá</string>
+    <string name="pictures_empty_folder_title">Nenhuma imagem em “%1$s”</string>
+    <string name="pictures_empty_folder_body">Adicione arquivos JPG, PNG ou GIF a esta pasta ou escolha outra.</string>
+    <string name="pictures_empty_choose_another">Escolher outra pasta</string>
+    <string name="pictures_drop_title">Solte para adicionar a pasta</string>
+    <string name="pictures_drop_body">As imagens dela aparecerão aqui como slides.</string>
+    <string name="pictures_cant_open_title">Não é possível abrir esta pasta</string>
+    <string name="pictures_cant_open_body">O ChurchPresenter não tem permissão para ler “%1$s”.</string>
+    <string name="pictures_cant_open_retry">Tentar Novamente</string>
+    <string name="pictures_cant_open_choose">Escolher outra</string>
     <string name="loop">Loop</string>
     <string name="loop_on">Loop Ativado</string>
     <string name="loop_off">Loop Desativado</string>
@@ -510,6 +524,12 @@
     <string name="select_presentation_file">Selecione um arquivo de apresentação para ver os slides</string>
     <string name="supported_formats">Suportados: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Os slides são exibidos como imagens estáticas — animações, transições, vídeos e áudio não são suportados.</string>
+    <string name="presentation_empty_title">Nenhuma apresentação aberta</string>
+    <string name="presentation_empty_body">Abra um arquivo do PowerPoint, Keynote ou PDF. Animações, builds, transições e vídeos do Keynote são reproduzidos exatamente como no original.</string>
+    <string name="presentation_empty_open">Abrir apresentação</string>
+    <string name="presentation_empty_drag_hint">ou arraste um arquivo para cá</string>
+    <string name="presentation_drop_title">Solte para abrir a apresentação</string>
+    <string name="presentation_drop_body">PowerPoint, Keynote ou PDF.</string>
     <string name="presentation_error_password_protected">Este PDF está protegido por senha e não pode ser aberto. Remova a senha e tente novamente.</string>
     <string name="presentation_error_empty_document">Este arquivo não tem páginas para exibir.</string>
     <string name="presentation_error_library_missing">O suporte a PDF não está disponível nesta compilação.</string>
@@ -702,10 +722,38 @@
     <string name="bible_no_primary_hint">Abra ⚙ Configurações e vá para a aba Bíblia, depois:</string>
     <string name="bible_no_primary_step1">1. Defina o diretório de armazenamento da Bíblia</string>
     <string name="bible_no_primary_step2">2. Selecione um arquivo de Bíblia Principal</string>
+    <string name="bible_empty_title">Nenhuma Bíblia selecionada</string>
+    <string name="bible_empty_body">Escolha a pasta de Bíblias e sua Bíblia principal em Configurações › Bíblia.</string>
+    <string name="bible_empty_open_settings">Abrir configurações da Bíblia</string>
+    <string name="bible_no_match_title">Nenhum versículo corresponde a “%1$s”</string>
+    <string name="bible_no_match_title_book">Nenhum versículo em %2$s corresponde a “%1$s”</string>
+    <string name="bible_no_match_body">Verifique a ortografia ou tente usar menos palavras.</string>
+    <string name="bible_no_match_body_book">Verifique a ortografia ou pesquise na Bíblia inteira.</string>
+    <string name="bible_no_match_clear">Limpar pesquisa</string>
+    <string name="bible_no_match_body_exact">Apenas palavras inteiras foram pesquisadas. Verifique a ortografia ou pesquise também dentro das palavras.</string>
+    <string name="bible_no_match_inside_words">Pesquisar dentro das palavras</string>
     <string name="songs_indexing">Indexando músicas…</string>
     <string name="songs_no_db_title">Nenhum Banco de Dados de Músicas Configurado</string>
     <string name="songs_no_db_hint">Abra ⚙ Configurações e vá para a aba Músicas, depois:</string>
     <string name="songs_no_db_step">Defina um diretório contendo um arquivo de banco de dados de músicas</string>
+    <string name="songs_empty_title">Ainda não há biblioteca de músicas</string>
+    <string name="songs_empty_body">Escolha a pasta com o arquivo do seu banco de dados de músicas. Você pode alterá-la depois em Configurações.</string>
+    <string name="songs_empty_choose_folder">Escolher pasta</string>
+    <string name="songs_empty_open_settings">Abrir Configurações</string>
+    <string name="songs_empty_folder_dialog">Selecionar Pasta de Músicas</string>
+    <string name="songs_no_match_title">Nenhuma música corresponde a “%1$s”</string>
+    <string name="songs_no_match_body">Também não há nada nas letras. Verifique a ortografia.</string>
+    <string name="songs_no_match_body_lyrics">Verifique a ortografia ou pesquise nas letras.</string>
+    <string name="songs_no_match_clear">Limpar pesquisa</string>
+    <string name="songs_no_selection_title">Nenhuma música selecionada</string>
+    <string name="songs_no_selection_body">Escolha uma música na lista para ver a letra.</string>
+    <string name="songs_no_match_search_lyrics">Pesquisar nas letras</string>
+    <plurals name="songs_loaded_title">
+        <item quantity="one">%1$d música carregada</item>
+        <item quantity="many">%1$d de músicas carregadas</item>
+        <item quantity="other">%1$d músicas carregadas</item>
+    </plurals>
+    <string name="songs_loaded_body">Escolha uma música na lista, ou pesquise uma, para ver a letra.</string>
 
     <!-- Output role (fill+key) -->
     <string name="key_output">Saída Key</string>
@@ -1280,6 +1328,14 @@
     <string name="qa_displaying">Exibindo: %1$s…</string>
     <string name="qa_waiting">Aguardando perguntas…</string>
     <string name="qa_start_session_hint">Inicie uma sessão para receber perguntas</string>
+    <string name="qa_empty_title">Nenhuma sessão de P&amp;R em andamento</string>
+    <string name="qa_empty_body">Inicie uma sessão e as pessoas poderão enviar perguntas pelo celular. Elas aparecerão aqui.</string>
+    <string name="qa_empty_start">Iniciar sessão</string>
+    <string name="qa_empty_resume_last">Retomar a última sessão</string>
+    <string name="qa_waiting_title">Aguardando perguntas</string>
+    <string name="qa_waiting_body">Novas perguntas aparecem aqui assim que alguém envia uma.</string>
+    <string name="qa_join_show">Mostrar informações de participação na tela</string>
+    <string name="qa_join_hide">Ocultar informações de participação</string>
     <string name="qa_no_finished">Nenhuma pergunta finalizada</string>
     <string name="qa_no_history">Nenhum histórico de sessões anteriores</string>
     <string name="qa_export_to_file">Exportar para Arquivo</string>
@@ -1341,6 +1397,16 @@
     <string name="stt_live_preview">Pré-visualização ao Vivo</string>
     <string name="stt_not_connected">Não conectado. Digite a URL do servidor STT e clique em Conectar.</string>
     <string name="stt_waiting_for_transcription">Aguardando transcrição…</string>
+    <string name="stt_empty_title">Não conectado a um servidor de fala para texto</string>
+    <string name="stt_empty_body">As legendas ao vivo aparecerão aqui assim que o ChurchPresenter se conectar ao seu servidor STT.</string>
+    <string name="stt_empty_connecting_body">Conectando a %1$s…</string>
+    <string name="stt_empty_connect">Conectar</string>
+    <string name="stt_empty_connecting">Conectando…</string>
+    <string name="stt_listening_title">Ouvindo…</string>
+    <string name="stt_listening_body">Comece a falar e as palavras aparecerão aqui.</string>
+    <string name="stt_error_title">Não é possível acessar %1$s</string>
+    <string name="stt_error_body">Verifique se o servidor STT está em execução e se o endereço está correto.</string>
+    <string name="stt_error_retry">Tentar Novamente</string>
     <string name="stt_translation_label">Tradução</string>
 
     <!-- CCLI Report -->
@@ -1521,6 +1587,8 @@
     <string name="dictionary_kjv_usage">Uso na KJV</string>
     <string name="dictionary_no_results">Nenhum resultado encontrado</string>
     <string name="dictionary_select_entry">Selecione uma entrada para ver os detalhes</string>
+    <string name="dictionary_empty_title">Nenhuma palavra selecionada</string>
+    <string name="dictionary_empty_body">Escolha um item da lista ou pesquise por número de Strong, palavra ou definição.</string>
     <string name="dictionary_loading">Carregando dicionário…</string>
     <string name="dictionary_entry_count">%1$d entradas</string>
     <string name="copy_verse">Copiar versículo</string>

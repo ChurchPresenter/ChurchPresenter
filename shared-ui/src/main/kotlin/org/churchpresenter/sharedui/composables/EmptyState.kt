@@ -1,5 +1,7 @@
 package org.churchpresenter.sharedui.composables
 
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.icons.generated.resources.ic_download
 import org.churchpresenter.theme.semantic
 import androidx.compose.foundation.background
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
@@ -61,7 +63,8 @@ private val BUTTON_RADIUS = 8.dp
 private val BUTTON_ICON_SIZE = 16.dp
 private val CHIP_HEIGHT = 22.dp
 private val CHIP_RADIUS = 6.dp
-private val CONTENT_MAX_WIDTH = 340.dp
+private val CONTENT_MAX_WIDTH = 400.dp
+private val BODY_MAX_WIDTH = 340.dp
 private val DROP_INSET = 10.dp
 private val DROP_RADIUS = 12.dp
 private val DROP_STROKE = 2.dp
@@ -70,9 +73,18 @@ private const val DROP_FILL_ALPHA = 0.06f
 private const val DROP_DASH = 6f
 private const val DROP_GAP = 5f
 
-/** The card an empty tab shows its state on; it takes files dropped on it through [drop]. */
+/**
+ * The card an empty tab shows its state on. It takes files dropped on it through [drop], and while
+ * they are dragged over it shows [dropTitle] and [dropBody] in place of [content].
+ */
 @Composable
-fun EmptyStatePanel(drop: FileDrop, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+fun EmptyStatePanel(
+    drop: FileDrop,
+    dropTitle: String,
+    dropBody: String,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
     val primary = MaterialTheme.colorScheme.primary
     Box(
         modifier = modifier
@@ -81,8 +93,13 @@ fun EmptyStatePanel(drop: FileDrop, modifier: Modifier = Modifier, content: @Com
             .dragAndDropTarget(shouldStartDragAndDrop = drop::accepts, target = drop)
             .drawBehind { if (drop.dragOver) drawDropOutline(primary) },
         contentAlignment = Alignment.Center,
-        content = content,
-    )
+    ) {
+        if (drop.dragOver) {
+            EmptyStateContent(icon = IconRes.drawable.ic_download, neutral = false, title = dropTitle, body = dropBody)
+        } else {
+            content()
+        }
+    }
 }
 
 /**
@@ -116,7 +133,7 @@ fun EmptyStateContent(
                     when {
                         error -> colors.errorContainer
                         success -> MaterialTheme.semantic.successContainer
-                        neutral -> colors.secondaryContainer
+                        neutral -> colors.surfaceVariant
                         else -> colors.primaryContainer
                     },
                     AppShape(if (compact) COMPACT_TILE_RADIUS else TILE_RADIUS),
@@ -155,6 +172,7 @@ fun EmptyStateContent(
             ),
             color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = BODY_MAX_WIDTH),
         )
         if (action != null) {
             Spacer(Modifier.height(if (compact) 14.dp else 20.dp))
@@ -209,7 +227,7 @@ fun EmptyStateSecondaryButton(label: String, icon: DrawableResource, onClick: ()
         modifier = Modifier.height(BUTTON_HEIGHT),
         shape = AppShape(BUTTON_RADIUS),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colors.secondaryContainer,
+            containerColor = colors.surfaceVariant,
             contentColor = colors.onSurface,
         ),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
@@ -235,7 +253,7 @@ fun FormatChips(formats: List<String>) {
         formats.forEach { format ->
             Box(
                 modifier = Modifier.height(CHIP_HEIGHT)
-                    .background(colors.secondaryContainer, AppShape(CHIP_RADIUS))
+                    .background(colors.surfaceVariant, AppShape(CHIP_RADIUS))
                     .padding(horizontal = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {

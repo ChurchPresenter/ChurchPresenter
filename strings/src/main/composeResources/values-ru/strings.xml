@@ -385,6 +385,18 @@
     <string name="loading">Загрузка...</string>
     <string name="select_folder_to_view">Выберите папку для просмотра изображений</string>
     <string name="select_image_folder_dialog">Выбрать папку с изображениями</string>
+    <string name="pictures_empty_body">Выберите папку с изображениями, чтобы показать их как слайды.</string>
+    <string name="pictures_empty_choose_folder">Выбрать папку</string>
+    <string name="pictures_empty_drag_hint">или перетащите папку сюда</string>
+    <string name="pictures_empty_folder_title">В папке «%1$s» нет изображений</string>
+    <string name="pictures_empty_folder_body">Добавьте в эту папку файлы JPG, PNG или GIF или выберите другую.</string>
+    <string name="pictures_empty_choose_another">Выбрать другую папку</string>
+    <string name="pictures_drop_title">Отпустите, чтобы добавить папку</string>
+    <string name="pictures_drop_body">Её изображения появятся здесь как слайды.</string>
+    <string name="pictures_cant_open_title">Не удаётся открыть эту папку</string>
+    <string name="pictures_cant_open_body">У ChurchPresenter нет разрешения на чтение «%1$s».</string>
+    <string name="pictures_cant_open_retry">Повторить</string>
+    <string name="pictures_cant_open_choose">Выбрать другую</string>
     <string name="loop">По кругу</string>
     <string name="transition_duration">Длительность перехода:</string>
     <string name="unit_s">с</string>
@@ -418,6 +430,12 @@
     <string name="select_presentation_file">Выберите файл презентации для просмотра слайдов</string>
     <string name="supported_formats">Поддерживается: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Слайды отображаются как статические изображения — анимации, переходы, видео и аудио не поддерживаются.</string>
+    <string name="presentation_empty_title">Презентация не открыта</string>
+    <string name="presentation_empty_body">Откройте файл PowerPoint, Keynote или PDF. Анимации, построения, переходы и видео Keynote воспроизводятся так же, как в оригинале.</string>
+    <string name="presentation_empty_open">Открыть презентацию</string>
+    <string name="presentation_empty_drag_hint">или перетащите файл сюда</string>
+    <string name="presentation_drop_title">Отпустите, чтобы открыть презентацию</string>
+    <string name="presentation_drop_body">PowerPoint, Keynote или PDF.</string>
     <string name="presentation_error_password_protected">Этот PDF защищён паролем и не может быть открыт. Удалите пароль и повторите попытку.</string>
     <string name="presentation_error_empty_document">В этом файле нет страниц для отображения.</string>
     <string name="presentation_error_library_missing">Поддержка PDF недоступна в этой сборке.</string>
@@ -750,6 +768,8 @@
     <string name="toggle_menu_show_all">Показать все</string>
     <string name="toggle_menu_always">Всегда</string>
     <string name="schedule_drop_hint">Перетащите файлы сюда, чтобы добавить в программу</string>
+    <string name="schedule_empty_title">Программа пуста</string>
+    <string name="schedule_empty_body">Добавьте песни, стихи или медиа кнопкой + или перетащите их сюда.</string>
     <string name="schedule_drop_unsupported">Нельзя добавить %1$s</string>
     <string name="schedule_note_placeholder">Добавить заметку…</string>
     <string name="screen_number">Экран %1$d</string>
@@ -1297,6 +1317,14 @@
     <string name="qa_displaying">Отображается: %1$s…</string>
     <string name="qa_waiting">Ожидание вопросов…</string>
     <string name="qa_start_session_hint">Начните сеанс для получения вопросов</string>
+    <string name="qa_empty_title">Сеанс вопросов и ответов не запущен</string>
+    <string name="qa_empty_body">Начните сеанс, и люди смогут присылать вопросы со своих телефонов. Они появятся здесь.</string>
+    <string name="qa_empty_start">Начать сеанс</string>
+    <string name="qa_empty_resume_last">Продолжить последний сеанс</string>
+    <string name="qa_waiting_title">Ожидание вопросов</string>
+    <string name="qa_waiting_body">Новые вопросы появятся здесь, как только их кто-нибудь пришлёт.</string>
+    <string name="qa_join_show">Показать данные для подключения на экране</string>
+    <string name="qa_join_hide">Скрыть данные для подключения</string>
     <string name="qa_no_approved">Нет одобренных вопросов</string>
     <string name="qa_no_finished">Нет завершённых вопросов</string>
     <string name="qa_no_denied">Нет отклонённых вопросов</string>
@@ -1362,6 +1390,16 @@
     <string name="stt_live_preview">Предпросмотр</string>
     <string name="stt_not_connected">Нет подключения. Введите URL-адрес сервера STT и нажмите «Подключиться».</string>
     <string name="stt_waiting_for_transcription">Ожидание транскрипции…</string>
+    <string name="stt_empty_title">Нет подключения к серверу распознавания речи</string>
+    <string name="stt_empty_body">Субтитры в реальном времени появятся здесь, когда ChurchPresenter подключится к вашему серверу STT.</string>
+    <string name="stt_empty_connecting_body">Подключение к %1$s…</string>
+    <string name="stt_empty_connect">Подключиться</string>
+    <string name="stt_empty_connecting">Подключение…</string>
+    <string name="stt_listening_title">Слушаю…</string>
+    <string name="stt_listening_body">Начните говорить, и слова появятся здесь.</string>
+    <string name="stt_error_title">Не удаётся связаться с %1$s</string>
+    <string name="stt_error_body">Убедитесь, что сервер STT запущен и адрес указан верно.</string>
+    <string name="stt_error_retry">Повторить</string>
     <string name="stt_translation_label">Перевод</string>
 
     <!-- CCLI Report -->
@@ -1470,6 +1508,16 @@
     <string name="bible_no_primary_hint">Откройте ⚙ Настройки и перейдите на вкладку «Библия», затем:</string>
     <string name="bible_no_primary_step1">1. Укажите папку с Библией</string>
     <string name="bible_no_primary_step2">2. Выберите основной файл Библии</string>
+    <string name="bible_empty_title">Библия не выбрана</string>
+    <string name="bible_empty_body">Выберите папку с Библиями и основную Библию в разделе Настройки › Библия.</string>
+    <string name="bible_empty_open_settings">Открыть настройки Библии</string>
+    <string name="bible_no_match_title">Нет стихов по запросу «%1$s»</string>
+    <string name="bible_no_match_title_book">В книге %2$s нет стихов по запросу «%1$s»</string>
+    <string name="bible_no_match_body">Проверьте написание или введите меньше слов.</string>
+    <string name="bible_no_match_body_book">Проверьте написание или ищите по всей Библии.</string>
+    <string name="bible_no_match_clear">Очистить поиск</string>
+    <string name="bible_no_match_body_exact">Искались только целые слова. Проверьте написание или включите поиск внутри слов.</string>
+    <string name="bible_no_match_inside_words">Искать внутри слов</string>
     <string name="canvas_bible_version">Версия Библии</string>
     <string name="canvas_bible_verse_text">Текст стиха</string>
     <string name="canvas_bible_reference">Ссылка</string>
@@ -1527,6 +1575,25 @@
     <string name="songs_no_db_title">База данных песен не настроена</string>
     <string name="songs_no_db_hint">Откройте ⚙ Настройки и перейдите на вкладку «Песни», затем:</string>
     <string name="songs_no_db_step">Укажите папку, содержащую базу данных песен</string>
+    <string name="songs_empty_title">Библиотека песен ещё не выбрана</string>
+    <string name="songs_empty_body">Выберите папку с файлом базы данных песен. Позже это можно изменить в Настройках.</string>
+    <string name="songs_empty_choose_folder">Выбрать папку</string>
+    <string name="songs_empty_open_settings">Открыть настройки</string>
+    <string name="songs_empty_folder_dialog">Выберите папку с песнями</string>
+    <string name="songs_no_match_title">Нет песен по запросу «%1$s»</string>
+    <string name="songs_no_match_body">В текстах песен тоже ничего нет. Проверьте написание.</string>
+    <string name="songs_no_match_body_lyrics">Проверьте написание или ищите по текстам песен.</string>
+    <string name="songs_no_match_clear">Очистить поиск</string>
+    <string name="songs_no_selection_title">Песня не выбрана</string>
+    <string name="songs_no_selection_body">Выберите песню в списке, чтобы увидеть её текст.</string>
+    <string name="songs_no_match_search_lyrics">Искать в текстах</string>
+    <plurals name="songs_loaded_title">
+        <item quantity="one">Загружена %1$d песня</item>
+        <item quantity="few">Загружено %1$d песни</item>
+        <item quantity="many">Загружено %1$d песен</item>
+        <item quantity="other">Загружено %1$d песни</item>
+    </plurals>
+    <string name="songs_loaded_body">Выберите песню в списке или найдите её через поиск, чтобы увидеть текст.</string>
     <string name="web_type_to_page_placeholder">Сначала нажмите на поле ввода на живой странице</string>
     <string name="web_focus_first_input">Фокус на первое поле ввода</string>
     <string name="tab_dictionary">Словарь</string>
@@ -1540,6 +1607,8 @@
     <string name="dictionary_kjv_usage">Использование (KJV)</string>
     <string name="dictionary_no_results">Результаты не найдены</string>
     <string name="dictionary_select_entry">Выберите запись для просмотра</string>
+    <string name="dictionary_empty_title">Слово не выбрано</string>
+    <string name="dictionary_empty_body">Выберите статью в списке или ищите по номеру Стронга, слову или определению.</string>
     <string name="dictionary_loading">Загрузка словаря…</string>
     <string name="dictionary_entry_count">%1$d записей</string>
 

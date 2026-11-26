@@ -97,7 +97,7 @@ class BibleTabBrowseTest {
     fun `with no primary Bible configured the tab explains how to add one instead of browsing`() =
         bibleTab(settings = { it.copy(bibleSettings = BibleSettings(primaryBible = "")) }) { _, _ ->
             assertTrue(showsExactly(BibleLabel.NO_PRIMARY), "the empty state is shown")
-            assertTrue(showsContainingText("Primary Bible"), "and how to fix it")
+            assertTrue(showsContainingText("primary Bible in Settings"), "and how to fix it")
             // The browser is replaced, not merely empty — its headers are gone too.
             assertFalse(showsExactly(BibleLabel.BOOK.uppercase()), "no BOOK column header")
             assertFalse(showsExactly(BibleLabel.VERSE.uppercase()), "no VERSE column header")

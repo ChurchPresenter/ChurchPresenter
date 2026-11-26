@@ -20,6 +20,7 @@ import org.churchpresenter.qa.selectSort
 import org.churchpresenter.qa.typeQuestion
 import org.churchpresenter.qa.QAManager
 import kotlin.test.Test
+import androidx.compose.ui.test.onNodeWithText
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.bothThemes
 
@@ -154,6 +155,13 @@ class QATabScreenshotTest {
         qaButton(QALabel.SHOW_QR).performClick()
         waitForIdle()
     }
+
+    @Test
+    fun `join info put on screen while waiting for questions`() =
+        shoot("session_waiting_join_on_screen", seed = { startSession("Sunday") }) {
+            onNodeWithText("Show join info on screen").performClick()
+            waitForIdle()
+        }
 
     @Test
     fun `a finished session waiting to be resumed`() = shoot("history", seed = {

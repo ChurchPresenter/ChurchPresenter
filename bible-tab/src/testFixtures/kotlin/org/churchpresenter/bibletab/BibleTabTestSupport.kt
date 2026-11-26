@@ -217,6 +217,8 @@ fun bibleTab(
      * here, so a suite about the tab's own keys and clicks starts with the keyboard on the tab.
      */
     focusSearchOnOpen: Boolean = false,
+    /** The app's way to the Bible settings page, from the tab with no primary Bible. */
+    onOpenBibleSettings: () -> Unit = {},
     block: ComposeUiTest.(vm: BibleViewModel, reports: BibleReports) -> Unit,
 ) {
     val dir = Files.createTempDirectory("cp-bible-tab").toFile()
@@ -258,6 +260,7 @@ fun bibleTab(
                         BibleTab(
                             viewModel = vm,
                             appSettings = appSettings,
+                            onOpenBibleSettings = onOpenBibleSettings,
                             onSettingsChange = { transform ->
                                 reports.settingsChanges++
                                 val updated = transform(appSettings)
@@ -337,7 +340,7 @@ object BibleLabel {
     const val CURRENT_BOOK = "Current Book"
     const val CONTAINS_PHRASE = "Contains Phrase"
     const val EXACT_MATCH = "Exact Match"
-    const val NO_PRIMARY = "No Primary Bible Configured"
+    const val NO_PRIMARY = "No Bible selected"
     const val SWAP = "Swap"
 
     /** The mic button's tooltip, which is what it offers to do next. */

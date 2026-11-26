@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.icons.generated.resources.ic_download
 import org.churchpresenter.icons.generated.resources.ic_folder
 import org.churchpresenter.icons.generated.resources.ic_refresh
 import org.churchpresenter.icons.generated.resources.ic_search
@@ -111,19 +110,24 @@ class EmptyStateScreenshotTest {
     @Test
     fun `a file dragged over the panel`() = captureComponent(SECTION, "drag_over") {
         val drop = FileDrop {}.apply { dragOver = true }
-        EmptyStatePanel(drop, Modifier.size(360.dp, 260.dp)) {
+        EmptyStatePanel(
+            drop,
+            dropTitle = "Drop to add the folder",
+            dropBody = "Its pictures will show here as slides.",
+            modifier = Modifier.size(360.dp, 260.dp),
+        ) {
             EmptyStateContent(
-                icon = Res.drawable.ic_download,
+                icon = Res.drawable.ic_storage_pictures,
                 neutral = false,
-                title = "Drop to add the folder",
-                body = "Its pictures will show here as slides.",
+                title = "No folder selected",
+                body = "Not shown while dragging.",
             )
         }
     }
 
     @Test
     fun `the panel at rest`() = captureComponent(SECTION, "panel") {
-        EmptyStatePanel(FileDrop {}, Modifier.size(360.dp, 260.dp)) {
+        EmptyStatePanel(FileDrop {}, "Drop to add the folder", "", Modifier.size(360.dp, 260.dp)) {
             EmptyStateContent(
                 icon = Res.drawable.ic_storage_pictures,
                 neutral = false,
@@ -140,5 +144,5 @@ class EmptyStateScreenshotTest {
 
 @Composable
 private fun Box360(content: @Composable () -> Unit) {
-    Box(Modifier.width(360.dp)) { content() }
+    Box(Modifier.width(420.dp)) { content() }
 }

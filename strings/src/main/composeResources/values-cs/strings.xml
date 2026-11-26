@@ -396,6 +396,18 @@
     <string name="loading">Načítání...</string>
     <string name="select_folder_to_view">Vyberte složku pro zobrazení obrázků</string>
     <string name="select_image_folder_dialog">Vybrat složku s obrázky</string>
+    <string name="pictures_empty_body">Vyberte složku s obrázky a zobrazte je jako snímky.</string>
+    <string name="pictures_empty_choose_folder">Vybrat složku</string>
+    <string name="pictures_empty_drag_hint">nebo sem přetáhněte složku</string>
+    <string name="pictures_empty_folder_title">Ve složce „%1$s“ nejsou žádné obrázky</string>
+    <string name="pictures_empty_folder_body">Přidejte do této složky soubory JPG, PNG nebo GIF, nebo vyberte jinou.</string>
+    <string name="pictures_empty_choose_another">Vybrat jinou složku</string>
+    <string name="pictures_drop_title">Pusťte pro přidání složky</string>
+    <string name="pictures_drop_body">Její obrázky se zde zobrazí jako snímky.</string>
+    <string name="pictures_cant_open_title">Tuto složku nelze otevřít</string>
+    <string name="pictures_cant_open_body">ChurchPresenter nemá oprávnění číst „%1$s“.</string>
+    <string name="pictures_cant_open_retry">Zkusit znovu</string>
+    <string name="pictures_cant_open_choose">Vybrat jinou</string>
     <string name="loop">Smyčka</string>
     <string name="transition_duration">Doba přechodu:</string>
     <string name="unit_s">s</string>
@@ -429,6 +441,12 @@
     <string name="select_presentation_file">Vyberte soubor prezentace pro zobrazení snímků</string>
     <string name="supported_formats">Podporováno: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Snímky jsou vykresleny jako statické obrázky — animace, přechody, videa a zvuk nejsou podporovány.</string>
+    <string name="presentation_empty_title">Není otevřena žádná prezentace</string>
+    <string name="presentation_empty_body">Otevřete soubor PowerPoint, Keynote nebo PDF. Animace, postupná odhalení, přechody a videa z Keynote se přehrají stejně jako v originále.</string>
+    <string name="presentation_empty_open">Otevřít prezentaci</string>
+    <string name="presentation_empty_drag_hint">nebo sem přetáhněte soubor</string>
+    <string name="presentation_drop_title">Pusťte pro otevření prezentace</string>
+    <string name="presentation_drop_body">PowerPoint, Keynote nebo PDF.</string>
     <string name="presentation_error_password_protected">Toto PDF je chráněno heslem a nelze jej otevřít. Odstraňte heslo a zkuste to znovu.</string>
     <string name="presentation_error_empty_document">Tento soubor nemá žádné stránky k zobrazení.</string>
     <string name="presentation_error_library_missing">Podpora PDF není v této verzi k dispozici.</string>
@@ -761,6 +779,8 @@
     <string name="toggle_menu_show_all">Zobrazit vše</string>
     <string name="toggle_menu_always">Vždy</string>
     <string name="schedule_drop_hint">Přetáhněte soubory sem pro přidání do programu</string>
+    <string name="schedule_empty_title">Program je prázdný</string>
+    <string name="schedule_empty_body">Přidejte písně, verše nebo média tlačítkem + nebo je sem přetáhněte.</string>
     <string name="schedule_drop_unsupported">%1$s nelze přidat</string>
     <string name="schedule_note_placeholder">Přidat poznámku…</string>
     <string name="screen_number">Obrazovka %1$d</string>
@@ -1277,6 +1297,14 @@
     <string name="qa_displaying">Zobrazuje se: %1$s…</string>
     <string name="qa_waiting">Čekání na otázky…</string>
     <string name="qa_start_session_hint">Spusťte relaci pro příjem otázek</string>
+    <string name="qa_empty_title">Neprobíhá žádná relace otázek a odpovědí</string>
+    <string name="qa_empty_body">Spusťte relaci a lidé budou moci posílat otázky ze svých telefonů. Zobrazí se zde.</string>
+    <string name="qa_empty_start">Spustit relaci</string>
+    <string name="qa_empty_resume_last">Obnovit poslední relaci</string>
+    <string name="qa_waiting_title">Čekání na otázky</string>
+    <string name="qa_waiting_body">Nové otázky se zde zobrazí, jakmile je někdo pošle.</string>
+    <string name="qa_join_show">Zobrazit informace o připojení na obrazovce</string>
+    <string name="qa_join_hide">Skrýt informace o připojení</string>
     <string name="qa_no_approved">Žádné schválené otázky</string>
     <string name="qa_no_finished">Žádné dokončené otázky</string>
     <string name="qa_no_denied">Žádné odmítnuté otázky</string>
@@ -1342,6 +1370,16 @@
     <string name="stt_live_preview">Živý náhled</string>
     <string name="stt_not_connected">Nepřipojeno. Zadejte URL serveru STT a klikněte na Připojit.</string>
     <string name="stt_waiting_for_transcription">Čekání na přepis…</string>
+    <string name="stt_empty_title">Nepřipojeno k serveru pro převod řeči na text</string>
+    <string name="stt_empty_body">Živé titulky se zde zobrazí, jakmile se ChurchPresenter připojí k vašemu serveru STT.</string>
+    <string name="stt_empty_connecting_body">Připojování k %1$s…</string>
+    <string name="stt_empty_connect">Připojit</string>
+    <string name="stt_empty_connecting">Připojování…</string>
+    <string name="stt_listening_title">Naslouchání…</string>
+    <string name="stt_listening_body">Začněte mluvit a slova se zobrazí zde.</string>
+    <string name="stt_error_title">Nelze se spojit s %1$s</string>
+    <string name="stt_error_body">Zkontrolujte, že server STT běží a adresa je správná.</string>
+    <string name="stt_error_retry">Zkusit znovu</string>
     <string name="stt_translation_label">Překlad</string>
 
     <!-- CCLI Report -->
@@ -1474,6 +1512,16 @@
     <string name="bible_no_primary_hint">Otevři ⚙ Nastavení a přejdi na záložku „Bible", pak:</string>
     <string name="bible_no_primary_step1">1. Nastav složku s Biblí</string>
     <string name="bible_no_primary_step2">2. Vyber primární soubor Bible</string>
+    <string name="bible_empty_title">Není vybrána žádná Bible</string>
+    <string name="bible_empty_body">Vyberte složku s Biblemi a svou hlavní Bibli v Nastavení › Bible.</string>
+    <string name="bible_empty_open_settings">Otevřít nastavení Bible</string>
+    <string name="bible_no_match_title">Žádné verše neodpovídají „%1$s“</string>
+    <string name="bible_no_match_title_book">Žádné verše v %2$s neodpovídají „%1$s“</string>
+    <string name="bible_no_match_body">Zkontrolujte pravopis nebo zkuste méně slov.</string>
+    <string name="bible_no_match_body_book">Zkontrolujte pravopis nebo prohledejte celou Bibli.</string>
+    <string name="bible_no_match_clear">Vymazat hledání</string>
+    <string name="bible_no_match_body_exact">Hledala se jen celá slova. Zkontrolujte pravopis nebo hledejte i uvnitř slov.</string>
+    <string name="bible_no_match_inside_words">Hledat uvnitř slov</string>
     <string name="canvas_bible_version">Verze Bible</string>
     <string name="canvas_bible_verse_text">Text verše</string>
     <string name="canvas_bible_reference">Odkaz</string>
@@ -1534,6 +1582,25 @@
     <string name="songs_no_db_title">Databáze písní není nakonfigurována</string>
     <string name="songs_no_db_hint">Otevři ⚙ Nastavení a přejdi na záložku „Písně", pak:</string>
     <string name="songs_no_db_step">Nastav složku obsahující soubor databáze písní</string>
+    <string name="songs_empty_title">Zatím žádná knihovna písní</string>
+    <string name="songs_empty_body">Vyberte složku se souborem databáze písní. Později ji můžete změnit v Nastavení.</string>
+    <string name="songs_empty_choose_folder">Vybrat složku</string>
+    <string name="songs_empty_open_settings">Otevřít nastavení</string>
+    <string name="songs_empty_folder_dialog">Vyberte složku s písněmi</string>
+    <string name="songs_no_match_title">Žádné písně neodpovídají „%1$s“</string>
+    <string name="songs_no_match_body">Ani v textech nic není. Zkontrolujte pravopis.</string>
+    <string name="songs_no_match_body_lyrics">Zkontrolujte pravopis nebo hledejte v textech písní.</string>
+    <string name="songs_no_match_clear">Vymazat hledání</string>
+    <string name="songs_no_selection_title">Není vybrána žádná píseň</string>
+    <string name="songs_no_selection_body">Vyberte píseň ze seznamu a zobrazí se její text.</string>
+    <string name="songs_no_match_search_lyrics">Hledat v textech</string>
+    <plurals name="songs_loaded_title">
+        <item quantity="one">Načtena %1$d píseň</item>
+        <item quantity="few">Načteny %1$d písně</item>
+        <item quantity="many">Načteno %1$d písně</item>
+        <item quantity="other">Načteno %1$d písní</item>
+    </plurals>
+    <string name="songs_loaded_body">Vyberte píseň ze seznamu nebo ji vyhledejte a zobrazí se její text.</string>
     <string name="web_type_to_page_placeholder">Nejdřív klikni na vstupní pole na živé stránce</string>
     <string name="web_focus_first_input">Zaměřit první vstupní pole na stránce</string>
     <string name="tab_dictionary">Slovník</string>
@@ -1547,6 +1614,8 @@
     <string name="dictionary_kjv_usage">Použití KJV</string>
     <string name="dictionary_no_results">Žádné výsledky</string>
     <string name="dictionary_select_entry">Vyberte záznam pro zobrazení podrobností</string>
+    <string name="dictionary_empty_title">Není vybráno žádné slovo</string>
+    <string name="dictionary_empty_body">Vyberte heslo ze seznamu nebo hledejte podle Strongova čísla, slova či definice.</string>
     <string name="dictionary_loading">Načítání slovníku…</string>
     <string name="dictionary_entry_count">%1$d záznamů</string>
 

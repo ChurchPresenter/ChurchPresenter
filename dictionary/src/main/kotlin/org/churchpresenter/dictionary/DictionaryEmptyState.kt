@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,6 +26,9 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.Res as IconRes
+
+/** The examples' row, so a finder for the entry list can tell a chip from a list row. */
+const val EXAMPLE_ENTRIES_TAG = "dictionaryExampleEntries"
 
 /** Love, in Hebrew and Greek, and grace: entries worth opening to see what the pane shows. */
 private val EXAMPLE_ENTRIES = listOf("H157", "G26", "G5485")
@@ -44,6 +48,7 @@ internal fun NoEntrySelected(getEntry: ((String) -> StrongsEntry?)?, onPick: (St
     ) {
         if (examples.isNotEmpty()) {
             FlowRow(
+                modifier = Modifier.testTag(EXAMPLE_ENTRIES_TAG),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
@@ -62,7 +67,7 @@ private fun ExampleEntryChip(entry: StrongsEntry, onClick: () -> Unit) {
         modifier = Modifier.height(30.dp),
         shape = AppShape(8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colors.secondaryContainer,
+            containerColor = colors.surfaceVariant,
             contentColor = colors.onSurface,
         ),
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),

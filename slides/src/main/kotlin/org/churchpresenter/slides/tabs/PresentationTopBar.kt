@@ -1,6 +1,5 @@
 package org.churchpresenter.slides.tabs
 
-import org.churchpresenter.slides.viewmodel.isPresentationFile
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
@@ -401,15 +400,4 @@ internal fun PresentationTabScope.openPresentationChooser(viewModel: Presentatio
                 RecentPresentationFiles.add(file.toFile().absolutePath)
             }
         }
-}
-
-/** Opens the presentations among files dropped on the tab, each kept as a recent one. */
-internal fun PresentationTabScope.openDroppedPresentations(viewModel: PresentationViewModel, files: List<File>) {
-    scope.launch {
-        val decks = withContext(Dispatchers.IO) { files.filter { it.isFile && isPresentationFile(it) } }
-        decks.forEach { file ->
-            viewModel.addPresentation(file)
-            RecentPresentationFiles.add(file.absolutePath)
-        }
-    }
 }

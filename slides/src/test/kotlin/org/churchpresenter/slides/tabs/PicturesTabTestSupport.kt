@@ -158,7 +158,7 @@ internal fun picturesTab(
 internal object PictureLabel {
     const val SELECT_FOLDER = "Select Folder"
     const val NO_FOLDER = "No folder selected"
-    const val EMPTY_GRID = "Select a folder to view images"
+    const val EMPTY_GRID = "Choose a folder of pictures to show them as slides."
     const val ADD_TO_SCHEDULE = "Add to Schedule"
     const val GO_LIVE = "Go Live"
     const val PREVIOUS = "Previous Image"

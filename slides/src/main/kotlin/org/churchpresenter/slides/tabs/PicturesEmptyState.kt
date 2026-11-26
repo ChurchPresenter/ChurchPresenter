@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import org.churchpresenter.icons.generated.resources.ic_download
 import org.churchpresenter.icons.generated.resources.ic_folder
 import org.churchpresenter.icons.generated.resources.ic_storage_pictures
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
@@ -45,15 +44,14 @@ import org.churchpresenter.icons.generated.resources.Res as IconRes
 @Composable
 internal fun PicturesTabScope.PicturesEmptyState(viewModel: PicturesViewModel) {
     val drop = remember(viewModel, this) { FileDrop { files -> openDropped(viewModel, files) } }
-    EmptyStatePanel(drop, Modifier.fillMaxSize()) {
+    EmptyStatePanel(
+        drop,
+        dropTitle = stringResource(Res.string.pictures_drop_title),
+        dropBody = stringResource(Res.string.pictures_drop_body),
+        modifier = Modifier.fillMaxSize(),
+    ) {
         val folder = viewModel.selectedFolder
         when {
-            drop.dragOver -> EmptyStateContent(
-                icon = IconRes.drawable.ic_download,
-                neutral = false,
-                title = stringResource(Res.string.pictures_drop_title),
-                body = stringResource(Res.string.pictures_drop_body),
-            )
             folder == null -> EmptyStateContent(
                 icon = IconRes.drawable.ic_storage_pictures,
                 neutral = false,

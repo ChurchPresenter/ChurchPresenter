@@ -246,6 +246,7 @@ internal object ScheduleLabel {
     const val ZOOM_IN = "Zoom In"
     const val ZOOM_OUT = "Zoom Out"
     const val DROP_HINT = "Drag files here to add to schedule"
+    const val EMPTY = "Schedule is empty"
     const val MOVE_UP = "Move Up"
     const val MOVE_DOWN = "Move Down"
     const val GO_LIVE = "Go Live"
