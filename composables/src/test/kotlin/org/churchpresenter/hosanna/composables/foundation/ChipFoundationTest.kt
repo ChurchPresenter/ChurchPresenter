@@ -6,9 +6,9 @@ import androidx.compose.ui.graphics.compositeOver
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.churchpresenter.hosanna.HosannaDarkColors
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.StateAlpha
 import org.churchpresenter.hosanna.composables.chip.chipPadding
 import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.model.ChipColor
@@ -17,11 +17,11 @@ import org.churchpresenter.hosanna.composables.model.ChipSize
 
 class ChipFoundationTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
 
     @Test
     fun `every chip color is a theme role, neutral has none`() {
-        listOf(c, HosannaDarkColors).forEach { colors ->
+        listOf(c, themeColorsFor(ThemeMode.DARK)).forEach { colors ->
             val expected = mapOf(
                 ChipColor.Verse to colors.verse,
                 ChipColor.Chorus to colors.chorus,
@@ -53,7 +53,7 @@ class ChipFoundationTest {
         assertEquals(
             ChipColors(
                 c.primaryContainer,
-                c.primary.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_EDGE),
+                c.primary.copy(alpha = StateAlpha.CONTENT_TYPE_EDGE),
                 c.onPrimaryContainer,
                 c.onPrimaryContainer,
                 null,
@@ -62,8 +62,8 @@ class ChipFoundationTest {
         )
         assertEquals(
             ChipColors(
-                c.verse.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_CONTAINER),
-                c.verse.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_EDGE),
+                c.verse.copy(alpha = StateAlpha.CONTENT_TYPE_CONTAINER),
+                c.verse.copy(alpha = StateAlpha.CONTENT_TYPE_EDGE),
                 c.verse,
                 c.verse,
                 null,
@@ -81,17 +81,17 @@ class ChipFoundationTest {
                 assertEquals(rest, c.chipColors(color, selected, ButtonState.Rest))
                 assertEquals(rest, c.chipColors(color, selected, ButtonState.Loading))
                 assertEquals(
-                    rest.copy(container = layer(HosannaStateAlpha.HOVER)),
+                    rest.copy(container = layer(StateAlpha.HOVER)),
                     c.chipColors(color, selected, ButtonState.Hovered),
                 )
                 assertEquals(
-                    rest.copy(container = layer(HosannaStateAlpha.PRESSED)),
+                    rest.copy(container = layer(StateAlpha.PRESSED)),
                     c.chipColors(color, selected, ButtonState.Pressed),
                 )
                 assertEquals(
                     rest.copy(
-                        container = layer(HosannaStateAlpha.FOCUS),
-                        ring = c.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+                        container = layer(StateAlpha.FOCUS),
+                        ring = c.primary.copy(alpha = StateAlpha.FOCUS_RING),
                     ),
                     c.chipColors(color, selected, ButtonState.Focused),
                 )
@@ -101,9 +101,9 @@ class ChipFoundationTest {
 
     @Test
     fun `a disabled chip looks the same whatever its color`() {
-        val ink = c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        val ink = c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         val expected = ChipColors(
-            c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER),
+            c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER),
             Color.Transparent,
             ink,
             ink,

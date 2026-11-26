@@ -4,16 +4,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.churchpresenter.hosanna.HosannaDarkColors
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.StateAlpha
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 class ButtonFoundationTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
 
     @Test
     fun `disabled outranks loading, loading outranks every interaction`() {
@@ -56,7 +56,7 @@ class ButtonFoundationTest {
 
     @Test
     fun `hover pressed and focus lay the content color over the container`() {
-        listOf(c, HosannaDarkColors).forEach { colors ->
+        listOf(c, themeColorsFor(ThemeMode.DARK)).forEach { colors ->
             ButtonHierarchy.entries.forEach { h ->
                 ButtonIntent.entries.forEach { i ->
                     val (container, content) = colors.restColors(h, i)
@@ -64,13 +64,13 @@ class ButtonFoundationTest {
                     val hovered = colors.buttonColors(h, i, ButtonState.Hovered)
                     val pressed = colors.buttonColors(h, i, ButtonState.Pressed)
                     val focused = colors.buttonColors(h, i, ButtonState.Focused)
-                    assertEquals(ButtonColors(layer(HosannaStateAlpha.HOVER), content, null), hovered)
-                    assertEquals(ButtonColors(layer(HosannaStateAlpha.PRESSED), content, null), pressed)
+                    assertEquals(ButtonColors(layer(StateAlpha.HOVER), content, null), hovered)
+                    assertEquals(ButtonColors(layer(StateAlpha.PRESSED), content, null), pressed)
                     assertEquals(
                         ButtonColors(
-                            layer(HosannaStateAlpha.FOCUS),
+                            layer(StateAlpha.FOCUS),
                             content,
-                            colors.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+                            colors.primary.copy(alpha = StateAlpha.FOCUS_RING),
                         ),
                         focused,
                     )
@@ -90,8 +90,8 @@ class ButtonFoundationTest {
 
     @Test
     fun `disabled looks the same for every intent`() {
-        val content = c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
-        val filled = c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER)
+        val content = c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
+        val filled = c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER)
         ButtonIntent.entries.forEach { i ->
             assertEquals(
                 ButtonColors(filled, content, null),
@@ -113,22 +113,22 @@ class ButtonFoundationTest {
         ButtonState.entries.forEach { state ->
             val raised = state in setOf(ButtonState.Rest, ButtonState.Hovered, ButtonState.Loading)
             assertEquals(
-                if (raised) HosannaLevel.Level1 else HosannaLevel.Level0,
+                if (raised) ElevationLevel.Level1 else ElevationLevel.Level0,
                 buttonLevel(ButtonHierarchy.Primary, state),
                 "$state",
             )
-            assertEquals(HosannaLevel.Level0, buttonLevel(ButtonHierarchy.Secondary, state))
-            assertEquals(HosannaLevel.Level0, buttonLevel(ButtonHierarchy.Tertiary, state))
+            assertEquals(ElevationLevel.Level0, buttonLevel(ButtonHierarchy.Secondary, state))
+            assertEquals(ElevationLevel.Level0, buttonLevel(ButtonHierarchy.Tertiary, state))
         }
     }
 
     @Test
     fun `a floating button lifts on hover, drops when pressed and is flat when disabled`() {
-        assertEquals(HosannaLevel.Level3, floatingLevel(ButtonState.Rest))
-        assertEquals(HosannaLevel.Level3, floatingLevel(ButtonState.Focused))
-        assertEquals(HosannaLevel.Level3, floatingLevel(ButtonState.Loading))
-        assertEquals(HosannaLevel.Level4, floatingLevel(ButtonState.Hovered))
-        assertEquals(HosannaLevel.Level1, floatingLevel(ButtonState.Pressed))
-        assertEquals(HosannaLevel.Level0, floatingLevel(ButtonState.Disabled))
+        assertEquals(ElevationLevel.Level3, floatingLevel(ButtonState.Rest))
+        assertEquals(ElevationLevel.Level3, floatingLevel(ButtonState.Focused))
+        assertEquals(ElevationLevel.Level3, floatingLevel(ButtonState.Loading))
+        assertEquals(ElevationLevel.Level4, floatingLevel(ButtonState.Hovered))
+        assertEquals(ElevationLevel.Level1, floatingLevel(ButtonState.Pressed))
+        assertEquals(ElevationLevel.Level0, floatingLevel(ButtonState.Disabled))
     }
 }

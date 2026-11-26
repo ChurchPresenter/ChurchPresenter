@@ -44,7 +44,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.NavigationDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
 import org.churchpresenter.hosanna.composables.foundation.TabColors
@@ -66,7 +66,7 @@ internal fun TabItem(
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
-    val colors = HosannaTheme.colors.tabColors(selected, buttonState(true, false, hovered, pressed, focused))
+    val colors = AppTheme.colors.tabColors(selected, buttonState(true, false, hovered, pressed, focused))
     val reveal = remember { BringIntoViewRequester() }
     LaunchedEffect(selected) { if (selected) reveal.bringIntoView() }
     val iconOnly = style == TabStyle.Icon
@@ -134,7 +134,7 @@ private fun TabBody(
                 }
             }
             if (!iconOnly) {
-                BasicText(tab.label, style = HosannaTheme.typography.bodyStrong.copy(color = colors.content))
+                BasicText(tab.label, style = AppTheme.typography.bodyStrong.copy(color = colors.content))
                 tab.badge?.let { TabBadge(it, colors, NavigationDefaults.Badge) }
             }
         }
@@ -149,7 +149,7 @@ private fun DrawScope.drawTabChrome(colors: TabColors) {
     val pillSize = Size(size.width + 2 * pad, pill)
     drawRoundRect(colors.layer, topLeft, pillSize, radius)
     colors.ring?.let {
-        drawRoundRect(it, topLeft, pillSize, radius, style = Stroke(HosannaTheme.focusRingWidth.toPx()))
+        drawRoundRect(it, topLeft, pillSize, radius, style = Stroke(AppTheme.focusRingWidth.toPx()))
     }
     val bar = NavigationDefaults.Indicator.toPx()
     val bottom = size.height / 2 + NavigationDefaults.BarHeight.toPx() / 2
@@ -167,7 +167,7 @@ private fun TabBadge(text: String, colors: TabColors, height: Dp, modifier: Modi
             .padding(horizontal = NavigationDefaults.BadgePadding),
         contentAlignment = Alignment.Center,
     ) {
-        BasicText(text, style = HosannaTheme.typography.captionStrong.copy(color = colors.onBadge))
+        BasicText(text, style = AppTheme.typography.captionStrong.copy(color = colors.onBadge))
     }
 }
 

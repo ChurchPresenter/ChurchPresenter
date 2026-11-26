@@ -2,7 +2,7 @@ package org.churchpresenter.hosanna.composables.defaults
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 
 internal object ListDefaults {
     val OneLine: Dp = 36.dp
@@ -12,8 +12,8 @@ internal object ListDefaults {
     val NavigationGap: Dp = 2.dp
     val RowPadding: Dp = 12.dp
     val SelectedPadding: Dp = 16.dp
-    val RowRadius: Dp = HosannaRadius.M
-    val PanelRadius: Dp = HosannaRadius.L
+    val RowRadius: Dp = AppRadius.M
+    val PanelRadius: Dp = AppRadius.L
     val PanelInset: Dp = 4.dp
     val PartGap: Dp = 12.dp
     val Bar: Dp = 4.dp

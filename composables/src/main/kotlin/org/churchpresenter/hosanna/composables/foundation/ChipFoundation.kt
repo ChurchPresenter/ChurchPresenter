@@ -33,9 +33,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.ThemeColors
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ChipDefaults
 import org.churchpresenter.hosanna.composables.model.ChipColor
@@ -44,7 +44,7 @@ import org.churchpresenter.hosanna.composables.model.ChipSize
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
-internal fun HosannaColors.accent(color: ChipColor): Color? = when (color) {
+internal fun ThemeColors.accent(color: ChipColor): Color? = when (color) {
     ChipColor.Neutral -> null
     ChipColor.Verse -> verse
     ChipColor.Chorus -> chorus
@@ -62,19 +62,19 @@ internal fun HosannaColors.accent(color: ChipColor): Color? = when (color) {
     ChipColor.Live -> live
 }
 
-internal fun HosannaColors.restChipColors(color: ChipColor, selected: Boolean): ChipColors {
+internal fun ThemeColors.restChipColors(color: ChipColor, selected: Boolean): ChipColors {
     val accent = accent(color)
     return when {
         selected -> ChipColors(
             primaryContainer,
-            primary.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_EDGE),
+            primary.copy(alpha = StateAlpha.CONTENT_TYPE_EDGE),
             onPrimaryContainer,
             onPrimaryContainer,
             null,
         )
         accent != null -> ChipColors(
-            accent.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_CONTAINER),
-            accent.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_EDGE),
+            accent.copy(alpha = StateAlpha.CONTENT_TYPE_CONTAINER),
+            accent.copy(alpha = StateAlpha.CONTENT_TYPE_EDGE),
             accent,
             accent,
             null,
@@ -83,27 +83,27 @@ internal fun HosannaColors.restChipColors(color: ChipColor, selected: Boolean): 
     }
 }
 
-internal fun HosannaColors.chipColors(color: ChipColor, selected: Boolean, state: ButtonState): ChipColors {
+internal fun ThemeColors.chipColors(color: ChipColor, selected: Boolean, state: ButtonState): ChipColors {
     val rest = restChipColors(color, selected)
     fun layer(alpha: Float) = rest.content.copy(alpha = alpha).compositeOver(rest.container)
     return when (state) {
         ButtonState.Rest, ButtonState.Loading -> rest
-        ButtonState.Hovered -> rest.copy(container = layer(HosannaStateAlpha.HOVER))
-        ButtonState.Pressed -> rest.copy(container = layer(HosannaStateAlpha.PRESSED))
+        ButtonState.Hovered -> rest.copy(container = layer(StateAlpha.HOVER))
+        ButtonState.Pressed -> rest.copy(container = layer(StateAlpha.PRESSED))
         ButtonState.Focused -> rest.copy(
-            container = layer(HosannaStateAlpha.FOCUS),
-            ring = primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+            container = layer(StateAlpha.FOCUS),
+            ring = primary.copy(alpha = StateAlpha.FOCUS_RING),
         )
         ButtonState.Disabled -> {
-            val ink = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
-            ChipColors(onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER), Color.Transparent, ink, ink, null)
+            val ink = onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
+            ChipColors(onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER), Color.Transparent, ink, ink, null)
         }
     }
 }
 
 @Composable
 internal fun chipTextStyle(size: ChipSize): TextStyle =
-    if (size == ChipSize.Small) HosannaTheme.typography.captionStrong else HosannaTheme.typography.label
+    if (size == ChipSize.Small) AppTheme.typography.captionStrong else AppTheme.typography.label
 
 @Composable
 internal fun ChipFrame(
@@ -120,7 +120,7 @@ internal fun ChipFrame(
     val hovered by interactionSource.collectIsHoveredAsState()
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
-    val colors = HosannaTheme.colors.chipColors(color, selected, buttonState(enabled, false, hovered, pressed, focused))
+    val colors = AppTheme.colors.chipColors(color, selected, buttonState(enabled, false, hovered, pressed, focused))
     val container by animateColorAsState(colors.container, tween(ChipDefaults.TRANSITION_MILLIS, easing = EaseOut))
     val shape = RoundedCornerShape(ChipDefaults.Radius)
     Row(
@@ -162,7 +162,7 @@ internal fun ChipCircleButton(
     Box(
         modifier = Modifier
             .size(side)
-            .background(if (active) fill else Color.Transparent, HosannaTheme.shapes.full)
+            .background(if (active) fill else Color.Transparent, AppTheme.shapes.full)
             .clickable(interactionSource, null, enabled, role = Role.Button, onClick = onClick)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,

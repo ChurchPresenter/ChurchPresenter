@@ -88,6 +88,8 @@ class RuleIntentResolver : IntentResolver {
             ::undoRule,
             // First: "help" alone asks for the list, before display setup reads "help" as a setup.
             ::commandsRule,
+            // Before display setup, which "not working" otherwise reads as a screen problem.
+            ::songSaveRule,
             ::setupWizardRule,
             // What shows on the stage monitor, before its setup below.
             ::setupTopicsRule,
@@ -98,6 +100,7 @@ class RuleIntentResolver : IntentResolver {
             ::displaySetupRule,
             ::backgroundColorRule,
             // Before the font rule: "how do I make the song title bigger" is a tour, not a change.
+            ::transitionRule,
             ::lookRule,
             ::fontSizeRule,
             ::shortcutRule,

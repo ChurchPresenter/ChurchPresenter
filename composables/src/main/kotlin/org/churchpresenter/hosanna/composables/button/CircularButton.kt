@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.CircularButtonDefaults
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
@@ -107,7 +107,7 @@ fun CircularButtonGroup(
 ) {
     Row(
         modifier = modifier
-            .background(HosannaTheme.colors.secondaryContainer, HosannaTheme.shapes.full)
+            .background(AppTheme.colors.secondaryContainer, AppTheme.shapes.full)
             .padding(CircularButtonDefaults.GroupPadding),
         horizontalArrangement = Arrangement.spacedBy(CircularButtonDefaults.GroupGap),
         verticalAlignment = Alignment.CenterVertically,

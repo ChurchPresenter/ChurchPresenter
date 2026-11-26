@@ -3386,6 +3386,11 @@
     <string name="helper_tour_stop">Lopeta</string>
     <string name="helper_hint_tab">Tämä on välilehti %1$s.</string>
     <string name="helper_hint_new_song">Napsauta tästä, niin voit kirjoittaa uuden laulun.</string>
+    <string name="helper_hint_look_transition">%1$s häivyttää tekstin sisään ja ulos sekä kohteesta seuraavaan. Kesto määrää, kuinka kauan kukin häivytys kestää.</string>
+    <string name="helper_hint_song_save">Napsauta Tallenna, kun olet valmis. Uusi laulu tarvitsee ensin otsikon.</string>
+    <string name="helper_song_save_follower">Tämä tietokone seuraa toista konetta Instanssilinkin kautta, joten sen lauluja ei voi tallentaa täällä. Muokkaa laulua koneella, jota se seuraa.</string>
+    <string name="helper_song_save_no_folder">Laulukansiota ei ole asetettu, joten laululle ei ole tallennuspaikkaa. Valitse kansio kohdassa Asetukset › Järjestelmä, kohdan Tallennus alta.</string>
+    <string name="helper_song_save_check">Tallenna pysyy harmaana, kunnes uudella laululla on otsikko, ja niin kauan kuin samassa laulukirjassa on toinen laulu, jolla on sama numero ja otsikko. Jos Tallenna on sininen mutta laulu ei tallennu, laulukansio voi olla vain luku -tilassa tai poissa verkosta. Tarkista se kohdassa Asetukset › Järjestelmä.</string>
     <string name="helper_hint_pick_and_edit">Valitse laulu ja napsauta painiketta %1$s.</string>
     <string name="helper_hint_chords_switch">Kytke %1$s päälle, jos se on pois päältä. Sointutyökalut avautuvat esikatselun alle.</string>
     <string name="helper_hint_chord_palette">Vie kursori juuri tavun eteen ja napsauta sointua tästä. Voit myös kirjoittaa sointuja hakasulkeisiin, kuten [G]Amazing [C]grace, tai liittää sointulapun, jossa soinnut ovat sanojen yläpuolella, niin se muunnetaan puolestasi.</string>

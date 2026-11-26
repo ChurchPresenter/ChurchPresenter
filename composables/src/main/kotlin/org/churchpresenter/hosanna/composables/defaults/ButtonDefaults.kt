@@ -3,7 +3,7 @@ package org.churchpresenter.hosanna.composables.defaults
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.model.FabSize
 import org.churchpresenter.hosanna.composables.model.IconButtonSize
@@ -30,9 +30,9 @@ internal object StandardButtonDefaults {
 internal data class IconButtonMetrics(val side: Dp, val icon: Dp, val spinner: Dp, val cornerRadius: Dp?)
 
 internal object IconButtonDefaults {
-    val Large = IconButtonMetrics(side = 40.dp, icon = 20.dp, spinner = 18.dp, cornerRadius = HosannaRadius.M)
-    val Medium = IconButtonMetrics(side = 34.dp, icon = 16.dp, spinner = 16.dp, cornerRadius = HosannaRadius.M)
-    val Small = IconButtonMetrics(side = 28.dp, icon = 14.dp, spinner = 14.dp, cornerRadius = HosannaRadius.S)
+    val Large = IconButtonMetrics(side = 40.dp, icon = 20.dp, spinner = 18.dp, cornerRadius = AppRadius.M)
+    val Medium = IconButtonMetrics(side = 34.dp, icon = 16.dp, spinner = 16.dp, cornerRadius = AppRadius.M)
+    val Small = IconButtonMetrics(side = 28.dp, icon = 14.dp, spinner = 14.dp, cornerRadius = AppRadius.S)
 
     fun metrics(size: IconButtonSize): IconButtonMetrics = when (size) {
         IconButtonSize.Large -> Large
@@ -86,8 +86,8 @@ internal object SegmentedButtonDefaults {
     val TrackPadding: Dp = 3.dp
     val TrackGap: Dp = 2.dp
     val TrackEdge: Dp = 1.dp
-    val SegmentRadius: Dp = HosannaRadius.S
-    val TrackRadius: Dp = HosannaRadius.nested(SegmentRadius, TrackPadding)
+    val SegmentRadius: Dp = AppRadius.S
+    val TrackRadius: Dp = AppRadius.nested(SegmentRadius, TrackPadding)
 
     fun metrics(size: SegmentedButtonSize): SegmentMetrics = when (size) {
         SegmentedButtonSize.Default -> Default
@@ -101,8 +101,8 @@ internal data class IconSegmentMetrics(val width: Dp, val height: Dp, val icon: 
 internal object IconSegmentDefaults {
     val Regular = IconSegmentMetrics(width = 32.dp, height = 30.dp, icon = 18.dp)
     val Compact = IconSegmentMetrics(width = 28.dp, height = 26.dp, icon = 16.dp)
-    val SegmentRadius: Dp = HosannaRadius.M
-    val TrackRadius: Dp = HosannaRadius.nested(SegmentRadius, SegmentedButtonDefaults.TrackPadding)
+    val SegmentRadius: Dp = AppRadius.M
+    val TrackRadius: Dp = AppRadius.nested(SegmentRadius, SegmentedButtonDefaults.TrackPadding)
     val GroupGap: Dp = 8.dp
 
     fun metrics(compact: Boolean): IconSegmentMetrics = if (compact) Compact else Regular

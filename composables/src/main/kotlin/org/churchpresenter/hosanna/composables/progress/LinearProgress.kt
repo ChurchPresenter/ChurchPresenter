@@ -31,14 +31,14 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.ProgressDefaults
 import org.churchpresenter.hosanna.composables.foundation.ProgressColors
 import org.churchpresenter.hosanna.composables.foundation.progressColors
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ProgressStatus
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_pause
@@ -73,7 +73,7 @@ fun LinearProgress(
     retryInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     thin: Boolean = false,
 ) {
-    val colors = HosannaTheme.colors.progressColors(status)
+    val colors = AppTheme.colors.progressColors(status)
     val trailing = if (status == ProgressStatus.Running) detail else statusText
     Column(modifier, verticalArrangement = Arrangement.spacedBy(ProgressDefaults.LabelGap)) {
         if (!thin && (label != null || trailing != null)) {
@@ -81,7 +81,7 @@ fun LinearProgress(
                 BasicText(
                     label.orEmpty(),
                     Modifier.weight(1f),
-                    style = HosannaTheme.typography.label.copy(color = colors.label),
+                    style = AppTheme.typography.label.copy(color = colors.label),
                 )
                 ProgressStatusText(status, trailing, colors)
                 if (status == ProgressStatus.Failed && retryText != null) {
@@ -113,7 +113,7 @@ private fun ProgressStatusText(status: ProgressStatus, text: String?, colors: Pr
             )
         }
         val ink = if (status == ProgressStatus.Running) colors.detail else colors.status
-        BasicText(text, style = HosannaTheme.typography.caption.tabular().copy(color = ink))
+        BasicText(text, style = AppTheme.typography.caption.tabular().copy(color = ink))
     }
 }
 

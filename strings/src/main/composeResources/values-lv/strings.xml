@@ -3387,6 +3387,11 @@
     <string name="helper_tour_stop">Beigt</string>
     <string name="helper_hint_tab">Šī ir cilne %1$s.</string>
     <string name="helper_hint_new_song">Noklikšķiniet šeit, lai uzrakstītu jaunu dziesmu.</string>
+    <string name="helper_hint_look_transition">%1$s pakāpeniski parāda un paslēpj tekstu, kā arī pāriet no viena vienuma uz nākamo. Ilgums nosaka, cik ilgi ilgst katra pāreja.</string>
+    <string name="helper_hint_song_save">Kad esat pabeidzis, noklikšķiniet uz Saglabāt. Jaunai dziesmai vispirms vajag nosaukumu.</string>
+    <string name="helper_song_save_follower">Šis dators caur Instanču saiti seko citam, tāpēc tā dziesmas šeit nevar saglabāt. Rediģējiet dziesmu datorā, kuram tas seko.</string>
+    <string name="helper_song_save_no_folder">Dziesmu mape nav iestatīta, tāpēc dziesmu nav kur saglabāt. Izvēlieties to sadaļā Iestatījumi › Sistēma, zem Krātuve.</string>
+    <string name="helper_song_save_check">Saglabāt paliek pelēks, kamēr jaunai dziesmai nav nosaukuma un kamēr tajā pašā dziesmu grāmatā ir cita dziesma ar tādu pašu numuru un nosaukumu. Ja Saglabāt ir zils, bet dziesma netiek saglabāta, dziesmu mape varbūt ir tikai lasāma vai bezsaistē. Pārbaudiet to sadaļā Iestatījumi › Sistēma.</string>
     <string name="helper_hint_pick_and_edit">Izvēlieties dziesmu un noklikšķiniet uz pogas %1$s.</string>
     <string name="helper_hint_chords_switch">Ieslēdziet slēdzi %1$s, ja tas ir izslēgts. Akordu rīki atveras zem priekšskatījuma.</string>
     <string name="helper_hint_chord_palette">Novietojiet kursoru tieši pirms zilbes un noklikšķiniet šeit uz akorda. Akordus var rakstīt arī kvadrātiekavās, piemēram, [G]Amazing [C]grace, vai ielīmēt lapu ar akordiem virs vārdiem, un tā tiks pārveidota jūsu vietā.</string>

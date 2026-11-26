@@ -5,7 +5,7 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 ## What it is
 
-The app's look: the **nine color schemes**, the semantic color roles, the typography and shape
+The app's look: the **twelve themes**, the semantic color roles, the typography and shape
 scales, and the theme-mode plumbing. A real Gradle module of this build —
 `include(":theme")`, `implementation(projects.theme)` — in the package
 `org.churchpresenter.theme`.
@@ -23,7 +23,7 @@ that string, so a future package move has to update it by hand; both tests fail 
 
 ## The one rule that matters
 
-**A color literal belongs in this module (or `:hosanna-theme`, for its own palette) or nowhere.** The module depends on Compose and on
+**A color literal belongs in this module or nowhere.** The module depends on Compose and on
 nothing of the app's own, so nothing here can start reading a setting, a file or a ViewModel — that
 is what keeps the palette a palette. A `Color(0xFF…)` anywhere else in the codebase is a finding
 (see `DEVELOPMENT_GUIDE.md`'s zero-tolerance list).
@@ -42,17 +42,23 @@ Corollaries:
 
 | File | Owns |
 |---|---|
-| `Theme.kt` | The nine `ColorScheme`s (Light, Warm, Ocean, Rose light; Dark, Studio, Midnight, Forest, Mocha dark), `AppTypography`, the shape scale, `colorSchemeFor(mode, systemDark)` and the `ChurchPresenterTheme` composable that also provides the scrollbar style |
+| `Theme.kt` | Every theme, all its colors together: each of the twelve `ColorScheme`s (Light, Warm, Ocean, Rose, Slate, Sand light; Dark, Studio, Midnight, Forest, Mocha, Plum dark) with its own `SemanticColors` set right below it. Also `AppTypography`, the shape scale, `colorSchemeFor(mode, systemDark)`, `semanticColorsFor(mode, scheme)` and the `ChurchPresenterTheme` composable that also provides the scrollbar style |
 | `ThemeManager.kt` | `ThemeMode` (the fixed palettes plus `SYSTEM` and `CUSTOM`), `ThemeManager`, `LocalThemeManager`/`ProvideThemeManager`/`rememberThemeManager`, and `themeFromSettings(saved)` |
 | `ThemeCustomization.kt` | `ThemeCustomization` (accent, light/dark base, the optional background/text/secondary/selection/success/warning/error colours, UI font family, UI font scale, list-row spacing — the Margin), `LocalThemeCustomization`, `customColorScheme(custom)` — the HSL-generated palette behind `ThemeMode.CUSTOM` — `customSemanticColorsFor(custom)` `UI_FONT_SCALES` and `DEFAULT_ROW_SPACING` (Normal) |
 | `AppShape.kt` | `AppShape(...)` — the app's corner: a `RoundedCornerShape` at `CORNER_SCALE` of the radius written. Percent corners are not scaled, so a pill stays a pill. Plain circular corners on purpose — a squircle was tried and drew animated screens about four times slower (see the constant's KDoc) |
 | `UiScale.kt` | `ProvideUiScale` — the interface size and UI text size on `LocalDensity`, applied once per window; the Ctrl +/− steps and the screen's cap |
-| `SemanticColors.kt` | `SemanticColors` — the named roles (success, warning, live, staged…) derived per scheme — `semanticColorsFor`, `isDarkScheme`, and the `MaterialTheme.semantic` accessor |
+| `SemanticColors.kt` | `SemanticColors` — the named roles Material has no name for (success, warning, live, the content and section colors…) — `isDarkScheme`, and the `MaterialTheme.semantic` accessor. The values are each theme's, in `Theme.kt`; a new role gets a value in all twelve sets there |
+| `AppTheme.kt` | `AppTheme` — the active theme as `:composables` draws with it: `colors` (`ThemeColors`), `typography` (`TypeScale`, in the theme's font), `elevation` (`Shadows`, light or dark by the scheme), `shapes` (`AppShapes`) and `focusRingWidth`. It provides nothing; it reads what `ChurchPresenterTheme` set |
+| `ThemeColors.kt` | `ThemeColors` — the scheme's Material roles and the semantic roles under the names components ask by (`live`, `star`, `onSurfaceFaint`, `song`, `verse`…), the output's fixed black and white (`screen`/`onScreen`), and `themeColorsFor(mode)` for tests |
+| `TypeScale.kt` | `TypeScale` and `typeScale(family)` — the components' sizes and weights (display … overline), in whatever font the theme uses; `tabular()`, `asOverline()` |
+| `AppShapes.kt` | `AppRadius` (XS 4 … XL 16, `nested`) and `AppShapes`/`DefaultAppShapes` — exact radii, unscaled |
+| `Shadows.kt` | `ElevationLevel`, `Shadows` (`LightShadows`/`DarkShadows`) and `Modifier.elevationShadow` — the components' layered drop shadows |
+| `StateAlpha.kt` | `StateAlpha` — how strongly hover, focus, press, drag and disabled show |
 | `AppThemeWrapper.kt` | The one-call wrapper (`ProvideThemeManager` + `ChurchPresenterTheme`) used by app entry points, previews and screenshot tests |
 
 **Every rounded corner in the app is an `AppShape`, never a `RoundedCornerShape`** — in this module,
 the app and every module that draws UI. `CORNER_SCALE` is then the single number for how rounded
-the app is. `:hosanna-theme` is the other exception: its radii are exact (`HosannaTheme.shapes`). The standing exception is audience-facing output (`composeApp/.../presenter/`):
+the app is. `:composables` is the other exception: its radii are exact (`AppTheme.shapes`, `AppRadius`). The standing exception is audience-facing output (`composeApp/.../presenter/`):
 those corners are part of what a church shows on its screens, not the app's own chrome.
 
 `ThemeMode.SYSTEM` is **not** a palette of its own — it resolves to Light or Dark, so anything

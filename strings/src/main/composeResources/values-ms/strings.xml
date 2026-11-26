@@ -3385,6 +3385,11 @@
     <string name="helper_tour_stop">Henti</string>
     <string name="helper_hint_tab">Ini tab %1$s.</string>
     <string name="helper_hint_new_song">Klik di sini untuk menulis lagu baharu.</string>
+    <string name="helper_hint_look_transition">%1$s melenyapkan teks masuk dan keluar, dan dari satu item ke item seterusnya. Tempoh menetapkan berapa lama setiap lenyapan.</string>
+    <string name="helper_hint_song_save">Klik Simpan apabila selesai. Lagu baharu perlukan tajuk dahulu.</string>
+    <string name="helper_song_save_follower">Komputer ini mengikut komputer lain melalui Pautan Salinan, jadi lagunya tidak boleh disimpan di sini. Edit lagu itu pada komputer yang diikutinya.</string>
+    <string name="helper_song_save_no_folder">Tiada folder lagu ditetapkan, jadi lagu itu tiada tempat untuk disimpan. Pilih satu dalam Tetapan › Sistem, di bawah Storan.</string>
+    <string name="helper_song_save_check">Simpan kekal kelabu sehingga lagu baharu ada tajuk, dan selagi ada lagu lain dalam buku lagu yang sama dengan nombor dan tajuk yang sama. Jika Simpan biru tetapi lagu tidak disimpan, folder lagu mungkin baca sahaja atau di luar talian. Semaknya dalam Tetapan › Sistem.</string>
     <string name="helper_hint_pick_and_edit">Pilih lagu itu, kemudian klik %1$s.</string>
     <string name="helper_hint_chords_switch">Hidupkan %1$s jika ia dimatikan. Alat kord terbuka di bawah pratonton.</string>
     <string name="helper_hint_chord_palette">Letakkan kursor betul-betul sebelum suku kata dan klik kord di sini. Anda juga boleh menaip kord dalam kurungan segi empat, seperti [G]Amazing [C]grace, atau tampal helaian dengan kord di atas lirik dan ia akan ditukar untuk anda.</string>

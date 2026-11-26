@@ -3,8 +3,8 @@ package org.churchpresenter.hosanna.composables.foundation
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.ThemeColors
+import org.churchpresenter.theme.StateAlpha
 
 @Immutable
 internal data class ListRowColors(
@@ -15,21 +15,21 @@ internal data class ListRowColors(
     val bar: Color?,
 )
 
-internal fun HosannaColors.listRowColors(
+internal fun ThemeColors.listRowColors(
     selected: Boolean,
     live: Boolean,
     marker: Boolean,
     state: ButtonState,
 ): ListRowColors {
     if (state == ButtonState.Disabled) {
-        val ink = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        val ink = onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         return ListRowColors(Color.Transparent, ink, ink, null, null)
     }
     val base = if (selected) primaryContainer else Color.Transparent
     val content = if (selected) onPrimaryContainer else onSurface
     val layer = when (state) {
-        ButtonState.Hovered -> HosannaStateAlpha.HOVER
-        ButtonState.Pressed -> HosannaStateAlpha.PRESSED
+        ButtonState.Hovered -> StateAlpha.HOVER
+        ButtonState.Pressed -> StateAlpha.PRESSED
         else -> 0f
     }
     return ListRowColors(

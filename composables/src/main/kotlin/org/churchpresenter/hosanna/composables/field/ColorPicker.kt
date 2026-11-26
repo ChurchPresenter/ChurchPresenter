@@ -48,8 +48,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.ColorFieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
@@ -68,7 +68,7 @@ import org.churchpresenter.hosanna.composables.model.sameRgb
 import org.churchpresenter.hosanna.composables.model.toColor
 import org.churchpresenter.hosanna.composables.model.toHsv
 import org.churchpresenter.hosanna.composables.model.withOpacityPercent
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 
 private const val HUE_DEGREES = 360f
 private const val PERCENT_MAX = 100
@@ -109,8 +109,8 @@ internal fun ColorPickerPopover(
                 ) { pick(hsv.copy(hue = it * HUE_DEGREES)) }
                 if (allowOpacity) {
                     val solid = color.copy(alpha = 1f)
-                    val light = HosannaTheme.colors.surfaceContainerLowest
-                    val dark = HosannaTheme.colors.outlineVariant
+                    val light = AppTheme.colors.surfaceContainerLowest
+                    val dark = AppTheme.colors.outlineVariant
                     ColorSlider(
                         fraction = color.alpha,
                         thumb = color,
@@ -155,7 +155,7 @@ private fun SaturationArea(hsv: Hsv, onPick: (Hsv) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(ColorFieldDefaults.AreaHeight)
-            .clip(HosannaTheme.shapes.m)
+            .clip(AppTheme.shapes.m)
             .pointerInput(Unit) {
                 detectTapGestures { onPick(areaHsv(latest, it, size.width.toFloat(), size.height.toFloat())) }
             }
@@ -202,7 +202,7 @@ private fun ColorSlider(fraction: Float, thumb: Color, track: DrawScope.() -> Un
             Modifier
                 .fillMaxWidth()
                 .height(ColorFieldDefaults.SliderHeight)
-                .clip(HosannaTheme.shapes.full)
+                .clip(AppTheme.shapes.full)
                 .drawBehind(track),
         )
         Box(
@@ -220,8 +220,8 @@ private fun ColorSlider(fraction: Float, thumb: Color, track: DrawScope.() -> Un
 
 @Composable
 private fun PickerInput(text: String, modifier: Modifier, accept: (String) -> Unit, suffix: String? = null) {
-    val colors = HosannaTheme.colors
-    val shape = HosannaTheme.shapes.m
+    val colors = AppTheme.colors
+    val shape = AppTheme.shapes.m
     var value by remember(text) { mutableStateOf(text) }
     Row(
         modifier = modifier
@@ -238,11 +238,11 @@ private fun PickerInput(text: String, modifier: Modifier, accept: (String) -> Un
                 accept(it)
             },
             modifier = Modifier.weight(1f),
-            textStyle = HosannaTheme.typography.body.tabular().copy(color = colors.onSurface),
+            textStyle = AppTheme.typography.body.tabular().copy(color = colors.onSurface),
             singleLine = true,
             cursorBrush = SolidColor(colors.primary),
         )
-        suffix?.let { BasicText(it, style = HosannaTheme.typography.caption.copy(color = colors.onSurfaceVariant)) }
+        suffix?.let { BasicText(it, style = AppTheme.typography.caption.copy(color = colors.onSurfaceVariant)) }
     }
 }
 
@@ -250,7 +250,7 @@ private fun PickerInput(text: String, modifier: Modifier, accept: (String) -> Un
 private fun SwatchRow(title: String, swatches: List<Color>, current: Color, onPick: (Color) -> Unit) {
     if (swatches.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(ColorFieldDefaults.SwatchGap)) {
-        BasicText(title, style = HosannaTheme.typography.caption.copy(color = HosannaTheme.colors.onSurfaceFaint))
+        BasicText(title, style = AppTheme.typography.caption.copy(color = AppTheme.colors.onSurfaceFaint))
         Row(horizontalArrangement = Arrangement.spacedBy(ColorFieldDefaults.SwatchGap)) {
             swatches.take(ColorFieldDefaults.SWATCHES_PER_ROW).forEach { swatch ->
                 PaletteSwatch(swatch, selected = sameRgb(swatch, current)) { onPick(swatch) }
@@ -261,17 +261,17 @@ private fun SwatchRow(title: String, swatches: List<Color>, current: Color, onPi
 
 @Composable
 private fun PaletteSwatch(color: Color, selected: Boolean, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val ring = ColorFieldDefaults.Ring
-    val outer = RoundedCornerShape(HosannaRadius.nested(HosannaRadius.S, ring * 2))
+    val outer = RoundedCornerShape(AppRadius.nested(AppRadius.S, ring * 2))
     Box(
         modifier = Modifier
             .size(ColorFieldDefaults.PaletteSwatch)
             .then(if (selected) Modifier.border(ring, colors.primary, outer) else Modifier)
             .padding(if (selected) ring * 2 else ring * 0)
-            .clip(HosannaTheme.shapes.s)
+            .clip(AppTheme.shapes.s)
             .background(color)
-            .border(FieldDefaults.Border, colors.outlineVariant, HosannaTheme.shapes.s)
+            .border(FieldDefaults.Border, colors.outlineVariant, AppTheme.shapes.s)
             .clickable(role = Role.Button, onClick = onClick)
             .semantics { contentDescription = hexText(color) },
     )

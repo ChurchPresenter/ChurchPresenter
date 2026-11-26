@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 
 internal object FieldDefaults {
     val LabeledHeight: Dp = 44.dp
@@ -140,7 +140,7 @@ internal object PositionPickerDefaults {
         width = 224.dp,
         height = 126.dp,
         inset = 3.dp,
-        radius = HosannaRadius.S,
+        radius = AppRadius.S,
         dot = 6.dp,
         selectedDot = 8.dp,
     )
@@ -148,7 +148,7 @@ internal object PositionPickerDefaults {
         width = 112.dp,
         height = 63.dp,
         inset = 2.dp,
-        radius = HosannaRadius.XS,
+        radius = AppRadius.XS,
         dot = 4.dp,
         selectedDot = 6.dp,
     )

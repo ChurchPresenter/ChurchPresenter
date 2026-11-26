@@ -35,8 +35,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.TableDefaults
 import org.churchpresenter.hosanna.composables.model.SortDirection
 import org.churchpresenter.hosanna.composables.model.TableBulk
@@ -60,7 +60,7 @@ internal fun TableHeader(
     bulk: TableBulk?,
     onResize: (String, Dp) -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Row(
         Modifier
             .fillMaxWidth()
@@ -88,10 +88,10 @@ internal fun TableHeader(
 private fun HeaderCell(column: TableColumn, sort: TableSort?, onSortChange: (TableSort) -> Unit, modifier: Modifier) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val sorted = sort?.column == column.key
     val ink = if (sorted) colors.onSurface else colors.onSurfaceVariant
-    val layer = colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER)
+    val layer = colors.onSurface.copy(alpha = StateAlpha.HOVER)
     val descending = sort?.direction == SortDirection.Descending
     val arrow = if (descending) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
     Row(
@@ -117,7 +117,7 @@ private fun HeaderCell(column: TableColumn, sort: TableSort?, onSortChange: (Tab
             Modifier.weight(1f, fill = false),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = HosannaTheme.typography.captionStrong.copy(color = ink),
+            style = AppTheme.typography.captionStrong.copy(color = ink),
         )
         if (sorted) {
             Image(
@@ -139,11 +139,11 @@ private fun HeaderDivider(
 ) {
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
-    val body = HosannaTheme.typography.body
-    val label = HosannaTheme.typography.captionStrong
+    val body = AppTheme.typography.body
+    val label = AppTheme.typography.captionStrong
     fun fitWidth(column: TableColumn, layout: TableLayout, rows: List<TableRow>): Dp {
         val index = layout.columns.indexOf(column)
         val cells = rows.map { measurer.measure(it.cells.getOrElse(index) { "" }, body).size.width }

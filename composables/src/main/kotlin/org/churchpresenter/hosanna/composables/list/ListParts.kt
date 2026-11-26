@@ -15,14 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.defaults.ListDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
 import org.churchpresenter.hosanna.composables.model.IconButtonSize
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 
 /**
  * A 30dp tile with an icon, for the start of a list row.
@@ -32,7 +32,7 @@ import org.churchpresenter.hosanna.tabular
  */
 @Composable
 fun ListIconTile(icon: Painter, modifier: Modifier = Modifier) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Box(
         modifier
             .size(ListDefaults.IconTile)
@@ -59,7 +59,7 @@ fun ListMeta(text: String, modifier: Modifier = Modifier) {
     BasicText(
         text,
         modifier,
-        style = HosannaTheme.typography.caption.tabular().copy(color = HosannaTheme.colors.onSurfaceVariant),
+        style = AppTheme.typography.caption.tabular().copy(color = AppTheme.colors.onSurfaceVariant),
     )
 }
 

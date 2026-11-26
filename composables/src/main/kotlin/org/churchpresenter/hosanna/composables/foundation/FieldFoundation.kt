@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.ThemeColors
+import org.churchpresenter.theme.StateAlpha
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 
 internal enum class FieldState { Rest, Hovered, Focused, Disabled, ReadOnly }
@@ -36,15 +36,15 @@ internal fun fieldState(enabled: Boolean, readOnly: Boolean, hovered: Boolean, f
     else -> FieldState.Rest
 }
 
-internal fun HosannaColors.fieldColors(state: FieldState, error: Boolean): FieldColors {
+internal fun ThemeColors.fieldColors(state: FieldState, error: Boolean): FieldColors {
     val accent = if (error) this.error else primary
     val border = if (error) this.error else outline
     val label = if (error) this.error else onSurfaceVariant
     return when (state) {
         FieldState.Rest -> FieldColors(surfaceVariant, border, null, label, onSurface, onSurfaceFaint, accent)
         FieldState.Hovered -> FieldColors(
-            onSurface.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(surfaceVariant),
-            if (error) border else onSurface.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(outline),
+            onSurface.copy(alpha = StateAlpha.HOVER).compositeOver(surfaceVariant),
+            if (error) border else onSurface.copy(alpha = StateAlpha.HOVER).compositeOver(outline),
             null,
             label,
             onSurface,
@@ -54,7 +54,7 @@ internal fun HosannaColors.fieldColors(state: FieldState, error: Boolean): Field
         FieldState.Focused -> FieldColors(
             surfaceContainerLowest,
             accent,
-            accent.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+            accent.copy(alpha = StateAlpha.FOCUS_RING),
             accent,
             onSurface,
             onSurfaceFaint,
@@ -70,8 +70,8 @@ internal fun HosannaColors.fieldColors(state: FieldState, error: Boolean): Field
             Color.Transparent,
         )
         FieldState.Disabled -> {
-            val ink = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
-            val edge = onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER)
+            val ink = onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
+            val edge = onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER)
             FieldColors(surfaceVariant, edge, null, ink, ink, ink, Color.Transparent)
         }
     }

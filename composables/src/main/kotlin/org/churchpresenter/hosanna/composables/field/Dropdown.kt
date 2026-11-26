@@ -42,9 +42,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.foundation.FieldState
@@ -103,7 +103,7 @@ fun Dropdown(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = if (expanded) FieldState.Focused else fieldState(enabled, readOnly, hovered, focused)
-    val colors = HosannaTheme.colors.fieldColors(state, error != null)
+    val colors = AppTheme.colors.fieldColors(state, error != null)
     val spec = tween<Color>(FieldDefaults.TRANSITION_MILLIS, easing = EaseOut)
     val container by animateColorAsState(colors.container, spec)
     val border by animateColorAsState(colors.border, spec)
@@ -111,8 +111,8 @@ fun Dropdown(
     val density = LocalDensity.current
     var fieldWidth by remember { mutableStateOf(0.dp) }
     val requester = remember { FocusRequester() }
-    val shape = HosannaTheme.shapes.m
-    val typography = HosannaTheme.typography
+    val shape = AppTheme.shapes.m
+    val typography = AppTheme.typography
     val value = labelOf(entries, selectedKey)
     val interactive = enabled && !readOnly
     fun open() {
@@ -124,11 +124,11 @@ fun Dropdown(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { fieldWidth = with(density) { it.width.toDp() } }
-                    .then(colors.ring?.let { Modifier.focusRing(it, HosannaRadius.M) } ?: Modifier)
+                    .then(colors.ring?.let { Modifier.focusRing(it, AppRadius.M) } ?: Modifier)
                     .background(container, shape)
                     .then(
                         if (readOnly) {
-                            Modifier.dashedBorder(border, FieldDefaults.Border, HosannaRadius.M)
+                            Modifier.dashedBorder(border, FieldDefaults.Border, AppRadius.M)
                         } else {
                             Modifier.border(FieldDefaults.Border, border, shape)
                         },

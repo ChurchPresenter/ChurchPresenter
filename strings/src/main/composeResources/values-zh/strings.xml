@@ -3385,6 +3385,11 @@
     <string name="helper_tour_stop">停止</string>
     <string name="helper_hint_tab">这是“%1$s”标签页。</string>
     <string name="helper_hint_new_song">点这里写一首新歌。</string>
+    <string name="helper_hint_look_transition">“%1$s”让文字淡入淡出，也让一项淡入到下一项。“时长”决定每次淡变用多久。</string>
+    <string name="helper_hint_song_save">写完后点击“保存”。新歌要先有标题。</string>
+    <string name="helper_song_save_follower">这台电脑通过实例互联跟随另一台电脑，所以不能在这里保存歌曲。请到它跟随的那台电脑上编辑这首歌。</string>
+    <string name="helper_song_save_no_folder">还没有设置歌曲文件夹，所以歌曲无处保存。请在 设置 › 系统 的“存储”下选择一个。</string>
+    <string name="helper_song_save_check">新歌还没有标题时，或同一歌本里已有编号和标题都相同的另一首歌时，“保存”会保持灰色。如果“保存”是蓝色但歌曲没有保存，可能是歌曲文件夹只读或已离线。请在 设置 › 系统 中检查。</string>
     <string name="helper_hint_pick_and_edit">选中歌曲，然后点击“%1$s”。</string>
     <string name="helper_hint_chords_switch">如果“%1$s”是关着的，就把它打开。和弦工具会出现在预览下方。</string>
     <string name="helper_hint_chord_palette">把光标放在音节前面，然后在这里点一个和弦。你也可以用方括号输入和弦，例如 [G]奇异[C]恩典，或者粘贴和弦写在歌词上方的谱子，它会自动转换。</string>

@@ -3364,6 +3364,11 @@
     <string name="helper_hint_tab">Te ʻāpi %1$s teie.</string>
     <string name="helper_hint_control">ʻO %1$s teie.</string>
     <string name="helper_hint_new_song">ʻA pata i ʻō nei nō te pāpaʻi i te hōʻē hīmene ʻāpī.</string>
+    <string name="helper_hint_look_transition">Nā %1$s e faʻaʻite mālie ʻe e haʻamoʻe mālie i te pāpaʻi, ʻe mai te tahi tuhaʻa i te tahi atu. Nā Roaraʻa e faʻataʻa e hia te maoro o te taui tātaʻitahi.</string>
+    <string name="helper_hint_song_save">ʻA pata i Haʻapāpū ia oti ana ʻoe. E tiʻa i te hīmene ʻāpī ia roaʻa te hōʻē upoʻo parau nā mua.</string>
+    <string name="helper_song_save_follower">E pāʻi teie ʻōnohi i te tahi atu nā roto i te Instance Link, nō reira ʻaita e nehenehe e haʻapāpū i tāna mau hīmene i ʻō nei. ʻA taui i te hīmene i nià i te ʻōnohi tāna e pāʻi ra.</string>
+    <string name="helper_song_save_no_folder">ʻAita e ʻōpīpiri hīmene i faʻataʻahia, nō reira ʻaita e vāhi nō te haʻapāpū i te hīmene. ʻA māʻiti i te hōʻē i roto i Te mau paramètre › Système, i raro aʻe i Vāhi vaiiho.</string>
+    <string name="helper_song_save_check">E vai rehu noa Haʻapāpū ʻia ʻore te hīmene ʻāpī e upoʻo parau, ʻe ʻia vai te tahi atu hīmene i roto i te buka hīmene hōʻē ā e numera ʻe e upoʻo parau hōʻē ā. Mai te mea e mea ninamu Haʻapāpū ʻaita rā te hīmene i haʻapāpūhia, peneiaʻe e taiʻoraʻa ana noa te ʻōpīpiri hīmene ʻaore rā ʻaita i tūtaʻihia. ʻA hiʻo i roto i Te mau paramètre › Système.</string>
     <!-- %1$s is the Edit Song button's name (edit_song), passed in so the hint names it as the
          translated UI does. -->
     <string name="helper_hint_pick_and_edit">ʻA maiti i te hīmene, ʻa pata ai i niʻa iā %1$s.</string>

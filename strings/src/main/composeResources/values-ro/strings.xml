@@ -3372,6 +3372,11 @@
     <string name="helper_tour_stop">Oprire</string>
     <string name="helper_hint_tab">Aceasta este fila %1$s.</string>
     <string name="helper_hint_new_song">Faceți clic aici pentru a scrie o cântare nouă.</string>
+    <string name="helper_hint_look_transition">%1$s face textul să apară și să dispară treptat și trece treptat de la un element la următorul. Durată stabilește cât durează fiecare estompare.</string>
+    <string name="helper_hint_song_save">Faceți clic pe Salvează când ați terminat. O cântare nouă are nevoie mai întâi de un titlu.</string>
+    <string name="helper_song_save_follower">Acest computer urmează altul prin Instance Link, așa că cântările lui nu pot fi salvate aici. Editați cântarea pe computerul pe care îl urmează.</string>
+    <string name="helper_song_save_no_folder">Nu este setat niciun dosar pentru cântări, așa că cântarea nu are unde fi salvată. Alegeți unul în Setări › Sistem, la Stocare.</string>
+    <string name="helper_song_save_check">Salvează rămâne gri până când o cântare nouă are titlu și cât timp o altă cântare din aceeași carte de cântări are același număr și titlu. Dacă Salvează e albastru, dar cântarea nu se salvează, dosarul cântărilor poate fi doar în citire sau offline. Verificați-l în Setări › Sistem.</string>
     <string name="helper_hint_pick_and_edit">Alegeți cântarea, apoi faceți clic pe %1$s.</string>
     <string name="helper_hint_chords_switch">Activați %1$s, dacă este oprit. Instrumentele pentru acorduri se deschid sub previzualizare.</string>
     <string name="helper_hint_chord_palette">Puneți cursorul chiar înaintea silabei și faceți clic pe un acord de aici. Puteți și să scrieți acordurile între paranteze drepte, ca [G]Ce har [C]minunat, sau să lipiți o partitură cu acordurile deasupra versurilor, iar ea va fi convertită automat.</string>

@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.FabDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonFrame
 import org.churchpresenter.hosanna.composables.foundation.ButtonIcon
@@ -126,7 +126,7 @@ fun ExtendedFloatingActionButton(
                 ButtonIcon(icon, content, FabDefaults.ExtendedIcon)
                 BasicText(
                     text = text,
-                    style = HosannaTheme.typography.subtitle.copy(color = content),
+                    style = AppTheme.typography.subtitle.copy(color = content),
                     maxLines = 1,
                     softWrap = false,
                 )

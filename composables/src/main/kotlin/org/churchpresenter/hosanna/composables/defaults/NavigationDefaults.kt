@@ -2,7 +2,7 @@ package org.churchpresenter.hosanna.composables.defaults
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaRadius
+import org.churchpresenter.theme.AppRadius
 
 internal object NavigationDefaults {
     val BarHeight: Dp = 48.dp
@@ -18,7 +18,7 @@ internal object NavigationDefaults {
     val IconGap: Dp = 6.dp
     val Pill: Dp = 32.dp
     val PillPadding: Dp = 8.dp
-    val PillRadius: Dp = HosannaRadius.M
+    val PillRadius: Dp = AppRadius.M
     val Indicator: Dp = 3.dp
     val IndicatorRadius: Dp = 3.dp
     val Badge: Dp = 18.dp

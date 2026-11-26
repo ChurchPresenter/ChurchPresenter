@@ -197,6 +197,53 @@ private val LightColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,        // Success button text
 )
 
+// Light theme -- the roles Material has no name for (see [SemanticColors]).
+internal val LightSemanticColors = SemanticColors(
+    success = Color(0xFF2E7D32),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFD3EDD5),
+    onSuccessContainer = Color(0xFF10391B),
+    warning = Color(0xFF8A5A00),
+    onWarning = Color(0xFFFFFFFF),
+    warningContainer = Color(0xFFFBE7C2),
+    onWarningContainer = Color(0xFF3D2800),
+    info = Color(0xFF1565C0),
+    favorite = Color(0xFFC28800),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    onSurfaceFaint = Color(0xFF7C7C82),
+    marker = Color(0xFFC4972A),
+    hebrew = Color(0xFFB45309),
+    greek = Color(0xFF1D4ED8),
+    chordVerse = Color(0xFF8A5A00),
+    chordChorus = Color(0xFF7B3FA6),
+    chordBridge = Color(0xFF13704C),
+    chordTag = Color(0xFF9E3B26),
+    chordIntro = Color(0xFF4F6B8A),
+    chordVoice = Color(0xFF15777D),
+    chordOther = Color(0xFF666B74),
+    contentBible = Color(0xFF2F6FD0),
+    contentSongs = Color(0xFF6A4FC4),
+    contentPictures = Color(0xFF158A76),
+    contentLowerThird = Color(0xFFA06C14),
+    contentPresentation = Color(0xFFB23F70),
+    contentMedia = Color(0xFF1D78B4),
+    contentCalendar = Color(0xFFC0392B),
+    contentSchedule = Color(0xFF4E7F1C),
+    contentAnnouncement = Color(0xFFA43A9C),
+    override = Color(0xFFC27C0E),
+    overrideContainer = Color(0xFFFBEBD0),
+    onOverrideContainer = Color(0xFF8A5A0A),
+    inherited = Color(0xFFC4C8CF),
+    targetContainer = Color(0xFFE3EEFB),
+    onTargetContainer = Color(0xFF1F4F8A),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF2A78D6),
+)
+
 // Warm light theme — cream/amber tones
 private val WarmColorScheme = lightColorScheme(
     primary = Color(0xFF7C5C3A),
@@ -225,6 +272,53 @@ private val WarmColorScheme = lightColorScheme(
     outlineVariant = Color(0xFFD9C8A8),
     inverseSurface = Color(0xFF4CAF50),
     inverseOnSurface = Color.White,
+)
+
+// Warm theme -- the roles Material has no name for (see [SemanticColors]).
+internal val WarmSemanticColors = SemanticColors(
+    success = Color(0xFF2E7D32),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFD3EDD5),
+    onSuccessContainer = Color(0xFF10391B),
+    warning = Color(0xFF8A5A00),
+    onWarning = Color(0xFFFFFFFF),
+    warningContainer = Color(0xFFFBE7C2),
+    onWarningContainer = Color(0xFF3D2800),
+    info = Color(0xFF1565C0),
+    favorite = Color(0xFFC28800),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    onSurfaceFaint = Color(0xFF8C7962),
+    marker = Color(0xFFC4972A),
+    hebrew = Color(0xFFB45309),
+    greek = Color(0xFF1D4ED8),
+    chordVerse = Color(0xFF8A5A00),
+    chordChorus = Color(0xFF7B3FA6),
+    chordBridge = Color(0xFF13704C),
+    chordTag = Color(0xFF9E3B26),
+    chordIntro = Color(0xFF4F6B8A),
+    chordVoice = Color(0xFF10747A),
+    chordOther = Color(0xFF666B74),
+    contentBible = Color(0xFF2F6FD0),
+    contentSongs = Color(0xFF6A4FC4),
+    contentPictures = Color(0xFF158A76),
+    contentLowerThird = Color(0xFFA06C14),
+    contentPresentation = Color(0xFFB23F70),
+    contentMedia = Color(0xFF1D78B4),
+    contentCalendar = Color(0xFFC0392B),
+    contentSchedule = Color(0xFF4E7F1C),
+    contentAnnouncement = Color(0xFFA43A9C),
+    override = Color(0xFFC27C0E),
+    overrideContainer = Color(0xFFFBEBD0),
+    onOverrideContainer = Color(0xFF8A5A0A),
+    inherited = Color(0xFFC4C8CF),
+    targetContainer = Color(0xFFE3EEFB),
+    onTargetContainer = Color(0xFF1F4F8A),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF2A78D6),
 )
 
 // Ocean light theme — soft blue-tinted surfaces
@@ -257,6 +351,53 @@ private val OceanColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
+// Ocean theme -- the roles Material has no name for (see [SemanticColors]).
+internal val OceanSemanticColors = SemanticColors(
+    success = Color(0xFF2E7D32),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFD3EDD5),
+    onSuccessContainer = Color(0xFF10391B),
+    warning = Color(0xFF8A5A00),
+    onWarning = Color(0xFFFFFFFF),
+    warningContainer = Color(0xFFFBE7C2),
+    onWarningContainer = Color(0xFF3D2800),
+    info = Color(0xFF1565C0),
+    favorite = Color(0xFFC28800),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    onSurfaceFaint = Color(0xFF638096),
+    marker = Color(0xFFC4972A),
+    hebrew = Color(0xFFB45309),
+    greek = Color(0xFF1D4ED8),
+    chordVerse = Color(0xFF8A5A00),
+    chordChorus = Color(0xFF7B3FA6),
+    chordBridge = Color(0xFF13704C),
+    chordTag = Color(0xFF9E3B26),
+    chordIntro = Color(0xFF4F6B8A),
+    chordVoice = Color(0xFF10747A),
+    chordOther = Color(0xFF666B74),
+    contentBible = Color(0xFF2F6FD0),
+    contentSongs = Color(0xFF6A4FC4),
+    contentPictures = Color(0xFF158A76),
+    contentLowerThird = Color(0xFFA06C14),
+    contentPresentation = Color(0xFFB23F70),
+    contentMedia = Color(0xFF1D78B4),
+    contentCalendar = Color(0xFFC0392B),
+    contentSchedule = Color(0xFF4E7F1C),
+    contentAnnouncement = Color(0xFFA43A9C),
+    override = Color(0xFFC27C0E),
+    overrideContainer = Color(0xFFFBEBD0),
+    onOverrideContainer = Color(0xFF8A5A0A),
+    inherited = Color(0xFFC4C8CF),
+    targetContainer = Color(0xFFE3EEFB),
+    onTargetContainer = Color(0xFF1F4F8A),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF2A78D6),
+)
+
 // Rose light theme — warm pinkish-grey palette
 private val RoseColorScheme = lightColorScheme(
     primary = Color(0xFF8E4A5A),
@@ -287,6 +428,53 @@ private val RoseColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
+// Rose theme -- the roles Material has no name for (see [SemanticColors]).
+internal val RoseSemanticColors = SemanticColors(
+    success = Color(0xFF2E7D32),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFD3EDD5),
+    onSuccessContainer = Color(0xFF10391B),
+    warning = Color(0xFF8A5A00),
+    onWarning = Color(0xFFFFFFFF),
+    warningContainer = Color(0xFFFBE7C2),
+    onWarningContainer = Color(0xFF3D2800),
+    info = Color(0xFF1565C0),
+    favorite = Color(0xFFC28800),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    onSurfaceFaint = Color(0xFF8E6A76),
+    marker = Color(0xFFC4972A),
+    hebrew = Color(0xFFB45309),
+    greek = Color(0xFF1D4ED8),
+    chordVerse = Color(0xFF8A5A00),
+    chordChorus = Color(0xFF7B3FA6),
+    chordBridge = Color(0xFF13704C),
+    chordTag = Color(0xFF9E3B26),
+    chordIntro = Color(0xFF4F6B8A),
+    chordVoice = Color(0xFF10747A),
+    chordOther = Color(0xFF646971),
+    contentBible = Color(0xFF2F6FD0),
+    contentSongs = Color(0xFF6A4FC4),
+    contentPictures = Color(0xFF158A76),
+    contentLowerThird = Color(0xFFA06C14),
+    contentPresentation = Color(0xFFB23F70),
+    contentMedia = Color(0xFF1D78B4),
+    contentCalendar = Color(0xFFC0392B),
+    contentSchedule = Color(0xFF4E7F1C),
+    contentAnnouncement = Color(0xFFA43A9C),
+    override = Color(0xFFC27C0E),
+    overrideContainer = Color(0xFFFBEBD0),
+    onOverrideContainer = Color(0xFF8A5A0A),
+    inherited = Color(0xFFC4C8CF),
+    targetContainer = Color(0xFFE3EEFB),
+    onTargetContainer = Color(0xFF1F4F8A),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF2A78D6),
+)
+
 // Dark theme colors — classic neutral dark
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFF90CAF9),
@@ -315,6 +503,53 @@ private val DarkColorScheme = darkColorScheme(
     outlineVariant = Color(0xFF49454F),
     inverseSurface = Color(0xFF66BB6A),
     inverseOnSurface = Color.Black,
+)
+
+// Dark theme -- the roles Material has no name for (see [SemanticColors]).
+internal val DarkSemanticColors = SemanticColors(
+    success = Color(0xFF6FD69A),
+    onSuccess = Color(0xFF06371C),
+    successContainer = Color(0xFF1E4630),
+    onSuccessContainer = Color(0xFFC8EFD6),
+    warning = Color(0xFFE8A33D),
+    onWarning = Color(0xFF3D2800),
+    warningContainer = Color(0xFF4A3413),
+    onWarningContainer = Color(0xFFFBE7C2),
+    info = Color(0xFF7FB4F0),
+    favorite = Color(0xFFF0C04A),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    onSurfaceFaint = Color(0xFF8F8994),
+    marker = Color(0xFFD8AC45),
+    hebrew = Color(0xFFE8A33D),
+    greek = Color(0xFF8FB3F5),
+    chordVerse = Color(0xFFE8A33D),
+    chordChorus = Color(0xFFD9A0F0),
+    chordBridge = Color(0xFF6FD69A),
+    chordTag = Color(0xFFF5A08E),
+    chordIntro = Color(0xFF9DB6D3),
+    chordVoice = Color(0xFF5CCFD4),
+    chordOther = Color(0xFFA4A7AE),
+    contentBible = Color(0xFF7FB2F7),
+    contentSongs = Color(0xFFA894F5),
+    contentPictures = Color(0xFF63CFBA),
+    contentLowerThird = Color(0xFFE8AB5F),
+    contentPresentation = Color(0xFFE88BAD),
+    contentMedia = Color(0xFF6CBDF0),
+    contentCalendar = Color(0xFFF08A7E),
+    contentSchedule = Color(0xFFA5D37C),
+    contentAnnouncement = Color(0xFFE597DE),
+    override = Color(0xFFE8A33D),
+    overrideContainer = Color(0xFF4A3413),
+    onOverrideContainer = Color(0xFFFBE7C2),
+    inherited = Color(0xFF5C6068),
+    targetContainer = Color(0xFF1E3552),
+    onTargetContainer = Color(0xFFA9CBF5),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF7FB4F0),
 )
 
 // Studio dark theme — amber accent, deep navy panels
@@ -349,6 +584,53 @@ private val StudioColorScheme = darkColorScheme(
     inverseOnSurface = Color.Black,
 )
 
+// Studio theme -- the roles Material has no name for (see [SemanticColors]).
+internal val StudioSemanticColors = SemanticColors(
+    success = Color(0xFF6FD69A),
+    onSuccess = Color(0xFF06371C),
+    successContainer = Color(0xFF1E4630),
+    onSuccessContainer = Color(0xFFC8EFD6),
+    warning = Color(0xFFE8A33D),
+    onWarning = Color(0xFF3D2800),
+    warningContainer = Color(0xFF4A3413),
+    onWarningContainer = Color(0xFFFBE7C2),
+    info = Color(0xFF7FB4F0),
+    favorite = Color(0xFFF0C04A),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    onSurfaceFaint = Color(0xFF8A877C),
+    marker = Color(0xFFD8AC45),
+    hebrew = Color(0xFFE8A33D),
+    greek = Color(0xFF8FB3F5),
+    chordVerse = Color(0xFFE8A33D),
+    chordChorus = Color(0xFFD9A0F0),
+    chordBridge = Color(0xFF6FD69A),
+    chordTag = Color(0xFFF5A08E),
+    chordIntro = Color(0xFF9DB6D3),
+    chordVoice = Color(0xFF5CCFD4),
+    chordOther = Color(0xFFA4A7AE),
+    contentBible = Color(0xFF7FB2F7),
+    contentSongs = Color(0xFFA894F5),
+    contentPictures = Color(0xFF63CFBA),
+    contentLowerThird = Color(0xFFE8AB5F),
+    contentPresentation = Color(0xFFE88BAD),
+    contentMedia = Color(0xFF6CBDF0),
+    contentCalendar = Color(0xFFF08A7E),
+    contentSchedule = Color(0xFFA5D37C),
+    contentAnnouncement = Color(0xFFE597DE),
+    override = Color(0xFFE8A33D),
+    overrideContainer = Color(0xFF4A3413),
+    onOverrideContainer = Color(0xFFFBE7C2),
+    inherited = Color(0xFF5C6068),
+    targetContainer = Color(0xFF1E3552),
+    onTargetContainer = Color(0xFFA9CBF5),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF7FB4F0),
+)
+
 // Midnight dark theme — deep navy blue
 private val MidnightColorScheme = darkColorScheme(
     primary = Color(0xFF82AAFF),
@@ -377,6 +659,53 @@ private val MidnightColorScheme = darkColorScheme(
     outlineVariant = Color(0xFF1E2A3A),
     inverseSurface = Color(0xFF66BB6A),
     inverseOnSurface = Color.Black,
+)
+
+// Midnight theme -- the roles Material has no name for (see [SemanticColors]).
+internal val MidnightSemanticColors = SemanticColors(
+    success = Color(0xFF6FD69A),
+    onSuccess = Color(0xFF06371C),
+    successContainer = Color(0xFF1E4630),
+    onSuccessContainer = Color(0xFFC8EFD6),
+    warning = Color(0xFFE8A33D),
+    onWarning = Color(0xFF3D2800),
+    warningContainer = Color(0xFF4A3413),
+    onWarningContainer = Color(0xFFFBE7C2),
+    info = Color(0xFF7FB4F0),
+    favorite = Color(0xFFF0C04A),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    onSurfaceFaint = Color(0xFF8592A4),
+    marker = Color(0xFFD8AC45),
+    hebrew = Color(0xFFE8A33D),
+    greek = Color(0xFF8FB3F5),
+    chordVerse = Color(0xFFE8A33D),
+    chordChorus = Color(0xFFD9A0F0),
+    chordBridge = Color(0xFF6FD69A),
+    chordTag = Color(0xFFF5A08E),
+    chordIntro = Color(0xFF9DB6D3),
+    chordVoice = Color(0xFF5CCFD4),
+    chordOther = Color(0xFFA4A7AE),
+    contentBible = Color(0xFF7FB2F7),
+    contentSongs = Color(0xFFA894F5),
+    contentPictures = Color(0xFF63CFBA),
+    contentLowerThird = Color(0xFFE8AB5F),
+    contentPresentation = Color(0xFFE88BAD),
+    contentMedia = Color(0xFF6CBDF0),
+    contentCalendar = Color(0xFFF08A7E),
+    contentSchedule = Color(0xFFA5D37C),
+    contentAnnouncement = Color(0xFFE597DE),
+    override = Color(0xFFE8A33D),
+    overrideContainer = Color(0xFF4A3413),
+    onOverrideContainer = Color(0xFFFBE7C2),
+    inherited = Color(0xFF5C6068),
+    targetContainer = Color(0xFF1E3552),
+    onTargetContainer = Color(0xFFA9CBF5),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF7FB4F0),
 )
 
 // Forest dark theme — dark green-tinted surfaces
@@ -409,6 +738,53 @@ private val ForestColorScheme = darkColorScheme(
     inverseOnSurface = Color.Black,
 )
 
+// Forest theme -- the roles Material has no name for (see [SemanticColors]).
+internal val ForestSemanticColors = SemanticColors(
+    success = Color(0xFF6FD69A),
+    onSuccess = Color(0xFF06371C),
+    successContainer = Color(0xFF1E4630),
+    onSuccessContainer = Color(0xFFC8EFD6),
+    warning = Color(0xFFE8A33D),
+    onWarning = Color(0xFF3D2800),
+    warningContainer = Color(0xFF4A3413),
+    onWarningContainer = Color(0xFFFBE7C2),
+    info = Color(0xFF7FB4F0),
+    favorite = Color(0xFFF0C04A),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    onSurfaceFaint = Color(0xFF78947F),
+    marker = Color(0xFFD8AC45),
+    hebrew = Color(0xFFE8A33D),
+    greek = Color(0xFF8FB3F5),
+    chordVerse = Color(0xFFE8A33D),
+    chordChorus = Color(0xFFD9A0F0),
+    chordBridge = Color(0xFF6FD69A),
+    chordTag = Color(0xFFF5A08E),
+    chordIntro = Color(0xFF9DB6D3),
+    chordVoice = Color(0xFF5CCFD4),
+    chordOther = Color(0xFFA4A7AE),
+    contentBible = Color(0xFF7FB2F7),
+    contentSongs = Color(0xFFA894F5),
+    contentPictures = Color(0xFF63CFBA),
+    contentLowerThird = Color(0xFFE8AB5F),
+    contentPresentation = Color(0xFFE88BAD),
+    contentMedia = Color(0xFF6CBDF0),
+    contentCalendar = Color(0xFFF08A7E),
+    contentSchedule = Color(0xFFA5D37C),
+    contentAnnouncement = Color(0xFFE597DE),
+    override = Color(0xFFE8A33D),
+    overrideContainer = Color(0xFF4A3413),
+    onOverrideContainer = Color(0xFFFBE7C2),
+    inherited = Color(0xFF5C6068),
+    targetContainer = Color(0xFF1E3552),
+    onTargetContainer = Color(0xFFA9CBF5),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF7FB4F0),
+)
+
 // Mocha dark theme — warm dark brown (Catppuccin-style)
 private val MochaColorScheme = darkColorScheme(
     primary = Color(0xFFCBA6F7),
@@ -437,6 +813,53 @@ private val MochaColorScheme = darkColorScheme(
     outlineVariant = Color(0xFF302840),
     inverseSurface = Color(0xFF66BB6A),
     inverseOnSurface = Color.Black,
+)
+
+// Mocha theme -- the roles Material has no name for (see [SemanticColors]).
+internal val MochaSemanticColors = SemanticColors(
+    success = Color(0xFF6FD69A),
+    onSuccess = Color(0xFF06371C),
+    successContainer = Color(0xFF1E4630),
+    onSuccessContainer = Color(0xFFC8EFD6),
+    warning = Color(0xFFE8A33D),
+    onWarning = Color(0xFF3D2800),
+    warningContainer = Color(0xFF4A3413),
+    onWarningContainer = Color(0xFFFBE7C2),
+    info = Color(0xFF7FB4F0),
+    favorite = Color(0xFFF0C04A),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    onSurfaceFaint = Color(0xFF8C92AE),
+    marker = Color(0xFFD8AC45),
+    hebrew = Color(0xFFE8A33D),
+    greek = Color(0xFF8FB3F5),
+    chordVerse = Color(0xFFE8A33D),
+    chordChorus = Color(0xFFD9A0F0),
+    chordBridge = Color(0xFF6FD69A),
+    chordTag = Color(0xFFF5A08E),
+    chordIntro = Color(0xFF9DB6D3),
+    chordVoice = Color(0xFF5CCFD4),
+    chordOther = Color(0xFFA7AAB1),
+    contentBible = Color(0xFF7FB2F7),
+    contentSongs = Color(0xFFA894F5),
+    contentPictures = Color(0xFF63CFBA),
+    contentLowerThird = Color(0xFFE8AB5F),
+    contentPresentation = Color(0xFFE88BAD),
+    contentMedia = Color(0xFF6CBDF0),
+    contentCalendar = Color(0xFFF08A7E),
+    contentSchedule = Color(0xFFA5D37C),
+    contentAnnouncement = Color(0xFFE597DE),
+    override = Color(0xFFE8A33D),
+    overrideContainer = Color(0xFF4A3413),
+    onOverrideContainer = Color(0xFFFBE7C2),
+    inherited = Color(0xFF5C6068),
+    targetContainer = Color(0xFF1E3552),
+    onTargetContainer = Color(0xFFA9CBF5),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF7FB4F0),
 )
 
 // Slate light theme — cool desaturated blue-grey, held apart from Ocean by having far less
@@ -470,6 +893,53 @@ private val SlateColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
+// Slate theme -- the roles Material has no name for (see [SemanticColors]).
+internal val SlateSemanticColors = SemanticColors(
+    success = Color(0xFF2E7D32),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFD3EDD5),
+    onSuccessContainer = Color(0xFF10391B),
+    warning = Color(0xFF8A5A00),
+    onWarning = Color(0xFFFFFFFF),
+    warningContainer = Color(0xFFFBE7C2),
+    onWarningContainer = Color(0xFF3D2800),
+    info = Color(0xFF1565C0),
+    favorite = Color(0xFFC28800),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    onSurfaceFaint = Color(0xFF6B7885),
+    marker = Color(0xFFC4972A),
+    hebrew = Color(0xFFB45309),
+    greek = Color(0xFF1D4ED8),
+    chordVerse = Color(0xFF8A5A00),
+    chordChorus = Color(0xFF7B3FA6),
+    chordBridge = Color(0xFF13704C),
+    chordTag = Color(0xFF9E3B26),
+    chordIntro = Color(0xFF4C6987),
+    chordVoice = Color(0xFF026F75),
+    chordOther = Color(0xFF61666F),
+    contentBible = Color(0xFF2F6FD0),
+    contentSongs = Color(0xFF6A4FC4),
+    contentPictures = Color(0xFF158A76),
+    contentLowerThird = Color(0xFFA06C14),
+    contentPresentation = Color(0xFFB23F70),
+    contentMedia = Color(0xFF1D78B4),
+    contentCalendar = Color(0xFFC0392B),
+    contentSchedule = Color(0xFF4E7F1C),
+    contentAnnouncement = Color(0xFFA43A9C),
+    override = Color(0xFFC27C0E),
+    overrideContainer = Color(0xFFFBEBD0),
+    onOverrideContainer = Color(0xFF8A5A0A),
+    inherited = Color(0xFFC4C8CF),
+    targetContainer = Color(0xFFE3EEFB),
+    onTargetContainer = Color(0xFF1F4F8A),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF2A78D6),
+)
+
 // Sand light theme — a warm neutral taupe. Warm is a cream with a yellow cast; this is greyer and
 // browner, so the two do not read as the same theme at a glance.
 private val SandColorScheme = lightColorScheme(
@@ -501,6 +971,53 @@ private val SandColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
+// Sand theme -- the roles Material has no name for (see [SemanticColors]).
+internal val SandSemanticColors = SemanticColors(
+    success = Color(0xFF2E7D32),
+    onSuccess = Color(0xFFFFFFFF),
+    successContainer = Color(0xFFD3EDD5),
+    onSuccessContainer = Color(0xFF10391B),
+    warning = Color(0xFF8A5A00),
+    onWarning = Color(0xFFFFFFFF),
+    warningContainer = Color(0xFFFBE7C2),
+    onWarningContainer = Color(0xFF3D2800),
+    info = Color(0xFF1565C0),
+    favorite = Color(0xFFC28800),
+    live = Color(0xFFD23B3B),
+    onLive = Color(0xFFFFFFFF),
+    onSurfaceFaint = Color(0xFF82796E),
+    marker = Color(0xFFC4972A),
+    hebrew = Color(0xFFB45309),
+    greek = Color(0xFF1D4ED8),
+    chordVerse = Color(0xFF8A5A00),
+    chordChorus = Color(0xFF7B3FA6),
+    chordBridge = Color(0xFF13704C),
+    chordTag = Color(0xFF9E3B26),
+    chordIntro = Color(0xFF4F6B8A),
+    chordVoice = Color(0xFF10747A),
+    chordOther = Color(0xFF646971),
+    contentBible = Color(0xFF2F6FD0),
+    contentSongs = Color(0xFF6A4FC4),
+    contentPictures = Color(0xFF158A76),
+    contentLowerThird = Color(0xFFA06C14),
+    contentPresentation = Color(0xFFB23F70),
+    contentMedia = Color(0xFF1D78B4),
+    contentCalendar = Color(0xFFC0392B),
+    contentSchedule = Color(0xFF4E7F1C),
+    contentAnnouncement = Color(0xFFA43A9C),
+    override = Color(0xFFC27C0E),
+    overrideContainer = Color(0xFFFBEBD0),
+    onOverrideContainer = Color(0xFF8A5A0A),
+    inherited = Color(0xFFC4C8CF),
+    targetContainer = Color(0xFFE3EEFB),
+    onTargetContainer = Color(0xFF1F4F8A),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF2A78D6),
+)
+
 // Plum dark theme — a deep aubergine with a warm pink accent. The dark set had no red-purple:
 // Mocha is a cool lilac over a blue-grey ground, this is a warm magenta over an aubergine one.
 private val PlumColorScheme = darkColorScheme(
@@ -530,6 +1047,53 @@ private val PlumColorScheme = darkColorScheme(
     outlineVariant = Color(0xFF5E4759),
     inverseSurface = Color(0xFF66BB6A),
     inverseOnSurface = Color.Black,
+)
+
+// Plum theme -- the roles Material has no name for (see [SemanticColors]).
+internal val PlumSemanticColors = SemanticColors(
+    success = Color(0xFF6FD69A),
+    onSuccess = Color(0xFF06371C),
+    successContainer = Color(0xFF1E4630),
+    onSuccessContainer = Color(0xFFC8EFD6),
+    warning = Color(0xFFE8A33D),
+    onWarning = Color(0xFF3D2800),
+    warningContainer = Color(0xFF4A3413),
+    onWarningContainer = Color(0xFFFBE7C2),
+    info = Color(0xFF7FB4F0),
+    favorite = Color(0xFFF0C04A),
+    live = Color(0xFFFF6B6B),
+    onLive = Color(0xFF2A0A0A),
+    onSurfaceFaint = Color(0xFFA28C99),
+    marker = Color(0xFFD8AC45),
+    hebrew = Color(0xFFE8A33D),
+    greek = Color(0xFF8FB3F5),
+    chordVerse = Color(0xFFE8A33D),
+    chordChorus = Color(0xFFD9A0F0),
+    chordBridge = Color(0xFF6FD69A),
+    chordTag = Color(0xFFF5A08E),
+    chordIntro = Color(0xFF9DB6D3),
+    chordVoice = Color(0xFF5CCFD4),
+    chordOther = Color(0xFFA4A7AE),
+    contentBible = Color(0xFF7FB2F7),
+    contentSongs = Color(0xFFA894F5),
+    contentPictures = Color(0xFF63CFBA),
+    contentLowerThird = Color(0xFFE8AB5F),
+    contentPresentation = Color(0xFFE88BAD),
+    contentMedia = Color(0xFF6CBDF0),
+    contentCalendar = Color(0xFFF08A7E),
+    contentSchedule = Color(0xFFA5D37C),
+    contentAnnouncement = Color(0xFFE597DE),
+    override = Color(0xFFE8A33D),
+    overrideContainer = Color(0xFF4A3413),
+    onOverrideContainer = Color(0xFFFBE7C2),
+    inherited = Color(0xFF5C6068),
+    targetContainer = Color(0xFF1E3552),
+    onTargetContainer = Color(0xFFA9CBF5),
+    adjustHandle = Color(0xFF90CAF9),
+    onAdjustHandle = Color(0xFF003258),
+    adjustAccent = Color(0xFFFFB74D),
+    onAdjustAccent = Color(0xFF3A2600),
+    dropIndicator = Color(0xFF7FB4F0),
 )
 
 /**
@@ -575,6 +1139,31 @@ fun colorSchemeFor(
     ThemeMode.CUSTOM -> customColorScheme(custom)
 }
 
+/**
+ * [themeMode]'s semantic colors -- each theme's own set, defined beside its scheme above. `SYSTEM` is
+ * the Light or Dark theme it resolved to; a custom theme starts from Light's or Dark's set by how
+ * bright it is, and [ThemeCustomization] may then replace its status colors.
+ */
+fun semanticColorsFor(themeMode: ThemeMode, scheme: ColorScheme): SemanticColors = when (themeMode) {
+    ThemeMode.LIGHT -> LightSemanticColors
+    ThemeMode.WARM -> WarmSemanticColors
+    ThemeMode.OCEAN -> OceanSemanticColors
+    ThemeMode.ROSE -> RoseSemanticColors
+    ThemeMode.SLATE -> SlateSemanticColors
+    ThemeMode.SAND -> SandSemanticColors
+    ThemeMode.DARK -> DarkSemanticColors
+    ThemeMode.STUDIO -> StudioSemanticColors
+    ThemeMode.MIDNIGHT -> MidnightSemanticColors
+    ThemeMode.FOREST -> ForestSemanticColors
+    ThemeMode.MOCHA -> MochaSemanticColors
+    ThemeMode.PLUM -> PlumSemanticColors
+    ThemeMode.SYSTEM, ThemeMode.CUSTOM -> semanticColorsFor(scheme)
+}
+
+/** The Light or the Dark theme's semantic colors, whichever [scheme]'s brightness is closer to. */
+fun semanticColorsFor(scheme: ColorScheme): SemanticColors =
+    if (isDarkScheme(scheme)) DarkSemanticColors else LightSemanticColors
+
 @Composable
 fun ChurchPresenterTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
@@ -586,7 +1175,7 @@ fun ChurchPresenterTheme(
         colorSchemeFor(themeMode, systemDark, customization)
     }
     val semanticColors = remember(colorScheme, themeMode, customization) {
-        semanticColorsFor(colorScheme).let {
+        semanticColorsFor(themeMode, colorScheme).let {
             if (themeMode == ThemeMode.CUSTOM) customSemanticColors(it, customization) else it
         }
     }
