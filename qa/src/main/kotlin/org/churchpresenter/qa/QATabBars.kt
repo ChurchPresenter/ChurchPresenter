@@ -188,17 +188,7 @@ private fun QATabScope.DisplayButtons() {
     Spacer(Modifier.width(8.dp))
 
     ActionIconButton(
-        onClick = {
-            if (showQROnDisplay && isQALocked) return@ActionIconButton
-            qaManager.toggleQRCodeDisplay()
-            output.setShowQRCodeOnDisplay(qaManager.showQRCodeOnDisplay)
-            if (qaManager.showQRCodeOnDisplay) {
-                output.setDisplayedQuestion(null)
-                presenting(Presenting.QA)
-            } else if (qaManager.displayedQuestion == null) {
-                presenting(Presenting.NONE)
-            }
-        },
+        onClick = ::toggleJoinInfoOnScreen,
         enabled = !(showQROnDisplay && isQALocked),
         tooltipText = stringResource(if (showQROnDisplay) Res.string.qa_hide_qr else Res.string.qa_show_qr),
         icon = Icons.Default.Tv,
@@ -453,5 +443,18 @@ private fun StatBadge(label: String, count: Int, color: Color) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+/** Puts the join QR code on screen, or takes it down; held while the Q&A output is locked. */
+internal fun QATabScope.toggleJoinInfoOnScreen() {
+    if (showQROnDisplay && isQALocked) return
+    qaManager.toggleQRCodeDisplay()
+    output.setShowQRCodeOnDisplay(qaManager.showQRCodeOnDisplay)
+    if (qaManager.showQRCodeOnDisplay) {
+        output.setDisplayedQuestion(null)
+        presenting(Presenting.QA)
+    } else if (qaManager.displayedQuestion == null) {
+        presenting(Presenting.NONE)
     }
 }

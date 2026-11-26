@@ -90,7 +90,6 @@ fun QATab(
                 .bibleListCard()
         ) {
             tab.TopBar()
-            if (tab.isServerRunning && !tab.sessionActive) tab.NoSessionBanner()
             tab.FilterBar()
             if (tab.sessionActive) tab.AddQuestionField()
             tab.displayedQuestion?.let { tab.DisplayingBar(it) }

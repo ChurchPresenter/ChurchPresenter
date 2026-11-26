@@ -2141,6 +2141,14 @@
     <string name="qa_displaying">Displaying: %1$s…</string>
     <string name="qa_waiting">Waiting for questions…</string>
     <string name="qa_start_session_hint">Start a session to receive questions</string>
+    <string name="qa_empty_title">No Q&amp;A session running</string>
+    <string name="qa_empty_body">Start a session and people can send questions from their phones. They’ll show up here.</string>
+    <string name="qa_empty_start">Start session</string>
+    <string name="qa_empty_resume_last">Resume last session</string>
+    <string name="qa_waiting_title">Waiting for questions</string>
+    <string name="qa_waiting_body">New questions appear here as soon as someone sends one.</string>
+    <string name="qa_join_show">Show join info on screen</string>
+    <string name="qa_join_hide">Hide join info</string>
     <string name="qa_no_approved">No approved questions yet</string>
     <string name="qa_no_finished">No finished questions</string>
     <string name="qa_no_denied">No denied questions</string>
