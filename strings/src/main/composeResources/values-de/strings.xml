@@ -3342,6 +3342,11 @@
     <string name="helper_tour_stop">Beenden</string>
     <string name="helper_hint_tab">Das ist der Tab %1$s.</string>
     <string name="helper_hint_new_song">Klicken Sie hier, um ein neues Lied zu schreiben.</string>
+    <string name="helper_hint_look_transition">%1$s blendet den Text ein und aus und von einem Element zum nächsten über. Dauer legt fest, wie lange jede Überblendung dauert.</string>
+    <string name="helper_hint_song_save">Klicken Sie auf Speichern, wenn Sie fertig sind. Ein neues Lied braucht zuerst einen Titel.</string>
+    <string name="helper_song_save_follower">Dieser Computer folgt über Instance Link einem anderen, daher können seine Lieder hier nicht gespeichert werden. Bearbeiten Sie das Lied auf dem Computer, dem er folgt.</string>
+    <string name="helper_song_save_no_folder">Es ist kein Liederordner festgelegt, daher kann das Lied nirgends gespeichert werden. Wählen Sie einen unter Einstellungen › System, im Bereich Speicher.</string>
+    <string name="helper_song_save_check">Speichern bleibt grau, solange ein neues Lied keinen Titel hat und solange ein anderes Lied im selben Liederbuch dieselbe Nummer und denselben Titel hat. Ist Speichern blau, aber das Lied wird nicht gespeichert, ist der Liederordner vielleicht schreibgeschützt oder offline. Prüfen Sie ihn unter Einstellungen › System.</string>
     <string name="helper_hint_pick_and_edit">Wählen Sie das Lied und klicken Sie dann auf %1$s.</string>
     <string name="helper_hint_chords_switch">Schalten Sie %1$s ein, falls es aus ist. Die Akkord-Werkzeuge öffnen sich unter der Vorschau.</string>
     <string name="helper_hint_chord_palette">Setzen Sie den Cursor direkt vor die Silbe und klicken Sie hier auf einen Akkord. Sie können Akkorde auch in eckigen Klammern tippen, etwa [G]Großer [C]Gott, oder ein Blatt mit Akkorden über dem Text einfügen – es wird für Sie umgewandelt.</string>

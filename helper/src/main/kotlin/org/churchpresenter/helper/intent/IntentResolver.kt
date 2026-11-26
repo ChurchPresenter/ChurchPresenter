@@ -20,6 +20,10 @@ data class ResolveContext(
      * one — so a typed book is matched as that Bible names it. Empty when none is loaded.
      */
     val bibleBooks: List<List<String>> = emptyList(),
+    /** Whether a song folder is set, so a song has somewhere to be saved. */
+    val songFolderSet: Boolean = true,
+    /** Whether this computer follows another over Instance Link, so its songs are the other's. */
+    val followsAnotherComputer: Boolean = false,
 )
 
 /** An output profile, by the name the operator gave it; [stageMonitor] when it is one. */

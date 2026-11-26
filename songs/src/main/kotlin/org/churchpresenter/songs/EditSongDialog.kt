@@ -1,5 +1,7 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -371,6 +373,7 @@ private fun EditSongFooter(
             shape = AppShape(9.dp),
             enabled = saveEnabled,
             onClick = onSave,
+            modifier = Modifier.guideTarget(GuideTargets.SONG_SAVE),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
         ) {
             Text(stringResource(Res.string.save))

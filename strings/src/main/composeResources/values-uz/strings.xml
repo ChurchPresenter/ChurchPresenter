@@ -3386,6 +3386,11 @@
     <string name="helper_tour_stop">Toʻxtatish</string>
     <string name="helper_hint_tab">Bu %1$s yorligʻi.</string>
     <string name="helper_hint_new_song">Yangi qoʻshiq yozish uchun shu yerni bosing.</string>
+    <string name="helper_hint_look_transition">%1$s matnni asta-sekin koʻrsatadi va yashiradi, bir elementdan keyingisiga ham shunday oʻtkazadi. Davomiylik har bir oʻtish qancha davom etishini belgilaydi.</string>
+    <string name="helper_hint_song_save">Tugatgach, Saqlash tugmasini bosing. Yangi qoʻshiqqa avval sarlavha kerak.</string>
+    <string name="helper_song_save_follower">Bu kompyuter Instance Link orqali boshqa kompyuterga ergashadi, shuning uchun uning qoʻshiqlarini bu yerda saqlab boʻlmaydi. Qoʻshiqni u ergashadigan kompyuterda tahrirlang.</string>
+    <string name="helper_song_save_no_folder">Qoʻshiqlar jildi belgilanmagan, shuning uchun qoʻshiqni saqlashga joy yoʻq. Uni Sozlamalar › Tizim boʻlimida, Saqlash ostida tanlang.</string>
+    <string name="helper_song_save_check">Yangi qoʻshiqda sarlavha boʻlmaguncha va oʻsha qoʻshiq kitobida raqami va sarlavhasi bir xil boshqa qoʻshiq bor ekan, Saqlash kulrang boʻlib qoladi. Saqlash koʻk boʻlsa-yu, qoʻshiq saqlanmasa, qoʻshiqlar jildi faqat oʻqish uchun yoki oflayn boʻlishi mumkin. Uni Sozlamalar › Tizim boʻlimida tekshiring.</string>
     <string name="helper_hint_pick_and_edit">Qoʻshiqni tanlang, soʻng %1$s ni bosing.</string>
     <string name="helper_hint_chords_switch">Agar %1$s oʻchiq boʻlsa, yoqing. Akkord vositalari koʻrib chiqish ostida ochiladi.</string>
     <string name="helper_hint_chord_palette">Kursorni boʻgʻindan oldinga qoʻyib, shu yerdagi akkordni bosing. Akkordlarni kvadrat qavsda ham yozishingiz mumkin, masalan [G]Amazing [C]grace, yoki akkordlari soʻzlar ustida yozilgan varaqni joylashtiring, u siz uchun oʻgiriladi.</string>

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.shouldUseRemoteContent
+import androidx.compose.runtime.collectAsState
 import org.churchpresenter.bibletab.standardEnglishBookName
 import org.churchpresenter.sharedui.guide.WickPlace
 import org.churchpresenter.bible.Bible
@@ -168,6 +170,11 @@ internal fun AppRootState.WickLamp(
                 profiles = helperProfiles(projection),
                 outputs = helperOutputs(projection),
                 bibleBooks = remember(primaryBibleForInstanceLink) { helperBibleBooks(primaryBibleForInstanceLink) },
+                songFolderSet = appSettings.songSettings.storageDirectory.isNotBlank(),
+                followsAnotherComputer = shouldUseRemoteContent(
+                    instanceLinkViewModel.connectionStatus.collectAsState().value,
+                    appSettings.instanceLink.role,
+                ),
             ),
             anythingLive = anythingLive,
             place = place,

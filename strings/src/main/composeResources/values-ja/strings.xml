@@ -3385,6 +3385,11 @@
     <string name="helper_tour_stop">終了</string>
     <string name="helper_hint_tab">ここが「%1$s」タブです。</string>
     <string name="helper_hint_new_song">新しい賛美歌を書くにはここをクリックします。</string>
+    <string name="helper_hint_look_transition">「%1$s」は、テキストの表示と消去、そして項目から次の項目への切り替えをフェードで行います。「長さ」で各フェードにかける時間を決めます。</string>
+    <string name="helper_hint_song_save">終わったら「保存」をクリックします。新しい賛美歌には、まずタイトルが必要です。</string>
+    <string name="helper_song_save_follower">このコンピューターはインスタンスリンクで別のコンピューターに従っているので、ここでは賛美歌を保存できません。従っている先のコンピューターで編集してください。</string>
+    <string name="helper_song_save_no_folder">賛美歌フォルダーが設定されていないため、保存先がありません。設定 › システム の「ストレージ」で選んでください。</string>
+    <string name="helper_song_save_check">新しい賛美歌にタイトルがないあいだと、同じ賛美歌集に番号とタイトルが同じ別の賛美歌があるあいだは、「保存」は灰色のままです。「保存」が青いのに保存されない場合は、賛美歌フォルダーが読み取り専用かオフラインかもしれません。設定 › システム で確認してください。</string>
     <string name="helper_hint_pick_and_edit">賛美歌を選んで、「%1$s」をクリックします。</string>
     <string name="helper_hint_chords_switch">「%1$s」がオフならオンにします。プレビューの下にコードのツールが開きます。</string>
     <string name="helper_hint_chord_palette">カーソルを音節の直前に置き、ここでコードをクリックします。[G]驚くばかりの[C]恵みなりき のように角かっこでコードを入力したり、歌詞の上にコードが書かれた譜面を貼り付けたりしても、自動で変換されます。</string>

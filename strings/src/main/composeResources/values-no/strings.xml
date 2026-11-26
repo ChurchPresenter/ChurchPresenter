@@ -3386,6 +3386,11 @@
     <string name="helper_tour_stop">Stopp</string>
     <string name="helper_hint_tab">Dette er fanen %1$s.</string>
     <string name="helper_hint_new_song">Klikk her for å skrive en ny sang.</string>
+    <string name="helper_hint_look_transition">%1$s toner teksten inn og ut, og fra ett element til det neste. Varighet bestemmer hvor lenge hver toning varer.</string>
+    <string name="helper_hint_song_save">Klikk Lagre når du er ferdig. En ny sang trenger en tittel først.</string>
+    <string name="helper_song_save_follower">Denne datamaskinen følger en annen via Instance Link, så sangene kan ikke lagres her. Rediger sangen på datamaskinen den følger.</string>
+    <string name="helper_song_save_no_folder">Ingen sangmappe er valgt, så sangen har ingen steder å bli lagret. Velg en i Innstillinger › System, under Lagring.</string>
+    <string name="helper_song_save_check">Lagre forblir grå til en ny sang har en tittel, og så lenge en annen sang i samme sangbok har samme nummer og tittel. Hvis Lagre er blå, men sangen ikke blir lagret, kan sangmappen være skrivebeskyttet eller frakoblet. Sjekk den i Innstillinger › System.</string>
     <string name="helper_hint_pick_and_edit">Velg sangen, og klikk så %1$s.</string>
     <string name="helper_hint_chords_switch">Slå på %1$s hvis det er av. Akkordverktøyene åpnes under forhåndsvisningen.</string>
     <string name="helper_hint_chord_palette">Sett markøren rett foran stavelsen og klikk på en akkord her. Du kan også skrive akkorder i hakeparenteser, som [G]Deilig er [C]jorden, eller lime inn et ark med akkorder over teksten, så blir det konvertert for deg.</string>

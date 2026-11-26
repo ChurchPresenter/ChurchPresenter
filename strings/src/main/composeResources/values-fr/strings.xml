@@ -3370,6 +3370,11 @@
     <string name="helper_tour_stop">Arrêter</string>
     <string name="helper_hint_tab">Voici l'onglet %1$s.</string>
     <string name="helper_hint_new_song">Cliquez ici pour écrire un nouveau cantique.</string>
+    <string name="helper_hint_look_transition">%1$s fait apparaître et disparaître le texte en fondu, et passe en fondu d'un élément au suivant. Durée règle la longueur de chaque fondu.</string>
+    <string name="helper_hint_song_save">Cliquez sur Enregistrer quand vous avez terminé. Un nouveau cantique a d'abord besoin d'un titre.</string>
+    <string name="helper_song_save_follower">Cet ordinateur en suit un autre via Instance Link : ses cantiques ne peuvent donc pas être enregistrés ici. Modifiez le cantique sur l'ordinateur qu'il suit.</string>
+    <string name="helper_song_save_no_folder">Aucun dossier de cantiques n'est défini, le cantique n'a donc nulle part où être enregistré. Choisissez-en un dans Paramètres › Système, sous Stockage.</string>
+    <string name="helper_song_save_check">Enregistrer reste gris tant qu'un nouveau cantique n'a pas de titre, et tant qu'un autre cantique du même recueil a le même numéro et le même titre. Si Enregistrer est bleu mais que le cantique n'est pas enregistré, le dossier des cantiques est peut-être en lecture seule ou hors ligne. Vérifiez-le dans Paramètres › Système.</string>
     <string name="helper_hint_pick_and_edit">Choisissez le cantique, puis cliquez sur %1$s.</string>
     <string name="helper_hint_chords_switch">Activez %1$s s'il est désactivé. Les outils d'accords s'ouvrent sous l'aperçu.</string>
     <string name="helper_hint_chord_palette">Placez le curseur juste avant la syllabe et cliquez sur un accord ici. Vous pouvez aussi taper les accords entre crochets, comme [G]Grâce [C]infinie, ou coller une grille avec les accords au-dessus des paroles : elle est convertie pour vous.</string>
