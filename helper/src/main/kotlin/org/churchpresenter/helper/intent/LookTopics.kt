@@ -1,5 +1,7 @@
 package org.churchpresenter.helper.intent
 
+import org.churchpresenter.strings.generated.resources.profile_group_transition
+import org.churchpresenter.strings.generated.resources.helper_hint_look_transition
 import org.churchpresenter.helper.action.GuideStep
 import org.churchpresenter.helper.action.GuideTour
 import org.churchpresenter.helper.action.HelperAction
@@ -156,6 +158,15 @@ internal object LookTours {
                 before = HelperAction.SelectTab(Tabs.SONGS),
             ),
             GuideStep(GuideTargets.SONG_LYRICS, helperText(Res.string.helper_hint_song_lyrics)),
+        ),
+    )
+
+    /** Settings, a profile, its Songs or Bible page, then its Transition group. */
+    fun transition(songs: Boolean) = GuideTour(
+        onPage(songs) + step(
+            GuideTargets.PROFILE_TRANSITION,
+            Res.string.helper_hint_look_transition,
+            Res.string.profile_group_transition,
         ),
     )
 

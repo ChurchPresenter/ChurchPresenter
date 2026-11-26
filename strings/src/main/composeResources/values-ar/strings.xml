@@ -3390,6 +3390,11 @@
     <string name="helper_tour_stop">إيقاف</string>
     <string name="helper_hint_tab">هذا تبويب %1$s.</string>
     <string name="helper_hint_new_song">انقر هنا لكتابة ترنيمة جديدة.</string>
+    <string name="helper_hint_look_transition">%1$s يُظهر النص ويُخفيه بتلاشٍ، ومن عنصر إلى الذي يليه. تحدد المدة طول كل تلاشٍ.</string>
+    <string name="helper_hint_song_save">اضغط حفظ عندما تنتهي. الترنيمة الجديدة تحتاج إلى عنوان أولًا.</string>
+    <string name="helper_song_save_follower">هذا الحاسوب يتبع حاسوبًا آخر عبر Instance Link، لذا لا يمكن حفظ ترانيمه هنا. عدّل الترنيمة على الحاسوب الذي يتبعه.</string>
+    <string name="helper_song_save_no_folder">لم يُحدَّد مجلد للترانيم، فلا مكان لحفظ الترنيمة. اختر مجلدًا في الإعدادات › النظام، ضمن التخزين.</string>
+    <string name="helper_song_save_check">يبقى زر حفظ رماديًا حتى يكون للترنيمة الجديدة عنوان، وما دامت ترنيمة أخرى في كتاب الترانيم نفسه لها الرقم والعنوان نفسيهما. إذا كان حفظ أزرق ولم تُحفظ الترنيمة، فقد يكون مجلد الترانيم للقراءة فقط أو غير متصل. تحقق منه في الإعدادات › النظام.</string>
     <string name="helper_hint_pick_and_edit">اختر الترنيمة، ثم انقر %1$s.</string>
     <string name="helper_hint_chords_switch">شغّل %1$s إن كان متوقفًا. تفتح أدوات الكوردات تحت المعاينة.</string>
     <string name="helper_hint_chord_palette">ضع المؤشر قبل المقطع مباشرة وانقر كوردًا هنا. يمكنك أيضًا كتابة الكوردات بين أقواس مربعة، مثل [G]Amazing [C]grace، أو لصق ورقة فيها الكوردات فوق الكلمات وسيتم تحويلها لك.</string>

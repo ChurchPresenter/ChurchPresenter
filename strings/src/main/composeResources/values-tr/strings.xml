@@ -3386,6 +3386,11 @@
     <string name="helper_tour_stop">Durdur</string>
     <string name="helper_hint_tab">Burası %1$s sekmesi.</string>
     <string name="helper_hint_new_song">Yeni bir şarkı yazmak için buraya tıklayın.</string>
+    <string name="helper_hint_look_transition">%1$s metni yavaşça gösterip gizler ve bir öğeden sonrakine geçirir. Süre, her geçişin ne kadar süreceğini belirler.</string>
+    <string name="helper_hint_song_save">Bitirince Kaydet düğmesine tıklayın. Yeni bir şarkının önce bir başlığı olmalı.</string>
+    <string name="helper_song_save_follower">Bu bilgisayar Kopya Bağlantısı üzerinden başka bir bilgisayarı izliyor, bu yüzden şarkıları burada kaydedilemez. Şarkıyı izlediği bilgisayarda düzenleyin.</string>
+    <string name="helper_song_save_no_folder">Şarkı klasörü ayarlanmamış, bu yüzden şarkının kaydedileceği bir yer yok. Ayarlar › Sistem'de, Depolama altında bir klasör seçin.</string>
+    <string name="helper_song_save_check">Yeni şarkının başlığı olana kadar ve aynı şarkı kitabında aynı numara ve başlığa sahip başka bir şarkı olduğu sürece Kaydet gri kalır. Kaydet maviyse ama şarkı kaydedilmiyorsa, şarkı klasörü salt okunur ya da çevrimdışı olabilir. Ayarlar › Sistem'de kontrol edin.</string>
     <string name="helper_hint_pick_and_edit">Şarkıyı seçin, sonra %1$s düğmesine tıklayın.</string>
     <string name="helper_hint_chords_switch">Kapalıysa %1$s anahtarını açın. Akor araçları ön izlemenin altında açılır.</string>
     <string name="helper_hint_chord_palette">İmleci hecenin hemen önüne koyun ve buradan bir akora tıklayın. Akorları köşeli parantez içinde de yazabilirsiniz, örneğin [G]Amazing [C]grace; ya da akorları sözlerin üstünde olan bir notayı yapıştırın, sizin için dönüştürülür.</string>

@@ -3343,6 +3343,11 @@
     <string name="helper_tour_stop">Zakończ</string>
     <string name="helper_hint_tab">To jest karta %1$s.</string>
     <string name="helper_hint_new_song">Kliknij tutaj, aby napisać nową pieśń.</string>
+    <string name="helper_hint_look_transition">%1$s płynnie pokazuje i ukrywa tekst oraz przechodzi od jednego elementu do następnego. Czas trwania określa, jak długo trwa każde przejście.</string>
+    <string name="helper_hint_song_save">Kliknij Zapisz, gdy skończysz. Nowa pieśń najpierw potrzebuje tytułu.</string>
+    <string name="helper_song_save_follower">Ten komputer podąża za innym przez Instance Link, więc jego pieśni nie da się tu zapisać. Edytuj pieśń na komputerze, za którym podąża.</string>
+    <string name="helper_song_save_no_folder">Nie ustawiono folderu pieśni, więc pieśń nie ma gdzie zostać zapisana. Wybierz go w Ustawienia › System, w sekcji Pamięć.</string>
+    <string name="helper_song_save_check">Zapisz pozostaje szare, dopóki nowa pieśń nie ma tytułu, i dopóki inna pieśń w tym samym śpiewniku ma ten sam numer i tytuł. Jeśli Zapisz jest niebieskie, a pieśń się nie zapisuje, folder pieśni może być tylko do odczytu lub offline. Sprawdź go w Ustawienia › System.</string>
     <string name="helper_hint_pick_and_edit">Wybierz pieśń, a potem kliknij %1$s.</string>
     <string name="helper_hint_chords_switch">Włącz %1$s, jeśli jest wyłączone. Narzędzia akordów otworzą się pod podglądem.</string>
     <string name="helper_hint_chord_palette">Ustaw kursor tuż przed sylabą i kliknij tutaj akord. Akordy możesz też wpisywać w nawiasach kwadratowych, np. [G]Cudowna [C]łaska, albo wkleić tekst z akordami nad słowami, a zostanie przekonwertowany.</string>

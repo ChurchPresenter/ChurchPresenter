@@ -102,6 +102,12 @@ internal val THAI = Glossary(
         "ใหญ่ไป" to "too big",
         "ไม่พอดี" to "doesn't fit",
         "ล้นจอ" to "doesn't fit",
+        // Saving: "บันทึก".
+        "บันทึก" to "save",
+        "ไม่มีอะไรเกิดขึ้น" to "nothing happens",
+        "ไม่ตอบสนอง" to "nothing happens",
+        "กดไม่ได้" to "greyed",
+        "ปิดใช้งาน" to "greyed",
         "ไม่ทำงาน" to "not working",
         "ใช้ไม่ได้" to "not working",
         "ไม่แสดง" to "not showing",

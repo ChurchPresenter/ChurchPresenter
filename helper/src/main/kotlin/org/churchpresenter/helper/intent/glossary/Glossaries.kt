@@ -16,6 +16,8 @@ internal object Glossaries {
     fun readings(normalized: String, language: String): Sequence<String> = sequence {
         val own = ALL.firstOrNull { it.language == language }
         own?.toEnglish(normalized)?.takeIf { it != normalized }?.let { yield(it) }
+        // Texting shorthand read as English, beside the text as typed: "u" is a word in Uzbek.
+        expandShorthand(normalized).takeIf { it != normalized }?.let { yield(it) }
         yield(normalized)
         ALL.asSequence()
             .filter { it !== own }
@@ -24,3 +26,12 @@ internal object Glossaries {
             .forEach { yield(it) }
     }.distinct()
 }
+
+/** How people type to a chat: "what can u do", "pls", "thx". */
+private val SHORTHAND = mapOf(
+    "u" to "you", "ur" to "your", "pls" to "please", "plz" to "please", "thx" to "thanks", "wat" to "what",
+)
+
+/** [normalized] with each word of texting shorthand written out. */
+internal fun expandShorthand(normalized: String): String =
+    normalized.split(' ').joinToString(" ") { SHORTHAND[it] ?: it }
