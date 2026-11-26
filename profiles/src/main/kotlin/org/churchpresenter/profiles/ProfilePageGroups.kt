@@ -321,6 +321,7 @@ internal fun TransitionGroup(
     SettingsGroup(
         stringResource(Res.string.profile_group_transition),
         key = "transition",
+        modifier = Modifier.guideTarget(GuideTargets.PROFILE_TRANSITION),
         action = reset,
         paths = listOf("fadeIn", "fadeOut", "crossfade", "transitionDuration").flatMap(path),
     ) {

@@ -100,6 +100,7 @@ class RuleIntentResolver : IntentResolver {
             ::displaySetupRule,
             ::backgroundColorRule,
             // Before the font rule: "how do I make the song title bigger" is a tour, not a change.
+            ::transitionRule,
             ::lookRule,
             ::fontSizeRule,
             ::shortcutRule,

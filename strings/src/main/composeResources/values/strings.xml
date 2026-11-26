@@ -3598,6 +3598,7 @@
     <string name="helper_hint_tab">This is the %1$s tab.</string>
     <string name="helper_hint_control">This is %1$s.</string>
     <string name="helper_hint_new_song">Click here to write a new song.</string>
+    <string name="helper_hint_look_transition">%1$s fades the text in and out, and from one item to the next. Duration sets how long each fade takes.</string>
     <string name="helper_hint_song_save">Press Save when you’re done. A new song needs a title first.</string>
     <string name="helper_song_save_follower">This computer follows another one over Instance Link, so its songs can’t be saved here. Edit the song on the computer it follows.</string>
     <string name="helper_song_save_no_folder">No song folder is set, so the song has nowhere to be saved. Choose one in Settings › System, under Storage.</string>

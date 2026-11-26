@@ -83,6 +83,7 @@ object GuideTargets {
     val PROFILE_VERTICAL_ALIGNMENT = GuideTarget("settings.profiles.verticalAlignment")
     val PROFILE_MARGINS = GuideTarget("settings.profiles.margins")
     val PROFILE_END_MARKER = GuideTarget("settings.profiles.endMarker")
+    val PROFILE_TRANSITION = GuideTarget("settings.profiles.transition")
     val BIBLE_CROSS_REFS = GuideTarget("bible.crossRefs")
     val PLANNING_CENTER_IMPORT = GuideTarget("schedule.planningCenter")
     val SERVER_ENABLE = GuideTarget("settings.server.enable")
