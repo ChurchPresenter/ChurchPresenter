@@ -461,6 +461,10 @@ private fun LyricsList(
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
 ) {
+    if (currentSong == null) {
+        NoSongSelected()
+        return
+    }
     Box {
         val lyricsListState = rememberLazyListState()
         val titleSlideEnabled = appSettings.operatorSongSettings().titleSlideEnabled
@@ -471,17 +475,17 @@ private fun LyricsList(
             if (live.titleSlideSelected) {
                 lyricsListState.followLyricsEntry(0)
             } else if (selectedSectionIndex >= 0) {
-                val offset = if (titleSlideEnabled && currentSong != null) 1 else 0
+                val offset = if (titleSlideEnabled) 1 else 0
                 lyricsListState.followLyricsEntry(selectedSectionIndex + offset)
             }
         }
 
         // Get lyric sections from ViewModel — no parsing in UI
-        val sections = if (currentSong != null) lyricSections() else emptyList()
+        val sections = lyricSections()
         // The languages the operator keeps in this panel, less any the song never fills.
         val columns = panelColumnSlots(
             sections,
-            appSettings.panelLanguageSlots(currentSong?.translationCount ?: 1),
+            appSettings.panelLanguageSlots(currentSong.translationCount),
         )
 
         LazyColumn(
@@ -491,7 +495,7 @@ private fun LyricsList(
             verticalArrangement = Arrangement.spacedBy(rowPad(4.dp)),
         ) {
             // ── Title slide entry ────────────────────────────────────
-            if (titleSlideEnabled && currentSong != null && sections.isNotEmpty()) {
+            if (titleSlideEnabled && sections.isNotEmpty()) {
                 item {
                     TitleSlideEntry(
                         currentSong = currentSong,
@@ -510,7 +514,7 @@ private fun LyricsList(
                 itemsIndexed(sections) { sectionIndex, section ->
                     LyricSectionEntry(
                         section = section,
-                        cue = currentSong?.sectionNotes?.get(section.sectionKey)
+                        cue = currentSong.sectionNotes.get(section.sectionKey)
                             ?.takeIf { section.slideIndex == 0 }.orEmpty(),
                         sectionIndex = sectionIndex,
                         columns = columns,

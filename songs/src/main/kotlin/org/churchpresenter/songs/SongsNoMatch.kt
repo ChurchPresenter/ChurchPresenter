@@ -1,5 +1,8 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.strings.generated.resources.songs_no_selection_body
+import org.churchpresenter.strings.generated.resources.songs_no_selection_title
+import org.churchpresenter.icons.generated.resources.ic_storage_songs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -39,5 +42,19 @@ internal fun SongListScope.NoSongsMatch() {
                 onSearchQueryChange("")
             }
         }
+    }
+}
+
+/** The lyrics side with no song picked: say so, rather than that the song has no lyrics. */
+@Composable
+internal fun NoSongSelected() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        EmptyStateContent(
+            icon = IconRes.drawable.ic_storage_songs,
+            neutral = true,
+            compact = true,
+            title = stringResource(Res.string.songs_no_selection_title),
+            body = stringResource(Res.string.songs_no_selection_body),
+        )
     }
 }
