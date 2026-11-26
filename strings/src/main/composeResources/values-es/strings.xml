@@ -3370,6 +3370,11 @@
     <string name="helper_tour_stop">Detener</string>
     <string name="helper_hint_tab">Esta es la pestaña %1$s.</string>
     <string name="helper_hint_new_song">Haga clic aquí para escribir un canto nuevo.</string>
+    <string name="helper_hint_look_transition">%1$s funde el texto al aparecer y desaparecer, y de un elemento al siguiente. Duración indica cuánto tarda cada fundido.</string>
+    <string name="helper_hint_song_save">Haga clic en Guardar cuando termine. Un canto nuevo necesita primero un título.</string>
+    <string name="helper_song_save_follower">Este equipo sigue a otro mediante Instance Link, así que sus cantos no se pueden guardar aquí. Edite el canto en el equipo al que sigue.</string>
+    <string name="helper_song_save_no_folder">No hay ninguna carpeta de cantos configurada, así que el canto no tiene dónde guardarse. Elija una en Configuración › Sistema, en Almacenamiento.</string>
+    <string name="helper_song_save_check">Guardar sigue gris hasta que un canto nuevo tenga título, y mientras otro canto del mismo cancionero tenga el mismo número y título. Si Guardar está azul pero el canto no se guarda, puede que la carpeta de cantos sea de solo lectura o esté desconectada. Revísela en Configuración › Sistema.</string>
     <string name="helper_hint_pick_and_edit">Elija el canto y haga clic en %1$s.</string>
     <string name="helper_hint_chords_switch">Active %1$s si está desactivado. Las herramientas de acordes se abren debajo de la vista previa.</string>
     <string name="helper_hint_chord_palette">Ponga el cursor justo antes de la sílaba y haga clic aquí en un acorde. También puede escribir los acordes entre corchetes, como [G]Sublime [C]gracia, o pegar una hoja con los acordes encima de la letra y se convertirá por usted.</string>

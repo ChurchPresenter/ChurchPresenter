@@ -3387,6 +3387,11 @@
     <string name="helper_tour_stop">Zaustavi</string>
     <string name="helper_hint_tab">Ovo je kartica %1$s.</string>
     <string name="helper_hint_new_song">Kliknite ovdje da napišete novu pjesmu.</string>
+    <string name="helper_hint_look_transition">%1$s postupno prikazuje i skriva tekst te prelazi s jedne stavke na sljedeću. Trajanje određuje koliko dugo traje svaki prijelaz.</string>
+    <string name="helper_hint_song_save">Kliknite Spremi kad završite. Nova pjesma najprije treba naslov.</string>
+    <string name="helper_song_save_follower">Ovo računalo preko Instance Link prati drugo, pa se njegove pjesme ne mogu spremiti ovdje. Uredite pjesmu na računalu koje prati.</string>
+    <string name="helper_song_save_no_folder">Mapa za pjesme nije postavljena, pa pjesmu nema kamo spremiti. Odaberite je u Postavke › Sustav, pod Pohrana.</string>
+    <string name="helper_song_save_check">Spremi ostaje sivo dok nova pjesma nema naslov i dok druga pjesma u istoj pjesmarici ima isti broj i naslov. Ako je Spremi plavo, a pjesma se ne spremi, mapa s pjesmama možda je samo za čitanje ili nedostupna. Provjerite je u Postavke › Sustav.</string>
     <string name="helper_hint_pick_and_edit">Odaberite pjesmu, a zatim kliknite %1$s.</string>
     <string name="helper_hint_chords_switch">Uključite %1$s ako je isključeno. Alati za akorde otvaraju se ispod pretpregleda.</string>
     <string name="helper_hint_chord_palette">Postavite pokazivač točno ispred sloga i ovdje kliknite akord. Akorde možete upisati i u uglatim zagradama, npr. [G]Čudesna [C]milost, ili zalijepiti tekst s akordima iznad riječi pa će se sam pretvoriti.</string>

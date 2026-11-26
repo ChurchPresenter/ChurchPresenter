@@ -3373,6 +3373,11 @@
     <string name="helper_tour_stop">Ukončiť</string>
     <string name="helper_hint_tab">Toto je karta %1$s.</string>
     <string name="helper_hint_new_song">Kliknite sem a napíšte novú pieseň.</string>
+    <string name="helper_hint_look_transition">%1$s plynulo zobrazí a skryje text a prelína jednu položku do ďalšej. Trvanie určuje, ako dlho trvá každé prelínanie.</string>
+    <string name="helper_hint_song_save">Keď skončíte, kliknite na Uložiť. Nová pieseň najprv potrebuje názov.</string>
+    <string name="helper_song_save_follower">Tento počítač cez Instance Link sleduje iný, takže jeho piesne sa tu uložiť nedajú. Upravte pieseň na počítači, ktorý sleduje.</string>
+    <string name="helper_song_save_no_folder">Nie je nastavený priečinok s piesňami, takže pieseň nemá kam uložiť. Vyberte ho v Nastavenia › Systém, v časti Úložisko.</string>
+    <string name="helper_song_save_check">Uložiť zostane sivé, kým nová pieseň nemá názov, a kým má iná pieseň v tom istom spevníku rovnaké číslo aj názov. Ak je Uložiť modré, ale pieseň sa neuloží, priečinok s piesňami môže byť iba na čítanie alebo offline. Skontrolujte ho v Nastavenia › Systém.</string>
     <string name="helper_hint_pick_and_edit">Vyberte pieseň a kliknite na %1$s.</string>
     <string name="helper_hint_chords_switch">Zapnite %1$s, ak je vypnuté. Nástroje na akordy sa otvoria pod náhľadom.</string>
     <string name="helper_hint_chord_palette">Umiestnite kurzor tesne pred slabiku a kliknite tu na akord. Akordy môžete písať aj do hranatých zátvoriek, napríklad [G]Úžasná [C]milosť, alebo vložiť text s akordmi nad slovami a prevedie sa sám.</string>

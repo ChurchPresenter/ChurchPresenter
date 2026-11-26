@@ -3371,6 +3371,11 @@
     <string name="helper_tour_stop">Parar</string>
     <string name="helper_hint_tab">Esta é a aba %1$s.</string>
     <string name="helper_hint_new_song">Clique aqui para escrever uma música nova.</string>
+    <string name="helper_hint_look_transition">%1$s faz o texto surgir e sumir com esmaecimento, e de um item para o seguinte. Duração define quanto tempo cada esmaecimento leva.</string>
+    <string name="helper_hint_song_save">Clique em Salvar quando terminar. Uma música nova precisa de um título primeiro.</string>
+    <string name="helper_song_save_follower">Este computador segue outro pelo Instance Link, então as músicas dele não podem ser salvas aqui. Edite a música no computador que ele segue.</string>
+    <string name="helper_song_save_no_folder">Nenhuma pasta de músicas está definida, então a música não tem onde ser salva. Escolha uma em Configurações › Sistema, em Armazenamento.</string>
+    <string name="helper_song_save_check">Salvar fica cinza até que uma música nova tenha título, e enquanto outra música do mesmo hinário tiver o mesmo número e título. Se Salvar estiver azul mas a música não for salva, a pasta de músicas pode estar como somente leitura ou offline. Verifique em Configurações › Sistema.</string>
     <string name="helper_hint_pick_and_edit">Escolha a música e clique em %1$s.</string>
     <string name="helper_hint_chords_switch">Ative %1$s, se estiver desativado. As ferramentas de acordes abrem abaixo da pré-visualização.</string>
     <string name="helper_hint_chord_palette">Coloque o cursor logo antes da sílaba e clique em um acorde aqui. Você também pode digitar acordes entre colchetes, como [G]Maravilhosa [C]graça, ou colar uma cifra com os acordes acima da letra, e ela é convertida para você.</string>

@@ -3385,6 +3385,11 @@
     <string name="helper_tour_stop">Berhenti</string>
     <string name="helper_hint_tab">Ini tab %1$s.</string>
     <string name="helper_hint_new_song">Klik di sini untuk menulis lagu baru.</string>
+    <string name="helper_hint_look_transition">%1$s memudarkan teks saat muncul dan hilang, serta dari satu item ke item berikutnya. Durasi mengatur berapa lama setiap pudaran.</string>
+    <string name="helper_hint_song_save">Klik Simpan setelah selesai. Lagu baru perlu judul dulu.</string>
+    <string name="helper_song_save_follower">Komputer ini mengikuti komputer lain lewat Instance Link, jadi lagunya tidak bisa disimpan di sini. Edit lagu itu di komputer yang diikutinya.</string>
+    <string name="helper_song_save_no_folder">Belum ada folder lagu, jadi lagu tidak punya tempat untuk disimpan. Pilih folder di Pengaturan › Sistem, di bagian Penyimpanan.</string>
+    <string name="helper_song_save_check">Simpan tetap abu-abu sampai lagu baru punya judul, dan selama ada lagu lain di buku lagu yang sama dengan nomor dan judul yang sama. Jika Simpan biru tetapi lagu tidak tersimpan, folder lagu mungkin hanya baca atau sedang offline. Periksa di Pengaturan › Sistem.</string>
     <string name="helper_hint_pick_and_edit">Pilih lagunya, lalu klik %1$s.</string>
     <string name="helper_hint_chords_switch">Nyalakan %1$s jika masih mati. Alat akor terbuka di bawah pratinjau.</string>
     <string name="helper_hint_chord_palette">Letakkan kursor tepat sebelum suku kata, lalu klik akor di sini. Anda juga bisa mengetik akor dalam kurung siku, seperti [G]Ajaib benar [C]anugerah, atau menempelkan lembar lagu dengan akor di atas liriknya dan akan dikonversi otomatis.</string>

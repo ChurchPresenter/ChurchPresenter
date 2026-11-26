@@ -3386,6 +3386,11 @@
     <string name="helper_tour_stop">Itigil</string>
     <string name="helper_hint_tab">Ito ang tab na %1$s.</string>
     <string name="helper_hint_new_song">I-click dito para sumulat ng bagong awit.</string>
+    <string name="helper_hint_look_transition">Pinalalabas at pinawawala ng %1$s ang teksto nang dahan-dahan, at mula sa isang item papunta sa susunod. Itinatakda ng Tagal kung gaano katagal ang bawat fade.</string>
+    <string name="helper_hint_song_save">I-click ang I-save kapag tapos ka na. Kailangan muna ng pamagat ang bagong awit.</string>
+    <string name="helper_song_save_follower">Sinusundan ng computer na ito ang ibang computer sa pamamagitan ng Instance Link, kaya hindi mase-save dito ang mga awit nito. I-edit ang awit sa computer na sinusundan nito.</string>
+    <string name="helper_song_save_no_folder">Walang nakatakdang folder ng awit, kaya walang mapag-save-an ang awit. Pumili ng isa sa Mga Setting › System, sa ilalim ng Imbakan.</string>
+    <string name="helper_song_save_check">Mananatiling kulay-abo ang I-save hangga't walang pamagat ang bagong awit, at habang may ibang awit sa parehong aklat ng awit na may parehong numero at pamagat. Kung asul ang I-save pero hindi nase-save ang awit, maaaring read-only o offline ang folder ng awit. Tingnan ito sa Mga Setting › System.</string>
     <string name="helper_hint_pick_and_edit">Piliin ang awit, saka i-click ang %1$s.</string>
     <string name="helper_hint_chords_switch">I-on ang %1$s kung naka-off. Bubukas ang chord tools sa ilalim ng preview.</string>
     <string name="helper_hint_chord_palette">Ilagay ang cursor bago mismo ang pantig at mag-click ng chord dito. Puwede ka ring mag-type ng chords sa loob ng square brackets, gaya ng [G]Amazing [C]grace, o mag-paste ng sheet na may chords sa itaas ng lyrics at iko-convert ito para sa iyo.</string>
