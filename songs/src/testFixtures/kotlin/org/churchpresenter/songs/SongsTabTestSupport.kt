@@ -197,6 +197,8 @@ fun songsTab(
     focusSearchOnOpen: Boolean = false,
     /** What the tab does with [scheduleSelection]: the app's click, go-live or remote push. */
     scheduleAction: MutableState<ScheduleSongAction> = mutableStateOf(ScheduleSongAction.PUSH),
+    /** The app's way to the settings page with the song folder, from the empty library. */
+    onOpenSettings: () -> Unit = {},
     /** Bumped to rebuild the tab, as switching away from it and back does in the app. */
     tabVisit: MutableState<Int> = mutableStateOf(0),
     block: ComposeUiTest.(vm: SongsViewModel, reports: TabReports) -> Unit,
@@ -258,6 +260,7 @@ fun songsTab(
                         SongsTab(
                             viewModel = vm,
                             appSettings = settingsOverride.value ?: settings,
+                            onOpenSettings = onOpenSettings,
                             onSettingsChange = { transform ->
                                 reports.settingsChanges++
                                 reports.settingsAfterChange = transform(reports.settingsAfterChange ?: settings)

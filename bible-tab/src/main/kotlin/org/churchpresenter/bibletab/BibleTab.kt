@@ -74,6 +74,8 @@ fun BibleTab(
     viewModel: BibleViewModel,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    /** Opens the Bible settings page, from the button shown while no primary Bible is chosen. */
+    onOpenBibleSettings: () -> Unit = {},
     onAddToSchedule: ((
         bookName: String,
         chapter: Int,
@@ -135,7 +137,8 @@ fun BibleTab(
     // on each recomposition.
     val onVerseWentLiveState = rememberUpdatedState(onVerseWentLive)
     val tab = remember(
-        states, appSettings, onSettingsChange, onAddToSchedule, onVerseSelected, onInstanceLinkSendVerse,
+        states, appSettings, onSettingsChange, onOpenBibleSettings, onAddToSchedule, onVerseSelected,
+        onInstanceLinkSendVerse,
         onInstanceLinkSendBibleHold, onPresenting, bibleOutput, verseStatistics, verseSequenceLog, sttManager,
         engineStatus, focusRequester, crossRefs, live, ui, widths, displayedVersesState, currentIsPresentingState,
         scope, shortcuts
@@ -144,6 +147,7 @@ fun BibleTab(
             states = states,
             appSettings = appSettings,
             onSettingsChange = onSettingsChange,
+            onOpenBibleSettings = onOpenBibleSettings,
             onAddToSchedule = onAddToSchedule,
             onVerseSelected = onVerseSelected,
             onInstanceLinkSendVerse = onInstanceLinkSendVerse,

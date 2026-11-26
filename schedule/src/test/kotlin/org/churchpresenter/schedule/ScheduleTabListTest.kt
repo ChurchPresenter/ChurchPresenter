@@ -22,13 +22,13 @@ class ScheduleTabListTest {
     @Test
     fun `an empty schedule invites the operator to drop files on it`() = scheduleTab { vm, _ ->
         assertTrue(vm.scheduleItems.isEmpty())
-        assertTrue(showsExactly(ScheduleLabel.DROP_HINT), "the empty-state hint is shown")
+        assertTrue(showsExactly(ScheduleLabel.EMPTY), "the empty state is shown")
     }
 
     @Test
     fun `the hint gives way to the items once there are any`() =
         scheduleTab(seed = { seedService() }) { _, _ ->
-            assertFalse(showsExactly(ScheduleLabel.DROP_HINT), "the hint is gone")
+            assertFalse(showsExactly(ScheduleLabel.EMPTY), "the empty state is gone")
         }
 
     @Test

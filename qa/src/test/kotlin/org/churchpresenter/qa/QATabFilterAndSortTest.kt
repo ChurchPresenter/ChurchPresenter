@@ -12,7 +12,7 @@ import org.churchpresenter.sharedui.testing.showsContainingText
 
 class QATabFilterAndSortTest {
 
-    private val startSessionHint = "Start a session to receive questions"
+    private val startSessionHint = "No Q&A session running"
 
     private fun ComposeUiTest.openHistory() {
         onNodeWithText(QALabel.HISTORY, substring = true).performClick()

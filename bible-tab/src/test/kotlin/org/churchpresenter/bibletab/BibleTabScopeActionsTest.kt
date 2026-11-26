@@ -109,6 +109,7 @@ class BibleTabScopeActionsTest {
                     states = vm.tabStates(),
                     appSettings = appSettings,
                     onSettingsChange = {},
+                    onOpenBibleSettings = {},
                     onAddToSchedule = if (withCallbacks) {
                         { book, chapter, verse, _, _, _ -> calls.scheduled += "$book $chapter:$verse" }
                     } else null,

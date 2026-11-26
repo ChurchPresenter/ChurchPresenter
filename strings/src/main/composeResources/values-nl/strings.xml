@@ -413,6 +413,8 @@
     <string name="tooltip_collapse_schedule">Programma inklappen</string>
     <string name="tooltip_expand_schedule">Programma uitklappen</string>
     <string name="schedule_drop_hint">Sleep bestanden hier om toe te voegen aan programma</string>
+    <string name="schedule_empty_title">Programma is leeg</string>
+    <string name="schedule_empty_body">Voeg liederen, verzen of media toe met + of sleep ze hierheen.</string>
     <string name="schedule_drop_unsupported">Kan %1$s niet toevoegen</string>
     <string name="schedule_note_placeholder">Notitie toevoegen…</string>
     <string name="schedule_add_files">Bestanden toevoegen…</string>
@@ -472,6 +474,18 @@
     <string name="loading">Laden...</string>
     <string name="select_folder_to_view">Selecteer een map om afbeeldingen te bekijken</string>
     <string name="select_image_folder_dialog">Afbeeldingsmap selecteren</string>
+    <string name="pictures_empty_body">Kies een map met afbeeldingen om ze als dia’s te tonen.</string>
+    <string name="pictures_empty_choose_folder">Map kiezen</string>
+    <string name="pictures_empty_drag_hint">of sleep een map hierheen</string>
+    <string name="pictures_empty_folder_title">Geen afbeeldingen in “%1$s”</string>
+    <string name="pictures_empty_folder_body">Voeg JPG-, PNG- of GIF-bestanden toe aan deze map, of kies een andere.</string>
+    <string name="pictures_empty_choose_another">Andere map kiezen</string>
+    <string name="pictures_drop_title">Loslaten om de map toe te voegen</string>
+    <string name="pictures_drop_body">De afbeeldingen worden hier als dia’s getoond.</string>
+    <string name="pictures_cant_open_title">Kan deze map niet openen</string>
+    <string name="pictures_cant_open_body">ChurchPresenter heeft geen toestemming om “%1$s” te lezen.</string>
+    <string name="pictures_cant_open_retry">Opnieuw proberen</string>
+    <string name="pictures_cant_open_choose">Andere kiezen</string>
     <string name="loop">Herhalen</string>
     <string name="loop_on">Herhalen aan</string>
     <string name="loop_off">Herhalen uit</string>
@@ -510,6 +524,12 @@
     <string name="select_presentation_file">Selecteer een presentatiebestand om dia's te bekijken</string>
     <string name="supported_formats">Ondersteund: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Dia's worden weergegeven als statische afbeeldingen — animaties, overgangen, video's en audio worden niet ondersteund.</string>
+    <string name="presentation_empty_title">Geen presentatie geopend</string>
+    <string name="presentation_empty_body">Open een PowerPoint-, Keynote- of PDF-bestand. Animaties, opbouweffecten, overgangen en Keynote-video’s spelen precies zoals in het origineel.</string>
+    <string name="presentation_empty_open">Presentatie openen</string>
+    <string name="presentation_empty_drag_hint">of sleep een bestand hierheen</string>
+    <string name="presentation_drop_title">Loslaten om de presentatie te openen</string>
+    <string name="presentation_drop_body">PowerPoint, Keynote of PDF.</string>
     <string name="presentation_error_password_protected">Deze PDF is met een wachtwoord beveiligd en kan niet worden geopend. Verwijder het wachtwoord en probeer het opnieuw.</string>
     <string name="presentation_error_empty_document">Dit bestand heeft geen pagina's om weer te geven.</string>
     <string name="presentation_error_library_missing">PDF-ondersteuning is niet beschikbaar in deze build.</string>
@@ -702,10 +722,37 @@
     <string name="bible_no_primary_hint">Open ⚙ Instellingen en ga naar het Bijbel-tabblad, dan:</string>
     <string name="bible_no_primary_step1">1. Stel de Bijbel opslagmap in</string>
     <string name="bible_no_primary_step2">2. Selecteer een primair Bijbelbestand</string>
+    <string name="bible_empty_title">Geen Bijbel geselecteerd</string>
+    <string name="bible_empty_body">Kies de Bijbelmap en je hoofdbijbel in Instellingen › Bijbel.</string>
+    <string name="bible_empty_open_settings">Bijbelinstellingen openen</string>
+    <string name="bible_no_match_title">Geen verzen gevonden voor “%1$s”</string>
+    <string name="bible_no_match_title_book">Geen verzen in %2$s gevonden voor “%1$s”</string>
+    <string name="bible_no_match_body">Controleer de spelling of probeer minder woorden.</string>
+    <string name="bible_no_match_body_book">Controleer de spelling of zoek in de hele Bijbel.</string>
+    <string name="bible_no_match_clear">Zoekopdracht wissen</string>
+    <string name="bible_no_match_body_exact">Alleen hele woorden zijn gezocht. Controleer de spelling of zoek ook binnen woorden.</string>
+    <string name="bible_no_match_inside_words">Ook binnen woorden zoeken</string>
     <string name="songs_indexing">Liederen indexeren…</string>
     <string name="songs_no_db_title">Geen liedendatabase geconfigureerd</string>
     <string name="songs_no_db_hint">Open ⚙ Instellingen en ga naar het Liederen-tabblad, dan:</string>
     <string name="songs_no_db_step">Stel een map in die een liedendatabasebestand bevat</string>
+    <string name="songs_empty_title">Nog geen liederenbibliotheek</string>
+    <string name="songs_empty_body">Kies de map met je liederendatabase. Je kunt dit later wijzigen in Instellingen.</string>
+    <string name="songs_empty_choose_folder">Map kiezen</string>
+    <string name="songs_empty_open_settings">Instellingen openen</string>
+    <string name="songs_empty_folder_dialog">Liederenmap selecteren</string>
+    <string name="songs_no_match_title">Geen liederen gevonden voor “%1$s”</string>
+    <string name="songs_no_match_body">Ook niets in de liedteksten. Controleer de spelling.</string>
+    <string name="songs_no_match_body_lyrics">Controleer de spelling of zoek in plaats daarvan in de liedteksten.</string>
+    <string name="songs_no_match_clear">Zoekopdracht wissen</string>
+    <string name="songs_no_selection_title">Geen lied geselecteerd</string>
+    <string name="songs_no_selection_body">Kies een lied uit de lijst om de tekst te zien.</string>
+    <string name="songs_no_match_search_lyrics">Liedteksten doorzoeken</string>
+    <plurals name="songs_loaded_title">
+        <item quantity="one">%1$d lied geladen</item>
+        <item quantity="other">%1$d liederen geladen</item>
+    </plurals>
+    <string name="songs_loaded_body">Kies een lied uit de lijst, of zoek er een, om de tekst te zien.</string>
 
     <!-- Output role (fill+key) -->
     <string name="key_output">Sleuteluitvoer</string>
@@ -1280,6 +1327,14 @@
     <string name="qa_displaying">Weergeven: %1$s…</string>
     <string name="qa_waiting">Wachten op vragen…</string>
     <string name="qa_start_session_hint">Start een sessie om vragen te ontvangen</string>
+    <string name="qa_empty_title">Geen V&amp;A-sessie actief</string>
+    <string name="qa_empty_body">Start een sessie, dan kunnen mensen vragen sturen vanaf hun telefoon. Ze verschijnen hier.</string>
+    <string name="qa_empty_start">Sessie starten</string>
+    <string name="qa_empty_resume_last">Laatste sessie hervatten</string>
+    <string name="qa_waiting_title">Wachten op vragen</string>
+    <string name="qa_waiting_body">Nieuwe vragen verschijnen hier zodra iemand er een stuurt.</string>
+    <string name="qa_join_show">Deelname-info op scherm tonen</string>
+    <string name="qa_join_hide">Deelname-info verbergen</string>
     <string name="qa_no_finished">Geen afgeronde vragen</string>
     <string name="qa_no_history">Geen geschiedenis van vorige sessies</string>
     <string name="qa_export_to_file">Exporteren naar bestand</string>
@@ -1341,6 +1396,16 @@
     <string name="stt_live_preview">Live voorbeeld</string>
     <string name="stt_not_connected">Niet verbonden. Voer de STT server-URL in en klik op Verbinden.</string>
     <string name="stt_waiting_for_transcription">Wachten op transcriptie…</string>
+    <string name="stt_empty_title">Niet verbonden met een spraak-naar-tekstserver</string>
+    <string name="stt_empty_body">Live ondertiteling verschijnt hier zodra ChurchPresenter verbinding maakt met je STT-server.</string>
+    <string name="stt_empty_connecting_body">Verbinden met %1$s…</string>
+    <string name="stt_empty_connect">Verbinden</string>
+    <string name="stt_empty_connecting">Verbinden…</string>
+    <string name="stt_listening_title">Luisteren…</string>
+    <string name="stt_listening_body">Begin te spreken en de woorden verschijnen hier.</string>
+    <string name="stt_error_title">Kan %1$s niet bereiken</string>
+    <string name="stt_error_body">Controleer of de STT-server draait en het adres klopt.</string>
+    <string name="stt_error_retry">Opnieuw proberen</string>
     <string name="stt_translation_label">Vertaling</string>
 
     <!-- CCLI Report -->
@@ -1521,6 +1586,8 @@
     <string name="dictionary_kjv_usage">KJV-gebruik</string>
     <string name="dictionary_no_results">Geen resultaten gevonden</string>
     <string name="dictionary_select_entry">Selecteer een invoer om details te bekijken</string>
+    <string name="dictionary_empty_title">Geen woord geselecteerd</string>
+    <string name="dictionary_empty_body">Kies een item uit de lijst, of zoek op Strong-nummer, woord of definitie.</string>
     <string name="dictionary_loading">Woordenboek laden…</string>
     <string name="dictionary_entry_count">%1$d vermeldingen</string>
     <string name="copy_verse">Vers kopiëren</string>

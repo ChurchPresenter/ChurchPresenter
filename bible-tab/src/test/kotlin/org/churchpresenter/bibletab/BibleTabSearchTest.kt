@@ -99,7 +99,7 @@ class BibleTabSearchTest {
         waitForIdle()
 
         assertTrue(
-            showsExactly("""No results found for "nothingmatchesthis" in the entire Bible"""),
+            showsExactly("No verses match “nothingmatchesthis”"),
             "the empty-result message names the query: ${renderedText().take(20)}",
         )
     }
@@ -133,7 +133,7 @@ class BibleTabSearchTest {
         // to produce an empty search rather than the navigation Auto mode would have done.
         assertEquals(0, vm.selectedBookIndex.value, "the browser did not move to John")
         assertTrue(
-            showsExactly("""No results found for "John 3:16" in the entire Bible"""),
+            showsExactly("No verses match “John 3:16”"),
             "it searched instead: ${renderedText().take(20)}",
         )
     }

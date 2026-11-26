@@ -170,31 +170,7 @@ private fun PresentationTabScope.PresentationFileBar(viewModel: PresentationView
 @Composable
 private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationViewModel) {
     RaisedButton(
-        onClick = {
-            scope.launch {
-                // The forms PresentationLoader reads: templates and slideshows open like presentations.
-                val allFilter = FileNameExtensionFilter(
-                    "All Presentation Files",
-                    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot", "key", "pdf",
-                )
-                val pptFilter = FileNameExtensionFilter(
-                    "PowerPoint Files (*.pptx, *.ppt, *.ppsx, *.potx, *.pptm)",
-                    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot",
-                )
-                val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
-                val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
-                val files = FileChooser.platformInstance.chooseMultiple(
-                    path = Path(appSettings.presentationStorageDirectory),
-                    filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),
-                    title = presentationFileDialogTitle,
-                    selectDirectory = false
-                )
-                files?.forEach { file ->
-                    viewModel.addPresentation(file.toFile())
-                    RecentPresentationFiles.add(file.toFile().absolutePath)
-                }
-            }
-        },
+        onClick = { openPresentationChooser(viewModel) },
         modifier = Modifier.height(32.dp).guideTarget(GuideTargets.PRESENTATION_SELECT_FILE),
         shape = AppShape(7.dp),
         colors = ButtonDefaults.buttonColors(
@@ -397,4 +373,31 @@ private fun PresentationTabScope.PresentationOutputButtons(viewModel: Presentati
         containerColor = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer
     )
+}
+
+/** Opens the file chooser; each file chosen there is opened and kept as a recent one. */
+internal fun PresentationTabScope.openPresentationChooser(viewModel: PresentationViewModel) {
+        scope.launch {
+            // The forms PresentationLoader reads: templates and slideshows open like presentations.
+            val allFilter = FileNameExtensionFilter(
+                "All Presentation Files",
+                "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot", "key", "pdf",
+            )
+            val pptFilter = FileNameExtensionFilter(
+                "PowerPoint Files (*.pptx, *.ppt, *.ppsx, *.potx, *.pptm)",
+                "pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pps", "pot",
+            )
+            val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
+            val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
+            val files = FileChooser.platformInstance.chooseMultiple(
+                path = Path(appSettings.presentationStorageDirectory),
+                filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),
+                title = presentationFileDialogTitle,
+                selectDirectory = false
+            )
+            files?.forEach { file ->
+                viewModel.addPresentation(file.toFile())
+                RecentPresentationFiles.add(file.toFile().absolutePath)
+            }
+        }
 }

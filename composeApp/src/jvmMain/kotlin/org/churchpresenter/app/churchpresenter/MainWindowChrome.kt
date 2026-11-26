@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.guide.SettingsPage
+import org.churchpresenter.app.churchpresenter.dialogs.optionsTabIndexOf
 import org.churchpresenter.schedule.LocalShowControlEnabled
 import androidx.compose.runtime.CompositionLocalProvider
 import org.churchpresenter.schedule.LocalActionChoices
@@ -155,6 +157,7 @@ internal fun MainWindowScope.MainDesktopHost() {
                 verseSequenceLog = verseSequenceLog,
                 onShowSettings = { openOptionsDialog(0) },
                 onShowBackgroundSettings = { openOptionsDialog(OPTIONS_TAB_BACKGROUND) },
+                onShowBibleSettings = { openOptionsDialog(optionsTabIndexOf(SettingsPage.BIBLE)) },
                 onSettingsChange = { updateFn ->
                     appSettings = updateFn(appSettings)
                     settingsManager.saveSettings(appSettings)

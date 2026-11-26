@@ -56,6 +56,7 @@ internal class MainDesktopScope(
     val web: WebAccessState,
     val onShowSettings: () -> Unit,
     val onShowBackgroundSettings: () -> Unit,
+    val onShowBibleSettings: () -> Unit,
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     val theme: ThemeMode,
     val qaManager: QAManager?,

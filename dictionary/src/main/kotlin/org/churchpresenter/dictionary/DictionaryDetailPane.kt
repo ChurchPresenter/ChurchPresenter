@@ -40,7 +40,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -58,7 +57,6 @@ import org.churchpresenter.icons.generated.resources.ic_redo
 import org.churchpresenter.icons.generated.resources.ic_undo
 import org.churchpresenter.strings.generated.resources.dictionary_kjv_usage
 import org.churchpresenter.strings.generated.resources.dictionary_pronunciation
-import org.churchpresenter.strings.generated.resources.dictionary_select_entry
 import org.churchpresenter.strings.generated.resources.dictionary_transliteration
 import org.churchpresenter.strings.generated.resources.go_live
 import org.churchpresenter.sharedui.composables.ActionIconButton
@@ -102,6 +100,8 @@ internal fun DictionaryDetailPane(
     getEntry: ((strongsNumber: String) -> StrongsEntry?)?,
     onAddToSchedule: ((StrongsEntry) -> Unit)?,
     onGoLive: ((StrongsEntry) -> Unit)?,
+    /** Opens the entry with this number, from the examples shown while none is chosen. */
+    onPickEntry: (strongsNumber: String) -> Unit = {},
 ) {
     Column(modifier = modifier) {
         DictionaryDetailActionRow(
@@ -120,13 +120,7 @@ internal fun DictionaryDetailPane(
 
         if (entry == null) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(Res.string.dictionary_select_entry),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(32.dp),
-                )
+                NoEntrySelected(getEntry, onPickEntry)
             }
         } else {
             // The scrolling scaffold stays here rather than travelling with either section:

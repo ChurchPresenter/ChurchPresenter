@@ -38,7 +38,7 @@ class SongLyricsPanelStatesTest {
 
     @Test
     fun `an empty library shows the no-database card`() = songsTab(songs = emptyList()) { _, _ ->
-        assertTrue(shows("No Song Database Configured"), rendered().toString())
+        assertTrue(shows("No song library yet"), rendered().toString())
     }
 
     @Test
@@ -48,11 +48,11 @@ class SongLyricsPanelStatesTest {
     }
 
     @Test
-    fun `a search matching nothing says there are no lyrics rather than no database`() = songsTab { _, _ ->
+    fun `a search matching nothing says no song is selected rather than no database`() = songsTab { _, _ ->
         search("zzzz-nothing")
 
-        assertTrue(shows("No lyrics available for this song"), rendered().toString())
-        assertFalse(shows("No Song Database Configured"))
+        assertTrue(shows("No song selected"), rendered().toString())
+        assertFalse(shows("No song library yet"))
     }
 
     @Test

@@ -61,7 +61,7 @@ class ScheduleTabDefaultsTest {
 
         waitForIdle()
         val shown = renderedText()
-        assertTrue(shown.any { it.contains(ScheduleLabel.DROP_HINT) }, shown.toString())
+        assertTrue(shown.any { it.contains(ScheduleLabel.EMPTY) }, shown.toString())
     }
 
     @OptIn(ExperimentalTestApi::class)
