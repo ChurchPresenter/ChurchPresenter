@@ -97,6 +97,10 @@ internal val LAO = Glossary(
         "ໃຫຍ່ໄປ" to "too big",
         "ບໍ່ພໍດີ" to "doesn't fit",
         "ລົ້ນຈໍ" to "doesn't fit",
+        // Saving: "ບັນທຶກ".
+        "ບັນທຶກ" to "save",
+        "ບໍ່ມີຫຍັງເກີດຂຶ້ນ" to "nothing happens",
+        "ກົດບໍ່ໄດ້" to "greyed",
         "ບໍ່ເຮັດວຽກ" to "not working",
         "ໃຊ້ບໍ່ໄດ້" to "not working",
         "ບໍ່ສະແດງ" to "not showing",

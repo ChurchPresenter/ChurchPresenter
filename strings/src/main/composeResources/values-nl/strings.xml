@@ -3369,6 +3369,11 @@
     <string name="helper_tour_stop">Stoppen</string>
     <string name="helper_hint_tab">Dit is het tabblad %1$s.</string>
     <string name="helper_hint_new_song">Klik hier om een nieuw lied te schrijven.</string>
+    <string name="helper_hint_look_transition">%1$s laat de tekst in- en uitfaden, en van het ene item naar het volgende. Duur bepaalt hoe lang elke fade duurt.</string>
+    <string name="helper_hint_song_save">Klik op Opslaan als je klaar bent. Een nieuw lied heeft eerst een titel nodig.</string>
+    <string name="helper_song_save_follower">Deze computer volgt een andere via Instance Link, dus de liederen kunnen hier niet worden opgeslagen. Bewerk het lied op de computer die hij volgt.</string>
+    <string name="helper_song_save_no_folder">Er is geen liedmap ingesteld, dus het lied kan nergens worden opgeslagen. Kies er een in Instellingen › Systeem, onder Opslag.</string>
+    <string name="helper_song_save_check">Opslaan blijft grijs zolang een nieuw lied geen titel heeft, en zolang een ander lied in hetzelfde liedboek hetzelfde nummer en dezelfde titel heeft. Is Opslaan blauw maar wordt het lied niet opgeslagen, dan is de liedmap misschien alleen-lezen of offline. Controleer hem in Instellingen › Systeem.</string>
     <string name="helper_hint_pick_and_edit">Kies het lied en klik dan op %1$s.</string>
     <string name="helper_hint_chords_switch">Zet %1$s aan als het uit staat. De akkoordhulpmiddelen openen onder het voorbeeld.</string>
     <string name="helper_hint_chord_palette">Zet de cursor vlak voor de lettergreep en klik hier op een akkoord. U kunt akkoorden ook tussen vierkante haken typen, zoals [G]Amazing [C]grace, of een blad met akkoorden boven de tekst plakken; dat wordt voor u omgezet.</string>

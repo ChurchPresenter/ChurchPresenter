@@ -3386,6 +3386,11 @@
     <string name="helper_tour_stop">Simama</string>
     <string name="helper_hint_tab">Hiki ni kichupo cha %1$s.</string>
     <string name="helper_hint_new_song">Bofya hapa kuandika wimbo mpya.</string>
+    <string name="helper_hint_look_transition">%1$s hufifiza maandishi yanapoingia na kutoka, na kutoka kipengee kimoja hadi kinachofuata. Muda huweka urefu wa kila ufifizaji.</string>
+    <string name="helper_hint_song_save">Bofya Hifadhi ukimaliza. Wimbo mpya unahitaji kichwa kwanza.</string>
+    <string name="helper_song_save_follower">Kompyuta hii inafuata nyingine kupitia Instance Link, kwa hiyo nyimbo zake haziwezi kuhifadhiwa hapa. Hariri wimbo kwenye kompyuta inayofuatwa.</string>
+    <string name="helper_song_save_no_folder">Hakuna folda ya nyimbo iliyowekwa, kwa hiyo wimbo hauna mahali pa kuhifadhiwa. Chagua moja katika Mipangilio › Mfumo, chini ya Hifadhi.</string>
+    <string name="helper_song_save_check">Hifadhi hubaki kijivu hadi wimbo mpya uwe na kichwa, na wakati wimbo mwingine katika kitabu kile kile cha nyimbo una nambari na kichwa sawa. Ikiwa Hifadhi ni ya buluu lakini wimbo haujahifadhiwa, huenda folda ya nyimbo ni ya kusoma tu au iko nje ya mtandao. Iangalie katika Mipangilio › Mfumo.</string>
     <string name="helper_hint_pick_and_edit">Chagua wimbo, kisha bofya %1$s.</string>
     <string name="helper_hint_chords_switch">Washa %1$s, ikiwa imezimwa. Zana za kodi hufunguka chini ya onyesho la awali.</string>
     <string name="helper_hint_chord_palette">Weka kishale kabla tu ya silabi na ubofye kodi hapa. Unaweza pia kuandika kodi ndani ya mabano ya mraba, kama [G]Neema ya [C]ajabu, au ubandike karatasi yenye kodi juu ya maneno nayo itabadilishwa kwa ajili yako.</string>

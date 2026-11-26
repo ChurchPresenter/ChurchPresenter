@@ -3386,6 +3386,11 @@
     <string name="helper_tour_stop">Avsluta</string>
     <string name="helper_hint_tab">Det här är fliken %1$s.</string>
     <string name="helper_hint_new_song">Klicka här för att skriva en ny sång.</string>
+    <string name="helper_hint_look_transition">%1$s tonar in och ut texten, och från ett objekt till nästa. Varaktighet anger hur länge varje toning pågår.</string>
+    <string name="helper_hint_song_save">Klicka på Spara när du är klar. En ny sång behöver en titel först.</string>
+    <string name="helper_song_save_follower">Den här datorn följer en annan via Instance Link, så dess sånger kan inte sparas här. Redigera sången på datorn den följer.</string>
+    <string name="helper_song_save_no_folder">Ingen sångmapp är vald, så sången har ingenstans att sparas. Välj en under Inställningar › System, under Lagring.</string>
+    <string name="helper_song_save_check">Spara förblir grå tills en ny sång har en titel, och så länge en annan sång i samma sångbok har samma nummer och titel. Om Spara är blå men sången inte sparas kan sångmappen vara skrivskyddad eller offline. Kontrollera den under Inställningar › System.</string>
     <string name="helper_hint_pick_and_edit">Välj sången och klicka sedan på %1$s.</string>
     <string name="helper_hint_chords_switch">Slå på %1$s om det är av. Ackordverktygen öppnas under förhandsvisningen.</string>
     <string name="helper_hint_chord_palette">Placera markören precis före stavelsen och klicka på ett ackord här. Du kan också skriva ackord inom hakparenteser, som [G]Härlig är [C]jorden, eller klistra in ett blad med ackord ovanför texten så konverteras det åt dig.</string>

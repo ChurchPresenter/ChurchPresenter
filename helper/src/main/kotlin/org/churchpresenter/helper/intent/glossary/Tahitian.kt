@@ -35,6 +35,8 @@ internal val TAHITIAN = Glossary(
         "faʻarahi" to "make bigger",
         "i muri iho" to "next",
         "i teie nei" to "for now",
+        // Nothing happening.
+        "aita e mea e tupu" to "nothing happens",
 
         // Things.
         "i te" to "the",

@@ -3374,6 +3374,11 @@
     <string name="helper_tour_stop">Lõpeta</string>
     <string name="helper_hint_tab">See on vahekaart %1$s.</string>
     <string name="helper_hint_new_song">Klõpsa siin, et kirjutada uus laul.</string>
+    <string name="helper_hint_look_transition">%1$s hajutab teksti sisse ja välja ning ühelt üksuselt järgmisele. Kestus määrab, kui kaua iga hajutus kestab.</string>
+    <string name="helper_hint_song_save">Kui oled valmis, klõpsa nuppu Salvesta. Uuel laulul peab enne olema pealkiri.</string>
+    <string name="helper_song_save_follower">See arvuti järgib Instance Linki kaudu teist arvutit, nii et selle laule ei saa siin salvestada. Muuda laulu arvutis, mida see järgib.</string>
+    <string name="helper_song_save_no_folder">Laulude kausta pole määratud, nii et laulu pole kuhugi salvestada. Vali see jaotises Seaded › Süsteem, Salvestusruumi all.</string>
+    <string name="helper_song_save_check">Salvesta jääb halliks, kuni uuel laulul pole pealkirja, ja seni, kuni samas laulikus on teine sama numbri ja pealkirjaga laul. Kui Salvesta on sinine, aga laul ei salvestu, võib laulude kaust olla ainult lugemiseks või võrguühenduseta. Kontrolli seda jaotises Seaded › Süsteem.</string>
     <string name="helper_hint_pick_and_edit">Vali laul ja klõpsa nuppu %1$s.</string>
     <string name="helper_hint_chords_switch">Lülita %1$s sisse, kui see on väljas. Akorditööriistad avanevad eelvaate all.</string>
     <string name="helper_hint_chord_palette">Pane kursor vahetult silbi ette ja klõpsa siin akordil. Akordi saad kirjutada ka nurksulgudesse, näiteks [G]Amazing [C]grace, või kleepida noodilehe, kus akordid on sõnade kohal, ja see teisendatakse sinu eest.</string>
