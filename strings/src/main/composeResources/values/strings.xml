@@ -2388,6 +2388,8 @@
     <string name="dictionary_kjv_usage">KJV Usage</string>
     <string name="dictionary_no_results">No results found</string>
     <string name="dictionary_select_entry">Select an entry to view details</string>
+    <string name="dictionary_empty_title">No word selected</string>
+    <string name="dictionary_empty_body">Pick an entry from the list, or search by Strong’s number, word or definition.</string>
     <string name="dictionary_loading">Loading dictionary…</string>
     <string name="dictionary_entry_count">%1$d entries</string>
     <string name="dictionary_in_scripture_header">In Scripture</string>
