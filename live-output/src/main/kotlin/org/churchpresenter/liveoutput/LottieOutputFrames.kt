@@ -30,10 +30,16 @@ internal const val MAX_OUTPUT_VARIANTS = 2
  */
 internal const val MIN_MEMORY_FOR_OUTPUT_FRAMES: Long = 7L * 1024 * 1024 * 1024 + 512L * 1024 * 1024
 
-/** This machine's physical memory in bytes, or null where the JVM cannot say. */
-internal fun physicalMemoryBytes(): Long? =
+/**
+ * This machine's physical memory in bytes, or null where the JVM cannot say -- including a runtime
+ * built without the `jdk.management` module, where the platform bean's class is missing.
+ */
+internal fun physicalMemoryBytes(): Long? = try {
     (ManagementFactory.getOperatingSystemMXBean() as? PlatformOsBean)
         ?.totalMemorySize?.takeIf { it > 0 }
+} catch (_: NoClassDefFoundError) {
+    null
+}
 
 /**
  * Whether a machine with [totalBytes] of memory pre-renders frames for its larger outputs. One that
