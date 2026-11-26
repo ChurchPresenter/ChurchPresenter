@@ -268,6 +268,19 @@ class PicturesViewModel private constructor(
         }
     }
 
+    /**
+     * Opens what was dropped on the tab: a dropped folder, or the folder of a dropped picture on
+     * that picture. Read off the event thread, as the folder chooser's choice is.
+     */
+    fun openDropped(files: List<File>, onFolderSelected: (String) -> Unit = {}) {
+        scope.launch {
+            val (folder, picture) = droppedPictureFolder(files) ?: return@launch
+            selectFolder(folder)
+            picture?.let { selectImagePath(it.absolutePath) }
+            onFolderSelected(folder.absolutePath)
+        }
+    }
+
     fun dispose() {
         parts.watcher.cancel()
         scope.cancel()
@@ -288,4 +301,14 @@ internal class PicturesParts(
     val navigator = PictureNavigator(state, playback)
     val live = PicturesLive(state)
     val watcher = PictureFolderWatcher(state, thumbnails, mainDispatcher, scope)
+}
+
+/**
+ * The folder a drop opens, and the picture to open it on: the first dropped folder, else the folder
+ * of the first dropped picture. Null when the drop holds neither.
+ */
+internal fun droppedPictureFolder(files: List<File>): Pair<File, File?>? {
+    files.firstOrNull { it.isDirectory }?.let { return it to null }
+    val picture = files.firstOrNull { it.isFile && it.extension.lowercase() in PICTURE_EXTENSIONS }
+    return picture?.absoluteFile?.parentFile?.let { it to picture }
 }

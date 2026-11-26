@@ -291,7 +291,10 @@ internal fun DeckLoadError.toUiError(): PresentationLoadError = when (this) {
     DeckLoadError.UNSUPPORTED_FORMAT, DeckLoadError.PARSE_FAILED -> PresentationLoadError.RENDER_FAILED
 }
 
-private fun isValidPresentationFile(file: File): Boolean =
+private fun isValidPresentationFile(file: File): Boolean = isPresentationFile(file)
+
+/** Whether [file] has an extension the presentation loader reads. */
+internal fun isPresentationFile(file: File): Boolean =
     file.extension.lowercase() in PresentationLoader.SUPPORTED_EXTENSIONS
 
 /**

@@ -1,5 +1,14 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.strings.generated.resources.presentation_empty_title
+import org.churchpresenter.strings.generated.resources.presentation_empty_open
+import org.churchpresenter.strings.generated.resources.presentation_empty_drag_hint
+import org.churchpresenter.strings.generated.resources.presentation_empty_body
+import org.churchpresenter.strings.generated.resources.presentation_drop_title
+import org.churchpresenter.strings.generated.resources.presentation_drop_body
+import org.churchpresenter.icons.generated.resources.ic_storage_presentation
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_download
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,17 +52,14 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.loading_slides
 import org.churchpresenter.strings.generated.resources.remove
-import org.churchpresenter.strings.generated.resources.select_presentation_file
 import org.churchpresenter.strings.generated.resources.presentation_focus_lost
 import org.churchpresenter.strings.generated.resources.media_vlc_install
 import org.churchpresenter.strings.generated.resources.media_vlc_arch_mismatch
 import org.churchpresenter.strings.generated.resources.media_vlc_load_failed
-import org.churchpresenter.strings.generated.resources.presentation_static_note
 import org.churchpresenter.strings.generated.resources.presentation_error_password_protected
 import org.churchpresenter.strings.generated.resources.presentation_error_empty_document
 import org.churchpresenter.strings.generated.resources.presentation_error_library_missing
 import org.churchpresenter.strings.generated.resources.presentation_error_render_failed
-import org.churchpresenter.strings.generated.resources.supported_formats
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.presentationengine.model.LayerSpec
 import org.churchpresenter.slides.data.RecentPresentationFiles
@@ -84,7 +90,7 @@ internal fun PresentationTabScope.PresentationBody(viewModel: PresentationViewMo
             } else if (viewModel.selectedPresentation != null) {
                 PresentationLoadingOrError(viewModel, Modifier.weight(1f).fillMaxWidth())
             } else {
-                PresentationEmptyState(Modifier.weight(1f).fillMaxWidth())
+                PresentationEmptyState(viewModel, Modifier.weight(1f).fillMaxWidth())
             }
 
             // Multi-file chip row
@@ -300,32 +306,33 @@ private fun PresentationTabScope.PresentationLoadingOrError(viewModel: Presentat
     }
 }
 
+/** No presentation open: what to open, the formats it reads, and a panel that takes a dropped file. */
 @Composable
-private fun PresentationEmptyState(modifier: Modifier) {
-    Box(
-        modifier = modifier
-            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-            .bibleListCard(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                stringResource(Res.string.select_presentation_file),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+private fun PresentationTabScope.PresentationEmptyState(viewModel: PresentationViewModel, modifier: Modifier) {
+    val drop = remember(viewModel, this) { FileDrop { files -> openDroppedPresentations(viewModel, files) } }
+    EmptyStatePanel(drop, modifier) {
+        if (drop.dragOver) {
+            EmptyStateContent(
+                icon = IconRes.drawable.ic_download,
+                neutral = false,
+                title = stringResource(Res.string.presentation_drop_title),
+                body = stringResource(Res.string.presentation_drop_body),
             )
-            Text(
-                stringResource(Res.string.supported_formats),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-            )
-            Text(
-                stringResource(Res.string.presentation_static_note),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
+        } else {
+            EmptyStateContent(
+                icon = IconRes.drawable.ic_storage_presentation,
+                neutral = false,
+                title = stringResource(Res.string.presentation_empty_title),
+                body = stringResource(Res.string.presentation_empty_body),
+                hint = stringResource(Res.string.presentation_empty_drag_hint),
+                footer = { FormatChips(PRESENTATION_FORMAT_CHIPS) },
+            ) {
+                EmptyStateButton(stringResource(Res.string.presentation_empty_open), IconRes.drawable.ic_folder) {
+                    openPresentationChooser(viewModel)
+                }
+            }
         }
     }
 }
+
+private val PRESENTATION_FORMAT_CHIPS = listOf(".pptx", ".ppt", ".key", ".pdf")

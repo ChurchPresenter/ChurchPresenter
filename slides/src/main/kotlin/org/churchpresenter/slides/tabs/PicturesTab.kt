@@ -3,31 +3,22 @@ package org.churchpresenter.slides.tabs
 import org.churchpresenter.settings.BackgroundContent
 import org.churchpresenter.sharedui.composables.BackgroundTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.ui.draw.alpha
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.sharedui.composables.focusRescuePressHook
 import org.churchpresenter.sharedui.composables.handleGoLiveKey
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.composables.rememberFocusLostRescue
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import org.churchpresenter.theme.keyboardFocusRing
@@ -38,10 +29,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoLibrary
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
-import org.churchpresenter.strings.generated.resources.select_folder_to_view
 import org.churchpresenter.strings.generated.resources.select_image_folder_dialog
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -54,7 +42,6 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import org.churchpresenter.sharedui.composables.bibleListCard
 
 internal const val PICTURES_MILLIS_PER_SECOND = 1000
 internal const val PICTURES_CAPTION_FONT_SP = 12.5f
@@ -192,7 +179,7 @@ fun PicturesTab(
         if (viewModel.images.isNotEmpty()) {
             tabScope.PicturesGrid(viewModel)
         } else {
-            PicturesEmptyState()
+            tabScope.PicturesEmptyState(viewModel)
         }
     }
 }
@@ -250,32 +237,5 @@ private fun PicturesEffects(
     LaunchedEffect(viewModel.animationType, viewModel.transitionDuration) {
         presenterManager?.setAnimationType(viewModel.animationType)
         presenterManager?.setTransitionDuration(viewModel.transitionDuration.toInt())
-    }
-}
-
-@Composable
-private fun PicturesEmptyState() {
-    Box(
-        modifier = Modifier.fillMaxSize()
-            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-            .bibleListCard(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.PhotoLibrary,
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-            Text(
-                text = stringResource(Res.string.select_folder_to_view),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
     }
 }

@@ -818,6 +818,14 @@
     <string name="picture_thumbnail_unreadable">Unreadable image</string>
     <string name="select_folder_to_view">Select a folder to view images</string>
     <string name="select_image_folder_dialog">Select Image Folder</string>
+    <string name="pictures_empty_body">Choose a folder of pictures to show them as slides.</string>
+    <string name="pictures_empty_choose_folder">Choose folder</string>
+    <string name="pictures_empty_drag_hint">or drag a folder here</string>
+    <string name="pictures_empty_folder_title">No pictures in “%1$s”</string>
+    <string name="pictures_empty_folder_body">Add JPG, PNG or GIF files to this folder, or pick another one.</string>
+    <string name="pictures_empty_choose_another">Choose another folder</string>
+    <string name="pictures_drop_title">Drop to add the folder</string>
+    <string name="pictures_drop_body">Its pictures will show here as slides.</string>
     <string name="loop">Loop</string>
     <string name="loop_on">Loop On</string>
     <string name="loop_off">Loop Off</string>
@@ -864,6 +872,12 @@
     <string name="select_presentation_file">Select a presentation file to view slides</string>
     <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="presentation_static_note">Animations, builds, slide transitions and embedded Keynote videos play back natively.</string>
+    <string name="presentation_empty_title">No presentation open</string>
+    <string name="presentation_empty_body">Open a PowerPoint, Keynote or PDF file. Animations, builds, transitions and Keynote videos play just like in the original.</string>
+    <string name="presentation_empty_open">Open presentation</string>
+    <string name="presentation_empty_drag_hint">or drag a file here</string>
+    <string name="presentation_drop_title">Drop to open the presentation</string>
+    <string name="presentation_drop_body">PowerPoint, Keynote or PDF.</string>
     <string name="presentation_error_password_protected">This PDF is password-protected and can't be opened. Remove the password and try again.</string>
     <string name="presentation_error_empty_document">This file has no pages to display.</string>
     <string name="presentation_error_library_missing">PDF support isn't available in this build.</string>

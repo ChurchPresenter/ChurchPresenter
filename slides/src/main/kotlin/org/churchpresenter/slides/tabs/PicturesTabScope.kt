@@ -40,6 +40,17 @@ internal class PicturesTabScope(
     val shortcuts: ShortcutMap,
     val wentLive: (ScheduleItem) -> Unit,
 ) {
+    /** Opens the folder chooser; a folder chosen there becomes the saved and most recent one. */
+    fun chooseFolder(viewModel: PicturesViewModel) = viewModel.openFolderChooser(folderDialogTitle, ::keepFolder)
+
+    /** Opens a folder or picture dropped on the tab, kept as [chooseFolder] keeps its choice. */
+    fun openDropped(viewModel: PicturesViewModel, files: List<File>) = viewModel.openDropped(files, ::keepFolder)
+
+    private fun keepFolder(folderPath: String) {
+        onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath)) }
+        RecentPictureFolders.add(folderPath)
+    }
+
     /** Previous/next, row up/down and play/pause; Instance Link next/previous with an empty folder. */
     fun handleKey(viewModel: PicturesViewModel, keyEvent: KeyEvent): Boolean {
         if (keyEvent.type != KeyEventType.KeyDown) return false

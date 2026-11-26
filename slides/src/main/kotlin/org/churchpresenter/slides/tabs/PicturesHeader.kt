@@ -100,14 +100,7 @@ private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         RaisedButton(
-            onClick = {
-                viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
-                    onSettingsChange { s ->
-                        s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath))
-                    }
-                    RecentPictureFolders.add(folderPath)
-                }
-            },
+            onClick = { chooseFolder(viewModel) },
             modifier = Modifier.height(32.dp).guideTarget(GuideTargets.PICTURES_SELECT_FOLDER),
             shape = AppShape(7.dp),
             colors = ButtonDefaults.buttonColors(
