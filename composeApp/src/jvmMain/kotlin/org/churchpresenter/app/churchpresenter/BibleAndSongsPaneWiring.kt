@@ -72,6 +72,8 @@ internal fun MainDesktopScope.SongsTabPane() {
         titleSlideFor = ::titleSlideSection,
         songEditor = { request -> AppSongEditor(request, theme, appSettings) },
         onSettingsChange = onSettingsChange,
+        // The song folder is on the System page, which is the one Settings opens on.
+        onOpenSettings = onShowSettings,
         onAddToSchedule = { songNumber, title, songbook, songId ->
             currentScheduleActions.addSong(songNumber, title, songbook, songId)
         },

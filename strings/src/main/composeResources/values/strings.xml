@@ -1368,6 +1368,15 @@
     <string name="songs_no_db_title">No Song Database Configured</string>
     <string name="songs_no_db_hint">Open ⚙ Settings and go to the Songs tab, then:</string>
     <string name="songs_no_db_step">Set a directory containing a song database file</string>
+    <string name="songs_empty_title">No song library yet</string>
+    <string name="songs_empty_body">Choose the folder with your song database file. You can change it later in Settings.</string>
+    <string name="songs_empty_choose_folder">Choose folder</string>
+    <string name="songs_empty_open_settings">Open Settings</string>
+    <string name="songs_empty_folder_dialog">Select Song Folder</string>
+    <string name="songs_no_match_title">No songs match “%1$s”</string>
+    <string name="songs_no_match_body">Check the spelling, or try fewer words.</string>
+    <string name="songs_no_match_body_lyrics">Check the spelling, or search the lyrics instead.</string>
+    <string name="songs_no_match_clear">Clear search</string>
 
     <!-- Output role (fill+key) -->
     <string name="key_output">Key Output</string>

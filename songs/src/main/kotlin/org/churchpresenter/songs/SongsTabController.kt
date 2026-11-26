@@ -70,6 +70,7 @@ internal class SongsTabController(
     var onSectionIndexChanged: (Int) -> Unit = {}
     var onLineIndexChanged: (Int) -> Unit = {}
     var onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
+    var onOpenSettings: () -> Unit = {}
 
     val tabFocusRequester = FocusRequester()
     val searchFocus = SearchFieldFocus()

@@ -1,4 +1,4 @@
-package org.churchpresenter.slides.tabs
+package org.churchpresenter.sharedui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedButton
 import org.jetbrains.compose.resources.DrawableResource
@@ -53,6 +52,9 @@ import java.io.File
 private val TILE_SIZE = 56.dp
 private val TILE_RADIUS = 16.dp
 private val TILE_ICON_SIZE = 26.dp
+private val COMPACT_TILE_SIZE = 40.dp
+private val COMPACT_TILE_RADIUS = 12.dp
+private val COMPACT_TILE_ICON_SIZE = 20.dp
 private val BUTTON_HEIGHT = 36.dp
 private val BUTTON_RADIUS = 8.dp
 private val BUTTON_ICON_SIZE = 16.dp
@@ -69,7 +71,7 @@ private const val DROP_GAP = 5f
 
 /** The card an empty tab shows its state on; it takes files dropped on it through [drop]. */
 @Composable
-internal fun EmptyStatePanel(drop: FileDrop, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+fun EmptyStatePanel(drop: FileDrop, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     val primary = MaterialTheme.colorScheme.primary
     Box(
         modifier = modifier
@@ -87,49 +89,60 @@ internal fun EmptyStatePanel(drop: FileDrop, modifier: Modifier = Modifier, cont
  * [neutral] tile is gray, for nothing here right now; otherwise blue, for something to set up.
  */
 @Composable
-internal fun EmptyStateContent(
+fun EmptyStateContent(
     icon: DrawableResource,
     neutral: Boolean,
     title: String,
     body: String,
     hint: String? = null,
+    /** Smaller tile, type and gaps, for a narrow list such as search results. */
+    compact: Boolean = false,
     footer: (@Composable () -> Unit)? = null,
     action: (@Composable () -> Unit)? = null,
 ) {
     val colors = MaterialTheme.colorScheme
     Column(
-        modifier = Modifier.widthIn(max = CONTENT_MAX_WIDTH).padding(24.dp),
+        modifier = Modifier.widthIn(max = CONTENT_MAX_WIDTH).padding(if (compact) 16.dp else 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier.size(TILE_SIZE)
-                .background(if (neutral) colors.secondaryContainer else colors.primaryContainer, AppShape(TILE_RADIUS)),
+            modifier = Modifier.size(if (compact) COMPACT_TILE_SIZE else TILE_SIZE)
+                .background(
+                    if (neutral) colors.secondaryContainer else colors.primaryContainer,
+                    AppShape(if (compact) COMPACT_TILE_RADIUS else TILE_RADIUS),
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painterResource(icon),
                 contentDescription = null,
-                modifier = Modifier.size(TILE_ICON_SIZE),
+                modifier = Modifier.size(if (compact) COMPACT_TILE_ICON_SIZE else TILE_ICON_SIZE),
                 tint = if (neutral) colors.onSurfaceVariant else colors.onPrimaryContainer,
             )
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(if (compact) 12.dp else 16.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, lineHeight = 22.sp),
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontSize = if (compact) 14.sp else 16.sp,
+                lineHeight = if (compact) 20.sp else 22.sp,
+            ),
             fontWeight = FontWeight.SemiBold,
             color = colors.onSurface,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(if (compact) 4.dp else 6.dp))
         Text(
             text = body,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.5.sp, lineHeight = 20.sp),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = if (compact) 12.5.sp else 13.5.sp,
+                lineHeight = if (compact) 18.sp else 20.sp,
+            ),
             color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
         if (action != null) {
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(if (compact) 14.dp else 20.dp))
             action()
         }
         if (hint != null) {
@@ -150,7 +163,7 @@ internal fun EmptyStateContent(
 
 /** The empty state's button: filled primary, with [icon] before its label. */
 @Composable
-internal fun EmptyStateButton(label: String, icon: DrawableResource, onClick: () -> Unit) {
+fun EmptyStateButton(label: String, icon: DrawableResource, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     RaisedButton(
         onClick = onClick,
@@ -161,14 +174,47 @@ internal fun EmptyStateButton(label: String, icon: DrawableResource, onClick: ()
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(BUTTON_ICON_SIZE))
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
+    }
+}
+
+/** A second, lesser action beside [EmptyStateButton]: tonal, with [icon] before its label. */
+@Composable
+fun EmptyStateSecondaryButton(label: String, icon: DrawableResource, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    RaisedButton(
+        onClick = onClick,
+        modifier = Modifier.height(BUTTON_HEIGHT),
+        shape = AppShape(BUTTON_RADIUS),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colors.secondaryContainer,
+            contentColor = colors.onSurface,
+        ),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(BUTTON_ICON_SIZE))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                softWrap = false,
+            )
         }
     }
 }
 
 /** Small monospaced chips naming file formats, such as ".pptx". */
 @Composable
-internal fun FormatChips(formats: List<String>) {
+fun FormatChips(formats: List<String>) {
     val colors = MaterialTheme.colorScheme
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         formats.forEach { format ->
@@ -210,7 +256,7 @@ private fun DrawScope.drawDropOutline(primary: Color) {
 
 /** Files dragged over an empty panel; [onFiles] gets what was let go. */
 @Stable
-internal class FileDrop(private val onFiles: (List<File>) -> Unit) : DragAndDropTarget {
+class FileDrop(private val onFiles: (List<File>) -> Unit) : DragAndDropTarget {
     /** True while files are being dragged over the panel. */
     var dragOver by mutableStateOf(false)
 

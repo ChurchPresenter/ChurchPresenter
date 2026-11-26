@@ -358,6 +358,12 @@ private fun SongsTabController.SongLyricsSide(row: RowScope) = with(row) {
         onShowLanguageInPanel = { slot, shown ->
             onSettingsChange { s -> s.withPanelLanguageShown(slot, shown) }
         },
+        library = SongLibraryActions(
+            onChooseFolder = { folder ->
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(storageDirectory = folder)) }
+            },
+            onOpenSettings = onOpenSettings,
+        ),
     )
 }
 
