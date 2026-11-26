@@ -141,6 +141,62 @@ class SlidesFileChooserTest {
         }
     }
 
+    @Test
+    fun `Choose folder in the empty grid opens the chosen folder`() {
+        val chosen = pictureFolder()
+        val chooser = givenChooserReturns(chosen.absolutePath)
+
+        picturesTab(folder = null) { vm, _ ->
+            onNodeWithText("Choose folder").performClick()
+            awaitAnswered(chooser)
+            waitUntil("the chosen folder's pictures", ANSWER_TIMEOUT_MS) { vm.images.size == 3 }
+        }
+    }
+
+    @Test
+    fun `Choose another folder from an empty one opens the chosen folder`() {
+        val empty = tempDir("cp-slides-chooser-empty")
+        val chosen = pictureFolder()
+        val chooser = givenChooserReturns(chosen.absolutePath)
+
+        picturesTab(folder = empty) { vm, _ ->
+            onNodeWithText("Choose another folder").performClick()
+            awaitAnswered(chooser)
+            waitUntil("the chosen folder's pictures", ANSWER_TIMEOUT_MS) { vm.images.size == 3 }
+        }
+        empty.deleteRecursively()
+    }
+
+    @Test
+    fun `Choose another from a folder that cannot be read opens the chosen folder`() {
+        val locked = pictureFolder()
+        val chosen = pictureFolder()
+        val chooser = givenChooserReturns(chosen.absolutePath)
+        try {
+            locked.setReadable(false)
+            picturesTab(folder = locked) { vm, _ ->
+                onNodeWithText("Choose another").performClick()
+                awaitAnswered(chooser)
+                waitUntil("the chosen folder's pictures", ANSWER_TIMEOUT_MS) { vm.images.size == 3 }
+            }
+        } finally {
+            locked.setReadable(true)
+            locked.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `Open presentation in the empty tab adds the chosen deck`() {
+        val deck = pdfDeck(scratch, pages = 1, name = "empty-state.pdf")
+        val chooser = givenChooserReturns(deck.absolutePath)
+
+        presentationTab { vm, _ ->
+            onNodeWithText("Open presentation").performClick()
+            awaitAnswered(chooser)
+            waitUntil("the chosen deck to be added", ANSWER_TIMEOUT_MS) { vm.presentations.isNotEmpty() }
+        }
+    }
+
     private companion object {
         const val ANSWER_TIMEOUT_MS = 5_000L
 
