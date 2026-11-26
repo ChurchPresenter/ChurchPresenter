@@ -40,10 +40,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.ColorFieldDefaults
@@ -62,7 +62,7 @@ import org.churchpresenter.hosanna.composables.model.drawCheckerboard
 import org.churchpresenter.hosanna.composables.model.hexText
 import org.churchpresenter.hosanna.composables.model.opacityText
 import org.churchpresenter.hosanna.composables.model.parseColor
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_palette
 import org.jetbrains.compose.resources.painterResource
@@ -118,14 +118,14 @@ fun ColorField(
     var open by remember { mutableStateOf(false) }
     var original by remember { mutableStateOf(color) }
     LaunchedEffect(color, focused) { if (!focused) text = fieldText(color, labels.none) }
-    val colors = HosannaTheme.colors.fieldColors(
+    val colors = AppTheme.colors.fieldColors(
         if (open) FieldState.Focused else fieldState(enabled, false, hovered, focused),
         invalid,
     )
     val container by animateColorAsState(colors.container, tween(FieldDefaults.TRANSITION_MILLIS))
     val border by animateColorAsState(colors.border, tween(FieldDefaults.TRANSITION_MILLIS))
-    val shape = HosannaTheme.shapes.m
-    val typography = HosannaTheme.typography
+    val shape = AppTheme.shapes.m
+    val typography = AppTheme.typography
     fun openPicker() {
         original = color
         open = true
@@ -136,7 +136,7 @@ fun ColorField(
                 modifier = Modifier
                     .widthIn(min = if (allowOpacity) ColorFieldDefaults.WidthWithOpacity else ColorFieldDefaults.Width)
                     .width(IntrinsicSize.Max)
-                    .then(colors.ring?.let { Modifier.focusRing(it, HosannaRadius.M) } ?: Modifier)
+                    .then(colors.ring?.let { Modifier.focusRing(it, AppRadius.M) } ?: Modifier)
                     .hoverable(interactionSource, enabled)
                     .background(container, shape)
                     .border(FieldDefaults.Border, border, shape)
@@ -178,7 +178,7 @@ fun ColorField(
             }
             if (open && enabled) {
                 ColorPickerPopover(
-                    color = color ?: original ?: HosannaTheme.colors.primary,
+                    color = color ?: original ?: AppTheme.colors.primary,
                     onColorChange = {
                         invalid = false
                         onColorChange(it)
@@ -201,15 +201,15 @@ fun ColorField(
 
 @Composable
 private fun ColorSwatch(color: Color?, enabled: Boolean, contentDescription: String, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
-    val shape = HosannaTheme.shapes.s
+    val colors = AppTheme.colors
+    val shape = AppTheme.shapes.s
     val light = colors.surfaceContainerLowest
     val dark = colors.outlineVariant
     val none = colors.error
     Box(
         modifier = Modifier
             .size(ColorFieldDefaults.Swatch)
-            .alpha(if (enabled) 1f else HosannaStateAlpha.DISABLED_CONTENT)
+            .alpha(if (enabled) 1f else StateAlpha.DISABLED_CONTENT)
             .clip(shape)
             .drawBehind {
                 drawCheckerboard(light, dark)
@@ -238,7 +238,7 @@ private fun ColorValue(
     onText: (String) -> Unit,
     onLeave: () -> Unit,
 ) {
-    val typography = HosannaTheme.typography
+    val typography = AppTheme.typography
     var focusedOnce by remember { mutableStateOf(false) }
     Column(modifier) {
         BasicText(label.asOverline(), style = typography.overline.copy(color = colors.label))

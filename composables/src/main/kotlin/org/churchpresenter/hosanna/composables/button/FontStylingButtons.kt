@@ -28,10 +28,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaColors
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.ThemeColors
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.SplitButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -43,7 +43,7 @@ import org.churchpresenter.hosanna.composables.foundation.SegmentRole
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.focusRing
 import org.churchpresenter.hosanna.composables.model.TextStyleToggle
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.theme.elevationShadow
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_format_bold
@@ -100,13 +100,13 @@ fun TextStyleToggles(
     )
 }
 
-internal fun HosannaColors.splitDivider(checked: Boolean, enabled: Boolean): Color =
-    if (checked && enabled) onPrimary.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT) else outlineVariant
+internal fun ThemeColors.splitDivider(checked: Boolean, enabled: Boolean): Color =
+    if (checked && enabled) onPrimary.copy(alpha = StateAlpha.DISABLED_CONTENT) else outlineVariant
 
 internal fun splitPartOverlay(content: Color, state: ButtonState): Color = when (state) {
-    ButtonState.Hovered -> content.copy(alpha = HosannaStateAlpha.HOVER)
-    ButtonState.Pressed -> content.copy(alpha = HosannaStateAlpha.PRESSED)
-    ButtonState.Focused -> content.copy(alpha = HosannaStateAlpha.FOCUS)
+    ButtonState.Hovered -> content.copy(alpha = StateAlpha.HOVER)
+    ButtonState.Pressed -> content.copy(alpha = StateAlpha.PRESSED)
+    ButtonState.Focused -> content.copy(alpha = StateAlpha.FOCUS)
     else -> Color.Transparent
 }
 
@@ -140,15 +140,15 @@ fun SplitToggleButton(
     enabled: Boolean = true,
 ) {
     val metrics = IconSegmentDefaults.Regular
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val base = colors.segmentColors(checked, if (enabled) ButtonState.Rest else ButtonState.Disabled)
     val radius = IconSegmentDefaults.SegmentRadius
     val shape = RoundedCornerShape(radius)
-    val level = if (checked && enabled) HosannaLevel.Level1 else HosannaLevel.Level0
+    val level = if (checked && enabled) ElevationLevel.Level1 else ElevationLevel.Level0
     IconSegmentTrack(enabled = enabled, modifier = modifier) {
         Row(
             modifier = Modifier
-                .hosannaElevation(level, shape, HosannaTheme.elevation)
+                .elevationShadow(level, shape, AppTheme.elevation)
                 .background(base.container, shape),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -173,7 +173,7 @@ fun SplitToggleButton(
                             Modifier
                                 .width(SplitButtonDefaults.IndicatorWidth)
                                 .height(SplitButtonDefaults.Indicator)
-                                .background(indicatorColor, HosannaTheme.shapes.full),
+                                .background(indicatorColor, AppTheme.shapes.full),
                         )
                     }
                 }
@@ -217,7 +217,7 @@ private fun SplitPart(
     val state = buttonState(enabled, false, hovered, pressed, focused)
     val ring = if (state == ButtonState.Focused) {
         Modifier.focusRing(
-            HosannaTheme.colors.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+            AppTheme.colors.primary.copy(alpha = StateAlpha.FOCUS_RING),
             IconSegmentDefaults.SegmentRadius,
         )
     } else {

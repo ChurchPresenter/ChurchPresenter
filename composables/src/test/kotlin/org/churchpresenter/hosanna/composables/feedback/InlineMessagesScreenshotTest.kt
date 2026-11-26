@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.model.MessageAction
 import org.churchpresenter.hosanna.composables.model.MessageIntent
 import org.churchpresenter.hosanna.composables.testing.hosannaComponent
@@ -57,7 +57,7 @@ class InlineMessagesScreenshotTest {
             Banner("Pair this screen with the code below.", title = "Pairing code") {
                 BasicText(
                     "4821",
-                    style = HosannaTheme.typography.headline.copy(color = HosannaTheme.colors.onPrimaryContainer),
+                    style = AppTheme.typography.headline.copy(color = AppTheme.colors.onPrimaryContainer),
                 )
             }
         }

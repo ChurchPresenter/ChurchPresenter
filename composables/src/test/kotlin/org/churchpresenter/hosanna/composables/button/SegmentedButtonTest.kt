@@ -36,9 +36,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.StateAlpha
 import org.churchpresenter.hosanna.composables.defaults.SegmentedButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonColors
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -48,7 +49,7 @@ import org.churchpresenter.hosanna.composables.testing.testIcon
 
 class SegmentedButtonTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
     private val radio = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)
     private val three = listOf(SegmentedOption("Timer"), SegmentedOption("Duration"), SegmentedOption("Clock"))
 
@@ -94,24 +95,24 @@ class SegmentedButtonTest {
             c.segmentColors(false, ButtonState.Rest),
         )
         assertEquals(
-            ButtonColors(on(c.onPrimary, c.primary, HosannaStateAlpha.HOVER), c.onPrimary, null),
+            ButtonColors(on(c.onPrimary, c.primary, StateAlpha.HOVER), c.onPrimary, null),
             c.segmentColors(true, ButtonState.Hovered),
         )
         assertEquals(
-            ButtonColors(on(c.onSurface, Color.Transparent, HosannaStateAlpha.PRESSED), c.onSurface, null),
+            ButtonColors(on(c.onSurface, Color.Transparent, StateAlpha.PRESSED), c.onSurface, null),
             c.segmentColors(false, ButtonState.Pressed),
         )
         assertEquals(
             ButtonColors(
                 Color.Transparent,
                 c.onSurfaceVariant,
-                c.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+                c.primary.copy(alpha = StateAlpha.FOCUS_RING),
             ),
             c.segmentColors(false, ButtonState.Focused),
         )
-        val disabledInk = c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        val disabledInk = c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         assertEquals(
-            ButtonColors(c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER), disabledInk, null),
+            ButtonColors(c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER), disabledInk, null),
             c.segmentColors(true, ButtonState.Disabled),
         )
         assertEquals(ButtonColors(Color.Transparent, disabledInk, null), c.segmentColors(false, ButtonState.Disabled))
@@ -121,15 +122,15 @@ class SegmentedButtonTest {
     @Test
     fun `the track is the secondary container, faded when disabled`() {
         assertEquals(c.secondaryContainer, c.trackColor(true))
-        assertEquals(c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER), c.trackColor(false))
+        assertEquals(c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER), c.trackColor(false))
     }
 
     @Test
     fun `only an enabled selected segment is raised`() {
-        assertEquals(HosannaLevel.Level1, segmentLevel(true, ButtonState.Rest))
-        assertEquals(HosannaLevel.Level1, segmentLevel(true, ButtonState.Pressed))
-        assertEquals(HosannaLevel.Level0, segmentLevel(true, ButtonState.Disabled))
-        assertEquals(HosannaLevel.Level0, segmentLevel(false, ButtonState.Rest))
+        assertEquals(ElevationLevel.Level1, segmentLevel(true, ButtonState.Rest))
+        assertEquals(ElevationLevel.Level1, segmentLevel(true, ButtonState.Pressed))
+        assertEquals(ElevationLevel.Level0, segmentLevel(true, ButtonState.Disabled))
+        assertEquals(ElevationLevel.Level0, segmentLevel(false, ButtonState.Rest))
     }
 
     @Test

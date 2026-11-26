@@ -17,8 +17,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.StandardButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonFrame
 import org.churchpresenter.hosanna.composables.foundation.ButtonIcon
@@ -28,7 +28,7 @@ import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.ButtonIntent
 
 private fun look(hierarchy: ButtonHierarchy, intent: ButtonIntent) =
-    ButtonLook(hierarchy, intent, StandardButtonDefaults.Height, HosannaRadius.M)
+    ButtonLook(hierarchy, intent, StandardButtonDefaults.Height, AppRadius.M)
 
 /**
  * A button with a text label and an optional leading icon.
@@ -87,7 +87,7 @@ fun StandardButton(
                 }
                 BasicText(
                     text = text,
-                    style = HosannaTheme.typography.label.copy(color = content),
+                    style = AppTheme.typography.label.copy(color = content),
                     maxLines = 1,
                     softWrap = false,
                 )

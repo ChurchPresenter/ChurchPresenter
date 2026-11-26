@@ -32,15 +32,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.RichTooltipDefaults
 import org.churchpresenter.hosanna.composables.defaults.StandardButtonDefaults
 import org.churchpresenter.hosanna.composables.defaults.TooltipDefaults
 import org.churchpresenter.hosanna.composables.model.ButtonHierarchy
 import org.churchpresenter.hosanna.composables.model.TooltipPositionProvider
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.theme.elevationShadow
 
 /**
  * A small card with a title, a few lines and an optional action, opened by hovering or clicking [content]. It
@@ -156,18 +156,18 @@ internal fun RichTooltipCard(
     actionInteractionSource: MutableInteractionSource,
     modifier: Modifier = Modifier,
 ) {
-    val shape = HosannaTheme.shapes.l
-    val colors = HosannaTheme.colors
+    val shape = AppTheme.shapes.l
+    val colors = AppTheme.colors
     Column(
         modifier = modifier
             .widthIn(max = RichTooltipDefaults.MaxWidth)
-            .hosannaElevation(HosannaLevel.Level2, shape, HosannaTheme.elevation)
+            .elevationShadow(ElevationLevel.Level2, shape, AppTheme.elevation)
             .background(colors.surfaceContainer, shape)
             .padding(horizontal = RichTooltipDefaults.PaddingX, vertical = RichTooltipDefaults.PaddingY),
         verticalArrangement = Arrangement.spacedBy(RichTooltipDefaults.TitleGap),
     ) {
-        BasicText(title, style = HosannaTheme.typography.bodyStrong.copy(color = colors.onSurface))
-        BasicText(body, style = HosannaTheme.typography.caption.copy(color = colors.onSurfaceVariant))
+        BasicText(title, style = AppTheme.typography.bodyStrong.copy(color = colors.onSurface))
+        BasicText(body, style = AppTheme.typography.caption.copy(color = colors.onSurfaceVariant))
         actionText?.let {
             StandardButton(
                 it,

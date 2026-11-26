@@ -42,7 +42,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.defaults.TableDefaults
 import org.churchpresenter.hosanna.composables.feedback.Tooltip
@@ -75,7 +75,7 @@ internal fun TableRowItem(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(true, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.listRowColors(selected, live = false, marker = false, state = state)
+    val colors = AppTheme.colors.listRowColors(selected, live = false, marker = false, state = state)
     val height = if (compact) TableDefaults.CompactRowHeight else TableDefaults.RowHeight
     val lines = !selected && state == ButtonState.Rest
     val showActions = keepActions || selected || state != ButtonState.Rest
@@ -106,7 +106,7 @@ internal fun TableRowItem(
             layout.columns.forEachIndexed { index, column ->
                 BodyCell(row.cells.getOrElse(index) { "" }, column, colors, cellWidth(layout, column))
                 if (index < layout.columns.lastIndex) {
-                    CellLine(if (lines) HosannaTheme.colors.outlineVariant else Color.Transparent)
+                    CellLine(if (lines) AppTheme.colors.outlineVariant else Color.Transparent)
                 }
             }
             layout.actions?.let { width ->
@@ -135,7 +135,7 @@ private fun BodyCell(text: String, column: TableColumn, colors: ListRowColors, m
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 onTextLayout = { cut = it.hasVisualOverflow },
-                style = HosannaTheme.typography.body.copy(
+                style = AppTheme.typography.body.copy(
                     color = if (column.secondary) colors.supporting else colors.content,
                 ),
             )
@@ -165,7 +165,7 @@ internal fun BulkCell(state: ToggleableState, label: String, onChange: (Boolean)
 
 @Composable
 internal fun TableSkeleton(layout: TableLayout) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val sweep by rememberInfiniteTransition().animateFloat(
         initialValue = -1f,
         targetValue = 2f,
@@ -225,7 +225,7 @@ private const val LONG_BAR = 0.7f
 @Composable
 fun TableEmpty(text: String, modifier: Modifier = Modifier, actionText: String? = null, onAction: () -> Unit = {}) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        BasicText(text, style = HosannaTheme.typography.body.copy(color = HosannaTheme.colors.onSurfaceVariant))
+        BasicText(text, style = AppTheme.typography.body.copy(color = AppTheme.colors.onSurfaceVariant))
         actionText?.let { StandardButton(it, onAction, hierarchy = ButtonHierarchy.Tertiary) }
     }
 }

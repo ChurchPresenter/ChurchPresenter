@@ -38,9 +38,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.PositionMetrics
 import org.churchpresenter.hosanna.composables.defaults.PositionPickerDefaults
@@ -75,12 +75,12 @@ fun PositionPicker(
     compact: Boolean = false,
     enabled: Boolean = true,
 ) {
-    val colors = HosannaTheme.colors
-    val typography = HosannaTheme.typography
+    val colors = AppTheme.colors
+    val typography = AppTheme.typography
     val metrics = PositionPickerDefaults.metrics(compact)
     val focused by interactionSource.collectIsFocusedAsState()
-    val shape = HosannaTheme.shapes.m
-    val ink = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+    val shape = AppTheme.shapes.m
+    val ink = if (enabled) colors.onSurface else colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(PositionPickerDefaults.LabelGap)) {
         BasicText(label, style = typography.subtitle.copy(color = ink))
         Box(
@@ -89,8 +89,8 @@ fun PositionPicker(
                 .then(
                     if (focused && enabled) {
                         Modifier.focusRing(
-                            colors.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
-                            HosannaRadius.M,
+                            colors.primary.copy(alpha = StateAlpha.FOCUS_RING),
+                            AppRadius.M,
                         )
                     } else {
                         Modifier
@@ -102,11 +102,11 @@ fun PositionPicker(
                 }
                 .focusable(enabled, interactionSource)
                 .semantics { contentDescription = label }
-                .alpha(if (enabled) 1f else HosannaStateAlpha.DISABLED_CONTENT)
+                .alpha(if (enabled) 1f else StateAlpha.DISABLED_CONTENT)
                 .clip(shape)
                 .background(colors.screen)
                 .border(FieldDefaults.Border, colors.outline, shape)
-                .drawBehind { drawGrid(colors.onScreen.copy(alpha = HosannaStateAlpha.HOVER)) }
+                .drawBehind { drawGrid(colors.onScreen.copy(alpha = StateAlpha.HOVER)) }
                 .selectableGroup(),
         ) {
             Column(Modifier.fillMaxSize()) {
@@ -149,7 +149,7 @@ private fun PositionCell(
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
@@ -157,14 +157,14 @@ private fun PositionCell(
     val shape = RoundedCornerShape(metrics.radius)
     val tint = when {
         selected -> colors.primary
-        active && pressed -> colors.primary.copy(alpha = HosannaStateAlpha.PRESSED)
-        active -> colors.primary.copy(alpha = HosannaStateAlpha.HOVER)
+        active && pressed -> colors.primary.copy(alpha = StateAlpha.PRESSED)
+        active -> colors.primary.copy(alpha = StateAlpha.HOVER)
         else -> Color.Transparent
     }
     val dot = when {
         selected -> colors.onPrimary
         active -> colors.primary
-        else -> colors.onScreen.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        else -> colors.onScreen.copy(alpha = StateAlpha.DISABLED_CONTENT)
     }
     Box(
         modifier = modifier
@@ -178,7 +178,7 @@ private fun PositionCell(
         Box(
             Modifier
                 .size(if (selected) metrics.selectedDot else metrics.dot)
-                .background(dot, HosannaTheme.shapes.full),
+                .background(dot, AppTheme.shapes.full),
         )
     }
 }

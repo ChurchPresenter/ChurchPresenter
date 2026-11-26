@@ -52,10 +52,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.NumberFieldDefaults
@@ -73,7 +73,7 @@ import org.churchpresenter.hosanna.composables.model.formatNumber
 import org.churchpresenter.hosanna.composables.model.inRange
 import org.churchpresenter.hosanna.composables.model.parseNumber
 import org.churchpresenter.hosanna.composables.model.stepNumber
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
@@ -109,7 +109,7 @@ fun NumberField(
 ) {
     var outOfRange by remember { mutableStateOf(false) }
     val colors = numberFieldColors(interactionSource, enabled, outOfRange)
-    val shape = HosannaTheme.shapes.m
+    val shape = AppTheme.shapes.m
     Column(modifier) {
         Row(
             modifier = Modifier
@@ -120,11 +120,11 @@ fun NumberField(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                BasicText(label.asOverline(), style = HosannaTheme.typography.overline.copy(color = colors.label))
+                BasicText(label.asOverline(), style = AppTheme.typography.overline.copy(color = colors.label))
                 Spacer(Modifier.height(FieldDefaults.LabelGap))
                 NumberInput(
                     value, onValueChange, range, live = true, interactionSource, enabled,
-                    HosannaTheme.typography.bodyStrong.tabular().copy(color = colors.value),
+                    AppTheme.typography.bodyStrong.tabular().copy(color = colors.value),
                     colors.caret,
                 ) { outOfRange = it }
             }
@@ -168,7 +168,7 @@ fun UnitField(
 ) {
     var outOfRange by remember { mutableStateOf(false) }
     val colors = numberFieldColors(interactionSource, enabled, outOfRange)
-    val shape = HosannaTheme.shapes.m
+    val shape = AppTheme.shapes.m
     Column(modifier.width(IntrinsicSize.Max)) {
         Row(
             modifier = Modifier
@@ -182,11 +182,11 @@ fun UnitField(
         ) {
             NumberInput(
                 value, onValueChange, range, live = false, interactionSource, enabled,
-                HosannaTheme.typography.bodyStrong.tabular().copy(color = colors.value, textAlign = TextAlign.End),
+                AppTheme.typography.bodyStrong.tabular().copy(color = colors.value, textAlign = TextAlign.End),
                 colors.caret,
                 Modifier.weight(1f),
             ) { outOfRange = it }
-            BasicText(unit, style = HosannaTheme.typography.body.copy(color = colors.icon))
+            BasicText(unit, style = AppTheme.typography.body.copy(color = colors.icon))
         }
         Supporting("", null, if (outOfRange) rangeError else null, null, enabled)
     }
@@ -196,7 +196,7 @@ fun UnitField(
 private fun numberFieldColors(source: MutableInteractionSource, enabled: Boolean, error: Boolean): FieldColors {
     val hovered by source.collectIsHoveredAsState()
     val focused by source.collectIsFocusedAsState()
-    return HosannaTheme.colors.fieldColors(fieldState(enabled, false, hovered, focused), error)
+    return AppTheme.colors.fieldColors(fieldState(enabled, false, hovered, focused), error)
 }
 
 @Composable
@@ -209,7 +209,7 @@ private fun Modifier.numberFrame(
     val container by animateColorAsState(colors.container, tween(FieldDefaults.TRANSITION_MILLIS))
     val border by animateColorAsState(colors.border, tween(FieldDefaults.TRANSITION_MILLIS))
     return this
-        .then(colors.ring?.let { Modifier.focusRing(it, HosannaRadius.M) } ?: Modifier)
+        .then(colors.ring?.let { Modifier.focusRing(it, AppRadius.M) } ?: Modifier)
         .hoverable(source, enabled)
         .background(container, shape)
         .border(FieldDefaults.Border, border, shape)
@@ -280,27 +280,27 @@ private fun NumberInput(
 
 @Composable
 private fun NumberArrow(icon: DrawableResource, contentDescription: String, enabled: Boolean, onStep: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     val pressed by source.collectIsPressedAsState()
     val hold = rememberHoldRepeat(source, enabled) { onStep() }
     val fill = when {
-        enabled && pressed -> colors.onSurface.copy(alpha = HosannaStateAlpha.PRESSED)
-        enabled && hovered -> colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER)
+        enabled && pressed -> colors.onSurface.copy(alpha = StateAlpha.PRESSED)
+        enabled && hovered -> colors.onSurface.copy(alpha = StateAlpha.HOVER)
         else -> Color.Transparent
     }
     Box(
         modifier = Modifier
             .size(NumberFieldDefaults.ArrowWidth, NumberFieldDefaults.ArrowHeight)
-            .background(fill, HosannaTheme.shapes.xs)
+            .background(fill, AppTheme.shapes.xs)
             .clickable(source, null, enabled, role = Role.Button) { hold.click { onStep() } }
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
         FieldGlyph(
             painterResource(icon),
-            if (enabled) colors.onSurfaceVariant else colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT),
+            if (enabled) colors.onSurfaceVariant else colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT),
             NumberFieldDefaults.Arrow,
         )
     }

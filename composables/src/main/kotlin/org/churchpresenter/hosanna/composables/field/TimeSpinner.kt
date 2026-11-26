@@ -31,8 +31,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.StandardButton
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
@@ -48,7 +48,7 @@ import org.churchpresenter.hosanna.composables.model.spinValues
 import org.churchpresenter.hosanna.composables.model.stepTime
 import org.churchpresenter.hosanna.composables.model.timeParts
 import org.churchpresenter.hosanna.composables.model.wrapDay
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
@@ -92,7 +92,7 @@ internal fun TimeSpinner(
                     .fillMaxWidth()
                     .padding(vertical = TimeSpinnerDefaults.Padding)
                     .height(FieldDefaults.Border)
-                    .background(HosannaTheme.colors.outlineVariant),
+                    .background(AppTheme.colors.outlineVariant),
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 StandardButton(
@@ -109,8 +109,8 @@ internal fun TimeSpinner(
 
 @Composable
 private fun SpinColumn(title: String, values: SpinValues, actions: TimeFieldActions, onStep: (Boolean) -> Unit) {
-    val colors = HosannaTheme.colors
-    val typography = HosannaTheme.typography
+    val colors = AppTheme.colors
+    val typography = AppTheme.typography
     Column(
         modifier = Modifier
             .width(TimeSpinnerDefaults.ColumnWidth)
@@ -138,26 +138,26 @@ private fun SpinArrow(icon: DrawableResource, contentDescription: String, onClic
             .fillMaxWidth()
             .height(TimeSpinnerDefaults.ArrowHeight)
             .background(
-                if (hovered) HosannaTheme.colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
-                HosannaTheme.shapes.m,
+                if (hovered) AppTheme.colors.onSurface.copy(alpha = StateAlpha.HOVER) else Color.Transparent,
+                AppTheme.shapes.m,
             )
             .clickable(source, null, role = Role.Button, onClick = onClick)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
-        FieldGlyph(painterResource(icon), HosannaTheme.colors.onSurfaceVariant, TimeSpinnerDefaults.Arrow)
+        FieldGlyph(painterResource(icon), AppTheme.colors.onSurfaceVariant, TimeSpinnerDefaults.Arrow)
     }
 }
 
 @Composable
 private fun SpinValue(text: String, current: Boolean, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
-    val typography = HosannaTheme.typography
+    val colors = AppTheme.colors
+    val typography = AppTheme.typography
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(TimeSpinnerDefaults.RowHeight)
-            .background(if (current) colors.primary else Color.Transparent, HosannaTheme.shapes.m)
+            .background(if (current) colors.primary else Color.Transparent, AppTheme.shapes.m)
             .then(if (!current && text.isNotEmpty()) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {

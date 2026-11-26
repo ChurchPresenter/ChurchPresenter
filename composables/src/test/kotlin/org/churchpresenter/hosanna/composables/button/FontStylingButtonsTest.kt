@@ -25,8 +25,9 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.StateAlpha
 import org.churchpresenter.hosanna.composables.defaults.IconSegmentDefaults
 import org.churchpresenter.hosanna.composables.defaults.SplitButtonDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonColors
@@ -40,7 +41,7 @@ import org.churchpresenter.hosanna.composables.testing.testIcon
 
 class FontStylingButtonsTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
     private val checkbox = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Checkbox)
     private val button = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)
     private fun toggleState(state: ToggleableState) =
@@ -68,18 +69,18 @@ class FontStylingButtonsTest {
             c.iconSegmentColors(mixed, ButtonState.Rest),
         )
         assertEquals(
-            ButtonColors(layer(HosannaStateAlpha.HOVER), c.onPrimaryContainer, null),
+            ButtonColors(layer(StateAlpha.HOVER), c.onPrimaryContainer, null),
             c.iconSegmentColors(mixed, ButtonState.Hovered),
         )
         assertEquals(
-            ButtonColors(layer(HosannaStateAlpha.PRESSED), c.onPrimaryContainer, null),
+            ButtonColors(layer(StateAlpha.PRESSED), c.onPrimaryContainer, null),
             c.iconSegmentColors(mixed, ButtonState.Pressed),
         )
         assertEquals(
             ButtonColors(
                 c.primaryContainer,
                 c.onPrimaryContainer,
-                c.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING),
+                c.primary.copy(alpha = StateAlpha.FOCUS_RING),
             ),
             c.iconSegmentColors(mixed, ButtonState.Focused),
         )

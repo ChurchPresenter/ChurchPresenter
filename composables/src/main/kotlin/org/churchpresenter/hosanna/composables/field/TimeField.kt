@@ -41,10 +41,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import java.time.LocalTime
-import org.churchpresenter.hosanna.HosannaRadius
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.AppRadius
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.button.icon
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.TimeFieldDefaults
@@ -66,7 +66,7 @@ import org.churchpresenter.hosanna.composables.model.stepTime
 import org.churchpresenter.hosanna.composables.model.timeKey
 import org.churchpresenter.hosanna.composables.model.timeParts
 import org.churchpresenter.hosanna.composables.model.typeDigit
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
@@ -112,14 +112,14 @@ fun TimeField(
     val hovered by interactionSource.collectIsHoveredAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val parts = timeParts(use24Hour)
-    val colors = HosannaTheme.colors.fieldColors(
+    val colors = AppTheme.colors.fieldColors(
         if (open) FieldState.Focused else fieldState(enabled, false, hovered, focused),
         error != null,
     )
     val container by animateColorAsState(colors.container, tween(FieldDefaults.TRANSITION_MILLIS))
     val border by animateColorAsState(colors.border, tween(FieldDefaults.TRANSITION_MILLIS))
     val requester = remember { FocusRequester() }
-    val shape = HosannaTheme.shapes.m
+    val shape = AppTheme.shapes.m
     fun handle(key: TimeKey): Boolean {
         val part = active ?: TimePart.Minute
         when (key) {
@@ -146,7 +146,7 @@ fun TimeField(
                 modifier = Modifier
                     .widthIn(min = if (use24Hour) TimeFieldDefaults.Width24 else TimeFieldDefaults.Width12)
                     .width(IntrinsicSize.Max)
-                    .then(colors.ring?.let { Modifier.focusRing(it, HosannaRadius.M) } ?: Modifier)
+                    .then(colors.ring?.let { Modifier.focusRing(it, AppRadius.M) } ?: Modifier)
                     .hoverable(interactionSource, enabled)
                     .background(container, shape)
                     .border(FieldDefaults.Border, border, shape)
@@ -175,7 +175,7 @@ fun TimeField(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(verticalArrangement = Arrangement.Center) {
-                    BasicText(label.asOverline(), style = HosannaTheme.typography.overline.copy(color = colors.label))
+                    BasicText(label.asOverline(), style = AppTheme.typography.overline.copy(color = colors.label))
                     Spacer(Modifier.height(FieldDefaults.LabelGap))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         parts.forEachIndexed { index, part ->
@@ -223,15 +223,15 @@ fun TimeField(
 
 @Composable
 private fun TimeText(text: String, ink: Color) {
-    BasicText(text, style = HosannaTheme.typography.bodyStrong.tabular().copy(color = ink))
+    BasicText(text, style = AppTheme.typography.bodyStrong.tabular().copy(color = ink))
 }
 
 @Composable
 private fun TimePartText(text: String, active: Boolean, ink: Color, enabled: Boolean, onClick: () -> Unit) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Box(
         modifier = Modifier
-            .background(if (active) colors.primaryContainer else Color.Transparent, HosannaTheme.shapes.xs)
+            .background(if (active) colors.primaryContainer else Color.Transparent, AppTheme.shapes.xs)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = TimeFieldDefaults.PartPadding),
     ) {
@@ -241,17 +241,17 @@ private fun TimePartText(text: String, active: Boolean, ink: Color, enabled: Boo
 
 @Composable
 private fun NextDayTag(text: String) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Box(
         modifier = Modifier
             .height(TimeFieldDefaults.TagHeight)
-            .background(colors.tertiaryContainer, HosannaTheme.shapes.xs)
+            .background(colors.tertiaryContainer, AppTheme.shapes.xs)
             .padding(horizontal = TimeFieldDefaults.TagPadding),
         contentAlignment = Alignment.Center,
     ) {
         BasicText(
             text,
-            style = HosannaTheme.typography.captionStrong.copy(color = colors.onTertiaryContainer),
+            style = AppTheme.typography.captionStrong.copy(color = colors.onTertiaryContainer),
             maxLines = 1,
         )
     }
@@ -265,13 +265,13 @@ private fun TimeArrow(icon: DrawableResource, contentDescription: String, onClic
         modifier = Modifier
             .size(TimeFieldDefaults.ArrowWidth, TimeFieldDefaults.ArrowHeight)
             .background(
-                if (hovered) HosannaTheme.colors.onSurface.copy(alpha = HosannaStateAlpha.HOVER) else Color.Transparent,
-                HosannaTheme.shapes.xs,
+                if (hovered) AppTheme.colors.onSurface.copy(alpha = StateAlpha.HOVER) else Color.Transparent,
+                AppTheme.shapes.xs,
             )
             .clickable(source, null, role = Role.Button, onClick = onClick)
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
-        FieldGlyph(painterResource(icon), HosannaTheme.colors.onSurfaceVariant, TimeFieldDefaults.Arrow)
+        FieldGlyph(painterResource(icon), AppTheme.colors.onSurfaceVariant, TimeFieldDefaults.Arrow)
     }
 }

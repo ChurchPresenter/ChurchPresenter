@@ -3,15 +3,16 @@ package org.churchpresenter.hosanna.composables.foundation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.state.ToggleableState
-import org.churchpresenter.hosanna.HosannaLightColors
-import org.churchpresenter.hosanna.HosannaStateAlpha
+import org.churchpresenter.theme.themeColorsFor
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.theme.StateAlpha
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class CheckboxColorsTest {
 
-    private val c = HosannaLightColors
+    private val c = themeColorsFor(ThemeMode.LIGHT)
     private val off = ToggleableState.Off
     private val on = ToggleableState.On
     private val mixed = ToggleableState.Indeterminate
@@ -35,11 +36,11 @@ class CheckboxColorsTest {
             assertEquals(Color.Transparent, rest.edge)
             assertEquals(c.onPrimary, rest.mark)
             assertEquals(
-                c.onPrimary.copy(alpha = HosannaStateAlpha.HOVER).compositeOver(c.primary),
+                c.onPrimary.copy(alpha = StateAlpha.HOVER).compositeOver(c.primary),
                 c.checkboxColors(value, ButtonState.Hovered, error = false).fill,
             )
             assertEquals(
-                c.onPrimary.copy(alpha = HosannaStateAlpha.PRESSED).compositeOver(c.primary),
+                c.onPrimary.copy(alpha = StateAlpha.PRESSED).compositeOver(c.primary),
                 c.checkboxColors(value, ButtonState.Pressed, error = false).fill,
             )
         }
@@ -50,9 +51,9 @@ class CheckboxColorsTest {
         val hovered = c.checkboxColors(off, ButtonState.Hovered, false)
         val pressed = c.checkboxColors(on, ButtonState.Pressed, false)
         val focused = c.checkboxColors(off, ButtonState.Focused, false)
-        assertEquals(c.onSurface.copy(alpha = HosannaStateAlpha.HOVER), hovered.halo)
-        assertEquals(c.onSurface.copy(alpha = HosannaStateAlpha.PRESSED), pressed.halo)
-        assertEquals(c.primary.copy(alpha = HosannaStateAlpha.FOCUS_RING), focused.ring)
+        assertEquals(c.onSurface.copy(alpha = StateAlpha.HOVER), hovered.halo)
+        assertEquals(c.onSurface.copy(alpha = StateAlpha.PRESSED), pressed.halo)
+        assertEquals(c.primary.copy(alpha = StateAlpha.FOCUS_RING), focused.ring)
         assertNull(c.checkboxColors(off, ButtonState.Rest, false).ring)
     }
 
@@ -65,7 +66,7 @@ class CheckboxColorsTest {
 
     @Test
     fun `disabled fades everything but still shows a check`() {
-        val ink = c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        val ink = c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         val checked = c.checkboxColors(on, ButtonState.Disabled, error = true)
         assertEquals(ink, checked.fill)
         assertEquals(c.surfaceContainerLowest, checked.mark)
@@ -74,6 +75,6 @@ class CheckboxColorsTest {
         assertNull(checked.ring)
         val unchecked = c.checkboxColors(off, ButtonState.Disabled, error = false)
         assertEquals(c.surfaceContainerLowest, unchecked.fill)
-        assertEquals(c.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTAINER), unchecked.edge)
+        assertEquals(c.onSurface.copy(alpha = StateAlpha.DISABLED_CONTAINER), unchecked.edge)
     }
 }

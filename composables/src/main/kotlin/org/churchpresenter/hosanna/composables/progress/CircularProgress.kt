@@ -18,7 +18,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.ProgressDefaults
 import org.churchpresenter.hosanna.composables.foundation.FULL_TURN
 import org.churchpresenter.hosanna.composables.foundation.Spinner
@@ -26,7 +26,7 @@ import org.churchpresenter.hosanna.composables.foundation.progressColors
 import org.churchpresenter.hosanna.composables.model.ProgressSpinnerSize
 import org.churchpresenter.hosanna.composables.model.ProgressStatus
 import org.churchpresenter.hosanna.composables.model.percentText
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.jetbrains.compose.resources.painterResource
 
 private const val TOP = -90f
@@ -39,7 +39,7 @@ private const val TOP = -90f
  */
 @Composable
 fun ProgressSpinner(modifier: Modifier = Modifier, size: ProgressSpinnerSize = ProgressSpinnerSize.Inline) {
-    val colors = HosannaTheme.colors.progressColors(ProgressStatus.Running)
+    val colors = AppTheme.colors.progressColors(ProgressStatus.Running)
     Box(modifier) {
         Spinner(
             color = colors.fill,
@@ -64,7 +64,7 @@ fun CircularProgress(
     modifier: Modifier = Modifier,
     status: ProgressStatus = ProgressStatus.Running,
 ) {
-    val colors = HosannaTheme.colors.progressColors(status)
+    val colors = AppTheme.colors.progressColors(status)
     val shown by animateFloatAsState(progress.coerceIn(0f, 1f), tween(ProgressDefaults.FILL_MILLIS))
     Box(
         modifier.size(ProgressDefaults.Ring).progressSemantics(progress.coerceIn(0f, 1f)),
@@ -89,7 +89,7 @@ fun CircularProgress(
         } else {
             BasicText(
                 percentText(progress),
-                style = HosannaTheme.typography.captionStrong.tabular().copy(color = colors.label),
+                style = AppTheme.typography.captionStrong.tabular().copy(color = colors.label),
             )
         }
     }

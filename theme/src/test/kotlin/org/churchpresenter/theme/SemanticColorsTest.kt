@@ -16,10 +16,15 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class SemanticColorsTest {
 
-    private val lightModes = listOf(ThemeMode.LIGHT, ThemeMode.WARM, ThemeMode.OCEAN, ThemeMode.ROSE)
-    private val darkModes = listOf(
-        ThemeMode.DARK, ThemeMode.MIDNIGHT, ThemeMode.FOREST, ThemeMode.MOCHA, ThemeMode.STUDIO,
+    private val lightModes = listOf(
+        ThemeMode.LIGHT, ThemeMode.WARM, ThemeMode.OCEAN, ThemeMode.ROSE, ThemeMode.SLATE, ThemeMode.SAND,
     )
+    private val darkModes = listOf(
+        ThemeMode.DARK, ThemeMode.MIDNIGHT, ThemeMode.FOREST, ThemeMode.MOCHA, ThemeMode.STUDIO, ThemeMode.PLUM,
+    )
+
+    /** The roles design tones to each theme's own surfaces; every other role is shared by its half. */
+    private val perTheme = setOf("onSurfaceFaint", "chordIntro", "chordVoice", "chordOther")
 
     private fun <T> underTheme(mode: ThemeMode, capture: @Composable () -> T): T {
         var captured: T? = null
@@ -51,16 +56,30 @@ class SemanticColorsTest {
         "chordChorus" to c.chordChorus,
         "chordBridge" to c.chordBridge,
         "chordTag" to c.chordTag,
+        "live" to c.live,
+        "onLive" to c.onLive,
+        "onSurfaceFaint" to c.onSurfaceFaint,
+        "chordIntro" to c.chordIntro,
+        "chordVoice" to c.chordVoice,
+        "chordOther" to c.chordOther,
+        "contentAnnouncement" to c.contentAnnouncement,
     )
 
     @Test
-    fun `every light mode gets the light set and every dark mode the dark one`() {
+    fun `every light theme agrees with Light and every dark theme with Dark, but for its own tones`() {
         val light = semanticOf(ThemeMode.LIGHT)
         val dark = semanticOf(ThemeMode.DARK)
 
         assertNotEquals(light, dark, "one set for both halves means one of them is shown on the wrong surface")
-        lightModes.forEach { assertEquals(light, semanticOf(it), "$it is painted with the dark semantic set") }
-        darkModes.forEach { assertEquals(dark, semanticOf(it), "$it is painted with the light semantic set") }
+        fun shared(c: SemanticColors) = rolesOf(c).filterKeys { it !in perTheme }
+        lightModes.forEach { assertEquals(shared(light), shared(semanticOf(it)), "$it is off the light set") }
+        darkModes.forEach { assertEquals(shared(dark), shared(semanticOf(it)), "$it is off the dark set") }
+    }
+
+    @Test
+    fun `each theme has the faint text tone made for its own surfaces`() {
+        val faint = (lightModes + darkModes).map { semanticOf(it).onSurfaceFaint }
+        assertEquals(faint.size, faint.toSet().size, "two themes share one faint tone")
     }
 
     @Test

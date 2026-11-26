@@ -48,7 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.SliderDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
 import org.churchpresenter.hosanna.composables.foundation.SliderBubble
@@ -66,7 +66,7 @@ import org.churchpresenter.hosanna.composables.model.sliderOrigin
 import org.churchpresenter.hosanna.composables.model.sliderStepDots
 import org.churchpresenter.hosanna.composables.model.sliderValueAt
 import org.churchpresenter.hosanna.composables.model.snapToOrigin
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 
 private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
 
@@ -106,9 +106,9 @@ fun Slider(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.sliderColors(state)
+    val colors = AppTheme.colors.sliderColors(state)
     val shown = valueText ?: if (centered) signedText(value, range.decimals) else formatNumber(value, range.decimals)
-    val labelStyle = HosannaTheme.typography.caption.copy(color = colors.endLabel)
+    val labelStyle = AppTheme.typography.caption.copy(color = colors.endLabel)
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(SliderDefaults.LabelGap),
@@ -136,7 +136,7 @@ fun Slider(
                 modifier = Modifier
                     .padding(start = SliderDefaults.Gap - SliderDefaults.LabelGap)
                     .widthIn(min = if (centered) SliderDefaults.SignedValueWidth else SliderDefaults.ValueWidth),
-                style = HosannaTheme.typography.captionStrong.tabular()
+                style = AppTheme.typography.captionStrong.tabular()
                     .copy(color = colors.value, textAlign = TextAlign.End),
             )
         }

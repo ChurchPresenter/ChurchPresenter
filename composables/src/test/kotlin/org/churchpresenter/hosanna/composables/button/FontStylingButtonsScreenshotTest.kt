@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
 import org.churchpresenter.hosanna.composables.model.TextStyleToggle
 import org.churchpresenter.hosanna.composables.testing.frozenSource
@@ -57,7 +57,7 @@ class FontStylingButtonsScreenshotTest {
                         painterResource(Res.drawable.ic_text_backing), "Backing", checked, {}, {}, "Backing options",
                         interactionSource = mainSource,
                         optionsInteractionSource = optionsSource,
-                        indicatorColor = HosannaTheme.colors.star,
+                        indicatorColor = AppTheme.colors.star,
                         enabled = enabled,
                     )
                 }

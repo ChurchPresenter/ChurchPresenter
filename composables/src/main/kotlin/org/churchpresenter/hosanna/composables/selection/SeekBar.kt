@@ -45,7 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.SeekBarDefaults
 import org.churchpresenter.hosanna.composables.defaults.SliderDefaults
 import org.churchpresenter.hosanna.composables.foundation.ButtonState
@@ -59,7 +59,7 @@ import org.churchpresenter.hosanna.composables.model.clockText
 import org.churchpresenter.hosanna.composables.model.seekFraction
 import org.churchpresenter.hosanna.composables.model.seekTimeAt
 import org.churchpresenter.hosanna.composables.model.sliderKey
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 
 /**
  * A media seek bar with the elapsed and total time either side. Hovering shows the time under the pointer.
@@ -92,8 +92,8 @@ fun SeekBar(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val state = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.sliderColors(state)
-    val timeStyle = HosannaTheme.typography.captionStrong.tabular().copy(color = colors.value)
+    val colors = AppTheme.colors.sliderColors(state)
+    val timeStyle = AppTheme.typography.captionStrong.tabular().copy(color = colors.value)
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(SeekBarDefaults.TimeGap),

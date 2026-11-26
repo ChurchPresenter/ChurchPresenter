@@ -31,13 +31,13 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.state.ToggleableState
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.defaults.CheckboxDefaults
 import org.churchpresenter.hosanna.composables.foundation.CheckboxColors
 import org.churchpresenter.hosanna.composables.foundation.buttonState
 import org.churchpresenter.hosanna.composables.foundation.checkboxColors
 import org.churchpresenter.hosanna.composables.foundation.focusRing
-import org.churchpresenter.hosanna.tabular
+import org.churchpresenter.theme.tabular
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_remove
@@ -115,8 +115,8 @@ fun TriStateCheckbox(
     val pressed by interactionSource.collectIsPressedAsState()
     val focused by interactionSource.collectIsFocusedAsState()
     val interaction = buttonState(enabled, false, hovered, pressed, focused)
-    val colors = HosannaTheme.colors.checkboxColors(state, interaction, error)
-    val typography = HosannaTheme.typography
+    val colors = AppTheme.colors.checkboxColors(state, interaction, error)
+    val typography = AppTheme.typography
     val described = description != null && !compact
     Row(
         modifier = modifier

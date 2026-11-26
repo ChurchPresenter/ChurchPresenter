@@ -49,10 +49,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import org.churchpresenter.hosanna.HosannaLevel
-import org.churchpresenter.hosanna.HosannaStateAlpha
-import org.churchpresenter.hosanna.HosannaTheme
-import org.churchpresenter.hosanna.asOverline
+import org.churchpresenter.theme.ElevationLevel
+import org.churchpresenter.theme.StateAlpha
+import org.churchpresenter.theme.AppTheme
+import org.churchpresenter.theme.asOverline
 import org.churchpresenter.hosanna.composables.defaults.FieldDefaults
 import org.churchpresenter.hosanna.composables.defaults.MenuDefaults
 import org.churchpresenter.hosanna.composables.model.MenuEntry
@@ -65,7 +65,7 @@ import org.churchpresenter.hosanna.composables.model.itemCount
 import org.churchpresenter.hosanna.composables.model.menuKey
 import org.churchpresenter.hosanna.composables.model.menuRowContainer
 import org.churchpresenter.hosanna.composables.model.nextPickable
-import org.churchpresenter.hosanna.hosannaElevation
+import org.churchpresenter.theme.elevationShadow
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
@@ -142,7 +142,7 @@ internal fun DropdownMenu(
                     BasicText(
                         search.noMatches,
                         Modifier.padding(MenuDefaults.RowPadding),
-                        style = HosannaTheme.typography.body.copy(color = HosannaTheme.colors.onSurfaceFaint),
+                        style = AppTheme.typography.body.copy(color = AppTheme.colors.onSurfaceFaint),
                     )
                 }
                 Box(Modifier.heightIn(max = MenuDefaults.MaxHeight)) {
@@ -179,11 +179,11 @@ internal fun DropdownMenu(
 
 @Composable
 private fun menuScrollbarStyle(): ScrollbarStyle {
-    val thumb = HosannaTheme.colors.onSurfaceFaint
+    val thumb = AppTheme.colors.onSurfaceFaint
     return ScrollbarStyle(
         minimalHeight = MenuDefaults.RowHeight,
         thickness = MenuDefaults.ScrollbarThickness,
-        shape = HosannaTheme.shapes.s,
+        shape = AppTheme.shapes.s,
         hoverDurationMillis = MenuDefaults.OPEN_MILLIS,
         unhoverColor = thumb,
         hoverColor = thumb,
@@ -192,12 +192,12 @@ private fun menuScrollbarStyle(): ScrollbarStyle {
 
 @Composable
 internal fun MenuSurface(width: Dp?, padding: Dp = MenuDefaults.Padding, content: @Composable () -> Unit) {
-    val shape = HosannaTheme.shapes.l
+    val shape = AppTheme.shapes.l
     Column(
         modifier = Modifier
             .then(width?.let { Modifier.width(it) } ?: Modifier.width(IntrinsicSize.Max))
-            .hosannaElevation(HosannaLevel.Level3, shape, HosannaTheme.elevation)
-            .background(HosannaTheme.colors.surfaceContainerHigh, shape)
+            .elevationShadow(ElevationLevel.Level3, shape, AppTheme.elevation)
+            .background(AppTheme.colors.surfaceContainerHigh, shape)
             .padding(padding),
     ) {
         content()
@@ -214,7 +214,7 @@ internal fun MenuHeader(title: String) {
             top = MenuDefaults.HeaderTop,
             bottom = MenuDefaults.HeaderBottom,
         ),
-        style = HosannaTheme.typography.overline.copy(color = HosannaTheme.colors.onSurfaceFaint),
+        style = AppTheme.typography.overline.copy(color = AppTheme.colors.onSurfaceFaint),
     )
 }
 
@@ -225,7 +225,7 @@ internal fun MenuDivider() {
             .fillMaxWidth()
             .padding(horizontal = MenuDefaults.Padding, vertical = MenuDefaults.DividerMargin)
             .height(FieldDefaults.Border)
-            .background(HosannaTheme.colors.outlineVariant),
+            .background(AppTheme.colors.outlineVariant),
     )
 }
 
@@ -237,14 +237,14 @@ private fun MenuRow(
     onHover: () -> Unit,
     onClick: () -> Unit,
 ) {
-    val colors = HosannaTheme.colors
-    val typography = HosannaTheme.typography
+    val colors = AppTheme.colors
+    val typography = AppTheme.typography
     val source = remember { MutableInteractionSource() }
     val hovered by source.collectIsHoveredAsState()
     LaunchedEffect(hovered) { if (hovered && item.enabled) onHover() }
-    val shape = HosannaTheme.shapes.m
+    val shape = AppTheme.shapes.m
     val ink = when {
-        !item.enabled -> colors.onSurface.copy(alpha = HosannaStateAlpha.DISABLED_CONTENT)
+        !item.enabled -> colors.onSurface.copy(alpha = StateAlpha.DISABLED_CONTENT)
         selected -> colors.primary
         else -> colors.onSurface
     }
@@ -278,24 +278,24 @@ private fun MenuRow(
 
 @Composable
 private fun CountBadge(text: String, selected: Boolean) {
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Box(
         modifier = Modifier
             .height(MenuDefaults.BadgeHeight)
             .background(
                 if (selected) {
-                    colors.primary.copy(alpha = HosannaStateAlpha.CONTENT_TYPE_CONTAINER)
+                    colors.primary.copy(alpha = StateAlpha.CONTENT_TYPE_CONTAINER)
                 } else {
                     colors.background
                 },
-                HosannaTheme.shapes.s,
+                AppTheme.shapes.s,
             )
             .padding(horizontal = MenuDefaults.BadgePadding),
         contentAlignment = Alignment.Center,
     ) {
         BasicText(
             text,
-            style = HosannaTheme.typography.captionStrong.copy(
+            style = AppTheme.typography.captionStrong.copy(
                 color = if (selected) colors.primary else colors.onSurfaceFaint,
             ),
         )

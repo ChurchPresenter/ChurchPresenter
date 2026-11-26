@@ -42,7 +42,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.window.PopupProperties
 import kotlinx.coroutines.awaitCancellation
-import org.churchpresenter.hosanna.HosannaTheme
+import org.churchpresenter.theme.AppTheme
 import org.churchpresenter.hosanna.composables.button.IconButton
 import org.churchpresenter.hosanna.composables.button.SegmentedButton
 import org.churchpresenter.hosanna.composables.button.StandardButton
@@ -199,7 +199,7 @@ private fun TabRow(
     val canMoveUp by rememberUpdatedState(!first)
     val canMoveDown by rememberUpdatedState(!last)
     val row = with(LocalDensity.current) { MenuDefaults.RowHeight.toPx() }
-    val colors = HosannaTheme.colors
+    val colors = AppTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -212,7 +212,7 @@ private fun TabRow(
                 }
             }
             .then(
-                if (dragging) Modifier.background(colors.surfaceContainerHighest, HosannaTheme.shapes.m) else Modifier,
+                if (dragging) Modifier.background(colors.surfaceContainerHighest, AppTheme.shapes.m) else Modifier,
             )
             .hoverable(rowSource)
             .onPreviewKeyEvent { event ->
