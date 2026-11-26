@@ -29,6 +29,7 @@ object GuideTargets {
     val ADD_SONG_LANGUAGE = GuideTarget("songEditor.addLanguage")
     val SONG_CHORDS_SWITCH = GuideTarget("songEditor.chordsSwitch")
     val SONG_CHORD_PALETTE = GuideTarget("songEditor.chordPalette")
+    val SONG_SAVE = GuideTarget("songEditor.save")
     val BIBLE_DOWNLOAD = GuideTarget("settings.system.downloadBibles")
     val BIBLE_ADD_TRANSLATION = GuideTarget("settings.bible.addTranslation")
     val BIBLE_CATALOG_LIST = GuideTarget("bibleCatalog.list")

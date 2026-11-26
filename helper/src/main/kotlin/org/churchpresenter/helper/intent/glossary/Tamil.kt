@@ -139,6 +139,13 @@ internal val TAMIL = Glossary(
         "மிகவும் பெரிய*" to "too big",
         "ரொம்ப பெரிய*" to "too big",
         "பொருந்தவில்லை" to "doesn't fit",
+        // Saving: "சேமி" and its forms.
+        "சேமி*" to "save",
+        "எதுவும் நடக்கவில்லை" to "nothing happens",
+        "ஒன்றும் நடக்கவில்லை" to "nothing happens",
+        "ethuvum nadakkavillai" to "nothing happens",
+        "செயலற்ற*" to "greyed",
+        "முடக்கப்பட்ட*" to "greyed",
         "வேலை செய்யவில்லை" to "not working",
         "இயங்கவில்லை" to "not working",
         "தெரியவில்லை" to "not showing",

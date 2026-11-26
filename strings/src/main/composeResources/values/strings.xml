@@ -3598,6 +3598,10 @@
     <string name="helper_hint_tab">This is the %1$s tab.</string>
     <string name="helper_hint_control">This is %1$s.</string>
     <string name="helper_hint_new_song">Click here to write a new song.</string>
+    <string name="helper_hint_song_save">Press Save when you’re done. A new song needs a title first.</string>
+    <string name="helper_song_save_follower">This computer follows another one over Instance Link, so its songs can’t be saved here. Edit the song on the computer it follows.</string>
+    <string name="helper_song_save_no_folder">No song folder is set, so the song has nowhere to be saved. Choose one in Settings › System, under Storage.</string>
+    <string name="helper_song_save_check">Save stays grey until a new song has a title, and while another song in the same song book has the same number and title. If Save is blue but the song isn’t saved, the song folder may be read-only or offline. Check it in Settings › System.</string>
     <!-- %1$s is the Edit Song button's name (edit_song), passed in so the hint names it as the
          translated UI does. -->
     <string name="helper_hint_pick_and_edit">Pick the song, then click %1$s.</string>
