@@ -80,5 +80,5 @@ class ThemeColors(private val scheme: ColorScheme, private val semantic: Semanti
 /** [mode]'s colors outside a composition -- what a test of a color rule reads. */
 fun themeColorsFor(mode: ThemeMode): ThemeColors {
     val scheme = colorSchemeFor(mode)
-    return ThemeColors(scheme, semanticColorsFor(scheme))
+    return ThemeColors(scheme, semanticColorsFor(mode, scheme))
 }
