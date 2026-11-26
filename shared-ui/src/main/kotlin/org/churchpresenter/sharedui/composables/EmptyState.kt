@@ -95,6 +95,8 @@ fun EmptyStateContent(
     title: String,
     body: String,
     hint: String? = null,
+    /** A red tile, for something that went wrong; wins over [neutral]. */
+    error: Boolean = false,
     /** Smaller tile, type and gaps, for a narrow list such as search results. */
     compact: Boolean = false,
     footer: (@Composable () -> Unit)? = null,
@@ -108,7 +110,11 @@ fun EmptyStateContent(
         Box(
             modifier = Modifier.size(if (compact) COMPACT_TILE_SIZE else TILE_SIZE)
                 .background(
-                    if (neutral) colors.secondaryContainer else colors.primaryContainer,
+                    when {
+                        error -> colors.errorContainer
+                        neutral -> colors.secondaryContainer
+                        else -> colors.primaryContainer
+                    },
                     AppShape(if (compact) COMPACT_TILE_RADIUS else TILE_RADIUS),
                 ),
             contentAlignment = Alignment.Center,
@@ -117,7 +123,11 @@ fun EmptyStateContent(
                 painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(if (compact) COMPACT_TILE_ICON_SIZE else TILE_ICON_SIZE),
-                tint = if (neutral) colors.onSurfaceVariant else colors.onPrimaryContainer,
+                tint = when {
+                    error -> colors.onErrorContainer
+                    neutral -> colors.onSurfaceVariant
+                    else -> colors.onPrimaryContainer
+                },
             )
         }
         Spacer(Modifier.height(if (compact) 12.dp else 16.dp))

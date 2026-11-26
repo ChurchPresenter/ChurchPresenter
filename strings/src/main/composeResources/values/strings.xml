@@ -2222,6 +2222,16 @@
     <string name="stt_live_preview">Live Preview</string>
     <string name="stt_not_connected">Not connected. Enter the STT server URL and click Connect.</string>
     <string name="stt_waiting_for_transcription">Waiting for transcription…</string>
+    <string name="stt_empty_title">Not connected to a speech-to-text server</string>
+    <string name="stt_empty_body">Live captions show up here once ChurchPresenter connects to your STT server.</string>
+    <string name="stt_empty_connecting_body">Connecting to %1$s…</string>
+    <string name="stt_empty_connect">Connect</string>
+    <string name="stt_empty_connecting">Connecting…</string>
+    <string name="stt_listening_title">Listening…</string>
+    <string name="stt_listening_body">Start speaking and the words appear here.</string>
+    <string name="stt_error_title">Can’t reach %1$s</string>
+    <string name="stt_error_body">Check that the STT server is running and the address is right.</string>
+    <string name="stt_error_retry">Try again</string>
     <string name="stt_translation_label">Translation</string>
     <string name="stt_tab_shows">The STT tab shows</string>
     <string name="stt_tab_shows_both">Transcription and translation</string>

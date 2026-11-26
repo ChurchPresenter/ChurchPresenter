@@ -31,8 +31,6 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.settings.STTTabView
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,14 +46,12 @@ import org.churchpresenter.strings.generated.resources.stt_connect
 import org.churchpresenter.strings.generated.resources.stt_disconnect
 import org.churchpresenter.strings.generated.resources.stt_go_live
 import org.churchpresenter.strings.generated.resources.stt_live_preview
-import org.churchpresenter.strings.generated.resources.stt_not_connected
 import org.churchpresenter.strings.generated.resources.stt_server_url
 import org.churchpresenter.strings.generated.resources.stt_status_connecting
 import org.churchpresenter.strings.generated.resources.stt_status_unreachable
 import org.churchpresenter.strings.generated.resources.stt_status_reconnecting
 import org.churchpresenter.strings.generated.resources.obs_mode_stt
 import org.churchpresenter.strings.generated.resources.stt_translation_label
-import org.churchpresenter.strings.generated.resources.stt_waiting_for_transcription
 import org.churchpresenter.strings.generated.resources.tooltip_stt_settings
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
@@ -71,7 +67,9 @@ private const val IN_PROGRESS_ALPHA = 0.6f
 @Composable
 internal fun ConnectionBar(
     sttManager: STTManager,
-    savedUrl: String,
+    /** What the address field holds; the tab keeps it, so its empty state connects to it too. */
+    urlInput: String,
+    onUrlInputChange: (String) -> Unit,
     isLive: Boolean,
     onConnect: (String) -> Unit,
     onOpenSettings: () -> Unit,
@@ -80,7 +78,6 @@ internal fun ConnectionBar(
     val connected by sttManager.connected
     val connecting by sttManager.connecting
     val reconnecting by sttManager.reconnecting
-    var urlInput by remember(savedUrl) { mutableStateOf(savedUrl.ifEmpty { "http://" }) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -89,7 +86,7 @@ internal fun ConnectionBar(
     ) {
         StyledTextField(
             value = urlInput,
-            onValueChange = { urlInput = it },
+            onValueChange = onUrlInputChange,
             label = stringResource(Res.string.stt_server_url),
             singleLine = true,
             modifier = Modifier.weight(1f),
@@ -97,7 +94,7 @@ internal fun ConnectionBar(
             trailingIcon = {
                 if (!connected && !connecting && urlInput.isNotEmpty()) {
                     KeyIconButton(
-                        onClick = { urlInput = "" },
+                        onClick = { onUrlInputChange("") },
                         colors = IconButtonDefaults.iconButtonColors(
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -133,10 +130,7 @@ internal fun ConnectionBar(
             )
         } else {
             ActionIconButton(
-                onClick = {
-                    urlInput = connectUrl(urlInput)
-                    onConnect(urlInput)
-                },
+                onClick = { onConnect(urlInput) },
                 enabled = !connecting && urlInput.isNotBlank(),
                 tooltipText = stringResource(Res.string.stt_connect),
                 icon = Icons.Default.PlayArrow,
@@ -189,7 +183,7 @@ internal fun ConnectionStatus(sttManager: STTManager) {
  * under the other. Each output picks its own captions in its profile, so the tab follows none of them.
  */
 @Composable
-internal fun LivePreview(sttManager: STTManager, view: STTTabView) {
+internal fun LivePreview(sttManager: STTManager, view: STTTabView, urlInput: String, onConnect: (String) -> Unit) {
     val connected by sttManager.connected
     val inProgressText by sttManager.inProgressText
     val inProgressTranslation by sttManager.inProgressTranslation
@@ -211,8 +205,8 @@ internal fun LivePreview(sttManager: STTManager, view: STTTabView) {
         (showTranslation && (displayTranslation.isNotEmpty() || inProgressTranslation.isNotBlank()))
 
     when {
-        !connected -> PreviewNotice(stringResource(Res.string.stt_not_connected))
-        !hasContent -> PreviewNotice(stringResource(Res.string.stt_waiting_for_transcription))
+        !connected -> STTNotConnected(sttManager, urlInput, onConnect)
+        !hasContent -> STTListening()
         else -> {
             val highlighting = Highlighting(
                 words = sttManager.highlightedWords,
@@ -254,17 +248,6 @@ internal fun LivePreview(sttManager: STTManager, view: STTTabView) {
             }
         }
     }
-}
-
-@Composable
-private fun PreviewNotice(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        // The 4 dp the columns also sit below the title, then the notice's own margin.
-        modifier = Modifier.padding(top = 4.dp).padding(16.dp)
-    )
 }
 
 /** The words to highlight, and whether highlighting is on at all. */
