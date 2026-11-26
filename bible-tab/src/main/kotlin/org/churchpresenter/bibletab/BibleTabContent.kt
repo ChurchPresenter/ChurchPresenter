@@ -1,18 +1,26 @@
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.strings.generated.resources.bible_no_match_clear
+import org.churchpresenter.strings.generated.resources.bible_no_match_body_book
+import org.churchpresenter.strings.generated.resources.bible_no_match_body
+import org.churchpresenter.strings.generated.resources.bible_no_match_title_book
+import org.churchpresenter.strings.generated.resources.bible_no_match_title
+import org.churchpresenter.strings.generated.resources.bible_empty_open_settings
+import org.churchpresenter.strings.generated.resources.bible_empty_body
+import org.churchpresenter.strings.generated.resources.bible_empty_title
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_settings
+import org.churchpresenter.icons.generated.resources.ic_storage_bible
+import org.churchpresenter.sharedui.composables.EmptyStateContent
+import org.churchpresenter.sharedui.composables.EmptyStateButton
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.guide.GuideTargets
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
@@ -24,27 +32,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_cross_references_count
 import org.churchpresenter.strings.generated.resources.bible_cross_references_popover_title
-import org.churchpresenter.strings.generated.resources.bible_no_primary_hint
-import org.churchpresenter.strings.generated.resources.bible_no_primary_step1
-import org.churchpresenter.strings.generated.resources.bible_no_primary_step2
-import org.churchpresenter.strings.generated.resources.bible_no_primary_title
 import org.churchpresenter.strings.generated.resources.bible_smart_search_hint
 import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.strings.generated.resources.contains_phrase
 import org.churchpresenter.strings.generated.resources.current_book
 import org.churchpresenter.strings.generated.resources.entire_bible
 import org.churchpresenter.strings.generated.resources.exact_match
-import org.churchpresenter.strings.generated.resources.bible_no_results_bible
-import org.churchpresenter.strings.generated.resources.bible_no_results_book
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
-import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.swapBibleTranslations
 import org.churchpresenter.stt.STTManager
@@ -52,9 +52,6 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.ColumnScope
 import org.churchpresenter.sharedui.composables.FocusLostRescueState
 import org.churchpresenter.sharedui.composables.bibleListCard
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material3.Icon
 
 /** The tab's body under its key handler: the search row, detections, and the browser or a notice. */
 @Composable
@@ -67,7 +64,7 @@ internal fun ColumnScope.BibleTabContent(
         if (loadErrors.isNotEmpty()) {
             BibleLoadErrorBanner(
                 errors = loadErrors,
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 4.dp),
             )
         }
 
@@ -87,7 +84,7 @@ internal fun ColumnScope.BibleTabContent(
                         ))
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 4.dp),
             )
         }
 
@@ -129,7 +126,7 @@ internal fun ColumnScope.BibleTabContent(
         }
 
         if (appSettings.bibleSettings.primaryBible.isBlank() && viewModel.primaryBible.value == null) {
-            BibleNoPrimaryHint(appSettings)
+            BibleNoPrimaryHint(onOpenBibleSettings)
         } else if (isSearchMode && searchResults.isNotEmpty()) {
             LaunchedEffect(searchResults) { ui.highlightedResult = -1 }
             BibleSearchResults(
@@ -144,79 +141,50 @@ internal fun ColumnScope.BibleTabContent(
                 },
             )
         } else if (isSearchMode && searchQuery.isNotEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = if (scopeBook == null) {
-                        stringResource(Res.string.bible_no_results_bible, searchQuery)
-                    } else {
-                        stringResource(Res.string.bible_no_results_book, searchQuery, scopeBook)
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            BibleNoMatch(searchQuery, scopeBook) { viewModel.clearSearch(); focusRequester.requestFocus() }
         } else {
             BibleBrowser(viewModel, tab, focusRescue)
         }
     }
 }
 
-/** Nothing to show until a primary Bible is chosen: say so, and how. */
+/** Nothing to show until a primary Bible is chosen: say so, with Settings one click away. */
 @Composable
-private fun ColumnScope.BibleNoPrimaryHint(appSettings: AppSettings) {
-    Box(
-        modifier = Modifier.fillMaxWidth().weight(1f).padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            modifier = Modifier.widthIn(max = 360.dp),
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = 3.dp,
-            color = MaterialTheme.colorScheme.surfaceVariant
+private fun ColumnScope.BibleNoPrimaryHint(onOpenSettings: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+        EmptyStateContent(
+            icon = IconRes.drawable.ic_storage_bible,
+            neutral = false,
+            title = stringResource(Res.string.bible_empty_title),
+            body = stringResource(Res.string.bible_empty_body),
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(40.dp)
-                )
-                Text(
-                    text = stringResource(Res.string.bible_no_primary_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                Text(
-                    text = stringResource(Res.string.bible_no_primary_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
+            EmptyStateButton(
+                stringResource(Res.string.bible_empty_open_settings),
+                IconRes.drawable.ic_settings,
+                onOpenSettings,
+            )
+        }
+    }
+}
 
-                if (appSettings.bibleSettings.storageDirectory.isBlank()) {
-                    Text(
-                        text = stringResource(Res.string.bible_no_primary_step1),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.bible_no_primary_step2),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+/** A search with no verses: what was searched for, where, and the way back. */
+@Composable
+private fun ColumnScope.BibleNoMatch(query: String, scopeBook: String?, onClear: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+        EmptyStateContent(
+            icon = IconRes.drawable.ic_search,
+            neutral = true,
+            compact = true,
+            title = if (scopeBook == null) {
+                stringResource(Res.string.bible_no_match_title, query.trim())
+            } else {
+                stringResource(Res.string.bible_no_match_title_book, query.trim(), scopeBook)
+            },
+            body = stringResource(
+                if (scopeBook == null) Res.string.bible_no_match_body else Res.string.bible_no_match_body_book,
+            ),
+        ) {
+            EmptyStateButton(stringResource(Res.string.bible_no_match_clear), IconRes.drawable.ic_close, onClear)
         }
     }
 }

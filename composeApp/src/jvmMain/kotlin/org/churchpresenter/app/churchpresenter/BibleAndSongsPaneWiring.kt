@@ -29,6 +29,7 @@ internal fun MainDesktopScope.BibleTabPane() {
         viewModel = bibleViewModel,
         appSettings = appSettings,
         onSettingsChange = onSettingsChange,
+        onOpenBibleSettings = onShowBibleSettings,
         onAddToSchedule = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
             currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
         },

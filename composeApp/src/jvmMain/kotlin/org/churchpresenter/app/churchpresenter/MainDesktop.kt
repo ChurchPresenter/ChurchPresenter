@@ -70,6 +70,7 @@ fun MainDesktop(
     web: WebAccessState = WebAccessState(),
     onShowSettings: () -> Unit = {},
     onShowBackgroundSettings: () -> Unit = {},
+    onShowBibleSettings: () -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM,
     qaManager: QAManager? = null,
@@ -107,7 +108,8 @@ fun MainDesktop(
     val scope = remember(
         hostWindow, appSettings, livePreviewAppSettings, activeQuickBackground, onQuickBackgroundPicked,
         presenterManager, statisticsManager, verseSequenceLog, live, service, publish, flows, link, web, onShowSettings,
-        onShowBackgroundSettings, onSettingsChange, theme, qaManager, onOpenLottieGen, sttManager, dialogDismissSignal,
+        onShowBackgroundSettings, onShowBibleSettings, onSettingsChange, theme, qaManager, onOpenLottieGen, sttManager,
+        dialogDismissSignal,
         companionSatelliteViewModel, onRequestDeveloperMenuUnlock, signage, owned
     ) {
         MainDesktopScope(
@@ -127,6 +129,7 @@ fun MainDesktop(
             web = web,
             onShowSettings = onShowSettings,
             onShowBackgroundSettings = onShowBackgroundSettings,
+            onShowBibleSettings = onShowBibleSettings,
             onSettingsChange = onSettingsChange,
             theme = theme,
             qaManager = qaManager,

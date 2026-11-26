@@ -42,6 +42,7 @@ internal class BibleTabScope(
     val states: BibleTabStates,
     val appSettings: AppSettings,
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    val onOpenBibleSettings: () -> Unit,
     val onAddToSchedule: ((
         bookName: String,
         chapter: Int,
