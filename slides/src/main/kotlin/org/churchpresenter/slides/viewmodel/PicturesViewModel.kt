@@ -281,16 +281,16 @@ class PicturesViewModel private constructor(
 
     /**
      * Opens what was dropped on the tab: a dropped folder, or the folder of a dropped picture on
-     * that picture. Read off the event thread, as the folder chooser's choice is.
+     * that picture. Read off the event thread, as the folder chooser's choice is; the job is
+     * returned so a caller can wait for it.
      */
-    fun openDropped(files: List<File>, onFolderSelected: (String) -> Unit = {}) {
+    fun openDropped(files: List<File>, onFolderSelected: (String) -> Unit = {}): Job =
         scope.launch {
             val (folder, picture) = droppedPictureFolder(files) ?: return@launch
             selectFolder(folder)
             picture?.let { selectImagePath(it.absolutePath) }
             onFolderSelected(folder.absolutePath)
         }
-    }
 
     fun dispose() {
         parts.watcher.cancel()

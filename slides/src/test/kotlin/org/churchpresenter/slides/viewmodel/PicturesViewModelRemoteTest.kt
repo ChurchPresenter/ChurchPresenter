@@ -405,4 +405,18 @@ class PicturesViewModelRemoteTest {
         assertEquals(120, thumbnail.width, "upscaling a small image would only blur it")
         assertEquals(90, thumbnail.height)
     }
+
+    @Test
+    fun `a local folder opened after a mirrored one shows its own path`() {
+        val vm = vm()
+        vm.loadPictureFromRemote(folderId = "posix", folderPath = "/Volumes/primary-only/Sunday", imageCount = 0) {
+            pngBytes()
+        }
+        awaitUntil("the mirrored folder") { vm.selectedFolderDisplayPath != null }
+
+        val local = Files.createTempDirectory(tempHome.toPath(), "local").toFile()
+        vm.selectFolder(local)
+
+        assertEquals(local.absolutePath, vm.selectedFolderDisplayPath)
+    }
 }
