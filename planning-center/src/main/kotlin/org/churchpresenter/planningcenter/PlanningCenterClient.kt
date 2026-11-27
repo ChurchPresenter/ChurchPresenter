@@ -164,9 +164,8 @@ object PlanningCenterClient {
     /**
      * Authenticates via HTTP Basic (`Authorization: Basic base64(client_id:client_secret)`) —
      * the RFC 6749 §2.3.1 client-authentication method, and the one most OAuth providers
-     * (including Doorkeeper, which PCO's API runs on) expect for confidential clients. Also still
-     * includes client_id/secret as body params for servers that only check there — belt and
-     * braces, since a mismatch here surfaces as an opaque "unknown client" error either way.
+     * (including Doorkeeper, which PCO's API runs on) expect for confidential clients. Never also
+     * in the body: PCO rejects a request that authenticates the client more than one way.
      */
     private suspend fun requestToken(
         clientId: String,
@@ -175,8 +174,7 @@ object PlanningCenterClient {
         http: HttpClient,
     ): TokenOutcome = withContext(Dispatchers.IO) {
         try {
-            val bodyParams = formParams + mapOf("client_id" to clientId, "client_secret" to clientSecret)
-            val body = bodyParams.entries.joinToString("&") { (k, v) -> "$k=${v.encodeURLParameter()}" }
+            val body = formParams.entries.joinToString("&") { (k, v) -> "$k=${v.encodeURLParameter()}" }
             val credentials = "$clientId:$clientSecret".toByteArray(Charsets.UTF_8)
             val basicAuth = java.util.Base64.getEncoder().encodeToString(credentials)
             val response = http.post(TOKEN_URL) {

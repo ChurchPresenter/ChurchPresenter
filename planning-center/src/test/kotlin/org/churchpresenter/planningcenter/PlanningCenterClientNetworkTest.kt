@@ -18,6 +18,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -114,8 +115,8 @@ class PlanningCenterClientNetworkTest {
         val body = String((request.body as OutgoingContent.ByteArrayContent).bytes())
         assertTrue(body.contains("grant_type=authorization_code"))
         assertTrue(body.contains("code=the-code"))
-        assertTrue(body.contains("client_id=cid"))
-        assertTrue(body.contains("client_secret=csecret"))
+        assertFalse(body.contains("client_id="), "PCO rejects a second client-auth mechanism")
+        assertFalse(body.contains("client_secret="))
         assertTrue(body.contains("code_verifier=the-verifier"))
         assertTrue(body.contains(URLEncoder.encode(PlanningCenterClient.redirectUri(), "UTF-8")))
     }
